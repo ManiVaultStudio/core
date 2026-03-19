@@ -29,6 +29,22 @@ Q_PLUGIN_METADATA(IID "studio.manivault.PointData")
 
 using namespace mv::util;
 
+namespace
+{
+    namespace local
+    {
+        template<typename outT, typename inT>
+        inline outT safe_numeric_cast(const inT value)
+        {
+            static_assert(std::is_integral_v<inT> && std::is_integral_v<outT>);
+
+            assert(value >= std::numeric_limits<outT>::min() && value <= std::numeric_limits<outT>::max());
+            return static_cast<outT>(value);
+        }
+    }
+
+}
+
 PointData::~PointData(void)
 {
     
@@ -43,7 +59,7 @@ mv::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) 
     return mv::Dataset<DatasetImpl>(new Points(getName(), true, guid));
 }
 
-std::uint32_t PointData::getNumPoints() const
+std::uint64_t PointData::getNumPoints() const
 {
     if (_numDimensions == 0)
     {
@@ -52,12 +68,12 @@ std::uint32_t PointData::getNumPoints() const
     }
 
     if (_isDense)
-        return static_cast<unsigned int>(getSizeOfVector() / _numDimensions);
+        return static_cast<std::uint64_t>(getSizeOfVector() / _numDimensions);
     else
         return _numRows;
 }
 
-std::uint32_t PointData::getNumDimensions() const
+std::uint64_t PointData::getNumDimensions() const
 {
     return _numDimensions;
 }
@@ -99,7 +115,7 @@ const std::vector<QString>& PointData::getDimensionNames() const
 void PointData::setData(const std::nullptr_t, const std::size_t numPoints, const std::size_t numDimensions)
 {
     resizeVector(numPoints * numDimensions);
-    _numDimensions = static_cast<unsigned int>(numDimensions);
+    _numDimensions = static_cast<std::uint64_t>(numDimensions);
 }
 
 void PointData::setDimensionNames(const std::vector<QString>& dimNames)
@@ -167,7 +183,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
         std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
 
         populateDataBufferFromVariantMap(rawData, bytes.data());
-        _numRows = static_cast<unsigned int>(numberOfPoints); // FIXME should be redundant
+        _numRows = static_cast<std::uint64_t>(numberOfPoints); // FIXME should be redundant
 
         size_t offset = 0;
         std::vector<size_t> rowPointers(numberOfPoints + 1);
@@ -556,7 +572,7 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
     getTask().setVisible(!(projects().isOpeningProject() || projects().isImportingProject()));
     getTask().setRunning();
 
-    auto pointIndexOffset = 0u;
+    std::uint64_t pointIndexOffset = 0lu;
 
     QCoreApplication::processEvents();
 
@@ -571,7 +587,7 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
         {
             SelectionMap selectionMapToTarget;
 
-            for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
+            for (std::uint64_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
                 selectionMapToTarget.getMap()[pointIndexOffset + pointIndex] = std::vector<std::uint32_t>({ targetGlobalIndices[pointIndex] });
 
             addLinkedData(targetPoints, selectionMapToTarget);
@@ -581,8 +597,8 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
         {
             SelectionMap selectionMapToSource;
 
-            for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
-                selectionMapToSource.getMap()[targetGlobalIndices[pointIndex]] = std::vector<std::uint32_t>({ pointIndexOffset + pointIndex });
+            for (std::uint64_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
+                selectionMapToSource.getMap()[targetGlobalIndices[pointIndex]] = std::vector<std::uint32_t>({ ::local::safe_numeric_cast<std::uint32_t>(pointIndexOffset + pointIndex) });
 
             targetPoints->addLinkedData(toSmartPointer(), selectionMapToSource);
 
@@ -610,7 +626,7 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
 /*                            Index transformation                            */
 /* -------------------------------------------------------------------------- */
 
-void Points::getGlobalIndices(std::vector<unsigned int>& globalIndices) const
+void Points::getGlobalIndices(std::vector<std::uint32_t>& globalIndices) const
 {
     if (isProxy())
     {
@@ -648,18 +664,18 @@ void Points::getGlobalIndices(std::vector<unsigned int>& globalIndices) const
 
         for (const Dataset<Points>& subset : subsetChain)
         {
-            for (int i = 0; i < globalIndices.size(); i++)
+            for (std::uint64_t i = 0; i < globalIndices.size(); i++)
                 globalIndices[i] = subset->indices[globalIndices[i]];
         }
     }
 }
 
-void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndices, std::vector<bool>& selected) const
+void Points::selectedLocalIndices(const std::vector<std::uint32_t>& selectionIndices, std::vector<bool>& selected) const
 {
     //Timer timer(__FUNCTION__);
 
     // Find the global indices of this dataset
-    std::vector<unsigned int> localGlobalIndices;
+    std::vector<std::uint32_t> localGlobalIndices;
     getGlobalIndices(localGlobalIndices);
 
     if (isProxy()) {
@@ -673,12 +689,12 @@ void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndi
         // In an array the size of the full raw data, mark selected points as true
         std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
 
-        for (const unsigned int& selectionIndex : selectionIndices)
+        for (const std::uint32_t& selectionIndex : selectionIndices)
             globalSelection[selectionIndex] = true;
 
         // For all local points find out which are selected
         selected.resize(localGlobalIndices.size(), false);
-        for (int i = 0; i < localGlobalIndices.size(); i++)
+        for (std::uint64_t i = 0; i < localGlobalIndices.size(); i++)
         {
             if (globalSelection[localGlobalIndices[i]])
                 selected[i] = true;
@@ -698,18 +714,18 @@ void Points::getLocalSelectionIndices(std::vector<unsigned int>& localSelectionI
     auto selection = getSelection<Points>();
 
     // Find the global indices of this dataset
-    std::vector<unsigned int> localGlobalIndices;
+    std::vector<std::uint32_t> localGlobalIndices;
     getGlobalIndices(localGlobalIndices);
 
     // In an array the size of the full raw data, mark selected points as true
     std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
-    for (const unsigned int& selectionIndex : selection->indices)
+    for (const std::uint32_t& selectionIndex : selection->indices)
         globalSelection[selectionIndex] = true;
 
     // For all local points find out which are selected
     std::vector<bool> selected(localGlobalIndices.size(), false);
     int indexCount = 0;
-    for (int i = 0; i < localGlobalIndices.size(); i++)
+    for (std::uint64_t i = 0; i < localGlobalIndices.size(); i++)
     {
         if (globalSelection[localGlobalIndices[i]])
         {
@@ -719,8 +735,8 @@ void Points::getLocalSelectionIndices(std::vector<unsigned int>& localSelectionI
     }
 
     localSelectionIndices.resize(indexCount);
-    int c = 0;
-    for (int i = 0; i < selected.size(); i++)
+    std::uint64_t c = 0;
+    for (std::uint64_t i = 0; i < selected.size(); i++)
     {
         if (selected[i])
             localSelectionIndices[c++] = i;
@@ -816,7 +832,7 @@ static void resolveLinkedPointData(const LinkedData& linkedData, const std::vect
         const SelectionMap& mapping = linkedData.getMapping();
 
         // Create separate vector of additional linked selected points
-        std::vector<unsigned int> linkedIndices;
+        std::vector<std::uint32_t> linkedIndices;
 
         // Reserve at least as much space as required for a 1-1 mapping
         linkedIndices.reserve(indices.size());
@@ -954,18 +970,18 @@ void Points::selectInvert()
     const auto numberOfPoints = getNumPoints();
     std::set<std::uint32_t> selectionSet(localSelectionIndices.begin(), localSelectionIndices.end());
 
-    std::vector<unsigned int> selectionIndices;
+    std::vector<std::uint32_t> selectionIndices;
     selectionIndices.reserve(numberOfPoints - selectionSet.size());
 
-    for (std::uint32_t i = 0; i < numberOfPoints; i++)
+    for (std::uint64_t i = 0; i < numberOfPoints; i++)
         if (selectionSet.find(i) == selectionSet.end())
             selectionIndices.push_back(i);
 
     // Convert the inverted indices back to global indices
-    std::vector<unsigned int> globalIndices;
+    std::vector<std::uint32_t> globalIndices;
     getGlobalIndices(globalIndices);
 
-    for (unsigned int& index : selectionIndices)
+    for (std::uint32_t& index : selectionIndices)
     {
         index = globalIndices[index];
     }
@@ -1001,7 +1017,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     
         const auto& indicesMap = variantMap["Indices"].toMap();
     
-        indices.resize(indicesMap["Count"].toInt());
+        indices.resize(indicesMap["Count"].toUInt());
     
         populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
     }
@@ -1030,7 +1046,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         return dimensionNames;
         };
 
-    if (variantMap["NumberOfDimensions"].toInt() > 1000)
+    if (variantMap["NumberOfDimensions"].toUInt() > 1000)
         dimensionNameList = fetchDimensionNames();
     else
         dimensionNameList = variantMap["DimensionNames"].toStringList();
@@ -1042,7 +1058,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     }
     else
     {
-        for (std::uint32_t dimensionIndex = 0; dimensionIndex < getNumDimensions(); dimensionIndex++)
+        for (std::uint64_t dimensionIndex = 0; dimensionIndex < getNumDimensions(); dimensionIndex++)
             dimensionNames.emplace_back(QString("Dim %1").arg(QString::number(dimensionIndex)));
     }
 
@@ -1058,7 +1074,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     if (isFull()) {
         const auto& selectionMap = variantMap["Selection"].toMap();
 
-        const auto count = selectionMap["Count"].toInt();
+        const auto count = selectionMap["Count"].toUInt();
 
         if (count > 0) {
             auto selectionSet = getSelection<Points>();
@@ -1085,7 +1101,7 @@ QVariantMap Points::toVariantMap() const
             dimensionNames << dimensionName;
     }
     else {
-        for (std::uint32_t dimensionIndex = 0; dimensionIndex < getNumDimensions(); dimensionIndex++)
+        for (std::uint64_t dimensionIndex = 0; dimensionIndex < getNumDimensions(); dimensionIndex++)
             dimensionNames << QString("Dim %1").arg(QString::number(dimensionIndex));
     }
 
@@ -1107,11 +1123,11 @@ QVariantMap Points::toVariantMap() const
     }
 
     variantMap["Data"]                  = isFull() ? getRawData<PointData>()->toVariantMap() : QVariantMap();
-    variantMap["NumberOfPoints"]        = getNumPoints();
+    variantMap["NumberOfPoints"]        = QVariant::fromValue<std::uint64_t>(getNumPoints());
     variantMap["Indices"]               = indices;
     variantMap["Selection"]             = selection;
     variantMap["DimensionNames"]        = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true) : QVariant::fromValue(dimensionNames);
-    variantMap["NumberOfDimensions"]    = getNumDimensions();
+    variantMap["NumberOfDimensions"]    = QVariant::fromValue<std::uint64_t>(getNumDimensions());
     variantMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
 
     variantMap["Dense"]                 = Experimental::isDense(this);
