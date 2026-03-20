@@ -6,13 +6,15 @@
 #include "PassthroughBlobCodec.h"
 #include "PassthroughCodecSettingsAction.h"
 
+#include <util/CodecActionBinding.h>
+
 #ifdef _DEBUG
 	#define PASSTHROUGH_CODEC_FACTORY_VERBOSE
 #endif
 
 PassthroughBlobCodecFactory::PassthroughBlobCodecFactory(QObject* parent /*= nullptr*/) :
     BlobCodecFactory(parent),
-    _defaultSettingsAction(nullptr, "Settings")
+    _defaultSettingsAction(nullptr, "Default pass-through settings")
 {
 #ifdef 	PASSTHROUGH_CODEC_FACTORY_VERBOSE
     qDebug() << __FUNCTION__;
@@ -41,24 +43,17 @@ QString PassthroughBlobCodecFactory::displayName() const
     return "No compression";
 }
 
-mv::gui::CodecSettingsAction* PassthroughBlobCodecFactory::createSettingsFromVariantMap(const QVariantMap& map, QObject* parent) const
+std::shared_ptr<mv::util::BlobCodec> PassthroughBlobCodecFactory::createCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
 {
 #ifdef 	PASSTHROUGH_CODEC_FACTORY_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
-    auto* settings = new PassthroughCodecSettingsAction(nullptr, "Settings");
-    settings->fromVariantMap(map);
-    return settings;
-}
+    if (!codecSettingsAction) {
+        codecSettingsAction = createCodecSettingsAction(const_cast<PassthroughBlobCodecFactory*>(this));
+    }
 
-std::shared_ptr<mv::util::BlobCodec> PassthroughBlobCodecFactory::createCodec(mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
-{
-#ifdef 	PASSTHROUGH_CODEC_FACTORY_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    return std::make_shared<PassthroughBlobCodec>(const_cast<PassthroughBlobCodecFactory*>(this), codecSettingsAction);
+    return std::make_shared<PassthroughBlobCodec>(parent, codecSettingsAction);
 }
 
 const mv::gui::CodecSettingsAction* PassthroughBlobCodecFactory::getDefaultCodecSettingsAction() const
@@ -68,4 +63,9 @@ const mv::gui::CodecSettingsAction* PassthroughBlobCodecFactory::getDefaultCodec
 #endif
 
     return &_defaultSettingsAction;
+}
+
+mv::gui::CodecSettingsAction* PassthroughBlobCodecFactory::createCodecSettingsAction(QObject* parent) const
+{
+    return new PassthroughCodecSettingsAction(parent, "Pass-through codec settings action");
 }

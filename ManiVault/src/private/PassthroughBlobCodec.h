@@ -10,12 +10,12 @@ class PassthroughBlobCodec final : public mv::util::BlobCodec
 {
 public:
     
-    /*
-     * Constructs a PassthroughBlobCodec with an optional codec settings action.
-     * @param parent Parent QObject
-     * @param codecSettingsAction Codec settings action for this codec
+    /**
+     * Constructs a pass-through codec with a pointer to a parent object and a codec settings action.
+     * @param parent Pointer to parent object
+     * @param codecSettingsAction Codec settings action for this codec (must be a valid pointer)
      */
-    explicit PassthroughBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction = nullptr);
+    explicit PassthroughBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction);
 
     ~PassthroughBlobCodec();
 
@@ -32,7 +32,7 @@ public:
      * @param expectedSize Expected decoded size in bytes, or -1 if unknown
      * @return Decoded bytes or an error
      */
-    [[nodiscard]] Result decodeFromFile(const QString& filePath, qsizetype expectedSize = -1) const;
+    [[nodiscard]] Result decodeFromFile(const QString& filePath, qsizetype expectedSize = -1) const override;
 
     /*
      * Load encoded data from a file on disk and decode it directly to a provided output buffer.
@@ -42,7 +42,7 @@ public:
      * @param destinationSize Size of the output buffer in bytes
      * @return Decoded bytes or an error
      */
-    [[nodiscard]] Result decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const;
+    [[nodiscard]] Result decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const override;
 
     [[nodiscard]] QString getFileExtension() const override;
 };

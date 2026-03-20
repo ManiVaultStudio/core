@@ -15,22 +15,18 @@
 
 namespace {
 
-    QString getZstdErrorString(const char* prefix, size_t code)
-    {
-        return QStringLiteral("%1: %2")
-            .arg(QString::fromUtf8(prefix), QString::fromUtf8(ZSTD_getErrorName(code)));
-    }
+QString getZstdErrorString(const char* prefix, size_t code) {
+    return QStringLiteral("%1: %2").arg(QString::fromUtf8(prefix), QString::fromUtf8(ZSTD_getErrorName(code)));
+}
 
 }
 
-ZstdBlobCodec::ZstdBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) :
-	BlobCodec(parent)
+ZstdBlobCodec::ZstdBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction) :
+	BlobCodec(parent, codecSettingsAction)
 {
 #ifdef ZSTD_CODEC_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
-
-    setCodecSettingsAction(codecSettingsAction ? codecSettingsAction : new ZstdCodecSettingsAction(this, "Settings"));
 }
 
 ZstdBlobCodec::~ZstdBlobCodec()
@@ -59,7 +55,13 @@ mv::util::BlobCodec::Result ZstdBlobCodec::encode(const QByteArray& input) const
     if (input.isEmpty())
         return { true, {}, {} };
 
-    ZstdCodecSettingsAction* settings = dynamic_cast<ZstdCodecSettingsAction*>(getSettingsAction());
+    if (!getSettingsAction())
+        return { false, {}, "Codec settings action is not set" };
+
+    auto settings = dynamic_cast<ZstdCodecSettingsAction*>(getSettingsAction());
+
+    if (!settings)
+        return { false, {}, "Invalid codec settings action" };
 
     const auto bound = ZSTD_compressBound(static_cast<size_t>(input.size()));
 
@@ -153,7 +155,7 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decodeTo(const QByteArray& encodedDat
 mv::util::BlobCodec::Result ZstdBlobCodec::decodeFromFile(const QString& filePath, qsizetype expectedSize) const
 {
 #ifdef ZSTD_CODEC_VERBOSE
-    qDebug() << __FUNCTION__;
+    qDebug() << __FUNCTION__ << filePath;
 #endif
 
     QFile file(filePath);
@@ -169,7 +171,7 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decodeFromFile(const QString& filePat
 mv::util::BlobCodec::Result ZstdBlobCodec::decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const
 {
 #ifdef ZSTD_CODEC_VERBOSE
-    qDebug() << __FUNCTION__;
+    qDebug() << __FUNCTION__ << filePath;
 #endif
 
     if (destination == nullptr) {

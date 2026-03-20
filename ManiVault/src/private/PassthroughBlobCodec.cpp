@@ -12,13 +12,11 @@
 #endif
 
 PassthroughBlobCodec::PassthroughBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction) :
-    BlobCodec(parent)
+    BlobCodec(parent, codecSettingsAction ? codecSettingsAction : new PassthroughCodecSettingsAction(this, "Settings"))
 {
 #ifdef PASSTHROUGH_CODEC_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
-
-    setCodecSettingsAction(codecSettingsAction ? codecSettingsAction : new PassthroughCodecSettingsAction(this, "Settings"));
 }
 
 PassthroughBlobCodec::~PassthroughBlobCodec()
@@ -61,8 +59,8 @@ mv::util::BlobCodec::Result PassthroughBlobCodec::decode(const QByteArray& input
 
 mv::util::BlobCodec::Result PassthroughBlobCodec::decodeFromFile(const QString& filePath, qsizetype expectedSize) const
 {
-#ifdef PASSTHROUGH_CODEC_VERBOSE
-    qDebug() << __FUNCTION__;
+#ifdef ZSTD_CODEC_VERBOSE
+    qDebug() << __FUNCTION__ << filePath;
 #endif
 
     const QByteArray encodedData = mv::util::Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
@@ -72,8 +70,8 @@ mv::util::BlobCodec::Result PassthroughBlobCodec::decodeFromFile(const QString& 
 
 mv::util::BlobCodec::Result PassthroughBlobCodec::decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const
 {
-#ifdef PASSTHROUGH_CODEC_VERBOSE
-    qDebug() << __FUNCTION__;
+#ifdef ZSTD_CODEC_VERBOSE
+    qDebug() << __FUNCTION__ << filePath;
 #endif
 
     const QByteArray encodedData = mv::util::Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);

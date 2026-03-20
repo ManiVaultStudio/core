@@ -7,6 +7,9 @@
 #include "actions/HorizontalGroupAction.h"
 #include "actions/ToggleAction.h"
 #include "actions/OptionAction.h"
+#include "actions/CodecSettingsAction.h"
+
+#include "util/BlobCodec.h"
 
 namespace mv {
 
@@ -21,7 +24,7 @@ class CORE_EXPORT ProjectCompressionAction final : public gui::HorizontalGroupAc
 protected:
 
     /** Maps codec display names to codec instances */
-    using CodecInstanceMap = std::unordered_map<QString,std::shared_ptr<util::BlobCodec>>;
+    using CodecSettingsActionMap = std::unordered_map<QString, gui::CodecSettingsAction*>;
 
 public:
 
@@ -31,7 +34,14 @@ public:
      */
     ProjectCompressionAction(QObject* parent = nullptr);
 
-    std::shared_ptr<util::BlobCodec> getCodec() const;
+    gui::CodecSettingsAction* getCodecSettingsAction() const;
+
+    /**
+     * Create a new codec instance based on the current codec type and the associated settings action.
+     * @param parent Pointer to parent object
+     * @return Shared pointer to the created codec instance
+     */
+    util::SharedCodec createCodec(QObject* parent) const;
 
 public: // Serialization
 
@@ -53,9 +63,9 @@ public: // Action getters
     gui::OptionAction& getCodecTypeAction() { return _codecTypeAction; }
 
 private:
-    gui::ToggleAction   _enabledAction;         /** Action to enable/disable project file compression */
-    gui::OptionAction   _codecTypeAction;       /** Blob codec type action for project serialization */
-    CodecInstanceMap    _codecInstanceMap;      /** Maps codec display names to codec instances, used for serialization */
+    gui::ToggleAction       _enabledAction;             /** Action to enable/disable project file compression */
+    gui::OptionAction       _codecTypeAction;           /** Blob codec type action for project serialization */
+    CodecSettingsActionMap  _codecSettingsActionMap;    /** Maps codec display names to codec settings actions */
 
 public:
     static constexpr bool   DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */

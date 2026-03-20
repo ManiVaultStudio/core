@@ -10,12 +10,12 @@ class ZstdBlobCodec final : public mv::util::BlobCodec
 {
 public:
 
-    /*
-     * Constructs a ZstdBlobCodec with an optional codec settings action.
-     * @param parent Parent QObject
-     * @param codecSettingsAction Codec settings action for this codec
+    /**
+     * Constructs a Zstandard codec with a pointer to a parent object and a codec settings action.
+     * @param parent Pointer to parent object
+     * @param codecSettingsAction Codec settings action for this codec (must be a valid pointer)
      */
-    explicit ZstdBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction = nullptr);
+    explicit ZstdBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction);
 
     ~ZstdBlobCodec();
 

@@ -67,12 +67,16 @@ const BlobCodecFactory& CodecRegistry::factory(const QString& key) const
 	return *it.value();
 }
 
-gui::CodecSettingsAction* CodecRegistry::createSettingsFromVariantMap(BlobCodec::Type type, const QVariantMap& map, QObject* parent) const
+SharedCodec CodecRegistry::createCodec(QObject* parent, BlobCodec::Type type) const
 {
-	return factory(type).createSettingsFromVariantMap(map, parent);
+#ifdef CODEC_REGISTRY_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    return factory(type).createCodec(parent, nullptr);
 }
 
-std::shared_ptr<BlobCodec> CodecRegistry::createCodec(mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
+SharedCodec CodecRegistry::createCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) const
 {
 #ifdef CODEC_REGISTRY_VERBOSE
     qDebug() << __FUNCTION__;
@@ -81,19 +85,10 @@ std::shared_ptr<BlobCodec> CodecRegistry::createCodec(mv::gui::CodecSettingsActi
     if (!codecSettingsAction)
         throw std::runtime_error("Codec settings action is null");
 
-	return factory(codecSettingsAction->getTypeAction().getString()).createCodec(codecSettingsAction);
+	return factory(codecSettingsAction->getTypeAction().getString()).createCodec(parent, codecSettingsAction);
 }
 
-std::shared_ptr<BlobCodec> CodecRegistry::createCodec(BlobCodec::Type type) const
-{
-#ifdef CODEC_REGISTRY_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-
-    return factory(type).createCodec();
-}
-
-std::shared_ptr<BlobCodec> CodecRegistry::createCodec(const QString& typeName) const
+SharedCodec CodecRegistry::createCodec(QObject* parent, const QString& typeName) const
 {
 #ifdef CODEC_REGISTRY_VERBOSE
     qDebug() << __FUNCTION__;
@@ -102,7 +97,7 @@ std::shared_ptr<BlobCodec> CodecRegistry::createCodec(const QString& typeName) c
     if (typeName == "none")
         throw std::runtime_error("Blob codec type name is empty");
 
-    return createCodec(BlobCodec::typeFromString(typeName));
+    return createCodec(parent, BlobCodec::typeFromString(typeName));
 }
 
 std::vector<BlobCodec::Type> CodecRegistry::availableTypes() const

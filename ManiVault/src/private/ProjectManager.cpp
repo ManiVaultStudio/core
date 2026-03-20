@@ -937,6 +937,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
                 fileDialogLayout->addLayout(titleLayout, rowCount + 3, 1, 1, 2);
 
+                /*
                 connect(&saveFileDialog, &QFileDialog::currentChanged, this, [this](const QString& filePath) -> void {
                     if (!QFileInfo(filePath).isFile())
                         return;
@@ -949,6 +950,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                     //_project->getCompressionAction().getEnabledAction().setChecked(projectMetaAction->getCompressionAction().getEnabledAction().isChecked());
                     //_project->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
                 });
+                */
 
                 saveFileDialog.open();
 

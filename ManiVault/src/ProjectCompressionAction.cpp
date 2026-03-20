@@ -6,8 +6,6 @@
 
 #include "util/CodecRegistry.h"
 
-#include "actions/CodecSettingsAction.h"
-
 using namespace mv::gui;
 using namespace mv::util;
 
@@ -28,11 +26,11 @@ ProjectCompressionAction::ProjectCompressionAction(QObject* parent /*= nullptr*/
 
         typeNameForDisplayName[factory->displayName()] = factory->key();
 
-        auto codec = factory->createCodec();
+        auto codecSettingsAction = factory->createCodecSettingsAction(this);
 
-        _codecInstanceMap.emplace(factory->displayName(), codec);
+        _codecSettingsActionMap.emplace(factory->displayName(), codecSettingsAction);
 
-        addAction(const_cast<gui::CodecSettingsAction*>(codec->getSettingsAction()));
+        addAction(codecSettingsAction);
     };
 
     addCodec(&codecRegistry().factory(BlobCodec::Type::None));
@@ -41,8 +39,8 @@ ProjectCompressionAction::ProjectCompressionAction(QObject* parent /*= nullptr*/
     _codecTypeAction.initialize(typeNameForDisplayName.keys(), codecRegistry().factory(BlobCodec::Type::Zstd).displayName());
 
     auto codecTypeChanged = [this]() -> void {
-		for (auto& [displayName, codec] : _codecInstanceMap) {
-            _codecInstanceMap[displayName]->getSettingsAction()->setVisible(displayName == _codecTypeAction.getCurrentText());
+		for (auto& [displayName, codecSettingsAction] : _codecSettingsActionMap) {
+            codecSettingsAction->setVisible(displayName == _codecTypeAction.getCurrentText());
         }
 	};
 
@@ -51,20 +49,27 @@ ProjectCompressionAction::ProjectCompressionAction(QObject* parent /*= nullptr*/
     codecTypeChanged();
 }
 
-std::shared_ptr<BlobCodec> ProjectCompressionAction::getCodec() const
+CodecSettingsAction* ProjectCompressionAction::getCodecSettingsAction() const
 {
     try {
-        const auto codecType = codecRegistry().typeFromDisplayName(_codecTypeAction.getCurrentText());
-
-        if (!codecRegistry().isRegistered(codecType))
-            throw std::runtime_error("Codec not registered");
-
-        return _codecInstanceMap.at(_codecTypeAction.getCurrentText());
+        return _codecSettingsActionMap.at(_codecTypeAction.getCurrentText());
     }
     catch (const std::exception& e) {
         qWarning() << "Failed to create blob codec:" << e.what();
 
-        return nullptr;
+        return {};
+    }
+}
+
+SharedCodec ProjectCompressionAction::createCodec(QObject* parent) const
+{
+    try {
+        return codecRegistry().createCodec(parent, getCodecSettingsAction());
+    }
+    catch (const std::exception& e) {
+        qWarning() << "Failed to create blob codec:" << e.what();
+
+        return {};
     }
 }
 

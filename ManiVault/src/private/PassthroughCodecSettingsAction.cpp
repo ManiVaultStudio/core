@@ -20,6 +20,7 @@ PassthroughCodecSettingsAction::PassthroughCodecSettingsAction(QObject* parent, 
 #endif
 
     setForceHidden(true);
+    getTypeAction().setString(BlobCodec::typeToString(BlobCodec::Type::None));
 }
 
 PassthroughCodecSettingsAction::~PassthroughCodecSettingsAction()

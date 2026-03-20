@@ -8,17 +8,28 @@
 
 #include <stdexcept>
 
+#ifdef _DEBUG
+	#define CODEC_VERBOSE
+#endif
+
 namespace mv::util {
 
-BlobCodec::BlobCodec(QObject* parent, gui::CodecSettingsAction* codecSettingsAction /*= nullptr*/) :
+BlobCodec::BlobCodec(QObject* parent, gui::CodecSettingsAction* codecSettingsAction) :
     QObject(parent),
-    _codecSettingsAction(nullptr)
+    _codecSettingsAction(codecSettingsAction)
 {
-    setCodecSettingsAction(codecSettingsAction);
+    Q_ASSERT(_codecSettingsAction);
+
+    if (!_codecSettingsAction)
+        throw std::invalid_argument("Codec settings action must be a valid pointer");
 }
 
 BlobCodec::Result BlobCodec::decodeTo(const QByteArray& encodedData, char* destination, std::uint64_t destinationSize) const
 {
+#ifdef CODEC_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     Result result;
 
     if (destination == nullptr) {
@@ -49,7 +60,11 @@ BlobCodec::Result BlobCodec::decodeTo(const QByteArray& encodedData, char* desti
 
 BlobCodec::Result BlobCodec::encodeToFile(const QByteArray& input, const QString& filePath) const
 {
-    const auto encoded = encode(input);
+#ifdef CODEC_VERBOSE
+    qDebug() << __FUNCTION__ << filePath;
+#endif
+
+    auto encoded = encode(input);
 
     if (!encoded.isSuccess())
         return encoded;
@@ -67,6 +82,10 @@ BlobCodec::Result BlobCodec::encodeToFile(const QByteArray& input, const QString
 
 BlobCodec::Result BlobCodec::decodeFromFile(const QString& filePath, qsizetype expectedSize) const
 {
+#ifdef CODEC_VERBOSE
+    qDebug() << __FUNCTION__ << filePath;
+#endif
+
     QFile file(filePath);
 
     if (!file.open(QIODevice::ReadOnly))
@@ -77,6 +96,10 @@ BlobCodec::Result BlobCodec::decodeFromFile(const QString& filePath, qsizetype e
 
 BlobCodec::Result BlobCodec::decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const
 {
+#ifdef CODEC_VERBOSE
+    qDebug() << __FUNCTION__ << filePath;
+#endif
+
     Result result;
 
     if (destination == nullptr) {
@@ -129,22 +152,6 @@ BlobCodec::Type BlobCodec::typeFromString(const QString& typeString)
 gui::CodecSettingsAction* BlobCodec::getSettingsAction() const
 {
 	return _codecSettingsAction;
-}
-
-void BlobCodec::setCodecSettingsAction(gui::CodecSettingsAction* codecSettingsAction)
-{
-    if (codecSettingsAction == _codecSettingsAction)
-        return;
-
-    if (codecSettingsAction)
-        codecSettingsAction->setParent(this);
-
-    auto previousCodeSettingsAction = _codecSettingsAction;
-
-	_codecSettingsAction = codecSettingsAction;
-
-    if (previousCodeSettingsAction)
-        delete previousCodeSettingsAction;
 }
 
 }

@@ -10,9 +10,17 @@
 #include <util/BlobCodec.h>
 #include <util/BlobCodecFactory.h>
 
+/**
+ * @brief Factory interface for creating Zstandard codec instances.
+ *
+ * This factory is expected to live in the main thread
+ *
+ * @author Thomas Kroes
+ */
 class ZstdBlobCodecFactory final : public mv::util::BlobCodecFactory
 {
 public:
+
     ZstdBlobCodecFactory(QObject* parent = nullptr);
 
     ~ZstdBlobCodecFactory();
@@ -23,17 +31,21 @@ public:
 
 	QString displayName() const override;
 
-
-	mv::gui::CodecSettingsAction* createSettingsFromVariantMap(const QVariantMap& map, QObject* parent = nullptr) const override;
-
-	std::shared_ptr<mv::util::BlobCodec> createCodec(mv::gui::CodecSettingsAction* codecSettingsAction = nullptr) const override;
-
     /**
      * Get default codec settings action for this codec (returns nullptr if no settings are needed)
      * @return Default codec settings action for this codec (returns nullptr if no settings are needed)
      */
     const mv::gui::CodecSettingsAction* getDefaultCodecSettingsAction() const override;
 
+    mv::gui::CodecSettingsAction* createCodecSettingsAction(QObject* parent) const override;
+
+protected:
+
+    
+    std::shared_ptr<mv::util::BlobCodec> createCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction = nullptr) const override;
+
 private:
     ZstdCodecSettingsAction     _defaultSettingsAction;     /** Default codec settings action for this codec */
+
+    friend class mv::util::CodecRegistry;
 };

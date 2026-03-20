@@ -20,6 +20,8 @@ ZstdCodecSettingsAction::ZstdCodecSettingsAction(QObject* parent, const QString&
     qDebug() << __FUNCTION__;
 #endif
 
+    getTypeAction().setString(BlobCodec::typeToString(BlobCodec::Type::Zstd));
+
     addAction(&_levelAction);
 }
 

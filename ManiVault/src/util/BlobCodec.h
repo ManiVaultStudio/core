@@ -6,6 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "actions/CodecSettingsAction.h"
+
 #include <QByteArray>
 #include <QString>
 
@@ -53,11 +55,11 @@ public:
 public:
 
     /**
-     * Constructs a blob codec with an optional codec settings action.
-     * @param parent Parent QObject
-     * @param codecSettingsAction Codec settings action for this codec
+     * Constructs a codec with a codec settings action.
+     * @param parent Pointer to parent object
+     * @param codecSettingsAction Codec settings action for this codec (must be a valid pointer)
      */
-    BlobCodec(QObject* parent, gui::CodecSettingsAction* codecSettingsAction = nullptr);
+    BlobCodec(QObject* parent, gui::CodecSettingsAction* codecSettingsAction);
 
     /* Virtual destructor for proper cleanup in derived classes */
 	virtual ~BlobCodec() = default;
@@ -138,14 +140,10 @@ public:
      */
     gui::CodecSettingsAction* getSettingsAction() const;
 
-    /**
-     * Set codec settings action for this codec (the codec takes ownership of the pointer)
-     * @param codecSettingsAction Codec settings action for this codec (the codec takes ownership of the pointer)
-     */
-    void setCodecSettingsAction(gui::CodecSettingsAction* codecSettingsAction);
-
 private:
-    gui::CodecSettingsAction* _codecSettingsAction;    /* Cached settings action instance (if any) for this codec */
+    QPointer<gui::CodecSettingsAction>  _codecSettingsAction;    /* Cached settings action instance (if any) for this codec */
 };
+
+using SharedCodec = std::shared_ptr<BlobCodec>;
 
 }

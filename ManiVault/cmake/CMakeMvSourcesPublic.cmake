@@ -586,6 +586,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/BlobCodec.h
     src/util/BlobCodecFactory.h
     src/util/CodecRegistry.h
+    src/util/CodecActionBinding.h
 )
 
 if(APPLE)
@@ -652,6 +653,7 @@ set(PUBLIC_UTIL_SOURCES
 	src/util/BlobCodec.cpp
     src/util/BlobCodecFactory.cpp
     src/util/CodecRegistry.cpp
+    src/util/CodecActionBinding.cpp
 )
 
 if(APPLE)

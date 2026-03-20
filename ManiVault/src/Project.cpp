@@ -107,6 +107,9 @@ bool Project::isStartupProject() const
 
 void Project::fromVariantMap(const QVariantMap& variantMap)
 {
+    QElapsedTimer timer;
+    timer.start();
+
     Serializable::fromVariantMap(variantMap);
 
     projects().getProjectSerializationTask().setName("Load project");
@@ -121,11 +124,19 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
     _overrideApplicationStatusBarAction.fromParentVariantMap(variantMap);
     _statusBarVisibleAction.fromParentVariantMap(variantMap);
     _statusBarOptionsAction.fromParentVariantMap(variantMap);
-
+    qDebug() << "Project::fromVariantMap: loaded project meta and UI actions in" << timer.elapsed() << "ms";
+    timer.restart();
     dataHierarchy().fromParentVariantMap(variantMap);
+    qDebug() << "Project::fromVariantMap: loaded data hierarchy in" << timer.elapsed() << "ms";
+    timer.restart();
     actions().fromParentVariantMap(variantMap);
+    qDebug() << "Project::fromVariantMap: loaded actions in" << timer.elapsed() << "ms";
+        timer.restart();
     plugins().fromParentVariantMap(variantMap);
+        qDebug() << "Project::fromVariantMap: loaded plugins in" << timer.elapsed() << "ms";
+            timer.restart();
     events().fromParentVariantMap(variantMap, true);
+    qDebug() << "Project::fromVariantMap: loaded events in" << timer.elapsed() << "ms";
 
     if (getReadOnlyAction().isChecked() && getAllowedPluginsOnlyAction().isChecked()) {
         for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
