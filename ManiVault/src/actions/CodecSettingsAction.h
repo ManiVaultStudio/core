@@ -6,6 +6,7 @@
 
 #include "VerticalGroupAction.h"
 #include "StringAction.h"
+#include "IntegralAction.h"
 
 namespace mv::gui {
 
@@ -31,9 +32,11 @@ public: // Action getters
     const StringAction& getTypeAction() const { return _typeAction; }
 
     StringAction& getTypeAction() { return _typeAction; }
+    IntegralAction& getBlockSizeAction() { return _blockSizeAction; }
 
 private:
-    StringAction    _typeAction;    /** Type of compression codec */
+    StringAction    _typeAction;        /** Type of compression codec */
+    IntegralAction  _blockSizeAction;   /** Block size for compression (MiB) */
 };
 
 }

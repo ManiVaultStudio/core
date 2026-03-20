@@ -104,50 +104,48 @@ QByteArray readBinaryFileToByteArray(const QString& filePath)
     return file.readAll();
 }
 
-QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk /*= false*/, std::uint64_t maxBlockSize /*= DEFAULT_MAX_BLOCK_SIZE*/, const BlobCodec* blobCodecOverride /*= nullptr*/)
+QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk /*= false*/, const BlobCodec* blobCodecOverride /*= nullptr*/)
 {
     try {
         if (!mv::projects().hasProject())
             throw std::runtime_error("Unable to save raw data, no project is currently open");
 
-    	Q_ASSERT(maxBlockSize != 0);
-
-	    if (maxBlockSize == static_cast<std::uint64_t>(-1))
-	        maxBlockSize = DEFAULT_MAX_BLOCK_SIZE;
-
         auto createCodec = [&]() -> std::shared_ptr<BlobCodec> {
             return mv::projects().getCurrentProject()->getCompressionAction().createCodec(nullptr);
-        };
+		};
+
+        const std::uint64_t maxBlockSizeInBytes = mv::projects().getCurrentProject()->getCompressionAction().getCodecSettingsAction()->getBlockSizeAction().getValue() << 20;
 
 	    QVariantMap rawData;
 
 	    rawData["Size"]     = QVariant::fromValue(numberOfBytes);
 	    rawData["Codec"]    = QVariant::fromValue(createCodec()->getName());
 
-	    const auto numberOfBlocks = static_cast<std::uint64_t>((numberOfBytes + maxBlockSize - 1) / maxBlockSize);
+	    const auto numberOfBlocks = (numberOfBytes + maxBlockSizeInBytes - 1) / maxBlockSizeInBytes;
 
-	    QVector<EncodeBlockJob> jobs;
-	    jobs.reserve(static_cast<int>(numberOfBlocks));
+	    QVector<EncodeBlockJob> encodeBlockJobs;
+
+	    encodeBlockJobs.reserve(static_cast<int>(numberOfBlocks));
 
 	    std::uint64_t offset = 0;
 
 	    while (offset < numberOfBytes)
 	    {
-	        const auto blockSize = std::min(maxBlockSize, numberOfBytes - offset);
+	        const auto blockSize = std::min(maxBlockSizeInBytes, numberOfBytes - offset);
 
 	        EncodeBlockJob job;
 	        job._offset     = offset;
 	        job._size       = blockSize;
 	        job._rawData    = QByteArray(bytes + offset, static_cast<qsizetype>(blockSize));
 
-	        jobs.push_back(std::move(job));
+	        encodeBlockJobs.push_back(std::move(job));
 
 	        offset += blockSize;
 	    }
 
 	    const auto saveDir = QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Save));
 
-	    const auto results = QtConcurrent::blockingMapped<QVector<EncodeBlockResult>>(jobs, [createCodec, saveToDisk, saveDir](const EncodeBlockJob& job) -> EncodeBlockResult {
+	    const auto results = QtConcurrent::blockingMapped<QVector<EncodeBlockResult>>(encodeBlockJobs, [createCodec, saveToDisk, saveDir](const EncodeBlockJob& job) -> EncodeBlockResult {
 	        EncodeBlockResult result;
 
 	        try {
@@ -197,7 +195,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 	    }
 
 	    rawData["NumberOfBlocks"]   = QVariant::fromValue(numberOfBlocks);
-	    rawData["BlockSize"]        = QVariant::fromValue(maxBlockSize);
+	    rawData["BlockSize"]        = QVariant::fromValue(maxBlockSizeInBytes);
 	    rawData["Blocks"]           = QVariant::fromValue(blocks);
 
         return rawData;

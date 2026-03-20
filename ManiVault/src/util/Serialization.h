@@ -13,8 +13,6 @@
 #include <QStringList>
 #include <QVector>
 
-inline constexpr std::uint64_t DEFAULT_MAX_BLOCK_SIZE = 2ull * 1024ull * 1024ull;
-
 namespace mv::util {
 
 class BlobCodec;
@@ -40,10 +38,9 @@ CORE_EXPORT void loadRawDataFromBinaryFile(char* bytes, const std::uint64_t& num
  * @param bytes Pointer to input buffer
  * @param numberOfBytes Number of input bytes 
  * @param saveToDisk Whether to save the raw data to disk or inline in the variant
- * @param maxBlockSize Maximum size per block (defaults to DEFAULT_MAX_BLOCK_SIZE)
  * @param blobCodecOverride Optional blob codec to use for encoding the data blocks (defaults to nullptr, which means no compression)
  */
-CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk = false, std::uint64_t maxBlockSize = DEFAULT_MAX_BLOCK_SIZE, const BlobCodec* blobCodecOverride = nullptr);
+CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk = false, const BlobCodec* blobCodecOverride = nullptr);
 
 /**
  * Convert variant map to raw data

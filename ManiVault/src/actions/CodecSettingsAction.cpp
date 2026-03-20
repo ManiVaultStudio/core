@@ -8,11 +8,17 @@ namespace mv::gui {
 
 CodecSettingsAction::CodecSettingsAction(QObject* parent, const QString& title) :
     VerticalGroupAction(parent, title),
-    _typeAction(this, "Type")
+    _typeAction(this, "Type"),
+    _blockSizeAction(this, "Block size (MiB)", 1, 1024, 32)
 {
     setIconByName("gear");
 
     setConfigurationFlag(ConfigurationFlag::ForceCollapsedInGroup);
+
+    _typeAction.setToolTip("Type of compression codec");
+    _blockSizeAction.setToolTip("Block size (MiB) for compression");
+
+    addAction(&_blockSizeAction);
 }
 
 }
