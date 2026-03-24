@@ -112,8 +112,6 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
 
     Serializable::fromVariantMap(variantMap);
 
-    projects().getProjectSerializationTask().setName("Load project");
-
     _projectMetaAction.fromParentVariantMap(variantMap);
 
     if (variantMap.contains(_selectionGroupingAction.getSerializationName()))
@@ -148,8 +146,6 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap Project::toVariantMap() const
 {
-    projects().getProjectSerializationTask().setName("Save project");
-
     auto variantMap = Serializable::toVariantMap();
     
     _projectMetaAction.insertIntoVariantMap(variantMap);

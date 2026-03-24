@@ -7,7 +7,6 @@
 #include "AbstractManager.h"
 #include "Application.h"
 #include "Project.h"
-#include "ProjectSerializationTask.h"
 
 #include "actions/TriggerAction.h"
 #include "actions/RecentFilesAction.h"
@@ -133,7 +132,6 @@ public:
     AbstractProjectManager(QObject* parent) :
         AbstractManager(parent, "Project"),
         _state(State::Idle),
-        _projectSerializationTask(this, "Project serialization"),
         _projectDownloadTask(this, "Project Download", { Task::GuiScope::Modal })
     {
     }
@@ -310,16 +308,6 @@ public:
      * @return Preview image
      */
     virtual QImage getWorkspacePreview(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const = 0;
-
-    /** Get task for project serialization */
-    ProjectSerializationTask& getProjectSerializationTask() {
-        auto application = Application::current();
-
-        if (application->getStartupTask().isRunning())
-            return application->getStartupTask().getLoadProjectTask();
-
-        return _projectSerializationTask;
-    }
 
 public: // Menus
 
@@ -511,7 +499,6 @@ signals:
 
 private:
     State                               _state;                         /** Determines the state of the project manager */
-    ProjectSerializationTask            _projectSerializationTask;      /** Task for project serialization */
     Task                                _projectDownloadTask;           /** Progress reporting project downloading */
     QMap<TemporaryDirType, QString>     _temporaryDirPaths;             /** Temporary directories for file open/save etc. */
 };

@@ -558,11 +558,6 @@ Workspace* WorkspaceManager::getCurrentWorkspace()
 
 void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    auto& projectSerializationTask = projects().getProjectSerializationTask();
-
-    _mainDockManager->setSerializationTask(&projectSerializationTask.getSystemViewPluginsTask());
-    _viewPluginsDockManager->setSerializationTask(&projectSerializationTask.getViewPluginsTask());
-
     getCurrentWorkspace()->fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "DockManagers");
@@ -584,11 +579,6 @@ void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap WorkspaceManager::toVariantMap() const
 {
-    auto& projectSerializationTask = projects().getProjectSerializationTask();
-
-    _mainDockManager->setSerializationTask(&projectSerializationTask.getSystemViewPluginsTask());
-    _viewPluginsDockManager->setSerializationTask(&projectSerializationTask.getViewPluginsTask());
-
     auto currentWorkspaceMap = getCurrentWorkspace()->toVariantMap();
 
     QVariantMap dockManagers{

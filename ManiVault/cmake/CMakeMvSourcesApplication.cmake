@@ -116,10 +116,12 @@ set(PRIVATE_DATA_MANAGER_FILES
 
 set(PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS
     src/private/DataHierarchyManager.h
+    src/private/DataHierarchyLoadWorkflow.h
 )
 
 set(PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES
     src/private/DataHierarchyManager.cpp
+    src/private/DataHierarchyLoadWorkflow.cpp
 )
 
 set(PRIVATE_DATA_HIERARCHY_MANAGER_FILES

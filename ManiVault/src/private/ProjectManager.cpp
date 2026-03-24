@@ -384,10 +384,14 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
                 setState(State::Idle);
 
-                if (success)
+                if (success) {
+                    setState(State::Idle);
+                    emit projectOpened(*_project);
+
                     help().addNotification("Load", "Project loaded successfully");
-                else
+                } else {
                     help().addNotification("Error", "Unable to load ManiVault project: " + error);
+                }
             });
 
         _activeOpenWorkflow = std::move(workflow);
@@ -799,18 +803,6 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             Application::requestOverrideCursor(Qt::WaitCursor);
 
             /*
-            if (_project->getCompressionAction().getEnabledAction().isChecked())
-                qDebug().noquote() << "Saving ManiVault project to" << filePath << "with compression level" << _project->getCompressionAction().getLevelAction().getValue();
-            else
-                qDebug().noquote() << "Saving ManiVault project to" << filePath << "without compression";
-			*/
-
-            auto& projectSerializationTask  = projects().getProjectSerializationTask();
-            auto& compressionTask           = projectSerializationTask.getCompressionTask();
-
-            projectSerializationTask.startSave(filePath);
-            projectSerializationTask.setRunning();
-
             QCoreApplication::processEvents();
 
             Archiver archiver;
@@ -857,20 +849,17 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             setState(State::Idle);
 
             qDebug().noquote() << filePath << "saved successfully in " << saveTimer.elapsed() << "ms";
+            */
         }
         emit projectSaved(*_project);
     }
     catch (std::exception& e)
     {
         exceptionMessageBox("Unable to save project", e);
-
-        projects().getProjectSerializationTask().setFinished();
     }
     catch (...)
     {
         exceptionMessageBox("Unable to save project");
-
-        projects().getProjectSerializationTask().setFinished();
     }
 
     Application::current()->restoreOverrideCursor();
@@ -1092,15 +1081,11 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
     {
         exceptionMessageBox("Unable to publish ManiVault project", e);
 
-        projects().getProjectSerializationTask().setFinished();
-
         Application::current()->restoreOverrideCursor();
     }
     catch (...)
     {
         exceptionMessageBox("Unable to publish ManiVault project");
-
-        projects().getProjectSerializationTask().setFinished();
 
         Application::current()->restoreOverrideCursor();
     }

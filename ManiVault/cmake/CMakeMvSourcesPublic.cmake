@@ -716,14 +716,12 @@ set(PUBLIC_PROJECT_HEADERS
     src/Project.h
     src/ProjectMetaAction.h
     src/ProjectCompressionAction.h
-    src/ProjectSerializationTask.h
 )
 
 set(PUBLIC_PROJECT_SOURCES
     src/Project.cpp
     src/ProjectMetaAction.cpp
     src/ProjectCompressionAction.cpp
-    src/ProjectSerializationTask.cpp
 )
 
 set(PUBLIC_PROJECT_FILES

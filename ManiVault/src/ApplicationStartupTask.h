@@ -5,7 +5,6 @@
 #pragma once
 
 #include "Task.h"
-#include "ProjectSerializationTask.h"
 
 namespace mv {
 
@@ -36,13 +35,11 @@ public: // Task getters
     Task& getLoadCoreTask();                            /** Get aggregate task for loading the core */
     Task& getLoadCoreManagersTask();                    /** Get aggregate task for loading the core managers */
     Task& getLoadGuiTask();                             /** Get task for loading the GUI */
-    ProjectSerializationTask& getLoadProjectTask();     /** Get task for loading a project */
 
 private:
-    Task                        _loadCoreTask;              /** Aggregate task for loading the core */
-    Task                        _loadCoreManagersTask;      /** Aggregate task for loading the core managers */
-    Task                        _loadGuiTask;               /** Task for loading the GUI */
-    ProjectSerializationTask    _loadProjectTask;           /** Task for possibly loading a project at application startup */
+    Task    _loadCoreTask;              /** Aggregate task for loading the core */
+    Task    _loadCoreManagersTask;      /** Aggregate task for loading the core managers */
+    Task    _loadGuiTask;               /** Task for loading the GUI */
 };
 
 }

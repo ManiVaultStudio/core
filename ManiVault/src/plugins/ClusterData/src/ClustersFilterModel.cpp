@@ -60,7 +60,9 @@ void ClustersFilterModel::setNameFilter(const QString& nameFilter)
     if (nameFilter == _nameFilter)
         return;
 
-    _nameFilter = nameFilter;
-
-    invalidateFilter();
+    beginFilterChange();
+    {
+        _nameFilter = nameFilter;
+    }
+    endFilterChange();
 }

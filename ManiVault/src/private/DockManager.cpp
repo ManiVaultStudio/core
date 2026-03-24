@@ -38,8 +38,6 @@ DockManager::DockManager(const QString& name, QWidget* parent /*= nullptr*/) :
     CDockManager(parent),
     Serializable("Dock manager"),
     _name(name),
-    _serializationTask(nullptr),
-    _layoutTask(this, "Load " + _name.toLower() + " layout"),
     _hasWarmedUpNativeWidgets(false)
 {
     CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, true);
@@ -209,14 +207,9 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "State");
     variantMapMustContain(variantMap, "ViewPluginDockWidgets");
 
-    _layoutTask.setName("Load " + _name.toLower() + " layout");
-
     hide();
     {
         const auto viewPluginDockWidgetsList = variantMap["ViewPluginDockWidgets"].toList();
-
-        for (const auto& viewPluginDockWidgetVariant : viewPluginDockWidgetsList)
-            ViewPluginDockWidget::preRegisterSerializationTask(this, viewPluginDockWidgetVariant.toMap()["ID"].toString(), this);
 
         for (const auto& viewPluginDockWidgetVariant : viewPluginDockWidgetsList) {
             const auto viewPluginMap    = viewPluginDockWidgetVariant.toMap()["ViewPlugin"].toMap();
@@ -239,16 +232,8 @@ void DockManager::fromVariantMap(const QVariantMap& variantMap)
             QCoreApplication::processEvents();
         }
 
-        _layoutTask.setRunning();
-        {
-            if (!restoreState(QByteArray::fromBase64(variantMap["State"].toString().toUtf8()), variantMap["Version"].toInt()))
-                qCritical() << "Unable to restore state from" << objectName();
-        }
-        _layoutTask.setFinished();
-
-        _serializationTask->setFinished();
-
-        ViewPluginDockWidget::removeAllSerializationTasks();
+        if (!restoreState(QByteArray::fromBase64(variantMap["State"].toString().toUtf8()), variantMap["Version"].toInt()))
+            qCritical() << "Unable to restore state from" << objectName();
     }
     show();
 }
@@ -259,13 +244,6 @@ QVariantMap DockManager::toVariantMap() const
     qDebug() << __FUNCTION__ << objectName();
 #endif
 
-    const_cast<DockManager*>(this)->_layoutTask.setName("Save " + _name.toLower() + " layout");
-
-    _serializationTask->setEnabled(true);
-
-    for (const auto& viewPluginDockWidget : getViewPluginDockWidgets(true))
-        ViewPluginDockWidget::preRegisterSerializationTask(const_cast<DockManager*>(this), viewPluginDockWidget->getId(), const_cast<DockManager*>(this));
-
     auto variantMap = Serializable::toVariantMap();
 
     QVariantList viewPluginDockWidgetsList;
@@ -273,38 +251,10 @@ QVariantMap DockManager::toVariantMap() const
     for (const auto& viewPluginDockWidget : getViewPluginDockWidgets(true))
         viewPluginDockWidgetsList << viewPluginDockWidget->toVariantMap();
 
-    const_cast<DockManager*>(this)->_layoutTask.setRunning();
-    {
-        variantMap.insert({
-            { "State", QVariant::fromValue(saveState().toBase64()) },
-            { "ViewPluginDockWidgets", viewPluginDockWidgetsList }
-        });
-    }
-    const_cast<DockManager*>(this)->_layoutTask.setFinished();
-
-    _serializationTask->setFinished();
-
-    ViewPluginDockWidget::removeAllSerializationTasks();
+    variantMap.insert({
+        { "State", QVariant::fromValue(saveState().toBase64()) },
+        { "ViewPluginDockWidgets", viewPluginDockWidgetsList }
+    });
 
     return variantMap;
-}
-
-Task* DockManager::getSerializationTask() const
-{
-    return _serializationTask;
-}
-
-void DockManager::setSerializationTask(mv::Task* serializationTask)
-{
-    Q_ASSERT(serializationTask != nullptr);
-
-    if (serializationTask == nullptr)
-        return;
-
-    if (serializationTask == _serializationTask)
-        return;
-
-    _serializationTask = serializationTask;
-
-    _layoutTask.setParentTask(_serializationTask);
 }

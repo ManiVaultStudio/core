@@ -195,11 +195,6 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
     const auto guiName                = viewPluginMap["GuiName"].toMap()["Value"].toString();
     const auto viewPluginId           = viewPluginMap["ID"].toString();
 
-    auto serializationTask = ViewPluginDockWidget::getSerializationTask(viewPluginDockWidgetId);
-
-    serializationTask->setName(QString("Loading view plugin: %1").arg(guiName));
-    serializationTask->setRunning();
-
     variantMapMustContain(variantMap, "ViewPlugin");
 
     _viewPluginMap = variantMap["ViewPlugin"].toMap();
@@ -212,14 +207,8 @@ void ViewPluginDockWidget::fromVariantMap(const QVariantMap& variantMap)
 
     _viewPlugin->setId(viewPluginId);
 
-    //QCoreApplication::processEvents();
-
     if (variantMap.contains("DockManagerState"))
         _dockManager.restoreState(QByteArray::fromBase64(variantMap["DockManagerState"].toString().toUtf8()));
-
-    //QCoreApplication::processEvents();
-
-    serializationTask->setFinished();
 
     setProperty("ViewPluginId", _viewPlugin->getId());
 }
@@ -230,23 +219,14 @@ QVariantMap ViewPluginDockWidget::toVariantMap() const
     qDebug() << __FUNCTION__;
 #endif
 
-    auto viewPlugin        = const_cast<ViewPluginDockWidget*>(this)->getViewPlugin();
-    auto serializationTask = ViewPluginDockWidget::getSerializationTask(getId());
-
-    serializationTask->setName(QString("Saving view plugin: %1").arg(viewPlugin->text()));
-    serializationTask->setRunning();
-
+    auto viewPlugin = const_cast<ViewPluginDockWidget*>(this)->getViewPlugin();
     auto variantMap = DockWidget::toVariantMap();
 
     if (_viewPlugin) {
         variantMap.insert({{"ViewPlugin", viewPlugin->toVariantMap()}});
     }
 
-    QCoreApplication::processEvents();
-
     variantMap.insert({{"DockManagerState", QVariant::fromValue(_dockManager.saveState().toBase64())}});
-
-    serializationTask->setFinished();
 
     return variantMap;
 }
@@ -259,35 +239,6 @@ void ViewPluginDockWidget::cacheVisibility()
 void ViewPluginDockWidget::restoreVisibility()
 {
     toggleView(_cachedVisibility);
-}
-
-void ViewPluginDockWidget::preRegisterSerializationTask(QObject* parent, const QString& viewPluginDockWidgetId, DockManager* dockManager)
-{
-    if (viewPluginDockWidgetId.isEmpty())
-        return;
-
-    auto serializationTask = new Task(parent, "View plugin Dock Widget");
-
-    serializationTask->setMayKill(false);
-    serializationTask->setParentTask(dockManager->getSerializationTask());
-
-    serializationTasks[viewPluginDockWidgetId] = serializationTask;
-}
-
-Task* ViewPluginDockWidget::getSerializationTask(const QString& viewPluginDockWidgetId)
-{
-    if (serializationTasks.contains(viewPluginDockWidgetId))
-        return serializationTasks[viewPluginDockWidgetId];
-
-    return nullptr;
-}
-
-void ViewPluginDockWidget::removeAllSerializationTasks()
-{
-    for (auto serializationTask : serializationTasks.values())
-        delete serializationTask;
-
-    serializationTasks.clear();
 }
 
 void ViewPluginDockWidget::setViewPlugin(mv::plugin::ViewPlugin* viewPlugin)

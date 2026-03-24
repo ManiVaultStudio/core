@@ -111,17 +111,6 @@ public: // For prevent app flickering (minimizing and maximizing in sequence whe
      */
     bool hasWarmedUpNativeWidgets() const;
 
-public: // Serialization task
-
-    /** Get task for reporting serialization progress */
-    mv::Task* getSerializationTask() const;
-
-    /**
-     * Set task for reporting serialization progress to \p serializationTask
-     * @param serializationTask Pointer to serialization task
-     */
-    void setSerializationTask(mv::Task* serializationTask);
-
 public: // Serialization
 
     /**
@@ -141,7 +130,5 @@ public: // Serialization
 
 private:
     QString     _name;                      /** Dock manager name */
-    mv::Task*   _serializationTask;         /** For reporting serialization progress */
-    mv::Task    _layoutTask;                /** For reporting layout progress */
     bool        _hasWarmedUpNativeWidgets;  /** Whether the native widgets have been warmed up already, to prevent multiple warmups */
 };

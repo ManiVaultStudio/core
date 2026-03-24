@@ -252,8 +252,6 @@ QFuture<void> fromVariantMapAsync(WidgetAction* action, const QVariantMap& varia
 
 void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    auto& projectDataSerializationTask = projects().getProjectSerializationTask().getDataTask();
-
     QStringList subtasks;
     std::vector<std::pair<QVariantMap, bool>> datasetList;
 
@@ -271,10 +269,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
     enumerateDatasetNames(variantMap);
 
-    projectDataSerializationTask.setSubtasks(subtasks);
-    projectDataSerializationTask.setRunning();
-
-    const auto loadDataHierarchyItem = [&projectDataSerializationTask](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
+    const auto loadDataHierarchyItem = [](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
         const auto dataset          = dataHierarchyItemMap["Dataset"].toMap();
         const auto datasetId        = dataset["ID"].toString();
         const auto datasetName      = dataset["Name"].toString();
@@ -282,9 +277,6 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         const auto isDerived        = dataset["Derived"].toBool();
         const auto isFull           = dataset["Full"].toBool();
         const auto sourceDatasetID  = dataset["SourceDatasetID"].toString();
-
-        auto subtaskName = QString("Loading dataset hierarchy item: %1").arg(datasetName);
-        projectDataSerializationTask.setSubtaskStarted(datasetId, subtaskName);
 
         Dataset<DatasetImpl> loadedDataset;
 
@@ -294,8 +286,6 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
             loadedDataset->setSourceDataset(sourceDatasetID);
 
         loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);
-
-        projectDataSerializationTask.setSubtaskFinished(datasetId, subtaskName);
 
         QCoreApplication::processEvents();
 
@@ -326,7 +316,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
     QVector<DatasetLoadJob> datasetLoadJobs;
 
-    auto populateDatasets = [&projectDataSerializationTask, &datasetList, &datasetLoadJobs](const QVariantMap& variantMap) -> void {
+    auto populateDatasets = [&datasetList, &datasetLoadJobs](const QVariantMap& variantMap) -> void {
 
         if (Application::isSerializationAborted())
             return;
@@ -371,23 +361,11 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
     for (auto& datasetLoadJob : datasetLoadJobs)
         datasetLoadJob.future.waitForFinished();
-
-    projectDataSerializationTask.setFinished();
 }
 
 QVariantMap DataHierarchyManager::toVariantMap() const
 {
     if (!_items.empty()) {
-        auto& projectDataSerializationTask = projects().getProjectSerializationTask().getDataTask();
-        
-        QStringList subtasks;
-
-        for (auto& dataHierarchyItem : _items)
-            subtasks << dataHierarchyItem->getDataset()->getId();
-
-        projectDataSerializationTask.setSubtasks(subtasks);
-        projectDataSerializationTask.setRunning();
-
         QVariantMap variantMap;
 
         std::uint32_t sortIndex = 0;
@@ -398,13 +376,9 @@ QVariantMap DataHierarchyManager::toVariantMap() const
 
             const auto datasetName = dataHierarchyItem->getDataset()->getGuiName();
 
-            projectDataSerializationTask.setSubtaskStarted(dataHierarchyItem->getDataset()->getId(), QString("Saving %1").arg(datasetName));
-
             auto dataHierarchyItemMap = dataHierarchyItem->toVariantMap();
 
             QCoreApplication::processEvents();
-
-            projectDataSerializationTask.setSubtaskFinished(dataHierarchyItem->getDataset()->getId(), QString("Saving %1").arg(datasetName));
 
             dataHierarchyItemMap["SortIndex"] = sortIndex;
 
@@ -412,8 +386,6 @@ QVariantMap DataHierarchyManager::toVariantMap() const
 
             sortIndex++;
         }
-
-        projectDataSerializationTask.setFinished();
 
         return variantMap;
     }

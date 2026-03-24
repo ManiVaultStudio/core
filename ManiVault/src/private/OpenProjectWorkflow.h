@@ -6,6 +6,8 @@
 
 #include <util/WorkflowBase.h>
 
+#include <ModalTask.h>
+
 namespace mv
 {
     class ProjectManager;
@@ -50,8 +52,8 @@ protected:
 private:
     void setupOpenProject(OpenProjectContext& ctx);
     void extractProjectArchive(OpenProjectContext& ctx);
-    void loadProjectJson(OpenProjectContext& ctx);
-    void loadWorkspaceStage(OpenProjectContext& ctx);
+    void loadDatasetsJson(OpenProjectContext& ctx);
+    void loadWorkspaceFromJson(OpenProjectContext& ctx);
     void finalizeOpenProject(OpenProjectContext& ctx);
 
 private:
@@ -62,5 +64,10 @@ private:
     bool _importDataOnly = false;
     bool _disableReadOnly = false;
 
-    QString _finalError;
+    QString         _finalError;
+    mv::ModalTask   _loadTask;
+    mv::Task        _setupTask;
+    mv::Task        _extractJsonTask;
+    mv::Task        _loadDatasetsJsonTask;
+    mv::Task        _loadWorkspaceJsonTask;
 };

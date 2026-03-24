@@ -16,15 +16,11 @@ ApplicationStartupTask::ApplicationStartupTask(QObject* parent, const QString& n
     Task(parent, name, GuiScopes{ GuiScope::None }, status, mayKill, nullptr),
     _loadCoreTask(this, "Load core"),
     _loadCoreManagersTask(this, "Load core managers"),
-    _loadGuiTask(this, "Load GUI"),
-    _loadProjectTask(this, "Load project")
+    _loadGuiTask(this, "Load GUI")
 {
     _loadCoreTask.setParentTask(this);
     _loadCoreManagersTask.setParentTask(&_loadCoreTask);
     _loadGuiTask.setParentTask(this);
-    _loadProjectTask.setParentTask(this);
-
-    _loadProjectTask.setEnabled(false, true);
 
     setStatus(Task::Status::Idle, true);
 
@@ -63,11 +59,6 @@ Task& ApplicationStartupTask::getLoadCoreManagersTask()
 Task& ApplicationStartupTask::getLoadGuiTask()
 {
     return _loadGuiTask;
-}
-
-ProjectSerializationTask& ApplicationStartupTask::getLoadProjectTask()
-{
-    return _loadProjectTask;
 }
 
 }
