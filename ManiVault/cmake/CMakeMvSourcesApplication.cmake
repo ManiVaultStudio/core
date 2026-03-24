@@ -117,11 +117,15 @@ set(PRIVATE_DATA_MANAGER_FILES
 set(PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS
     src/private/DataHierarchyManager.h
     src/private/DataHierarchyLoadWorkflow.h
+    src/private/DataHierarchyLoadRecipeBuilder.h
+    src/private/DatasetLoadRecipeFactory.h
 )
 
 set(PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES
     src/private/DataHierarchyManager.cpp
     src/private/DataHierarchyLoadWorkflow.cpp
+    src/private/DataHierarchyLoadRecipeBuilder.cpp
+    src/private/DatasetLoadRecipeFactory.cpp
 )
 
 set(PRIVATE_DATA_HIERARCHY_MANAGER_FILES
@@ -161,6 +165,7 @@ set(PRIVATE_PROJECT_MANAGER_HEADERS
     src/private/ProjectSettingsDialog.h
     src/private/NewProjectDialog.h
     src/private/OpenProjectWorkflow.h
+    src/private/ProjectLoadRecipeBuilder.h
 )
 
 set(PRIVATE_PROJECT_MANAGER_SOURCES
@@ -169,6 +174,7 @@ set(PRIVATE_PROJECT_MANAGER_SOURCES
     src/private/ProjectSettingsDialog.cpp
     src/private/NewProjectDialog.cpp
     src/private/OpenProjectWorkflow.cpp
+    src/private/ProjectLoadRecipeBuilder.cpp
 )
 
 set(PRIVATE_PROJECT_MANAGER_FILES

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ProjectLoadRecipeBuilder.h"
+
 #include <util/WorkflowBase.h>
 
 #include <ModalTask.h>
@@ -52,22 +54,22 @@ protected:
 private:
     void setupOpenProject(OpenProjectContext& ctx);
     void extractProjectArchive(OpenProjectContext& ctx);
-    void loadDatasetsJson(OpenProjectContext& ctx);
+    void loadProjectJson(OpenProjectContext& ctx);
     void loadWorkspaceFromJson(OpenProjectContext& ctx);
     void finalizeOpenProject(OpenProjectContext& ctx);
 
 private:
-    mv::ProjectManager& _projectManager;
-
-    QString _filePath;
-    bool _loadWorkspace = true;
-    bool _importDataOnly = false;
-    bool _disableReadOnly = false;
-
-    QString         _finalError;
-    mv::ModalTask   _loadTask;
-    mv::Task        _setupTask;
-    mv::Task        _extractJsonTask;
-    mv::Task        _loadDatasetsJsonTask;
-    mv::Task        _loadWorkspaceJsonTask;
+    mv::ProjectManager&                             _projectManager;
+    QString                                         _filePath;
+    bool                                            _loadWorkspace = true;
+    bool                                            _importDataOnly = false;
+    bool                                            _disableReadOnly = false;
+    QString                                         _finalError;
+    mv::ModalTask                                   _loadTask;
+    mv::Task                                        _setupTask;
+    mv::Task                                        _extractJsonTask;
+    mv::Task                                        _loadDatasetsJsonTask;
+    mv::Task                                        _loadWorkspaceJsonTask;
+       _dataHierarchyContextStorage;
+    ProjectLoadRecipeBuilder                        _projectLoadRecipeBuilder;
 };

@@ -19,7 +19,8 @@ OpenProjectWorkflow::OpenProjectWorkflow(mv::ProjectManager& projectManager, QOb
     _setupTask(this, "Setting up project..."),
 	_extractJsonTask(this, "Extracting project archive"),
     _loadDatasetsJsonTask(this, "Loading datasets from JSON"),
-	_loadWorkspaceJsonTask(this, "Loading workspace from JSON")
+	_loadWorkspaceJsonTask(this, "Loading workspace from JSON"),
+    _projectLoadRecipeBuilder()
 {
     _setupTask.setParentTask(&_loadTask);
     _extractJsonTask.setParentTask(&_loadTask);
@@ -91,7 +92,7 @@ Group OpenProjectWorkflow::makeRecipe()
             auto& context = *ctx;
 
             try {
-                loadDatasetsJson(context);
+                loadProjectJson(context);
             }
             catch (const std::exception& e) {
                 context.error = QString::fromUtf8(e.what());
@@ -116,7 +117,16 @@ Group OpenProjectWorkflow::makeRecipe()
             catch (const std::exception& e) {
                 context.error = QString::fromUtf8(e.what());
             }
-        })
+        }),
+        If([&ctx] { return ctx->error.isEmpty(); }) >> Then {
+		    _dataHierarchyContextStorage,
+		    QSyncTask([this, &ctx] {
+		        auto& hierarchyCtx = *_dataHierarchyContextStorage;
+		        hierarchyCtx = {};
+		        hierarchyCtx._hierarchyMap = _projectManager.projects().toVariantMap()["DataHierarchy"].toMap();
+		    }),
+		    _dataHierarchyLoadRecipeBuilder.makeRecipe(_dataHierarchyContextStorage)
+		}
 	};
 }
 
@@ -174,7 +184,7 @@ void OpenProjectWorkflow::extractProjectArchive(OpenProjectContext& ctx)
     _extractJsonTask.setFinished();
 }
 
-void OpenProjectWorkflow::loadDatasetsJson(OpenProjectContext& ctx)
+void OpenProjectWorkflow::loadProjectJson(OpenProjectContext& ctx)
 {
     _loadDatasetsJsonTask.setRunning();
     {

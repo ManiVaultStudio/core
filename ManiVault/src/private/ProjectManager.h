@@ -277,7 +277,7 @@ private:
     ProjectsListModel                           _projectsListModel;                 /** Projects list model */
     ProjectsTreeModel                           _projectsTreeModel;                 /** Projects tree model */
     QtTaskTree::QSingleTaskTreeRunner           _openRunner;                        /** Task tree runner for opening projects */
-    std::unique_ptr<OpenProjectWorkflow>        _activeOpenWorkflow;
+    std::unique_ptr<OpenProjectWorkflow>        _activeOpenWorkflow;                /** Active workflow for opening a project */
 };
 
 }

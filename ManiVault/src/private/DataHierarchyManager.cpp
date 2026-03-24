@@ -252,115 +252,27 @@ QFuture<void> fromVariantMapAsync(WidgetAction* action, const QVariantMap& varia
 
 void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    QStringList subtasks;
-    std::vector<std::pair<QVariantMap, bool>> datasetList;
+    //if (Application::isSerializationAborted())
+    //    return;
 
-    const std::function<void(const QVariantMap&)> enumerateDatasetNames = [&enumerateDatasetNames, &subtasks, &datasetList](const QVariantMap& variantMap) -> void {
-        for (const auto& variant : variantMap.values()) {
-            enumerateDatasetNames(variant.toMap()["Children"].toMap());
+    //// Cancel any existing load
+    //if (_activeLoadWorkflow)
+    //    _activeLoadWorkflow->cancel();
 
-            const auto dataset      = variant.toMap()["Dataset"].toMap();
-            const auto datasetId    = dataset["ID"].toString();
+    //_activeLoadWorkflow = std::make_unique<DataHierarchyLoadWorkflow>(*this, this);
 
-            subtasks << datasetId;
-            datasetList.emplace_back(dataset, dataset["Derived"].toBool() || !dataset["ProxyMembers"].toStringList().isEmpty());
-        }
-    };
+    //connect(_activeLoadWorkflow.get(), &DataHierarchyLoadWorkflow::finished,
+    //    this,
+    //    [this](bool success, const QString& error) {
+    //        if (!success) {
+    //            qWarning() << "Failed to load data hierarchy:" << error;
+    //        }
 
-    enumerateDatasetNames(variantMap);
+    //        _activeLoadWorkflow.reset();
+    //    });
 
-    const auto loadDataHierarchyItem = [](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
-        const auto dataset          = dataHierarchyItemMap["Dataset"].toMap();
-        const auto datasetId        = dataset["ID"].toString();
-        const auto datasetName      = dataset["Name"].toString();
-        const auto pluginKind       = dataset["PluginKind"].toString();
-        const auto isDerived        = dataset["Derived"].toBool();
-        const auto isFull           = dataset["Full"].toBool();
-        const auto sourceDatasetID  = dataset["SourceDatasetID"].toString();
-
-        Dataset<DatasetImpl> loadedDataset;
-
-        loadedDataset = (isDerived || !isFull) ? mv::data().createDatasetWithoutSelection(pluginKind, guiName, parent, datasetId) : mv::data().createDataset(pluginKind, guiName, parent, datasetId);
-
-        if (isDerived)
-            loadedDataset->setSourceDataset(sourceDatasetID);
-
-        loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);
-
-        QCoreApplication::processEvents();
-
-        return loadedDataset;
-    };
-
-    const std::function<void(const QVariantMap&, Dataset<DatasetImpl>)> populateDataHierarchy = [&populateDataHierarchy, loadDataHierarchyItem](const QVariantMap& variantMap, Dataset<DatasetImpl> parent) -> void {
-
-        if (Application::isSerializationAborted())
-            return;
-
-        QVector<QVariantMap> sortedItems;
-
-        sortedItems.resize(variantMap.count());
-
-        for (const auto& variant : variantMap.values())
-            sortedItems[variant.toMap()["SortIndex"].toInt()] = variant.toMap();
-
-        for (const auto& item : sortedItems)
-            populateDataHierarchy(item["Children"].toMap(), loadDataHierarchyItem(item, item["Name"].toString(), parent));
-    };
-
-    struct DatasetLoadJob
-    {
-        DatasetImpl* dataset = nullptr;
-        QFuture<void> future;
-    };
-
-    QVector<DatasetLoadJob> datasetLoadJobs;
-
-    auto populateDatasets = [&datasetList, &datasetLoadJobs](const QVariantMap& variantMap) -> void {
-
-        if (Application::isSerializationAborted())
-            return;
-
-        // Maintain data hierarchy item order within partitions
-        std::reverse(datasetList.begin(), datasetList.end());
-
-        // First load non-derived datasets
-        std::stable_partition(datasetList.begin(), datasetList.end(),
-            [](const std::pair<QVariantMap, bool>& element) {
-                return !element.second; 
-            });
-
-        for (const auto& [dataVariantMap, isDerived] : datasetList)
-        {
-            const auto datasetId = dataVariantMap["ID"].toString();
-            const auto datasetName = dataVariantMap["Name"].toString();
-
-            auto subtaskName = QString("Loading dataset: %1").arg(datasetName);
-            //projectDataSerializationTask.setSubtaskStarted(datasetId, subtaskName);
-
-            auto dataset = mv::data().getDataset(datasetId).get();
-
-            //dataset->fromVariantMap(dataVariantMap);
-            datasetLoadJobs.push_back({
-				dataset,
-				fromVariantMapAsync(dataset, dataVariantMap)
-            });
-
-            //fromVariantMapAsync(mv::data().getDataset(datasetId).get(), dataVariantMap);
-            //mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
-
-            //projectDataSerializationTask.setSubtaskFinished(datasetId, subtaskName);
-
-            //QCoreApplication::processEvents();
-        }
-    };
-
-    populateDataHierarchy(variantMap, Dataset<DatasetImpl>());
-
-    populateDatasets(variantMap);
-
-    for (auto& datasetLoadJob : datasetLoadJobs)
-        datasetLoadJob.future.waitForFinished();
+    //_activeLoadWorkflow->setInput(variantMap);
+    //_activeLoadWorkflow->start();
 }
 
 QVariantMap DataHierarchyManager::toVariantMap() const

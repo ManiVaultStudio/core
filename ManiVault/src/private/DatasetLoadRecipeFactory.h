@@ -4,4 +4,10 @@
 
 #pragma once
 
+#include <Set.h>
 
+class DatasetLoadRecipeFactory
+{
+public:
+    QtTaskTree::Group makeLoadRecipe(mv::Dataset<mv::DatasetImpl> dataset, const QVariantMap& datasetMap);
+};

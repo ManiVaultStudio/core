@@ -2,6 +2,9 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#pragma once
+#include "DatasetLoadRecipeFactory.h"
 
-
+QtTaskTree::Group DatasetLoadRecipeFactory::makeLoadRecipe(mv::Dataset<mv::DatasetImpl> dataset, const QVariantMap& datasetMap)
+{
+    return {};
+}

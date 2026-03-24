@@ -5,6 +5,7 @@
 #pragma once
 
 #include "AbstractDataHierarchyManager.h"
+#include "DataHierarchyLoadWorkflow.h"
 
 #include <actions/WidgetAction.h>
 
@@ -114,7 +115,7 @@ public: // Serialization
 
     /**
      * Load widget action from variant
-     * @param Variant representation of the widget action
+     * @param variantMap Variant map containing the widget action data
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -125,7 +126,7 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-    std::vector<std::unique_ptr<DataHierarchyItem>>     _items;      /** Unique pointers to data hierarchy items */
+    std::vector<std::unique_ptr<DataHierarchyItem>>     _items;                 /** Unique pointers to data hierarchy items */
 };
 
 }
