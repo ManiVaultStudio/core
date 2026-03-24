@@ -132,8 +132,26 @@ void PointData::setValueAt(const std::size_t index, const float newValue)
         _variantOfVectors);
 }
 
+#include <windows.h>
+#include <psapi.h>
+
+SIZE_T getMemoryUsageBytes()
+{
+    PROCESS_MEMORY_COUNTERS_EX pmc;
+
+    if (GetProcessMemoryInfo(GetCurrentProcess(),
+        reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&pmc),
+        sizeof(pmc)))
+    {
+        return pmc.WorkingSetSize; // physical memory (RAM)
+    }
+
+    return 0;
+}
+
 void PointData::fromVariantMap(const QVariantMap& variantMap)
 {
+    qDebug() << __FUNCTION__ << "Memory usage before loading data (MB):" << getMemoryUsageBytes() / (1024 * 1024);
     variantMapMustContain(variantMap, "Data");
     variantMapMustContain(variantMap, "NumberOfPoints");
     variantMapMustContain(variantMap, "NumberOfDimensions");
@@ -160,7 +178,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
         QElapsedTimer rawDataTimer;
         rawDataTimer.start();
 
-        populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr());
+        populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr(), ConcurrencyMode::Sequential);
         qDebug() << __FUNCTION__ << "Elapsed time for populating raw data (ms):" << rawDataTimer.elapsed();
     }
     else
@@ -171,7 +189,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
         std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
 
-        populateDataBufferFromVariantMap(rawData, bytes.data());
+        populateDataBufferFromVariantMap(rawData, bytes.data(), ConcurrencyMode::Sequential);
         _numRows = static_cast<unsigned int>(numberOfPoints); // FIXME should be redundant
 
         size_t offset = 0;
@@ -190,6 +208,8 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
         qDebug() << "Loaded sparse data with" << _numRows << "points and" << _numDimensions << "dimensions.";
     }
+
+    qDebug() << __FUNCTION__ << "Memory usage after loading data (MB):" << getMemoryUsageBytes() / (1024 * 1024);
 }
 
 QVariantMap PointData::toVariantMap() const
@@ -1074,7 +1094,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         _dimensionsPickerAction->fromParentVariantMap(variantMap);
     }
 
-    //events().notifyDatasetDataChanged(this);
+    events().notifyDatasetDataChanged(this);
     /*
     // Handle saved selection
     if (isFull()) {
@@ -1092,9 +1112,9 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
             //events().notifyDatasetDataSelectionChanged(this);
         }
     }
-
+*/
     qDebug() << __FUNCTION__ << "Elapsed time (ms):" << elapsedTimer.elapsed();
-    */
+    
 }
 
 QVariantMap Points::toVariantMap() const

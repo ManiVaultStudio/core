@@ -7,6 +7,8 @@
 
 #include <util/Exception.h>
 
+#include <QtConcurrent>
+
 #include <algorithm>
 #include <stdexcept>
 
@@ -236,6 +238,18 @@ void DataHierarchyManager::removeAllItems()
     _items.clear();
 }
 
+QFuture<void> fromVariantMapAsync(WidgetAction* action, const QVariantMap& variantMap)
+{
+    Q_ASSERT(action);
+
+    if (!action)
+        return {};
+
+    return QtConcurrent::run([action, &variantMap]() -> void {
+        action->fromVariantMap(variantMap);
+    });
+}
+
 void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 {
     auto& projectDataSerializationTask = projects().getProjectSerializationTask().getDataTask();
@@ -304,7 +318,15 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
             populateDataHierarchy(item["Children"].toMap(), loadDataHierarchyItem(item, item["Name"].toString(), parent));
     };
 
-    auto populateDatasets = [&projectDataSerializationTask, &datasetList](const QVariantMap& variantMap) -> void {
+    struct DatasetLoadJob
+    {
+        DatasetImpl* dataset = nullptr;
+        QFuture<void> future;
+    };
+
+    QVector<DatasetLoadJob> datasetLoadJobs;
+
+    auto populateDatasets = [&projectDataSerializationTask, &datasetList, &datasetLoadJobs](const QVariantMap& variantMap) -> void {
 
         if (Application::isSerializationAborted())
             return;
@@ -324,11 +346,20 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
             const auto datasetName = dataVariantMap["Name"].toString();
 
             auto subtaskName = QString("Loading dataset: %1").arg(datasetName);
-            projectDataSerializationTask.setSubtaskStarted(datasetId, subtaskName);
+            //projectDataSerializationTask.setSubtaskStarted(datasetId, subtaskName);
 
-            mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
+            auto dataset = mv::data().getDataset(datasetId).get();
 
-            projectDataSerializationTask.setSubtaskFinished(datasetId, subtaskName);
+            //dataset->fromVariantMap(dataVariantMap);
+            datasetLoadJobs.push_back({
+				dataset,
+				fromVariantMapAsync(dataset, dataVariantMap)
+            });
+
+            //fromVariantMapAsync(mv::data().getDataset(datasetId).get(), dataVariantMap);
+            //mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
+
+            //projectDataSerializationTask.setSubtaskFinished(datasetId, subtaskName);
 
             //QCoreApplication::processEvents();
         }
@@ -337,6 +368,9 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
     populateDataHierarchy(variantMap, Dataset<DatasetImpl>());
 
     populateDatasets(variantMap);
+
+    for (auto& datasetLoadJob : datasetLoadJobs)
+        datasetLoadJob.future.waitForFinished();
 
     projectDataSerializationTask.setFinished();
 }

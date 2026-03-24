@@ -82,8 +82,8 @@ SharedCodec CodecRegistry::createCodec(QObject* parent, mv::gui::CodecSettingsAc
     qDebug() << __FUNCTION__;
 #endif
 
-    if (!codecSettingsAction)
-        throw std::runtime_error("Codec settings action is null");
+    //if (!codecSettingsAction)
+    //    throw std::runtime_error("Codec settings action is null");
 
 	return factory(codecSettingsAction->getTypeAction().getString()).createCodec(parent, codecSettingsAction);
 }
@@ -94,7 +94,7 @@ SharedCodec CodecRegistry::createCodec(QObject* parent, const QString& typeName)
     qDebug() << __FUNCTION__;
 #endif
 
-    if (typeName == "none")
+    if (typeName == "")
         throw std::runtime_error("Blob codec type name is empty");
 
     return createCodec(parent, BlobCodec::typeFromString(typeName));

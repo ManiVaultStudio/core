@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "OpenProjectWorkflow.h"
+
 #include <AbstractProjectManager.h>
 
 #include <models/ProjectsListModel.h>
@@ -174,6 +176,10 @@ public:
      */
     QDir getDownloadedProjectsDir() const override;
 
+private:
+
+    QString chooseProjectFileViaDialog();
+
 public: // Menus
 
     /**
@@ -253,23 +259,25 @@ public: // Action getters
     mv::gui::TriggerAction& getBackToProjectAction() override { return _backToProjectAction; }
 
 private:
-    QScopedPointer<mv::Project>     _project;                           /** Current project */
-    gui::TriggerAction              _newBlankProjectAction;             /** Action for creating a blank project (without view plugins and data) */
-    gui::TriggerAction              _newProjectFromWorkspaceAction;     /** Action for creating a new project from a workspace */
-    gui::TriggerAction              _openProjectAction;                 /** Action for opening a project */
-    gui::TriggerAction              _importProjectAction;               /** Action for importing a project */
-    gui::TriggerAction              _saveProjectAction;                 /** Action for saving a project */
-    gui::TriggerAction              _saveProjectAsAction;               /** Action for saving a project under a new name */
-    gui::TriggerAction              _editProjectSettingsAction;         /** Action for triggering the project settings dialog */
-    gui::RecentFilesAction          _recentProjectsAction;              /** Menu for loading recent projects */
-    QMenu                           _newProjectMenu;                    /** Menu for creating a new project */
-    QMenu                           _importDataMenu;                    /** Menu for importing data */
-    gui::TriggerAction              _publishAction;                     /** Action for publishing the project to an end-user */
-    gui::TriggerAction              _pluginManagerAction;               /** Action for showing the loaded plugins dialog */
-    gui::ToggleAction               _showStartPageAction;               /** Action for toggling the start page */
-    gui::TriggerAction              _backToProjectAction;               /** Action for going back to the project */
-    ProjectsListModel               _projectsListModel;                 /** Projects list model */
-    ProjectsTreeModel               _projectsTreeModel;                 /** Projects tree model */
+    QScopedPointer<mv::Project>                 _project;                           /** Current project */
+    gui::TriggerAction                          _newBlankProjectAction;             /** Action for creating a blank project (without view plugins and data) */
+    gui::TriggerAction                          _newProjectFromWorkspaceAction;     /** Action for creating a new project from a workspace */
+    gui::TriggerAction                          _openProjectAction;                 /** Action for opening a project */
+    gui::TriggerAction                          _importProjectAction;               /** Action for importing a project */
+    gui::TriggerAction                          _saveProjectAction;                 /** Action for saving a project */
+    gui::TriggerAction                          _saveProjectAsAction;               /** Action for saving a project under a new name */
+    gui::TriggerAction                          _editProjectSettingsAction;         /** Action for triggering the project settings dialog */
+    gui::RecentFilesAction                      _recentProjectsAction;              /** Menu for loading recent projects */
+    QMenu                                       _newProjectMenu;                    /** Menu for creating a new project */
+    QMenu                                       _importDataMenu;                    /** Menu for importing data */
+    gui::TriggerAction                          _publishAction;                     /** Action for publishing the project to an end-user */
+    gui::TriggerAction                          _pluginManagerAction;               /** Action for showing the loaded plugins dialog */
+    gui::ToggleAction                           _showStartPageAction;               /** Action for toggling the start page */
+    gui::TriggerAction                          _backToProjectAction;               /** Action for going back to the project */
+    ProjectsListModel                           _projectsListModel;                 /** Projects list model */
+    ProjectsTreeModel                           _projectsTreeModel;                 /** Projects tree model */
+    QtTaskTree::QSingleTaskTreeRunner           _openRunner;                        /** Task tree runner for opening projects */
+    std::unique_ptr<OpenProjectWorkflow>        _activeOpenWorkflow;
 };
 
 }

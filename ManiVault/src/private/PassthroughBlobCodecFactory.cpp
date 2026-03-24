@@ -49,9 +49,9 @@ std::shared_ptr<mv::util::BlobCodec> PassthroughBlobCodecFactory::createCodec(QO
     qDebug() << __FUNCTION__;
 #endif
 
-    if (!codecSettingsAction) {
-        codecSettingsAction = createCodecSettingsAction(const_cast<PassthroughBlobCodecFactory*>(this));
-    }
+    //if (!codecSettingsAction) {
+    //    codecSettingsAction = createCodecSettingsAction(const_cast<PassthroughBlobCodecFactory*>(this));
+    //}
 
     return std::make_shared<PassthroughBlobCodec>(parent, codecSettingsAction);
 }

@@ -220,7 +220,7 @@ QString ColorMapAction::getColorMap() const
 QImage ColorMapAction::getColorMapImage() const
 {
     if (getCurrentColorMapAction().getModel() == nullptr)
-        return QImage();
+        return {};
 
     const auto filteredModelIndex = getCurrentColorMapAction().getModel()->index(getCurrentColorMapAction().getCurrentIndex(), 0);
 
@@ -234,7 +234,11 @@ QImage ColorMapAction::getColorMapImage() const
     const auto mirrorHorizontally   = getMirrorAction(Axis::X).isChecked();
     const auto mirrorVertically     = getMirrorAction(Axis::Y).isChecked();
 
-    colorMapImage = colorMapImage.mirrored(mirrorHorizontally, mirrorVertically);
+    if (mirrorHorizontally)
+		colorMapImage = colorMapImage.flipped(Qt::Horizontal);
+
+    if (mirrorVertically)
+        colorMapImage = colorMapImage.flipped(Qt::Vertical);
 
     if (getDiscretizeAction().isChecked()) {
 

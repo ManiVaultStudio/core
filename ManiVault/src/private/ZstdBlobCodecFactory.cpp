@@ -47,9 +47,9 @@ std::shared_ptr<mv::util::BlobCodec> ZstdBlobCodecFactory::createCodec(QObject* 
     qDebug() << __FUNCTION__;
 #endif
 
-    if (!codecSettingsAction) {
-        codecSettingsAction = createCodecSettingsAction(const_cast<ZstdBlobCodecFactory*>(this));
-    }
+    //if (!codecSettingsAction) {
+    //    codecSettingsAction = createCodecSettingsAction(const_cast<ZstdBlobCodecFactory*>(this));
+    //}
 
     return std::make_shared<ZstdBlobCodec>(parent, codecSettingsAction);
 }

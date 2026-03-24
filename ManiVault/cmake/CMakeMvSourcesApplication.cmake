@@ -158,6 +158,7 @@ set(PRIVATE_PROJECT_MANAGER_HEADERS
     src/private/ProjectWidget.h
     src/private/ProjectSettingsDialog.h
     src/private/NewProjectDialog.h
+    src/private/OpenProjectWorkflow.h
 )
 
 set(PRIVATE_PROJECT_MANAGER_SOURCES
@@ -165,6 +166,7 @@ set(PRIVATE_PROJECT_MANAGER_SOURCES
     src/private/ProjectWidget.cpp
     src/private/ProjectSettingsDialog.cpp
     src/private/NewProjectDialog.cpp
+    src/private/OpenProjectWorkflow.cpp
 )
 
 set(PRIVATE_PROJECT_MANAGER_FILES

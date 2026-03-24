@@ -124,11 +124,11 @@ WorkspaceManager::WorkspaceManager(QObject* parent) :
 
     QFile styleSheetFile(":/styles/ads_light.css");
 
-    styleSheetFile.open(QIODevice::ReadOnly);
+    if (styleSheetFile.open(QIODevice::ReadOnly)) {
+        QTextStream styleSheetStream(&styleSheetFile);
 
-    QTextStream styleSheetStream(&styleSheetFile);
-
-    _styleSheet = styleSheetStream.readAll();
+        _styleSheet = styleSheetStream.readAll();
+    }
 
     styleSheetFile.close();
 }

@@ -19,7 +19,7 @@ PassthroughCodecSettingsAction::PassthroughCodecSettingsAction(QObject* parent, 
     qDebug() << __FUNCTION__;
 #endif
 
-    setForceHidden(true);
+    //setForceHidden(true);
     getTypeAction().setString(BlobCodec::typeToString(BlobCodec::Type::None));
 }
 

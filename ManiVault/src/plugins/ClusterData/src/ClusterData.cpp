@@ -120,7 +120,7 @@ std::int32_t ClusterData::getClusterIndex(const QString& clusterName) const
 void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
-    return;
+    
 
     const auto dataMap = variantMap["Data"].toMap();
 
@@ -132,10 +132,13 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 
     packedIndices.resize(dataMap["NumberOfIndices"].toInt());
 
+    qDebug() << "Deserializing ClusterData from variant map";
+    qDebug() << dataMap;
+    qDebug() << "Number of indices:" << packedIndices.size();
     // Convert raw data to indices
-    populateDataBufferFromVariantMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data());
+    populateDataBufferFromVariantMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), ConcurrencyMode::Sequential);
 
-    if (dataMap.contains("ClustersRawData")) {
+	if (dataMap.contains("ClustersRawData")) {
         QByteArray clustersByteArray;
 
         QDataStream clustersDataStream(&clustersByteArray, QIODevice::ReadOnly);
@@ -143,7 +146,7 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
         const auto clustersRawDataSize = dataMap["ClustersRawDataSize"].toInt();
 
         clustersByteArray.resize(clustersRawDataSize);
-
+        
         populateDataBufferFromVariantMap(dataMap["ClustersRawData"].toMap(), (char*)clustersByteArray.data());
 
         QVariantList clusters;
@@ -154,6 +157,7 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 
         long clusterIndex = 0;
 
+        /*
         for (const auto& clusterVariant : clusters) {
             const auto clusterMap = clusterVariant.toMap();
 
@@ -170,6 +174,7 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 
             ++clusterIndex;
         }
+        */
     }
     
     // For backwards compatibility

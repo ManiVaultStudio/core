@@ -640,13 +640,16 @@ void OptionAction::StringsFilterModel::setTextFilter(const QString& textFilter)
     if (_textFilter == textFilter)
         return;
 
-    _textFilter = textFilter;
-
-    invalidateFilter(); // Reapply the filter
+    beginFilterChange();
+    {
+        _textFilter = textFilter;
+    }
+    endFilterChange();
 }
 
 OptionAction::LazyIndicesModel::LazyIndicesModel(QObject* parent): QAbstractListModel(parent)
-{}
+{
+}
 
 void OptionAction::LazyIndicesModel::setSourceAndMatches(QAbstractItemModel* sourceModel, const QVector<int>& matches)
 {

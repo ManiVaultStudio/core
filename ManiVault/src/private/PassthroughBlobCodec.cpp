@@ -12,7 +12,7 @@
 #endif
 
 PassthroughBlobCodec::PassthroughBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction) :
-    BlobCodec(parent, codecSettingsAction ? codecSettingsAction : new PassthroughCodecSettingsAction(this, "Settings"))
+    BlobCodec(parent, codecSettingsAction)
 {
 #ifdef PASSTHROUGH_CODEC_VERBOSE
     qDebug() << __FUNCTION__;

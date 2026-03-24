@@ -18,10 +18,10 @@ BlobCodec::BlobCodec(QObject* parent, gui::CodecSettingsAction* codecSettingsAct
     QObject(parent),
     _codecSettingsAction(codecSettingsAction)
 {
-    Q_ASSERT(_codecSettingsAction);
+    //Q_ASSERT(_codecSettingsAction);
 
-    if (!_codecSettingsAction)
-        throw std::invalid_argument("Codec settings action must be a valid pointer");
+    //if (!_codecSettingsAction)
+    //    throw std::invalid_argument("Codec settings action must be a valid pointer");
 }
 
 BlobCodec::Result BlobCodec::decodeTo(const QByteArray& encodedData, char* destination, std::uint64_t destinationSize) const

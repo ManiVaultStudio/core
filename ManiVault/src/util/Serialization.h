@@ -17,6 +17,12 @@ namespace mv::util {
 
 class BlobCodec;
 
+enum class ConcurrencyMode
+{
+    Sequential,
+    Parallel
+};
+
 /**
  * Save raw data to binary file on disk
  * @param bytes Pointer to input buffer
@@ -39,15 +45,17 @@ CORE_EXPORT void loadRawDataFromBinaryFile(char* bytes, const std::uint64_t& num
  * @param numberOfBytes Number of input bytes 
  * @param saveToDisk Whether to save the raw data to disk or inline in the variant
  * @param blobCodecOverride Optional blob codec to use for encoding the data blocks (defaults to nullptr, which means no compression)
+ * @param concurrencyMode Whether to encode the blocks sequentially or in parallel (defaults to sequential)
  */
-CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk = false, const BlobCodec* blobCodecOverride = nullptr);
+CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk = false, const BlobCodec* blobCodecOverride = nullptr, ConcurrencyMode concurrencyMode = ConcurrencyMode::Sequential);
 
 /**
  * Convert variant map to raw data
  * @param variantMap Variant map containing the data blocks
  * @param bytes Output buffer to which the data is copied
+ * @param concurrencyMode Whether to decode the blocks sequentially or in parallel (defaults to sequential)
  */
-CORE_EXPORT void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes);
+CORE_EXPORT void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, ConcurrencyMode concurrencyMode = ConcurrencyMode::Sequential);
 
 /**
  * Raises an exception if an item with key is not found in a variant map

@@ -135,7 +135,9 @@ void StyledIcon::initializeIconFont(const QString& iconFontName, const Version& 
         QFile iconFontMetaDataFile;
 
         iconFontMetaDataFile.setFileName(iconFontMetadataResourcePath);
-        iconFontMetaDataFile.open(QIODevice::ReadOnly | QIODevice::Text);
+
+        if (!iconFontMetaDataFile.open(QIODevice::ReadOnly | QIODevice::Text))
+            throw std::runtime_error(QString("Unable to open icon font metadata file: %1").arg(iconFontMetadataResourcePath).toStdString());
 
         QString iconFontMetaData = iconFontMetaDataFile.readAll();
 

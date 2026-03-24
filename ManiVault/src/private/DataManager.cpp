@@ -17,6 +17,8 @@
 #include <DataHierarchyItem.h>
 #include <AnalysisPlugin.h>
 
+#include <QtConcurrent>
+
 #include <stdexcept>
 
 #ifdef _DEBUG
@@ -763,12 +765,46 @@ void DataManager::fromVariantMap(const QVariantMap& variantMap)
     AbstractDataManager::fromVariantMap(variantMap);
 }
 
+QFuture<QVariantMap> toVariantMapAsync(WidgetAction* action)
+{
+    Q_ASSERT(action);
+
+    if (!action)
+        return {};
+
+    return QtConcurrent::run([action]() -> QVariantMap {
+        return action->toVariantMap();
+    });
+}
+
 QVariantMap DataManager::toVariantMap() const
 {
-    QVariantMap variantMap = AbstractDataManager::toVariantMap();
+    auto variantMap = AbstractDataManager::toVariantMap();
 
-    for (auto& dataset : _datasets)
-        variantMap[dataset->getId()] = dataset->toVariantMap();
+    QVariantList savedDataList;
+
+    struct DataSaveJob
+    {
+        DatasetImpl* dataset = nullptr;
+        QFuture<QVariantMap> future;
+    };
+
+    QVector<DataSaveJob> dataSaveJobs;
+
+    for (auto& dataset : _datasets) {
+        dataSaveJobs.push_back({
+            dataset.get(),
+            toVariantMapAsync(dataset.get())
+        });
+
+	    //variantMap[dataset->getId()] = dataset->toVariantMap();
+    }
+
+    for (auto& dataSaveJob : dataSaveJobs) {
+        auto dataSaveResult = dataSaveJob.future.result();
+
+        variantMap[dataSaveJob.dataset->getId()] = dataSaveResult;
+    }
 
     return variantMap;
 }
