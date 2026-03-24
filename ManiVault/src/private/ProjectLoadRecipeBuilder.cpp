@@ -64,7 +64,7 @@ Group ProjectLoadRecipeBuilder::makeLoadDataHierarchyStage(Storage<ProjectLoadCo
             auto& hierarchyLoadContext  = *_dataHierarchyLoadContext;
 
             hierarchyLoadContext = {};
-            hierarchyLoadContext._hierarchyMap = projectLoadContext._dataHierarchyVariantMap;
+            hierarchyLoadContext._hierarchyMap = hierarchyLoadContext._dataHierarchyVariantMap;
         }),
 
         // Run hierarchy recipe
