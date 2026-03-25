@@ -6,6 +6,7 @@
 
 #include "DataHierarchyManager.h"
 #include "DataHierarchyLoadRecipeBuilder.h"
+#include "DatasetsLoadRecipeBuilder.h"
 #include "WorkspaceLoadRecipeBuilder.h"
 
 struct OpenProjectContext;
@@ -22,6 +23,7 @@ struct ProjectLoadContext
 
     DataHierarchyLoadContext    _dataHierarchyLoadContext;      /** Context for loading the data hierarchy, which contains the dataset entries to be loaded in the correct order based on their dependencies */
     WorkspaceLoadContext        _workspaceLoadContext;          /* Context for loading the workspace, which contains the workspace load data */
+    DatasetsLoadContext         _datasetsLoadContext;           /* Context for loading the datasets, which contains the dataset entries to be loaded in the correct order based on their dependencies */
 };
 
 /** Storage for project load context */
@@ -49,5 +51,6 @@ public:
 
 private:
     DataHierarchyLoadRecipeBuilder      _dataHierarchyLoadRecipeBuilder;    /** Builder for the data hierarchy load recipe, which is used to create the stage of loading the datasets in the data hierarchy based on the dataset entries in \p dataHierarchyLoadContextStorage */
+    DatasetsLoadRecipeBuilder           _datasetsLoadRecipeBuilder;         /** Builder for the datasets load recipe, which is used to create the stage of loading the datasets based on the dataset entries in \p datasetsLoadContextStorage */
     WorkspaceLoadRecipeBuilder          _workspaceLoadRecipeBuilder;        /** Builder for the workspace load recipe, which is used to create the stage of loading the workspace based on the data in \p workspaceLoadContextStorage */
 };

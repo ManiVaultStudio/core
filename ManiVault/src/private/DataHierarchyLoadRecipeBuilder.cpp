@@ -65,7 +65,10 @@ void DataHierarchyLoadRecipeBuilder::loadProjectJson(DataHierarchyLoadContext& d
         if (dataHierarchyLoadContext._jsonFilePath.isEmpty())
             throw std::runtime_error("Project JSON file path is empty.");
 
-        dataHierarchyLoadContext._dataHierarchyVariantMap = util::loadJsonToVariantMap(dataHierarchyLoadContext._jsonFilePath);
+        const auto jsonVariantMap       = util::loadJsonToVariantMap(dataHierarchyLoadContext._jsonFilePath);
+        const auto projectVariantMap    = jsonVariantMap["Project"].toMap();
+
+        dataHierarchyLoadContext._dataHierarchyVariantMap = projectVariantMap["DataHierarchy"].toMap();
     }
     catch (const std::exception& e) {
         if (dataHierarchyLoadContext._error.isEmpty())
@@ -98,7 +101,7 @@ void DataHierarchyLoadRecipeBuilder::enumerateDatasets(DataHierarchyLoadContext&
 
                 dataHierarchyLoadContext._datasetEntries.push_back(std::move(entry));
             }
-            };
+        };
 
         enumerate(dataHierarchyLoadContext._dataHierarchyVariantMap);
     }

@@ -121,6 +121,8 @@ set(PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS
     src/private/DataHierarchyLoadWorkflow.h
     src/private/DataHierarchyLoadRecipeBuilder.h
     src/private/DatasetLoadRecipeFactory.h
+    src/private/DatasetsLoadRecipeBuilder.h
+    src/private/DatasetLoadRecipeBuilder.h
 )
 
 set(PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES
@@ -128,6 +130,8 @@ set(PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES
     src/private/DataHierarchyLoadWorkflow.cpp
     src/private/DataHierarchyLoadRecipeBuilder.cpp
     src/private/DatasetLoadRecipeFactory.cpp
+    src/private/DatasetsLoadRecipeBuilder.cpp
+    src/private/DatasetLoadRecipeBuilder.cpp
 )
 
 set(PRIVATE_DATA_HIERARCHY_MANAGER_FILES

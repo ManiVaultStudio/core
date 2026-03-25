@@ -24,6 +24,7 @@ Group ProjectLoadRecipeBuilder::makeRecipe(OpenProjectContextStorage& openProjec
 	    }),
 
     	_dataHierarchyLoadRecipeBuilder.makeRecipe(projectLoadContextStorage),
-		_workspaceLoadRecipeBuilder.makeRecipe(projectLoadContextStorage)
+		_workspaceLoadRecipeBuilder.makeRecipe(projectLoadContextStorage),
+        _datasetsLoadRecipeBuilder.makeRecipe(projectLoadContextStorage)
     };
 }
