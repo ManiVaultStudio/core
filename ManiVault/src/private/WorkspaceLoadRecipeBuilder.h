@@ -6,15 +6,16 @@
 
 #include "WorkspaceManager.h"
 
+struct ProjectLoadContext;
+
+using ProjectLoadContextStorage = QtTaskTree::Storage<ProjectLoadContext>;
+
 /** Context for workspace loading */
 struct WorkspaceLoadContext
 {
-    QString     _workspaceJsonPath;     /** Path to the workspace JSON file */
-    QString     _error;                 /** Error message, if any error occurs during the loading process */
+    QString     _jsonFilePath;  /** Path to the workspace JSON file */
+    QString     _error;         /** Error message, if any error occurs during the loading process */
 };
-
-/** Storage for workspace load context */
-using WorkspaceLoadContextStorage = QtTaskTree::Storage<WorkspaceLoadContext>;
 
 /**
  * Builder for workspace load recipe
@@ -29,17 +30,17 @@ public:
     WorkspaceLoadRecipeBuilder() = default;
 
     /**
-     * Make a recipe for loading the workspace based on the data in \p workspaceLoadContextStorage
-     * @param workspaceLoadContextStorage The storage containing the workspace load context
+     * Make a recipe for loading the workspace based on the data in \p projectLoadContextStorage
+     * @param projectLoadContextStorage The storage containing the project load context, which includes the workspace load context
      * @return A QtTaskTree::Group representing the recipe for loading the workspace
      */
-    QtTaskTree::Group makeRecipe(WorkspaceLoadContextStorage& workspaceLoadContextStorage);
+    QtTaskTree::Group makeRecipe(ProjectLoadContextStorage& projectLoadContextStorage);
 
 private:
 
     /**
      * Load the workspace based on the data in \p workspaceLoadContext
-     * @param workspaceLoadContext The context containing the data for loading the workspace
+     * @param workspaceLoadContext The context containing the workspace load data
      */
-    void loadWorkspace(const WorkspaceLoadContext& workspaceLoadContext);
+    void loadWorkspace(WorkspaceLoadContext& workspaceLoadContext);
 };

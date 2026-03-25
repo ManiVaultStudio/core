@@ -29,8 +29,6 @@ struct OpenProjectContext
     QString projectJsonPath;
 
     QString error;
-
-    ProjectLoadContext   _projectLoadContext;
 };
 
 class OpenProjectWorkflow final : public mv::util::WorkflowBase<OpenProjectContext>

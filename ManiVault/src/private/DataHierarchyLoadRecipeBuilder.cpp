@@ -3,45 +3,27 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "DataHierarchyLoadRecipeBuilder.h"
+#include "ProjectLoadRecipeBuilder.h"
 
 using namespace mv;
 
 using namespace QtTaskTree;
 
-Group DataHierarchyLoadRecipeBuilder::makeRecipe(DataHierarchyLoadContextStorage& dataHierarchyLoadContextStorage)
+Group DataHierarchyLoadRecipeBuilder::makeRecipe(ProjectLoadContextStorage& projectLoadContextStorage)
 {
     const Storage<int> currentDatasetIndex;
 
     return Group{
-        dataHierarchyLoadContextStorage,
-
-        QSyncTask([this, &dataHierarchyLoadContextStorage] {
-            auto& context = *dataHierarchyLoadContextStorage;
-
+        QSyncTask([this, &projectLoadContextStorage] {
             try {
-                enumerateDatasets(context);
+                auto& dataHierarchyLoadContext = projectLoadContextStorage->_dataHierarchyLoadContext;
+                enumerateDatasets(dataHierarchyLoadContext);
             }
             catch (const std::exception& e) {
-                context._error = QString::fromUtf8(e.what());
+                auto& dataHierarchyLoadContext = projectLoadContextStorage->_dataHierarchyLoadContext;
+                dataHierarchyLoadContext._error = QString::fromUtf8(e.what());  
             }
-        }),
-
-        If([&dataHierarchyLoadContextStorage] { return dataHierarchyLoadContextStorage->_error.isEmpty(); }) >> Then {
-            QSyncTask([this, &dataHierarchyLoadContextStorage] {
-                auto& context = *dataHierarchyLoadContextStorage;
-
-                try {
-                    populateHierarchy(context._dataHierarchyVariantMap, Dataset<DatasetImpl>());
-                }
-                catch (const std::exception& e) {
-                    context._error = QString::fromUtf8(e.what());
-                }
-            })
-        },
-
-        //If([&dataHierarchyLoadContextStorage] { return dataHierarchyLoadContextStorage->_error.isEmpty(); }) >> Then {
-        //    makeDatasetLoadStage(dataHierarchyLoadContextStorage)
-        //}
+        })
     };
 }
 
@@ -83,7 +65,7 @@ QVector<DataHierarchyLoadContext::DatasetEntry> DataHierarchyLoadRecipeBuilder::
 
 void DataHierarchyLoadRecipeBuilder::enumerateDatasets(DataHierarchyLoadContext& dataHierarchyLoadContext)
 {
-    qDebug() << "Enumerating datasets in hierarchy map";
+    qDebug() << __FUNCTION__ << dataHierarchyLoadContext._jsonFilePath;
     return;
 
     dataHierarchyLoadContext._datasetEntries.clear();

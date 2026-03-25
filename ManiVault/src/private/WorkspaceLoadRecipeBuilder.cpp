@@ -3,29 +3,28 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "WorkspaceLoadRecipeBuilder.h"
+#include "ProjectLoadRecipeBuilder.h"
 
 using namespace mv;
 
 using namespace QtTaskTree;
 
-Group WorkspaceLoadRecipeBuilder::makeRecipe(WorkspaceLoadContextStorage& workspaceLoadContextStorage)
+Group WorkspaceLoadRecipeBuilder::makeRecipe(ProjectLoadContextStorage& projectLoadContextStorage)
 {
     return Group{
-        workspaceLoadContextStorage,
-
-        QSyncTask([this, &workspaceLoadContextStorage] {
-            auto& context = *workspaceLoadContextStorage;
+        QSyncTask([this, &projectLoadContextStorage] {
             try {
-                loadWorkspace(context);
+                auto& workspaceLoadContext = projectLoadContextStorage->_workspaceLoadContext;
+                loadWorkspace(workspaceLoadContext);
             }
             catch (const std::exception& e) {
-                context._error = QString::fromUtf8(e.what());
+                projectLoadContextStorage->_error = QString::fromUtf8(e.what());
             }
         })
     };
 }
 
-void WorkspaceLoadRecipeBuilder::loadWorkspace(const WorkspaceLoadContext& workspaceLoadContext)
+void WorkspaceLoadRecipeBuilder::loadWorkspace(WorkspaceLoadContext& workspaceLoadContext)
 {
-    qDebug() << "Loading workspace from JSON file:" << workspaceLoadContext._workspaceJsonPath;
+    qDebug() << __FUNCTION__ << workspaceLoadContext._jsonFilePath;
 }

@@ -10,6 +10,10 @@ namespace mv
     class DataHierarchyManager;
 }
 
+struct ProjectLoadContext;
+
+using ProjectLoadContextStorage = QtTaskTree::Storage<ProjectLoadContext>;
+
 /** Context for loading the data hierarchy, containing the hierarchy map and dataset entries to be loaded, as well as any error message if an error occurs during the loading process */
 struct DataHierarchyLoadContext
 {
@@ -23,6 +27,7 @@ struct DataHierarchyLoadContext
         bool        _isDerived = false;     /** Whether the dataset is derived */
     };
 
+    QString                 _jsonFilePath;              /** The file path of the JSON file containing the data hierarchy structure and dataset data */
     QVariantMap             _dataHierarchyVariantMap;   /** The variant map containing the data hierarchy structure and dataset data */
     QString                 _error;                     /** Error message, if any error occurs during the loading process */
     QVector<DatasetEntry>   _datasetEntries;            /** The list of dataset entries extracted from the hierarchy map, to be loaded in the correct order based on their dependencies */
@@ -42,11 +47,11 @@ public:
     DataHierarchyLoadRecipeBuilder() = default;
 
     /**
-     * Make a recipe for loading the data hierarchy based on the data in \p dataHierarchyLoadContextStorage
-     * @param dataHierarchyLoadContextStorage The storage containing the data hierarchy load context
+     * Make a recipe for loading the data hierarchy based on the data in \p projectLoadContextStorage
+     * @param projectLoadContextStorage The storage containing the project load context, which includes the data hierarchy load context
      * @return A QtTaskTree::Group representing the recipe for loading the data hierarchy
      */
-    QtTaskTree::Group makeRecipe(DataHierarchyLoadContextStorage& dataHierarchyLoadContextStorage);
+    QtTaskTree::Group makeRecipe(ProjectLoadContextStorage& projectLoadContextStorage);
 
 private:
 
@@ -85,4 +90,7 @@ private:
      * @return A QtTaskTree::Group representing the dataset loading stage
      */
     QtTaskTree::Group makeDatasetLoadStage(DataHierarchyLoadContextStorage& dataHierarchyLoadContextStorage);
+
+private:
+    DataHierarchyLoadContextStorage     _dataHierarchyLoadContextStorage;       /** Storage for the data hierarchy load context, which contains the dataset entries to be loaded in the correct order based on their dependencies */
 };

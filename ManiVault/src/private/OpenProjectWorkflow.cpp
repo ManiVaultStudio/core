@@ -19,8 +19,7 @@ OpenProjectWorkflow::OpenProjectWorkflow(mv::ProjectManager& projectManager, QOb
     _setupTask(this, "Setting up project..."),
 	_extractJsonTask(this, "Extracting project archive"),
     _loadDatasetsJsonTask(this, "Loading datasets from JSON"),
-	_loadWorkspaceJsonTask(this, "Loading workspace from JSON"),
-    _projectLoadRecipeBuilder()
+	_loadWorkspaceJsonTask(this, "Loading workspace from JSON")
 {
     _setupTask.setParentTask(&_loadTask);
     _extractJsonTask.setParentTask(&_loadTask);
@@ -88,7 +87,7 @@ Group OpenProjectWorkflow::makeRecipe()
                 context.error = QString::fromUtf8(e.what());
             }
         }),
-        _projectLoadRecipeBuilder.makeRecipe(_projectLoadContextStorage),
+        _projectLoadRecipeBuilder.makeRecipe(ctx, _projectLoadContextStorage),
         QSyncTask([this, &ctx] {
             auto& context = *ctx;
 
@@ -116,9 +115,9 @@ void OpenProjectWorkflow::setupOpenProject(OpenProjectContext& ctx)
         if (!temporaryDirectory.isValid())
             throw std::runtime_error("Unable to create temporary open-project directory");
 
-        ctx.temporaryDirectoryPath = temporaryDirectory.path();
-        ctx.workspaceJsonPath = QFileInfo(ctx.temporaryDirectoryPath, "workspace.json").absoluteFilePath();
-        ctx.projectJsonPath = QFileInfo(ctx.temporaryDirectoryPath, "project.json").absoluteFilePath();
+        ctx.temporaryDirectoryPath  = temporaryDirectory.path();
+        ctx.workspaceJsonPath       = QFileInfo(ctx.temporaryDirectoryPath, "workspace.json").absoluteFilePath();
+        ctx.projectJsonPath         = QFileInfo(ctx.temporaryDirectoryPath, "project.json").absoluteFilePath();
 
         qDebug() << "Created temporary directory for opening project: " << ctx.temporaryDirectoryPath;
         qDebug() << "Workspace JSON path: " << ctx.workspaceJsonPath;

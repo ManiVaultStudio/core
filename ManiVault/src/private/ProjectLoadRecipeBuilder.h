@@ -8,17 +8,20 @@
 #include "DataHierarchyLoadRecipeBuilder.h"
 #include "WorkspaceLoadRecipeBuilder.h"
 
+struct OpenProjectContext;
+
+using OpenProjectContextStorage = QtTaskTree::Storage<OpenProjectContext>;
+
 /** Context for project loading */
 struct ProjectLoadContext
 {
-    QString                     _projectJsonPath;               /** Path to the project JSON file */
-    QVariantMap                 _projectVariantMap;             /** Variant map containing the project data */
-    QVariantMap                 _dataHierarchyVariantMap;       /** Variant map containing the data hierarchy structure and dataset data */
-    bool                        _loadWorkspace = true;          /** Whether to load the workspace */
-    QString                     _workspaceJsonPath;             /** Path to the workspace JSON file */
-    QString                     _error;                         /** Error message, if any error occurs during the loading process */
-    DataHierarchyLoadContext    _dataHierarchyLoadContext;      /** Storage for data hierarchy load context */
-    WorkspaceLoadContext        _workspaceLoadContext;          /** Storage for workspace load context */
+	QVariantMap     _projectVariantMap;             /** Variant map containing the project data */
+    QVariantMap     _dataHierarchyVariantMap;       /** Variant map containing the data hierarchy structure and dataset data */
+    bool            _loadWorkspace = true;          /** Whether to load the workspace */
+    QString         _error;                         /** Error message, if any error occurs during the loading process */
+
+    DataHierarchyLoadContext    _dataHierarchyLoadContext;      /** Context for loading the data hierarchy, which contains the dataset entries to be loaded in the correct order based on their dependencies */
+    WorkspaceLoadContext        _workspaceLoadContext;          /* Context for loading the workspace, which contains the workspace load data */
 };
 
 /** Storage for project load context */
@@ -39,16 +42,12 @@ public:
     /**
      * Make a recipe for loading the project based on the data in \p projectLoadContextStorage
      * @param projectLoadContextStorage The storage containing the project load context
+     * @param openProjectContextStorage The storage containing the open project context
      * @return A QtTaskTree::Group representing the recipe for loading the project
      */
-    QtTaskTree::Group makeRecipe(ProjectLoadContextStorage& projectLoadContextStorage);
+    QtTaskTree::Group makeRecipe(OpenProjectContextStorage& openProjectContextStorage, ProjectLoadContextStorage& projectLoadContextStorage);
 
 private:
-    //QtTaskTree::Group makeLoadDataHierarchyStage(QtTaskTree::Storage<ProjectLoadContext>& projectLoadContext);
-
-private:
-    DataHierarchyLoadRecipeBuilder      _dataHierarchyLoadRecipeBuilder;
-    WorkspaceLoadRecipeBuilder          _workspaceLoadRecipeBuilder;
-    DataHierarchyLoadContextStorage     _dataHierarchyLoadContextStorage;
-    WorkspaceLoadContextStorage         _workspaceLoadContextStorage;
+    DataHierarchyLoadRecipeBuilder      _dataHierarchyLoadRecipeBuilder;    /** Builder for the data hierarchy load recipe, which is used to create the stage of loading the datasets in the data hierarchy based on the dataset entries in \p dataHierarchyLoadContextStorage */
+    WorkspaceLoadRecipeBuilder          _workspaceLoadRecipeBuilder;        /** Builder for the workspace load recipe, which is used to create the stage of loading the workspace based on the data in \p workspaceLoadContextStorage */
 };

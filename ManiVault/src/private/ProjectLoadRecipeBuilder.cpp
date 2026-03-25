@@ -3,58 +3,27 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ProjectLoadRecipeBuilder.h"
+#include "OpenProjectWorkflow.h"
 
 using namespace mv;
 
 using namespace QtTaskTree;
 
-//ProjectLoadRecipeBuilder::ProjectLoadRecipeBuilder()
-//{
-//}
-
-Group ProjectLoadRecipeBuilder::makeRecipe(ProjectLoadContextStorage& projectLoadContextStorage)
+Group ProjectLoadRecipeBuilder::makeRecipe(OpenProjectContextStorage& openProjectContextStorage, ProjectLoadContextStorage& projectLoadContextStorage)
 {
     return Group{
         projectLoadContextStorage,
 
-        _dataHierarchyLoadRecipeBuilder.makeRecipe(_dataHierarchyLoadContextStorage),
-        _workspaceLoadRecipeBuilder.makeRecipe(_workspaceLoadContextStorage)
+        QSyncTask([&openProjectContextStorage, &projectLoadContextStorage] {
+	        auto& context = *projectLoadContextStorage;
 
-        //// --- Stage 1: Load project JSON (metadata only)
-        //QSyncTask([this, &projectLoadContextStorage] {
-        //    auto& context = *projectLoadContextStorage;
+        	context = {};
 
-        //    try {
-        //        loadProjectJson(context);
-        //    }
-        //    catch (const std::exception& e) {
-        //        context._error = QString::fromUtf8(e.what());
-        //    }
-        //}),
+	        context._dataHierarchyLoadContext._jsonFilePath     = openProjectContextStorage->projectJsonPath;
+	        context._workspaceLoadContext._jsonFilePath         = openProjectContextStorage->workspaceJsonPath;
+	    }),
 
-        //// --- Stage 2: Load data hierarchy (separate workflow)
-        //If([&projectLoadContextStorage] {
-	       // return projectLoadContextStorage->_error.isEmpty();
-        //}) >> Then {
-        //    makeLoadDataHierarchyStage(projectLoadContextStorage)
-        //}
+    	_dataHierarchyLoadRecipeBuilder.makeRecipe(projectLoadContextStorage),
+		_workspaceLoadRecipeBuilder.makeRecipe(projectLoadContextStorage)
     };
 }
-
-//Group ProjectLoadRecipeBuilder::makeLoadDataHierarchyStage(Storage<ProjectLoadContext>& projectLoadContext)
-//{
-//    return Group{
-//        _dataHierarchyLoadContext,
-//
-//        // Initialize hierarchy context
-//        QSyncTask([&projectLoadContext, this] {
-//            auto& hierarchyLoadContext  = *_dataHierarchyLoadContext;
-//
-//            hierarchyLoadContext = {};
-//            hierarchyLoadContext._dataHierarchyVariantMap = hierarchyLoadContext._dataHierarchyVariantMap;
-//        }),
-//
-//        // Run hierarchy recipe
-//        _dataHierarchyLoadRecipeBuilder.makeRecipe(_dataHierarchyLoadContext)
-//    };
-//}
