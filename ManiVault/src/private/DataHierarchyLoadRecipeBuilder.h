@@ -20,11 +20,12 @@ struct DataHierarchyLoadContext
     /** Represents an entry for a dataset to be loaded, containing the dataset data and metadata extracted from the hierarchy map, as well as whether the dataset is derived or not (to determine load order) */
     struct DatasetEntry
     {
-        QVariantMap _datasetMap;            /** The variant map containing the dataset data */
-        QString     _datasetId;             /** The ID of the dataset */
-        QString     _datasetName;           /** The name of the dataset */
-        QString     _pluginKind;            /** The plugin kind of the dataset */
-        bool        _isDerived = false;     /** Whether the dataset is derived */
+	    mv::Dataset<>   _dataset;               /** The dataset to be loaded, which may or may not have its dataset pointer set yet (if the dataset is not yet loaded) */
+        QVariantMap     _datasetMap;            /** The variant map containing the dataset data */
+        QString         _datasetId;             /** The ID of the dataset */
+        QString         _datasetName;           /** The name of the dataset */
+        QString         _pluginKind;            /** The plugin kind of the dataset */
+        bool            _isDerived = false;     /** Whether the dataset is derived */
     };
 
     QString                 _jsonFilePath;              /** The file path of the JSON file containing the data hierarchy structure and dataset data */
@@ -82,21 +83,21 @@ private:
 
     /**
      * Recursively populate the data hierarchy based on the hierarchy map
+     * @param dataHierarchyLoadContext The context containing the hierarchy map and dataset entries to populate the data hierarchy from
      * @param map The hierarchy map to populate from
      * @param parent The parent dataset for the current level of the hierarchy
      */
-    void populateHierarchy(const QVariantMap& map, const mv::Dataset<>& parent);
-
-    
+    void populateHierarchy(DataHierarchyLoadContext& dataHierarchyLoadContext, const QVariantMap& map, const mv::Dataset<>& parent);
 
     /**
      * Load a dataset and its hierarchy item from the given item map
+     * @param dataHierarchyLoadContext The context containing the dataset entries to load and any error message if an error occurs during the loading process
      * @param itemMap The variant map containing the dataset and hierarchy item data
      * @param guiName The GUI name to assign to the loaded dataset
      * @param parent The parent dataset for the dataset being loaded
      * @return The loaded dataset
      */
-    mv::Dataset<> loadDataHierarchyItem(const QVariantMap& itemMap, const QString& guiName, const mv::Dataset<>& parent);
+    mv::Dataset<> loadDataHierarchyItem(DataHierarchyLoadContext& dataHierarchyLoadContext, const QVariantMap& itemMap, const QString& guiName, const mv::Dataset<>& parent);
 
     /**
      * Make a QtTaskTree::Group representing the stage of loading the datasets in the data hierarchy, based on the dataset entries in \p dataHierarchyLoadContextStorage

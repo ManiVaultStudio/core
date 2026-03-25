@@ -93,11 +93,11 @@ void DataHierarchyLoadRecipeBuilder::enumerateDatasets(DataHierarchyLoadContext&
 
                 DataHierarchyLoadContext::DatasetEntry entry;
 
-                entry._datasetMap = datasetMap;
-                entry._datasetId = datasetMap["ID"].toString();
-                entry._datasetName = datasetMap["Name"].toString();
-                entry._pluginKind = datasetMap["PluginKind"].toString();
-                entry._isDerived = datasetMap["Derived"].toBool() || !datasetMap["ProxyMembers"].toStringList().isEmpty();
+                entry._datasetMap   = datasetMap;
+                entry._datasetId    = datasetMap["ID"].toString();
+                entry._datasetName  = datasetMap["Name"].toString();
+                entry._pluginKind   = datasetMap["PluginKind"].toString();
+                entry._isDerived    = datasetMap["Derived"].toBool() || !datasetMap["ProxyMembers"].toStringList().isEmpty();
 
                 dataHierarchyLoadContext._datasetEntries.push_back(std::move(entry));
             }
@@ -143,7 +143,7 @@ void DataHierarchyLoadRecipeBuilder::populateHierarchy(DataHierarchyLoadContext&
 
         const auto& rootMap = dataHierarchyLoadContext._dataHierarchyVariantMap;
 
-        populateHierarchy(rootMap, {});
+        populateHierarchy(dataHierarchyLoadContext, rootMap, {});
     }
     catch (const std::exception& e) {
         if (dataHierarchyLoadContext._error.isEmpty())
@@ -151,7 +151,7 @@ void DataHierarchyLoadRecipeBuilder::populateHierarchy(DataHierarchyLoadContext&
     }
 }
 
-void DataHierarchyLoadRecipeBuilder::populateHierarchy(const QVariantMap& map, const Dataset<>& parent)
+void DataHierarchyLoadRecipeBuilder::populateHierarchy(DataHierarchyLoadContext& dataHierarchyLoadContext, const QVariantMap& map, const Dataset<>& parent)
 {
     qDebug() << __FUNCTION__;
 
@@ -164,38 +164,59 @@ void DataHierarchyLoadRecipeBuilder::populateHierarchy(const QVariantMap& map, c
     }
 
     for (const auto& item : sortedItems) {
-        auto child = loadDataHierarchyItem(item, item["Name"].toString(), parent);
-        populateHierarchy(item["Children"].toMap(), child);
+        auto child = loadDataHierarchyItem(dataHierarchyLoadContext, item, item["Name"].toString(), parent);
+        populateHierarchy(dataHierarchyLoadContext, item["Children"].toMap(), child);
     }
 }
 
-Dataset<> DataHierarchyLoadRecipeBuilder::loadDataHierarchyItem(const QVariantMap& itemMap, const QString& guiName, const Dataset<>& parent)
+Dataset<> DataHierarchyLoadRecipeBuilder::loadDataHierarchyItem(DataHierarchyLoadContext& dataHierarchyLoadContext, const QVariantMap& itemMap, const QString& guiName, const Dataset<>& parent)
 {
-    qDebug() << __FUNCTION__;
+    try {
+        qDebug() << __FUNCTION__;
 
-    const auto datasetMap       = itemMap["Dataset"].toMap();
-    const auto datasetId        = datasetMap["ID"].toString();
-    const auto pluginKind       = datasetMap["PluginKind"].toString();
-    const auto isDerived        = datasetMap["Derived"].toBool();
-    const auto isFull           = datasetMap["Full"].toBool();
-    const auto sourceDatasetID  = datasetMap["SourceDatasetID"].toString();
+        const auto datasetMap = itemMap["Dataset"].toMap();
+        const auto datasetId = datasetMap["ID"].toString();
+        const auto pluginKind = datasetMap["PluginKind"].toString();
+        const auto isDerived = datasetMap["Derived"].toBool();
+        const auto isFull = datasetMap["Full"].toBool();
+        const auto sourceDatasetID = datasetMap["SourceDatasetID"].toString();
 
-    Dataset<> loadedDataset;
+        Dataset<> loadedDataset;
 
-    if (isDerived || !isFull)
-        loadedDataset = data().createDatasetWithoutSelection(pluginKind, guiName, parent, datasetId);
-    else
-        loadedDataset = data().createDataset(pluginKind, guiName, parent, datasetId);
+        if (isDerived || !isFull)
+            loadedDataset = data().createDatasetWithoutSelection(pluginKind, guiName, parent, datasetId);
+        else
+            loadedDataset = data().createDataset(pluginKind, guiName, parent, datasetId);
 
-    if (!loadedDataset.isValid())
-        throw std::runtime_error(QString("Unable to create dataset \"%1\" of plugin kind \"%2\"").arg(datasetId, pluginKind).toStdString());
+        if (!loadedDataset.isValid())
+            throw std::runtime_error(QString("Unable to create dataset \"%1\" of plugin kind \"%2\"").arg(datasetId, pluginKind).toStdString());
 
-    if (isDerived)
-        loadedDataset->setSourceDataset(sourceDatasetID);
+        if (isDerived)
+            loadedDataset->setSourceDataset(sourceDatasetID);
 
-    //loadedDataset->getDataHierarchyItem().fromVariantMap(itemMap);
+        auto& datasetEntries = dataHierarchyLoadContext._datasetEntries;
 
-    return loadedDataset;
+        auto it = std::find_if(datasetEntries.begin(), datasetEntries.end(), [&datasetId](const DataHierarchyLoadContext::DatasetEntry& entry) {
+            return entry._datasetId == datasetId;
+        });
+
+        if (it != datasetEntries.end()) {
+            DataHierarchyLoadContext::DatasetEntry& entry = *it;
+
+            entry._dataset = loadedDataset;
+        }
+        else {
+            throw std::runtime_error(QString("Dataset entry with ID \"%1\" not found in dataset entries").arg(datasetId).toStdString());
+        }
+
+        return loadedDataset;
+    }
+    catch (const std::exception& e) {
+        if (dataHierarchyLoadContext._error.isEmpty())
+            dataHierarchyLoadContext._error = QString::fromUtf8(e.what());
+
+        return {};
+    }
 }
 
 Group DataHierarchyLoadRecipeBuilder::makeDatasetLoadStage(DataHierarchyLoadContextStorage& dataHierarchyLoadContextStorage)
