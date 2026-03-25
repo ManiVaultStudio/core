@@ -454,4 +454,29 @@ void loadFromDisk(const QVariantMap& variantMap, QVector<uint32_t>& vec)
     QDataStream dataStream(byteArray);
     dataStream >> vec;
 }
+
+QVariantMap loadJsonToVariantMap(const QString& filePath)
+{
+	QFile file(filePath);
+
+	if (!file.open(QIODevice::ReadOnly)) {
+		throw std::runtime_error(("Failed to open file: " + filePath).toStdString());
+	}
+
+	const QByteArray data = file.readAll();
+
+	QJsonParseError parseError;
+	QJsonDocument   doc = QJsonDocument::fromJson(data, &parseError);
+
+	if (parseError.error != QJsonParseError::NoError) {
+		throw std::runtime_error(("JSON parse error: " + parseError.errorString()).toStdString());
+	}
+
+	if (!doc.isObject()) {
+		throw std::runtime_error("JSON root is not an object");
+	}
+
+	return doc.object().toVariantMap();
+}
+
 }

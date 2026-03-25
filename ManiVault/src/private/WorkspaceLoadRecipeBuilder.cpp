@@ -15,6 +15,15 @@ Group WorkspaceLoadRecipeBuilder::makeRecipe(ProjectLoadContextStorage& projectL
         QSyncTask([this, &projectLoadContextStorage] {
             try {
                 auto& workspaceLoadContext = projectLoadContextStorage->_workspaceLoadContext;
+                loadWorkspaceJson(workspaceLoadContext);
+            }
+            catch (const std::exception& e) {
+                projectLoadContextStorage->_error = QString::fromUtf8(e.what());
+            }
+        }),
+        QSyncTask([this, &projectLoadContextStorage] {
+            try {
+                auto& workspaceLoadContext = projectLoadContextStorage->_workspaceLoadContext;
                 loadWorkspace(workspaceLoadContext);
             }
             catch (const std::exception& e) {
@@ -22,6 +31,22 @@ Group WorkspaceLoadRecipeBuilder::makeRecipe(ProjectLoadContextStorage& projectL
             }
         })
     };
+}
+
+void WorkspaceLoadRecipeBuilder::loadWorkspaceJson(WorkspaceLoadContext& workspaceLoadContext)
+{
+    try {
+        qDebug() << __FUNCTION__ << workspaceLoadContext._jsonFilePath;
+
+        if (workspaceLoadContext._jsonFilePath.isEmpty())
+            throw std::runtime_error("Workspace JSON file path is empty.");
+
+        workspaceLoadContext._workspaceVariantMap = util::loadJsonToVariantMap(workspaceLoadContext._jsonFilePath);
+    }
+    catch (const std::exception& e) {
+        if (workspaceLoadContext._error.isEmpty())
+            workspaceLoadContext._error = QString::fromUtf8(e.what());
+    }
 }
 
 void WorkspaceLoadRecipeBuilder::loadWorkspace(WorkspaceLoadContext& workspaceLoadContext)

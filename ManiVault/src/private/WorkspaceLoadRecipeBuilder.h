@@ -13,8 +13,9 @@ using ProjectLoadContextStorage = QtTaskTree::Storage<ProjectLoadContext>;
 /** Context for workspace loading */
 struct WorkspaceLoadContext
 {
-    QString     _jsonFilePath;  /** Path to the workspace JSON file */
-    QString     _error;         /** Error message, if any error occurs during the loading process */
+    QString         _jsonFilePath;          /** Path to the workspace JSON file */
+    QVariantMap     _workspaceVariantMap;   /** Variant map containing the workspace data */
+    QString         _error;                 /** Error message, if any error occurs during the loading process */
 };
 
 /**
@@ -37,6 +38,12 @@ public:
     QtTaskTree::Group makeRecipe(ProjectLoadContextStorage& projectLoadContextStorage);
 
 private:
+
+    /**
+     * Load the workspace JSON file and populate the workspace load context with the data from the JSON file
+     * @param workspaceLoadContext The context to populate with the workspace load data
+     */
+    void loadWorkspaceJson(WorkspaceLoadContext& workspaceLoadContext);
 
     /**
      * Load the workspace based on the data in \p workspaceLoadContext

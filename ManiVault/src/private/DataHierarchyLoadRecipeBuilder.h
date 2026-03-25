@@ -56,10 +56,29 @@ public:
 private:
 
     /**
+     * Load the project JSON file and populate the project load context with the data from the JSON file
+     * @param dataHierarchyLoadContext The context to populate with the project load data
+     */
+    void loadProjectJson(DataHierarchyLoadContext& dataHierarchyLoadContext);
+
+    /**
      * Enumerate the datasets in the hierarchy map and populate the dataset entries in \p dataHierarchyLoadContext
      * @param dataHierarchyLoadContext The context to populate with the dataset entries
      */
     void enumerateDatasets(DataHierarchyLoadContext& dataHierarchyLoadContext);
+
+    /**
+     * Compute the load order of the datasets based on their dependencies, ensuring that parent datasets are loaded before their children
+     * @param dataHierarchyLoadContext The context containing the dataset entries to compute the load order for
+     * @return A vector of dataset entries in the order they should be loaded
+     */
+    QVector<DataHierarchyLoadContext::DatasetEntry> computeLoadOrder(DataHierarchyLoadContext& dataHierarchyLoadContext);
+
+    /**
+     * Populate the data hierarchy based on the hierarchy map in \p dataHierarchyLoadContext
+     * @param dataHierarchyLoadContext The context containing the hierarchy map to populate the data hierarchy from
+     */
+    void populateHierarchy(DataHierarchyLoadContext& dataHierarchyLoadContext);
 
     /**
      * Recursively populate the data hierarchy based on the hierarchy map
@@ -68,12 +87,7 @@ private:
      */
     void populateHierarchy(const QVariantMap& map, const mv::Dataset<>& parent);
 
-    /**
-     * Compute the load order of the datasets based on their dependencies, ensuring that parent datasets are loaded before their children
-     * @param dataHierarchyLoadContext The context containing the dataset entries to compute the load order for
-     * @return A vector of dataset entries in the order they should be loaded
-     */
-    QVector<DataHierarchyLoadContext::DatasetEntry> computeLoadOrder(const DataHierarchyLoadContext& dataHierarchyLoadContext);
+    
 
     /**
      * Load a dataset and its hierarchy item from the given item map

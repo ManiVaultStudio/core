@@ -96,4 +96,5 @@ CORE_EXPORT void loadFromDisk(const QVariantMap& variantMap, QStringList& list);
 */
 CORE_EXPORT void loadFromDisk(const QVariantMap& variantMap, QVector<uint32_t>& vec);
 
+CORE_EXPORT QVariantMap loadJsonToVariantMap(const QString& filePath);
 }
