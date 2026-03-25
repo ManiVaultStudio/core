@@ -5,6 +5,7 @@
 #pragma once
 
 #include "ProjectLoadRecipeBuilder.h"
+#include "DataHierarchyLoadRecipeBuilder.h"
 
 #include <util/WorkflowBase.h>
 
@@ -28,6 +29,8 @@ struct OpenProjectContext
     QString projectJsonPath;
 
     QString error;
+
+    ProjectLoadContext   _projectLoadContext;
 };
 
 class OpenProjectWorkflow final : public mv::util::WorkflowBase<OpenProjectContext>
@@ -59,17 +62,17 @@ private:
     void finalizeOpenProject(OpenProjectContext& ctx);
 
 private:
-    mv::ProjectManager&                             _projectManager;
-    QString                                         _filePath;
-    bool                                            _loadWorkspace = true;
-    bool                                            _importDataOnly = false;
-    bool                                            _disableReadOnly = false;
-    QString                                         _finalError;
-    mv::ModalTask                                   _loadTask;
-    mv::Task                                        _setupTask;
-    mv::Task                                        _extractJsonTask;
-    mv::Task                                        _loadDatasetsJsonTask;
-    mv::Task                                        _loadWorkspaceJsonTask;
-       _dataHierarchyContextStorage;
-    ProjectLoadRecipeBuilder                        _projectLoadRecipeBuilder;
+    mv::ProjectManager&         _projectManager;
+    QString                     _filePath;
+    bool                        _loadWorkspace = true;
+    bool                        _importDataOnly = false;
+    bool                        _disableReadOnly = false;
+    QString                     _finalError;
+    mv::ModalTask               _loadTask;
+    mv::Task                    _setupTask;
+    mv::Task                    _extractJsonTask;
+    mv::Task                    _loadDatasetsJsonTask;
+    mv::Task                    _loadWorkspaceJsonTask;
+    ProjectLoadContextStorage   _projectLoadContextStorage;
+    ProjectLoadRecipeBuilder    _projectLoadRecipeBuilder;
 };

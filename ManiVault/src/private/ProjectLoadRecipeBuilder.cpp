@@ -8,66 +8,53 @@ using namespace mv;
 
 using namespace QtTaskTree;
 
-ProjectLoadRecipeBuilder::ProjectLoadRecipeBuilder()
-{
-}
+//ProjectLoadRecipeBuilder::ProjectLoadRecipeBuilder()
+//{
+//}
 
 Group ProjectLoadRecipeBuilder::makeRecipe(ProjectLoadContextStorage& projectLoadContextStorage)
 {
     return Group{
         projectLoadContextStorage,
 
-        // --- Stage 1: Load project JSON (metadata only)
-        QSyncTask([this, &projectLoadContextStorage] {
-            auto& context = *projectLoadContextStorage;
+        _dataHierarchyLoadRecipeBuilder.makeRecipe(_dataHierarchyLoadContextStorage),
+        _workspaceLoadRecipeBuilder.makeRecipe(_workspaceLoadContextStorage)
 
-            try {
-                loadProjectJson(context);
-            }
-            catch (const std::exception& e) {
-                context._error = QString::fromUtf8(e.what());
-            }
-        }),
+        //// --- Stage 1: Load project JSON (metadata only)
+        //QSyncTask([this, &projectLoadContextStorage] {
+        //    auto& context = *projectLoadContextStorage;
 
-        // --- Stage 2: Load data hierarchy (separate workflow)
-        If([&projectLoadContextStorage] {
-	        return projectLoadContextStorage->_error.isEmpty();
-        }) >> Then {
-            makeLoadDataHierarchyStage(projectLoadContextStorage)
-        },
+        //    try {
+        //        loadProjectJson(context);
+        //    }
+        //    catch (const std::exception& e) {
+        //        context._error = QString::fromUtf8(e.what());
+        //    }
+        //}),
 
-        // --- Stage 3: Load workspace
-        If([&projectLoadContextStorage] {
-	        return projectLoadContextStorage->_error.isEmpty() && projectLoadContextStorage->_loadWorkspace;
-        }) >> Then {
-            QSyncTask([this, &projectLoadContextStorage] {
-                auto& context = *projectLoadContextStorage;
-
-                try {
-                    loadWorkspace(context);
-                }
-                catch (const std::exception& e) {
-                    context._error = QString::fromUtf8(e.what());
-                }
-            })
-        }
+        //// --- Stage 2: Load data hierarchy (separate workflow)
+        //If([&projectLoadContextStorage] {
+	       // return projectLoadContextStorage->_error.isEmpty();
+        //}) >> Then {
+        //    makeLoadDataHierarchyStage(projectLoadContextStorage)
+        //}
     };
 }
 
-Group ProjectLoadRecipeBuilder::makeLoadDataHierarchyStage(Storage<ProjectLoadContext>& projectLoadContext)
-{
-    return Group{
-        _dataHierarchyLoadContext,
-
-        // Initialize hierarchy context
-        QSyncTask([&projectLoadContext, this] {
-            auto& hierarchyLoadContext  = *_dataHierarchyLoadContext;
-
-            hierarchyLoadContext = {};
-            hierarchyLoadContext._hierarchyMap = hierarchyLoadContext._dataHierarchyVariantMap;
-        }),
-
-        // Run hierarchy recipe
-        _dataHierarchyLoadRecipeBuilder.makeRecipe(_dataHierarchyLoadContext)
-    };
-}
+//Group ProjectLoadRecipeBuilder::makeLoadDataHierarchyStage(Storage<ProjectLoadContext>& projectLoadContext)
+//{
+//    return Group{
+//        _dataHierarchyLoadContext,
+//
+//        // Initialize hierarchy context
+//        QSyncTask([&projectLoadContext, this] {
+//            auto& hierarchyLoadContext  = *_dataHierarchyLoadContext;
+//
+//            hierarchyLoadContext = {};
+//            hierarchyLoadContext._dataHierarchyVariantMap = hierarchyLoadContext._dataHierarchyVariantMap;
+//        }),
+//
+//        // Run hierarchy recipe
+//        _dataHierarchyLoadRecipeBuilder.makeRecipe(_dataHierarchyLoadContext)
+//    };
+//}

@@ -23,9 +23,9 @@ struct DataHierarchyLoadContext
         bool        _isDerived = false;     /** Whether the dataset is derived */
     };
 
-    QVariantMap             _hierarchyMap;      /** The variant map containing the data hierarchy structure and dataset data */
-    QString                 _error;             /** Error message, if any error occurs during the loading process */
-    QVector<DatasetEntry>   _datasetEntries;    /** The list of dataset entries extracted from the hierarchy map, to be loaded in the correct order based on their dependencies */
+    QVariantMap             _dataHierarchyVariantMap;   /** The variant map containing the data hierarchy structure and dataset data */
+    QString                 _error;                     /** Error message, if any error occurs during the loading process */
+    QVector<DatasetEntry>   _datasetEntries;            /** The list of dataset entries extracted from the hierarchy map, to be loaded in the correct order based on their dependencies */
 };
 
 /** Storage for data hierarchy load context */
@@ -39,7 +39,7 @@ class DataHierarchyLoadRecipeBuilder
 public:
 
     /** Construct builder */
-    explicit DataHierarchyLoadRecipeBuilder();
+    DataHierarchyLoadRecipeBuilder() = default;
 
     /**
      * Make a recipe for loading the data hierarchy based on the data in \p dataHierarchyLoadContextStorage

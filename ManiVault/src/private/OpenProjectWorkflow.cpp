@@ -88,26 +88,7 @@ Group OpenProjectWorkflow::makeRecipe()
                 context.error = QString::fromUtf8(e.what());
             }
         }),
-        QSyncTask([this, &ctx] {
-            auto& context = *ctx;
-
-            try {
-                loadProjectJson(context);
-            }
-            catch (const std::exception& e) {
-                context.error = QString::fromUtf8(e.what());
-            }
-        }),
-        QSyncTask([this, &ctx] {
-            auto& context = *ctx;
-
-            try {
-                loadWorkspaceFromJson(context);
-            }
-            catch (const std::exception& e) {
-                context.error = QString::fromUtf8(e.what());
-            }
-        }),
+        _projectLoadRecipeBuilder.makeRecipe(_projectLoadContextStorage),
         QSyncTask([this, &ctx] {
             auto& context = *ctx;
 
@@ -117,23 +98,12 @@ Group OpenProjectWorkflow::makeRecipe()
             catch (const std::exception& e) {
                 context.error = QString::fromUtf8(e.what());
             }
-        }),
-        If([&ctx] { return ctx->error.isEmpty(); }) >> Then {
-		    _dataHierarchyContextStorage,
-		    QSyncTask([this, &ctx] {
-		        auto& hierarchyCtx = *_dataHierarchyContextStorage;
-		        hierarchyCtx = {};
-		        hierarchyCtx._hierarchyMap = _projectManager.projects().toVariantMap()["DataHierarchy"].toMap();
-		    }),
-		    _dataHierarchyLoadRecipeBuilder.makeRecipe(_dataHierarchyContextStorage)
-		}
+        })
 	};
 }
 
 void OpenProjectWorkflow::setupOpenProject(OpenProjectContext& ctx)
 {
-    qDebug() << __FUNCTION__ << ctx.filePath;
-
     _loadTask.setRunning();
 
     _setupTask.setRunning();

@@ -8,10 +8,6 @@ using namespace mv;
 
 using namespace QtTaskTree;
 
-DataHierarchyLoadRecipeBuilder::DataHierarchyLoadRecipeBuilder()
-{
-}
-
 Group DataHierarchyLoadRecipeBuilder::makeRecipe(DataHierarchyLoadContextStorage& dataHierarchyLoadContextStorage)
 {
     const Storage<int> currentDatasetIndex;
@@ -35,7 +31,7 @@ Group DataHierarchyLoadRecipeBuilder::makeRecipe(DataHierarchyLoadContextStorage
                 auto& context = *dataHierarchyLoadContextStorage;
 
                 try {
-                    populateHierarchy(context._hierarchyMap, Dataset<DatasetImpl>());
+                    populateHierarchy(context._dataHierarchyVariantMap, Dataset<DatasetImpl>());
                 }
                 catch (const std::exception& e) {
                     context._error = QString::fromUtf8(e.what());
@@ -43,14 +39,16 @@ Group DataHierarchyLoadRecipeBuilder::makeRecipe(DataHierarchyLoadContextStorage
             })
         },
 
-        If([&dataHierarchyLoadContextStorage] { return dataHierarchyLoadContextStorage->_error.isEmpty(); }) >> Then {
-            makeDatasetLoadStage(dataHierarchyLoadContextStorage)
-        }
+        //If([&dataHierarchyLoadContextStorage] { return dataHierarchyLoadContextStorage->_error.isEmpty(); }) >> Then {
+        //    makeDatasetLoadStage(dataHierarchyLoadContextStorage)
+        //}
     };
 }
 
 void DataHierarchyLoadRecipeBuilder::populateHierarchy(const QVariantMap& map, const Dataset<>& parent)
 {
+    qDebug() << "Populating hierarchy for parent dataset";
+    return;
     QVector<QVariantMap> sortedItems;
 
     sortedItems.resize(map.count());
@@ -67,6 +65,9 @@ void DataHierarchyLoadRecipeBuilder::populateHierarchy(const QVariantMap& map, c
 
 QVector<DataHierarchyLoadContext::DatasetEntry> DataHierarchyLoadRecipeBuilder::computeLoadOrder(const DataHierarchyLoadContext& dataHierarchyLoadContext)
 {
+    qDebug() << "Computing load order for" << dataHierarchyLoadContext._datasetEntries.size() << "datasets";
+    return {};
+
     QVector<DataHierarchyLoadContext::DatasetEntry> ordered = dataHierarchyLoadContext._datasetEntries;
 
     // Maintain hierarchy item order within partitions, matching old behavior
@@ -82,6 +83,9 @@ QVector<DataHierarchyLoadContext::DatasetEntry> DataHierarchyLoadRecipeBuilder::
 
 void DataHierarchyLoadRecipeBuilder::enumerateDatasets(DataHierarchyLoadContext& dataHierarchyLoadContext)
 {
+    qDebug() << "Enumerating datasets in hierarchy map";
+    return;
+
     dataHierarchyLoadContext._datasetEntries.clear();
 
     const std::function<void(const QVariantMap&)> enumerate = [&](const QVariantMap& map) {
@@ -104,11 +108,14 @@ void DataHierarchyLoadRecipeBuilder::enumerateDatasets(DataHierarchyLoadContext&
         }
     };
 
-    enumerate(dataHierarchyLoadContext._hierarchyMap);
+    enumerate(dataHierarchyLoadContext._dataHierarchyVariantMap);
 }
 
 Dataset<> DataHierarchyLoadRecipeBuilder::loadDataHierarchyItem(const QVariantMap& itemMap, const QString& guiName, const Dataset<>& parent)
 {
+    qDebug() << "Loading dataset for item" << guiName;
+    return {};
+
     const auto datasetMap       = itemMap["Dataset"].toMap();
     const auto datasetId        = datasetMap["ID"].toString();
     const auto pluginKind       = datasetMap["PluginKind"].toString();
@@ -136,6 +143,8 @@ Dataset<> DataHierarchyLoadRecipeBuilder::loadDataHierarchyItem(const QVariantMa
 
 Group DataHierarchyLoadRecipeBuilder::makeDatasetLoadStage(DataHierarchyLoadContextStorage& dataHierarchyLoadContextStorage)
 {
+    qDebug() << "Making dataset load stage for" << dataHierarchyLoadContextStorage->_datasetEntries.size() << "datasets";
+    return {};
     return Group{
         QThreadFunctionTask<void>([this, &dataHierarchyLoadContextStorage](QThreadFunction<void>& task) {
             task.setThreadFunctionData([this, &dataHierarchyLoadContextStorage](QPromise<void>& promise) {
