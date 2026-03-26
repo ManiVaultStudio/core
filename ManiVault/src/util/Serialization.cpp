@@ -6,6 +6,7 @@
 #include "CoreInterface.h"
 #include "Application.h"
 #include "CodecRegistry.h"
+#include "DecodeRequestState.h"
 
 #include <QUuid>
 #include <QtConcurrent>
@@ -193,7 +194,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
      return {};
 }
 
-static DecodeBlockResult decodeBlock(const DecodeBlockJob& job, char* bytes, const std::function<std::shared_ptr<BlobCodec>()>& createCodec)
+DecodeBlockResult decodeBlock(const DecodeBlockJob& job, char* bytes, const std::function<std::shared_ptr<BlobCodec>()>& createCodec)
 {
     DecodeBlockResult result;
 
@@ -243,84 +244,23 @@ static DecodeBlockResult decodeBlock(const DecodeBlockJob& job, char* bytes, con
     return result;
 }
 
-void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, ConcurrencyMode concurrencyMode /*= ConcurrencyMode::Parallel*/)
+bool populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, ConcurrencyMode concurrencyMode /*= ConcurrencyMode::Parallel*/)
 {
-    try {
-        variantMapMustContain(variantMap, "BlockSize");
-        variantMapMustContain(variantMap, "Blocks");
+    auto handle = SerializationScheduler::instance().submitDecode(variantMap, bytes, concurrencyMode);
 
-        const auto blocks = variantMap["Blocks"].toList();
-        const auto hasCodec = variantMap.contains("Codec");
-        const auto codecName = hasCodec ? variantMap["Codec"].toString() : QStringLiteral("none");
+    QEventLoop loop;
 
-        if (hasCodec && !codecRegistry().isRegistered(codecName)) {
-            throw std::runtime_error(
-                QString("Unable to load raw data, codec %1 is not registered").arg(codecName).toStdString()
-            );
-        }
+    QObject::connect(handle.data(), &DecodeRequestState::finished,
+        &loop, &QEventLoop::quit);
 
-        auto createCodec = [hasCodec, codecName]() -> std::shared_ptr<BlobCodec> {
-            if (hasCodec)
-                return codecRegistry().createCodec(nullptr, codecName);
+    loop.exec();
 
-            return codecRegistry().createCodec(nullptr, BlobCodec::Type::None);
-        };
-
-        const auto blockSize = variantMap["BlockSize"].toInt();
-        Q_UNUSED(blockSize);
-
-        QVector<DecodeBlockJob> decodeBlockJobs;
-        decodeBlockJobs.reserve(blocks.size());
-
-        for (const auto& block : blocks) {
-            const auto blockMap = block.toMap();
-
-            variantMapMustContain(blockMap, "Offset");
-            variantMapMustContain(blockMap, "Size");
-
-            DecodeBlockJob job;
-            job._offset = blockMap["Offset"].value<quint64>();
-            job._size = blockMap["Size"].value<quint64>();
-
-            if (blockMap.contains("URI"))
-                job._uri = blockMap["URI"].toString();
-
-            if (blockMap.contains("Data"))
-                job._encodedData = blockMap["Data"].toString();
-
-            decodeBlockJobs.push_back(std::move(job));
-        }
-
-        QVector<DecodeBlockResult> decodeBlockResults;
-        decodeBlockResults.resize(decodeBlockJobs.size());
-
-        static QThreadPool decodeThreadPool;
-
-        decodeThreadPool.setMaxThreadCount(std::max(1, QThread::idealThreadCount() - 1));
-
-        if (concurrencyMode == ConcurrencyMode::Parallel) {
-            decodeBlockResults = QtConcurrent::blockingMapped<QVector<DecodeBlockResult>>(
-                &decodeThreadPool,
-                decodeBlockJobs,
-                [bytes, createCodec](const DecodeBlockJob& job) {
-                    return decodeBlock(job, bytes, createCodec);
-                }
-            );
-        }
-        else {
-            for (int i = 0; i < decodeBlockJobs.size(); ++i) {
-                decodeBlockResults[i] = decodeBlock(decodeBlockJobs[i], bytes, createCodec);
-            }
-        }
-
-        for (const auto& result : decodeBlockResults) {
-            if (!result._error.isEmpty())
-                throw std::runtime_error(result._error.toStdString());
-        }
+    if (handle->hasError()) {
+        qWarning() << "Unable to populate data from buffer:" << handle->errorString();
+        return false;
     }
-    catch (const std::exception& e) {
-        qWarning() << "Unable to populate data from buffer:" << e.what();
-    }
+
+    return true;
 }
 
 void variantMapMustContain(const QVariantMap& variantMap, const QString& key)

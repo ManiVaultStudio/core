@@ -590,6 +590,8 @@ set(PUBLIC_UTIL_HEADERS
     src/util/DecodeExecutor.h
     src/util/WorkflowNode.h
     src/util/WorkflowBase.h
+    src/util/SerializationScheduler.h
+    src/util/DecodeRequestState.h
 )
 
 if(APPLE)
@@ -660,6 +662,8 @@ set(PUBLIC_UTIL_SOURCES
     src/util/DecodeExecutor.cpp
     src/util/WorkflowNode.cpp
     src/util/WorkflowBase.cpp
+    src/util/SerializationScheduler.cpp
+    src/util/DecodeRequestState.cpp
 )
 
 if(APPLE)

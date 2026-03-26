@@ -81,13 +81,17 @@ CORE_EXPORT void loadRawDataFromBinaryFile(char* bytes, const std::uint64_t& num
  */
 CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk = false, const BlobCodec* blobCodecOverride = nullptr, ConcurrencyMode concurrencyMode = ConcurrencyMode::Sequential);
 
+
+CORE_EXPORT DecodeBlockResult decodeBlock(const DecodeBlockJob& job, char* bytes, const std::function<std::shared_ptr<BlobCodec>()>& createCodec);
+
 /**
- * Convert variant map to raw data
- * @param variantMap Variant map containing the data blocks
- * @param bytes Output buffer to which the data is copied
+ * Convert variant map to raw data buffer (blocks are loaded from disk and decoded if necessary)
+ * @param variantMap Variant map containing the raw data or file information
+ * @param bytes Pointer to output buffer
  * @param concurrencyMode Whether to decode the blocks sequentially or in parallel (defaults to sequential)
+ * @return True if the data buffer was successfully populated, false otherwise
  */
-CORE_EXPORT void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, ConcurrencyMode concurrencyMode = ConcurrencyMode::Parallel);
+CORE_EXPORT bool populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, ConcurrencyMode concurrencyMode = ConcurrencyMode::Parallel);
 
 /**
  * Raises an exception if an item with key is not found in a variant map

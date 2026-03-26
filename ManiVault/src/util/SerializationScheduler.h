@@ -4,14 +4,15 @@
 
 #pragma once
 
+#include "ManiVaultGlobals.h"
+
 #include "DecodeRequestState.h"
 
 #include <util/Serialization.h>
 
 #include <QObject>
 
-
-class SerializationScheduler : public QObject
+CORE_EXPORT class SerializationScheduler : public QObject
 {
     Q_OBJECT
 

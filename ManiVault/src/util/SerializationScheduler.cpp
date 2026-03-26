@@ -23,10 +23,7 @@ SerializationScheduler& SerializationScheduler::instance()
     return executor;
 }
 
-DecodeRequestHandle SerializationScheduler::submitDecode(
-    const QVariantMap& variantMap,
-    char* destination,
-    mv::util::ConcurrencyMode concurrencyMode)
+DecodeRequestHandle SerializationScheduler::submitDecode(const QVariantMap& variantMap, char* destination, ConcurrencyMode concurrencyMode)
 {
     auto handle = DecodeRequestHandle::create();
 
@@ -87,7 +84,7 @@ DecodeRequestHandle SerializationScheduler::submitDecode(
 
         QFuture<QVector<DecodeBlockResult>> future;
 
-        if (concurrencyMode == mv::util::ConcurrencyMode::Parallel) {
+        if (concurrencyMode == ConcurrencyMode::Parallel) {
             future = QtConcurrent::mappedReduced<QVector<DecodeBlockResult>>(
                 &_pool,
                 decodeBlockJobs,

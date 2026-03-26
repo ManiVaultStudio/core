@@ -140,9 +140,7 @@ set(PRIVATE_SERIALIZATION_HEADERS
     src/private/WorkspaceLoadContext.h
     src/private/DataHierarchyLoadContext.h
     src/private/DatasetLoadContext.h
-    src/private/SerializationScheduler.h
     src/private/WorkspaceLoadRecipeBuilder.h
-    src/private/DecodeRequestState.h
 )
 
 set(PRIVATE_SERIALIZATION_SOURCES
@@ -158,9 +156,7 @@ set(PRIVATE_SERIALIZATION_SOURCES
     src/private/WorkspaceLoadContext.cpp
     src/private/DataHierarchyLoadContext.cpp
     src/private/DatasetLoadContext.cpp
-    src/private/SerializationScheduler.cpp
     src/private/WorkspaceLoadRecipeBuilder.cpp
-    src/private/DecodeRequestState.cpp
 )
 
 set(PRIVATE_SERIALIZATION_FILES
