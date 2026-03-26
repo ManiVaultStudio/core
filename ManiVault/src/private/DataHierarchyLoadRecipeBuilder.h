@@ -47,11 +47,10 @@ public:
     void enumerateDatasets(DataHierarchyLoadContext& dataHierarchyLoadContext);
 
     /**
-     * Compute the load order of the datasets based on their dependencies, ensuring that parent datasets are loaded before their children
-     * @param dataHierarchyLoadContext The context containing the dataset entries to compute the load order for
-     * @return A vector of dataset entries in the order they should be loaded
+     * Compute the load order of the dataset entries in \p dataHierarchyLoadContext based on their dependencies, and populate the dataset load contexts in the context with the dataset entries in the correct order
+     * @param dataHierarchyLoadContext The context containing the dataset entries to compute the load order for and to populate with the ordered dataset entries
      */
-    DatasetLoadContexts computeLoadOrder(DataHierarchyLoadContext& dataHierarchyLoadContext);
+    void partitionDatasetLoadContexts(DataHierarchyLoadContext& dataHierarchyLoadContext);
 
     /**
      * Populate the data hierarchy based on the hierarchy map in \p dataHierarchyLoadContext

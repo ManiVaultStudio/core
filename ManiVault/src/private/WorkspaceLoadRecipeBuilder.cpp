@@ -16,8 +16,6 @@ Group WorkspaceLoadRecipeBuilder::makeRecipe(ProjectLoadContextStorage& projectL
             try {
                 auto& workspaceLoadContext = projectLoadContextStorage->_workspaceLoadContext;
                 loadWorkspaceJson(workspaceLoadContext);
-
-                qDebug() << __FUNCTION__ << projectLoadContextStorage->_dataHierarchyLoadContext._datasetLoadContexts.count();
             }
             catch (const std::exception& e) {
                 projectLoadContextStorage->_error = QString::fromUtf8(e.what());

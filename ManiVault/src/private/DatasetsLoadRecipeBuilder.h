@@ -28,19 +28,12 @@ public:
 
 private:
 
-	/**
-     * Load the datasets based on the provided dataset load contexts, ensuring that non-derived datasets are loaded before derived datasets
-     * @param datasetLoadContexts The dataset load contexts for the non-derived datasets to be loaded
-     */
-    void loadNonDerivedDatasets(DatasetLoadContexts& datasetLoadContexts);
-
     /**
-     * Load the derived datasets based on the provided dataset load contexts, ensuring that parent datasets are loaded before their children
-     * @param datasetLoadContexts The dataset load contexts for the derived datasets to be loaded
+     * Load the datasets based on the dataset entries in the datasets load context in \p projectLoadContextStorage
+     * @param projectLoadContextStorage The storage containing the project load context, which includes the datasets load context with the dataset entries to be loaded
+     * @param derived Whether to load derived datasets (true) or non-derived datasets (false)
      */
-    void loadDerivedDatasets(DatasetLoadContexts& datasetLoadContexts);
-
-    QtTaskTree::Group makeDatasetJobsRecipe(const ProjectLoadContextStorage& projectLoadContextStorage);
+    void loadDatasets(const ProjectLoadContextStorage& projectLoadContextStorage, bool derived);
 
 private:
     DatasetLoadRecipeBuilder    _datasetLoadRecipeBuilder;      /** The builder for creating the recipe for loading individual datasets, used in the data hierarchy loading recipe */

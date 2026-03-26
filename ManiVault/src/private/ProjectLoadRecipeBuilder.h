@@ -35,14 +35,6 @@ using ProjectLoadContextStorage = QtTaskTree::Storage<ProjectLoadContext>;
  */
 class ProjectLoadRecipeBuilder
 {
-protected:
-
-    struct DatasetIdLists
-    {
-        QStringList _derivedIds;
-        QStringList _nonDerivedIds;
-    };
-
 public:
 
     /** Construct recipe builder */
@@ -54,16 +46,7 @@ public:
      * @param openProjectContextStorage The storage containing the open project context
      * @return A QtTaskTree::Group representing the recipe for loading the project
      */
-    QtTaskTree::Group makeRecipe(const QString& projectJsonPath, ProjectLoadContextStorage& projectLoadContextStorage);
-
-private:
-
-    /**
-     * Extract the dataset IDs for the derived and non-derived datasets from the data hierarchy variant map in \p dataHierarchyMap
-     * @param dataHierarchyMap The variant map containing the data hierarchy structure and dataset data
-     * @return A struct containing the lists of dataset IDs for the derived and non-derived datasets
-     */
-    DatasetIdLists extractDatasetIds(const QVariantMap& dataHierarchyMap);
+    QtTaskTree::Group makeRecipe(OpenProjectContextStorage& openProjectContextStorage, ProjectLoadContextStorage& projectLoadContextStorage);
 
 private:
     DataHierarchyLoadRecipeBuilder      _dataHierarchyLoadRecipeBuilder;    /** Builder for the data hierarchy load recipe, which is used to create the stage of loading the datasets in the data hierarchy based on the dataset entries in \p dataHierarchyLoadContextStorage */

@@ -37,7 +37,7 @@ Group DataHierarchyLoadRecipeBuilder::makeRecipe(ProjectLoadContextStorage& proj
         QSyncTask([this, &projectLoadContextStorage] {
             try {
                 auto& dataHierarchyLoadContext = projectLoadContextStorage->_dataHierarchyLoadContext;
-                computeLoadOrder(dataHierarchyLoadContext);
+                partitionDatasetLoadContexts(dataHierarchyLoadContext);
             }
             catch (const std::exception& e) {
                 auto& dataHierarchyLoadContext = projectLoadContextStorage->_dataHierarchyLoadContext;
@@ -111,29 +111,34 @@ void DataHierarchyLoadRecipeBuilder::enumerateDatasets(DataHierarchyLoadContext&
     }
 }
 
-DatasetLoadContexts DataHierarchyLoadRecipeBuilder::computeLoadOrder(DataHierarchyLoadContext& dataHierarchyLoadContext)
+void DataHierarchyLoadRecipeBuilder::partitionDatasetLoadContexts(DataHierarchyLoadContext& dataHierarchyLoadContext)
 {
     try {
         qDebug() << __FUNCTION__;
 
-        DatasetLoadContexts ordered = dataHierarchyLoadContext._datasetLoadContexts;
+        dataHierarchyLoadContext._derivedDatasetLoadContexts.clear();
+        dataHierarchyLoadContext._nonDerivedDatasetLoadContexts.clear();
+
+        auto& orderedDatasetLoadContexts = dataHierarchyLoadContext._datasetLoadContexts;
 
         // Maintain hierarchy item order within partitions, matching old behavior
-        std::reverse(ordered.begin(), ordered.end());
+        std::reverse(orderedDatasetLoadContexts.begin(), orderedDatasetLoadContexts.end());
 
         // First load non-derived datasets, then derived/proxy datasets
-        std::stable_partition(ordered.begin(), ordered.end(), [](const DatasetLoadContext& entry) {
-            return !entry._isDerived;
+        std::stable_partition(orderedDatasetLoadContexts.begin(), orderedDatasetLoadContexts.end(), [](const DatasetLoadContext& datasetLoadContext) {
+            return !datasetLoadContext._isDerived;
         });
 
-        return ordered;
+        for (const auto& orderedDatasetLoadContext : orderedDatasetLoadContexts)
+            if (orderedDatasetLoadContext._isDerived)
+                dataHierarchyLoadContext._derivedDatasetLoadContexts.push_back(const_cast<DatasetLoadContext*>(&orderedDatasetLoadContext));
+            else
+                dataHierarchyLoadContext._nonDerivedDatasetLoadContexts.push_back(const_cast<DatasetLoadContext*>(&orderedDatasetLoadContext));
     }
     catch (const std::exception& e) {
         if (dataHierarchyLoadContext._error.isEmpty())
             dataHierarchyLoadContext._error = QString::fromUtf8(e.what());
     }
-
-    return {};
 }
 
 void DataHierarchyLoadRecipeBuilder::populateHierarchy(DataHierarchyLoadContext& dataHierarchyLoadContext)
@@ -223,78 +228,5 @@ Group DataHierarchyLoadRecipeBuilder::makeDatasetLoadStage(DataHierarchyLoadCont
 {
     qDebug() << "Making dataset load stage for" << dataHierarchyLoadContextStorage->_datasetLoadContexts.size() << "datasets";
     return {};
-    return Group{
-        QThreadFunctionTask<void>([this, &dataHierarchyLoadContextStorage](QThreadFunction<void>& task) {
-            task.setThreadFunctionData([this, &dataHierarchyLoadContextStorage](QPromise<void>& promise) {
-                auto& context = *dataHierarchyLoadContextStorage;
-
-                try {
-                    const auto ordered = computeLoadOrder(context);
-
-                    for (const auto& entry : ordered) {
-                        if (entry._isDerived)
-                            continue;
-
-                        if (promise.isCanceled()) {
-                            if (context._error.isEmpty())
-                                context._error = "Dataset loading canceled";
-
-                            return;
-                        }
-
-                        auto dataset = mv::data().getDataset(entry._datasetId).get();
-
-                        if (!dataset) {
-                            throw std::runtime_error(QString("Unable to find dataset \"%1\" for loading").arg(entry._datasetId).toStdString());
-                        }
-
-                        dataset->fromVariantMap(entry._datasetMap);
-                    }
-                }
-                catch (const std::exception& e) {
-                    if (context._error.isEmpty())
-                        context._error = QString::fromUtf8(e.what());
-
-                    promise.future().cancel();
-                }
-            });
-        }),
-        If([&dataHierarchyLoadContextStorage] { return dataHierarchyLoadContextStorage->_error.isEmpty(); }) >> Then {
-            QThreadFunctionTask<void>([this, &dataHierarchyLoadContextStorage](QThreadFunction<void>& task) {
-                task.setThreadFunctionData([this, &dataHierarchyLoadContextStorage](QPromise<void>& promise) {
-                    auto& context = *dataHierarchyLoadContextStorage;
-
-                    try {
-                        const auto ordered = computeLoadOrder(context);
-
-                        for (const auto& entry : ordered) {
-                            if (!entry._isDerived)
-                                continue;
-
-                            if (promise.isCanceled()) {
-                                if (context._error.isEmpty())
-                                    context._error = "Dataset loading canceled";
-
-                                return;
-                            }
-
-                            auto dataset = mv::data().getDataset(entry._datasetId).get();
-
-                            if (!dataset) {
-                                throw std::runtime_error(QString("Unable to find dataset \"%1\" for loading").arg(entry._datasetId).toStdString());
-                            }
-
-                            dataset->fromVariantMap(entry._datasetMap);
-                        }
-                    }
-                    catch (const std::exception& e) {
-                        if (context._error.isEmpty())
-                            context._error = QString::fromUtf8(e.what());
-
-                        promise.future().cancel();
-                    }
-                });
-            })
-        }
-    };
+   
 }

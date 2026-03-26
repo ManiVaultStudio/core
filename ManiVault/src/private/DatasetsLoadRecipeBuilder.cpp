@@ -10,95 +10,42 @@ using namespace QtTaskTree;
 Group DatasetsLoadRecipeBuilder::makeRecipe(const ProjectLoadContextStorage& projectLoadContextStorage)
 {
     return Group{
-        //QSyncTask([this, projectLoadContextStorage] {
-        //    qDebug() << __FUNCTION__;
-        //    auto& datasetLoadContexts = projectLoadContextStorage->_dataHierarchyLoadContext._datasetLoadContexts;
-
-        //    //loadNonDerivedDatasets(datasetLoadContexts);
-        //    //loadDerivedDatasets(datasetLoadContexts);
-        //}),
-        //QSyncTask([this, projectLoadContextStorage] {
-        //    qDebug() << __FUNCTION__;
-        //    auto& datasetLoadContexts = projectLoadContextStorage->_dataHierarchyLoadContext._datasetLoadContexts;
-        //    qDebug() << datasetLoadContexts.size() << "datasets to load";
-
-        //    //loadNonDerivedDatasets(datasetLoadContexts);
-        //    //loadDerivedDatasets(datasetLoadContexts);
-        //    makeDatasetJobsRecipe(projectLoadContextStorage);
-        //})//,
-        //makeDatasetJobsRecipe(projectLoadContextStorage)
+        QSyncTask([this, projectLoadContextStorage] {
+            try {
+                loadDatasets(projectLoadContextStorage, false);
+            }
+            catch (const std::exception& e) {
+                projectLoadContextStorage->_error = QString::fromUtf8(e.what());
+            }
+        }),
+        QSyncTask([this, projectLoadContextStorage] {
+            try {
+                loadDatasets(projectLoadContextStorage, true);
+            }
+            catch (const std::exception& e) {
+                projectLoadContextStorage->_error = QString::fromUtf8(e.what());
+            }
+        })
     };
-
-
-
-    //auto& datasetEntries = projectLoadContextStorage->_datasetsLoadContext._datasetContexts;
-
-    //const auto nonDerivedDatasetEntries = collectDatasetItems(datasetEntries);
-    //const auto derivedDatasetEntries    = collectDatasetItems(datasetEntries, true);
-
-    ////if (nonDerivedDatasetEntries.isEmpty() && derivedDatasetEntries.isEmpty())
-    ////    return Group{};
-
-    //QList<GroupItem> nonDerivedParallelItems;
-    //nonDerivedParallelItems.reserve(nonDerivedDatasetEntries.size());
-
-    //for (auto nonDerivedDatasetEntry : nonDerivedDatasetEntries) {
-    //    if (!nonDerivedDatasetEntry)
-    //        continue;
-
-    //    nonDerivedParallelItems.append(_datasetLoadRecipeBuilder.makeRecipe(*nonDerivedDatasetEntry));
-    //}
-
-    //QList<GroupItem> derivedParallelItems;
-    //derivedParallelItems.reserve(derivedDatasetEntries.size());
-
-    //for (auto derivedDatasetEntry : derivedDatasetEntries) {
-    //    if (!derivedDatasetEntry)
-    //        continue;
-
-    //    derivedParallelItems.append(_datasetLoadRecipeBuilder.makeRecipe(*derivedDatasetEntry));
-    //}
-
-    //return Group{
-    //    parallel,
-    //	nonDerivedParallelItems,
-    //	derivedParallelItems
-    //};
 }
 
-void DatasetsLoadRecipeBuilder::loadNonDerivedDatasets(DatasetLoadContexts& datasetLoadContexts)
+void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& projectLoadContextStorage, bool derived)
 {
-    qDebug() << __FUNCTION__;
+    if (derived)
+        qDebug() << __FUNCTION__ << "(derived datasets)";
+    else
+        qDebug() << __FUNCTION__ << "(non-derived datasets)";
 
-    for (auto& datasetLoadContext : datasetLoadContexts) {
-        if (!datasetLoadContext._isDerived)
-            datasetLoadContext._dataset->fromVariantMap(datasetLoadContext._datasetMap);
+    auto& dataHierarchyLoadContext = projectLoadContextStorage->_dataHierarchyLoadContext;
+
+    const auto& contexts = derived ? dataHierarchyLoadContext._derivedDatasetLoadContexts : dataHierarchyLoadContext._nonDerivedDatasetLoadContexts;
+
+    for (const auto& context : contexts) {
+        auto nonConstContext = const_cast<DatasetLoadContext*>(context);
+
+        if (!nonConstContext->_dataset.isValid())
+            throw std::runtime_error("Dataset is invalid.");
+
+        nonConstContext->_dataset->fromVariantMap(context->_datasetMap);
     }
-}
-
-void DatasetsLoadRecipeBuilder::loadDerivedDatasets(DatasetLoadContexts& datasetLoadContexts)
-{
-    qDebug() << __FUNCTION__;
-
-    for (auto& datasetLoadContext : datasetLoadContexts) {
-        if (datasetLoadContext._isDerived)
-            datasetLoadContext._dataset->fromVariantMap(datasetLoadContext._datasetMap);
-    }
-}
-
-Group DatasetsLoadRecipeBuilder::makeDatasetJobsRecipe(const ProjectLoadContextStorage& projectLoadContextStorage)
-{
-    qDebug() << __FUNCTION__;
-
-    auto& datasetLoadContexts = projectLoadContextStorage->_dataHierarchyLoadContext._datasetLoadContexts;
-
-    qDebug() << datasetLoadContexts.size() << "datasets to load";
-    GroupItems items{ parallel };
-
-    for (auto& datasetLoadContext : datasetLoadContexts) {
-        if (datasetLoadContext._isDerived)
-            items << _datasetLoadRecipeBuilder.makeRecipe(datasetLoadContext);
-    }
-
-    return Group(items);
 }

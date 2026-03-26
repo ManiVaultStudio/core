@@ -17,4 +17,4 @@ struct DatasetLoadContext
 };
 
 using DatasetLoadContexts = QVector<DatasetLoadContext>;
-using FilteredDatasetLoadContexts = QVector<DatasetLoadContext*>;
+using DatasetLoadContextsPtrs = QVector<DatasetLoadContext*>;
