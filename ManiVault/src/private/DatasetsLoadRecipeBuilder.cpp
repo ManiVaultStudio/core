@@ -35,7 +35,8 @@ void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& pr
     qDebug() << __FUNCTION__ << (derived ? "(derived datasets)" : "(non-derived datasets)");
 
     auto& dataHierarchyLoadContext = projectLoadContextStorage->_dataHierarchyLoadContext;
-    const auto& contexts = derived
+
+	const auto& contexts = derived
         ? dataHierarchyLoadContext._derivedDatasetLoadContexts
         : dataHierarchyLoadContext._nonDerivedDatasetLoadContexts;
 
@@ -54,10 +55,10 @@ void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& pr
         workItems.append(nonConstContext);
     }
 
-    const auto concurrencyMode = mv::util::ConcurrencyMode::Parallel;
+    constexpr auto concurrencyMode = mv::util::ConcurrencyMode::Parallel;
 
     if (concurrencyMode == mv::util::ConcurrencyMode::Parallel) {
-        QThreadPool pool;
+        static QThreadPool pool;
         pool.setMaxThreadCount(std::max(1, QThread::idealThreadCount() - 1));
 
         std::atomic<bool> failed = false;
@@ -69,7 +70,11 @@ void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& pr
                 return;
 
             try {
-                ctx->_dataset->fromVariantMap(ctx->_datasetMap);
+                qDebug() << QString("[%1, %2]::begin::fromVariantMap()").arg(ctx->_datasetName, ctx->_pluginKind);
+                {
+                    ctx->_dataset->fromVariantMap(ctx->_datasetMap);
+                }
+                qDebug() << QString("[%1, %2]::end::fromVariantMap()").arg(ctx->_datasetName, ctx->_pluginKind);
             }
             catch (const std::exception& e) {
                 failed.store(true, std::memory_order_relaxed);

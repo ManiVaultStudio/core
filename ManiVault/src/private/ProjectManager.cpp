@@ -385,7 +385,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 setState(State::Idle);
                 emit projectOpened(*_project);
 
-                auto ms = workflowPtr->getDuration();
+                const auto ms = workflowPtr->getDuration();
 
                 QString text = (ms < 1000)
                     ? QString("%1 loaded successfully in %2 ms").arg(filePath).arg(ms)

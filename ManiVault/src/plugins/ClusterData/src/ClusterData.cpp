@@ -120,7 +120,7 @@ std::int32_t ClusterData::getClusterIndex(const QString& clusterName) const
 void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
-    return;
+    
     const auto dataMap = variantMap["Data"].toMap();
 
     variantMapMustContain(dataMap, "IndicesRawData");
@@ -130,6 +130,8 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
     QVector<std::uint32_t> packedIndices;
 
     packedIndices.resize(dataMap["NumberOfIndices"].toInt());
+
+    return;
 
     //qDebug() << "Deserializing ClusterData from variant map";
     //qDebug() << dataMap;
@@ -328,7 +330,7 @@ void Clusters::fromVariantMap(const QVariantMap& variantMap)
 
     getRawData<ClusterData>()->fromVariantMap(variantMap);
 
-    events().notifyDatasetDataChanged(this);
+    //events().notifyDatasetDataChanged(this);
 }
 
 QVariantMap Clusters::toVariantMap() const

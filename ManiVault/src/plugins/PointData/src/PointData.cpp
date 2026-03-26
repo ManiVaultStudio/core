@@ -132,26 +132,8 @@ void PointData::setValueAt(const std::size_t index, const float newValue)
         _variantOfVectors);
 }
 
-#include <windows.h>
-#include <psapi.h>
-
-SIZE_T getMemoryUsageBytes()
-{
-    PROCESS_MEMORY_COUNTERS_EX pmc;
-
-    if (GetProcessMemoryInfo(GetCurrentProcess(),
-        reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&pmc),
-        sizeof(pmc)))
-    {
-        return pmc.WorkingSetSize; // physical memory (RAM)
-    }
-
-    return 0;
-}
-
 void PointData::fromVariantMap(const QVariantMap& variantMap)
 {
-    qDebug() << __FUNCTION__ << "Memory usage before loading data (MB):" << getMemoryUsageBytes() / (1024 * 1024);
     variantMapMustContain(variantMap, "Data");
     variantMapMustContain(variantMap, "NumberOfPoints");
     variantMapMustContain(variantMap, "NumberOfDimensions");
@@ -164,8 +146,9 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
     const auto rawData              = data["Raw"].toMap();
 
     bool isDense = true;
+
     if (variantMap.contains("Dense"))
-        isDense = variantMap["Dense"].toBool();;
+        isDense = variantMap["Dense"].toBool();
 
     _isDense = isDense;
     _numDimensions = numberOfDimensions;
@@ -175,11 +158,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
         setElementTypeSpecifier(elementTypeIndex);
         resizeVector(numberOfElements);
 
-        QElapsedTimer rawDataTimer;
-        rawDataTimer.start();
-
         populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr(), ConcurrencyMode::Parallel);
-        qDebug() << __FUNCTION__ << "Elapsed time for populating raw data (ms):" << rawDataTimer.elapsed();
     }
     else
     {
@@ -208,8 +187,6 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
         qDebug() << "Loaded sparse data with" << _numRows << "points and" << _numDimensions << "dimensions.";
     }
-
-    qDebug() << __FUNCTION__ << "Memory usage after loading data (MB):" << getMemoryUsageBytes() / (1024 * 1024);
 }
 
 QVariantMap PointData::toVariantMap() const
@@ -1030,7 +1007,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
         populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data(), ConcurrencyMode::Parallel);
     }
-    /*
+    
     // Load dimension names
     QStringList dimensionNameList;
     std::vector<QString> dimensionNames;
@@ -1083,11 +1060,10 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     if (variantMap.contains("Dimensions")) {
         _dimensionsPickerAction->fromParentVariantMap(variantMap);
     }
-    */
 
     //events().notifyDatasetDataChanged(this);
-    /*
-    // Handle saved selection
+
+	// Handle saved selection
     if (isFull()) {
         const auto& selectionMap = variantMap["Selection"].toMap();
 
@@ -1103,7 +1079,6 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
             //events().notifyDatasetDataSelectionChanged(this);
         }
     }
-*/
 }
 
 QVariantMap Points::toVariantMap() const

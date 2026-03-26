@@ -23,6 +23,38 @@ enum class ConcurrencyMode
     Parallel
 };
 
+struct EncodeBlockJob
+{
+    std::uint64_t _offset = 0;
+    std::uint64_t _size = 0;
+    QByteArray _rawData;
+};
+
+struct EncodeBlockResult
+{
+    std::uint64_t   _offset = 0;
+    std::uint64_t   _size = 0;
+    QByteArray      _encodedData;
+    QString         _error;
+    QVariantMap     _block;
+};
+
+struct DecodeBlockJob
+{
+    quint64 _offset = 0;
+    quint64 _size = 0;
+    QString _uri;
+    QString _encodedData;
+};
+
+struct DecodeBlockResult
+{
+    std::uint64_t   _offset = 0;
+    std::uint64_t   _size = 0;
+    QByteArray      _decodedData;
+    QString         _error;
+};
+
 /**
  * Save raw data to binary file on disk
  * @param bytes Pointer to input buffer

@@ -16,37 +16,6 @@
 
 namespace mv::util {
 
-struct EncodeBlockJob
-{
-    std::uint64_t _offset = 0;
-    std::uint64_t _size = 0;
-    QByteArray _rawData;
-};
-
-struct EncodeBlockResult
-{
-    std::uint64_t _offset = 0;
-    std::uint64_t _size = 0;
-    QByteArray _encodedData;
-    QString _error;
-    QVariantMap _block;
-};
-
-struct DecodeBlockJob
-{
-    quint64 _offset = 0;
-    quint64 _size = 0;
-    QString _uri;
-    QString _encodedData;
-};
-struct DecodeBlockResult
-{
-    std::uint64_t _offset = 0;
-    std::uint64_t _size = 0;
-    QByteArray _decodedData;
-    QString _error;
-};
-
 void saveRawDataToBinaryFile(const char* bytes, const std::uint64_t& numberOfBytes, const QString& filePath)
 {
     // Exit prematurely if the serialization process was aborted
@@ -325,12 +294,13 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
         QVector<DecodeBlockResult> decodeBlockResults;
         decodeBlockResults.resize(decodeBlockJobs.size());
 
-        static QThreadPool pool;
-        pool.setMaxThreadCount(std::max(1, QThread::idealThreadCount() - 1));
+        static QThreadPool decodeThreadPool;
+
+        decodeThreadPool.setMaxThreadCount(std::max(1, QThread::idealThreadCount() - 1));
 
         if (concurrencyMode == ConcurrencyMode::Parallel) {
             decodeBlockResults = QtConcurrent::blockingMapped<QVector<DecodeBlockResult>>(
-                &pool,
+                &decodeThreadPool,
                 decodeBlockJobs,
                 [bytes, createCodec](const DecodeBlockJob& job) {
                     return decodeBlock(job, bytes, createCodec);

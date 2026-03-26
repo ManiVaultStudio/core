@@ -59,7 +59,6 @@ set(PRIVATE_WORKSPACE_MANAGER_HEADERS
     src/private/DockWidget.h
     src/private/DockAreaTitleBar.h
     src/private/WorkspaceSettingsDialog.h
-    src/private/WorkspaceLoadRecipeBuilder.h
 )
 
 set(PRIVATE_WORKSPACE_MANAGER_SOURCES
@@ -72,7 +71,6 @@ set(PRIVATE_WORKSPACE_MANAGER_SOURCES
     src/private/DockWidget.cpp
     src/private/DockAreaTitleBar.cpp
     src/private/WorkspaceSettingsDialog.cpp
-    src/private/WorkspaceLoadRecipeBuilder.cpp
 )
 
 set(PRIVATE_WORKSPACE_MANAGER_FILES
@@ -118,6 +116,18 @@ set(PRIVATE_DATA_MANAGER_FILES
 
 set(PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS
     src/private/DataHierarchyManager.h
+)
+
+set(PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES
+    src/private/DataHierarchyManager.cpp
+)
+
+set(PRIVATE_DATA_HIERARCHY_MANAGER_FILES
+    ${PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS}
+    ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
+)
+
+set(PRIVATE_SERIALIZATION_HEADERS
     src/private/DataHierarchyLoadWorkflow.h
     src/private/DataHierarchyLoadRecipeBuilder.h
     src/private/DatasetLoadRecipeFactory.h
@@ -125,13 +135,17 @@ set(PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS
     src/private/DatasetLoadRecipeBuilder.h
     src/private/DatasetsLoadContext.h
     src/private/ProjectLoadContext.h
+    src/private/OpenProjectWorkflow.h
+    src/private/ProjectLoadRecipeBuilder.h
     src/private/WorkspaceLoadContext.h
     src/private/DataHierarchyLoadContext.h
     src/private/DatasetLoadContext.h
+    src/private/SerializationScheduler.h
+    src/private/WorkspaceLoadRecipeBuilder.h
+    src/private/DecodeRequestState.h
 )
 
-set(PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES
-    src/private/DataHierarchyManager.cpp
+set(PRIVATE_SERIALIZATION_SOURCES
     src/private/DataHierarchyLoadWorkflow.cpp
     src/private/DataHierarchyLoadRecipeBuilder.cpp
     src/private/DatasetLoadRecipeFactory.cpp
@@ -139,14 +153,19 @@ set(PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES
     src/private/DatasetLoadRecipeBuilder.cpp
     src/private/DatasetsLoadContext.cpp
     src/private/ProjectLoadContext.cpp
+    src/private/OpenProjectWorkflow.cpp
+    src/private/ProjectLoadRecipeBuilder.cpp
     src/private/WorkspaceLoadContext.cpp
     src/private/DataHierarchyLoadContext.cpp
     src/private/DatasetLoadContext.cpp
+    src/private/SerializationScheduler.cpp
+    src/private/WorkspaceLoadRecipeBuilder.cpp
+    src/private/DecodeRequestState.cpp
 )
 
-set(PRIVATE_DATA_HIERARCHY_MANAGER_FILES
-    ${PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS}
-    ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
+set(PRIVATE_SERIALIZATION_FILES
+    ${PRIVATE_SERIALIZATION_HEADERS}
+    ${PRIVATE_SERIALIZATION_SOURCES}
 )
 
 set(PRIVATE_EVENT_MANAGER_HEADERS
@@ -180,8 +199,6 @@ set(PRIVATE_PROJECT_MANAGER_HEADERS
     src/private/ProjectWidget.h
     src/private/ProjectSettingsDialog.h
     src/private/NewProjectDialog.h
-    src/private/OpenProjectWorkflow.h
-    src/private/ProjectLoadRecipeBuilder.h
 )
 
 set(PRIVATE_PROJECT_MANAGER_SOURCES
@@ -189,8 +206,6 @@ set(PRIVATE_PROJECT_MANAGER_SOURCES
     src/private/ProjectWidget.cpp
     src/private/ProjectSettingsDialog.cpp
     src/private/NewProjectDialog.cpp
-    src/private/OpenProjectWorkflow.cpp
-    src/private/ProjectLoadRecipeBuilder.cpp
 )
 
 set(PRIVATE_PROJECT_MANAGER_FILES
@@ -292,6 +307,7 @@ set(PRIVATE_MANAGER_HEADERS
     ${PRIVATE_ERROR_MANAGER_HEADERS}
     ${PRIVATE_THEME_MANAGER_HEADERS}
     ${PRIVATE_SCRIPTING_MANAGER_HEADERS}
+    ${PRIVATE_SERIALIZATION_HEADERS}
 )
 
 set(PRIVATE_MANAGER_SOURCES
@@ -309,6 +325,7 @@ set(PRIVATE_MANAGER_SOURCES
     ${PRIVATE_ERROR_MANAGER_SOURCES}
     ${PRIVATE_THEME_MANAGER_SOURCES}
     ${PRIVATE_SCRIPTING_MANAGER_SOURCES}
+    ${PRIVATE_SERIALIZATION_SOURCES}
 )
 
 set(PRIVATE_MANAGER_FILES
@@ -511,3 +528,4 @@ source_group(Pages\\StartPage FILES ${PRIVATE_START_PAGE_FILES})
 source_group(Pages\\Learning FILES ${PRIVATE_LEARNING_PAGE_FILES})
 source_group(Miscellaneous FILES ${PRIVATE_MISCELLANEOUS_FILES})
 source_group(Actions FILES ${PRIVATE_ACTIONS_FILES})
+source_group(Serialization FILES ${PRIVATE_SERIALIZATION_FILES})
