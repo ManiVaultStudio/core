@@ -103,6 +103,8 @@ Group OpenProjectWorkflow::makeRecipe()
 
 void OpenProjectWorkflow::setupOpenProject(OpenProjectContext& ctx)
 {
+    _timer.start();
+
     _loadTask.setRunning();
 
     _setupTask.setRunning();
@@ -193,4 +195,6 @@ void OpenProjectWorkflow::finalizeOpenProject(OpenProjectContext& ctx)
     Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
 
     _loadTask.setFinished();
+
+    _duration = _timer.elapsed();
 }

@@ -40,6 +40,8 @@ public:
 
     void setInput(QString filePath, bool loadWorkspace, bool importDataOnly, bool disableReadOnly);
 
+    quint64 getDuration() const { return _duration; }
+
 signals:
     void finished(bool success, const QString& errorMessage);
 
@@ -73,4 +75,7 @@ private:
     mv::Task                    _loadWorkspaceJsonTask;
     ProjectLoadContextStorage   _projectLoadContextStorage;
     ProjectLoadRecipeBuilder    _projectLoadRecipeBuilder;
+    QElapsedTimer               _timer;
+    quint64                     _duration;
+
 };

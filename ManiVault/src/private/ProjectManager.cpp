@@ -378,21 +378,24 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
         workflow->setInput(filePath, loadWorkspace, importDataOnly, false);
 
-        connect(workflow.get(), &OpenProjectWorkflow::finished, this,
-            [this, workflowPtr = workflow.get()](bool success, const QString& error) {
-                Q_UNUSED(workflowPtr);
+        connect(workflow.get(), &OpenProjectWorkflow::finished, this, [this, filePath, workflowPtr = workflow.get()](bool success, const QString& error) {
+            setState(State::Idle);
 
+            if (success) {
                 setState(State::Idle);
+                emit projectOpened(*_project);
 
-                if (success) {
-                    setState(State::Idle);
-                    emit projectOpened(*_project);
+                auto ms = workflowPtr->getDuration();
 
-                    help().addNotification("Load", "Project loaded successfully");
-                } else {
-                    help().addNotification("Error", "Unable to load ManiVault project: " + error);
-                }
-            });
+                QString text = (ms < 1000)
+                    ? QString("%1 loaded successfully in %2 ms").arg(filePath).arg(ms)
+                    : QString("%1 loaded successfully in %2 s").arg(filePath).arg(ms / 1000.0, 0, 'f', 1);
+
+                help().addNotification("Project loaded", text);
+            } else {
+                help().addNotification("Error", "Unable to load ManiVault project: " + error);
+            }
+        });
 
         _activeOpenWorkflow = std::move(workflow);
         _activeOpenWorkflow->start();
