@@ -81,7 +81,7 @@ void DataHierarchyLoadRecipeBuilder::enumerateDatasets(DataHierarchyLoadContext&
     try {
         qDebug() << __FUNCTION__;
 
-        dataHierarchyLoadContext._datasetEntries.clear();
+        dataHierarchyLoadContext._datasetLoadContexts.clear();
 
         const std::function<void(const QVariantMap&)> enumerate = [&](const QVariantMap& map) {
             for (const auto& variant : map.values()) {
@@ -91,15 +91,15 @@ void DataHierarchyLoadRecipeBuilder::enumerateDatasets(DataHierarchyLoadContext&
 
                 const auto datasetMap = itemMap["Dataset"].toMap();
 
-                DataHierarchyLoadContext::DatasetEntry entry;
+                DatasetLoadContext datasetLoadContext;
 
-                entry._datasetMap   = datasetMap;
-                entry._datasetId    = datasetMap["ID"].toString();
-                entry._datasetName  = datasetMap["Name"].toString();
-                entry._pluginKind   = datasetMap["PluginKind"].toString();
-                entry._isDerived    = datasetMap["Derived"].toBool() || !datasetMap["ProxyMembers"].toStringList().isEmpty();
+                datasetLoadContext._datasetMap   = datasetMap;
+                datasetLoadContext._datasetId    = datasetMap["ID"].toString();
+                datasetLoadContext._datasetName  = datasetMap["Name"].toString();
+                datasetLoadContext._pluginKind   = datasetMap["PluginKind"].toString();
+                datasetLoadContext._isDerived    = datasetMap["Derived"].toBool() || !datasetMap["ProxyMembers"].toStringList().isEmpty();
 
-                dataHierarchyLoadContext._datasetEntries.push_back(std::move(entry));
+                dataHierarchyLoadContext._datasetLoadContexts.push_back(std::move(datasetLoadContext));
             }
         };
 
@@ -111,18 +111,18 @@ void DataHierarchyLoadRecipeBuilder::enumerateDatasets(DataHierarchyLoadContext&
     }
 }
 
-QVector<DataHierarchyLoadContext::DatasetEntry> DataHierarchyLoadRecipeBuilder::computeLoadOrder(DataHierarchyLoadContext& dataHierarchyLoadContext)
+DatasetLoadContexts DataHierarchyLoadRecipeBuilder::computeLoadOrder(DataHierarchyLoadContext& dataHierarchyLoadContext)
 {
     try {
         qDebug() << __FUNCTION__;
 
-        QVector<DataHierarchyLoadContext::DatasetEntry> ordered = dataHierarchyLoadContext._datasetEntries;
+        DatasetLoadContexts ordered = dataHierarchyLoadContext._datasetLoadContexts;
 
         // Maintain hierarchy item order within partitions, matching old behavior
         std::reverse(ordered.begin(), ordered.end());
 
         // First load non-derived datasets, then derived/proxy datasets
-        std::stable_partition(ordered.begin(), ordered.end(), [](const DataHierarchyLoadContext::DatasetEntry& entry) {
+        std::stable_partition(ordered.begin(), ordered.end(), [](const DatasetLoadContext& entry) {
             return !entry._isDerived;
         });
 
@@ -174,12 +174,12 @@ Dataset<> DataHierarchyLoadRecipeBuilder::loadDataHierarchyItem(DataHierarchyLoa
     try {
         qDebug() << __FUNCTION__;
 
-        const auto datasetMap = itemMap["Dataset"].toMap();
-        const auto datasetId = datasetMap["ID"].toString();
-        const auto pluginKind = datasetMap["PluginKind"].toString();
-        const auto isDerived = datasetMap["Derived"].toBool();
-        const auto isFull = datasetMap["Full"].toBool();
-        const auto sourceDatasetID = datasetMap["SourceDatasetID"].toString();
+        const auto datasetMap       = itemMap["Dataset"].toMap();
+        const auto datasetId        = datasetMap["ID"].toString();
+        const auto pluginKind       = datasetMap["PluginKind"].toString();
+        const auto isDerived        = datasetMap["Derived"].toBool();
+        const auto isFull           = datasetMap["Full"].toBool();
+        const auto sourceDatasetID  = datasetMap["SourceDatasetID"].toString();
 
         Dataset<> loadedDataset;
 
@@ -194,14 +194,14 @@ Dataset<> DataHierarchyLoadRecipeBuilder::loadDataHierarchyItem(DataHierarchyLoa
         if (isDerived)
             loadedDataset->setSourceDataset(sourceDatasetID);
 
-        auto& datasetEntries = dataHierarchyLoadContext._datasetEntries;
+        auto& datasetEntries = dataHierarchyLoadContext._datasetLoadContexts;
 
-        auto it = std::find_if(datasetEntries.begin(), datasetEntries.end(), [&datasetId](const DataHierarchyLoadContext::DatasetEntry& entry) {
+        auto it = std::find_if(datasetEntries.begin(), datasetEntries.end(), [&datasetId](const DatasetLoadContext& entry) {
             return entry._datasetId == datasetId;
         });
 
         if (it != datasetEntries.end()) {
-            DataHierarchyLoadContext::DatasetEntry& entry = *it;
+            DatasetLoadContext& entry = *it;
 
             entry._dataset = loadedDataset;
         }
@@ -221,7 +221,7 @@ Dataset<> DataHierarchyLoadRecipeBuilder::loadDataHierarchyItem(DataHierarchyLoa
 
 Group DataHierarchyLoadRecipeBuilder::makeDatasetLoadStage(DataHierarchyLoadContextStorage& dataHierarchyLoadContextStorage)
 {
-    qDebug() << "Making dataset load stage for" << dataHierarchyLoadContextStorage->_datasetEntries.size() << "datasets";
+    qDebug() << "Making dataset load stage for" << dataHierarchyLoadContextStorage->_datasetLoadContexts.size() << "datasets";
     return {};
     return Group{
         QThreadFunctionTask<void>([this, &dataHierarchyLoadContextStorage](QThreadFunction<void>& task) {

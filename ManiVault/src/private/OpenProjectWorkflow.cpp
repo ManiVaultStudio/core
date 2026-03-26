@@ -87,7 +87,7 @@ Group OpenProjectWorkflow::makeRecipe()
                 context.error = QString::fromUtf8(e.what());
             }
         }),
-        _projectLoadRecipeBuilder.makeRecipe(ctx, _projectLoadContextStorage),
+        _projectLoadRecipeBuilder.makeRecipe(_filePath, _projectLoadContextStorage),
         QSyncTask([this, &ctx] {
             auto& context = *ctx;
 

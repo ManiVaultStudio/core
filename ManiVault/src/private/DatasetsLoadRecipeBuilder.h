@@ -4,26 +4,13 @@
 
 #pragma once
 
+#include "DatasetLoadRecipeBuilder.h"
+#include "DatasetsLoadContext.h"
+#include "DatasetLoadContext.h"
+
 struct ProjectLoadContext;
 
 using ProjectLoadContextStorage = QtTaskTree::Storage<ProjectLoadContext>;
-
-struct DatasetsLoadContext
-{
-    struct DatasetEntry
-    {
-        QVariantMap _datasetMap;            /** The variant map containing the dataset data */
-        QString     _datasetId;             /** The ID of the dataset */
-        QString     _datasetName;           /** The name of the dataset */
-        QString     _pluginKind;            /** The plugin kind of the dataset */
-        bool        _isDerived = false;     /** Whether the dataset is derived */
-    };
-
-    QString                 _jsonFilePath;              /** The file path of the JSON file containing the data hierarchy structure and dataset data */
-    QVariantMap             _dataHierarchyVariantMap;   /** The variant map containing the data hierarchy structure and dataset data */
-    QString                 _error;                     /** Error message, if any error occurs during the loading process */
-    QVector<DatasetEntry>   _datasetEntries;            /** The list of dataset entries extracted from the hierarchy map, to be loaded in the correct order based on their dependencies */
-};
 
 class DatasetsLoadRecipeBuilder
 {
@@ -37,13 +24,24 @@ public:
      * @param projectLoadContextStorage The storage containing the project load context, which includes the datasets load context
      * @return A QtTaskTree::Group representing the recipe for loading the data hierarchy
      */
-    QtTaskTree::Group makeRecipe(ProjectLoadContextStorage& projectLoadContextStorage);
+    QtTaskTree::Group makeRecipe(const ProjectLoadContextStorage& projectLoadContextStorage);
 
 private:
 
-    /**
-     * Collect the data hierarchy items from the data hierarchy variant map
-     * @return Vector of pointers to the collected data hierarchy items
+	/**
+     * Load the datasets based on the provided dataset load contexts, ensuring that non-derived datasets are loaded before derived datasets
+     * @param datasetLoadContexts The dataset load contexts for the non-derived datasets to be loaded
      */
-    QVector<mv::DataHierarchyItem*> collectDatasetItems() const;
+    void loadNonDerivedDatasets(DatasetLoadContexts& datasetLoadContexts);
+
+    /**
+     * Load the derived datasets based on the provided dataset load contexts, ensuring that parent datasets are loaded before their children
+     * @param datasetLoadContexts The dataset load contexts for the derived datasets to be loaded
+     */
+    void loadDerivedDatasets(DatasetLoadContexts& datasetLoadContexts);
+
+    QtTaskTree::Group makeDatasetJobsRecipe(const ProjectLoadContextStorage& projectLoadContextStorage);
+
+private:
+    DatasetLoadRecipeBuilder    _datasetLoadRecipeBuilder;      /** The builder for creating the recipe for loading individual datasets, used in the data hierarchy loading recipe */
 };

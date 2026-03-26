@@ -4,19 +4,11 @@
 
 #pragma once
 
-#include "WorkspaceManager.h"
+#include "WorkspaceLoadContext.h"
 
 struct ProjectLoadContext;
 
 using ProjectLoadContextStorage = QtTaskTree::Storage<ProjectLoadContext>;
-
-/** Context for workspace loading */
-struct WorkspaceLoadContext
-{
-    QString         _jsonFilePath;          /** Path to the workspace JSON file */
-    QVariantMap     _workspaceVariantMap;   /** Variant map containing the workspace data */
-    QString         _error;                 /** Error message, if any error occurs during the loading process */
-};
 
 /**
  * Builder for workspace load recipe

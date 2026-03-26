@@ -10,18 +10,18 @@
 
 using namespace QtTaskTree;
 
-Group DatasetLoadRecipeBuilder::makeRecipe(mv::DataHierarchyItem& datasetItem)
+Group DatasetLoadRecipeBuilder::makeRecipe(const DatasetLoadContext& datasetLoadContext)
 {
     return Group{
-        QSyncTask([this, &datasetItem] {
-            loadDataset(datasetItem);
+        QSyncTask([this, &datasetLoadContext] {
+            loadDataset(datasetLoadContext);
         })
     };
 }
 
-void DatasetLoadRecipeBuilder::loadDataset(mv::DataHierarchyItem& datasetItem)
+void DatasetLoadRecipeBuilder::loadDataset(const DatasetLoadContext& datasetLoadContext)
 {
-    qDebug() << "Loading dataset:" << datasetItem.text();
+    qDebug() << "Loading dataset:" << datasetLoadContext._datasetName;
 
     // Put your actual dataset loading logic here.
     // Example:
@@ -29,5 +29,5 @@ void DatasetLoadRecipeBuilder::loadDataset(mv::DataHierarchyItem& datasetItem)
     // auto& datasetAction = datasetItem.getDatasetAction();
     // datasetAction.load();
 
-    qDebug() << "Finished loading dataset:" << datasetItem.text();
+    qDebug() << "Finished loading dataset:" << datasetLoadContext._datasetName;
 }

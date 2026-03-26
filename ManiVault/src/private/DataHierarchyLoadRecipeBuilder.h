@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include "DataHierarchyLoadContext.h"
+#include "DatasetLoadContext.h"
+
 namespace mv
 {
     /* Forward declaration of DataHierarchyManager to avoid circular dependency with DataHierarchyLoadRecipeBuilder */
@@ -13,29 +16,6 @@ namespace mv
 struct ProjectLoadContext;
 
 using ProjectLoadContextStorage = QtTaskTree::Storage<ProjectLoadContext>;
-
-/** Context for loading the data hierarchy, containing the hierarchy map and dataset entries to be loaded, as well as any error message if an error occurs during the loading process */
-struct DataHierarchyLoadContext
-{
-    /** Represents an entry for a dataset to be loaded, containing the dataset data and metadata extracted from the hierarchy map, as well as whether the dataset is derived or not (to determine load order) */
-    struct DatasetEntry
-    {
-	    mv::Dataset<>   _dataset;               /** The dataset to be loaded, which may or may not have its dataset pointer set yet (if the dataset is not yet loaded) */
-        QVariantMap     _datasetMap;            /** The variant map containing the dataset data */
-        QString         _datasetId;             /** The ID of the dataset */
-        QString         _datasetName;           /** The name of the dataset */
-        QString         _pluginKind;            /** The plugin kind of the dataset */
-        bool            _isDerived = false;     /** Whether the dataset is derived */
-    };
-
-    QString                 _jsonFilePath;              /** The file path of the JSON file containing the data hierarchy structure and dataset data */
-    QVariantMap             _dataHierarchyVariantMap;   /** The variant map containing the data hierarchy structure and dataset data */
-    QString                 _error;                     /** Error message, if any error occurs during the loading process */
-    QVector<DatasetEntry>   _datasetEntries;            /** The list of dataset entries extracted from the hierarchy map, to be loaded in the correct order based on their dependencies */
-};
-
-/** Storage for data hierarchy load context */
-using DataHierarchyLoadContextStorage = QtTaskTree::Storage<DataHierarchyLoadContext>;
 
 /**
  * Builder for creating a recipe to load the data hierarchy based on the data in a DataHierarchyLoadContextStorage
@@ -54,8 +34,6 @@ public:
      */
     QtTaskTree::Group makeRecipe(ProjectLoadContextStorage& projectLoadContextStorage);
 
-private:
-
     /**
      * Load the project JSON file and populate the project load context with the data from the JSON file
      * @param dataHierarchyLoadContext The context to populate with the project load data
@@ -73,7 +51,7 @@ private:
      * @param dataHierarchyLoadContext The context containing the dataset entries to compute the load order for
      * @return A vector of dataset entries in the order they should be loaded
      */
-    QVector<DataHierarchyLoadContext::DatasetEntry> computeLoadOrder(DataHierarchyLoadContext& dataHierarchyLoadContext);
+    DatasetLoadContexts computeLoadOrder(DataHierarchyLoadContext& dataHierarchyLoadContext);
 
     /**
      * Populate the data hierarchy based on the hierarchy map in \p dataHierarchyLoadContext

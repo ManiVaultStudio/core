@@ -6,26 +6,24 @@
 
 #include <QtTaskTree>
 
+#include "DatasetLoadContext.h"
+
 namespace mv
 {
     class DataHierarchyItem;
 }
 
-/**
- * @brief Builder for creating a recipe to load a dataset based on a data hierarchy item
- */
 class DatasetLoadRecipeBuilder
 {
 public:
 
-    /** Construct builder */
-    QtTaskTree::Group makeRecipe(mv::DataHierarchyItem& datasetItem);
+    QtTaskTree::Group makeRecipe(const DatasetLoadContext& datasetLoadContext);
 
 private:
 
     /**
      * Load the dataset based on the provided data hierarchy item
-     * @param datasetItem The data hierarchy item representing the dataset to be loaded
+     * @param datasetLoadContext The context representing the dataset to be loaded
      */
-    void loadDataset(mv::DataHierarchyItem& datasetItem);
+    void loadDataset(const DatasetLoadContext& datasetLoadContext);
 };
