@@ -55,7 +55,7 @@ CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64
  * @param bytes Output buffer to which the data is copied
  * @param concurrencyMode Whether to decode the blocks sequentially or in parallel (defaults to sequential)
  */
-CORE_EXPORT void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, ConcurrencyMode concurrencyMode = ConcurrencyMode::Sequential);
+CORE_EXPORT void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, ConcurrencyMode concurrencyMode = ConcurrencyMode::Parallel);
 
 /**
  * Raises an exception if an item with key is not found in a variant map

@@ -10,6 +10,7 @@ using namespace QtTaskTree;
 Group DatasetsLoadRecipeBuilder::makeRecipe(const ProjectLoadContextStorage& projectLoadContextStorage)
 {
     return Group{
+    	parallel,
         QSyncTask([this, projectLoadContextStorage] {
             try {
                 loadDatasets(projectLoadContextStorage, false);
@@ -31,21 +32,60 @@ Group DatasetsLoadRecipeBuilder::makeRecipe(const ProjectLoadContextStorage& pro
 
 void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& projectLoadContextStorage, bool derived)
 {
-    if (derived)
-        qDebug() << __FUNCTION__ << "(derived datasets)";
-    else
-        qDebug() << __FUNCTION__ << "(non-derived datasets)";
+    qDebug() << __FUNCTION__ << (derived ? "(derived datasets)" : "(non-derived datasets)");
 
     auto& dataHierarchyLoadContext = projectLoadContextStorage->_dataHierarchyLoadContext;
+    const auto& contexts = derived
+        ? dataHierarchyLoadContext._derivedDatasetLoadContexts
+        : dataHierarchyLoadContext._nonDerivedDatasetLoadContexts;
 
-    const auto& contexts = derived ? dataHierarchyLoadContext._derivedDatasetLoadContexts : dataHierarchyLoadContext._nonDerivedDatasetLoadContexts;
+    QList<DatasetLoadContext*> workItems;
+    workItems.reserve(contexts.size());
 
     for (const auto& context : contexts) {
-        auto nonConstContext = const_cast<DatasetLoadContext*>(context);
+        auto* nonConstContext = const_cast<DatasetLoadContext*>(context);
+
+        if (!nonConstContext)
+            throw std::runtime_error("Dataset load context is null.");
 
         if (!nonConstContext->_dataset.isValid())
             throw std::runtime_error("Dataset is invalid.");
 
-        nonConstContext->_dataset->fromVariantMap(context->_datasetMap);
+        workItems.append(nonConstContext);
     }
+
+    const auto concurrencyMode = mv::util::ConcurrencyMode::Parallel;
+
+    if (concurrencyMode == mv::util::ConcurrencyMode::Parallel) {
+        QThreadPool pool;
+        pool.setMaxThreadCount(std::max(1, QThread::idealThreadCount() - 1));
+
+        std::atomic<bool> failed = false;
+        QString errorString;
+        QMutex errorMutex;
+
+        QtConcurrent::blockingMap(&pool, workItems, [&](DatasetLoadContext* ctx) {
+            if (failed.load(std::memory_order_relaxed))
+                return;
+
+            try {
+                ctx->_dataset->fromVariantMap(ctx->_datasetMap);
+            }
+            catch (const std::exception& e) {
+                failed.store(true, std::memory_order_relaxed);
+
+                QMutexLocker locker(&errorMutex);
+                if (errorString.isEmpty())
+                    errorString = QString::fromUtf8(e.what());
+            }
+        });
+    }
+    else {
+        for (auto& workItem : workItems) {
+            workItem->_dataset->fromVariantMap(workItem->_datasetMap);
+        }
+    }
+
+    //if (!errorString.isEmpty())
+    //    throw std::runtime_error(errorString.toUtf8().constData());
 }

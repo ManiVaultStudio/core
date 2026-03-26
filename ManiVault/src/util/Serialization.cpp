@@ -274,7 +274,7 @@ static DecodeBlockResult decodeBlock(const DecodeBlockJob& job, char* bytes, con
     return result;
 }
 
-void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, ConcurrencyMode concurrencyMode /*= ConcurrencyMode::Sequential*/)
+void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, ConcurrencyMode concurrencyMode /*= ConcurrencyMode::Parallel*/)
 {
     try {
         variantMapMustContain(variantMap, "BlockSize");
@@ -325,8 +325,12 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
         QVector<DecodeBlockResult> decodeBlockResults;
         decodeBlockResults.resize(decodeBlockJobs.size());
 
+        static QThreadPool pool;
+        pool.setMaxThreadCount(std::max(1, QThread::idealThreadCount() - 1));
+
         if (concurrencyMode == ConcurrencyMode::Parallel) {
             decodeBlockResults = QtConcurrent::blockingMapped<QVector<DecodeBlockResult>>(
+                &pool,
                 decodeBlockJobs,
                 [bytes, createCodec](const DecodeBlockJob& job) {
                     return decodeBlock(job, bytes, createCodec);

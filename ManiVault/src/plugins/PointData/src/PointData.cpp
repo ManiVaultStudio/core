@@ -178,7 +178,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
         QElapsedTimer rawDataTimer;
         rawDataTimer.start();
 
-        populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr(), ConcurrencyMode::Sequential);
+        populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr(), ConcurrencyMode::Parallel);
         qDebug() << __FUNCTION__ << "Elapsed time for populating raw data (ms):" << rawDataTimer.elapsed();
     }
     else
@@ -189,7 +189,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
         std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
 
-        populateDataBufferFromVariantMap(rawData, bytes.data(), ConcurrencyMode::Sequential);
+        populateDataBufferFromVariantMap(rawData, bytes.data(), ConcurrencyMode::Parallel);
         _numRows = static_cast<unsigned int>(numberOfPoints); // FIXME should be redundant
 
         size_t offset = 0;
@@ -1002,9 +1002,6 @@ void Points::selectInvert()
 
 void Points::fromVariantMap(const QVariantMap& variantMap)
 {
-    QElapsedTimer elapsedTimer;
-    elapsedTimer.start();
-
     DatasetImpl::fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "DimensionNames");
@@ -1031,14 +1028,9 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     
         indices.resize(indicesMap["Count"].toInt());
 
-        QElapsedTimer indicesTimer;
-        indicesTimer.start();
-
-        populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
-
-        qDebug() << __FUNCTION__ << "Elapsed time for indices (ms):" << indicesTimer.elapsed();
+        populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data(), ConcurrencyMode::Parallel);
     }
-
+    /*
     // Load dimension names
     QStringList dimensionNameList;
     std::vector<QString> dimensionNames;
@@ -1059,8 +1051,6 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         dimensionsTimer.start();
 
         populateDataBufferFromVariantMap(variantMap["DimensionNames"].toMap(), (char*)dimensionsByteArray.data());
-
-        qDebug() << __FUNCTION__ << "Elapsed time for copying dimension names to byte array (ms):" << dimensionsTimer.elapsed();
 
         // Open input data stream
         QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::ReadOnly);
@@ -1093,8 +1083,9 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     if (variantMap.contains("Dimensions")) {
         _dimensionsPickerAction->fromParentVariantMap(variantMap);
     }
+    */
 
-    events().notifyDatasetDataChanged(this);
+    //events().notifyDatasetDataChanged(this);
     /*
     // Handle saved selection
     if (isFull()) {
@@ -1113,8 +1104,6 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         }
     }
 */
-    qDebug() << __FUNCTION__ << "Elapsed time (ms):" << elapsedTimer.elapsed();
-    
 }
 
 QVariantMap Points::toVariantMap() const
