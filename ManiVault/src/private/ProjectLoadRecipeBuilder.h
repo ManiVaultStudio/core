@@ -47,7 +47,6 @@ public:
      * @return A QtTaskTree::Group representing the recipe for loading the project
      */
     QtTaskTree::Group makeRecipe(OpenProjectContextStorage& openProjectContextStorage, ProjectLoadContextStorage& projectLoadContextStorage);
-
 private:
     DataHierarchyLoadRecipeBuilder      _dataHierarchyLoadRecipeBuilder;    /** Builder for the data hierarchy load recipe, which is used to create the stage of loading the datasets in the data hierarchy based on the dataset entries in \p dataHierarchyLoadContextStorage */
     DatasetsLoadRecipeBuilder           _datasetsLoadRecipeBuilder;         /** Builder for the datasets load recipe, which is used to create the stage of loading the datasets based on the dataset entries in \p datasetsLoadContextStorage */

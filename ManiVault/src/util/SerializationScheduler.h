@@ -26,5 +26,5 @@ private:
     SerializationScheduler(const SerializationScheduler&) = delete;
     SerializationScheduler& operator=(const SerializationScheduler&) = delete;
 
-    QThreadPool _pool;
+    QThreadPool     _pool;
 };

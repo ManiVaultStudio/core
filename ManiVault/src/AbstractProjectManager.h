@@ -24,6 +24,7 @@
 #include <QFuture>
 
 #include "Task.h"
+#include "ModalTask.h"
 
 namespace mv {
 
@@ -394,6 +395,8 @@ public: // Miscellaneous
     const Task& getProjectDownloadTask() const {
         return _projectDownloadTask;
     }
+
+    virtual ModalTask& getOpenTask() = 0;
 
 protected:
 

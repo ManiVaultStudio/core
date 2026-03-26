@@ -210,6 +210,7 @@ public: // Miscellaneous
      */
     static bool isMvFileName(const QString& name);
 
+    ModalTask& getOpenTask() override { return _openTask; }
 private:
 
     /** Resets the manager and creates a new project */
@@ -278,6 +279,7 @@ private:
     ProjectsTreeModel                           _projectsTreeModel;                 /** Projects tree model */
     QtTaskTree::QSingleTaskTreeRunner           _openRunner;                        /** Task tree runner for opening projects */
     std::unique_ptr<OpenProjectWorkflow>        _activeOpenWorkflow;                /** Active workflow for opening a project */
+    ModalTask                                   _openTask;
 };
 
 }

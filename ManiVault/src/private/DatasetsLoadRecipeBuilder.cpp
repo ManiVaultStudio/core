@@ -1,5 +1,4 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
-// A corresponding LICENSE file is located in the root directory of this source tree 
+// SPDX-License-Identifier: LGPL-3.0-or-later / A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "DatasetsLoadRecipeBuilder.h"
@@ -36,9 +35,9 @@ void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& pr
 
     auto& dataHierarchyLoadContext = projectLoadContextStorage->_dataHierarchyLoadContext;
 
-	const auto& contexts = derived
-        ? dataHierarchyLoadContext._derivedDatasetLoadContexts
-        : dataHierarchyLoadContext._nonDerivedDatasetLoadContexts;
+    auto progress = dataHierarchyLoadContext._progress;
+
+	const auto& contexts = derived ? dataHierarchyLoadContext._derivedDatasetLoadContexts : dataHierarchyLoadContext._nonDerivedDatasetLoadContexts;
 
     QList<DatasetLoadContext*> workItems;
     workItems.reserve(contexts.size());
@@ -70,11 +69,19 @@ void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& pr
                 return;
 
             try {
-                qDebug() << QString("[%1, %2]::begin::fromVariantMap()").arg(ctx->_datasetName, ctx->_pluginKind);
-                {
+                //qDebug() << QString("[%1, %2]::begin::fromVariantMap()").arg(ctx->_datasetName, ctx->_pluginKind);
+                //{
                     ctx->_dataset->fromVariantMap(ctx->_datasetMap);
+                //}
+                //qDebug() << QString("[%1, %2]::end::fromVariantMap()").arg(ctx->_datasetName, ctx->_pluginKind);
+
+                if (progress) {
+                    const int done = progress->_datasetsLoaded.fetch_add(1, std::memory_order_relaxed) + 1;
+
+                    if (progress->_datasetLoadedCallback) {
+                        progress->_datasetLoadedCallback(done, progress->_totalDatasets, ctx->_datasetName);
+                    }
                 }
-                qDebug() << QString("[%1, %2]::end::fromVariantMap()").arg(ctx->_datasetName, ctx->_pluginKind);
             }
             catch (const std::exception& e) {
                 failed.store(true, std::memory_order_relaxed);

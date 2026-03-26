@@ -62,7 +62,8 @@ ProjectManager::ProjectManager(QObject* parent) :
     _pluginManagerAction(nullptr, "Plugin Browser..."),
     _showStartPageAction(nullptr, "Start Page...", true),
     _backToProjectAction(nullptr, "Back to project"),
-    _projectsListModel(StandardItemModel::PopulationMode::AutomaticSynchronous, this)
+    _projectsListModel(StandardItemModel::PopulationMode::AutomaticSynchronous, this),
+    _openTask(this, "OPEN")
 {
     //_newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     //_newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -385,11 +386,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 setState(State::Idle);
                 emit projectOpened(*_project);
 
-                const auto ms = workflowPtr->getDuration();
-
-                QString text = (ms < 1000)
-                    ? QString("%1 loaded successfully in %2 ms").arg(filePath).arg(ms)
-                    : QString("%1 loaded successfully in %2 s").arg(filePath).arg(ms / 1000.0, 0, 'f', 1);
+                const auto ms   = workflowPtr->getDuration();
+                const auto text = (ms < 1000) ? QString("%1 loaded successfully in %2 ms").arg(filePath).arg(ms) : QString("%1 loaded successfully in %2 s").arg(filePath).arg(ms / 1000.0, 0, 'f', 1);
 
                 help().addNotification("Project loaded", text);
             } else {

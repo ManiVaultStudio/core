@@ -5,7 +5,7 @@
 #include "SerializationScheduler.h"
 
 #ifdef _DEBUG
-	#define ZSTD_CODEC_VERBOSE
+	#define SERIALIZATION_SCHEDULER_VERBOSE
 #endif
 
 using namespace mv::util;
@@ -31,17 +31,13 @@ DecodeRequestHandle SerializationScheduler::submitDecode(const QVariantMap& vari
         variantMapMustContain(variantMap, "BlockSize");
         variantMapMustContain(variantMap, "Blocks");
 
-        const auto blocks = variantMap.value("Blocks").toList();
-        const bool hasCodec = variantMap.contains("Codec");
+        const auto blocks       = variantMap.value("Blocks").toList();
+        const bool hasCodec     = variantMap.contains("Codec");
         const QString codecName = hasCodec ? variantMap.value("Codec").toString()
             : QStringLiteral("none");
 
         if (hasCodec && !codecRegistry().isRegistered(codecName)) {
-            throw std::runtime_error(
-                QStringLiteral("Unable to load raw data, codec %1 is not registered")
-                .arg(codecName)
-                .toStdString()
-            );
+            throw std::runtime_error(QStringLiteral("Unable to load raw data, codec %1 is not registered").arg(codecName).toStdString());
         }
 
         auto createCodec = [hasCodec, codecName]() -> std::shared_ptr<BlobCodec> {

@@ -15,21 +15,28 @@ using namespace QtTaskTree;
 OpenProjectWorkflow::OpenProjectWorkflow(mv::ProjectManager& projectManager, QObject* parent) :
 	WorkflowBase<OpenProjectContext>(parent),
 	_projectManager(projectManager),
-    _loadTask(this, "Opening project..."),
     _setupTask(this, "Setting up project..."),
 	_extractJsonTask(this, "Extracting project archive"),
     _loadDatasetsJsonTask(this, "Loading datasets from JSON"),
 	_loadWorkspaceJsonTask(this, "Loading workspace from JSON")
 {
-    _setupTask.setParentTask(&_loadTask);
-    _extractJsonTask.setParentTask(&_loadTask);
-    _loadDatasetsJsonTask.setParentTask(&_loadTask);
-    _loadWorkspaceJsonTask.setParentTask(&_loadTask);
+    //_setupTask.setParentTask(&_loadTask);
+    //_extractJsonTask.setParentTask(&_loadTask);
+    //_loadDatasetsJsonTask.setParentTask(&_loadTask);
+    //_loadWorkspaceJsonTask.setParentTask(&_loadTask);
 
-    _setupTask.setWeight(.1f);
-    _extractJsonTask.setWeight(.1f);
-	_loadDatasetsJsonTask.setWeight(.7f);
-	_loadWorkspaceJsonTask.setWeight(.1f);
+ //   _setupTask.setWeight(.1f);
+ //   _extractJsonTask.setWeight(.1f);
+	//_loadDatasetsJsonTask.setWeight(.7f);
+	//_loadWorkspaceJsonTask.setWeight(.1f);
+
+    QCoreApplication::processEvents();
+
+    //auto task = new ModalTask(nullptr, "================= project...");
+
+    //task->setRunning();
+    //task->setEnabled(true);
+    //task->setProgress(.8f, "//////////");
 }
 
 void OpenProjectWorkflow::setInput(QString filePath, bool loadWorkspace, bool importDataOnly, bool disableReadOnly)
@@ -64,6 +71,7 @@ Group OpenProjectWorkflow::makeRecipe()
 {
 	auto& ctx = contextStorage();
 
+    
 	return Group{
 		ctx,
 
@@ -105,7 +113,7 @@ void OpenProjectWorkflow::setupOpenProject(OpenProjectContext& ctx)
 {
     _timer.start();
 
-    _loadTask.setRunning();
+    mv::projects().getOpenTask().setRunning();
 
     _setupTask.setRunning();
     {
@@ -155,29 +163,6 @@ void OpenProjectWorkflow::extractProjectArchive(OpenProjectContext& ctx)
     _extractJsonTask.setFinished();
 }
 
-void OpenProjectWorkflow::loadProjectJson(OpenProjectContext& ctx)
-{
-    _loadDatasetsJsonTask.setRunning();
-    {
-        projects().fromJsonFile(ctx.projectJsonPath);
-    }
-    _loadDatasetsJsonTask.setFinished();
-}
-
-void OpenProjectWorkflow::loadWorkspaceFromJson(OpenProjectContext& ctx)
-{
-    _loadWorkspaceJsonTask.setRunning();
-	{
-		const QFileInfo workspaceFileInfo(ctx.workspaceJsonPath);
-
-		if (workspaceFileInfo.exists())
-			workspaces().loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
-
-		workspaces().setWorkspaceFilePath("");
-	}
-    _loadWorkspaceJsonTask.setFinished();
-}
-
 void OpenProjectWorkflow::finalizeOpenProject(OpenProjectContext& ctx)
 {
     if (!ctx.error.isEmpty())
@@ -194,7 +179,7 @@ void OpenProjectWorkflow::finalizeOpenProject(OpenProjectContext& ctx)
     //unsetTemporaryDirPath(TemporaryDirType::Open);
     Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
 
-    _loadTask.setFinished();
+    //_loadTask.setFinished();
 
     _duration = _timer.elapsed();
 }
