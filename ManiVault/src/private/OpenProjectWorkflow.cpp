@@ -30,7 +30,7 @@ OpenProjectWorkflow::OpenProjectWorkflow(mv::ProjectManager& projectManager, QOb
 	//_loadDatasetsJsonTask.setWeight(.7f);
 	//_loadWorkspaceJsonTask.setWeight(.1f);
 
-    QCoreApplication::processEvents();
+    //QCoreApplication::processEvents();
 
     //auto task = new ModalTask(nullptr, "================= project...");
 
@@ -113,10 +113,10 @@ void OpenProjectWorkflow::setupOpenProject(OpenProjectContext& ctx)
 {
     _timer.start();
 
-    mv::projects().getOpenTask().setRunning();
+    
 
-    _setupTask.setRunning();
-    {
+    //_setupTask.setRunning();
+    //{
         if (QFileInfo(ctx.filePath).isDir())
             throw std::runtime_error("Project file path may not be a directory");
 
@@ -143,24 +143,24 @@ void OpenProjectWorkflow::setupOpenProject(OpenProjectContext& ctx)
         Application::requestOverrideCursor(Qt::WaitCursor);
 
         _projectManager.getCurrentProject()->setFilePath(ctx.filePath);
-    }
-    _setupTask.setFinished();
+    //}
+    //_setupTask.setFinished();
 }
 
 void OpenProjectWorkflow::extractProjectArchive(OpenProjectContext& ctx)
 {
-    _extractJsonTask.setSubtasks(2);
-    _extractJsonTask.setRunning();
-	{
+ //   _extractJsonTask.setSubtasks(2);
+ //   _extractJsonTask.setRunning();
+	//{
         Archiver archiver;
 
         archiver.extractSingleFile(ctx.filePath, "project.json", ctx.projectJsonPath);
-        _extractJsonTask.setSubtaskFinished(0, "Datasets loaded");
+        //_extractJsonTask.setSubtaskFinished(0, "Datasets loaded");
 
 		archiver.extractSingleFile(ctx.filePath, "workspace.json", ctx.workspaceJsonPath);
-        _extractJsonTask.setSubtaskFinished(1, "Workspace loaded");
-	}
-    _extractJsonTask.setFinished();
+        //_extractJsonTask.setSubtaskFinished(1, "Workspace loaded");
+	//}
+    //_extractJsonTask.setFinished();
 }
 
 void OpenProjectWorkflow::finalizeOpenProject(OpenProjectContext& ctx)

@@ -36,22 +36,21 @@ Group ProjectLoadRecipeBuilder::makeRecipe(OpenProjectContextStorage& openProjec
 
             const int totalDatasets = dataHierarchyLoadContext._progress->_totalDatasets;
 
+            //mv::projects().getOpenTask().setRunning();
             //task.setSubtasks(totalDatasets);
             //task.setRunning();
             //task.setProgress(.5f, "-------------");
-            dataHierarchyLoadContext._progress->_datasetLoadedCallback = [](int completed, int total, const QString& datasetName) {
-                mv::projects().getOpenTask().setProgressMode(Task::ProgressMode::Manual);
-                mv::projects().getOpenTask().setProgress(static_cast<float>(completed) / total, datasetName);
+            //dataHierarchyLoadContext._progress->_datasetLoadedCallback = [](int completed, int total, const QString& datasetName) {
+                //mv::projects().getOpenTask().setProgressMode(Task::ProgressMode::Manual);
+                //mv::projects().getOpenTask().setProgress(static_cast<float>(completed) / total, datasetName);
 
-                qDebug() << "Loaded dataset:" << datasetName << "(" << completed << "/" << total << ")";
+                //qDebug() << "Loaded dataset:" << datasetName << "(" << completed << "/" << total << ")" << static_cast<float>(completed) / total;
 
-                if (total == 0)
-                    mv::projects().getOpenTask().setFinished();
+                //if (completed == total)
+                //    mv::projects().getOpenTask().setFinished();
 
-                QCoreApplication::processEvents();
-            };
-
-            
+                //QCoreApplication::processEvents();
+            //};
         }),
 		_datasetsLoadRecipeBuilder.makeRecipe(projectLoadContextStorage),
         _workspaceLoadRecipeBuilder.makeRecipe(projectLoadContextStorage)

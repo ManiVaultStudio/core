@@ -39,6 +39,8 @@ void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& pr
 
 	const auto& contexts = derived ? dataHierarchyLoadContext._derivedDatasetLoadContexts : dataHierarchyLoadContext._nonDerivedDatasetLoadContexts;
 
+    QStringList subtaskNames;
+
     QList<DatasetLoadContext*> workItems;
     workItems.reserve(contexts.size());
 
@@ -52,7 +54,12 @@ void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& pr
             throw std::runtime_error("Dataset is invalid.");
 
         workItems.append(nonConstContext);
+
+        subtaskNames << nonConstContext->_datasetName;
     }
+
+    mv::projects().getOpenTask().setSubtasks(subtaskNames);
+    mv::projects().getOpenTask().setRunning();
 
     constexpr auto concurrencyMode = mv::util::ConcurrencyMode::Parallel;
 
@@ -71,17 +78,21 @@ void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& pr
             try {
                 //qDebug() << QString("[%1, %2]::begin::fromVariantMap()").arg(ctx->_datasetName, ctx->_pluginKind);
                 //{
-                    ctx->_dataset->fromVariantMap(ctx->_datasetMap);
+                ctx->_dataset->fromVariantMap(ctx->_datasetMap);
+
+                mv::projects().getOpenTask().setSubtaskFinished(ctx->_dataset->getGuiName());
+
+                QCoreApplication::processEvents();
                 //}
                 //qDebug() << QString("[%1, %2]::end::fromVariantMap()").arg(ctx->_datasetName, ctx->_pluginKind);
 
-                if (progress) {
+                /*if (progress) {
                     const int done = progress->_datasetsLoaded.fetch_add(1, std::memory_order_relaxed) + 1;
 
                     if (progress->_datasetLoadedCallback) {
                         progress->_datasetLoadedCallback(done, progress->_totalDatasets, ctx->_datasetName);
                     }
-                }
+                }*/
             }
             catch (const std::exception& e) {
                 failed.store(true, std::memory_order_relaxed);
