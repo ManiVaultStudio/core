@@ -803,16 +803,10 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             Application::requestOverrideCursor(Qt::WaitCursor);
 
-            /*
+            
             QCoreApplication::processEvents();
 
             Archiver archiver;
-
-            connect(&projectSerializationTask, &Task::requestAbort, this, [this]() -> void {
-                Application::setSerializationAborted(true);
-
-                throw std::runtime_error("Canceled before project was saved");
-            });
 
             QFileInfo projectJsonFileInfo(temporaryDirectoryPath, "project.json"), projectMetaJsonFileInfo(temporaryDirectoryPath, "meta.json");
 
@@ -826,20 +820,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             workspaces().saveWorkspace(workspaceFileInfo.absoluteFilePath(), false);
 
-            compressionTask.setSubtasks(archiver.getTaskNamesForDirectoryCompression(temporaryDirectoryPath));
-            compressionTask.setRunning();
-
-            connect(&archiver, &Archiver::taskStarted, this, [&compressionTask](const QString& taskName) -> void {
-                compressionTask.setSubtaskStarted(taskName, QString("Compressing %1").arg(taskName));
-            });
-
-            connect(&archiver, &Archiver::taskFinished, this, [&compressionTask](const QString& taskName) -> void {
-                compressionTask.setSubtaskFinished(taskName, QString("Compressing %1").arg(taskName));
-            });
-
             archiver.compressDirectory(temporaryDirectoryPath, filePath, true, 0, password);
-
-            compressionTask.setFinished();
 
             _recentProjectsAction.addRecentFilePath(filePath);
 
@@ -850,7 +831,6 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             setState(State::Idle);
 
             qDebug().noquote() << filePath << "saved successfully in " << saveTimer.elapsed() << "ms";
-            */
         }
         emit projectSaved(*_project);
     }

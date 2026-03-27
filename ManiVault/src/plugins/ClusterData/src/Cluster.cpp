@@ -9,6 +9,91 @@
 
 #include <stdexcept>
 
+namespace
+{
+
+    template <typename T>
+    QDataStream& writeStdVector(QDataStream& out, const std::vector<T>& values)
+    {
+        static_assert(std::is_arithmetic_v<T>, "writeStdVector only supports arithmetic types here.");
+
+        out << static_cast<quint32>(values.size());
+
+        for (const auto& value : values)
+            out << value;
+
+        return out;
+    }
+
+    template <typename T>
+    QDataStream& readStdVector(QDataStream& in, std::vector<T>& values)
+    {
+        static_assert(std::is_arithmetic_v<T>, "readStdVector only supports arithmetic types here.");
+
+        quint32 size = 0;
+        in >> size;
+
+        if (in.status() != QDataStream::Ok) {
+            values.clear();
+            return in;
+        }
+
+        values.resize(static_cast<std::size_t>(size));
+
+        for (quint32 i = 0; i < size; ++i)
+            in >> values[static_cast<std::size_t>(i)];
+
+        return in;
+    }
+
+} // namespace
+
+QDataStream& operator<<(QDataStream& out, const Cluster& cluster)
+{
+    // Simple format version for forward compatibility
+    constexpr quint32 kClusterStreamVersion = 1;
+    out << kClusterStreamVersion;
+
+    out << cluster._name;
+    out << cluster._id;
+    out << cluster._color;
+
+    writeStdVector(out, cluster._indices);
+    writeStdVector(out, cluster._median);
+    writeStdVector(out, cluster._mean);
+    writeStdVector(out, cluster._stddev);
+
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, Cluster& cluster)
+{
+    quint32 version = 0;
+    in >> version;
+
+    if (in.status() != QDataStream::Ok)
+        return in;
+
+    switch (version) {
+    case 1:
+        in >> cluster._name;
+        in >> cluster._id;
+        in >> cluster._color;
+
+        readStdVector(in, cluster._indices);
+        readStdVector(in, cluster._median);
+        readStdVector(in, cluster._mean);
+        readStdVector(in, cluster._stddev);
+        break;
+
+    default:
+        in.setStatus(QDataStream::ReadCorruptData);
+        break;
+    }
+
+    return in;
+}
+
 Cluster::Cluster(const QString& name /*= ""*/, const QColor& color /*= Qt::gray*/, const std::vector<std::uint32_t>& indices /*= std::vector<std::uint32_t>()*/) :
     _name(name),
     _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),

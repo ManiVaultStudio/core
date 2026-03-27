@@ -74,7 +74,6 @@ void TaskAction::setTask(Task* task)
 
         connect(_task, &Task::progressChanged, this, [this]() -> void {
             updateProgressActionProgress();
-            qDebug() << "======================Progress changed in GUI:" << _task->getProgress();
         });
 
         connect(_task, &Task::progressTextChanged, this, [this]() -> void {

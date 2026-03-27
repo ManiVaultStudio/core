@@ -250,8 +250,7 @@ bool populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
 
     QEventLoop loop;
 
-    QObject::connect(handle.data(), &DecodeRequestState::finished,
-        &loop, &QEventLoop::quit);
+    QObject::connect(handle.data(), &DecodeRequestState::finished, &loop, &QEventLoop::quit);
 
     loop.exec();
 
