@@ -1061,7 +1061,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         _dimensionsPickerAction->fromParentVariantMap(variantMap);
     }
 
-    //events().notifyDatasetDataChanged(this);
+    events().notifyDatasetDataChanged(this);
 
 	// Handle saved selection
     if (isFull()) {

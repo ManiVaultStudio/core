@@ -173,6 +173,8 @@ ProgressAction::BarWidget::BarWidget(QWidget* parent, ProgressAction* progressAc
 
     const auto updateValue = [this]() -> void {
         setValue(_progressAction->getProgress());
+
+        update();
     };
 
     updateValue();

@@ -525,19 +525,17 @@ void Task::setIdle()
 }
 
 void Task::setRunning()
-{
+{   
     if (QThread::currentThread() == thread()) {
         privateSetRunning();
+        privateSetProgressDescription(getName());
         return;
     }
 
     QMetaObject::invokeMethod(this, [this] {
-			privateSetRunning();
-        },
-        Qt::QueuedConnection
-    );
-
-    setProgressDescription(getName());
+        privateSetRunning();
+        privateSetProgressDescription(getName());
+        }, Qt::QueuedConnection);
 }
 
 void Task::setRunningIndeterminate()
@@ -552,8 +550,6 @@ void Task::setRunningIndeterminate()
         },
         Qt::QueuedConnection
     );
-
-    setProgressDescription(getName());
 }
 
 void Task::setFinished()
@@ -842,21 +838,15 @@ void Task::setSubtaskFinished(std::uint32_t subtaskIndex, const QString& progres
 void Task::setSubtaskFinished(const QString& subtaskName, const QString& progressDescription /*= QString()*/)
 {
     if (QThread::currentThread() == thread()) {
-        qDebug() << __FUNCTION__ << "MAIN_THREAD";
         privateSetSubtaskFinished(subtaskName, progressDescription);
-        QCoreApplication::processEvents();
         return;
     }
 
     QMetaObject::invokeMethod(this, [this, subtaskName, progressDescription]() {
-			qDebug() << __FUNCTION__ << "WORKER_THREAD";
             privateSetSubtaskFinished(subtaskName, progressDescription);
-            QCoreApplication::processEvents();
         },
         Qt::QueuedConnection
     );
-
-    QCoreApplication::processEvents();
 }
 
 void Task::setSubtaskName(std::uint32_t subtaskIndex, const QString& subtaskName)
@@ -1008,7 +998,7 @@ void Task::updateProgress()
 
         case ProgressMode::Subtasks:
         {
-            _progress = _subtasks.isEmpty() ? 0.f : static_cast<float>(_subtasks.count(true)) / static_cast<float>(_subtasks.size() / 8);
+            _progress = _subtasks.isEmpty() ? 0.f : static_cast<float>(_subtasks.count(true)) / static_cast<float>(_subtasks.size());
             break;
         }
 
@@ -1622,7 +1612,7 @@ void Task::privateSetSubtasks(const QStringList& subtasksNames)
 {
     privateSetProgressMode(ProgressMode::Subtasks);
 
-    const auto numberOfBits = subtasksNames.count() * 8;
+    const auto numberOfBits = subtasksNames.count();
 
     _subtasks.resize(numberOfBits);
     _subtasks.fill(false, numberOfBits);
@@ -1689,8 +1679,6 @@ void Task::privateSetSubtaskFinished(std::uint32_t subtaskIndex, const QString& 
         privateSetProgressDescription(progressDescription);
 
     emit subtaskFinished(subtaskIndex, subtaskName);
-
-    QCoreApplication::processEvents();
 }
 
 void Task::privateSetSubtaskFinished(const QString& subtaskName, const QString& progressDescription /*= QString()*/)
@@ -1748,6 +1736,9 @@ void Task::privateSetProgressTextFormatter(const ProgressTextFormatter& progress
 
 void Task::privateEmitProgressChanged()
 {
+    emit progressChanged(getProgress());
+    QCoreApplication::processEvents();
+    return;
     //qDebug() << __FUNCTION__ << getProgress();
 
     if (!getTimer(TimerType::EmitProgressChanged).isActive()) {

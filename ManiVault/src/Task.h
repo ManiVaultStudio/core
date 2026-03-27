@@ -943,8 +943,8 @@ private:
     ProgressTextFormatter   _progressTextFormatter;                         /** Progress text formatter function (overrides Task::getProgressText() when set) */
 
 private:
-    static constexpr std::uint32_t EMIT_CHANGED_TIMER_INTERVAL      = 100;      /** Single shot task progress and description timer interval */
-    static constexpr std::uint32_t DEFERRED_TASK_STATUS_INTERVAL    = 250;      /** Delay after which the deferred task status is set */
+    static constexpr std::uint32_t EMIT_CHANGED_TIMER_INTERVAL      = 25;   /** Single shot task progress and description timer interval */
+    static constexpr std::uint32_t DEFERRED_TASK_STATUS_INTERVAL    = 250;  /** Delay after which the deferred task status is set */
 };
 
 }

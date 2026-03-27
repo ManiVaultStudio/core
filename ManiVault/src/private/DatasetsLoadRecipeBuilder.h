@@ -29,11 +29,10 @@ public:
 private:
 
     /**
-     * Load the datasets based on the dataset entries in the datasets load context in \p projectLoadContextStorage
-     * @param projectLoadContextStorage The storage containing the project load context, which includes the datasets load context with the dataset entries to be loaded
-     * @param derived Whether to load derived datasets (true) or non-derived datasets (false)
+     * Load the datasets based on the provided project load context storage
+     * @param projectLoadContextStorage The storage containing the project load context, which includes the datasets load context
      */
-    void loadDatasets(const ProjectLoadContextStorage& projectLoadContextStorage, bool derived);
+    void loadDatasets(const ProjectLoadContextStorage& projectLoadContextStorage);
 
 private:
     DatasetLoadRecipeBuilder    _datasetLoadRecipeBuilder;      /** The builder for creating the recipe for loading individual datasets, used in the data hierarchy loading recipe */

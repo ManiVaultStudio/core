@@ -12,7 +12,7 @@ Group DatasetsLoadRecipeBuilder::makeRecipe(const ProjectLoadContextStorage& pro
     	parallel,
         QSyncTask([this, projectLoadContextStorage] {
             try {
-                loadDatasets(projectLoadContextStorage, false);
+                loadDatasets(projectLoadContextStorage);
             }
             catch (const std::exception& e) {
                 projectLoadContextStorage->_error = QString::fromUtf8(e.what());
@@ -20,7 +20,7 @@ Group DatasetsLoadRecipeBuilder::makeRecipe(const ProjectLoadContextStorage& pro
         }),
         QSyncTask([this, projectLoadContextStorage] {
             try {
-                loadDatasets(projectLoadContextStorage, true);
+                mv::projects().getOpenTask().setFinished();
             }
             catch (const std::exception& e) {
                 projectLoadContextStorage->_error = QString::fromUtf8(e.what());
@@ -29,15 +29,13 @@ Group DatasetsLoadRecipeBuilder::makeRecipe(const ProjectLoadContextStorage& pro
     };
 }
 
-void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& projectLoadContextStorage, bool derived)
+void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& projectLoadContextStorage)
 {
-    qDebug() << __FUNCTION__ << (derived ? "(derived datasets)" : "(non-derived datasets)");
-
     auto& dataHierarchyLoadContext = projectLoadContextStorage->_dataHierarchyLoadContext;
 
     auto progress = dataHierarchyLoadContext._progress;
 
-	const auto& contexts = derived ? dataHierarchyLoadContext._derivedDatasetLoadContexts : dataHierarchyLoadContext._nonDerivedDatasetLoadContexts;
+	const auto& contexts = dataHierarchyLoadContext._datasetLoadContexts;
 
     QStringList subtaskNames;
 
@@ -45,7 +43,7 @@ void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& pr
     workItems.reserve(contexts.size());
 
     for (const auto& context : contexts) {
-        auto* nonConstContext = const_cast<DatasetLoadContext*>(context);
+        auto* nonConstContext = const_cast<DatasetLoadContext*>(&context);
 
         if (!nonConstContext)
             throw std::runtime_error("Dataset load context is null.");
@@ -61,9 +59,6 @@ void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& pr
     mv::projects().getOpenTask().setRunning();
     mv::projects().getOpenTask().setSubtasks(subtaskNames);
     
-
-    QCoreApplication::processEvents();
-
     constexpr auto concurrencyMode = mv::util::ConcurrencyMode::Parallel;
 
     if (concurrencyMode == mv::util::ConcurrencyMode::Parallel) {
@@ -79,26 +74,9 @@ void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& pr
                 return;
 
             try {
-                //qDebug() << QString("[%1, %2]::begin::fromVariantMap()").arg(ctx->_datasetName, ctx->_pluginKind);
-                //{
                 ctx->_dataset->fromVariantMap(ctx->_datasetMap);
 
-                mv::projects().getOpenTask().setSubtaskFinished(ctx->_dataset->getGuiName());
-
-                //qDebug() << "Task thread:" << mv::projects().getOpenTask().thread();
-                //qDebug() << "Current thread:" << QThread::currentThread();
-
-                QCoreApplication::processEvents();
-                //}
-                //qDebug() << QString("[%1, %2]::end::fromVariantMap()").arg(ctx->_datasetName, ctx->_pluginKind);
-
-                /*if (progress) {
-                    const int done = progress->_datasetsLoaded.fetch_add(1, std::memory_order_relaxed) + 1;
-
-                    if (progress->_datasetLoadedCallback) {
-                        progress->_datasetLoadedCallback(done, progress->_totalDatasets, ctx->_datasetName);
-                    }
-                }*/
+                //mv::projects().getOpenTask().setSubtaskFinished(ctx->_dataset->getGuiName());
             }
             catch (const std::exception& e) {
                 failed.store(true, std::memory_order_relaxed);
@@ -114,7 +92,4 @@ void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& pr
             workItem->_dataset->fromVariantMap(workItem->_datasetMap);
         }
     }
-
-    //if (!errorString.isEmpty())
-    //    throw std::runtime_error(errorString.toUtf8().constData());
 }

@@ -120,7 +120,7 @@ std::int32_t ClusterData::getClusterIndex(const QString& clusterName) const
 void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
-    
+    return;
     const auto dataMap = variantMap["Data"].toMap();
 
     variantMapMustContain(dataMap, "IndicesRawData");
@@ -131,12 +131,6 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 
     packedIndices.resize(dataMap["NumberOfIndices"].toInt());
 
-    return;
-
-    //qDebug() << "Deserializing ClusterData from variant map";
-    //qDebug() << dataMap;
-    //qDebug() << "Number of indices:" << packedIndices.size();
-    // Convert raw data to indices
     populateDataBufferFromVariantMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), ConcurrencyMode::Sequential);
 
 	if (dataMap.contains("ClustersRawData")) {
@@ -150,54 +144,56 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
         
         populateDataBufferFromVariantMap(dataMap["ClustersRawData"].toMap(), (char*)clustersByteArray.data());
 
-        QVariantList clusters;
+        //QVariantList clusters;
 
-        clustersDataStream >> clusters;
+        //clusters.reserve(250000);
 
-        _clusters.resize(clusters.count());
+        //clustersDataStream >> clusters;
 
-        long clusterIndex = 0;
+        //_clusters.resize(clusters.count());
 
-        for (const auto& clusterVariant : clusters) {
-            const auto clusterMap = clusterVariant.toMap();
+        //long clusterIndex = 0;
 
-            auto& cluster = _clusters[clusterIndex];
+        //for (const auto& clusterVariant : clusters) {
+        //    const auto clusterMap = clusterVariant.toMap();
 
-            cluster.setName(clusterMap["Name"].toString());
-            cluster.setId(clusterMap["ID"].toString());
-            cluster.setColor(clusterMap["Color"].toString());
+        //    auto& cluster = _clusters[clusterIndex];
 
-            const auto globalIndicesOffset  = clusterMap["GlobalIndicesOffset"].toInt();
-            const auto numberOfIndices      = clusterMap["NumberOfIndices"].toInt();
+        //    //cluster.setName(clusterMap["Name"].toString());
+        //    //cluster.setId(clusterMap["ID"].toString());
+        //    //cluster.setColor(clusterMap["Color"].toString());
 
-            cluster.getIndices() = std::vector<std::uint32_t>(packedIndices.begin() + globalIndicesOffset, packedIndices.begin() + globalIndicesOffset + numberOfIndices);
+        //    const auto globalIndicesOffset  = clusterMap["GlobalIndicesOffset"].toInt();
+        //    const auto numberOfIndices      = clusterMap["NumberOfIndices"].toInt();
 
-            ++clusterIndex;
-        }
+        //    //cluster.getIndices() = std::vector<std::uint32_t>(packedIndices.begin() + globalIndicesOffset, packedIndices.begin() + globalIndicesOffset + numberOfIndices);
+
+        //    ++clusterIndex;
+        //}
     }
     
     // For backwards compatibility
-    if (dataMap.contains("Clusters")) {
-        const auto clustersList = dataMap["Clusters"].toList();
+    //if (dataMap.contains("Clusters")) {
+    //    const auto clustersList = dataMap["Clusters"].toList();
 
-        _clusters.resize(clustersList.count());
+    //    _clusters.resize(clustersList.count());
 
-        for (const auto& clusterVariant : clustersList) {
-            const auto clusterMap   = clusterVariant.toMap();
-            const auto clusterIndex = clustersList.indexOf(clusterMap);
+    //    for (const auto& clusterVariant : clustersList) {
+    //        const auto clusterMap   = clusterVariant.toMap();
+    //        const auto clusterIndex = clustersList.indexOf(clusterMap);
 
-            auto& cluster = _clusters[clusterIndex];
+    //        auto& cluster = _clusters[clusterIndex];
 
-            cluster.setName(clusterMap["Name"].toString());
-            cluster.setId(clusterMap["ID"].toString());
-            cluster.setColor(clusterMap["Color"].toString());
+    //        cluster.setName(clusterMap["Name"].toString());
+    //        cluster.setId(clusterMap["ID"].toString());
+    //        cluster.setColor(clusterMap["Color"].toString());
 
-            const auto globalIndicesOffset  = clusterMap["GlobalIndicesOffset"].toInt();
-            const auto numberOfIndices      = clusterMap["NumberOfIndices"].toInt();
+    //        const auto globalIndicesOffset  = clusterMap["GlobalIndicesOffset"].toInt();
+    //        const auto numberOfIndices      = clusterMap["NumberOfIndices"].toInt();
 
-            cluster.getIndices() = std::vector<std::uint32_t>(packedIndices.begin() + globalIndicesOffset, packedIndices.begin() + globalIndicesOffset + numberOfIndices);
-        }
-    }
+    //        cluster.getIndices() = std::vector<std::uint32_t>(packedIndices.begin() + globalIndicesOffset, packedIndices.begin() + globalIndicesOffset + numberOfIndices);
+    //    }
+    //}
 }
 
 QVariantMap ClusterData::toVariantMap() const
