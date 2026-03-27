@@ -915,47 +915,6 @@ signals:
      */
     void childTaskRemoved(Task* childTask);
 
-    /**
-     * The signals below are private signals and can/should only be called from within this Task class
-     * These signals provide a way to make cross thread task usage possible
-     */
-    void privateSetParentTaskSignal(Task* parentTask, QPrivateSignal);
-    void privateAddChildTaskSignal(Task* childTask, QPrivateSignal);
-    void privateRemoveChildTaskSignal(Task* childTask, QPrivateSignal);
-    void privateSetNameSignal(const QString& name, QPrivateSignal);
-    void privateSetDescriptionSignal(const QString& description, QPrivateSignal);
-    void privateSetIconSignal(const QIcon& icon, QPrivateSignal);
-    void privateSetEnabledSignal(bool enabled, bool recursive, QPrivateSignal);
-    void privateSetVisibleSignal(bool visible, QPrivateSignal);
-    void privateSetMayKillSignal(bool mayKill, bool recursive, QPrivateSignal);
-    void privateResetSignal(bool recursive, QPrivateSignal);
-    void privateSetStatusSignal(const Status& status, bool recursive, QPrivateSignal);
-    void privateSetStatusDeferredSignal(const Status& status, bool recursive, std::uint32_t delay, QPrivateSignal);
-    void privateSetUndefinedSignal(QPrivateSignal);
-    void privateSetIdleSignal(QPrivateSignal);
-    void privateSetRunningSignal(QPrivateSignal);
-    void privateSetRunningIndeterminateSignal(QPrivateSignal);
-    void privateSetFinishedSignal(QPrivateSignal);
-    void privateSetAboutToBeAbortedSignal(QPrivateSignal);
-    void privateSetAbortingSignal(QPrivateSignal);
-    void privateSetAbortedSignal(QPrivateSignal);
-    void privateKillSignal(bool, QPrivateSignal);
-    void privateSetProgressModeSignal(const ProgressMode& progressMode, QPrivateSignal);
-    void privateSetGuiScopesSignal(const GuiScopes& guiScopes, QPrivateSignal);
-    void privateAddGuiScopeSignal(const GuiScope& guiScope, QPrivateSignal);
-    void privateRemoveGuiScopeSignal(const GuiScope& guiScope, QPrivateSignal);
-    void privateResetProgressSignal(bool recursive, QPrivateSignal);
-    void privateSetProgressSignal(float progress, const QString& subtaskDescription, QPrivateSignal);
-    void privateSetSubtasksSignal(std::uint32_t numberOfSubtasks, QPrivateSignal);
-    void privateSetSubtasksSignal(const QStringList& subtasksNames, QPrivateSignal);
-    void privateSetSubtaskStartedSignal(std::uint32_t subtaskIndex, const QString& progressDescription, QPrivateSignal);
-    void privateSetSubtaskStartedSignal(const QString& subtaskName, const QString& progressDescription, QPrivateSignal);
-    void privateSetSubtaskFinishedSignal(std::uint32_t subtaskIndex, const QString& progressDescription, QPrivateSignal);
-    void privateSetSubtaskFinishedSignal(const QString& subtaskName, const QString& progressDescription, QPrivateSignal);
-    void privateSetSubtaskNameSignal(std::uint32_t subtaskIndex, const QString& subtaskName, QPrivateSignal);
-    void privateSetProgressDescriptionSignal(const QString& progressDescription, std::uint32_t clearDelay, QPrivateSignal);
-    void privateSetProgressTextFormatterSignal(const ProgressTextFormatter& progressTextFormatter, QPrivateSignal);
-
 private:
     std::int32_t            _configuration;                                 /** Configuration flags */
     float                   _weight;                                        /** Relative size of the progress interval this task occupies when it is a child task */

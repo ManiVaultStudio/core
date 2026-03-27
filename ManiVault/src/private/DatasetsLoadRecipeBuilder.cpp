@@ -58,8 +58,11 @@ void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& pr
         subtaskNames << nonConstContext->_datasetName;
     }
 
-    mv::projects().getOpenTask().setSubtasks(subtaskNames);
     mv::projects().getOpenTask().setRunning();
+    mv::projects().getOpenTask().setSubtasks(subtaskNames);
+    
+
+    QCoreApplication::processEvents();
 
     constexpr auto concurrencyMode = mv::util::ConcurrencyMode::Parallel;
 
@@ -81,6 +84,9 @@ void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& pr
                 ctx->_dataset->fromVariantMap(ctx->_datasetMap);
 
                 mv::projects().getOpenTask().setSubtaskFinished(ctx->_dataset->getGuiName());
+
+                //qDebug() << "Task thread:" << mv::projects().getOpenTask().thread();
+                //qDebug() << "Current thread:" << QThread::currentThread();
 
                 QCoreApplication::processEvents();
                 //}

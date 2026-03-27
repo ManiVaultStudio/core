@@ -84,42 +84,6 @@ Task::Task(QObject* parent, const QString& name, const GuiScopes& guiScopes /*= 
     connect(&getTimer(TimerType::DeferredStatus), &QTimer::timeout, this, [this]() -> void {
         setStatus(_deferredStatus, _deferredStatusRecursive);
     });
-
-    connect(this, &Task::privateSetParentTaskSignal, this, &Task::privateSetParentTask);
-    connect(this, &Task::privateAddChildTaskSignal, this, &Task::privateAddChildTask);
-    connect(this, &Task::privateRemoveChildTaskSignal, this, &Task::privateRemoveChildTask);
-    connect(this, &Task::privateSetNameSignal, this, &Task::privateSetName);
-    connect(this, &Task::privateSetDescriptionSignal, this, &Task::privateSetDescription);
-    connect(this, &Task::privateSetIconSignal, this, &Task::privateSetIcon);
-    connect(this, &Task::privateSetEnabledSignal, this, &Task::privateSetEnabled);
-    connect(this, &Task::privateSetVisibleSignal, this, &Task::privateSetVisible);
-    connect(this, &Task::privateSetMayKillSignal, this, &Task::privateSetMayKill);
-    connect(this, &Task::privateSetStatusSignal, this, &Task::privateSetStatus);
-    connect(this, &Task::privateSetStatusDeferredSignal, this, &Task::privateSetStatusDeferred);
-    connect(this, &Task::privateResetSignal, this, &Task::privateReset);
-    connect(this, &Task::privateSetIdleSignal, this, &Task::privateSetIdle);
-    connect(this, &Task::privateSetRunningSignal, this, &Task::privateSetRunning);
-    connect(this, &Task::privateSetRunningIndeterminateSignal, this, &Task::privateSetRunningIndeterminate);
-    connect(this, &Task::privateSetFinishedSignal, this, &Task::privateSetFinished);
-    connect(this, &Task::privateSetAboutToBeAbortedSignal, this, &Task::privateSetAboutToBeAborted);
-    connect(this, &Task::privateSetAbortingSignal, this, &Task::privateSetAborting);
-    connect(this, &Task::privateSetAbortedSignal, this, &Task::privateSetAborted);
-    connect(this, &Task::privateKillSignal, this, &Task::privateKill);
-    connect(this, &Task::privateSetProgressModeSignal, this, &Task::privateSetProgressMode);
-    connect(this, &Task::privateSetGuiScopesSignal, this, &Task::privateSetGuiScopes);
-    connect(this, &Task::privateAddGuiScopeSignal, this, &Task::privateAddGuiScope);
-    connect(this, &Task::privateRemoveGuiScopeSignal, this, &Task::privateRemoveGuiScope);
-    connect(this, &Task::privateResetProgressSignal, this, &Task::privateResetProgress);
-    connect(this, &Task::privateSetProgressSignal, this, &Task::privateSetProgress);
-    connect(this, qOverload<std::uint32_t, QPrivateSignal>(&Task::privateSetSubtasksSignal), this, qOverload<std::uint32_t>(&Task::privateSetSubtasks));
-    connect(this, qOverload<const QStringList&, QPrivateSignal>(&Task::privateSetSubtasksSignal), this, qOverload<const QStringList&>(&Task::privateSetSubtasks));
-    connect(this, qOverload<std::uint32_t, const QString&, QPrivateSignal>(&Task::privateSetSubtaskStartedSignal), this, qOverload<std::uint32_t, const QString&>(&Task::privateSetSubtaskStarted));
-    connect(this, qOverload<const QString&, const QString&, QPrivateSignal>(&Task::privateSetSubtaskStartedSignal), this, qOverload<const QString&, const QString&>(&Task::privateSetSubtaskStarted));
-    connect(this, qOverload<std::uint32_t, const QString&, QPrivateSignal>(&Task::privateSetSubtaskFinishedSignal), this, qOverload<std::uint32_t, const QString&>(&Task::privateSetSubtaskFinished));
-    connect(this, qOverload<const QString&, const QString&, QPrivateSignal>(&Task::privateSetSubtaskFinishedSignal), this, qOverload<const QString&, const QString&>(&Task::privateSetSubtaskFinished));
-    connect(this, &Task::privateSetSubtaskNameSignal, this, &Task::privateSetSubtaskName);
-    connect(this, &Task::privateSetProgressDescriptionSignal, this, &Task::privateSetProgressDescription);
-    connect(this, &Task::privateSetProgressTextFormatterSignal, this, &Task::privateSetProgressTextFormatter);
 }
 
 Task::~Task()
@@ -216,7 +180,16 @@ Task* Task::getParentTask()
 
 void Task::setParentTask(Task* parentTask)
 {
-    emit privateSetParentTaskSignal(parentTask, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetParentTask(parentTask);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, parentTask] {
+            privateSetParentTask(parentTask);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 bool Task::hasParentTask()
@@ -283,12 +256,30 @@ Task::TasksPtrs Task::getChildTasksForGuiScopesAndStatuses(bool recursively /*= 
 
 void Task::addChildTask(Task* childTask)
 {
-    emit privateAddChildTaskSignal(childTask, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateAddChildTask(childTask);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, childTask] {
+        privateAddChildTask(childTask);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 void Task::removeChildTask(Task* childTask)
 {
-    emit privateRemoveChildTaskSignal(childTask, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateRemoveChildTask(childTask);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, childTask] {
+			privateRemoveChildTask(childTask);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 QString Task::getName() const
@@ -298,7 +289,16 @@ QString Task::getName() const
 
 void Task::setName(const QString& name)
 {
-    emit privateSetNameSignal(name, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetName(name);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, name] {
+			privateSetName(name);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 QString Task::getDescription() const
@@ -308,7 +308,16 @@ QString Task::getDescription() const
 
 void Task::setDescription(const QString& description)
 {
-    emit privateSetDescriptionSignal(description, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetDescription(description);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, description] {
+			privateSetDescription(description);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 QIcon Task::getIcon() const
@@ -318,7 +327,16 @@ QIcon Task::getIcon() const
 
 void Task::setIcon(const QIcon& icon)
 {
-    emit privateSetIconSignal(icon, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetIcon(icon);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, icon] {
+			privateSetIcon(icon);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 bool Task::getEnabled() const
@@ -328,7 +346,16 @@ bool Task::getEnabled() const
 
 void Task::setEnabled(bool enabled, bool recursive /*= false*/)
 {
-    emit privateSetEnabledSignal(enabled, recursive, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetEnabled(enabled, recursive);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, enabled, recursive] {
+			privateSetEnabled(enabled, recursive);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 bool Task::getVisible() const
@@ -338,7 +365,16 @@ bool Task::getVisible() const
 
 void Task::setVisible(bool visible)
 {
-    emit privateSetVisibleSignal(visible, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetVisible(visible);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, visible] {
+	       privateSetVisible(visible);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 bool Task::getMayKill() const
@@ -348,7 +384,16 @@ bool Task::getMayKill() const
 
 void Task::setMayKill(bool mayKill, bool recursive /*= false*/)
 {
-    emit privateSetMayKillSignal(mayKill, recursive, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetMayKill(mayKill, recursive);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, mayKill, recursive] {
+			privateSetMayKill(mayKill, recursive);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 bool Task::isKillable() const
@@ -361,7 +406,16 @@ bool Task::isKillable() const
 
 void Task::reset(bool recursive /*= false*/)
 {
-    emit privateResetSignal(recursive, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateReset(recursive);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, recursive] {
+			privateReset(recursive);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 void Task::setAlwaysProcessEvents(bool alwaysProcessEvents)
@@ -416,61 +470,160 @@ bool Task::isAborted() const
 
 void Task::setStatus(const Status& status, bool recursive /*= false*/)
 {
-    emit privateSetStatusSignal(status, recursive, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetStatus(status, recursive);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, status, recursive] {
+			privateSetStatus(status, recursive);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 void Task::setStatusDeferred(const Status& status, bool recursive /*= false*/, std::uint32_t delay /*= DEFERRED_TASK_STATUS_INTERVAL*/)
 {
-    emit privateSetStatusDeferredSignal(status, recursive, delay, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetStatusDeferred(status, recursive, delay);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, status, recursive, delay] {
+			privateSetStatusDeferred(status, recursive, delay);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 void Task::setUndefined()
 {
-    emit privateSetUndefinedSignal(QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetUndefined();
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this] {
+			privateSetUndefined();
+        },
+        Qt::QueuedConnection
+    );
 }
 
 void Task::setIdle()
 {
-    emit privateSetIdleSignal(QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetIdle();
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this] {
+			privateSetIdle();
+        },
+        Qt::QueuedConnection
+    );
 }
 
 void Task::setRunning()
 {
-    emit privateSetRunningSignal(QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetRunning();
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this] {
+			privateSetRunning();
+        },
+        Qt::QueuedConnection
+    );
 
     setProgressDescription(getName());
 }
 
 void Task::setRunningIndeterminate()
 {
-    emit privateSetRunningIndeterminateSignal(QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetRunningIndeterminate();
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this] {
+			privateSetRunningIndeterminate();
+        },
+        Qt::QueuedConnection
+    );
 
     setProgressDescription(getName());
 }
 
 void Task::setFinished()
 {
-    emit privateSetFinishedSignal(QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetFinished();
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this] {
+			privateSetFinished();
+        },
+        Qt::QueuedConnection
+    );
 }
 
 void Task::setAboutToBeAborted()
 {
-    emit privateSetAboutToBeAbortedSignal(QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetAboutToBeAborted();
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this] {
+			privateSetAboutToBeAborted();
+        },
+        Qt::QueuedConnection
+    );
 }
 
 void Task::setAborting()
 {
-    emit privateSetAbortingSignal(QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetAborting();
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this] {
+			privateSetAborting();
+        },
+        Qt::QueuedConnection
+    );
 }
 
 void Task::setAborted()
 {
-    emit privateSetAbortedSignal(QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetAborted();
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this] {
+			privateSetAborted();
+        },
+        Qt::QueuedConnection
+    );
 }
 
 void Task::kill(bool recursive /*= true*/)
 {
-    emit privateKillSignal(recursive, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateKill();
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this] {
+			privateKill();
+        },
+        Qt::QueuedConnection
+    );
 }
 
 AbstractTaskHandler* Task::getHandler()
@@ -495,7 +648,16 @@ Task::ProgressMode Task::getProgressMode() const
 
 void Task::setProgressMode(const ProgressMode& progressMode)
 {
-    emit privateSetProgressModeSignal(progressMode, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetProgressMode(progressMode);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, progressMode] {
+			privateSetProgressMode(progressMode);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 Task::GuiScopes Task::getGuiScopes() const
@@ -505,17 +667,44 @@ Task::GuiScopes Task::getGuiScopes() const
 
 void Task::setGuiScopes(const GuiScopes& guiScopes)
 {
-    emit privateSetGuiScopesSignal(guiScopes, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetGuiScopes(guiScopes);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, guiScopes] {
+			privateSetGuiScopes(guiScopes);
+		},
+        Qt::QueuedConnection
+    );
 }
 
 void Task::addGuiScope(const GuiScope& guiScope)
 {
-    emit privateAddGuiScopeSignal(guiScope, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateAddGuiScope(guiScope);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, guiScope] {
+			privateAddGuiScope(guiScope);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 void Task::removeGuiScope(const GuiScope& guiScope)
 {
-    emit privateRemoveGuiScopeSignal(guiScope, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateRemoveGuiScope(guiScope);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, guiScope] {
+			privateRemoveGuiScope(guiScope);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 bool Task::doGuiScopesOverlap(const GuiScopes& guiScopesA, const GuiScopes& guiScopesB) const
@@ -544,12 +733,30 @@ float Task::getProgress() const
 
 void Task::setProgress(float progress, const QString& subtaskDescription /*= ""*/)
 {
-    emit privateSetProgressSignal(progress, subtaskDescription, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetProgress(progress, subtaskDescription);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, progress, subtaskDescription] {
+			privateSetProgress(progress, subtaskDescription);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 void Task::resetProgress(bool recursive /*= false*/)
 {
-    emit privateResetProgressSignal(recursive, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateResetProgress(recursive);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, recursive] {
+			privateResetProgress(recursive);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 QTimer& Task::getTimer(const TimerType& timerType)
@@ -564,37 +771,106 @@ void Task::setTimerInterval(const TimerType& timerType, std::uint32_t interval)
 
 void Task::setSubtasks(std::uint32_t numberOfSubtasks)
 {
-    emit privateSetSubtasksSignal(numberOfSubtasks, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetSubtasks(numberOfSubtasks);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, numberOfSubtasks] {
+			privateSetSubtasks(numberOfSubtasks);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 void Task::setSubtasks(const QStringList& subtasksNames)
 {
-    emit privateSetSubtasksSignal(subtasksNames, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetSubtasks(subtasksNames);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, subtasksNames] {
+			privateSetSubtasks(subtasksNames);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 void Task::setSubtaskStarted(std::uint32_t subtaskIndex, const QString& progressDescription /*= QString()*/)
 {
-    emit privateSetSubtaskStartedSignal(subtaskIndex, progressDescription, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetSubtaskStarted(subtaskIndex, progressDescription);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, subtaskIndex, progressDescription] {
+        privateSetSubtaskStarted(subtaskIndex, progressDescription);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 void Task::setSubtaskStarted(const QString& subtaskName, const QString& progressDescription /*= QString()*/)
 {
-    emit privateSetSubtaskStartedSignal(subtaskName, progressDescription, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetSubtaskStarted(subtaskName, progressDescription);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, subtaskName, progressDescription] {
+			privateSetSubtaskStarted(subtaskName, progressDescription);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 void Task::setSubtaskFinished(std::uint32_t subtaskIndex, const QString& progressDescription /*= QString()*/)
 {
-    emit privateSetSubtaskFinishedSignal(subtaskIndex, progressDescription, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetSubtaskFinished(subtaskIndex, progressDescription);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, subtaskIndex, progressDescription] {
+			privateSetSubtaskFinished(subtaskIndex, progressDescription);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 void Task::setSubtaskFinished(const QString& subtaskName, const QString& progressDescription /*= QString()*/)
 {
-    emit privateSetSubtaskFinishedSignal(subtaskName, progressDescription, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        qDebug() << __FUNCTION__ << "MAIN_THREAD";
+        privateSetSubtaskFinished(subtaskName, progressDescription);
+        QCoreApplication::processEvents();
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, subtaskName, progressDescription]() {
+			qDebug() << __FUNCTION__ << "WORKER_THREAD";
+            privateSetSubtaskFinished(subtaskName, progressDescription);
+            QCoreApplication::processEvents();
+        },
+        Qt::QueuedConnection
+    );
+
+    QCoreApplication::processEvents();
 }
 
 void Task::setSubtaskName(std::uint32_t subtaskIndex, const QString& subtaskName)
 {
-    emit privateSetSubtaskNameSignal(subtaskIndex, subtaskName, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetSubtaskName(subtaskIndex, subtaskName);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, subtaskIndex, subtaskName] {
+			privateSetSubtaskName(subtaskIndex, subtaskName);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 QStringList Task::getSubtasksNames() const
@@ -645,7 +921,16 @@ QString Task::getProgressDescription() const
 
 void Task::setProgressDescription(const QString& progressDescription, std::uint32_t clearDelay /*= 0*/)
 {
-    emit privateSetProgressDescriptionSignal(progressDescription, clearDelay, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetProgressDescription(progressDescription, clearDelay);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, progressDescription, clearDelay] {
+			privateSetProgressDescription(progressDescription, clearDelay);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 QString Task::getProgressText() const
@@ -655,7 +940,16 @@ QString Task::getProgressText() const
 
 void Task::setProgressTextFormatter(const ProgressTextFormatter& progressTextFormatter)
 {
-    emit privateSetProgressTextFormatterSignal(progressTextFormatter, QPrivateSignal());
+    if (QThread::currentThread() == thread()) {
+        privateSetProgressTextFormatter(progressTextFormatter);
+        return;
+    }
+
+    QMetaObject::invokeMethod(this, [this, progressTextFormatter] {
+			privateSetProgressTextFormatter(progressTextFormatter);
+        },
+        Qt::QueuedConnection
+    );
 }
 
 QString Task::getStandardProgressText() const
@@ -699,8 +993,14 @@ void Task::updateProgress()
 //    qDebug() << __FUNCTION__ << getName();
 //#endif
 
-    if (core() == nullptr)
+    if (!core())
         return;
+
+    qDebug() << "status =" << static_cast<int>(_status)
+        << "mode =" << static_cast<int>(_progressMode)
+        << "done =" << _subtasks.count(true)
+        << "size =" << _subtasks.size()
+        << "progress =" << _progress;
 
     switch (_progressMode) {
         case ProgressMode::Manual:
@@ -1305,7 +1605,7 @@ void Task::privateSetSubtasks(std::uint32_t numberOfSubtasks)
     if (numberOfSubtasks == 0)
         return;
 
-    const auto numberOfBits = numberOfSubtasks * 8;
+    const auto numberOfBits = numberOfSubtasks;
 
     _subtasks.clear();
     _subtasks.resize(numberOfBits);
@@ -1368,14 +1668,17 @@ void Task::privateSetSubtaskStarted(const QString& subtaskName, const QString& p
 
 void Task::privateSetSubtaskFinished(std::uint32_t subtaskIndex, const QString& progressDescription)
 {
-    if (_progressMode != ProgressMode::Subtasks)
+    if (_progressMode != ProgressMode::Subtasks) {
+        qDebug() << "return: not in Subtasks mode";
         return;
+    }
 
-    if (subtaskIndex >= _subtasks.count())
+    if (subtaskIndex >= _subtasks.count()) {
+        qDebug() << "return: index out of range";
         return;
+    }
 
     _subtasks.setBit(subtaskIndex, true);
-    
     updateProgress();
 
     const auto subtaskName = getSubtasksName(subtaskIndex);
@@ -1386,6 +1689,8 @@ void Task::privateSetSubtaskFinished(std::uint32_t subtaskIndex, const QString& 
         privateSetProgressDescription(progressDescription);
 
     emit subtaskFinished(subtaskIndex, subtaskName);
+
+    QCoreApplication::processEvents();
 }
 
 void Task::privateSetSubtaskFinished(const QString& subtaskName, const QString& progressDescription /*= QString()*/)
