@@ -27,7 +27,7 @@ public:
      * Construct with \p datasets
      * @param datasets Mime data datasets for dropping
      */
-    DatasetsMimeData(Datasets datasets);
+    explicit DatasetsMimeData(Datasets datasets);
 
     /**
      * Get supported mime types
