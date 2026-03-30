@@ -41,6 +41,12 @@ public:
      */
     Datasets getDatasets() const;
 
+    /**
+     * Get stored datasets as a const reference
+     * @return Stored datasets reference
+     */
+    const Datasets& getDatasetsRef() const;
+
     /** Supported mime type */
     static QString format();
 
