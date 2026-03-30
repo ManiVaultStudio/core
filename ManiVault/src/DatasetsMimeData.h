@@ -33,25 +33,25 @@ public:
      * Get supported mime types
      * @return List of string of supported mime types
      */
-    QStringList formats() const override;
+    [[nodiscard]] QStringList formats() const override;
 
     /**
      * Get stored datasets
      * @return Stored datasets
      */
-    Datasets getDatasets() const;
+    [[nodiscard]] Datasets getDatasets() const;
 
     /**
      * Get stored datasets as a const reference
      * @return Stored datasets reference
      */
-    const Datasets& getDatasetsRef() const;
+    [[nodiscard]] const Datasets& getDatasetsRef() const;
 
     /**
      * Get count of stored datasets
      * @return Datasets count
      */
-    size_t getDatasetsCount() const {
+    [[nodiscard]] size_t getDatasetsCount() const {
         return _datasets.size();
     }
 
