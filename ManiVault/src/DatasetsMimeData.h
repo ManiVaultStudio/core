@@ -47,6 +47,14 @@ public:
      */
     const Datasets& getDatasetsRef() const;
 
+    /**
+     * Get count of stored datasets
+     * @return Datasets count
+     */
+    size_t getDatasetsCount() const {
+        return _datasets.size();
+    }
+
     /** Supported mime type */
     static QString format();
 
