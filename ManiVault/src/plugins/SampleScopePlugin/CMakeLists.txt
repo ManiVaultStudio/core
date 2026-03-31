@@ -31,7 +31,7 @@ add_library(${SAMPLE_CONTEXT_PLUGIN} SHARED ${SAMPLE_SCOPE_PLUGIN_SOURCES})
 
 target_include_directories(${SAMPLE_CONTEXT_PLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${SAMPLE_CONTEXT_PLUGIN} PRIVATE cxx_std_20)
+target_compile_features(${SAMPLE_CONTEXT_PLUGIN} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
 target_link_libraries(${SAMPLE_CONTEXT_PLUGIN} PRIVATE Qt6::Core)
 target_link_libraries(${SAMPLE_CONTEXT_PLUGIN} PRIVATE Qt6::Widgets)

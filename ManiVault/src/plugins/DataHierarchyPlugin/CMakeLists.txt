@@ -42,7 +42,7 @@ add_library(${DATAHIERARCHYPLUGIN} SHARED ${DATAHIERARCHY_SOURCES})
 
 target_include_directories(${DATAHIERARCHYPLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${DATAHIERARCHYPLUGIN} PRIVATE cxx_std_20)
+target_compile_features(${DATAHIERARCHYPLUGIN} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::WebEngineWidgets)

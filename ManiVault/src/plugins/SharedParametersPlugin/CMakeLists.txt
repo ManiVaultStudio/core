@@ -33,7 +33,7 @@ add_dependencies(${SHARED_PARAMETERS_PLUGIN} ${MV_PUBLIC_LIB})
 
 target_include_directories(${SHARED_PARAMETERS_PLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include")
 
-target_compile_features(${SHARED_PARAMETERS_PLUGIN} PRIVATE cxx_std_20)
+target_compile_features(${SHARED_PARAMETERS_PLUGIN} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
 target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
