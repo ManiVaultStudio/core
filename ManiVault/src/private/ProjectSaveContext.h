@@ -6,6 +6,8 @@
 
 #include <util/WorkflowContextBase.h>
 
+#include "Archiver.h"
+
 class ProjectSaveContext : public WorkflowContextBase
 {
 public:
@@ -14,6 +16,7 @@ public:
     QString             _temporaryDirectoryPath;    /** Path to the temporary directory */
     QString             _workspaceJsonPath;         /** Path to the workspace JSON file */
     QString             _projectJsonPath;           /** Path to the project JSON file */
+    mv::util::Archiver  _archiver;                  /** Archiver for handling the project archive */
 };
 
 using ProjectSaveContextStorage = QtTaskTree::Storage<ProjectSaveContext>;

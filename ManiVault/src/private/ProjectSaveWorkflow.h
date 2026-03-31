@@ -57,6 +57,9 @@ private:
 private: // Stages
 
     void setup(ProjectSaveContext& context);
-    void save(ProjectSaveContext& context);
+    void saveProjectJson(ProjectSaveContext& context);
+    void saveProjectMetaJson(ProjectSaveContext& context);
+	void saveWorkspaceJson(ProjectSaveContext& context);
+    void archive(ProjectSaveContext& context);
     void finalize(ProjectSaveContext& context);
 };

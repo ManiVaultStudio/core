@@ -986,12 +986,6 @@ void Task::updateProgress()
     if (!core())
         return;
 
-    qDebug() << "status =" << static_cast<int>(_status)
-        << "mode =" << static_cast<int>(_progressMode)
-        << "done =" << _subtasks.count(true)
-        << "size =" << _subtasks.size()
-        << "progress =" << _progress;
-
     switch (_progressMode) {
         case ProgressMode::Manual:
             break;
@@ -1503,10 +1497,6 @@ void Task::privateKill(bool recursive /*= true*/)
     }
 
     if (getMayKill() && (isRunning() || isRunningIndeterminate())) {
-#ifdef TASK_VERBOSE
-        qDebug() << __FUNCTION__ << getName();
-#endif
-
         privateSetAboutToBeAborted();
         privateSetAborting();
         

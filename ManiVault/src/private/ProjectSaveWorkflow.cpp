@@ -7,8 +7,6 @@
 #include "ProjectManager.h"
 #include "Archiver.h"
 
-#include <util/Miscellaneous.h>
-
 using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
@@ -40,19 +38,47 @@ Group ProjectSaveWorkflow::makeRecipe()
 
 			try {
                 setup(*projectSaveContext);
+                return true;
 			}
 			catch (const std::exception& e) {
 				projectSaveContext->_errorMessage = QString::fromUtf8(e.what());
+                return false;
 			}
 		}),
         QSyncTask([&] {
             auto projectSaveContext = contextAs<ProjectSaveContext>(contextStorage);
 
             try {
-                save(*projectSaveContext);
+                saveProjectJson(*projectSaveContext);
+                return true;
             }
             catch (const std::exception& e) {
                 projectSaveContext->_errorMessage = QString::fromUtf8(e.what());
+                return false;
+            }
+        }),
+        QSyncTask([&] {
+            auto projectSaveContext = contextAs<ProjectSaveContext>(contextStorage);
+
+            try {
+                saveProjectMetaJson(*projectSaveContext);
+                return true;
+            }
+            catch (const std::exception& e) {
+                projectSaveContext->_errorMessage = QString::fromUtf8(e.what());
+                return false;
+            }
+        }),
+        QSyncTask([&] {
+            auto projectSaveContext = contextAs<ProjectSaveContext>(contextStorage);
+
+            try {
+                saveWorkspaceJson(*projectSaveContext);
+                return true;
+            }
+            catch (const std::exception& e) {
+                projectSaveContext->_errorMessage = QString::fromUtf8(e.what());
+                return false;
             }
         }),
         QSyncTask([&] {
@@ -60,9 +86,11 @@ Group ProjectSaveWorkflow::makeRecipe()
 
             try {
                 finalize(*projectSaveContext);
+                return true;
             }
             catch (const std::exception& e) {
                 projectSaveContext->_errorMessage = QString::fromUtf8(e.what());
+                return false;
             }
         })
 	};
@@ -129,12 +157,12 @@ void ProjectSaveWorkflow::setup(ProjectSaveContext& context)
     if (QFileInfo(context._filePath).isDir())
         throw std::runtime_error("Project file path may not be a directory");
 
-    QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "OpenProject"));
+    context._temporaryDirectory = UniqueTemporaryDir(new QTemporaryDir(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "OpenProject")));
 
-    if (!temporaryDirectory.isValid())
+    if (!QFileInfo(context._temporaryDirectory->path()).exists())
         throw std::runtime_error("Unable to create temporary save-project directory");
 
-    context._temporaryDirectoryPath  = temporaryDirectory.path();
+    context._temporaryDirectoryPath  = context._temporaryDirectory->path();
     context._workspaceJsonPath       = QFileInfo(context._temporaryDirectoryPath, "workspace.json").absoluteFilePath();
     context._projectJsonPath         = QFileInfo(context._temporaryDirectoryPath, "project.json").absoluteFilePath();
 
@@ -147,11 +175,42 @@ void ProjectSaveWorkflow::setup(ProjectSaveContext& context)
 	Application::setSerializationAborted(false);
 }
 
-void ProjectSaveWorkflow::save(ProjectSaveContext& context)
+void ProjectSaveWorkflow::saveProjectJson(ProjectSaveContext& context)
 {
 #ifdef PROJECT_SAVE_WORKFLOW_VERBOSE
-    printLine("Recipe stage", "Save", 2);
+    printLine("Recipe stage", "Save project JSON", 2);
 #endif
+
+    projects().toJsonFile(context._projectJsonPath);
+}
+
+void ProjectSaveWorkflow::saveProjectMetaJson(ProjectSaveContext& context)
+{
+#ifdef PROJECT_SAVE_WORKFLOW_VERBOSE
+    printLine("Recipe stage", "Save project meta JSON", 2);
+#endif
+
+    if (auto project = projects().getCurrentProject()) {
+        //project->getProjectMetaAction().toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
+    }
+}
+
+void ProjectSaveWorkflow::saveWorkspaceJson(ProjectSaveContext& context)
+{
+#ifdef PROJECT_SAVE_WORKFLOW_VERBOSE
+    printLine("Recipe stage", "Save workspace JSON", 2);
+#endif
+
+    workspaces().saveWorkspace(context._workspaceJsonPath, false);
+}
+
+void ProjectSaveWorkflow::archive(ProjectSaveContext& context)
+{
+#ifdef PROJECT_SAVE_WORKFLOW_VERBOSE
+    printLine("Recipe stage", "Archive", 2);
+#endif
+
+    context._archiver.compressDirectory(context._temporaryDirectoryPath, context._filePath, true, 0);
 }
 
 void ProjectSaveWorkflow::finalize(ProjectSaveContext& context)
@@ -163,10 +222,14 @@ void ProjectSaveWorkflow::finalize(ProjectSaveContext& context)
     if (!context._errorMessage.isEmpty())
         throw std::runtime_error(context._errorMessage.toStdString());
 
-    //_projectManager.getRecentProjectsAction().addRecentFilePath(context._filePath);
+    mv::projects().getRecentProjectsAction().addRecentFilePath(context._filePath);
 
-    //auto project = _projectManager.getCurrentProject();
-    //project->updateContributors();
+    if (auto project = projects().getCurrentProject()) {
+        project->setFilePath(context._filePath);
+        project->updateContributors();
+    } else {
+        throw std::runtime_error("Current project is null");
+    }
 
     Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
 }

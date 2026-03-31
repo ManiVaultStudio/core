@@ -803,35 +803,6 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             _activeWorkflow = std::move(workflow);
             _activeWorkflow->start();
-
-         //   Application::requestOverrideCursor(Qt::WaitCursor);
-
-         //   
-         //   Archiver archiver;
-
-         //   QFileInfo projectJsonFileInfo(temporaryDirectoryPath, "project.json"), projectMetaJsonFileInfo(temporaryDirectoryPath, "meta.json");
-
-         //   Application::setSerializationAborted(false);
-
-         //   projects().toJsonFile(projectJsonFileInfo.absoluteFilePath());
-
-         //   _project->getProjectMetaAction().toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
-         //   
-         //   QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
-
-         //   workspaces().saveWorkspace(workspaceFileInfo.absoluteFilePath(), false);
-
-         //   archiver.compressDirectory(temporaryDirectoryPath, filePath, true, 0, password);
-
-         //   _recentProjectsAction.addRecentFilePath(filePath);
-
-         //   _project->setFilePath(filePath);
-
-         //   unsetTemporaryDirPath(TemporaryDirType::Save);
-
-         //   setState(State::Idle);
-
-         //   qDebug().noquote() << filePath << "saved successfully in " << saveTimer.elapsed() << "ms";
         }
         emit projectSaved(*_project);
     }
