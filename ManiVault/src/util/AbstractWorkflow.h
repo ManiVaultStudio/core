@@ -8,6 +8,8 @@
 #include "WorkflowRuntimeContext.h"
 #include "WorkflowResultBase.h"
 
+#include "ModalTask.h"
+
 #include <QtTaskTree>
 #include <QObject>
 
@@ -173,6 +175,7 @@ private:
     UniqueWorkflowContext               _initialWorkflowContext;    /** Initial workflow context, used for storing any necessary information for the workflow that needs to be accessed by the tasks in the workflow. */
     WorkflowRuntimeContextStorage       _contextStorage;            /** Storage for the workflow context, used for passing data between tasks. */
     UniqueWorkflowResultBase            _result;                    /** Result of the workflow, used for storing the success flag and error message after the workflow is done. It is the responsibility of the concrete workflow to populate this result. */
+    ModalTask                           _task;                      /** Modal task for showing the workflow progress in a modal dialog. This is used for workflows that need to run modally, and it will automatically show a modal dialog with the workflow progress when the workflow is started. The modal task will be set up with the title of the workflow, and it can be used for showing the progress of the workflow in the UI. */
 };
 
 } // namespace mv::util

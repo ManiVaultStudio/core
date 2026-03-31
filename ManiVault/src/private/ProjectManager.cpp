@@ -804,15 +804,9 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             _activeWorkflow = std::move(workflow);
             _activeWorkflow->start();
 
-         //   QElapsedTimer saveTimer;
-
-        	//saveTimer.start();
-
          //   Application::requestOverrideCursor(Qt::WaitCursor);
 
          //   
-         //   QCoreApplication::processEvents();
-
          //   Archiver archiver;
 
          //   QFileInfo projectJsonFileInfo(temporaryDirectoryPath, "project.json"), projectMetaJsonFileInfo(temporaryDirectoryPath, "meta.json");
@@ -1055,10 +1049,6 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
             currentProject->getOverrideApplicationStatusBarAction().restoreState();
             currentProject->getProjectMetaAction().getApplicationVersionAction().setVersion(Application::current()->getVersion());
 
-            /* TODO: Fix plugin status bar action visibility
-            currentProject->getStatusBarVisibleAction().restoreState();
-            currentProject->getStatusBarOptionsAction().restoreState();
-            */
             unsetTemporaryDirPath(TemporaryDirType::Publish);
 
             Application::current()->restoreOverrideCursor();

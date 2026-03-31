@@ -711,4 +711,25 @@ QString getFilenameFromWaterButlerMetadata(const QByteArray& raw)
 
 	return {};
 }
+
+void printLine(const QString& key, const QVariant& value /*= {}*/, int indent /*= 0*/, int colonColumn /*= 24*/)
+{
+    const QString indentStr(indent, ' ');
+    const QString left = indentStr + key;
+
+    if (!value.isValid()) {
+        qDebug().noquote() << left;
+        return;
+    }
+
+    int spaces = colonColumn - left.size();
+
+    if (spaces < 1) {
+        qDebug().noquote() << left + " : " + value.toString();
+        return;
+    }
+
+    qDebug().noquote() << left + QString(spaces, ' ') + ": " + value.toString();
+}
+
 }

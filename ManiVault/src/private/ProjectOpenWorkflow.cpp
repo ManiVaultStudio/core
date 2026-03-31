@@ -20,7 +20,7 @@ ProjectOpenWorkflow::ProjectOpenWorkflow(const QString& filePath, QObject* paren
 
 Group ProjectOpenWorkflow::makeRecipe()
 {
-    auto contextStorage = this->contextStorage();
+    auto& contextStorage = this->contextStorage();
 
 	return Group{
         contextStorage,

@@ -7,11 +7,17 @@
 #include "ProjectManager.h"
 #include "Archiver.h"
 
+#include <util/Miscellaneous.h>
+
 using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
 
 using namespace QtTaskTree;
+
+#ifdef _DEBUG
+	#define PROJECT_SAVE_WORKFLOW_VERBOSE
+#endif
 
 ProjectSaveWorkflow::ProjectSaveWorkflow(const QString& filePath, QObject* parent) :
     AbstractWorkflow(createContext(filePath), "Project Save", parent)
@@ -20,7 +26,11 @@ ProjectSaveWorkflow::ProjectSaveWorkflow(const QString& filePath, QObject* paren
 
 Group ProjectSaveWorkflow::makeRecipe()
 {
-    auto contextStorage = this->contextStorage();
+#ifdef PROJECT_SAVE_WORKFLOW_VERBOSE
+    printLine("Stage", "Make recipe");
+#endif
+
+    auto& contextStorage = this->contextStorage();
 
 	return Group{
 		contextStorage,
@@ -60,17 +70,25 @@ Group ProjectSaveWorkflow::makeRecipe()
 
 void ProjectSaveWorkflow::setupStorage(WorkflowRuntimeContext& context)
 {
-    qDebug() << __FUNCTION__;
+#ifdef PROJECT_SAVE_WORKFLOW_VERBOSE
+    printLine("Stage", "Setup storage", 1);
+#endif
 }
 
 void ProjectSaveWorkflow::onStorageDone(const WorkflowRuntimeContext& context)
 {
-    qDebug() << __FUNCTION__;
+#ifdef PROJECT_SAVE_WORKFLOW_VERBOSE
+    printLine("Stage", "Storage done", 1);
+#endif
 }
 
 void ProjectSaveWorkflow::handleDone(QtTaskTree::DoneWith status)
 {
     AbstractWorkflow::handleDone(status);
+    
+#ifdef PROJECT_SAVE_WORKFLOW_VERBOSE
+    printLine("Stage", "Handle done", 1);
+#endif
 
     if (const auto result = resultAs<ProjectSaveResult>()) {
         const auto duration = getDuration();
@@ -102,7 +120,11 @@ UniqueWorkflowContext ProjectSaveWorkflow::createContext(const QString& filePath
 
 void ProjectSaveWorkflow::setup(ProjectSaveContext& context)
 {
-    qDebug() << __FUNCTION__;
+#ifdef PROJECT_SAVE_WORKFLOW_VERBOSE
+    printLine("Stage", "Setup", 1);
+#endif
+
+    Application::requestOverrideCursor(Qt::WaitCursor);
 
     if (QFileInfo(context._filePath).isDir())
         throw std::runtime_error("Project file path may not be a directory");
@@ -116,20 +138,27 @@ void ProjectSaveWorkflow::setup(ProjectSaveContext& context)
     context._workspaceJsonPath       = QFileInfo(context._temporaryDirectoryPath, "workspace.json").absoluteFilePath();
     context._projectJsonPath         = QFileInfo(context._temporaryDirectoryPath, "project.json").absoluteFilePath();
 
-    qDebug() << "Created temporary directory for saving project: " << context._temporaryDirectoryPath;
+#ifdef PROJECT_SAVE_WORKFLOW_VERBOSE
+    printLine("Temp. Dir", context._temporaryDirectoryPath, 2);
+    printLine("Workspace JSON", context._workspaceJsonPath, 2);
+    printLine("Project JSON", context._projectJsonPath, 2);
+#endif
 
 	Application::setSerializationAborted(false);
-    Application::requestOverrideCursor(Qt::WaitCursor);
 }
 
 void ProjectSaveWorkflow::save(ProjectSaveContext& context)
 {
-    qDebug() << __FUNCTION__;
+#ifdef PROJECT_SAVE_WORKFLOW_VERBOSE
+    printLine("Stage", "Save", 1);
+#endif
 }
 
 void ProjectSaveWorkflow::finalize(ProjectSaveContext& context)
 {
-    qDebug() << __FUNCTION__;
+#ifdef PROJECT_SAVE_WORKFLOW_VERBOSE
+    printLine("Stage", "Finalize", 1);
+#endif
 
     if (!context._errorMessage.isEmpty())
         throw std::runtime_error(context._errorMessage.toStdString());

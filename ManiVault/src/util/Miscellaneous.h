@@ -285,4 +285,13 @@ CORE_EXPORT QString getFilenameFromUrlPath(const QUrl& effectiveUrl);
  */
 CORE_EXPORT QString getFilenameFromWaterButlerMetadata(const QByteArray& raw);
 
+/**
+ * Print a key-value pair with optional indentation and aligned colons
+ * @param key Key to print
+ * @param value Value to print (default is an invalid QVariant, which will be printed as "null")
+ * @param indent Number of spaces to indent (default is 0)
+ * @param colonColumn Column at which to align the colon (default is 24)
+ */
+CORE_EXPORT void printLine(const QString& key, const QVariant& value = {}, int indent = 0, int colonColumn = 24);
+
 }
