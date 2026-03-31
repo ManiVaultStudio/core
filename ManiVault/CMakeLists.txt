@@ -332,7 +332,7 @@ target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${valijson_SOURCE_DIR}/include")
 
-target_compile_features(${MV_PUBLIC_LIB} PRIVATE cxx_std_20)
+target_compile_features(${MV_PUBLIC_LIB} PUBLIC cxx_std_20)
 
 target_compile_definitions(${MV_PUBLIC_LIB} 
     PRIVATE 
