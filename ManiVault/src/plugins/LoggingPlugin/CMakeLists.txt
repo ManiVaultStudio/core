@@ -31,7 +31,7 @@ add_library(${LOGGINGPLUGIN} SHARED ${LOGGING_SOURCES})
 
 target_include_directories(${LOGGINGPLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${LOGGINGPLUGIN} PRIVATE cxx_std_20)
+target_compile_features(${LOGGINGPLUGIN} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
 target_link_libraries(${LOGGINGPLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${LOGGINGPLUGIN} PRIVATE Qt6::WebEngineWidgets)

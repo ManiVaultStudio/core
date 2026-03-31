@@ -37,7 +37,7 @@ add_library(ManiVault::${IMAGEDATA} ALIAS ${IMAGEDATA})
 
 target_include_directories(${IMAGEDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${IMAGEDATA} PUBLIC cxx_std_20)
+target_compile_features(${IMAGEDATA} PUBLIC cxx_std_${MV_CXX_STANDARD})
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)

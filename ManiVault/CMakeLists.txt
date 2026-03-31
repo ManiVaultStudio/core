@@ -17,7 +17,9 @@ set(MV_PUBLIC_LIB Core)                      # A public shared library used by p
 # -----------------------------------------------------------------------------
 # CMake Settings
 # -----------------------------------------------------------------------------
-set(CMAKE_CXX_STANDARD 20)
+set(MV_CXX_STANDARD 20)
+
+set(CMAKE_CXX_STANDARD ${MV_CXX_STANDARD})
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -332,7 +334,7 @@ target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${valijson_SOURCE_DIR}/include")
 
-target_compile_features(${MV_PUBLIC_LIB} PUBLIC cxx_std_20)
+target_compile_features(${MV_PUBLIC_LIB} PUBLIC cxx_std_${MV_CXX_STANDARD})
 
 target_compile_definitions(${MV_PUBLIC_LIB} 
     PRIVATE 
@@ -394,7 +396,7 @@ target_include_directories(${MV_EXE} PRIVATE
 target_include_directories(${MV_EXE} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
 target_include_directories(${MV_EXE} PRIVATE "${valijson_SOURCE_DIR}/include")
 
-target_compile_features(${MV_EXE} PRIVATE cxx_std_20)
+target_compile_features(${MV_EXE} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
 target_compile_definitions(${MV_EXE} PRIVATE VALIJSON_USE_EXCEPTIONS=1)
 
