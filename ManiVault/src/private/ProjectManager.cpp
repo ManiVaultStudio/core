@@ -375,24 +375,13 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
         setState(State::OpeningProject);
 
-        // setTemporaryDirPath(TemporaryDirType::Open, ctx.temporaryDirectoryPath);
-        // emit projectAboutToBeOpened(*_project);
-
         auto workflow = std::make_unique<ProjectOpenWorkflow>(filePath, this);
 
         connect(workflow.get(), &ProjectOpenWorkflow::finished, this, [this, filePath, workflowPtr = workflow.get()](bool success, const QString& error) {
             setState(State::Idle);
 
             if (success) {
-                setState(State::Idle);
                 emit projectOpened(*_project);
-
-                const auto ms   = workflowPtr->getDuration();
-                const auto text = (ms < 1000) ? QString("%1 loaded successfully in %2 ms").arg(filePath).arg(ms) : QString("%1 loaded successfully in %2 s").arg(filePath).arg(ms / 1000.0, 0, 'f', 1);
-
-                help().addNotification("Project loaded", text);
-            } else {
-                help().addNotification("Error", "Unable to load ManiVault project: " + error);
             }
         });
 
@@ -806,13 +795,14 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 if (success) {
                     setState(State::Idle);
                     emit projectOpened(*_project);
-
-                    
                 }
                 else {
                     
                 }
             });
+
+            _activeWorkflow = std::move(workflow);
+            _activeWorkflow->start();
 
          //   QElapsedTimer saveTimer;
 

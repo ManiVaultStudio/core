@@ -6,14 +6,14 @@
 
 #include <util/WorkflowContextBase.h>
 
-struct CORE_EXPORT ProjectSaveContext : public WorkflowContextBase
+class ProjectSaveContext : public WorkflowContextBase
 {
+public:
     QString             _filePath;                  /** Path to the project file */
     UniqueTemporaryDir  _temporaryDirectory;        /** Temporary directory for extracting project files */
     QString             _temporaryDirectoryPath;    /** Path to the temporary directory */
     QString             _workspaceJsonPath;         /** Path to the workspace JSON file */
     QString             _projectJsonPath;           /** Path to the project JSON file */
-    QString             _error;                     /** Error message, if any */
 };
 
 using ProjectSaveContextStorage = QtTaskTree::Storage<ProjectSaveContext>;

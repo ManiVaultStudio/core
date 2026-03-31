@@ -6,12 +6,12 @@
 
 #include "ManiVaultGlobals.h"
 
-struct CORE_EXPORT WorkflowContextBase
+class CORE_EXPORT WorkflowContextBase
 {
 public:
     virtual ~WorkflowContextBase() = default;
 
-    QString     _error;
+    QString     _errorMessage;
 };
 
 using UniqueTemporaryDir = std::unique_ptr<QTemporaryDir>;

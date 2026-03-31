@@ -32,7 +32,7 @@ Group ProjectSaveWorkflow::makeRecipe()
                 setup(*projectSaveContext);
 			}
 			catch (const std::exception& e) {
-				projectSaveContext->_error = QString::fromUtf8(e.what());
+				projectSaveContext->_errorMessage = QString::fromUtf8(e.what());
 			}
 		}),
         QSyncTask([&] {
@@ -42,7 +42,7 @@ Group ProjectSaveWorkflow::makeRecipe()
                 save(*projectSaveContext);
             }
             catch (const std::exception& e) {
-                projectSaveContext->_error = QString::fromUtf8(e.what());
+                projectSaveContext->_errorMessage = QString::fromUtf8(e.what());
             }
         }),
         QSyncTask([&] {
@@ -52,7 +52,7 @@ Group ProjectSaveWorkflow::makeRecipe()
                 finalize(*projectSaveContext);
             }
             catch (const std::exception& e) {
-                projectSaveContext->_error = QString::fromUtf8(e.what());
+                projectSaveContext->_errorMessage = QString::fromUtf8(e.what());
             }
         })
 	};
@@ -70,22 +70,25 @@ void ProjectSaveWorkflow::onStorageDone(const WorkflowRuntimeContext& context)
 
 void ProjectSaveWorkflow::handleDone(QtTaskTree::DoneWith status)
 {
-	AbstractWorkflow::handleDone(status);
+    AbstractWorkflow::handleDone(status);
 
-    auto projectSaveResult = resultAs<ProjectSaveResult>();
+    if (const auto result = resultAs<ProjectSaveResult>()) {
+        const auto duration = getDuration();
+        const auto text     = (duration < 1000) ? QString("%1 saved successfully in %2 ms").arg(result->_filePath).arg(duration) : QString("%1 saved successfully in %2 s").arg(result->_filePath).arg(duration / 1000.0, 0, 'f', 1);
 
-    const auto duration = getDuration();
-    const auto text     = (duration < 1000) ? QString("%1 saved successfully in %2 ms").arg(projectSaveResult->_filePath).arg(duration) : QString("%1 saved successfully in %2 s").arg(projectSaveResult->_filePath).arg(duration / 1000.0, 0, 'f', 1);
-
-    if (status == QtTaskTree::DoneWith::Success)
-        help().addNotification("Project saved", text);
-    else
-        help().addNotification("Error", "Unable to save ManiVault project: " + projectSaveResult->_errorMessage);
+        if (status == QtTaskTree::DoneWith::Success)
+            help().addNotification("Project saved", text, StyledIcon("floppy-disk"));
+        else
+            help().addNotification("Error", "Unable to save ManiVault project: " + result->_errorMessage, StyledIcon("exclamation-triangle"));
+    }
+    else {
+        throw std::runtime_error("Unexpected error: ProjectSaveResult is null");
+    }
 }
 
 void ProjectSaveWorkflow::initResult(UniqueWorkflowResultBase& result)
 {
-    result = UniqueProjectSaveResult();
+    result.reset(new ProjectSaveResult());
 }
 
 UniqueWorkflowContext ProjectSaveWorkflow::createContext(const QString& filePath)
@@ -128,8 +131,8 @@ void ProjectSaveWorkflow::finalize(ProjectSaveContext& context)
 {
     qDebug() << __FUNCTION__;
 
-    if (!context._error.isEmpty())
-        throw std::runtime_error(context._error.toStdString());
+    if (!context._errorMessage.isEmpty())
+        throw std::runtime_error(context._errorMessage.toStdString());
 
     //_projectManager.getRecentProjectsAction().addRecentFilePath(context._filePath);
 

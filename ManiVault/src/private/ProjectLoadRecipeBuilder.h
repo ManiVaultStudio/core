@@ -9,8 +9,6 @@
 #include "ProjectOpenContext.h"
 #include "WorkspaceLoadRecipeBuilder.h"
 
-struct ProjectOpenContext;
-
 /** Context for project loading */
 struct ProjectLoadContext
 {

@@ -32,7 +32,7 @@ Group ProjectOpenWorkflow::makeRecipe()
                 setup(*projectOpenContext);
 			}
 			catch (const std::exception& e) {
-                projectOpenContext->_error = QString::fromUtf8(e.what());
+                projectOpenContext->_errorMessage = QString::fromUtf8(e.what());
 			}
 		}),
         QSyncTask([&] {
@@ -42,7 +42,7 @@ Group ProjectOpenWorkflow::makeRecipe()
                 extractProjectArchive(*projectOpenContext);
             }
             catch (const std::exception& e) {
-                projectOpenContext->_error = QString::fromUtf8(e.what());
+                projectOpenContext->_errorMessage = QString::fromUtf8(e.what());
             }
         }),
         //_projectLoadRecipeBuilder.makeRecipe(contextStorage, _projectLoadContextStorage),
@@ -53,7 +53,7 @@ Group ProjectOpenWorkflow::makeRecipe()
                 finalize(*projectOpenContext);
             }
             catch (const std::exception& e) {
-                projectOpenContext->_error = QString::fromUtf8(e.what());
+                projectOpenContext->_errorMessage = QString::fromUtf8(e.what());
             }
         })
 	};
@@ -69,9 +69,26 @@ void ProjectOpenWorkflow::onStorageDone(const WorkflowRuntimeContext& context)
     qDebug() << __FUNCTION__;
 }
 
+void ProjectOpenWorkflow::handleDone(QtTaskTree::DoneWith status)
+{
+    AbstractWorkflow::handleDone(status);
+
+    if (const auto result = resultAs<ProjectOpenResult>()) {
+        const auto duration = getDuration();
+        const auto text     = (duration < 1000) ? QString("%1 opened successfully in %2 ms").arg(result->_filePath).arg(duration) : QString("%1 saved successfully in %2 s").arg(result->_filePath).arg(duration / 1000.0, 0, 'f', 1);
+
+        if (status == QtTaskTree::DoneWith::Success)
+            help().addNotification("Project opened", text, StyledIcon("folder-open"));
+        else
+            help().addNotification("Error", "Unable to open ManiVault project: " + result->_errorMessage, StyledIcon("exclamation-triangle"));
+    } else {
+        throw std::runtime_error("Unexpected error: ProjectOpenResult is null");
+    }
+}
+
 void ProjectOpenWorkflow::initResult(UniqueWorkflowResultBase& result)
 {
-    result = UniqueProjectOpenResult();
+    result.reset(new ProjectOpenResult());
 }
 
 UniqueWorkflowContext ProjectOpenWorkflow::createContext(const QString& filePath)
@@ -121,8 +138,8 @@ void ProjectOpenWorkflow::extractProjectArchive(ProjectOpenContext& context)
 
 void ProjectOpenWorkflow::finalize(ProjectOpenContext& context)
 {
-    if (!context._error.isEmpty())
-        throw std::runtime_error(context._error.toStdString());
+    if (!context._errorMessage.isEmpty())
+        throw std::runtime_error(context._errorMessage.toStdString());
 
     mv::projects().getRecentProjectsAction().addRecentFilePath(context._filePath);
 

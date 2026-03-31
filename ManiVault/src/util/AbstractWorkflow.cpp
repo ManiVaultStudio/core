@@ -26,6 +26,8 @@ void AbstractWorkflow::start()
 
 	_timer.restart();
 
+    initResult(_result);
+
     _runner.start(
         makeRecipe(),
         [this](QtTaskTree::QTaskTree& tree) {

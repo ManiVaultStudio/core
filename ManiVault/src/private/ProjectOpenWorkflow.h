@@ -31,6 +31,12 @@ protected:
      */
     void onStorageDone(const WorkflowRuntimeContext& context) override;
 
+    /**
+     * Perform any necessary handling when the workflow is done, for example by performing any necessary cleanup or by emitting a signal indicating that the workflow is done. The handleDone method will be called with a DoneWith status when the workflow is done, allowing derived classes to perform any necessary handling when the workflow is done based on the completion status of the workflow.
+     * @param status DoneWith status indicating whether the workflow finished successfully, with an error, or was canceled. The handleDone method will be called with a DoneWith status when the workflow is done, allowing derived classes to perform any necessary handling when the workflow is done based on the completion status of the workflow.
+     */
+    void handleDone(QtTaskTree::DoneWith status) override;
+
 protected: // Workflow result initialization
 
     /**

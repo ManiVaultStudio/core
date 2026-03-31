@@ -6,8 +6,9 @@
 
 #include <util/WorkflowContextBase.h>
 
-struct ProjectOpenContext : public WorkflowContextBase
+class ProjectOpenContext : public WorkflowContextBase
 {
+public:
     QString             _filePath;
     bool                _loadWorkspace = true;
     bool                _importDataOnly = false;
