@@ -17,20 +17,17 @@
 
 #include <util/Exception.h>
 #include <util/Serialization.h>
-#include <util/Timer.h>
 #include <util/StandardPaths.h>
 #include "Archiver.h"
 
 #include <widgets/FileDialog.h>
 
-#include <QStandardPaths>
 #include <QGridLayout>
 #include <QEventLoop>
 #include <QHeaderView>
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QMetaObject>
-#include <QtConcurrent>
 
 #include <exception>
 
@@ -38,8 +35,6 @@
 #include "ProjectSaveWorkflow.h"
 
 #include "Task.h"
-
-#include "ZstdBlobCodec.h"
 
 #ifdef _DEBUG
     #define PROJECT_MANAGER_VERBOSE
@@ -65,8 +60,7 @@ ProjectManager::ProjectManager(QObject* parent) :
     _pluginManagerAction(nullptr, "Plugin Browser..."),
     _showStartPageAction(nullptr, "Start Page...", true),
     _backToProjectAction(nullptr, "Back to project"),
-    _projectsListModel(StandardItemModel::PopulationMode::AutomaticSynchronous, this),
-    _openTask(this, "OPEN")
+    _projectsListModel(StandardItemModel::PopulationMode::AutomaticSynchronous, this)
 {
     //_newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     //_newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -383,10 +377,12 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             if (success) {
                 emit projectOpened(*_project);
             }
+
+            resetActiveWorkflow();
         });
 
-        _activeWorkflow = std::move(workflow);
-        _activeWorkflow->start();
+        setActiveWorkflow(std::move(workflow));
+        getActiveWorkflow()->start();
     }
     catch (const std::exception& e) {
         setState(State::Idle);
@@ -796,13 +792,12 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                     setState(State::Idle);
                     emit projectOpened(*_project);
                 }
-                else {
-                    
-                }
+
+                resetActiveWorkflow();
             });
 
-            _activeWorkflow = std::move(workflow);
-            _activeWorkflow->start();
+            setActiveWorkflow(std::move(workflow));
+            getActiveWorkflow()->start();
         }
         emit projectSaved(*_project);
     }
@@ -1215,6 +1210,29 @@ QDir ProjectManager::getDownloadedProjectsDir() const
     return resultDir;
 }
 
+util::AbstractWorkflow* ProjectManager::getActiveWorkflow()
+{
+	return _activeWorkflow.get();
+}
+
+bool ProjectManager::hasActiveWorkflow() const
+{
+	return _activeWorkflow != nullptr;
+}
+
+void ProjectManager::setActiveWorkflow(util::UniqueAbstractWorkflow activeWorkflow)
+{
+	if (_activeWorkflow)
+		throw std::runtime_error("Cannot set active workflow, another workflow is already active");
+
+	_activeWorkflow = std::move(activeWorkflow);
+}
+
+void ProjectManager::resetActiveWorkflow()
+{
+    _activeWorkflow.reset();
+}
+
 QString ProjectManager::chooseProjectFileViaDialog()
 {
 	FileOpenDialog fileOpenDialog;
@@ -1362,7 +1380,6 @@ void ProjectManager::createProject()
     mv::help().getShowLearningCenterPageAction().setChecked(false);
 
     _showStartPageAction.setChecked(false);
-    
 }
 
 void ProjectManager::fromVariantMap(const QVariantMap& variantMap)

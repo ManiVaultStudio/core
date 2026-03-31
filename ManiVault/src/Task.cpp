@@ -986,6 +986,7 @@ void Task::updateProgress()
     if (!core())
         return;
 
+
     switch (_progressMode) {
         case ProgressMode::Manual:
             break;

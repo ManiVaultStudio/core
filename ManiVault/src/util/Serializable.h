@@ -10,6 +10,12 @@
 
 #include <QString>
 #include <QJsonDocument>
+#include <QPointer>
+
+namespace mv
+{
+    class Task;
+}
 
 namespace mv::util {
 
@@ -149,6 +155,26 @@ public:
      */
     std::int32_t getSerializationCountTo() const;
 
+public: // Task related
+
+    /**
+     * Get task that the serializable object belongs to (if any)
+     * @return Task that the serializable object belongs to (if any)
+     */
+    QPointer<Task> getTask() const;
+
+    /**
+     * Whether the serializable object belongs to a task
+     * @return Whether the serializable object belongs to a task
+     */
+    bool hasTask() const;
+
+    /**
+     * Set task that the serializable object belongs to (if any)
+     * @param task Task that the serializable object belongs to (if any)
+     */
+    void setTask(Task* task);
+
 protected: // Serialization
 
     /**
@@ -210,6 +236,7 @@ private:
     QString         _id;                        /** Globally unique identifier of the serializable object */
     QString         _serializationName;         /** Serialization name */
     std::int32_t    _serializationCounter[2];   /** Serialization counter (used to query how many times the action is serialized to- and from) */
+    QPointer<Task>  _task;                      /** Task that the serializable object belongs to (if any) */    
 };
 
 }

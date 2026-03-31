@@ -73,8 +73,6 @@ void AbstractWorkflow::handleDone(QtTaskTree::DoneWith doneWith)
     const bool success = (doneWith == QtTaskTree::DoneWith::Success);
 
     _task.setFinished();
-
-	emit finished(success, QString{});
 }
 
 void AbstractWorkflow::setupTree(QtTaskTree::QTaskTree& context)

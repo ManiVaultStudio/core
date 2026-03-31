@@ -126,10 +126,11 @@ void ProjectSaveWorkflow::handleDone(QtTaskTree::DoneWith status)
             help().addNotification("Project saved", text, StyledIcon("floppy-disk"));
         else
             help().addNotification("Error", "Unable to save ManiVault project: " + result->_errorMessage, StyledIcon("exclamation-triangle"));
-    }
-    else {
+    } else {
         throw std::runtime_error("Unexpected error: ProjectSaveResult is null");
     }
+
+    emit finished(status == DoneWith::Success, QString{});
 }
 
 void ProjectSaveWorkflow::initResult(UniqueWorkflowResultBase& result)

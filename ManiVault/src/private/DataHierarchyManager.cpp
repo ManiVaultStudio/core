@@ -282,13 +282,32 @@ QVariantMap DataHierarchyManager::toVariantMap() const
 
         std::uint32_t sortIndex = 0;
 
+        if (hasTask()) {
+            QStringList subtaskNames;
+
+            subtaskNames.reserve(_items.size());
+
+            for (auto& dataHierarchyItem : _items) {
+                subtaskNames << dataHierarchyItem->getDataset()->getGuiName();
+            }
+
+            getTask()->setSubtasks(subtaskNames);
+            getTask()->setRunning();
+        }
+
         for (auto& dataHierarchyItem : _items) {
             if (dataHierarchyItem->hasParent())
                 continue;
 
             const auto datasetName = dataHierarchyItem->getDataset()->getGuiName();
 
+            if (hasTask())
+                getTask()->setSubtaskStarted(datasetName);
+
             auto dataHierarchyItemMap = dataHierarchyItem->toVariantMap();
+
+            if (hasTask())
+                getTask()->setSubtaskFinished(datasetName);
 
             QCoreApplication::processEvents();
 

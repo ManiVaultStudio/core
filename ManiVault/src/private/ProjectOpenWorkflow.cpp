@@ -100,6 +100,8 @@ void ProjectOpenWorkflow::handleDone(QtTaskTree::DoneWith status)
     } else {
         throw std::runtime_error("Unexpected error: ProjectOpenResult is null");
     }
+
+    emit finished(status == DoneWith::Success, QString{});
 }
 
 void ProjectOpenWorkflow::initResult(UniqueWorkflowResultBase& result)

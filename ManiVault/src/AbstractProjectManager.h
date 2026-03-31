@@ -31,6 +31,9 @@ namespace mv {
 namespace util
 {
     class BlobCodec;
+    class AbstractWorkflow;
+
+    using UniqueAbstractWorkflow = std::unique_ptr<AbstractWorkflow>;
 }
 
 /**
@@ -379,6 +382,29 @@ public: // State
         return _state == State::PublishingProject;
     }
 
+public: // Workflow
+
+	/**
+     * Get active workflow
+     * @return Pointer to the active workflow, or nullptr if no active workflow exists
+     */
+    virtual util::AbstractWorkflow* getActiveWorkflow() = 0;
+
+    /**
+     * Get whether there is an active workflow
+     * @return Boolean determining whether there is an active workflow
+     */
+    virtual bool hasActiveWorkflow() const = 0;
+
+    /**
+     * Set active workflow to \p activeWorkflow
+     * @param activeWorkflow Unique pointer to the active workflow
+     */
+    virtual void setActiveWorkflow(util::UniqueAbstractWorkflow activeWorkflow) = 0;
+
+    /** Reset active workflow (set it to nullptr) */
+    virtual void resetActiveWorkflow() = 0;
+
 public: // Miscellaneous
 
     /**
@@ -395,8 +421,6 @@ public: // Miscellaneous
     const Task& getProjectDownloadTask() const {
         return _projectDownloadTask;
     }
-
-    virtual ModalTask& getOpenTask() = 0;
 
 protected:
 
@@ -501,9 +525,9 @@ signals:
     void stateChanged(const State& state);
 
 private:
-    State                               _state;                         /** Determines the state of the project manager */
-    Task                                _projectDownloadTask;           /** Progress reporting project downloading */
-    QMap<TemporaryDirType, QString>     _temporaryDirPaths;             /** Temporary directories for file open/save etc. */
+    State                           _state;               /** Determines the state of the project manager */
+    Task                            _projectDownloadTask; /** Progress reporting project downloading */
+    QMap<TemporaryDirType, QString> _temporaryDirPaths;   /** Temporary directories for file open/save etc. */
 };
 
 }

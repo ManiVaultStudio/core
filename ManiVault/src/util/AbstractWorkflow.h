@@ -68,6 +68,15 @@ public:
     quint64 getDuration() const;
 
     /**
+     * Utility method for accessing the task associated with the workflow. This method allows tasks in the recipe to access the task associated with the workflow, which can be useful for updating the progress of the workflow or for checking the status of the workflow. The getTask method will return a reference to the Task object associated with the workflow, allowing tasks in the recipe to access it and use it for their execution.
+     * @return A reference to the Task object associated with the workflow, allowing tasks in the recipe to access it and use it for their execution. This can be useful for updating the progress of the workflow or for checking the status of the workflow.
+     */
+    Task& getTask()
+    {
+        return _task;
+    }
+
+    /**
      * Utility method for accessing the workflow context stored in the WorkflowRuntimeContextStorage. This method allows tasks in the recipe to access the workflow context and use the data stored in it for their execution, while also allowing for type safety when accessing the context. The contextAs method will attempt to dynamically cast the workflow context stored in the WorkflowRuntimeContextStorage to the specified type T, and it will return a pointer to the casted context if the cast is successful, or nullptr if the cast fails. This allows tasks in the recipe to access the workflow context and use the data stored in it for their execution, while also allowing for type safety when accessing the context.
      * @tparam T The type to which the workflow context should be cast. This should be a type that derives from WorkflowContextBase and is used for storing any necessary information for the workflow that needs to be accessed by the tasks in the workflow. The contextAs method will attempt to dynamically cast the workflow context stored in the WorkflowRuntimeContextStorage to the specified type T, and it will return a pointer to the casted context if the cast is successful, or nullptr if the cast fails. This allows tasks in the recipe to access the workflow context and use the data stored in it for their execution, while also allowing for type safety when accessing the context.
      * @param storage Reference to the workflow runtime context storage, used for passing data between tasks. The contextAs method will access the workflow context stored in the WorkflowRuntimeContextStorage and attempt to dynamically cast it to the specified type T, returning a pointer to the casted context if the cast is successful, or nullptr if the cast fails. This allows tasks in the recipe to access the workflow context and use the data stored in it for their execution, while also allowing for type safety when accessing the context.
@@ -177,5 +186,7 @@ private:
     UniqueWorkflowResultBase            _result;                    /** Result of the workflow, used for storing the success flag and error message after the workflow is done. It is the responsibility of the concrete workflow to populate this result. */
     ModalTask                           _task;                      /** Modal task for showing the workflow progress in a modal dialog. This is used for workflows that need to run modally, and it will automatically show a modal dialog with the workflow progress when the workflow is started. The modal task will be set up with the title of the workflow, and it can be used for showing the progress of the workflow in the UI. */
 };
+
+using UniqueAbstractWorkflow = std::unique_ptr<AbstractWorkflow>;
 
 } // namespace mv::util

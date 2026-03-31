@@ -20,7 +20,6 @@ Group DatasetsLoadRecipeBuilder::makeRecipe(const ProjectLoadContextStorage& pro
         }),
         QSyncTask([this, projectLoadContextStorage] {
             try {
-                mv::projects().getOpenTask().setFinished();
             }
             catch (const std::exception& e) {
                 projectLoadContextStorage->_error = QString::fromUtf8(e.what());
@@ -56,9 +55,6 @@ void DatasetsLoadRecipeBuilder::loadDatasets(const ProjectLoadContextStorage& pr
         subtaskNames << nonConstContext->_datasetName;
     }
 
-    mv::projects().getOpenTask().setRunning();
-    mv::projects().getOpenTask().setSubtasks(subtaskNames);
-    
     constexpr auto concurrencyMode = mv::util::ConcurrencyMode::Parallel;
 
     if (concurrencyMode == mv::util::ConcurrencyMode::Parallel) {

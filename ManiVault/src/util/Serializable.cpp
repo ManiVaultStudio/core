@@ -180,6 +180,21 @@ std::int32_t Serializable::getSerializationCountTo() const
     return getSerializationCount(Direction::To);
 }
 
+QPointer<Task> Serializable::getTask() const
+{
+    return _task;
+}
+
+bool Serializable::hasTask() const
+{
+    return !_task.isNull();
+}
+
+void Serializable::setTask(Task* task)
+{
+    _task = task;
+}
+
 void Serializable::fromVariantMap(Serializable* serializable, const QVariantMap& variantMap)
 {
 #ifdef SERIALIZABLE_VERBOSE
