@@ -4,12 +4,12 @@
 
 #pragma once
 
-#include "OpenProjectWorkflow.h"
-
 #include <AbstractProjectManager.h>
 
 #include <models/ProjectsListModel.h>
 #include <models/ProjectsTreeModel.h>
+
+#include <util/AbstractWorkflow.h>
 
 #include <QObject>
 
@@ -278,7 +278,7 @@ private:
     ProjectsListModel                           _projectsListModel;                 /** Projects list model */
     ProjectsTreeModel                           _projectsTreeModel;                 /** Projects tree model */
     QtTaskTree::QSingleTaskTreeRunner           _openRunner;                        /** Task tree runner for opening projects */
-    std::unique_ptr<OpenProjectWorkflow>        _activeOpenWorkflow;                /** Active workflow for opening a project */
+    std::unique_ptr<util::AbstractWorkflow>     _activeWorkflow;                    /** Active workflow  */
     ModalTask                                   _openTask;
 };
 

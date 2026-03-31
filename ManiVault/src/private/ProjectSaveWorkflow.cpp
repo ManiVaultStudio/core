@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ProjectSaveWorkflow.h"
+#include "ProjectSaveResult.h"
 #include "ProjectManager.h"
 #include "Archiver.h"
 
@@ -55,6 +56,36 @@ Group ProjectSaveWorkflow::makeRecipe()
             }
         })
 	};
+}
+
+void ProjectSaveWorkflow::setupStorage(WorkflowRuntimeContext& context)
+{
+    qDebug() << __FUNCTION__;
+}
+
+void ProjectSaveWorkflow::onStorageDone(const WorkflowRuntimeContext& context)
+{
+    qDebug() << __FUNCTION__;
+}
+
+void ProjectSaveWorkflow::handleDone(QtTaskTree::DoneWith status)
+{
+	AbstractWorkflow::handleDone(status);
+
+    auto projectSaveResult = resultAs<ProjectSaveResult>();
+
+    const auto duration = getDuration();
+    const auto text     = (duration < 1000) ? QString("%1 saved successfully in %2 ms").arg(projectSaveResult->_filePath).arg(duration) : QString("%1 saved successfully in %2 s").arg(projectSaveResult->_filePath).arg(duration / 1000.0, 0, 'f', 1);
+
+    if (status == QtTaskTree::DoneWith::Success)
+        help().addNotification("Project saved", text);
+    else
+        help().addNotification("Error", "Unable to save ManiVault project: " + projectSaveResult->_errorMessage);
+}
+
+void ProjectSaveWorkflow::initResult(UniqueWorkflowResultBase& result)
+{
+    result = UniqueProjectSaveResult();
 }
 
 UniqueWorkflowContext ProjectSaveWorkflow::createContext(const QString& filePath)

@@ -6,11 +6,10 @@
 
 #include "DataHierarchyLoadRecipeBuilder.h"
 #include "DatasetsLoadRecipeBuilder.h"
+#include "ProjectOpenContext.h"
 #include "WorkspaceLoadRecipeBuilder.h"
 
 struct ProjectOpenContext;
-
-using OpenProjectContextStorage = QtTaskTree::Storage<ProjectOpenContext>;
 
 /** Context for project loading */
 struct ProjectLoadContext
@@ -40,13 +39,8 @@ public:
     /** Construct recipe builder */
     ProjectLoadRecipeBuilder() = default;
 
-    /**
-     * Make a recipe for loading the project based on the data in \p projectLoadContextStorage
-     * @param projectLoadContextStorage The storage containing the project load context
-     * @param openProjectContextStorage The storage containing the open project context
-     * @return A QtTaskTree::Group representing the recipe for loading the project
-     */
-    QtTaskTree::Group makeRecipe(OpenProjectContextStorage& openProjectContextStorage, ProjectLoadContextStorage& projectLoadContextStorage);
+    QtTaskTree::Group makeRecipe(ProjectOpenContextStorage& openProjectContextStorage);
+
 private:
     DataHierarchyLoadRecipeBuilder      _dataHierarchyLoadRecipeBuilder;    /** Builder for the data hierarchy load recipe, which is used to create the stage of loading the datasets in the data hierarchy based on the dataset entries in \p dataHierarchyLoadContextStorage */
     DatasetsLoadRecipeBuilder           _datasetsLoadRecipeBuilder;         /** Builder for the datasets load recipe, which is used to create the stage of loading the datasets based on the dataset entries in \p datasetsLoadContextStorage */

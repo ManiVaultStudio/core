@@ -4,61 +4,18 @@
 
 #pragma once
 
-#include "ProjectLoadRecipeBuilder.h"
-#include "DataHierarchyLoadRecipeBuilder.h"
+#include <util/WorkflowContextBase.h>
 
-#include <util/AbstractWorkflow.h>
-
-#include <ModalTask.h>
-
-namespace mv
+struct ProjectOpenContext : public WorkflowContextBase
 {
-    class ProjectManager;
-}
-
-struct OpenProjectContext
-{
-    QString filePath;
-    bool loadWorkspace = true;
-    bool importDataOnly = false;
-    bool disableReadOnly = false;
-
-    std::unique_ptr<QTemporaryDir> temporaryDirectory;
-    QString temporaryDirectoryPath;
-    QString workspaceJsonPath;
-    QString projectJsonPath;
-
-    QString error;
+    QString             _filePath;
+    bool                _loadWorkspace = true;
+    bool                _importDataOnly = false;
+    bool                _disableReadOnly = false;
+    UniqueTemporaryDir  _temporaryDirectory;
+    QString             _temporaryDirectoryPath;
+    QString             _workspaceJsonPath;
+    QString             _projectJsonPath;
 };
 
-class OpenProjectWorkflow final : public mv::util::AbstractWorkflow
-{
-    Q_OBJECT
-
-public:
-    explicit OpenProjectWorkflow(mv::ProjectManager& projectManager, QObject* parent = nullptr);
-
-    void setInput(QString filePath, bool loadWorkspace, bool importDataOnly, bool disableReadOnly);
-
-    QtTaskTree::Group makeRecipe() override;
-
-private: // Stages
-
-    void setup(OpenProjectContext& context);
-    void extractProjectArchive(OpenProjectContext& context);
-    void finalize(OpenProjectContext& context);
-
-private:
-    mv::ProjectManager&         _projectManager;
-    QString                     _filePath;
-    bool                        _loadWorkspace = true;
-    bool                        _importDataOnly = false;
-    bool                        _disableReadOnly = false;
-    QString                     _finalError;
-    mv::Task                    _setupTask;
-    mv::Task                    _extractJsonTask;
-    mv::Task                    _loadDatasetsJsonTask;
-    mv::Task                    _loadWorkspaceJsonTask;
-    ProjectLoadContextStorage   _projectLoadContextStorage;
-    ProjectLoadRecipeBuilder    _projectLoadRecipeBuilder;
-};
+using ProjectOpenContextStorage = QtTaskTree::Storage<ProjectOpenContext>;

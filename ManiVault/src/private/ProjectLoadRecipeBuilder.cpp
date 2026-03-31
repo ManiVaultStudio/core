@@ -3,29 +3,31 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ProjectLoadRecipeBuilder.h"
-#include "OpenProjectWorkflow.h"
+#include "ProjectOpenContext.h"
 
 using namespace mv;
 
 using namespace QtTaskTree;
 
-Group ProjectLoadRecipeBuilder::makeRecipe(OpenProjectContextStorage& openProjectContextStorage, ProjectLoadContextStorage& projectLoadContextStorage)
+Group ProjectLoadRecipeBuilder::makeRecipe(ProjectOpenContextStorage& openProjectContextStorage)
 {
-    return Group{
-        projectLoadContextStorage,
+    return {};
 
-        QSyncTask([&openProjectContextStorage , &projectLoadContextStorage] {
-	        auto& context = *projectLoadContextStorage;
+  //  return Group{
+  //      projectLoadContextStorage,
 
-        	context = {};
+  //      QSyncTask([&openProjectContextStorage , &projectLoadContextStorage] {
+	 //       auto& context = *projectLoadContextStorage;
 
-	        context._dataHierarchyLoadContext._jsonFilePath     = openProjectContextStorage->projectJsonPath;
-	        context._workspaceLoadContext._jsonFilePath         = openProjectContextStorage->workspaceJsonPath;
-	    }),
+  //      	context = {};
 
-    	_dataHierarchyLoadRecipeBuilder.makeRecipe(projectLoadContextStorage),
-		_datasetsLoadRecipeBuilder.makeRecipe(projectLoadContextStorage),
-        _workspaceLoadRecipeBuilder.makeRecipe(projectLoadContextStorage)
-    };
+	 //       context._dataHierarchyLoadContext._jsonFilePath     = openProjectContextStorage->projectJsonPath;
+	 //       context._workspaceLoadContext._jsonFilePath         = openProjectContextStorage->workspaceJsonPath;
+	 //   }),
+
+  //  	_dataHierarchyLoadRecipeBuilder.makeRecipe(projectLoadContextStorage),
+		//_datasetsLoadRecipeBuilder.makeRecipe(projectLoadContextStorage),
+  //      _workspaceLoadRecipeBuilder.makeRecipe(projectLoadContextStorage)
+  //  };
 }
 

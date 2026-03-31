@@ -34,7 +34,9 @@
 
 #include <exception>
 
+#include "ProjectOpenWorkflow.h"
 #include "ProjectSaveWorkflow.h"
+
 #include "Task.h"
 
 #include "ZstdBlobCodec.h"
@@ -376,11 +378,9 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         // setTemporaryDirPath(TemporaryDirType::Open, ctx.temporaryDirectoryPath);
         // emit projectAboutToBeOpened(*_project);
 
-        auto workflow = std::make_unique<OpenProjectWorkflow>(*this, this);
+        auto workflow = std::make_unique<ProjectOpenWorkflow>(filePath, this);
 
-        workflow->setInput(filePath, loadWorkspace, importDataOnly, false);
-
-        connect(workflow.get(), &OpenProjectWorkflow::finished, this, [this, filePath, workflowPtr = workflow.get()](bool success, const QString& error) {
+        connect(workflow.get(), &ProjectOpenWorkflow::finished, this, [this, filePath, workflowPtr = workflow.get()](bool success, const QString& error) {
             setState(State::Idle);
 
             if (success) {
@@ -396,8 +396,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             }
         });
 
-        _activeOpenWorkflow = std::move(workflow);
-        _activeOpenWorkflow->start();
+        _activeWorkflow = std::move(workflow);
+        _activeWorkflow->start();
     }
     catch (const std::exception& e) {
         setState(State::Idle);
@@ -798,7 +798,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
 
-            auto workflow = std::make_unique<ProjectSaveWorkflow>(*this, filePath, this);
+            auto workflow = std::make_unique<ProjectSaveWorkflow>(filePath, this);
 
             connect(workflow.get(), &ProjectSaveWorkflow::finished, this, [this, filePath, workflowPtr = workflow.get()](bool success, const QString& error) {
                 setState(State::Idle);
@@ -807,13 +807,10 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                     setState(State::Idle);
                     emit projectOpened(*_project);
 
-                    const auto ms = workflowPtr->getDuration();
-                    const auto text = (ms < 1000) ? QString("%1 saved successfully in %2 ms").arg(filePath).arg(ms) : QString("%1 saved successfully in %2 s").arg(filePath).arg(ms / 1000.0, 0, 'f', 1);
-
-                    help().addNotification("Project saved", text);
+                    
                 }
                 else {
-                    help().addNotification("Error", "Unable to save ManiVault project: " + error);
+                    
                 }
             });
 

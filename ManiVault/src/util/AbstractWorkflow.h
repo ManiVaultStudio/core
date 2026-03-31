@@ -6,6 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 #include "WorkflowRuntimeContext.h"
+#include "WorkflowResultBase.h"
 
 #include <QtTaskTree>
 #include <QObject>
@@ -120,6 +121,25 @@ protected:
      */
     virtual void setupTree(QtTaskTree::QTaskTree& taskTree);
 
+protected: // Workflow result initialization and access
+
+    /**
+     * Perform any necessary initialization of the workflow result before the workflow is executed. This allows for setting up any necessary information in the result that needs to be accessed after the workflow is done, for example by initializing the workflow result with any necessary information about the result of the workflow that needs to be accessed after the workflow is done. The initResult method will be called with a reference to the workflow result, allowing derived classes to implement custom logic for initializing the workflow result before the workflow is executed.
+     * @param result Reference to the workflow result, used for storing the success flag and error message after the workflow is done. The initResult method can be used for performing any necessary initialization of the workflow result before the workflow is executed, for example by setting up any necessary information in the result that needs to be accessed after the workflow is done. The initResult method will be called with a reference to the workflow result, allowing derived classes to implement custom logic for initializing the workflow result before the workflow is executed.
+     */
+    virtual void initResult(UniqueWorkflowResultBase& result) = 0;
+
+    /**
+     * Utility method for accessing the workflow result stored in the _result member variable. This method allows for type-safe access to the workflow result, which is stored as a unique pointer to a WorkflowResultBase. The resultAs method will attempt to dynamically cast the workflow result stored in the _result member variable to the specified type ResultType, and it will return a pointer to the casted result if the cast is successful, or nullptr if the cast fails. This allows for type-safe access to the workflow result after the workflow is done, for example by allowing external code to access any necessary information about the result of the workflow that is stored in a derived class of Workflow
+     * @tparam ResultType The type to which the workflow result should be cast. This should be a type that derives from WorkflowResultBase and is used for storing any necessary information about the result of the workflow that needs to be accessed after the workflow is done. The resultAs method will attempt to dynamically cast the workflow result stored in the _result member variable to the specified type ResultType, and it will return a pointer to the casted result if the cast is successful, or nullptr if the cast fails. This allows for type-safe access to the workflow result after the workflow is done, for example by allowing external code to access any necessary information about the result of the workflow that is stored in a derived class of Workflow
+     * @return A pointer to the casted workflow result if the cast is successful, or nullptr if the cast fails. This allows for type-safe access to the workflow result after the workflow is done, for example by allowing external code to access any necessary information about the result of the workflow that is stored in a derived class of Workflow
+     */
+    template<typename ResultType>
+    ResultType* resultAs()
+    {
+        return dynamic_cast<ResultType*>(_result.get());
+    }
+
 public: // Context storage access for tasks
 
     /** Access the workflow runtime context storage. */
@@ -152,6 +172,7 @@ private:
     quint64                             _duration;                  /** Stored duration after workflow done. */
     UniqueWorkflowContext               _initialWorkflowContext;    /** Initial workflow context, used for storing any necessary information for the workflow that needs to be accessed by the tasks in the workflow. */
     WorkflowRuntimeContextStorage       _contextStorage;            /** Storage for the workflow context, used for passing data between tasks. */
+    UniqueWorkflowResultBase            _result;                    /** Result of the workflow, used for storing the success flag and error message after the workflow is done. It is the responsibility of the concrete workflow to populate this result. */
 };
 
 } // namespace mv::util

@@ -142,8 +142,10 @@ set(PRIVATE_SERIALIZATION_HEADERS
     src/private/WorkspaceLoadRecipeBuilder.h
     src/private/ProjectSaveWorkflow.h
     src/private/ProjectSaveContext.h
-    src/private/ProjectOpenContext.h
+    src/private/ProjectSaveResult.h
     src/private/ProjectOpenWorkflow.h
+    src/private/ProjectOpenContext.h
+    src/private/ProjectOpenResult.h
 )
 
 set(PRIVATE_SERIALIZATION_SOURCES
@@ -161,8 +163,10 @@ set(PRIVATE_SERIALIZATION_SOURCES
     src/private/WorkspaceLoadRecipeBuilder.cpp
     src/private/ProjectSaveWorkflow.cpp
     src/private/ProjectSaveContext.cpp
-    src/private/ProjectOpenContext.cpp
+    src/private/ProjectSaveResult.cpp
     src/private/ProjectOpenWorkflow.cpp
+    src/private/ProjectOpenContext.cpp
+    src/private/ProjectOpenResult.cpp
 )
 
 set(PRIVATE_SERIALIZATION_FILES
