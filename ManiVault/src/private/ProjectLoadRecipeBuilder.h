@@ -8,9 +8,9 @@
 #include "DatasetsLoadRecipeBuilder.h"
 #include "WorkspaceLoadRecipeBuilder.h"
 
-struct OpenProjectContext;
+struct ProjectOpenContext;
 
-using OpenProjectContextStorage = QtTaskTree::Storage<OpenProjectContext>;
+using OpenProjectContextStorage = QtTaskTree::Storage<ProjectOpenContext>;
 
 /** Context for project loading */
 struct ProjectLoadContext

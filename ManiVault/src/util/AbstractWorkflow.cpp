@@ -4,6 +4,8 @@
 
 #include "AbstractWorkflow.h"
 
+#include "private/ProjectSaveContext.h"
+
 namespace mv::util
 {
 

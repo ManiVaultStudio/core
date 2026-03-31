@@ -128,20 +128,6 @@ public: // Context storage access for tasks
     /** Access the workflow runtime context storage (const version). */
     const WorkflowRuntimeContextStorage& contextStorage() const;
 
-public: // For derived classes to implement the actual workflow logic
-
-    /*
-     * Setup and finalize are separated from the recipe to allow for better control over when the context is initialized and finalized, which can be useful for workflows that need to perform some setup before the recipe is created or need to perform some finalization after the recipe is done.
-     * @param context Reference to the workflow runtime context storage, used for passing data between tasks. The context will be initialized before the recipe is created and finalized after the recipe is done. The setup method can be used for performing any necessary setup before the recipe is created, while the finalize method can be used for performing any necessary finalization after the recipe is done.
-     */
-    virtual void setup(UniqueWorkflowContext& context) = 0;
-
-    /*
-     * Setup and finalize are separated from the recipe to allow for better control over when the context is initialized and finalized, which can be useful for workflows that need to perform some setup before the recipe is created or need to perform some finalization after the recipe is done.
-     * @param context Reference to the workflow runtime context storage, used for passing data between tasks. The context will be initialized before the recipe is created and finalized after the recipe is done. The setup method can be used for performing any necessary setup before the recipe is created, while the finalize method can be used for performing any necessary finalization after the recipe is done.
-     */
-    virtual void finalize(UniqueWorkflowContext& context) = 0;
-
 private:
 
     /**

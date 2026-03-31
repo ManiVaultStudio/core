@@ -13,7 +13,7 @@ using namespace mv::util;
 using namespace QtTaskTree;
 
 OpenProjectWorkflow::OpenProjectWorkflow(mv::ProjectManager& projectManager, QObject* parent) :
-	WorkflowBase<OpenProjectContext>("Open Project", parent),
+	WorkflowBase<ProjectOpenContext>("Open Project", parent),
 	_projectManager(projectManager),
     _setupTask(this, "Setting up project..."),
 	_extractJsonTask(this, "Extracting project archive"),
@@ -47,7 +47,7 @@ void OpenProjectWorkflow::setInput(QString filePath, bool loadWorkspace, bool im
 	_disableReadOnly = disableReadOnly;
 }
 
-void OpenProjectWorkflow::initializeContext(OpenProjectContext& storage)
+void OpenProjectWorkflow::initializeContext(ProjectOpenContext& storage)
 {
 	storage                 = {};
 	storage.filePath        = _filePath;
@@ -56,66 +56,54 @@ void OpenProjectWorkflow::initializeContext(OpenProjectContext& storage)
 	storage.disableReadOnly = _disableReadOnly;
 }
 
-void OpenProjectWorkflow::onStorageDone(const OpenProjectContext& storage)
-{
-	_finalError = storage.error;
-}
-
-void OpenProjectWorkflow::handleDone(QtTaskTree::DoneWith doneWith)
-{
-	const bool success = doneWith == QtTaskTree::DoneWith::Success && _finalError.isEmpty();
-	emit finished(success, _finalError);
-}
-
 Group OpenProjectWorkflow::makeRecipe()
 {
-	auto& ctx = contextStorage();
+    auto contextStorage = this->contextStorage();
 
-    
 	return Group{
-		ctx,
+        contextStorage,
 
-		QSyncTask([this, &ctx] {
-			auto& context = *ctx;
+		QSyncTask([&] {
+            auto projectOpenContext = contextAs<ProjectOpenContext>(contextStorage);
 
 			try {
-                setup(context);
+                setup(*projectOpenContext);
 			}
 			catch (const std::exception& e) {
-				context.error = QString::fromUtf8(e.what());
+                projectOpenContext->error = QString::fromUtf8(e.what());
 			}
 		}),
-        QSyncTask([this, &ctx] {
-            auto& context = *ctx;
+        QSyncTask([&] {
+            auto projectOpenContext = contextAs<ProjectOpenContext>(contextStorage);
 
             try {
-                extractProjectArchive(context);
+                extractProjectArchive(*projectOpenContext);
             }
             catch (const std::exception& e) {
-                context.error = QString::fromUtf8(e.what());
+                projectOpenContext->error = QString::fromUtf8(e.what());
             }
         }),
-        _projectLoadRecipeBuilder.makeRecipe(ctx, _projectLoadContextStorage),
-        QSyncTask([this, &ctx] {
-            auto& context = *ctx;
+        _projectLoadRecipeBuilder.makeRecipe(contextStorage, _projectLoadContextStorage),
+        QSyncTask([&] {
+            auto projectOpenContext = contextAs<ProjectOpenContext>(contextStorage);
 
             try {
-                finalize(context);
+                finalize(*projectOpenContext);
             }
             catch (const std::exception& e) {
-                context.error = QString::fromUtf8(e.what());
+                projectOpenContext->error = QString::fromUtf8(e.what());
             }
         })
 	};
 }
 
-void OpenProjectWorkflow::setup(OpenProjectContext& ctx)
+void OpenProjectWorkflow::setup(ProjectOpenContext& context)
 {
     
 
     //_setupTask.setRunning();
     //{
-        if (QFileInfo(ctx.filePath).isDir())
+        if (QFileInfo(context.filePath).isDir())
             throw std::runtime_error("Project file path may not be a directory");
 
         QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "OpenProject"));
@@ -123,55 +111,55 @@ void OpenProjectWorkflow::setup(OpenProjectContext& ctx)
         if (!temporaryDirectory.isValid())
             throw std::runtime_error("Unable to create temporary open-project directory");
 
-        ctx.temporaryDirectoryPath  = temporaryDirectory.path();
-        ctx.workspaceJsonPath       = QFileInfo(ctx.temporaryDirectoryPath, "workspace.json").absoluteFilePath();
-        ctx.projectJsonPath         = QFileInfo(ctx.temporaryDirectoryPath, "project.json").absoluteFilePath();
+        context.temporaryDirectoryPath  = temporaryDirectory.path();
+        context.workspaceJsonPath       = QFileInfo(context.temporaryDirectoryPath, "workspace.json").absoluteFilePath();
+        context.projectJsonPath         = QFileInfo(context.temporaryDirectoryPath, "project.json").absoluteFilePath();
 
-        qDebug() << "Created temporary directory for opening project: " << ctx.temporaryDirectoryPath;
-        qDebug() << "Workspace JSON path: " << ctx.workspaceJsonPath;
-        qDebug() << "Project JSON path: " << ctx.projectJsonPath;
+        qDebug() << "Created temporary directory for opening project: " << context.temporaryDirectoryPath;
+        qDebug() << "Workspace JSON path: " << context.workspaceJsonPath;
+        qDebug() << "Project JSON path: " << context.projectJsonPath;
 
         Application::setSerializationAborted(false);
 
         workspaces().reset();
 
-        if (!ctx.importDataOnly)
+        if (!context.importDataOnly)
             _projectManager.newProject();
 
         Application::requestOverrideCursor(Qt::WaitCursor);
 
-        _projectManager.getCurrentProject()->setFilePath(ctx.filePath);
+        _projectManager.getCurrentProject()->setFilePath(context.filePath);
     //}
     //_setupTask.setFinished();
 }
 
-void OpenProjectWorkflow::extractProjectArchive(OpenProjectContext& ctx)
+void OpenProjectWorkflow::extractProjectArchive(ProjectOpenContext& context)
 {
  //   _extractJsonTask.setSubtasks(2);
  //   _extractJsonTask.setRunning();
 	//{
         Archiver archiver;
 
-        archiver.extractSingleFile(ctx.filePath, "project.json", ctx.projectJsonPath);
+        archiver.extractSingleFile(context.filePath, "project.json", context.projectJsonPath);
         //_extractJsonTask.setSubtaskFinished(0, "Datasets loaded");
 
-		archiver.extractSingleFile(ctx.filePath, "workspace.json", ctx.workspaceJsonPath);
+		archiver.extractSingleFile(context.filePath, "workspace.json", context.workspaceJsonPath);
         //_extractJsonTask.setSubtaskFinished(1, "Workspace loaded");
 	//}
     //_extractJsonTask.setFinished();
 }
 
-void OpenProjectWorkflow::finalize(OpenProjectContext& ctx)
+void OpenProjectWorkflow::finalize(ProjectOpenContext& context)
 {
-    if (!ctx.error.isEmpty())
-        throw std::runtime_error(ctx.error.toStdString());
+    if (!context.error.isEmpty())
+        throw std::runtime_error(context.error.toStdString());
 
-    _projectManager.getRecentProjectsAction().addRecentFilePath(ctx.filePath);
+    _projectManager.getRecentProjectsAction().addRecentFilePath(context.filePath);
 
     auto project = _projectManager.getCurrentProject();
     project->updateContributors();
 
-    if (ctx.disableReadOnly)
+    if (context.disableReadOnly)
         project->getReadOnlyAction().setChecked(false);
 
     //unsetTemporaryDirPath(TemporaryDirType::Open);

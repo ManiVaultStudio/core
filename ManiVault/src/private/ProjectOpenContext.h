@@ -7,7 +7,7 @@
 #include "ProjectLoadRecipeBuilder.h"
 #include "DataHierarchyLoadRecipeBuilder.h"
 
-#include <util/WorkflowBase.h>
+#include <util/AbstractWorkflow.h>
 
 #include <ModalTask.h>
 
@@ -31,7 +31,7 @@ struct OpenProjectContext
     QString error;
 };
 
-class OpenProjectWorkflow final : public mv::util::WorkflowBase<OpenProjectContext>
+class OpenProjectWorkflow final : public mv::util::AbstractWorkflow
 {
     Q_OBJECT
 
@@ -40,22 +40,13 @@ public:
 
     void setInput(QString filePath, bool loadWorkspace, bool importDataOnly, bool disableReadOnly);
 
-signals:
-    void finished(bool success, const QString& errorMessage);
-
-protected:
-    void initializeContext(OpenProjectContext& storage) override;
-
-    void onStorageDone(const OpenProjectContext& storage) override;
-
-    void handleDone(QtTaskTree::DoneWith doneWith) override;
-
     QtTaskTree::Group makeRecipe() override;
 
-private:
-    void setup(OpenProjectContext& ctx) override;
-    void extractProjectArchive(OpenProjectContext& ctx);
-    void finalize(OpenProjectContext& ctx) override;
+private: // Stages
+
+    void setup(OpenProjectContext& context);
+    void extractProjectArchive(OpenProjectContext& context);
+    void finalize(OpenProjectContext& context);
 
 private:
     mv::ProjectManager&         _projectManager;

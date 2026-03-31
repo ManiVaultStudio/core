@@ -18,27 +18,25 @@ class ProjectSaveWorkflow final : public mv::util::AbstractWorkflow
     Q_OBJECT
 
 public:
-    explicit ProjectSaveWorkflow(mv::ProjectManager& projectManager, const QString& filePath, QObject* parent = nullptr);
+    explicit ProjectSaveWorkflow(const QString& filePath, QObject* parent = nullptr);
 
 protected:
 
-    /**
-     * Initialize the workflow context with the provided project file path and other necessary information for the save operation.
-     * @param projectSaveContext Reference to the context storage for the workflow, used for passing data between tasks. The context will be initialized with the project file path and any other necessary information for the save operation.
-     */
-    void initializeContext(ProjectSaveContext& projectSaveContext) override;
 
     QtTaskTree::Group makeRecipe() override;
 
-    void setup(ProjectSaveContext& context) override;
-    void save(ProjectSaveContext& context);
-    void finalize(ProjectSaveContext& context) override;
-
-
-
 private:
-    mv::ProjectManager&     _projectManager;        /** Reference to the project manager, used for performing project save operations. */
-    QString                 _finalError;            /** Final error message, if any */
-    ProjectSaveContext          _projectSaveContext;    /** Context storage for the workflow, used for passing data between tasks. */
-    ProjectSaveContextStorage   _contextStorage;    /** TODO */
+
+    /**
+     * Utility method for creating a workflow context from a file. This method can be used by derived classes of AbstractWorkflow to implement custom logic for creating a workflow context based on a file, for example by reading the file and extracting any necessary information for the workflow that needs to be accessed by the tasks in the workflow. The createContextFromFile method will take a file path as an argument and return a unique pointer to a WorkflowContextBase that is initialized with the necessary information extracted from the file.
+     * @param filePath Path to the file from which to create the workflow context. This method can be used for creating a workflow context based on a file, for example by reading the file and extracting any necessary information for the workflow that needs to be accessed by the tasks in the workflow. The createContextFromFile method can be used by derived classes of AbstractWorkflow to implement custom logic for creating a workflow context based on a file, and it can return a unique pointer to a WorkflowContextBase that is initialized with the necessary information extracted from the file.
+     * @return A unique pointer to a WorkflowContextBase that is initialized with the necessary information extracted from the file. This method can be used by derived classes of AbstractWorkflow to implement custom logic for creating a workflow context based on a file, and it can return a unique pointer to a WorkflowContextBase that is initialized with the necessary information extracted from the file.
+     */
+    static UniqueWorkflowContext createContext(const QString& filePath);
+
+private: // Stages
+
+    void setup(ProjectSaveContext& context);
+    void save(ProjectSaveContext& context);
+    void finalize(ProjectSaveContext& context);
 };

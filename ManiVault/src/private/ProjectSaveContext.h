@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <util/WorkflowContext.h>
+#include <util/WorkflowContextBase.h>
 
-struct ProjectSaveContext
+struct CORE_EXPORT ProjectSaveContext : public WorkflowContextBase
 {
     QString             _filePath;                  /** Path to the project file */
     UniqueTemporaryDir  _temporaryDirectory;        /** Temporary directory for extracting project files */

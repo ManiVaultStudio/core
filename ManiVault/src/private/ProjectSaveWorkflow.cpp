@@ -12,16 +12,9 @@ using namespace mv::util;
 
 using namespace QtTaskTree;
 
-ProjectSaveWorkflow::ProjectSaveWorkflow(mv::ProjectManager& projectManager, const QString& filePath, QObject* parent) :
-	WorkflowBase<ProjectSaveContext>("Project Save", parent),
-	_projectManager(projectManager)
+ProjectSaveWorkflow::ProjectSaveWorkflow(const QString& filePath, QObject* parent) :
+    AbstractWorkflow(createContext(filePath), "Project Save", parent)
 {
-    _projectSaveContext._filePath = filePath;
-}
-
-void ProjectSaveWorkflow::initializeContext(ProjectSaveContext& projectSaveContext)
-{
-    projectSaveContext._filePath = _projectSaveContext._filePath;
 }
 
 Group ProjectSaveWorkflow::makeRecipe()
@@ -32,36 +25,45 @@ Group ProjectSaveWorkflow::makeRecipe()
 		contextStorage,
 
 		QSyncTask([&] {
-			auto& context = *contextStorage;
+			auto projectSaveContext = contextAs<ProjectSaveContext>(contextStorage);
 
 			try {
-                setup(context);
+                setup(*projectSaveContext);
 			}
 			catch (const std::exception& e) {
-				context._error = QString::fromUtf8(e.what());
+				projectSaveContext->_error = QString::fromUtf8(e.what());
 			}
 		}),
         QSyncTask([&] {
-            auto& context = *contextStorage;
+            auto projectSaveContext = contextAs<ProjectSaveContext>(contextStorage);
 
             try {
-                save(context);
+                save(*projectSaveContext);
             }
             catch (const std::exception& e) {
-                context._error = QString::fromUtf8(e.what());
+                projectSaveContext->_error = QString::fromUtf8(e.what());
             }
         }),
         QSyncTask([&] {
-            auto& context = *contextStorage;
+            auto projectSaveContext = contextAs<ProjectSaveContext>(contextStorage);
 
             try {
-                finalize(context);
+                finalize(*projectSaveContext);
             }
             catch (const std::exception& e) {
-                context._error = QString::fromUtf8(e.what());
+                projectSaveContext->_error = QString::fromUtf8(e.what());
             }
         })
 	};
+}
+
+UniqueWorkflowContext ProjectSaveWorkflow::createContext(const QString& filePath)
+{
+    auto context = std::make_unique<ProjectSaveContext>();
+
+    context->_filePath = filePath;
+
+    return context;
 }
 
 void ProjectSaveWorkflow::setup(ProjectSaveContext& context)
@@ -98,7 +100,7 @@ void ProjectSaveWorkflow::finalize(ProjectSaveContext& context)
     if (!context._error.isEmpty())
         throw std::runtime_error(context._error.toStdString());
 
-    _projectManager.getRecentProjectsAction().addRecentFilePath(context._filePath);
+    //_projectManager.getRecentProjectsAction().addRecentFilePath(context._filePath);
 
     //auto project = _projectManager.getCurrentProject();
     //project->updateContributors();
