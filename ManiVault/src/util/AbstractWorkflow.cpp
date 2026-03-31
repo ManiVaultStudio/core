@@ -18,6 +18,9 @@ AbstractWorkflow::AbstractWorkflow(UniqueWorkflowContext workflowContext, QStrin
     _initialWorkflowContext(std::move(workflowContext)),
     _task(this, _title, Task::Status::Idle, true)
 {
+#ifdef ABSTRACT_WORKFLOW_VERBOSE
+    printLine(_title, "Create");
+#endif
 }
 
 const QString& AbstractWorkflow::title() const
@@ -28,7 +31,7 @@ const QString& AbstractWorkflow::title() const
 void AbstractWorkflow::start()
 {
 #ifdef ABSTRACT_WORKFLOW_VERBOSE
-    printLine(_title, "Start");
+    printLine(_title, "Start", 1);
 #endif
 
     _duration = 0;
@@ -52,7 +55,7 @@ void AbstractWorkflow::start()
 void AbstractWorkflow::cancel()
 {
 #ifdef ABSTRACT_WORKFLOW_VERBOSE
-    printLine(_title, "Cancel");
+    printLine(_title, "Cancel", 1);
 #endif
 
 	_runner.cancel();
@@ -92,7 +95,7 @@ const WorkflowRuntimeContextStorage& AbstractWorkflow::contextStorage() const
 void AbstractWorkflow::registerStorageHandlers(QtTaskTree::QTaskTree& tree)
 {
 #ifdef ABSTRACT_WORKFLOW_VERBOSE
-    printLine(_title, "Register storage handlers");
+    printLine(_title, "Register storage handlers", 1);
 #endif
 
     tree.onStorageSetup(

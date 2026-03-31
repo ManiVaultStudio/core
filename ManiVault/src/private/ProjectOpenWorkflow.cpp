@@ -13,6 +13,10 @@ using namespace mv::util;
 
 using namespace QtTaskTree;
 
+#ifdef _DEBUG
+	#define PROJECT_OPEN_WORKFLOW_VERBOSE
+#endif
+
 ProjectOpenWorkflow::ProjectOpenWorkflow(const QString& filePath, QObject* parent) :
 	AbstractWorkflow(createContext(filePath), "Open Project", parent)
 {
@@ -20,6 +24,10 @@ ProjectOpenWorkflow::ProjectOpenWorkflow(const QString& filePath, QObject* paren
 
 Group ProjectOpenWorkflow::makeRecipe()
 {
+#ifdef PROJECT_OPEN_WORKFLOW_VERBOSE
+    printLine("Workflow", "Make recipe", 1);
+#endif
+
     auto& contextStorage = this->contextStorage();
 
 	return Group{
@@ -61,17 +69,25 @@ Group ProjectOpenWorkflow::makeRecipe()
 
 void ProjectOpenWorkflow::setupStorage(WorkflowRuntimeContext& context)
 {
-    qDebug() << __FUNCTION__;
+#ifdef PROJECT_OPEN_WORKFLOW_VERBOSE
+    printLine("Workflow", "Setup storage", 1);
+#endif
 }
 
 void ProjectOpenWorkflow::onStorageDone(const WorkflowRuntimeContext& context)
 {
-    qDebug() << __FUNCTION__;
+#ifdef PROJECT_OPEN_WORKFLOW_VERBOSE
+    printLine("Workflow", "Storage done", 1);
+#endif
 }
 
 void ProjectOpenWorkflow::handleDone(QtTaskTree::DoneWith status)
 {
     AbstractWorkflow::handleDone(status);
+
+#ifdef PROJECT_OPEN_WORKFLOW_VERBOSE
+    printLine("Workflow", "Handle done", 1);
+#endif
 
     if (const auto result = resultAs<ProjectOpenResult>()) {
         const auto duration = getDuration();
@@ -102,6 +118,10 @@ UniqueWorkflowContext ProjectOpenWorkflow::createContext(const QString& filePath
 
 void ProjectOpenWorkflow::setup(ProjectOpenContext& context)
 {
+    #ifdef PROJECT_OPEN_WORKFLOW_VERBOSE
+        printLine("Recipe stage", "Setup", 2);
+    #endif
+
     if (QFileInfo(context._filePath).isDir())
         throw std::runtime_error("Project file path may not be a directory");
 
@@ -114,9 +134,12 @@ void ProjectOpenWorkflow::setup(ProjectOpenContext& context)
     context._workspaceJsonPath       = QFileInfo(context._temporaryDirectoryPath, "workspace.json").absoluteFilePath();
     context._projectJsonPath         = QFileInfo(context._temporaryDirectoryPath, "project.json").absoluteFilePath();
 
-    qDebug() << "Created temporary directory for opening project: " << context._temporaryDirectoryPath;
-    qDebug() << "Workspace JSON path: " << context._workspaceJsonPath;
-    qDebug() << "Project JSON path: " << context._projectJsonPath;
+#ifdef PROJECT_OPEN_WORKFLOW_VERBOSE
+    printLine("Temp. Dir", context._temporaryDirectoryPath, 3);
+    printLine("Workspace JSON", context._workspaceJsonPath, 3);
+    printLine("Project JSON", context._projectJsonPath, 3);
+#endif
+
     Application::setSerializationAborted(false);
 
     workspaces().reset();
@@ -130,6 +153,10 @@ void ProjectOpenWorkflow::setup(ProjectOpenContext& context)
 
 void ProjectOpenWorkflow::extractProjectArchive(ProjectOpenContext& context)
 {
+#ifdef PROJECT_OPEN_WORKFLOW_VERBOSE
+    printLine("Recipe stage", "Extract project archive", 2);
+#endif
+		
     Archiver archiver;
 
     archiver.extractSingleFile(context._filePath, "project.json", context._projectJsonPath);
@@ -138,6 +165,10 @@ void ProjectOpenWorkflow::extractProjectArchive(ProjectOpenContext& context)
 
 void ProjectOpenWorkflow::finalize(ProjectOpenContext& context)
 {
+#ifdef PROJECT_OPEN_WORKFLOW_VERBOSE
+    printLine("Recipe stage", "Finalize", 2);
+#endif
+
     if (!context._errorMessage.isEmpty())
         throw std::runtime_error(context._errorMessage.toStdString());
 
