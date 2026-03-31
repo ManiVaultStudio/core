@@ -652,6 +652,7 @@ set(ManiVault_LIB_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/lib/" CACHE INTERNAL "
 set(ManiVault_INSTALL_DIR "${MV_INSTALL_DIR}" CACHE INTERNAL "")
 set(ManiVault_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" CACHE INTERNAL "") # this differs from config
 set(ManiVault_VERSION "${MV_VERSION}" CACHE INTERNAL "")
+set(ManiVault_CXX_STANDARD "${MV_CXX_STANDARD}" CACHE INTERNAL "")
 
 # Call the install functions of the all public targets
 # needed for plugins directly after the build
