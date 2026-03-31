@@ -40,8 +40,6 @@ public:
 
     void setInput(QString filePath, bool loadWorkspace, bool importDataOnly, bool disableReadOnly);
 
-    quint64 getDuration() const { return _duration; }
-
 signals:
     void finished(bool success, const QString& errorMessage);
 
@@ -55,9 +53,9 @@ protected:
     QtTaskTree::Group makeRecipe() override;
 
 private:
-    void setupOpenProject(OpenProjectContext& ctx);
+    void setup(OpenProjectContext& ctx) override;
     void extractProjectArchive(OpenProjectContext& ctx);
-    void finalizeOpenProject(OpenProjectContext& ctx);
+    void finalize(OpenProjectContext& ctx) override;
 
 private:
     mv::ProjectManager&         _projectManager;
@@ -72,7 +70,4 @@ private:
     mv::Task                    _loadWorkspaceJsonTask;
     ProjectLoadContextStorage   _projectLoadContextStorage;
     ProjectLoadRecipeBuilder    _projectLoadRecipeBuilder;
-    QElapsedTimer               _timer;
-    quint64                     _duration;
-
 };

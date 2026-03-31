@@ -34,6 +34,7 @@
 
 #include <exception>
 
+#include "ProjectSaveWorkflow.h"
 #include "Task.h"
 
 #include "ZstdBlobCodec.h"
@@ -797,40 +798,59 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
 
-            QElapsedTimer saveTimer;
+            auto workflow = std::make_unique<ProjectSaveWorkflow>(*this, filePath, this);
 
-        	saveTimer.start();
+            connect(workflow.get(), &ProjectSaveWorkflow::finished, this, [this, filePath, workflowPtr = workflow.get()](bool success, const QString& error) {
+                setState(State::Idle);
 
-            Application::requestOverrideCursor(Qt::WaitCursor);
+                if (success) {
+                    setState(State::Idle);
+                    emit projectOpened(*_project);
 
-            
-            QCoreApplication::processEvents();
+                    const auto ms = workflowPtr->getDuration();
+                    const auto text = (ms < 1000) ? QString("%1 saved successfully in %2 ms").arg(filePath).arg(ms) : QString("%1 saved successfully in %2 s").arg(filePath).arg(ms / 1000.0, 0, 'f', 1);
 
-            Archiver archiver;
+                    help().addNotification("Project saved", text);
+                }
+                else {
+                    help().addNotification("Error", "Unable to save ManiVault project: " + error);
+                }
+            });
 
-            QFileInfo projectJsonFileInfo(temporaryDirectoryPath, "project.json"), projectMetaJsonFileInfo(temporaryDirectoryPath, "meta.json");
+         //   QElapsedTimer saveTimer;
 
-            Application::setSerializationAborted(false);
+        	//saveTimer.start();
 
-            projects().toJsonFile(projectJsonFileInfo.absoluteFilePath());
+         //   Application::requestOverrideCursor(Qt::WaitCursor);
 
-            _project->getProjectMetaAction().toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
-            
-            QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
+         //   
+         //   QCoreApplication::processEvents();
 
-            workspaces().saveWorkspace(workspaceFileInfo.absoluteFilePath(), false);
+         //   Archiver archiver;
 
-            archiver.compressDirectory(temporaryDirectoryPath, filePath, true, 0, password);
+         //   QFileInfo projectJsonFileInfo(temporaryDirectoryPath, "project.json"), projectMetaJsonFileInfo(temporaryDirectoryPath, "meta.json");
 
-            _recentProjectsAction.addRecentFilePath(filePath);
+         //   Application::setSerializationAborted(false);
 
-            _project->setFilePath(filePath);
+         //   projects().toJsonFile(projectJsonFileInfo.absoluteFilePath());
 
-            unsetTemporaryDirPath(TemporaryDirType::Save);
+         //   _project->getProjectMetaAction().toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
+         //   
+         //   QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
 
-            setState(State::Idle);
+         //   workspaces().saveWorkspace(workspaceFileInfo.absoluteFilePath(), false);
 
-            qDebug().noquote() << filePath << "saved successfully in " << saveTimer.elapsed() << "ms";
+         //   archiver.compressDirectory(temporaryDirectoryPath, filePath, true, 0, password);
+
+         //   _recentProjectsAction.addRecentFilePath(filePath);
+
+         //   _project->setFilePath(filePath);
+
+         //   unsetTemporaryDirPath(TemporaryDirType::Save);
+
+         //   setState(State::Idle);
+
+         //   qDebug().noquote() << filePath << "saved successfully in " << saveTimer.elapsed() << "ms";
         }
         emit projectSaved(*_project);
     }

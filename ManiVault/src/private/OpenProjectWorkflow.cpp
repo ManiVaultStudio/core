@@ -13,7 +13,7 @@ using namespace mv::util;
 using namespace QtTaskTree;
 
 OpenProjectWorkflow::OpenProjectWorkflow(mv::ProjectManager& projectManager, QObject* parent) :
-	WorkflowBase<OpenProjectContext>(parent),
+	WorkflowBase<OpenProjectContext>("Open Project", parent),
 	_projectManager(projectManager),
     _setupTask(this, "Setting up project..."),
 	_extractJsonTask(this, "Extracting project archive"),
@@ -79,7 +79,7 @@ Group OpenProjectWorkflow::makeRecipe()
 			auto& context = *ctx;
 
 			try {
-				setupOpenProject(context);
+                setup(context);
 			}
 			catch (const std::exception& e) {
 				context.error = QString::fromUtf8(e.what());
@@ -100,7 +100,7 @@ Group OpenProjectWorkflow::makeRecipe()
             auto& context = *ctx;
 
             try {
-                finalizeOpenProject(context);
+                finalize(context);
             }
             catch (const std::exception& e) {
                 context.error = QString::fromUtf8(e.what());
@@ -109,10 +109,8 @@ Group OpenProjectWorkflow::makeRecipe()
 	};
 }
 
-void OpenProjectWorkflow::setupOpenProject(OpenProjectContext& ctx)
+void OpenProjectWorkflow::setup(OpenProjectContext& ctx)
 {
-    _timer.start();
-
     
 
     //_setupTask.setRunning();
@@ -163,7 +161,7 @@ void OpenProjectWorkflow::extractProjectArchive(OpenProjectContext& ctx)
     //_extractJsonTask.setFinished();
 }
 
-void OpenProjectWorkflow::finalizeOpenProject(OpenProjectContext& ctx)
+void OpenProjectWorkflow::finalize(OpenProjectContext& ctx)
 {
     if (!ctx.error.isEmpty())
         throw std::runtime_error(ctx.error.toStdString());
@@ -178,8 +176,4 @@ void OpenProjectWorkflow::finalizeOpenProject(OpenProjectContext& ctx)
 
     //unsetTemporaryDirPath(TemporaryDirType::Open);
     Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
-
-    //_loadTask.setFinished();
-
-    _duration = _timer.elapsed();
 }

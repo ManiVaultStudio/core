@@ -588,8 +588,9 @@ set(PUBLIC_UTIL_HEADERS
     src/util/CodecRegistry.h
     src/util/CodecActionBinding.h
     src/util/DecodeExecutor.h
-    src/util/WorkflowNode.h
-    src/util/WorkflowBase.h
+    src/util/WorkflowRuntimeContext.h
+    src/util/WorkflowContextBase.h
+    src/util/AbstractWorkflow.h
     src/util/SerializationScheduler.h
     src/util/DecodeRequestState.h
 )
@@ -660,8 +661,9 @@ set(PUBLIC_UTIL_SOURCES
     src/util/CodecRegistry.cpp
     src/util/CodecActionBinding.cpp
     src/util/DecodeExecutor.cpp
-    src/util/WorkflowNode.cpp
-    src/util/WorkflowBase.cpp
+    src/util/WorkflowContextBase.cpp
+    src/util/WorkflowRuntimeContext.cpp
+    src/util/AbstractWorkflow.cpp
     src/util/SerializationScheduler.cpp
     src/util/DecodeRequestState.cpp
 )
