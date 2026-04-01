@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+
+#pragma once
+
+namespace mv {
+
+enum class ActionOperation
+{
+    Save,
+    Load,
+
+    // Future-proofing
+    Duplicate,
+    Export,
+    Validate
+};
+
+} // namespace mv
