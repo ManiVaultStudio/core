@@ -278,47 +278,52 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 QVariantMap DataHierarchyManager::toVariantMap() const
 {
     if (!_items.empty()) {
-        QVariantMap variantMap;
+        auto toPlan = makeToPlan();
 
-        std::uint32_t sortIndex = 0;
+        toPlan.addSequentialStage("Enumerate datasets", [this](SerializationPlan::Job& job) -> void {
+            std::uint32_t sortIndex = 0;
 
-        if (hasTask()) {
-            QStringList subtaskNames;
+            if (hasTask()) {
+                QStringList subtaskNames;
 
-            subtaskNames.reserve(_items.size());
+                subtaskNames.reserve(_items.size());
 
-            for (auto& dataHierarchyItem : _items) {
-                subtaskNames << dataHierarchyItem->getDataset()->getGuiName();
+                for (auto& dataHierarchyItem : _items) {
+                    subtaskNames << dataHierarchyItem->getDataset()->getGuiName();
+                }
             }
+        });
 
-            getTask()->setSubtasks(subtaskNames);
-            getTask()->setRunning();
-        }
+        SerializationPlan::Jobs saveJobs;
 
         for (auto& dataHierarchyItem : _items) {
             if (dataHierarchyItem->hasParent())
                 continue;
 
             const auto datasetName = dataHierarchyItem->getDataset()->getGuiName();
+            auto dataHierarchyItemMap = 
 
-            if (hasTask())
-                getTask()->setSubtaskStarted(datasetName);
+            saveJobs.emplace_back(dataHierarchyItem->getDataset()->getGuiName(), [&dataHierarchyItem](SerializationPlan::Job& job) {
+                const auto map = dataHierarchyItem->toVariantMap();
 
-            auto dataHierarchyItemMap = dataHierarchyItem->toVariantMap();
+            	job.setResult(map);
 
-            if (hasTask())
-                getTask()->setSubtaskFinished(datasetName);
+                //dataHierarchyItemMap["SortIndex"] = sortIndex;
 
-            QCoreApplication::processEvents();
+                //variantMap[dataHierarchyItem->getDataset()->getId()] = dataHierarchyItemMap;
+            });
 
-            dataHierarchyItemMap["SortIndex"] = sortIndex;
-
-            variantMap[dataHierarchyItem->getDataset()->getId()] = dataHierarchyItemMap;
-
-            sortIndex++;
+            //sortIndex++;
         }
 
-        return variantMap;
+        toPlan.addParallelStage("Save datasets", saveJobs);
+
+        toPlan.addSequentialStage("Finalize datasets", [this](SerializationPlan::Job& jo) -> void {
+        });
+
+        toPlan.execute(*mv::projects().getSerializationPlanExecutor());
+
+        return toPlan.getResult().toMap();
     }
 
     return {};

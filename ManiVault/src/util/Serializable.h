@@ -7,6 +7,7 @@
 #include "ManiVaultGlobals.h"
 
 #include "Serialization.h"
+#include "SerializationPlan.h"
 
 #include <QString>
 #include <QJsonDocument>
@@ -154,6 +155,9 @@ public:
      * @return Serialization count to
      */
     std::int32_t getSerializationCountTo() const;
+
+    static SerializationPlan makeFromPlan();
+    static SerializationPlan makeToPlan();
 
 public: // Task related
 

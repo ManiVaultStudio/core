@@ -362,6 +362,10 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/StartPageConfigurationAction.h
     src/actions/BrandingConfigurationAction.h
     src/actions/ProjectsConfigurationAction.h
+    src/actions/ActionHooks.h
+    src/actions/ActionRecipeProvider.h
+    src/actions/ActionRecipeComposer.h
+    src/actions/ActionRecipeContext.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -408,6 +412,10 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/StartPageConfigurationAction.cpp
     src/actions/BrandingConfigurationAction.cpp
     src/actions/ProjectsConfigurationAction.cpp
+    src/actions/ActionHooks.cpp
+    src/actions/ActionRecipeProvider.cpp
+    src/actions/ActionRecipeComposer.cpp
+    src/actions/ActionRecipeContext.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
@@ -595,6 +603,8 @@ set(PUBLIC_UTIL_HEADERS
     src/util/AbstractWorkflow.h
     src/util/SerializationScheduler.h
     src/util/DecodeRequestState.h
+    src/util/SerializationPlan.h
+    src/util/AbstractSerializationPlanExecutor.h
 )
 
 if(APPLE)
@@ -669,6 +679,8 @@ set(PUBLIC_UTIL_SOURCES
     src/util/AbstractWorkflow.cpp
     src/util/SerializationScheduler.cpp
     src/util/DecodeRequestState.cpp
+    src/util/SerializationPlan.cpp
+    src/util/AbstractSerializationPlanExecutor.cpp
 )
 
 if(APPLE)

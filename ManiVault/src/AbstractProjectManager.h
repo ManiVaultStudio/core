@@ -34,6 +34,7 @@ namespace util
     class AbstractWorkflow;
 
     using UniqueAbstractWorkflow = std::unique_ptr<AbstractWorkflow>;
+    class AbstractSerializationPlanExecutor;
 }
 
 /**
@@ -233,6 +234,12 @@ public:
      * @return Reference to the projects tree model
      */
     virtual const ProjectsTreeModel& getProjectsTreeModel() const = 0;
+
+    /**
+     * Get serialization plan executor
+     * @return Pointer to the serialization plan executor (nullptr if not available)
+     */
+    virtual util::AbstractSerializationPlanExecutor* getSerializationPlanExecutor() = 0;
 
 public: // Project download
 
@@ -525,9 +532,9 @@ signals:
     void stateChanged(const State& state);
 
 private:
-    State                           _state;               /** Determines the state of the project manager */
-    Task                            _projectDownloadTask; /** Progress reporting project downloading */
-    QMap<TemporaryDirType, QString> _temporaryDirPaths;   /** Temporary directories for file open/save etc. */
+    State                                   _state;                     /** Determines the state of the project manager */
+    Task                                    _projectDownloadTask;       /** Progress reporting project downloading */
+    QMap<TemporaryDirType, QString>         _temporaryDirPaths;         /** Temporary directories for file open/save etc. */
 };
 
 }

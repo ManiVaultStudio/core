@@ -6,6 +6,7 @@
 #include "PluginManagerDialog.h"
 #include "ProjectSettingsDialog.h"
 #include "NewProjectDialog.h"
+#include "Archiver.h"
 
 #include <CoreInterface.h>
 #include <ProjectMetaAction.h>
@@ -18,7 +19,7 @@
 #include <util/Exception.h>
 #include <util/Serialization.h>
 #include <util/StandardPaths.h>
-#include "Archiver.h"
+
 
 #include <widgets/FileDialog.h>
 
@@ -1210,7 +1211,12 @@ QDir ProjectManager::getDownloadedProjectsDir() const
     return resultDir;
 }
 
-util::AbstractWorkflow* ProjectManager::getActiveWorkflow()
+AbstractSerializationPlanExecutor* ProjectManager::getSerializationPlanExecutor()
+{
+    return &_serializationPlanExecutor;
+}
+
+AbstractWorkflow* ProjectManager::getActiveWorkflow()
 {
 	return _activeWorkflow.get();
 }
