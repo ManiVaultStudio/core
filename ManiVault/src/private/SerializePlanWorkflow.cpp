@@ -124,12 +124,12 @@ GroupItem SerializePlanWorkflow::buildJobTask(SerializationPlan::Job& job)
     auto errorText = std::make_shared<QString>();
 
     return QThreadFunctionTask<void>(
-        [sharedJob, name, errorText](QThreadFunction<void>& task) {
+        [this, sharedJob, name, errorText](QThreadFunction<void>& task) {
             task.setAutoDelayedSync(false);
 
             task.setThreadFunctionData(
-                [sharedJob, name, errorText]() mutable {
-                    OperationContextScope scope(context.get());
+                [this, sharedJob, name, errorText]() mutable {
+                    OperationContextScope scope(&getOperationContext());
 
 #ifdef SERIALIZE_PLAN_WORKFLOW_VERBOSE
                     printLine("Job started", name, 2);

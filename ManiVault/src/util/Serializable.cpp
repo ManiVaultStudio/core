@@ -5,6 +5,7 @@
 #include "Serializable.h"
 #include "Application.h"
 #include "CoreInterface.h"
+#include "OperationContextScope.h"
 
 #include "actions/WidgetAction.h"
 
@@ -203,6 +204,42 @@ bool Serializable::hasTask() const
 void Serializable::setTask(Task* task)
 {
     _task = task;
+}
+
+void Serializable::reportSerializationWarning(QString scope, QString message)
+{
+    if (auto context = OperationContextScope::get()) {
+	    context->reportWarning(std::move(scope), std::move(message));
+        return;
+    }
+
+#ifdef _DEBUG
+    qWarning() << "No active OperationContext for serialization error:" << scope << message;
+#endif
+}
+
+void Serializable::reportSerializationError(QString scope, QString message)
+{
+    if (auto context = OperationContextScope::get()) {
+	    context->reportError(std::move(scope), std::move(message));
+        return;
+    }
+
+#ifdef _DEBUG
+    qWarning() << "No active OperationContext for serialization error:" << scope << message;
+#endif
+}
+
+void Serializable::reportFatalSerializationError(QString scope, QString message)
+{
+    if (auto context = OperationContextScope::get()) {
+	    context->reportFatal(std::move(scope), std::move(message));
+        return;
+    }
+
+#ifdef _DEBUG
+    qWarning() << "No active OperationContext for serialization error:" << scope << message;
+#endif
 }
 
 void Serializable::fromVariantMap(Serializable* serializable, const QVariantMap& variantMap)

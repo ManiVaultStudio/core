@@ -179,6 +179,29 @@ public: // Task related
      */
     void setTask(Task* task);
 
+public:
+
+    /**
+     * Convenience wrapper that reports to the currently active operation context, if any.
+     * @param scope Scope of the warning (e.g. the name of the serializable object or the name of the property that is being serialized)
+     * @param message Warning message
+     */
+    static void reportSerializationWarning(QString scope, QString message);
+
+    /**
+     * Convenience wrapper that reports to the currently active operation context, if any.
+     * @param scope Scope of the error (e.g. the name of the serializable object or the name of the property that is being serialized)
+     * @param message Error message
+     */
+    static void reportSerializationError(QString scope, QString message);
+
+    /**
+     * Convenience wrapper that reports to the currently active operation context, if any.
+     * @param scope Scope of the fatal error (e.g. the name of the serializable object or the name of the property that is being serialized)
+     * @param message Fatal error message
+     */
+    static void reportFatalSerializationError(QString scope, QString message);
+
 protected: // Serialization
 
     /**

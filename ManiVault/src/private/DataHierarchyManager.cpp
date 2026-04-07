@@ -337,6 +337,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
         return toPlan.getResult().toMap();
     }
 
+    Serializable::reportSerializationError("Data hierarchy manager", "Failed to serialize datasets");
     return {};
 }
 
