@@ -6,12 +6,14 @@
 
 #include "ManiVaultGlobals.h"
 
+#include <QObject>
+
 namespace mv::util
 {
 
 class SerializationPlan;
 
-class CORE_EXPORT AbstractSerializationPlanExecutor
+class CORE_EXPORT AbstractSerializationPlanExecutor : public QObject
 {
 public:
 

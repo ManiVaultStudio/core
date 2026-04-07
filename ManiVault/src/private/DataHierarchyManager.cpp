@@ -297,16 +297,11 @@ QVariantMap DataHierarchyManager::toVariantMap() const
         SerializationPlan::Jobs saveJobs;
 
         for (auto& dataHierarchyItem : _items) {
-            if (dataHierarchyItem->hasParent())
-                continue;
-
-            const auto datasetName = dataHierarchyItem->getDataset()->getGuiName();
-            auto dataHierarchyItemMap = 
-
+            qDebug() << "Add save job for dataset" << dataHierarchyItem->getDataset()->getGuiName();
             saveJobs.emplace_back(dataHierarchyItem->getDataset()->getGuiName(), [&dataHierarchyItem](SerializationPlan::Job& job) {
                 const auto map = dataHierarchyItem->toVariantMap();
 
-            	job.setResult(map);
+            	//job.setResult(map);
 
                 //dataHierarchyItemMap["SortIndex"] = sortIndex;
 
@@ -318,7 +313,24 @@ QVariantMap DataHierarchyManager::toVariantMap() const
 
         toPlan.addParallelStage("Save datasets", saveJobs);
 
-        toPlan.addSequentialStage("Finalize datasets", [this](SerializationPlan::Job& jo) -> void {
+        toPlan.addSequentialStage("Finalize datasets", [this, saveJobs](SerializationPlan::Job& job) -> void {
+            qDebug() << "===========Finalize datasets";
+            QVariantMap datasetsVariantMap;
+
+            for (const auto& saveJob : saveJobs) {
+                const auto datasetVariantMap = saveJob.getResult().toMap();
+
+                if (datasetVariantMap.isEmpty())
+                    throw std::runtime_error(QString("Failed to serialize dataset %1").arg(saveJob.getName()).toStdString());
+
+                datasetsVariantMap[saveJob.getName()] = datasetVariantMap;
+            }
+
+            job.setResult(datasetsVariantMap);
+        });
+
+        toPlan.addSequentialStage("Log datasets", [this](SerializationPlan::Job& job) -> void {
+            qDebug() << "===========Log datasets";
         });
 
         toPlan.execute(*mv::projects().getSerializationPlanExecutor());

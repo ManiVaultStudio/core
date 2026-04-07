@@ -353,6 +353,7 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/ZstdBlobCodec.h
     src/private/ZstdBlobCodecFactory.h
     src/private/TaskTreeSerializationPlanExecutor.h
+    src/private/SerializePlanWorkflow.h
 )
 
 if(MV_USE_ERROR_LOGGING)
@@ -377,6 +378,7 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/ZstdBlobCodec.cpp
     src/private/ZstdBlobCodecFactory.cpp
     src/private/TaskTreeSerializationPlanExecutor.cpp
+    src/private/SerializePlanWorkflow.cpp
 )
 
 if(MV_USE_ERROR_LOGGING)

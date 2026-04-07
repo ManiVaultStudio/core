@@ -7,6 +7,8 @@
 #include <util/AbstractSerializationPlanExecutor.h>
 #include <util/SerializationPlan.h>
 
+#include "SerializePlanWorkflow.h"
+
 #include <QString>
 
 class TaskTreeSerializationPlanExecutor final : public mv::util::AbstractSerializationPlanExecutor
@@ -16,5 +18,6 @@ public:
     void execute(mv::util::SerializationPlan& serializationPlan) override;
 
 private:
+    std::unique_ptr<SerializePlanWorkflow>      _workflow;
 };
 

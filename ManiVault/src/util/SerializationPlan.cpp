@@ -4,37 +4,84 @@
 
 #include "SerializationPlan.h"
 
-mv::util::SerializationPlan::Job::Job(QString name, JobFunction function) :
+namespace mv::util
+{
+
+SerializationPlan::Job::Job(QString name, JobFunction function) :
     _name(std::move(name)),
     _function(std::move(function))
 {
 }
 
-mv::util::SerializationPlan::Stage::Stage(QString name, Jobs jobs) :
+QString SerializationPlan::Job::getName() const
+{
+	return _name;
+}
+
+SerializationPlan::JobFunction SerializationPlan::Job::getFunction() const
+{
+	return _function;
+}
+
+void SerializationPlan::Job::run()
+{
+	qDebug() << "Running job:" << _name;
+	if (_function)
+		_function(*this);
+}
+
+void SerializationPlan::Job::setResult(QVariant result)
+{
+	_result = std::move(result);
+}
+
+const QVariant& SerializationPlan::Job::getResult() const
+{
+	return _result;
+}
+
+SerializationPlan::Stage::Stage(QString name, Mode mode, Jobs jobs) :
     _name(std::move(name)),
+    _mode(mode),
     _jobs(std::move(jobs))
 {
 }
 
-void mv::util::SerializationPlan::addStage(Stage stage)
+SerializationPlan::Stage::Mode SerializationPlan::Stage::getMode() const
+{
+	return _mode;
+}
+
+QString SerializationPlan::Stage::getName() const
+{
+	return _name;
+}
+
+SerializationPlan::Jobs SerializationPlan::Stage::getJobs() const
+{
+	return _jobs;
+}
+
+void SerializationPlan::addStage(Stage stage)
 {
     _stages.emplace_back(std::move(stage));
 }
 
-void mv::util::SerializationPlan::addSequentialStage(QString name, JobFunction jobFunction)
+void SerializationPlan::addSequentialStage(QString name, JobFunction jobFunction)
 {
-    _stages.emplace_back(Stage(name, {
+    _stages.emplace_back(Stage(name, Stage::Mode::Sequential, {
         Job(name, std::move(jobFunction))
     }));
 }
 
-void mv::util::SerializationPlan::addParallelStage(QString name, Jobs jobs)
+void SerializationPlan::addParallelStage(QString name, Jobs jobs)
 {
-    _stages.emplace_back(Stage(std::move(name), std::move(jobs)));
+    _stages.emplace_back(std::move(name), Stage::Mode::Parallel, std::move(jobs));
 }
 
-void mv::util::SerializationPlan::execute(AbstractSerializationPlanExecutor& serializationPlanExecutor)
+void SerializationPlan::execute(AbstractSerializationPlanExecutor& serializationPlanExecutor)
 {
     serializationPlanExecutor.execute(*this);
 }
 
+}

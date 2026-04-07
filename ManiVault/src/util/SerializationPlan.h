@@ -29,17 +29,15 @@ public:
     public:
         Job(QString name, JobFunction function);
 
-        QString getName() const { return _name; }
-        JobFunction getFunction() const { return _function; }
+        QString     getName() const;
 
-        void run()
-        {
-            if (_function)
-                _function(*this);
-        }
+        JobFunction getFunction() const;
 
-        void setResult(QVariant result) { _result = std::move(result); }
-        const QVariant& getResult() const { return _result; }
+        void run();
+
+        void            setResult(QVariant result);
+
+        const QVariant& getResult() const;
 
     private:
         QString         _name;
@@ -52,13 +50,23 @@ public:
     class CORE_EXPORT Stage
     {
     public:
-        Stage(QString name, Jobs jobs);
+        enum class Mode
+        {
+            Sequential,
+            Parallel
+        };
 
-        QString getName() const { return _name; }
-        Jobs getJobs() const { return _jobs; }
+        Stage(QString name, Mode mode, Jobs jobs);
+
+        Mode getMode() const;
+
+        QString getName() const;
+
+        Jobs    getJobs() const;
 
     private:
         QString _name;
+        Mode    _mode;
         Jobs    _jobs;
     };
 
@@ -71,7 +79,7 @@ public:
 	void execute(AbstractSerializationPlanExecutor& serializationPlanExecutor);
 
     QVariant getResult() const { return _result; }
-
+    Stages getStages() const { return _stages; }
 private:
     Stages  _stages;
     QVariant _result;

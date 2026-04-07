@@ -7,4 +7,12 @@
 void TaskTreeSerializationPlanExecutor::execute(mv::util::SerializationPlan& serializationPlan)
 {
     qDebug() << __FUNCTION__;
+
+    _workflow = std::make_unique<SerializePlanWorkflow>(serializationPlan, this);
+
+    connect(_workflow.get(), &SerializePlanWorkflow::finished, this, [this, workflowPtr = _workflow.get()](bool success, const QString& error) {
+        qDebug() << "Workflow finished with success:" << success << "error:" << error;
+    });
+
+    _workflow->start();
 }
