@@ -14,16 +14,19 @@ class OperationContext;
 class CORE_EXPORT OperationContextScope
 {
 public:
-    OperationContextScope(OperationContext* ctx);
+    explicit OperationContextScope(SharedOperationContext context);
 
-    virtual ~OperationContextScope();
+    ~OperationContextScope();
 
     static OperationContext* get();
 
-private:
-    OperationContext* _previous;
+    static SharedOperationContext getShared();
 
-    static OperationContext*& current();
+private:
+    static SharedOperationContext& currentShared();
+
+private:
+    SharedOperationContext  _previous;
 };
 
 }

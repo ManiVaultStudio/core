@@ -292,6 +292,8 @@ QVariantMap DataHierarchyManager::toVariantMap() const
                     subtaskNames << dataHierarchyItem->getDataset()->getGuiName();
                 }
             }
+
+            Serializable::reportSerializationError("Data hierarchy manager", "Failed to Enumerate datasets");
         });
 
         SerializationPlan::Jobs saveJobs;
@@ -301,6 +303,8 @@ QVariantMap DataHierarchyManager::toVariantMap() const
                 const auto map = dataHierarchyItem->toVariantMap();
 
             	job.setResult(map);
+
+                Serializable::reportSerializationError("Data hierarchy manager", "Failed to save dataset: " + dataHierarchyItem->getDataset()->getGuiName());
 
                 //dataHierarchyItemMap["SortIndex"] = sortIndex;
 
@@ -318,6 +322,8 @@ QVariantMap DataHierarchyManager::toVariantMap() const
             for (const auto& saveJob : saveJobs) {
                 const auto datasetVariantMap = saveJob.getResult().toMap();
 
+                
+
                 if (datasetVariantMap.isEmpty())
                     throw std::runtime_error(QString("Failed to serialize dataset %1").arg(saveJob.getName()).toStdString());
 
@@ -330,6 +336,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
         toPlan.addSequentialStage("Log datasets", [this]() -> void {
             //qDebug() << "Data hierarchy manager serialization result:" << job.getResult();
             //job.setResult({});
+            Serializable::reportSerializationError("Data hierarchy manager", "Failed to log datasets");
         });
 
         toPlan.execute(*mv::projects().getSerializationPlanExecutor());
@@ -337,7 +344,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
         return toPlan.getResult().toMap();
     }
 
-    Serializable::reportSerializationError("Data hierarchy manager", "Failed to serialize datasets");
+    
     return {};
 }
 

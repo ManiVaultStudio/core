@@ -19,8 +19,8 @@ using namespace mv::util;
 
 #define SERIALIZE_PLAN_WORKFLOW_VERBOSE
 
-SerializePlanWorkflow::SerializePlanWorkflow(SerializationPlan serializationPlan, QObject* parent) :
-    AbstractWorkflow(createContext(serializationPlan), "Serialize Plan", parent),
+SerializePlanWorkflow::SerializePlanWorkflow(SerializationPlan serializationPlan, QObject* parent, SharedOperationContext operationContext /*= {}*/) :
+    AbstractWorkflow(createContext(serializationPlan), "Serialize Plan", parent, operationContext),
     _serializationPlan(std::move(serializationPlan))
 {
 }
@@ -129,7 +129,7 @@ GroupItem SerializePlanWorkflow::buildJobTask(SerializationPlan::Job& job)
 
             task.setThreadFunctionData(
                 [this, sharedJob, name, errorText]() mutable {
-                    OperationContextScope scope(&getOperationContext());
+                    OperationContextScope scope(getOperationContext());
 
 #ifdef SERIALIZE_PLAN_WORKFLOW_VERBOSE
                     printLine("Job started", name, 2);

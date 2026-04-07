@@ -61,4 +61,6 @@ private:
     std::atomic_bool        _abortRequested = false;
 };
 
+using SharedOperationContext = std::shared_ptr<OperationContext>;
+
 }

@@ -7,26 +7,30 @@
 namespace mv::util
 {
 
-OperationContextScope::OperationContextScope(OperationContext* ctx)
+OperationContextScope::OperationContextScope(SharedOperationContext context): _previous(currentShared())
 {
-	_previous = current();
-	current() = ctx;
+	currentShared() = std::move(context);
 }
 
 OperationContextScope::~OperationContextScope()
 {
-	current() = _previous;
+	currentShared() = _previous;
 }
 
 OperationContext* OperationContextScope::get()
 {
-	return current();
+	return currentShared().get();
 }
 
-OperationContext*& OperationContextScope::current()
+SharedOperationContext OperationContextScope::getShared()
 {
-	thread_local OperationContext* ctx = nullptr;
-	return ctx;
+	return currentShared();
+}
+
+SharedOperationContext& OperationContextScope::currentShared()
+{
+	thread_local SharedOperationContext context;
+	return context;
 }
 
 }

@@ -24,7 +24,7 @@ class SerializePlanWorkflow final : public mv::util::AbstractWorkflow
     Q_OBJECT
 
 public:
-    explicit SerializePlanWorkflow(mv::util::SerializationPlan serializationPlan, QObject* parent = nullptr);
+    explicit SerializePlanWorkflow(mv::util::SerializationPlan serializationPlan, QObject* parent = nullptr, mv::util::SharedOperationContext operationContext = {});
 
 protected:
 

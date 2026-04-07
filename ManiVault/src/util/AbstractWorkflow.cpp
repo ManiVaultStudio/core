@@ -11,13 +11,13 @@
 namespace mv::util
 {
 
-AbstractWorkflow::AbstractWorkflow(UniqueWorkflowContext workflowContext, QString title, QObject* parent) :
+AbstractWorkflow::AbstractWorkflow(UniqueWorkflowContext workflowContext, QString title, QObject* parent, SharedOperationContext operationContext /*= {}*/) :
 	QObject(parent),
 	_title(std::move(title)),
 	_duration(0),
     _initialWorkflowContext(std::move(workflowContext)),
     _task(this, _title, Task::Status::Idle, true),
-    _operationContext(std::make_shared<OperationContext>())
+    _operationContext(operationContext ? std::move(operationContext) : std::make_shared<OperationContext>())
 {
 #ifdef ABSTRACT_WORKFLOW_VERBOSE
     printLine(_title, "Create");
@@ -96,9 +96,9 @@ const std::shared_ptr<OperationContext>& AbstractWorkflow::getConstOperationCont
 	return _operationContext;
 }
 
-OperationContext& AbstractWorkflow::getOperationContext() const
+SharedOperationContext AbstractWorkflow::getOperationContext()
 {
-	return *_operationContext;
+	return _operationContext;
 }
 
 void AbstractWorkflow::registerStorageHandlers(QtTaskTree::QTaskTree& tree)

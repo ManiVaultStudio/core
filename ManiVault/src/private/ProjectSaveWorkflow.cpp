@@ -101,6 +101,8 @@ void ProjectSaveWorkflow::setupStorage(WorkflowRuntimeContext& context)
 #ifdef PROJECT_SAVE_WORKFLOW_VERBOSE
     printLine("Workflow", "Setup storage", 1);
 #endif
+
+    OperationContextScope scope(getOperationContext());
 }
 
 void ProjectSaveWorkflow::onStorageDone(const WorkflowRuntimeContext& context)
@@ -130,6 +132,12 @@ void ProjectSaveWorkflow::handleDone(QtTaskTree::DoneWith status)
         throw std::runtime_error("Unexpected error: ProjectSaveResult is null");
     }
 
+    if (getOperationContext()->hasErrors()) {
+        qDebug() << "Project save completed with errors:" << getOperationContext()->combinedErrorMessage();
+        help().addNotification("Project saved with errors", getOperationContext()->combinedErrorMessage(), StyledIcon("exclamation-triangle"));
+    }
+        
+
     emit finished(status == DoneWith::Success, QString{});
 }
 
@@ -152,6 +160,8 @@ void ProjectSaveWorkflow::setup(ProjectSaveContext& context)
 #ifdef PROJECT_SAVE_WORKFLOW_VERBOSE
     printLine("Recipe stage", "Setup", 2);
 #endif
+
+    OperationContextScope scope(getOperationContext());
 
     Application::requestOverrideCursor(Qt::WaitCursor);
 
@@ -182,6 +192,8 @@ void ProjectSaveWorkflow::saveProjectJson(ProjectSaveContext& context)
     printLine("Recipe stage", "Save project JSON", 2);
 #endif
 
+    OperationContextScope scope(getOperationContext());
+
     projects().toJsonFile(context._projectJsonPath);
 }
 
@@ -190,6 +202,8 @@ void ProjectSaveWorkflow::saveProjectMetaJson(ProjectSaveContext& context)
 #ifdef PROJECT_SAVE_WORKFLOW_VERBOSE
     printLine("Recipe stage", "Save project meta JSON", 2);
 #endif
+
+    OperationContextScope scope(getOperationContext());
 
     if (auto project = projects().getCurrentProject()) {
         //project->getProjectMetaAction().toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
