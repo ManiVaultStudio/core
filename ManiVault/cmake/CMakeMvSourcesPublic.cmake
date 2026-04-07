@@ -605,6 +605,8 @@ set(PUBLIC_UTIL_HEADERS
     src/util/DecodeRequestState.h
     src/util/SerializationPlan.h
     src/util/AbstractSerializationPlanExecutor.h
+    src/util/OperationContext.h
+    src/util/OperationContextScope.h
 )
 
 if(APPLE)
@@ -681,6 +683,8 @@ set(PUBLIC_UTIL_SOURCES
     src/util/DecodeRequestState.cpp
     src/util/SerializationPlan.cpp
     src/util/AbstractSerializationPlanExecutor.cpp
+    src/util/OperationContext.cpp
+    src/util/OperationContextScope.cpp
 )
 
 if(APPLE)

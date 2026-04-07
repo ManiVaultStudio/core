@@ -27,22 +27,42 @@ public:
     class CORE_EXPORT Job
     {
     public:
+        using ErrorString = QString;
+
         Job(QString name, JobFunction function);
 
-        QString     getName() const;
+        QString getName() const;
 
-        JobFunction getFunction() const;
+        const JobFunction& getFunction() const;
 
         void run();
 
-        void            setResult(QVariant result);
+        void setResult(QVariant result);
 
         const QVariant& getResult() const;
 
+        void clearResult();
+
+        void setError(QString error);
+
+        bool           hasError() const;
+
+        const QString& getError() const;
+
+        void           clearError();
+
+        void setException(const std::exception& e);
+
+        void setUnknownException();
+
+        void fail(QString error);
+
+
     private:
-        QString         _name;
-        JobFunction     _function;
-        QVariant        _result;
+        QString     _name;
+        JobFunction _function;
+        QVariant    _result;
+        std::optional<QString> _error;
     };
 
     using Jobs = std::vector<Job>;
@@ -73,7 +93,28 @@ public:
     using Stages = std::vector<Stage>;
 
     void addStage(Stage stage);
-	void addSequentialStage(QString name, JobFunction jobFunction);
+
+    template<typename Function>
+    void addSequentialStage(QString name, Function&& function)
+    {
+        if constexpr (std::is_invocable_v<Function, Job&>) {
+            _stages.emplace_back(Stage(name, Stage::Mode::Sequential, {
+				Job(std::move(name), JobFunction(std::forward<Function>(function)))
+            }));
+        }
+        else if constexpr (std::is_invocable_v<Function>) {
+            _stages.emplace_back(Stage(name, Stage::Mode::Sequential, {
+                Job(std::move(name), JobFunction([fn = std::forward<Function>(function)](Job&) mutable {
+	                fn();
+	            }))
+            }));
+        }
+        else {
+            static_assert(std::is_invocable_v<Function, Job&> || std::is_invocable_v<Function>,
+                "Stage function must be callable as void(Job&) or void()");
+        }
+    }
+
 	void addParallelStage(QString name, Jobs jobs);
 
 	void execute(AbstractSerializationPlanExecutor& serializationPlanExecutor);

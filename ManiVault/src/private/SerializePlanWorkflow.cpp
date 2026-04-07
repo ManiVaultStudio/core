@@ -7,6 +7,8 @@
 #include "ProjectManager.h"
 #include "Archiver.h"
 
+#include <util/OperationContextScope.h>
+
 using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
@@ -36,20 +38,10 @@ Group SerializePlanWorkflow::makeRecipe()
     root << contextStorage;
 
     for (auto& stage : _serializationPlan.getStages()) {
-	    //if (stage.getMode() == SerializationPlan::Stage::Mode::Sequential) {
-     //       root << buildJobTask(stage.getJobs()[0]);
-     //       /*root << QSyncTask([&] {
-     //           stage.getJobs()[0].run();
-     //       });*/
-	    //} else {
-     //       
-	    //}
         root << buildStageGroup(stage);
     }
 
-    root << onGroupDone([](DoneWith doneWith) {
-        qDebug() << "Save group done with:" << doneWith;
-        }, CallDoneFlag::Always);
+    root << onGroupDone([](DoneWith doneWith) {}, CallDoneFlag::Always);
 
     return root;
 }
@@ -76,19 +68,26 @@ void SerializePlanWorkflow::handleDone(QtTaskTree::DoneWith status)
     printLine("Workflow", "Handle done", 1);
 #endif
 
-    if (const auto result = resultAs<ProjectSaveResult>()) {
-        const auto duration = getDuration();
-        const auto text     = (duration < 1000) ? QString("%1 saved successfully in %2 ms").arg(result->_filePath).arg(duration) : QString("%1 saved successfully in %2 s").arg(result->_filePath).arg(duration / 1000.0, 0, 'f', 1);
+    const auto result = resultAs<ProjectSaveResult>();
 
-        if (status == QtTaskTree::DoneWith::Success)
-            help().addNotification("Project saved", text, StyledIcon("floppy-disk"));
-        else
-            help().addNotification("Error", "Unable to save ManiVault project: " + result->_errorMessage, StyledIcon("exclamation-triangle"));
-    } else {
-        throw std::runtime_error("Unexpected error: ProjectSaveResult is null");
-    }
+    if (result->_success)
+        emit finished(status == DoneWith::Success, QString{});
+    else
+        emit finished(status == DoneWith::Error, result->_errorMessage);
 
-    emit finished(status == DoneWith::Success, QString{});
+    //if (const auto result = resultAs<ProjectSaveResult>()) {
+    //    const auto duration = getDuration();
+    //    const auto text     = (duration < 1000) ? QString("%1 saved successfully in %2 ms").arg(result->_filePath).arg(duration) : QString("%1 saved successfully in %2 s").arg(result->_filePath).arg(duration / 1000.0, 0, 'f', 1);
+
+    //    if (status == DoneWith::Success)
+    //        help().addNotification("Project saved", text, StyledIcon("floppy-disk"));
+    //    else
+    //        help().addNotification("Error", "Unable to save ManiVault project: " + result->_errorMessage, StyledIcon("exclamation-triangle"));
+    //} else {
+    //    throw std::runtime_error("Unexpected error: ProjectSaveResult is null");
+    //}
+
+    
 }
 
 void SerializePlanWorkflow::initResult(UniqueWorkflowResultBase& result)
@@ -117,31 +116,57 @@ Group SerializePlanWorkflow::buildStageGroup(SerializationPlan::Stage& stage)
     return { items };
 }
 
-GroupItem SerializePlanWorkflow::buildJobTask(SerializationPlan::Job job)
+GroupItem SerializePlanWorkflow::buildJobTask(SerializationPlan::Job& job)
 {
     const QString name = job.getName();
 
+    auto sharedJob = std::make_shared<SerializationPlan::Job>(std::move(job));
+    auto errorText = std::make_shared<QString>();
+
     return QThreadFunctionTask<void>(
-        [job = std::move(job), name](QThreadFunction<void>& task) {
+        [sharedJob, name, errorText](QThreadFunction<void>& task) {
             task.setAutoDelayedSync(false);
 
             task.setThreadFunctionData(
-                [job = std::move(job), name]() mutable {
+                [sharedJob, name, errorText]() mutable {
+                    OperationContextScope scope(context.get());
+
 #ifdef SERIALIZE_PLAN_WORKFLOW_VERBOSE
                     printLine("Job started", name, 2);
 #endif
-
-                    job.run();
+                    try {
+                        sharedJob->run();
+                    }
+                    catch (const std::exception& e) {
+                        sharedJob->setException(e);
+                    }
+                    catch (...) {
+                        sharedJob->setUnknownException();
+                    }
 
 #ifdef SERIALIZE_PLAN_WORKFLOW_VERBOSE
-                    printLine("Job ended", name, 3);
+                    printLine("Job ended", name, 2);
 #endif
                 });
         },
-        [name](const QThreadFunction<void>&, DoneWith doneWith) {
+        [this, name, sharedJob](const QThreadFunction<void>&, DoneWith doneWith) -> DoneResult {
 #ifdef SERIALIZE_PLAN_WORKFLOW_VERBOSE
             printLine("Task done", name, 2);
 #endif
+
+            if (doneWith == DoneWith::Cancel)
+                return DoneResult::Error;
+
+            if (sharedJob->hasError()) {
+                auto result = resultAs<ProjectSaveResult>();
+
+                result->_success        = false;
+                result->_errorMessage   = sharedJob->getError();
+
+	            return DoneResult::Error;
+            }
+
+            return DoneResult::Success;
         },
         CallDoneFlag::Always
     );

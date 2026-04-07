@@ -237,10 +237,10 @@ public: // Operators
     }
 
 private:
-    QString         _id;                        /** Globally unique identifier of the serializable object */
-    QString         _serializationName;         /** Serialization name */
-    std::int32_t    _serializationCounter[2];   /** Serialization counter (used to query how many times the action is serialized to- and from) */
-    QPointer<Task>  _task;                      /** Task that the serializable object belongs to (if any) */    
+    QString             _id;                        /** Globally unique identifier of the serializable object */
+    QString             _serializationName;         /** Serialization name */
+    std::int32_t        _serializationCounter[2];   /** Serialization counter (used to query how many times the action is serialized to- and from) */
+    QPointer<Task>      _task;                      /** Task that the serializable object belongs to (if any) */
 };
 
 }

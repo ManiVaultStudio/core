@@ -297,11 +297,10 @@ QVariantMap DataHierarchyManager::toVariantMap() const
         SerializationPlan::Jobs saveJobs;
 
         for (auto& dataHierarchyItem : _items) {
-            qDebug() << "Add save job for dataset" << dataHierarchyItem->getDataset()->getGuiName();
             saveJobs.emplace_back(dataHierarchyItem->getDataset()->getGuiName(), [&dataHierarchyItem](SerializationPlan::Job& job) {
                 const auto map = dataHierarchyItem->toVariantMap();
 
-            	//job.setResult(map);
+            	job.setResult(map);
 
                 //dataHierarchyItemMap["SortIndex"] = sortIndex;
 
@@ -314,7 +313,6 @@ QVariantMap DataHierarchyManager::toVariantMap() const
         toPlan.addParallelStage("Save datasets", saveJobs);
 
         toPlan.addSequentialStage("Finalize datasets", [this, saveJobs](SerializationPlan::Job& job) -> void {
-            qDebug() << "===========Finalize datasets";
             QVariantMap datasetsVariantMap;
 
             for (const auto& saveJob : saveJobs) {
@@ -329,8 +327,9 @@ QVariantMap DataHierarchyManager::toVariantMap() const
             job.setResult(datasetsVariantMap);
         });
 
-        toPlan.addSequentialStage("Log datasets", [this](SerializationPlan::Job& job) -> void {
-            qDebug() << "===========Log datasets";
+        toPlan.addSequentialStage("Log datasets", [this]() -> void {
+            //qDebug() << "Data hierarchy manager serialization result:" << job.getResult();
+            //job.setResult({});
         });
 
         toPlan.execute(*mv::projects().getSerializationPlanExecutor());

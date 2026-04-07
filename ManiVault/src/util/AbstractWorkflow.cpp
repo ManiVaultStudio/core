@@ -16,7 +16,8 @@ AbstractWorkflow::AbstractWorkflow(UniqueWorkflowContext workflowContext, QStrin
 	_title(std::move(title)),
 	_duration(0),
     _initialWorkflowContext(std::move(workflowContext)),
-    _task(this, _title, Task::Status::Idle, true)
+    _task(this, _title, Task::Status::Idle, true),
+    _operationContext(std::make_shared<OperationContext>())
 {
 #ifdef ABSTRACT_WORKFLOW_VERBOSE
     printLine(_title, "Create");
@@ -88,6 +89,16 @@ WorkflowRuntimeContextStorage& AbstractWorkflow::contextStorage()
 const WorkflowRuntimeContextStorage& AbstractWorkflow::contextStorage() const
 {
 	return _contextStorage;
+}
+
+const std::shared_ptr<OperationContext>& AbstractWorkflow::getConstOperationContext() const
+{
+	return _operationContext;
+}
+
+OperationContext& AbstractWorkflow::getOperationContext() const
+{
+	return *_operationContext;
 }
 
 void AbstractWorkflow::registerStorageHandlers(QtTaskTree::QTaskTree& tree)

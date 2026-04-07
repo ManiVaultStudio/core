@@ -4,14 +4,22 @@
 
 #include "TaskTreeSerializationPlanExecutor.h"
 
+#ifdef _DEBUG
+	#define TASK_TREE_SERIALIZATION_VERBOSE
+#endif
+
 void TaskTreeSerializationPlanExecutor::execute(mv::util::SerializationPlan& serializationPlan)
 {
-    qDebug() << __FUNCTION__;
+#ifdef TASK_TREE_SERIALIZATION_VERBOSE
+    printLine("Job started", name, 2);
+#endif
 
     _workflow = std::make_unique<SerializePlanWorkflow>(serializationPlan, this);
 
     connect(_workflow.get(), &SerializePlanWorkflow::finished, this, [this, workflowPtr = _workflow.get()](bool success, const QString& error) {
+#ifdef TASK_TREE_SERIALIZATION_VERBOSE
         qDebug() << "Workflow finished with success:" << success << "error:" << error;
+#endif
     });
 
     _workflow->start();

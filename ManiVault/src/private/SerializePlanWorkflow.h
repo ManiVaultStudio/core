@@ -62,7 +62,7 @@ private:
 
     Group buildStageGroup(mv::util::SerializationPlan::Stage& stage);
 
-    GroupItem buildJobTask(mv::util::SerializationPlan::Job job);
+    GroupItem buildJobTask(mv::util::SerializationPlan::Job& job);
 
 private: // Stages
 

@@ -7,6 +7,7 @@
 #include "ManiVaultGlobals.h"
 #include "WorkflowRuntimeContext.h"
 #include "WorkflowResultBase.h"
+#include "OperationContext.h"
 
 #include "ModalTask.h"
 
@@ -159,6 +160,20 @@ public: // Context storage access for tasks
     /** Access the workflow runtime context storage (const version). */
     const WorkflowRuntimeContextStorage& contextStorage() const;
 
+public: // Operation context
+
+    /**
+     * Access the operation context for the workflow, which can be used for storing any necessary information about the operation being performed by the workflow. This can be used for providing additional context to the tasks in the recipe, for example by allowing them to access information about the operation being performed by the workflow. The operation context is stored as a shared pointer, allowing it to be shared between the workflow and the tasks in the recipe, and it can be used for storing any necessary information about the operation being performed by the workflow that needs to be accessed by the tasks in the recipe.
+     * @return A shared pointer to the operation context for the workflow, which can be used for storing any necessary information about the operation being performed by the workflow. This can be used for providing additional context to the tasks in the recipe, for example by allowing them to access information about the operation being performed by the workflow. The operation context is stored as a shared pointer, allowing it to be shared between the workflow and the tasks in the recipe, and it can be used for storing any necessary information about the operation being performed by the workflow that needs to be accessed by the tasks in the recipe.
+     */
+    const std::shared_ptr<OperationContext>& getConstOperationContext() const;
+
+    /**
+     * Access the operation context for the workflow, which can be used for storing any necessary information about the operation being performed by the workflow. This can be used for providing additional context to the tasks in the recipe, for example by allowing them to access information about the operation being performed by the workflow. The operation context is stored as a shared pointer, allowing it to be shared between the workflow and the tasks in the recipe, and it can be used for storing any necessary information about the operation being performed by the workflow that needs to be accessed by the tasks in the recipe.
+     * @return A shared pointer to the operation context for the workflow, which can be used for storing any necessary information about the operation being performed by the workflow. This can be used for providing additional context to the tasks in the recipe, for example by allowing them to access information about the operation being performed by the workflow. The operation context is stored as a shared pointer, allowing it to be shared between the workflow and the tasks in the recipe, and it can be used for storing any necessary information about the operation being performed by the workflow that needs to be accessed by the tasks in the recipe.
+     */
+    OperationContext& getOperationContext() const;
+
 private:
 
     /**
@@ -185,6 +200,7 @@ private:
     WorkflowRuntimeContextStorage       _contextStorage;            /** Storage for the workflow context, used for passing data between tasks. */
     UniqueWorkflowResultBase            _result;                    /** Result of the workflow, used for storing the success flag and error message after the workflow is done. It is the responsibility of the concrete workflow to populate this result. */
     ModalTask                           _task;                      /** Modal task for showing the workflow progress in a modal dialog. This is used for workflows that need to run modally, and it will automatically show a modal dialog with the workflow progress when the workflow is started. The modal task will be set up with the title of the workflow, and it can be used for showing the progress of the workflow in the UI. */
+    std::shared_ptr<OperationContext>   _operationContext;          /* Operation context for the workflow, used for storing any necessary information about the operation being performed by the workflow. This can be used for providing additional context to the tasks in the recipe, for example by allowing them to access information about the operation being performed by the workflow. The operation context is stored as a shared pointer, allowing it to be shared between the workflow and the tasks in the recipe, and it can be used for storing any necessary information about the operation being performed by the workflow that needs to be accessed by the tasks in the recipe. */
 };
 
 using UniqueAbstractWorkflow = std::unique_ptr<AbstractWorkflow>;
