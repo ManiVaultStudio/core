@@ -367,9 +367,6 @@ QVariantMap DataHierarchyManager::toVariantMap() const
                     variantMap[topLevelItem->getDataset()->getId()] = traverseItem(topLevelItem, variantMap);
                 }
 
-                QJsonObject jsonObj = QJsonObject::fromVariantMap(variantMap);
-                QJsonDocument doc(jsonObj);
-
                 job.setResult(variantMap);
             } catch (std::exception& e) {
                 Serializable::reportSerializationError("Data hierarchy manager", "Failed to assemble item maps: " + QString::fromStdString(e.what()));

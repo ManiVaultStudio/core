@@ -294,4 +294,10 @@ CORE_EXPORT QString getFilenameFromWaterButlerMetadata(const QByteArray& raw);
  */
 CORE_EXPORT void printLine(const QString& key, const QVariant& value = {}, int indent = 0, int colonColumn = 24);
 
+/**
+ *  Pretty print a QVariantMap
+ *  @param variantMap Map to print
+ */
+CORE_EXPORT void prettyPrintVariantMap(const QVariantMap& variantMap);
+
 }

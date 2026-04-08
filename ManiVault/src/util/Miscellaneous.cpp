@@ -732,4 +732,9 @@ void printLine(const QString& key, const QVariant& value /*= {}*/, int indent /*
     qDebug().noquote() << left + QString(spaces, ' ') + ": " + value.toString();
 }
 
+void prettyPrintVariantMap(const QVariantMap& variantMap)
+{
+    qDebug().noquote() << QJsonDocument(QJsonObject::fromVariantMap(variantMap)).toJson(QJsonDocument::Indented);
+}
+
 }
