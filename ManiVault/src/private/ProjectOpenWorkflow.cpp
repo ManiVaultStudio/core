@@ -115,6 +115,11 @@ void ProjectOpenWorkflow::handleDone(QtTaskTree::DoneWith status)
 	    } else {
 	        throw std::runtime_error("Unexpected error: ProjectOpenResult is null");
 	    }
+
+        if (getOperationContext()->hasErrors()) {
+            help().addNotification("Project opened with errors", getOperationContext()->combinedErrorMessage(), StyledIcon("exclamation-triangle"));
+            qDebug() << "Project open completed with errors:" << getOperationContext()->combinedErrorMessage();
+        }
     }
 
     emit finished(status == DoneWith::Success, QString{});

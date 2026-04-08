@@ -138,8 +138,8 @@ void ProjectSaveWorkflow::handleDone(QtTaskTree::DoneWith status)
 	    }
 
 	    if (getOperationContext()->hasErrors()) {
-	        qDebug() << "Project save completed with errors:" << getOperationContext()->combinedErrorMessage();
 	        help().addNotification("Project saved with errors", getOperationContext()->combinedErrorMessage(), StyledIcon("exclamation-triangle"));
+            qDebug() << "Project save completed with errors:" << getOperationContext()->combinedErrorMessage();
 	    }
     }
 
