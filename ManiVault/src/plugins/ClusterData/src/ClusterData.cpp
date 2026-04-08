@@ -129,6 +129,8 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
     const auto clustersRawDataSize = dataMap["ClustersRawDataSize"].toInt();
     clustersByteArray.resize(clustersRawDataSize);
 
+    prettyPrintVariantMap(dataMap);
+
     populateDataBufferFromVariantMap(dataMap["ClustersRawData"].toMap(), clustersByteArray.data());
 
     QDataStream clustersDataStream(&clustersByteArray, QIODevice::ReadOnly);
@@ -218,13 +220,12 @@ QVariantMap ClusterData::toVariantMap() const
     QByteArray clustersByteArray;
     QDataStream clustersDataStream(&clustersByteArray, QIODevice::WriteOnly);
 
-    // optional but recommended for stability
     clustersDataStream.setVersion(QDataStream::Qt_6_5);
 
     clustersDataStream << _clusters;
 
     variantMap["ClustersRawDataSize"]   = clustersByteArray.size();
-    variantMap["ClustersRawData"]       = rawDataToVariantMap(clustersByteArray.constData(), clustersByteArray.size(), true);
+    variantMap["ClustersRawData"]       = rawDataToVariantMap(clustersByteArray.constData(), clustersByteArray.size());
 
     return variantMap;
 }

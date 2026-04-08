@@ -75,11 +75,10 @@ CORE_EXPORT void loadRawDataFromBinaryFile(char* bytes, const std::uint64_t& num
  * Convert raw data buffer to variant map (divide up in blocks when the total number of bytes exceeds maxBlockSize)
  * @param bytes Pointer to input buffer
  * @param numberOfBytes Number of input bytes 
- * @param saveToDisk Whether to save the raw data to disk or inline in the variant
  * @param blobCodecOverride Optional blob codec to use for encoding the data blocks (defaults to nullptr, which means no compression)
  * @param concurrencyMode Whether to encode the blocks sequentially or in parallel (defaults to sequential)
  */
-CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk = false, const BlobCodec* blobCodecOverride = nullptr, ConcurrencyMode concurrencyMode = ConcurrencyMode::Sequential);
+CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, const BlobCodec* blobCodecOverride = nullptr, ConcurrencyMode concurrencyMode = ConcurrencyMode::Sequential);
 
 
 CORE_EXPORT DecodeBlockResult decodeBlock(const DecodeBlockJob& job, char* bytes, const std::function<std::shared_ptr<BlobCodec>()>& createCodec);

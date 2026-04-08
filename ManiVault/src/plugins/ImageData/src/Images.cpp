@@ -855,15 +855,15 @@ QVariantMap Images::toVariantMap() const
 {
     auto variantMap = DatasetImpl::toVariantMap();
 
-    variantMap["TypeIndex"]                     = static_cast<std::int32_t>(getType());
-    variantMap["TypeName"]                      = ImageData::getTypeName(getType());
-    variantMap["NumberOfImages"]                = getNumberOfImages();
-    variantMap["ImageSize"]                     = QVariantMap({ { "Width", getImageSize().width() }, { "Height", getImageSize().height() } });
-    variantMap["NumberOfComponentsPerPixel"]    = getNumberOfComponentsPerPixel();
-    variantMap["ImageFilePaths"]                = getImageFilePaths();
-    variantMap["MaskData"]                      = rawDataToVariantMap((char*)_maskData.data(), _maskData.size() * sizeof(std::uint8_t), true);
-    variantMap["MaskDataGiven"]                 = _maskDataGiven;
-    variantMap["VisibleRectangle"]              = QVariantMap({ { "X", _visibleRectangle.x() }, { "Y", _visibleRectangle.y() },{ "Width", _visibleRectangle.width() }, { "Height", _visibleRectangle.height() } });
+    variantMap["TypeIndex"]                  = static_cast<std::int32_t>(getType());
+    variantMap["TypeName"]                   = ImageData::getTypeName(getType());
+    variantMap["NumberOfImages"]             = getNumberOfImages();
+    variantMap["ImageSize"]                  = QVariantMap({ { "Width", getImageSize().width() }, { "Height", getImageSize().height() } });
+    variantMap["NumberOfComponentsPerPixel"] = getNumberOfComponentsPerPixel();
+    variantMap["ImageFilePaths"]             = getImageFilePaths();
+    variantMap["MaskData"]                   = rawDataToVariantMap((char*)_maskData.data(), _maskData.size() * sizeof(std::uint8_t));
+    variantMap["MaskDataGiven"]              = _maskDataGiven;
+    variantMap["VisibleRectangle"]           = QVariantMap({ { "X", _visibleRectangle.x() }, { "Y", _visibleRectangle.y() },{ "Width", _visibleRectangle.width() }, { "Height", _visibleRectangle.height() } });
 
     return variantMap;
 }

@@ -76,7 +76,7 @@ QByteArray readBinaryFileToByteArray(const QString& filePath)
     return file.readAll();
 }
 
-static EncodeBlockResult encodeBlock(const EncodeBlockJob& job, bool saveToDisk, const QString& saveDir, const std::function<std::shared_ptr<BlobCodec>()>& createCodec)
+static EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& saveDir, const std::function<std::shared_ptr<BlobCodec>()>& createCodec)
 {
     EncodeBlockResult result;
 
@@ -86,23 +86,18 @@ static EncodeBlockResult encodeBlock(const EncodeBlockJob& job, bool saveToDisk,
         blockVariantMap["Offset"] = QVariant::fromValue(job._offset);
         blockVariantMap["Size"]   = QVariant::fromValue(job._size);
 
-        if (saveToDisk) {
-            auto codec = createCodec();
+        auto codec = createCodec();
 
-            const auto fileName         = QUuid::createUuid().toString(QUuid::WithoutBraces) + codec->getFileExtension();
-            const auto filePath         = QDir::cleanPath(saveDir + QDir::separator() + fileName);
-            const auto encodeResult     = codec->encodeToFile(job._rawData, filePath);
+        const auto fileName         = QUuid::createUuid().toString(QUuid::WithoutBraces) + codec->getFileExtension();
+        const auto filePath         = QDir::cleanPath(saveDir + QDir::separator() + fileName);
+        const auto encodeResult     = codec->encodeToFile(job._rawData, filePath);
 
-            if (!encodeResult.isSuccess()) {
-                throw std::runtime_error(QString("Failed to encode block to file: %1").arg(filePath).toStdString());
-            }
-
-            blockVariantMap["CompressedSize"]   = QVariant::fromValue<std::uint64_t>(static_cast<std::uint64_t>(encodeResult._data.size()));
-            blockVariantMap["URI"]              = fileName;
+        if (!encodeResult.isSuccess()) {
+            throw std::runtime_error(QString("Failed to encode block to file: %1").arg(filePath).toStdString());
         }
-        else {
-            blockVariantMap["Data"] = QString::fromUtf8(job._rawData.toBase64());
-        }
+
+        blockVariantMap["CompressedSize"]   = QVariant::fromValue<std::uint64_t>(static_cast<std::uint64_t>(encodeResult._data.size()));
+        blockVariantMap["URI"]              = fileName;
 
         result._block = std::move(blockVariantMap);
     }
@@ -113,7 +108,7 @@ static EncodeBlockResult encodeBlock(const EncodeBlockJob& job, bool saveToDisk,
     return result;
 }
 
-QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk /*= false*/, const BlobCodec* blobCodecOverride /*= nullptr*/, ConcurrencyMode concurrencyMode /*= ConcurrencyMode::Sequential*/)
+QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, const BlobCodec* blobCodecOverride /*= nullptr*/, ConcurrencyMode concurrencyMode /*= ConcurrencyMode::Sequential*/)
 {
     try {
         if (!mv::projects().hasProject())
@@ -160,13 +155,13 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
         encodeBlockResults.resize(encodeBlockJobs.size());
 
         if (concurrencyMode == ConcurrencyMode::Parallel) {
-            encodeBlockResults = QtConcurrent::blockingMapped<QVector<EncodeBlockResult>>(encodeBlockJobs, [saveToDisk, saveDir, createCodec](const EncodeBlockJob& job) {
-            	return encodeBlock(job, saveToDisk, saveDir, createCodec);
+            encodeBlockResults = QtConcurrent::blockingMapped<QVector<EncodeBlockResult>>(encodeBlockJobs, [saveDir, createCodec](const EncodeBlockJob& job) {
+            	return encodeBlock(job, saveDir, createCodec);
             });
         }
         else {
             for (int i = 0; i < encodeBlockJobs.size(); ++i) {
-                encodeBlockResults[i] = encodeBlock(encodeBlockJobs[i], saveToDisk, saveDir, createCodec);
+                encodeBlockResults[i] = encodeBlock(encodeBlockJobs[i], saveDir, createCodec);
             }
         }
 
@@ -285,7 +280,7 @@ QVariant storeQVariant(const QVariant& variant)
     }
     // store large variant in one or more binary files similar to raw data
     const quint32 version = 1;
-    QVariantMap result = rawDataToVariantMap(byteArray.data(), byteArray.size(), true);
+    QVariantMap result = rawDataToVariantMap(byteArray.data(), byteArray.size());
     Q_ASSERT(!result.contains("QVariantOnDiskVersion"));
     result["QVariantOnDiskVersion"] = version; // add an extra item to the result so we can check how the data was stored
     return result;
@@ -337,7 +332,7 @@ QVariantMap storeOnDisk(const QStringList& list)
     QByteArray byteArray;
     QDataStream dataStream(&byteArray, QIODevice::WriteOnly);
     dataStream << list;
-    QVariantMap variantMap = rawDataToVariantMap((const char*)byteArray.data(), byteArray.size(), true);
+    QVariantMap variantMap = rawDataToVariantMap((const char*)byteArray.data(), byteArray.size());
     return variantMap;
 }
 
@@ -346,7 +341,7 @@ QVariantMap storeOnDisk(const QVector<uint32_t>& vec)
     QByteArray byteArray;
     QDataStream dataStream(&byteArray, QIODevice::WriteOnly);
     dataStream << vec;
-    QVariantMap variantMap = rawDataToVariantMap((const char*)byteArray.data(), byteArray.size(), true);
+    QVariantMap variantMap = rawDataToVariantMap((const char*)byteArray.data(), byteArray.size());
     return variantMap;
 }
 

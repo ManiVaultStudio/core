@@ -199,7 +199,7 @@ QVariantMap PointData::toVariantMap() const
         const auto typeSpecifierName = getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
         const auto typeIndex = static_cast<std::int32_t>(typeSpecifier);
 
-        QVariantMap rawData = rawDataToVariantMap((const char*)getDataConstVoidPtr(), getRawDataSize(), true);
+        QVariantMap rawData = rawDataToVariantMap((const char*)getDataConstVoidPtr(), getRawDataSize());
 
         return {
             { "TypeIndex", QVariant::fromValue(typeIndex) },
@@ -224,7 +224,7 @@ QVariantMap PointData::toVariantMap() const
         bytes.insert(bytes.end(), colIndicesBytes, colIndicesBytes + colIndices.size() * sizeof(size_t));
         bytes.insert(bytes.end(), valuesBytes, valuesBytes + values.size() * sizeof(float));
 
-        QVariantMap rawData = rawDataToVariantMap(bytes.data(), bytes.size(), true);
+        QVariantMap rawData = rawDataToVariantMap(bytes.data(), bytes.size());
 
         return {
             { "Raw", QVariant::fromValue(rawData) }
@@ -1104,7 +1104,7 @@ QVariantMap Points::toVariantMap() const
     QVariantMap indices;
 
     indices["Count"]    = QVariant::fromValue(this->indices.size());
-    indices["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t), true);
+    indices["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t));
 
     QVariantMap selection;
 
@@ -1112,14 +1112,14 @@ QVariantMap Points::toVariantMap() const
         auto selectionSet = getSelection<Points>();
 
         selection["Count"]  = QVariant::fromValue(selectionSet->indices.size());
-        selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), true);
+        selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t));
     }
 
     variantMap["Data"]               = isFull() ? getRawData<PointData>()->toVariantMap() : QVariantMap();
     variantMap["NumberOfPoints"]     = getNumPoints();
     variantMap["Indices"]            = indices;
     variantMap["Selection"]          = selection;
-    variantMap["DimensionNames"]     = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true) : QVariant::fromValue(dimensionNames);
+    variantMap["DimensionNames"]     = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size()) : QVariant::fromValue(dimensionNames);
     variantMap["NumberOfDimensions"] = getNumDimensions();
     variantMap["Dimensions"]         = _dimensionsPickerAction->toVariantMap();
 
