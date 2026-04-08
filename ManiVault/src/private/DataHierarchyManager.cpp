@@ -281,69 +281,106 @@ QVariantMap DataHierarchyManager::toVariantMap() const
         auto toPlan = makeToPlan();
 
         toPlan.addSequentialStage("Enumerate datasets", [this](SerializationPlan::Job& job) -> void {
-            std::uint32_t sortIndex = 0;
-
-            if (hasTask()) {
-                QStringList subtaskNames;
-
-                subtaskNames.reserve(_items.size());
-
-                for (auto& dataHierarchyItem : _items) {
-                    subtaskNames << dataHierarchyItem->getDataset()->getGuiName();
-                }
+            try {
+	            
+            } catch (std::exception& e) {
+                Serializable::reportSerializationError("Data hierarchy manager", "Failed to Enumerate datasets: " + QString::fromStdString(e.what()));
             }
-
-            Serializable::reportSerializationError("Data hierarchy manager", "Failed to Enumerate datasets");
+            catch (...) {
+                Serializable::reportSerializationError("Data hierarchy manager", "Failed to Enumerate datasets");
+            }
         });
 
-        SerializationPlan::Jobs saveJobs;
+        SerializationPlan::Jobs createItemMapJobs;
+
+        std::int32_t sortIndex = 0;
 
         for (auto& dataHierarchyItem : _items) {
-            saveJobs.emplace_back(dataHierarchyItem->getDataset()->getGuiName(), [&dataHierarchyItem](SerializationPlan::Job& job) {
-                const auto map = dataHierarchyItem->toVariantMap();
+            const auto dataset          = dataHierarchyItem->getDataset();
+            const auto datasetId        = dataset->getId();
+            const auto datasetGuiName   = dataset->getGuiName();
 
-            	job.setResult(map);
+            createItemMapJobs.emplace_back(datasetGuiName, [&toPlan, datasetId, &datasetGuiName, &sortIndex, &dataHierarchyItem](SerializationPlan::Job& job) {
+                try {
+                    const auto itemMap = dataHierarchyItem->toVariantMap();
 
-                Serializable::reportSerializationError("Data hierarchy manager", "Failed to save dataset: " + dataHierarchyItem->getDataset()->getGuiName());
+                    itemMap["SortIndex"] = sortIndex;
 
-                //dataHierarchyItemMap["SortIndex"] = sortIndex;
-
-                //variantMap[dataHierarchyItem->getDataset()->getId()] = dataHierarchyItemMap;
+                    (*toPlan.getSharedState())[datasetId] = itemMap;
+                } catch (std::exception& e) {
+                    Serializable::reportSerializationError("Data hierarchy manager", "Failed to save dataset: " + datasetGuiName + ": " + QString::fromStdString(e.what()));
+                }
+                catch (...) {
+                    Serializable::reportSerializationError("Data hierarchy manager", "Failed to save dataset: " + datasetGuiName);
+                }
             });
 
-            //sortIndex++;
+            sortIndex++;
         }
 
-        toPlan.addParallelStage("Save datasets", saveJobs);
+        toPlan.addParallelStage("Create item maps", createItemMapJobs);
 
-        toPlan.addSequentialStage("Finalize datasets", [this, saveJobs](SerializationPlan::Job& job) -> void {
-            QVariantMap datasetsVariantMap;
+        toPlan.addSequentialStage("Assemble item maps", [this, &toPlan](SerializationPlan::Job& job) -> void {
+            try {
+                QVariantMap variantMap;
 
-            for (const auto& saveJob : saveJobs) {
-                const auto datasetVariantMap = saveJob.getResult().toMap();
+                const auto findItemMap = [&toPlan](const QString& datasetId) -> QVariantMap {
+                    const auto datasetIds = toPlan.getSharedState()->keys();
 
-                
+                    const auto it = std::find_if(datasetIds.begin(), datasetIds.end(), [&datasetId](const auto& candidateDatasetId) -> bool {
+                        return candidateDatasetId == datasetId;
+                    });
 
-                if (datasetVariantMap.isEmpty())
-                    throw std::runtime_error(QString("Failed to serialize dataset %1").arg(saveJob.getName()).toStdString());
+                    if (it == datasetIds.end()) {
+                        throw std::runtime_error(QString("Failed to find serialization job for dataset ID %1").arg(datasetId).toStdString());
+                    }
 
-                datasetsVariantMap[saveJob.getName()] = datasetVariantMap;
+                	return (*toPlan.getSharedState())[datasetId].toMap();
+                };
+
+                std::function<QVariantMap(DataHierarchyItem*, QVariantMap&)> traverseItem;
+
+                traverseItem = [findItemMap, &traverseItem](DataHierarchyItem* item, QVariantMap& parentMap) -> QVariantMap {
+                    const auto datasetId = item->getDataset()->getId();
+
+                    parentMap[datasetId] = findItemMap(datasetId);
+
+                	std::uint32_t childSortIndex = 0;
+
+                    QVariantMap children;
+
+                    for (auto childItem : item->getChildren()) {
+			            auto itemMap = findItemMap(childItem->getDataset()->getId());
+
+			            itemMap["SortIndex"] = childSortIndex;
+
+			            children[datasetId] = traverseItem(childItem, children);
+			            childSortIndex++;
+			        }
+
+                    parentMap["Children"] = children;
+
+                    return parentMap;
+                };
+
+                for (const auto topLevelItem : const_cast<DataHierarchyManager*>(this)->getTopLevelItems()) {
+                    variantMap[topLevelItem->getDataset()->getId()] = traverseItem(topLevelItem, variantMap);
+                }
+
+                job.setResult(variantMap);
+            } catch (std::exception& e) {
+                Serializable::reportSerializationError("Data hierarchy manager", "Failed to assemble item maps: " + QString::fromStdString(e.what()));
             }
-
-            job.setResult(datasetsVariantMap);
+            catch (...) {
+                Serializable::reportSerializationError("Data hierarchy manager", "Failed to assemble item maps");
+            }
         });
 
-        toPlan.addSequentialStage("Log datasets", [this]() -> void {
-            //qDebug() << "Data hierarchy manager serialization result:" << job.getResult();
-            //job.setResult({});
-            Serializable::reportSerializationError("Data hierarchy manager", "Failed to log datasets");
-        });
-
+        qDebug() << "Executing data hierarchy manager toVariantMap plan with" << toPlan.getStages().size() << "stages and" << createItemMapJobs.size() << "jobs";
         toPlan.execute(*mv::projects().getSerializationPlanExecutor());
 
         return toPlan.getResult().toMap();
     }
-
     
     return {};
 }

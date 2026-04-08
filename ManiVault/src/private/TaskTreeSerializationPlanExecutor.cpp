@@ -19,6 +19,10 @@ void TaskTreeSerializationPlanExecutor::execute(mv::util::SerializationPlan& ser
 
     _workflow = std::make_unique<SerializePlanWorkflow>(serializationPlan, this, mv::util::OperationContextScope::getShared());
 
+    QEventLoop loop;
+
+    connect(_workflow.get(), &SerializePlanWorkflow::finished, &loop, &QEventLoop::quit);
+
     connect(_workflow.get(), &SerializePlanWorkflow::finished, this, [this, workflowPtr = _workflow.get()](bool success, const QString& error) {
 #ifdef TASK_TREE_SERIALIZATION_VERBOSE
         qDebug() << "Workflow finished with success:" << success << "error:" << error;
@@ -26,4 +30,6 @@ void TaskTreeSerializationPlanExecutor::execute(mv::util::SerializationPlan& ser
     });
 
     _workflow->start();
+
+    loop.exec();
 }

@@ -17,6 +17,9 @@ class AbstractSerializationPlanExecutor;
 
 class CORE_EXPORT SerializationPlan
 {
+public:
+
+    using SharedState = std::shared_ptr<QVariantMap>;
 
 public:
     class Job;
@@ -56,7 +59,6 @@ public:
         void setUnknownException();
 
         void fail(QString error);
-
 
     private:
         QString     _name;
@@ -121,9 +123,12 @@ public:
 
     QVariant getResult() const { return _result; }
     Stages getStages() const { return _stages; }
+    SharedState getSharedState() const { return _sharedState; }
+
 private:
     Stages  _stages;
     QVariant _result;
+    SharedState _sharedState = std::make_shared<QVariantMap>();
 };
 
 }
