@@ -356,6 +356,9 @@ void ProjectManager::newBlankProject()
 void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly /*= false*/, bool loadWorkspace /*= true*/)
 {
     try {
+        if (hasActiveWorkflow())
+            throw std::runtime_error("Another workflow is active");
+
         if (hasProject() && getCurrentProject()->getFilePath() == filePath)
             throw std::runtime_error("Project is already open");
 
@@ -696,6 +699,9 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
         qDebug() << __FUNCTION__ << filePath;
 #endif
 
+        if (hasActiveWorkflow())
+            throw std::runtime_error("Another workflow is active");
+
         // State is already set in projectManager::publishProject(...)
         if (!isPublishingProject())
             setState(State::SavingProject);
@@ -826,6 +832,8 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 #ifdef PROJECT_MANAGER_VERBOSE
         qDebug() << __FUNCTION__ << filePath;
 #endif
+        if (hasActiveWorkflow())
+            throw std::runtime_error("Another workflow is active");
 
         if (!hasProject())
             return;

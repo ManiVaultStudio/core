@@ -252,6 +252,55 @@ QFuture<void> fromVariantMapAsync(WidgetAction* action, const QVariantMap& varia
 
 void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 {
+    auto fromPlan = makeFromPlan();
+
+    fromPlan.addSequentialStage("Enumerate datasets", [this](SerializationPlan::Job& job) -> void {
+        try {
+            std::vector<std::pair<QVariantMap, bool>> datasetList;
+
+            const std::function<void(const QVariantMap&)> enumerateDatasetNames = [&enumerateDatasetNames, &datasetList](const QVariantMap& variantMap) -> void {
+                for (const auto& variant : variantMap.values()) {
+                    enumerateDatasetNames(variant.toMap()["Children"].toMap());
+
+                    const auto dataset      = variant.toMap()["Dataset"].toMap();
+                    const auto datasetId    = dataset["ID"].toString();
+
+                    datasetList.emplace_back(dataset, dataset["Derived"].toBool() || !dataset["ProxyMembers"].toStringList().isEmpty());
+                }
+            };
+        }
+        catch (std::exception& e) {
+            Serializable::reportSerializationError("Data hierarchy manager", "Failed to Enumerate datasets: " + QString::fromStdString(e.what()));
+        }
+        catch (...) {
+            Serializable::reportSerializationError("Data hierarchy manager", "Failed to Enumerate datasets");
+        }
+    });
+
+    fromPlan.addSequentialStage("Populate data hierarchy", [this](SerializationPlan::Job& job) -> void {
+        try {
+            
+        }
+        catch (std::exception& e) {
+            Serializable::reportSerializationError("Data hierarchy manager", "Failed to Populate data hierarchy: " + QString::fromStdString(e.what()));
+        }
+        catch (...) {
+            Serializable::reportSerializationError("Data hierarchy manager", "Failed to Populate data hierarchy");
+        }
+    });
+
+    fromPlan.addSequentialStage("Populate datasets", [this](SerializationPlan::Job& job) -> void {
+        try {
+
+        }
+        catch (std::exception& e) {
+            Serializable::reportSerializationError("Data hierarchy manager", "Failed to Populate datasets: " + QString::fromStdString(e.what()));
+        }
+        catch (...) {
+            Serializable::reportSerializationError("Data hierarchy manager", "Failed to Populate datasets");
+        }
+    });
+
     //if (Application::isSerializationAborted())
     //    return;
 
@@ -273,6 +322,8 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
     //_activeLoadWorkflow->setInput(variantMap);
     //_activeLoadWorkflow->start();
+
+    fromPlan.execute(*mv::projects().getSerializationPlanExecutor());
 }
 
 QVariantMap DataHierarchyManager::toVariantMap() const

@@ -165,6 +165,22 @@ void ProjectOpenWorkflow::extractProjectArchive(ProjectOpenContext& context)
 	archiver.extractSingleFile(context._filePath, "workspace.json", context._workspaceJsonPath);
 }
 
+void ProjectOpenWorkflow::openPojectJson(ProjectOpenContext& context)
+{
+#ifdef PROJECT_OPEN_WORKFLOW_VERBOSE
+    printLine("Recipe stage", "Open project JSON", 2);
+#endif
+
+    if (!QFileInfo(context._projectJsonPath).exists())
+        throw std::runtime_error("Project JSON file does not exist");
+
+    if (auto currentProject = mv::projects().getCurrentProject()) {
+        currentProject->fromJsonFile(context._projectJsonPath);
+    } else {
+        throw std::runtime_error("No current project found");
+    }
+}
+
 void ProjectOpenWorkflow::finalize(ProjectOpenContext& context)
 {
 #ifdef PROJECT_OPEN_WORKFLOW_VERBOSE
