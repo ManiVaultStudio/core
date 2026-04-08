@@ -174,7 +174,7 @@ void ProjectSaveWorkflow::setup(ProjectSaveContext& context)
     if (QFileInfo(context._filePath).isDir())
         throw std::runtime_error("Project file path may not be a directory");
 
-    context._temporaryDirectory = UniqueTemporaryDir(new QTemporaryDir(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "OpenProject")));
+    context._temporaryDirectory = std::make_unique<QTemporaryDir>(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "OpenProject"));
 
     if (!QFileInfo(context._temporaryDirectory->path()).exists())
         throw std::runtime_error("Unable to create temporary save-project directory");
