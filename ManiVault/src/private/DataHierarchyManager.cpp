@@ -254,32 +254,46 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 {
     auto fromPlan = makeFromPlan();
 
-    fromPlan.addSequentialStage("Enumerate datasets", [this](SerializationPlan::Job& job) -> void {
+    fromPlan.addSequentialStage("Populate data hierarchy", [this, variantMap](SerializationPlan::Job& job) -> void {
         try {
-            std::vector<std::pair<QVariantMap, bool>> datasetList;
+            const auto loadDataHierarchyItem = [variantMap](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
+                const auto dataset          = dataHierarchyItemMap["Dataset"].toMap();
+                const auto datasetId        = dataset["ID"].toString();
+                const auto datasetName      = dataset["Name"].toString();
+                const auto pluginKind       = dataset["PluginKind"].toString();
+                const auto isDerived        = dataset["Derived"].toBool();
+                const auto isFull           = dataset["Full"].toBool();
+                const auto sourceDatasetID  = dataset["SourceDatasetID"].toString();
 
-            const std::function<void(const QVariantMap&)> enumerateDatasetNames = [&enumerateDatasetNames, &datasetList](const QVariantMap& variantMap) -> void {
-                for (const auto& variant : variantMap.values()) {
-                    enumerateDatasetNames(variant.toMap()["Children"].toMap());
+                auto subtaskName = QString("Loading dataset hierarchy item: %1").arg(datasetName);
 
-                    const auto dataset      = variant.toMap()["Dataset"].toMap();
-                    const auto datasetId    = dataset["ID"].toString();
+                auto loadedDataset = (isDerived || !isFull) ? mv::data().createDatasetWithoutSelection(pluginKind, guiName, parent, datasetId) : mv::data().createDataset(pluginKind, guiName, parent, datasetId);
 
-                    datasetList.emplace_back(dataset, dataset["Derived"].toBool() || !dataset["ProxyMembers"].toStringList().isEmpty());
-                }
+                if (isDerived)
+                    loadedDataset->setSourceDataset(sourceDatasetID);
+
+                loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);
+
+                return loadedDataset;
             };
-        }
-        catch (std::exception& e) {
-            Serializable::reportSerializationError("Data hierarchy manager", "Failed to Enumerate datasets: " + QString::fromStdString(e.what()));
-        }
-        catch (...) {
-            Serializable::reportSerializationError("Data hierarchy manager", "Failed to Enumerate datasets");
-        }
-    });
 
-    fromPlan.addSequentialStage("Populate data hierarchy", [this](SerializationPlan::Job& job) -> void {
-        try {
-            
+            const std::function<void(const QVariantMap&, Dataset<DatasetImpl>)> populateDataHierarchy = [&populateDataHierarchy, loadDataHierarchyItem](const QVariantMap& variantMap, Dataset<DatasetImpl> parent) -> void {
+
+                if (Application::isSerializationAborted())
+                    return;
+
+                QVector<QVariantMap> sortedItems;
+
+                sortedItems.resize(variantMap.count());
+
+                for (const auto& variant : variantMap.values())
+                    sortedItems[variant.toMap()["SortIndex"].toInt()] = variant.toMap();
+
+                for (const auto& item : sortedItems)
+                    populateDataHierarchy(item["Children"].toMap(), loadDataHierarchyItem(item, item["Name"].toString(), parent));
+            };
+
+            populateDataHierarchy(variantMap, Dataset<DatasetImpl>());
         }
         catch (std::exception& e) {
             Serializable::reportSerializationError("Data hierarchy manager", "Failed to Populate data hierarchy: " + QString::fromStdString(e.what()));
@@ -289,17 +303,49 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         }
     });
 
-    fromPlan.addSequentialStage("Populate datasets", [this](SerializationPlan::Job& job) -> void {
-        try {
+    std::vector<std::pair<QVariantMap, bool>> datasetList;
 
+    const std::function<void(const QVariantMap&)> enumerateDatasetNames = [&enumerateDatasetNames, &datasetList](const QVariantMap& variantMap) -> void {
+        for (const auto& variant : variantMap.values()) {
+            enumerateDatasetNames(variant.toMap()["Children"].toMap());
+
+            const auto dataset = variant.toMap()["Dataset"].toMap();
+            const auto datasetId = dataset["ID"].toString();
+
+            datasetList.emplace_back(dataset, dataset["Derived"].toBool() || !dataset["ProxyMembers"].toStringList().isEmpty());
         }
-        catch (std::exception& e) {
-            Serializable::reportSerializationError("Data hierarchy manager", "Failed to Populate datasets: " + QString::fromStdString(e.what()));
-        }
-        catch (...) {
-            Serializable::reportSerializationError("Data hierarchy manager", "Failed to Populate datasets");
-        }
+    };
+
+    enumerateDatasetNames(variantMap);
+
+    // Maintain data hierarchy item order within partitions
+    std::reverse(datasetList.begin(), datasetList.end());
+
+    // First load non-derived datasets
+    std::stable_partition(datasetList.begin(), datasetList.end(), [](const std::pair<QVariantMap, bool>& element) {
+        return !element.second;
     });
+
+    SerializationPlan::Jobs loadDatasetJobs;
+
+    for (const auto& [dataVariantMap, isDerived] : datasetList) {
+        const auto datasetId    = dataVariantMap["ID"].toString();
+        const auto datasetName  = dataVariantMap["Name"].toString();
+
+        loadDatasetJobs.emplace_back(datasetName, [datasetId, dataVariantMap](SerializationPlan::Job& job) {
+            try {
+                mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
+            }
+            catch (std::exception& e) {
+                Serializable::reportSerializationError("Data hierarchy manager", "Failed to load dataset: " + QString::fromStdString(e.what()));
+            }
+            catch (...) {
+                Serializable::reportSerializationError("Data hierarchy manager", "Failed to load dataset");
+            }
+        });
+    }
+
+    fromPlan.addParallelStage("Load datasets", loadDatasetJobs);
 
     //if (Application::isSerializationAborted())
     //    return;

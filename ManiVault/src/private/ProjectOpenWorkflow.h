@@ -58,6 +58,7 @@ private: // Stages
 
     void setup(ProjectOpenContext& context);
     void extractProjectArchive(ProjectOpenContext& context);
-    void openPojectJson(ProjectOpenContext& context);
+    void openProjectJson(ProjectOpenContext& context);
+    void openWorkspaceJson(ProjectOpenContext& context);
     void finalize(ProjectOpenContext& context);
 };

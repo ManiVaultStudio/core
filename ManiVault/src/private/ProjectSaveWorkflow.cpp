@@ -121,13 +121,17 @@ void ProjectSaveWorkflow::handleDone(QtTaskTree::DoneWith status)
 #endif
 
     if (const auto result = resultAs<ProjectSaveResult>()) {
-        const auto duration = getDuration();
-        const auto text     = (duration < 1000) ? QString("%1 saved successfully in %2 ms").arg(result->_filePath).arg(duration) : QString("%1 saved successfully in %2 s").arg(result->_filePath).arg(duration / 1000.0, 0, 'f', 1);
+        const auto duration     = getDuration();
+        const auto successText  = (duration < 1000) ? QString("%1 saved successfully in %2 ms").arg(result->_filePath).arg(duration) : QString("%1 saved successfully in %2 s").arg(result->_filePath).arg(duration / 1000.0, 0, 'f', 1);
+        const auto errorText    = "Unable to save ManiVault project: " + result->_errorMessage;
 
-        if (status == QtTaskTree::DoneWith::Success)
-            help().addNotification("Project saved", text, StyledIcon("floppy-disk"));
-        else
-            help().addNotification("Error", "Unable to save ManiVault project: " + result->_errorMessage, StyledIcon("exclamation-triangle"));
+        if (status == QtTaskTree::DoneWith::Success) {
+            help().addNotification("Project saved", successText, StyledIcon("floppy-disk"));
+            qDebug() << successText;
+        } else {
+            help().addNotification("Error", errorText, StyledIcon("exclamation-triangle"));
+            qWarning() << errorText;
+        }
     } else {
         throw std::runtime_error("Unexpected error: ProjectSaveResult is null");
     }
