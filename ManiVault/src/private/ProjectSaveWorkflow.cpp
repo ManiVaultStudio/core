@@ -123,7 +123,7 @@ void ProjectSaveWorkflow::handleDone(QtTaskTree::DoneWith status)
     if (auto currentProject = mv::projects().getCurrentProject()) {
 	    if (const auto result = resultAs<ProjectSaveResult>()) {
 	        const auto duration     = getDuration();
-	        const auto successText  = (duration < 1000) ? QString("%1 saved successfully in %2 ms").arg(currentProject->getFilePath()).arg(duration) : QString("%1 saved successfully in %2 s").arg(result->_filePath).arg(duration / 1000.0, 0, 'f', 1);
+	        const auto successText  = (duration < 1000) ? QString("%1 saved successfully in %2 ms").arg(currentProject->getFilePath()).arg(duration) : QString("%1 saved successfully in %2 s").arg(currentProject->getFilePath()).arg(duration / 1000.0, 0, 'f', 1);
 	        const auto errorText    = "Unable to save ManiVault project: " + result->_errorMessage;
 
 	        if (status == QtTaskTree::DoneWith::Success) {
