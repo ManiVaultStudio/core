@@ -61,7 +61,7 @@ Group ProjectSaveWorkflow::makeRecipe()
             auto projectSaveContext = contextAs<ProjectSaveContext>(contextStorage);
 
             try {
-                saveProjectMetaJson(*projectSaveContext);
+                //saveProjectMetaJson(*projectSaveContext);
                 return true;
             }
             catch (const std::exception& e) {
@@ -179,9 +179,10 @@ void ProjectSaveWorkflow::setup(ProjectSaveContext& context)
     if (!QFileInfo(context._temporaryDirectory->path()).exists())
         throw std::runtime_error("Unable to create temporary save-project directory");
 
-    context._temporaryDirectoryPath  = context._temporaryDirectory->path();
-    context._workspaceJsonPath       = QFileInfo(context._temporaryDirectoryPath, "workspace.json").absoluteFilePath();
-    context._projectJsonPath         = QFileInfo(context._temporaryDirectoryPath, "project.json").absoluteFilePath();
+    context._temporaryDirectoryPath = context._temporaryDirectory->path();
+    context._workspaceJsonPath      = QFileInfo(context._temporaryDirectoryPath, "workspace.json").absoluteFilePath();
+    context._projectJsonPath        = QFileInfo(context._temporaryDirectoryPath, "project.json").absoluteFilePath();
+    context._metaJsonPath           = QFileInfo(context._temporaryDirectoryPath, "meta.json").absoluteFilePath();
 
 #ifdef PROJECT_SAVE_WORKFLOW_VERBOSE
     printLine("Temp. Dir", context._temporaryDirectoryPath, 3);
@@ -212,7 +213,7 @@ void ProjectSaveWorkflow::saveProjectMetaJson(ProjectSaveContext& context)
     OperationContextScope scope(getOperationContext());
 
     if (auto project = projects().getCurrentProject()) {
-        //project->getProjectMetaAction().toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
+        project->getProjectMetaAction().toJsonFile(context._metaJsonPath);
     }
 }
 

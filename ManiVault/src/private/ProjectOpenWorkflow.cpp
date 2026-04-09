@@ -67,6 +67,16 @@ Group ProjectOpenWorkflow::makeRecipe()
             auto projectOpenContext = contextAs<ProjectOpenContext>(contextStorage);
 
             try {
+                openWorkspaceJson(*projectOpenContext);
+            }
+            catch (const std::exception& e) {
+                projectOpenContext->_errorMessage = QString::fromUtf8(e.what());
+            }
+        }),
+        QSyncTask([&] {
+            auto projectOpenContext = contextAs<ProjectOpenContext>(contextStorage);
+
+            try {
                 finalize(*projectOpenContext);
             }
             catch (const std::exception& e) {
@@ -102,7 +112,7 @@ void ProjectOpenWorkflow::handleDone(QtTaskTree::DoneWith status)
     if (auto currentProject = mv::projects().getCurrentProject()) {
 	    if (const auto result = resultAs<ProjectOpenResult>()) {
 	        const auto duration     = getDuration();
-	        const auto successText  = (duration < 1000) ? QString("%1 opened successfully in %2 ms").arg(currentProject->getFilePath()).arg(duration) : QString("%1 saved successfully in %2 s").arg(result->_filePath).arg(duration / 1000.0, 0, 'f', 1);
+	        const auto successText  = (duration < 1000) ? QString("%1 opened successfully in %2 ms").arg(currentProject->getFilePath()).arg(duration) : QString("%1 opened successfully in %2 s").arg(currentProject->getFilePath()).arg(duration / 1000.0, 0, 'f', 1);
 	        const auto errorText    = "Unable to open ManiVault project: " + result->_errorMessage;
 
 	        if (status == QtTaskTree::DoneWith::Success) {
@@ -117,8 +127,9 @@ void ProjectOpenWorkflow::handleDone(QtTaskTree::DoneWith status)
 	    }
 
         if (getOperationContext()->hasErrors()) {
-            help().addNotification("Project opened with errors", getOperationContext()->combinedErrorMessage(), StyledIcon("exclamation-triangle"));
-            qDebug() << "Project open completed with errors:" << getOperationContext()->combinedErrorMessage();
+            const auto errorText = "Project opened with errors: " + getOperationContext()->combinedErrorMessage();
+            help().addNotification("Project opened with errors", errorText, StyledIcon("exclamation-triangle"));
+            qDebug() << errorText;
         }
     }
 
@@ -211,12 +222,7 @@ void ProjectOpenWorkflow::openWorkspaceJson(ProjectOpenContext& context)
     if (!QFileInfo(context._workspaceJsonPath).exists())
         throw std::runtime_error("Workspace JSON file does not exist");
 
-    //if (auto currentProject = mv::projects().getCurrentProject()) {
-    //    currentProject->fromJsonFile(context._projectJsonPath);
-    //}
-    //else {
-    //    throw std::runtime_error("No current project found");
-    //}
+    workspaces().loadWorkspace(context._workspaceJsonPath);
 }
 
 void ProjectOpenWorkflow::finalize(ProjectOpenContext& context)
