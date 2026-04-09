@@ -121,13 +121,11 @@ public:
 
 	void execute(AbstractSerializationPlanExecutor& serializationPlanExecutor);
 
-    QVariant getResult() const { return _result; }
     Stages getStages() const { return _stages; }
     SharedState getSharedState() const { return _sharedState; }
 
 private:
     Stages  _stages;
-    QVariant _result;
     SharedState _sharedState = std::make_shared<QVariantMap>();
 };
 

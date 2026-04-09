@@ -464,7 +464,9 @@ QVariantMap DataHierarchyManager::toVariantMap() const
                     variantMap[topLevelItem->getDataset()->getId()] = traverseItem(topLevelItem, variantMap);
                 }
 
-                job.setResult(variantMap);
+                //prettyPrintVariantMap(variantMap);
+
+                (*toPlan.getSharedState())["Hierarchy"] = variantMap;
             } catch (std::exception& e) {
                 Serializable::reportSerializationError("Data hierarchy manager", "Failed to assemble item maps: " + QString::fromStdString(e.what()));
             }
@@ -475,7 +477,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
 
         toPlan.execute(*mv::projects().getSerializationPlanExecutor());
 
-        return toPlan.getResult().toMap();
+        return (*toPlan.getSharedState())["Hierarchy"].toMap();
     }
     
     return {};

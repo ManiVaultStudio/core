@@ -61,7 +61,7 @@ Group ProjectSaveWorkflow::makeRecipe()
             auto projectSaveContext = contextAs<ProjectSaveContext>(contextStorage);
 
             try {
-                //saveProjectMetaJson(*projectSaveContext);
+                saveProjectMetaJson(*projectSaveContext);
                 return true;
             }
             catch (const std::exception& e) {
@@ -74,6 +74,18 @@ Group ProjectSaveWorkflow::makeRecipe()
 
             try {
                 saveWorkspaceJson(*projectSaveContext);
+                return true;
+            }
+            catch (const std::exception& e) {
+                projectSaveContext->_errorMessage = QString::fromUtf8(e.what());
+                return false;
+            }
+        }),
+        QSyncTask([&] {
+            auto projectSaveContext = contextAs<ProjectSaveContext>(contextStorage);
+
+            try {
+                archive(*projectSaveContext);
                 return true;
             }
             catch (const std::exception& e) {
