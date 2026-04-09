@@ -182,7 +182,7 @@ public:
      * Get serialization plan executor
      * @return Pointer to the serialization plan executor (nullptr if not available)
      */
-    util::AbstractSerializationPlanExecutor* getSerializationPlanExecutor();
+    util::AbstractSerializationPlanExecutor* getSerializationPlanExecutor() override;
 
 public: // Workflow
 

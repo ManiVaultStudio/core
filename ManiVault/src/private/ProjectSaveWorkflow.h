@@ -37,6 +37,20 @@ protected:
      */
     void handleDone(QtTaskTree::DoneWith status) override;
 
+public:
+
+    /**
+     * Returns a reference to the temporary directory used for any necessary temporary storage during the execution of the workflow. The temporary directory is created using QTemporaryDir, which provides a unique temporary directory that is automatically removed when it goes out of scope. The getTemporaryDir method can be used by derived classes of AbstractWorkflow to access the temporary directory for any necessary temporary storage during the execution of the workflow, for example by using the temporary directory for extracting files or for storing intermediate results that need to be accessed by multiple tasks in the workflow. The getTemporaryDir method returns a reference to the QTemporaryDir object, allowing derived classes to access the path of the temporary directory and to use it for any necessary temporary storage during the execution of the workflow.
+     * @return A reference to the temporary directory used for any necessary temporary storage during the execution of the workflow. The temporary directory is created using QTemporaryDir, which provides a unique temporary directory that is automatically removed when it goes out of scope. The getTemporaryDir method can be used by derived classes of AbstractWorkflow to access the temporary directory for any necessary temporary storage during the execution of the workflow, for example by using the temporary directory for extracting files or for storing intermediate results that need to be accessed by multiple tasks in the workflow. The getTemporaryDir method returns a reference to the QTemporaryDir object, allowing derived classes to access the path of the temporary directory and to use it for any necessary temporary storage during the execution of the workflow.
+     */
+    const QTemporaryDir& getTemporaryDir() const;
+
+    /**
+     * Returns the path of the temporary directory used for any necessary temporary storage during the execution of the workflow. The temporary directory is created using QTemporaryDir, which provides a unique temporary directory that is automatically removed when it goes out of scope. The getTemporaryDirPath method can be used by derived classes of AbstractWorkflow to access the path of the temporary directory for any necessary temporary storage during the execution of the workflow, for example by using the temporary directory for extracting files or for storing intermediate results that need to be accessed by multiple tasks in the workflow. The getTemporaryDirPath method returns a QString containing the path of the temporary directory, allowing derived classes to access the path of the temporary directory and to use it for any necessary temporary storage during the execution of the workflow.
+     * @return A QString containing the path of the temporary directory used for any necessary temporary storage during the execution of the workflow. The temporary directory is created using QTemporaryDir, which provides a unique temporary directory that is automatically removed when it goes out of scope. The getTemporaryDirPath method can be used by derived classes of AbstractWorkflow to access the path of the temporary directory for any necessary temporary storage during the execution of the workflow, for example by using the temporary directory for extracting files or for storing intermediate results that need to be accessed by multiple tasks in the workflow. The getTemporaryDirPath method returns a QString containing the path of the temporary directory, allowing derived classes to access the path of the temporary directory and to use it for any necessary temporary storage during the execution of the workflow.
+     */
+    QString getTemporaryDirPath() const;
+
 protected: // Workflow result initialization
 
     /**
@@ -62,4 +76,7 @@ private: // Stages
 	void saveWorkspaceJson(ProjectSaveContext& context);
     void archive(ProjectSaveContext& context);
     void finalize(ProjectSaveContext& context);
+
+private:
+    QTemporaryDir   _temporaryDir;
 };

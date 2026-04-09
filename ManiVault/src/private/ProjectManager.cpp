@@ -792,6 +792,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             auto workflow = std::make_unique<ProjectSaveWorkflow>(filePath, this);
 
+            setTemporaryDirPath(TemporaryDirType::Save, workflow->getTemporaryDirPath());
+
             connect(workflow.get(), &ProjectSaveWorkflow::finished, this, [this, filePath, workflowPtr = workflow.get()](bool success, const QString& error) {
                 setState(State::Idle);
 

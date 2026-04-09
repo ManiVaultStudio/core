@@ -250,7 +250,6 @@ bool populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
     loop.exec();
 
     if (handle->hasError()) {
-        qWarning() << "Unable to populate data from buffer:" << handle->errorString();
         return false;
     }
 

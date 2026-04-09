@@ -17,8 +17,11 @@ using namespace QtTaskTree;
 	#define PROJECT_SAVE_WORKFLOW_VERBOSE
 #endif
 
+#define PROJECT_SAVE_WORKFLOW_VERBOSE
+
 ProjectSaveWorkflow::ProjectSaveWorkflow(const QString& filePath, QObject* parent) :
-    AbstractWorkflow(createContext(filePath), "Project Save", parent)
+    AbstractWorkflow(createContext(filePath), "Project Save", parent),
+	_temporaryDir((QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "SaveProject")))
 {
 }
 
@@ -159,6 +162,16 @@ void ProjectSaveWorkflow::handleDone(QtTaskTree::DoneWith status)
     emit finished(status == DoneWith::Success, QString{});
 }
 
+const QTemporaryDir& ProjectSaveWorkflow::getTemporaryDir() const
+{
+	return _temporaryDir;
+}
+
+QString ProjectSaveWorkflow::getTemporaryDirPath() const
+{
+	return _temporaryDir.path();
+}
+
 void ProjectSaveWorkflow::initResult(UniqueWorkflowResultBase& result)
 {
     result.reset(new ProjectSaveResult());
@@ -186,18 +199,14 @@ void ProjectSaveWorkflow::setup(ProjectSaveContext& context)
     if (QFileInfo(context._filePath).isDir())
         throw std::runtime_error("Project file path may not be a directory");
 
-    context._temporaryDirectory = std::make_unique<QTemporaryDir>(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "OpenProject"));
+    if (!QFileInfo(getTemporaryDirPath()).exists())
+        throw std::runtime_error("Temporary directory does not exist");
 
-    if (!QFileInfo(context._temporaryDirectory->path()).exists())
-        throw std::runtime_error("Unable to create temporary save-project directory");
-
-    context._temporaryDirectoryPath = context._temporaryDirectory->path();
-    context._workspaceJsonPath      = QFileInfo(context._temporaryDirectoryPath, "workspace.json").absoluteFilePath();
-    context._projectJsonPath        = QFileInfo(context._temporaryDirectoryPath, "project.json").absoluteFilePath();
-    context._metaJsonPath           = QFileInfo(context._temporaryDirectoryPath, "meta.json").absoluteFilePath();
+    context._workspaceJsonPath      = QFileInfo(getTemporaryDirPath(), "workspace.json").absoluteFilePath();
+    context._projectJsonPath        = QFileInfo(getTemporaryDirPath(), "project.json").absoluteFilePath();
+    context._metaJsonPath           = QFileInfo(getTemporaryDirPath(), "meta.json").absoluteFilePath();
 
 #ifdef PROJECT_SAVE_WORKFLOW_VERBOSE
-    printLine("Temp. Dir", context._temporaryDirectoryPath, 3);
     printLine("Workspace JSON", context._workspaceJsonPath, 3);
     printLine("Project JSON", context._projectJsonPath, 3);
 #endif
@@ -244,7 +253,7 @@ void ProjectSaveWorkflow::archive(ProjectSaveContext& context)
     printLine("Recipe stage", "Archive", 2);
 #endif
 
-    context._archiver.compressDirectory(context._temporaryDirectoryPath, context._filePath, true, 0);
+    context._archiver.compressDirectory(getTemporaryDirPath(), context._filePath, true, 0);
 }
 
 void ProjectSaveWorkflow::finalize(ProjectSaveContext& context)

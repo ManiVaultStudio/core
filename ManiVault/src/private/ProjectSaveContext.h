@@ -11,13 +11,11 @@
 class ProjectSaveContext : public WorkflowContextBase
 {
 public:
-    QString             _filePath;                  /** Path to the project file */
-    UniqueTemporaryDir  _temporaryDirectory;        /** Temporary directory for extracting project files */
-    QString             _temporaryDirectoryPath;    /** Path to the temporary directory */
-    QString             _workspaceJsonPath;         /** Path to the workspace JSON file */
-    QString             _projectJsonPath;           /** Path to the project JSON file */
-    QString             _metaJsonPath;              /** Path to the project meta JSON file */
-    mv::util::Archiver  _archiver;                  /** Archiver for handling the project archive */
+    QString             _filePath;              /** Path to the project file */
+    QString             _workspaceJsonPath;     /** Path to the workspace JSON file */
+    QString             _projectJsonPath;       /** Path to the project JSON file */
+    QString             _metaJsonPath;          /** Path to the project meta JSON file */
+    mv::util::Archiver  _archiver;              /** Archiver for handling the project archive */
 };
 
 using ProjectSaveContextStorage = QtTaskTree::Storage<ProjectSaveContext>;

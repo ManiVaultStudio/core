@@ -257,13 +257,13 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
     fromPlan.addSequentialStage("Populate data hierarchy", [this, variantMap](SerializationPlan::Job& job) -> void {
         try {
             const auto loadDataHierarchyItem = [variantMap](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
-                const auto dataset          = dataHierarchyItemMap["Dataset"].toMap();
-                const auto datasetId        = dataset["ID"].toString();
-                const auto datasetName      = dataset["Name"].toString();
-                const auto pluginKind       = dataset["PluginKind"].toString();
-                const auto isDerived        = dataset["Derived"].toBool();
-                const auto isFull           = dataset["Full"].toBool();
-                const auto sourceDatasetID  = dataset["SourceDatasetID"].toString();
+                const auto dataset = dataHierarchyItemMap["Dataset"].toMap();
+                const auto datasetId = dataset["ID"].toString();
+                const auto datasetName = dataset["Name"].toString();
+                const auto pluginKind = dataset["PluginKind"].toString();
+                const auto isDerived = dataset["Derived"].toBool();
+                const auto isFull = dataset["Full"].toBool();
+                const auto sourceDatasetID = dataset["SourceDatasetID"].toString();
 
                 auto subtaskName = QString("Loading dataset hierarchy item: %1").arg(datasetName);
 
@@ -275,14 +275,23 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
                 loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);
 
                 return loadedDataset;
-            };
+                };
 
             const std::function<void(const QVariantMap&, Dataset<DatasetImpl>)> populateDataHierarchy = [&populateDataHierarchy, loadDataHierarchyItem](const QVariantMap& variantMap, Dataset<DatasetImpl> parent) -> void {
-            	QStringList sortedDatasetIds = variantMap.keys();
+                QVector<QPair<QString, std::int32_t>> sortedDatasets;
 
-                sortedDatasetIds.sort();
+                sortedDatasets.reserve(variantMap.keys().size());
 
-                for (const auto& datasetId : sortedDatasetIds)
+                for (const auto& datasetId : variantMap.keys()) {
+                    const auto sortIndex = variantMap[datasetId].toMap()["SortIndex"].toInt();
+                    sortedDatasets.emplace_back(datasetId, sortIndex);
+                }
+
+                std::sort(sortedDatasets.begin(), sortedDatasets.end(), [](const auto& a, const auto& b) {
+                	return a.second < b.second;  // ascending
+				});
+
+                for (const auto& [datasetId, sortIndex] : sortedDatasets)
                     populateDataHierarchy(variantMap[datasetId].toMap()["Children"].toMap(), loadDataHierarchyItem(variantMap[datasetId].toMap(), variantMap[datasetId].toMap()["Name"].toString(), parent));
             };
 
@@ -457,11 +466,8 @@ QVariantMap DataHierarchyManager::toVariantMap() const
                 };
 
                 for (const auto topLevelItem : const_cast<DataHierarchyManager*>(this)->getTopLevelItems()) {
-                    qDebug() << "Assembling item map for top-level item with dataset ID" << topLevelItem->getDataset()->getId();
                     variantMap[topLevelItem->getDataset()->getId()] = traverseItem(topLevelItem, variantMap, 0);
                 }
-
-                //prettyPrintVariantMap(variantMap);
 
                 (*toPlan.getSharedState())["Hierarchy"] = variantMap;
             } catch (std::exception& e) {
