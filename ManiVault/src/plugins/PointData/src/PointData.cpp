@@ -981,6 +981,8 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 {
     DatasetImpl::fromVariantMap(variantMap);
 
+    qDebug() << "Loading points dataset from variant map with name" << getGuiName();
+
     variantMapMustContain(variantMap, "DimensionNames");
     variantMapMustContain(variantMap, "Selection");
 
@@ -1104,7 +1106,7 @@ QVariantMap Points::toVariantMap() const
     QVariantMap indices;
 
     indices["Count"]    = QVariant::fromValue(this->indices.size());
-    indices["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t));
+    indices["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t), nullptr, ConcurrencyMode::Sequential);
 
     QVariantMap selection;
 
@@ -1112,14 +1114,14 @@ QVariantMap Points::toVariantMap() const
         auto selectionSet = getSelection<Points>();
 
         selection["Count"]  = QVariant::fromValue(selectionSet->indices.size());
-        selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t));
+        selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), nullptr, ConcurrencyMode::Sequential);
     }
 
     variantMap["Data"]               = isFull() ? getRawData<PointData>()->toVariantMap() : QVariantMap();
     variantMap["NumberOfPoints"]     = getNumPoints();
     variantMap["Indices"]            = indices;
     variantMap["Selection"]          = selection;
-    variantMap["DimensionNames"]     = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size()) : QVariant::fromValue(dimensionNames);
+    variantMap["DimensionNames"]     = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), nullptr, ConcurrencyMode::Sequential) : QVariant::fromValue(dimensionNames);
     variantMap["NumberOfDimensions"] = getNumDimensions();
     variantMap["Dimensions"]         = _dimensionsPickerAction->toVariantMap();
 
