@@ -13,10 +13,6 @@
 
 void TaskTreeSerializationPlanExecutor::execute(mv::util::SerializationPlan& serializationPlan)
 {
-#ifdef TASK_TREE_SERIALIZATION_VERBOSE
-    printLine("Job started", name, 2);
-#endif
-
     _workflow = std::make_unique<SerializePlanWorkflow>(serializationPlan, this, mv::util::OperationContextScope::getShared());
 
     QEventLoop loop;

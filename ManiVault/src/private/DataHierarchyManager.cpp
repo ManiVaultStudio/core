@@ -278,22 +278,15 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
             };
 
             const std::function<void(const QVariantMap&, Dataset<DatasetImpl>)> populateDataHierarchy = [&populateDataHierarchy, loadDataHierarchyItem](const QVariantMap& variantMap, Dataset<DatasetImpl> parent) -> void {
+            	QStringList sortedDatasetIds = variantMap.keys();
 
-                if (Application::isSerializationAborted())
-                    return;
+                sortedDatasetIds.sort();
 
-                QVector<QVariantMap> sortedItems;
-
-                sortedItems.resize(variantMap.count());
-
-                for (const auto& variant : variantMap.values())
-                    sortedItems[variant.toMap()["SortIndex"].toInt()] = variant.toMap();
-
-                for (const auto& item : sortedItems)
-                    populateDataHierarchy(item["Children"].toMap(), loadDataHierarchyItem(item, item["Name"].toString(), parent));
+                for (const auto& datasetId : sortedDatasetIds)
+                    populateDataHierarchy(variantMap[datasetId].toMap()["Children"].toMap(), loadDataHierarchyItem(variantMap[datasetId].toMap(), variantMap[datasetId].toMap()["Name"].toString(), parent));
             };
 
-            populateDataHierarchy(variantMap, Dataset<DatasetImpl>());
+            populateDataHierarchy(variantMap, Dataset<>());
         }
         catch (std::exception& e) {
             Serializable::reportSerializationError("Data hierarchy manager", "Failed to Populate data hierarchy: " + QString::fromStdString(e.what()));
@@ -435,12 +428,10 @@ QVariantMap DataHierarchyManager::toVariantMap() const
                 	return (*toPlan.getSharedState())[datasetId].toMap();
                 };
 
-                std::function<QVariantMap(DataHierarchyItem*, QVariantMap&)> traverseItem;
+                std::function<QVariantMap(DataHierarchyItem*, QVariantMap&, std::int32_t)> traverseItem;
 
-                traverseItem = [findItemMap, &traverseItem](DataHierarchyItem* item, QVariantMap& parentMap) -> QVariantMap {
+                traverseItem = [findItemMap, &traverseItem](DataHierarchyItem* item, QVariantMap& parentMap, std::int32_t sortIndex) -> QVariantMap {
                     const auto datasetId = item->getDataset()->getId();
-
-                    parentMap[datasetId] = findItemMap(datasetId);
 
                 	std::uint32_t childSortIndex = 0;
 
@@ -451,17 +442,23 @@ QVariantMap DataHierarchyManager::toVariantMap() const
 
 			            itemMap["SortIndex"] = childSortIndex;
 
-			            children[datasetId] = traverseItem(childItem, children);
+			            children[datasetId] = traverseItem(childItem, children, childSortIndex);
 			            childSortIndex++;
 			        }
 
-                    parentMap["Children"] = children;
+                    auto datasetMap = findItemMap(datasetId);
 
-                    return parentMap;
+                    datasetMap["Children"]  = children;
+                    datasetMap["SortIndex"] = sortIndex;
+
+                    parentMap[datasetId] = datasetMap;
+
+                    return datasetMap;
                 };
 
                 for (const auto topLevelItem : const_cast<DataHierarchyManager*>(this)->getTopLevelItems()) {
-                    variantMap[topLevelItem->getDataset()->getId()] = traverseItem(topLevelItem, variantMap);
+                    qDebug() << "Assembling item map for top-level item with dataset ID" << topLevelItem->getDataset()->getId();
+                    variantMap[topLevelItem->getDataset()->getId()] = traverseItem(topLevelItem, variantMap, 0);
                 }
 
                 //prettyPrintVariantMap(variantMap);
