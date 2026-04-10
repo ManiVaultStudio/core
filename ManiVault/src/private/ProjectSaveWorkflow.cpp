@@ -253,7 +253,7 @@ void ProjectSaveWorkflow::archive(ProjectSaveContext& context)
     printLine("Recipe stage", "Archive", 2);
 #endif
 
-    context._archiver.compressDirectory(getTemporaryDirPath(), context._filePath, true, 0);
+    context._archiver.compressDirectory(mv::projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Save), context._filePath, true, 0);
 }
 
 void ProjectSaveWorkflow::finalize(ProjectSaveContext& context)

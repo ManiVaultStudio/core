@@ -336,6 +336,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
         loadDatasetJobs.emplace_back(datasetName, [datasetId, dataVariantMap](SerializationPlan::Job& job) {
             try {
+                qDebug() << "Loading dataset" << datasetId;
                 mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
             }
             catch (std::exception& e) {
