@@ -128,18 +128,6 @@ set(PRIVATE_DATA_HIERARCHY_MANAGER_FILES
 )
 
 set(PRIVATE_SERIALIZATION_HEADERS
-    src/private/DataHierarchyLoadWorkflow.h
-    src/private/DataHierarchyLoadRecipeBuilder.h
-    src/private/DatasetLoadRecipeFactory.h
-    src/private/DatasetsLoadRecipeBuilder.h
-    src/private/DatasetLoadRecipeBuilder.h
-    src/private/DatasetsLoadContext.h
-    src/private/ProjectLoadContext.h
-    src/private/ProjectLoadRecipeBuilder.h
-    src/private/WorkspaceLoadContext.h
-    src/private/DataHierarchyLoadContext.h
-    src/private/DatasetLoadContext.h
-    src/private/WorkspaceLoadRecipeBuilder.h
     src/private/ProjectSaveWorkflow.h
     src/private/ProjectSaveContext.h
     src/private/ProjectSaveResult.h
@@ -149,18 +137,6 @@ set(PRIVATE_SERIALIZATION_HEADERS
 )
 
 set(PRIVATE_SERIALIZATION_SOURCES
-    src/private/DataHierarchyLoadWorkflow.cpp
-    src/private/DataHierarchyLoadRecipeBuilder.cpp
-    src/private/DatasetLoadRecipeFactory.cpp
-    src/private/DatasetsLoadRecipeBuilder.cpp
-    src/private/DatasetLoadRecipeBuilder.cpp
-    src/private/DatasetsLoadContext.cpp
-    src/private/ProjectLoadContext.cpp
-    src/private/ProjectLoadRecipeBuilder.cpp
-    src/private/WorkspaceLoadContext.cpp
-    src/private/DataHierarchyLoadContext.cpp
-    src/private/DatasetLoadContext.cpp
-    src/private/WorkspaceLoadRecipeBuilder.cpp
     src/private/ProjectSaveWorkflow.cpp
     src/private/ProjectSaveContext.cpp
     src/private/ProjectSaveResult.cpp
