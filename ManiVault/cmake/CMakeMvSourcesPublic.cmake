@@ -601,7 +601,6 @@ set(PUBLIC_UTIL_HEADERS
     src/util/WorkflowContextBase.h
     src/util/WorkflowResultBase.h
     src/util/AbstractWorkflow.h
-    src/util/SerializationScheduler.h
     src/util/DecodeRequestState.h
     src/util/SerializationPlan.h
     src/util/AbstractSerializationPlanExecutor.h
@@ -679,7 +678,6 @@ set(PUBLIC_UTIL_SOURCES
     src/util/WorkflowResultBase.cpp
     src/util/WorkflowRuntimeContext.cpp
     src/util/AbstractWorkflow.cpp
-    src/util/SerializationScheduler.cpp
     src/util/DecodeRequestState.cpp
     src/util/SerializationPlan.cpp
     src/util/AbstractSerializationPlanExecutor.cpp

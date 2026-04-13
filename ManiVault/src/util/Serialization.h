@@ -13,15 +13,11 @@
 #include <QStringList>
 #include <QVector>
 
+#include "SerializationPlan.h"
+
 namespace mv::util {
 
 class BlobCodec;
-
-enum class ConcurrencyMode
-{
-    Sequential,
-    Parallel
-};
 
 struct EncodeBlockJob
 {
@@ -39,21 +35,27 @@ struct EncodeBlockResult
     QVariantMap     _block;
 };
 
+/** Information about a block of data to decode */
 struct DecodeBlockJob
 {
-    quint64 _offset = 0;
-    quint64 _size = 0;
-    QString _uri;
-    QString _encodedData;
+    quint64 _offset = 0;            /** Offset of the block in the original data buffer */
+    quint64 _compressedSize = 0;    /** Size of the compressed data block */
+    QString _uri;                   /** URI of the file containing the compressed data block (if applicable) */
+    QString _encodedData;           /** Base64 encoded string containing the compressed data block (if applicable) */
 };
 
+using DecodeBlockJobs = QVector<DecodeBlockJob>;
+
+/** Result of decoding a block of data */
 struct DecodeBlockResult
 {
-    std::uint64_t   _offset = 0;
-    std::uint64_t   _size = 0;
-    QByteArray      _decodedData;
-    QString         _error;
+    std::uint64_t   _offset = 0;    /** Offset of the block in the original data buffer */
+    std::uint64_t   _size = 0;      /** Size of the decoded data block */
+    QByteArray      _decodedData;   /** Decoded data block */
+    QString         _error;         /** Error message if decoding failed (empty if decoding was successful) */
 };
+
+using DecodeBlockResults = QVector<DecodeBlockResult>;
 
 /**
  * Save raw data to binary file on disk
@@ -78,10 +80,24 @@ CORE_EXPORT void loadRawDataFromBinaryFile(char* bytes, const std::uint64_t& num
  * @param blobCodecOverride Optional blob codec to use for encoding the data blocks (defaults to nullptr, which means no compression)
  * @param concurrencyMode Whether to encode the blocks sequentially or in parallel (defaults to sequential)
  */
-CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, const BlobCodec* blobCodecOverride = nullptr, ConcurrencyMode concurrencyMode = ConcurrencyMode::Sequential);
+CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, const BlobCodec* blobCodecOverride = nullptr, SerializationPlan::ConcurrencyMode concurrencyMode = SerializationPlan::ConcurrencyMode::Parallel);
 
+/**
+ * Decode a block of data from a file on disk and populate the provided output buffer with the decoded data
+ * @param decodeBlockJob DecodeBlockJob containing the block information
+ * @param bytes Pointer to output buffer
+ * @param createCodec Function that creates a blob codec
+ * @return DecodeBlockResult containing the decoded data or an error message
+ */
+CORE_EXPORT DecodeBlockResult decodeBlockFromFile(const DecodeBlockJob& decodeBlockJob, char* bytes, const std::function<std::shared_ptr<BlobCodec>()>& createCodec);
 
-CORE_EXPORT DecodeBlockResult decodeBlock(const DecodeBlockJob& job, char* bytes, const std::function<std::shared_ptr<BlobCodec>()>& createCodec);
+/**
+ * Decode a block of data from a base64 encoded string and populate the provided output buffer with the decoded data
+ * @param decodeBlockJob DecodeBlockJob containing the block information
+ * @param bytes Pointer to output buffer
+ * @return DecodeBlockResult containing the decoded data or an error message
+ */
+CORE_EXPORT DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, char* bytes);
 
 /**
  * Convert variant map to raw data buffer (blocks are loaded from disk and decoded if necessary)
@@ -90,7 +106,7 @@ CORE_EXPORT DecodeBlockResult decodeBlock(const DecodeBlockJob& job, char* bytes
  * @param concurrencyMode Whether to decode the blocks sequentially or in parallel (defaults to sequential)
  * @return True if the data buffer was successfully populated, false otherwise
  */
-CORE_EXPORT bool populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, ConcurrencyMode concurrencyMode = ConcurrencyMode::Parallel);
+CORE_EXPORT bool populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, SerializationPlan::ConcurrencyMode concurrencyMode = SerializationPlan::ConcurrencyMode::Parallel);
 
 /**
  * Raises an exception if an item with key is not found in a variant map

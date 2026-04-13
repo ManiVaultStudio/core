@@ -88,9 +88,9 @@ static EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& s
 
         auto codec = createCodec();
 
-        const auto fileName         = QUuid::createUuid().toString(QUuid::WithoutBraces) + codec->getFileExtension();
-        const auto filePath         = QDir::cleanPath(saveDir + QDir::separator() + fileName);
-        const auto encodeResult     = codec->encodeToFile(job._rawData, filePath);
+        const auto fileName     = QUuid::createUuid().toString(QUuid::WithoutBraces) + codec->getFileExtension();
+        const auto filePath     = QDir::cleanPath(saveDir + QDir::separator() + fileName);
+        const auto encodeResult = codec->encodeToFile(job._rawData, filePath);
 
         if (!encodeResult.isSuccess()) {
             throw std::runtime_error(QString("Failed to encode block to file: %1").arg(filePath).toStdString());
@@ -108,7 +108,7 @@ static EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& s
     return result;
 }
 
-QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, const BlobCodec* blobCodecOverride /*= nullptr*/, ConcurrencyMode concurrencyMode /*= ConcurrencyMode::Sequential*/)
+QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, const BlobCodec* blobCodecOverride /*= nullptr*/, SerializationPlan::ConcurrencyMode concurrencyMode /*= SerializationPlan::ConcurrencyMode::Sequential*/)
 {
     try {
         if (!mv::projects().hasProject())
@@ -154,16 +154,15 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
         encodeBlockResults.resize(encodeBlockJobs.size());
 
-        if (concurrencyMode == ConcurrencyMode::Parallel) {
-            encodeBlockResults = QtConcurrent::blockingMapped<QVector<EncodeBlockResult>>(encodeBlockJobs, [saveDir, createCodec](const EncodeBlockJob& job) {
-            	return encodeBlock(job, saveDir, createCodec);
-            });
+        for (int i = 0; i < encodeBlockJobs.size(); ++i) {
+            encodeBlockResults[i] = encodeBlock(encodeBlockJobs[i], saveDir, createCodec);
         }
-        else {
-            for (int i = 0; i < encodeBlockJobs.size(); ++i) {
-                encodeBlockResults[i] = encodeBlock(encodeBlockJobs[i], saveDir, createCodec);
-            }
-        }
+
+        //SerializationPlan encodePlan;
+        //SerializationPlan::Jobs encodeJobs;
+
+        //encodePlan.addStage("EncodeBlocks", SerializationPlan::ConcurrencyMode::Sequential, std::move(encodeJobs));
+        //encodePlan.execute(*mv::projects().getSerializationPlanExecutor());
 
         QVariantList blocks;
 
@@ -189,41 +188,41 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
      return {};
 }
 
-DecodeBlockResult decodeBlock(const DecodeBlockJob& job, char* bytes, const std::function<std::shared_ptr<BlobCodec>()>& createCodec)
+DecodeBlockResult decodeBlockFromFile(const DecodeBlockJob& decodeBlockJob, char* bytes, const std::function<std::shared_ptr<BlobCodec>()>& createCodec)
 {
     DecodeBlockResult result;
 
     try {
         auto codec = createCodec();
 
-        if (!job._uri.isEmpty()) {
+        if (!decodeBlockJob._uri.isEmpty()) {
             const auto decodeResult = codec->decodeFromFileTo(
-                job._uri,
-                bytes + job._offset,
-                static_cast<std::uint64_t>(job._size)
+                decodeBlockJob._uri,
+                bytes + decodeBlockJob._offset,
+                static_cast<std::uint64_t>(decodeBlockJob._size)
             );
 
             if (!decodeResult.isSuccess()) {
                 throw std::runtime_error(
-                    QString("Failed to decode block from file: %1").arg(job._uri).toStdString()
+                    QString("Failed to decode block from file: %1").arg(decodeBlockJob._uri).toStdString()
                 );
             }
 
             return result;
         }
 
-        if (!job._encodedData.isEmpty()) {
-            const QByteArray encodedBytes = QByteArray::fromBase64(job._encodedData.toUtf8());
+        if (!decodeBlockJob._encodedData.isEmpty()) {
+            const QByteArray encodedBytes = QByteArray::fromBase64(decodeBlockJob._encodedData.toUtf8());
 
             const auto decodeResult = codec->decodeTo(
                 encodedBytes,
-                bytes + job._offset,
-                static_cast<std::uint64_t>(job._size)
+                bytes + decodeBlockJob._offset,
+                static_cast<std::uint64_t>(decodeBlockJob._size)
             );
 
             if (!decodeResult.isSuccess()) {
                 throw std::runtime_error(
-                    QString("Failed to decode inline block at offset %1").arg(job._offset).toStdString()
+                    QString("Failed to decode inline block at offset %1").arg(decodeBlockJob._offset).toStdString()
                 );
             }
 
@@ -239,18 +238,70 @@ DecodeBlockResult decodeBlock(const DecodeBlockJob& job, char* bytes, const std:
     return result;
 }
 
-bool populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, ConcurrencyMode concurrencyMode /*= ConcurrencyMode::Parallel*/)
+DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, char* bytes)
 {
-    auto handle = SerializationScheduler::instance().submitDecode(variantMap, bytes, concurrencyMode);
+    DecodeBlockResult result;
 
-    QEventLoop loop;
+    try {
+    }
+    catch (const std::exception& e) {
+        result._error = QString::fromUtf8(e.what());
+    }
 
-    QObject::connect(handle.data(), &DecodeRequestState::finished, &loop, &QEventLoop::quit);
+    return result;
+}
 
-    loop.exec();
+bool populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, SerializationPlan::ConcurrencyMode concurrencyMode /*= SerializationPlan::ConcurrencyMode::Parallel*/)
+{
+    variantMapMustContain(variantMap, "BlockSize");
+    variantMapMustContain(variantMap, "Blocks");
 
-    if (handle->hasError()) {
-        return false;
+    const auto blocks       = variantMap.value("Blocks").toList();
+    const bool hasCodec     = variantMap.contains("Codec");
+    const auto codecName    = hasCodec ? variantMap.value("Codec").toString() : QStringLiteral("none");
+
+    if (hasCodec && !codecRegistry().isRegistered(codecName)) {
+        throw std::runtime_error(QStringLiteral("Unable to load raw data, codec %1 is not registered").arg(codecName).toStdString());
+    }
+
+    auto createCodec = [hasCodec, codecName]() -> std::shared_ptr<BlobCodec> {
+        if (hasCodec)
+            return codecRegistry().createCodec(nullptr, codecName);
+
+        return codecRegistry().createCodec(nullptr, BlobCodec::Type::None);
+    };
+
+    DecodeBlockJobs decodeBlockJobs;
+    decodeBlockJobs.reserve(blocks.size());
+
+    for (const auto& block : blocks) {
+        const auto blockMap = block.toMap();
+
+        variantMapMustContain(blockMap, "Offset");
+        variantMapMustContain(blockMap, "Size");
+
+        DecodeBlockJob job;
+
+        job._offset         = blockMap.value("Offset").value<quint64>();
+        job._compressedSize = blockMap.value("CompressedSize").value<quint64>();
+
+        if (blockMap.contains("URI"))
+            job._uri = blockMap.value("URI").toString();
+
+        if (blockMap.contains("Data"))
+            job._encodedData = blockMap.value("Data").toString();
+
+        decodeBlockJobs.push_back(std::move(job));
+    }
+
+    DecodeBlockResults results;
+    results.reserve(decodeBlockJobs.size());
+
+    for (const auto& job : decodeBlockJobs) {
+	    if (job._uri.isEmpty())
+	    	results.push_back(decodeBlockFromBase64(job, bytes));
+        else
+            results.push_back(decodeBlockFromFile(job, bytes, createCodec));
     }
 
     return true;

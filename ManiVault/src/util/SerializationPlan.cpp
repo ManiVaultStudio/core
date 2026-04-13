@@ -82,16 +82,16 @@ void SerializationPlan::Job::fail(QString error)
 	setError(std::move(error));
 }
 
-SerializationPlan::Stage::Stage(QString name, Mode mode, Jobs jobs) :
+SerializationPlan::Stage::Stage(QString name, ConcurrencyMode concurrencyMode, Jobs jobs) :
     _name(std::move(name)),
-    _mode(mode),
+    _concurrencyMode(concurrencyMode),
     _jobs(std::move(jobs))
 {
 }
 
-SerializationPlan::Stage::Mode SerializationPlan::Stage::getMode() const
+SerializationPlan::ConcurrencyMode SerializationPlan::Stage::getMode() const
 {
-	return _mode;
+	return _concurrencyMode;
 }
 
 QString SerializationPlan::Stage::getName() const
@@ -109,9 +109,37 @@ void SerializationPlan::addStage(Stage stage)
     _stages.emplace_back(std::move(stage));
 }
 
+void SerializationPlan::addSequentialStage(QString name, Jobs jobs)
+{
+    if (jobs.empty()) {
+        qWarning() << "Attempted to add empty sequential stage:" << name;
+	    return;
+    }
+        
+    _stages.emplace_back(std::move(name), ConcurrencyMode::Sequential, std::move(jobs));
+}
+
 void SerializationPlan::addParallelStage(QString name, Jobs jobs)
 {
-    _stages.emplace_back(std::move(name), Stage::Mode::Parallel, std::move(jobs));
+    if (jobs.empty()) {
+        qWarning() << "Attempted to add empty parallel stage:" << name;
+        return;
+    }
+
+    _stages.emplace_back(std::move(name), ConcurrencyMode::Parallel, std::move(jobs));
+}
+
+void SerializationPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs)
+{
+	switch (mode) {
+		case ConcurrencyMode::Sequential:
+            addSequentialStage(std::move(name), std::move(jobs));
+            break;
+
+        case ConcurrencyMode::Parallel:
+            addParallelStage(std::move(name), std::move(jobs));
+            break;
+	}
 }
 
 void SerializationPlan::execute(AbstractSerializationPlanExecutor& serializationPlanExecutor)

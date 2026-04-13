@@ -108,7 +108,7 @@ Group SerializePlanWorkflow::buildStageGroup(SerializationPlan::Stage& stage)
 
     GroupItems items;
 
-    items << (stage.getMode() == SerializationPlan::Stage::Mode::Parallel ? parallel : sequential);
+    items << (stage.getMode() == SerializationPlan::ConcurrencyMode::Parallel ? parallel : sequential);
 
     for (auto& job : stage.getJobs())
         items << buildJobTask(job);

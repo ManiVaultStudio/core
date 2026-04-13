@@ -158,7 +158,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
         setElementTypeSpecifier(elementTypeIndex);
         resizeVector(numberOfElements);
 
-        populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr(), ConcurrencyMode::Parallel);
+        populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr());
     }
     else
     {
@@ -168,7 +168,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
         std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
 
-        populateDataBufferFromVariantMap(rawData, bytes.data(), ConcurrencyMode::Parallel);
+        populateDataBufferFromVariantMap(rawData, bytes.data());
         _numRows = static_cast<unsigned int>(numberOfPoints); // FIXME should be redundant
 
         size_t offset = 0;
@@ -1007,7 +1007,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     
         indices.resize(indicesMap["Count"].toInt());
 
-        populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data(), ConcurrencyMode::Parallel);
+        populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
     }
     
     // Load dimension names
@@ -1106,7 +1106,7 @@ QVariantMap Points::toVariantMap() const
     QVariantMap indices;
 
     indices["Count"]    = QVariant::fromValue(this->indices.size());
-    indices["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t), nullptr, ConcurrencyMode::Sequential);
+    indices["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t), nullptr);
 
     QVariantMap selection;
 
@@ -1114,14 +1114,14 @@ QVariantMap Points::toVariantMap() const
         auto selectionSet = getSelection<Points>();
 
         selection["Count"]  = QVariant::fromValue(selectionSet->indices.size());
-        selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), nullptr, ConcurrencyMode::Sequential);
+        selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), nullptr);
     }
 
     variantMap["Data"]               = isFull() ? getRawData<PointData>()->toVariantMap() : QVariantMap();
     variantMap["NumberOfPoints"]     = getNumPoints();
     variantMap["Indices"]            = indices;
     variantMap["Selection"]          = selection;
-    variantMap["DimensionNames"]     = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), nullptr, ConcurrencyMode::Sequential) : QVariant::fromValue(dimensionNames);
+    variantMap["DimensionNames"]     = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), nullptr) : QVariant::fromValue(dimensionNames);
     variantMap["NumberOfDimensions"] = getNumDimensions();
     variantMap["Dimensions"]         = _dimensionsPickerAction->toVariantMap();
 

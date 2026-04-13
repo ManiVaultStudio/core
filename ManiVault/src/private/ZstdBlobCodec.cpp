@@ -183,7 +183,6 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decodeFromFileTo(const QString& fileP
 
     const QByteArray encodedData = mv::util::Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
 
-    qDebug() << "Read " << encodedData.size() << " bytes from file for decoding";
     return decodeTo(encodedData, destination, destinationSize);
 }
 

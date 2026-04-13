@@ -19,6 +19,12 @@ class CORE_EXPORT SerializationPlan
 {
 public:
 
+    enum class ConcurrencyMode
+    {
+        Sequential,
+        Parallel
+    };
+
     using SharedState = std::shared_ptr<QVariantMap>;
 
 public:
@@ -72,24 +78,19 @@ public:
     class CORE_EXPORT Stage
     {
     public:
-        enum class Mode
-        {
-            Sequential,
-            Parallel
-        };
 
-        Stage(QString name, Mode mode, Jobs jobs);
+        Stage(QString name, ConcurrencyMode concurrencyMode, Jobs jobs);
 
-        Mode getMode() const;
+        ConcurrencyMode getMode() const;
 
         QString getName() const;
 
         Jobs    getJobs() const;
 
     private:
-        QString _name;
-        Mode    _mode;
-        Jobs    _jobs;
+        QString         _name;
+        ConcurrencyMode _concurrencyMode;
+        Jobs            _jobs;
     };
 
     using Stages = std::vector<Stage>;
@@ -100,12 +101,12 @@ public:
     void addSequentialStage(QString name, Function&& function)
     {
         if constexpr (std::is_invocable_v<Function, Job&>) {
-            _stages.emplace_back(Stage(name, Stage::Mode::Sequential, {
+            _stages.emplace_back(Stage(name, ConcurrencyMode::Sequential, {
 				Job(std::move(name), JobFunction(std::forward<Function>(function)))
             }));
         }
         else if constexpr (std::is_invocable_v<Function>) {
-            _stages.emplace_back(Stage(name, Stage::Mode::Sequential, {
+            _stages.emplace_back(Stage(name, ConcurrencyMode::Sequential, {
                 Job(std::move(name), JobFunction([fn = std::forward<Function>(function)](Job&) mutable {
 	                fn();
 	            }))
@@ -117,7 +118,9 @@ public:
         }
     }
 
+    void addSequentialStage(QString name, Jobs jobs);
 	void addParallelStage(QString name, Jobs jobs);
+    void addStage(QString name, ConcurrencyMode mode, Jobs jobs);
 
 	void execute(AbstractSerializationPlanExecutor& serializationPlanExecutor);
 
