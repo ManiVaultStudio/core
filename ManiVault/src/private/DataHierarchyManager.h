@@ -5,7 +5,6 @@
 #pragma once
 
 #include "AbstractDataHierarchyManager.h"
-#include "DataHierarchyLoadWorkflow.h"
 
 #include <actions/WidgetAction.h>
 

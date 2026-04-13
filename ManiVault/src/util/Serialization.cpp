@@ -199,7 +199,7 @@ DecodeBlockResult decodeBlockFromFile(const DecodeBlockJob& decodeBlockJob, char
             const auto decodeResult = codec->decodeFromFileTo(
                 decodeBlockJob._uri,
                 bytes + decodeBlockJob._offset,
-                static_cast<std::uint64_t>(decodeBlockJob._size)
+                static_cast<std::uint64_t>(decodeBlockJob._compressedSize)
             );
 
             if (!decodeResult.isSuccess()) {
@@ -217,7 +217,7 @@ DecodeBlockResult decodeBlockFromFile(const DecodeBlockJob& decodeBlockJob, char
             const auto decodeResult = codec->decodeTo(
                 encodedBytes,
                 bytes + decodeBlockJob._offset,
-                static_cast<std::uint64_t>(decodeBlockJob._size)
+                static_cast<std::uint64_t>(decodeBlockJob._compressedSize)
             );
 
             if (!decodeResult.isSuccess()) {
