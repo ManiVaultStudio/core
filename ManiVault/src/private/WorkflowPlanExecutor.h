@@ -25,6 +25,10 @@ public:
 	 */
 	void execute(mv::util::WorkflowPlan& workflowPlan) override;
 
+    void runStage(const mv::util::WorkflowPlan::Stage& stage) override;
+    void runStageInSequence(const mv::util::WorkflowPlan::Stage& stage) override;
+    void runStageInParallel(const mv::util::WorkflowPlan::Stage& stage) override;
+
 private:
     mv::util::UniqueWorkflow    _workflow;  /** The workflow that is currently running, used for storing the workflow instance while it is running. This allows the workflow to be canceled if needed, and it also allows for better control over the lifecycle of the workflow. The workflow is stored as a unique pointer, which ensures that it is properly cleaned up when it is no longer needed. The workflow will be created in the execute method when the workflow plan is executed, and it will be reset to nullptr when the workflow is done. */
 };

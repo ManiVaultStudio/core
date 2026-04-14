@@ -5,14 +5,14 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
-#include "WorkflowRuntimeContext.h"
-#include "WorkflowResultBase.h"
 #include "OperationContext.h"
 
 #include <QtTaskTree>
 
 namespace mv::util
 {
+
+class AbstractWorkflowPlanExecutor;
 
 /*
  * AbstractWorkflow is a base class for defining workflows in the application.
@@ -49,13 +49,6 @@ public:
      */
     QString getTitle() const;
 
-    /**
-     * Starts the workflow by creating the recipe using the makeRecipe method, initializing the context using the initializeContext method, and then running the recipe using the QtTaskTree runner. The workflow will execute the tasks defined in the recipe, and when it is done, it will call the handleDone method with the completion status of the workflow. The start method also starts a timer to measure the duration of the workflow, which can be accessed using the getDuration method after the workflow is done.
-     * @see makeRecipe
-     * @see initializeContext
-     * @see handleDone
-     * @see getDuration
-     */
     void start();
 
     /**

@@ -5,7 +5,6 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
-#include "AbstractWorkflowPlanExecutor.h"
 #include "WorkflowContextBase.h"
 
 #include <QString>
@@ -83,7 +82,7 @@ public:
 
         Stage(QString name, ConcurrencyMode concurrencyMode, Jobs jobs);
 
-        ConcurrencyMode getMode() const;
+        ConcurrencyMode getConcurrencyMode() const;
 
         QString getName() const;
 

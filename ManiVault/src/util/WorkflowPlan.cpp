@@ -99,7 +99,7 @@ WorkflowPlan::Stage::Stage(QString name, ConcurrencyMode concurrencyMode, Jobs j
 {
 }
 
-WorkflowPlan::ConcurrencyMode WorkflowPlan::Stage::getMode() const
+WorkflowPlan::ConcurrencyMode WorkflowPlan::Stage::getConcurrencyMode() const
 {
 	return _concurrencyMode;
 }

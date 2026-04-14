@@ -35,23 +35,7 @@ void Workflow::start()
 
     _duration = 0;
 
-    for (const auto& stage : _workflowPlan.getStages()) {
-        for (auto& job : stage.getJobs()) {
-            job.run();
-        }
-    }
-    //_task.setRunning();
-
-    //initResult(_result);
-
-    //_runner.start(
-    //    makeRecipe(),
-    //    [this](QtTaskTree::QTaskTree& tree) {
-    //        registerStorageHandlers(tree);
-    //    },
-    //    [this](QtTaskTree::DoneWith doneWith) {
-    //        handleDone(doneWith);
-    //});
+    
 }
 
 void Workflow::cancel()

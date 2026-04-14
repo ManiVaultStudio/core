@@ -399,7 +399,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
             sortIndex++;
         }
 
-        toPlan.addSequentialStage("Create item maps", createItemMapJobs);
+        toPlan.addParallelStage("Create item maps", createItemMapJobs);
 
         toPlan.addSequentialStage("Assemble item maps", [this, &toPlan](WorkflowPlan::Job& job) -> void {
             try {

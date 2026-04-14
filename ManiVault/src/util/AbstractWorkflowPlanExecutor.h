@@ -5,19 +5,21 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+#include "WorkflowPlan.h"
 
 #include <QObject>
 
 namespace mv::util
 {
 
-class WorkflowPlan;
-
 class CORE_EXPORT AbstractWorkflowPlanExecutor : public QObject
 {
 public:
 
     virtual void execute(WorkflowPlan& workflowPlan) = 0;
+    virtual void runStage(const WorkflowPlan::Stage& stage) = 0;
+    virtual void runStageInSequence(const WorkflowPlan::Stage& stage) = 0;
+    virtual void runStageInParallel(const WorkflowPlan::Stage& stage) = 0;
 };
 
 }
