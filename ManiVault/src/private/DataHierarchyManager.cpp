@@ -346,7 +346,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         });
     }
 
-    fromPlan.addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Parallel, loadDatasetJobs);
+    fromPlan.addSequentialStage("Load datasets", loadDatasetJobs);
     fromPlan.addSequentialStage("Notify datasets", [this](WorkflowPlan::Job& job) {
         for (const auto& item : _items) {
             events().notifyDatasetDataChanged(item->getDataset());

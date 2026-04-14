@@ -49,7 +49,8 @@ public:
      */
     QString getTitle() const;
 
-    void start();
+    void beginRun();
+    void endRun();
 
     /**
      * Cancels the workflow by calling the cancel method on the QtTaskTree runner. This will stop the execution of the workflow and any running tasks, and it will call the handleDone method with a DoneWith::Canceled status to indicate that the workflow was canceled. After canceling the workflow, the duration of the workflow can still be accessed using the getDuration method, which will return the duration from when the workflow was started until it was canceled.
@@ -177,6 +178,7 @@ private:
     SharedOperationContext              _operationContext;          /* Operation context for the workflow, used for storing any necessary information about the operation being performed by the workflow. This can be used for providing additional context to the tasks in the recipe, for example by allowing them to access information about the operation being performed by the workflow. The operation context is stored as a shared pointer, allowing it to be shared between the workflow and the tasks in the recipe, and it can be used for storing any necessary information about the operation being performed by the workflow that needs to be accessed by the tasks in the recipe. */
     DoneCallback                        _doneCallback;              /** Optional callback that can be set to be called when the workflow is done, with a success flag and an error message. This can be used by external code to react to the completion of the workflow, for example by showing a success message or an error dialog to the user. */
     WorkflowPlan                        _workflowPlan;              /** Plan for the workflow, used for defining the sequence of tasks and their dependencies. */
+    QElapsedTimer                       _elapsedTimer;              /** Timer for measuring the duration of the workflow. The timer is started when the workflow is started, and it is used for measuring the duration of the workflow when it is done. The elapsed time can be accessed using the getDuration method, which will return the duration in milliseconds from when the workflow was started until it was done. */
 };
 
 using UniqueWorkflow = std::unique_ptr<Workflow>;

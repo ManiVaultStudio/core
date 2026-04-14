@@ -14,8 +14,8 @@ namespace mv::util
 Workflow::Workflow(WorkflowPlan workflowPlan, SharedOperationContext operationContext /*= {}*/) :
 	//_title(std::move(title)),
 	_duration(0),
-    _workflowPlan(std::move(workflowPlan)),
-    _operationContext(operationContext ? std::move(operationContext) : std::make_shared<OperationContext>())
+    _operationContext(operationContext ? std::move(operationContext) : std::make_shared<OperationContext>()),
+    _workflowPlan(std::move(workflowPlan))
 {
 #ifdef WORKFLOW_VERBOSE
     printLine(_title, "Create");
@@ -27,7 +27,7 @@ QString Workflow::getTitle() const
 	return _workflowPlan.getTitle();
 }
 
-void Workflow::start()
+void Workflow::beginRun()
 {
 #ifdef WORKFLOW_VERBOSE
     printLine(_title, "Start", 1);
@@ -35,7 +35,21 @@ void Workflow::start()
 
     _duration = 0;
 
-    
+    _elapsedTimer.start();
+}
+
+void Workflow::endRun()
+{
+    _duration = static_cast<quint64>(_elapsedTimer.elapsed());
+
+    if (auto currentProject = mv::projects().getCurrentProject()) {
+        const auto duration     = getDuration();
+        const auto successText  = (duration < 1000) ? QString("%1 completed successfully in %2 ms").arg(getTitle()).arg(duration) : QString("%1 opened successfully in %2 s").arg(currentProject->getFilePath()).arg(duration / 1000.0, 0, 'f', 1);
+        //const auto errorText    = getTitle() + result->_errorMessage;
+
+        help().addNotification("Project opened", successText, StyledIcon("folder-open"));
+        qDebug() << successText;
+}
 }
 
 void Workflow::cancel()

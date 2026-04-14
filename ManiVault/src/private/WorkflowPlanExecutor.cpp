@@ -30,11 +30,13 @@ void WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan)
     //    }
     //);
 
-    _workflow->start();
-
-    for (const auto& stage : workflowPlan.getStages()) {
-        runStage(stage);
+    _workflow->beginRun();
+    {
+        for (const auto& stage : workflowPlan.getStages()) {
+            runStage(stage);
+        }
     }
+    _workflow->endRun();
 }
 
 void WorkflowPlanExecutor::runStage(const mv::util::WorkflowPlan::Stage& stage)
