@@ -19,8 +19,8 @@ using namespace QtTaskTree;
 
 #define PROJECT_SAVE_WORKFLOW_VERBOSE
 
-ProjectSaveWorkflow::ProjectSaveWorkflow(const QString& filePath, QObject* parent) :
-    AbstractWorkflow(createContext(filePath), "Project Save", parent),
+ProjectSaveWorkflow::ProjectSaveWorkflow(const QString& filePath) :
+    AbstractWorkflow(createContext(filePath), "Project Save"),
 	_temporaryDir((QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "SaveProject")))
 {
 }
@@ -159,7 +159,7 @@ void ProjectSaveWorkflow::handleDone(QtTaskTree::DoneWith status)
 	    }
     }
 
-    emit finished(status == DoneWith::Success, QString{});
+    //emit finished(status == DoneWith::Success, QString{});
 }
 
 const QTemporaryDir& ProjectSaveWorkflow::getTemporaryDir() const

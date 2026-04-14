@@ -108,7 +108,7 @@ static EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& s
     return result;
 }
 
-QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, const BlobCodec* blobCodecOverride /*= nullptr*/, SerializationPlan::ConcurrencyMode concurrencyMode /*= SerializationPlan::ConcurrencyMode::Sequential*/)
+QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, const BlobCodec* blobCodecOverride /*= nullptr*/, WorkflowPlan::ConcurrencyMode concurrencyMode /*= WorkflowPlan::ConcurrencyMode::Sequential*/)
 {
     try {
         if (!mv::projects().hasProject())
@@ -234,7 +234,7 @@ DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, co
     return result;
 }
 
-void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& bytes, SerializationPlan::ConcurrencyMode concurrencyMode /*= SerializationPlan::ConcurrencyMode::Parallel*/)
+void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& bytes, WorkflowPlan::ConcurrencyMode concurrencyMode /*= WorkflowPlan::ConcurrencyMode::Parallel*/)
 {
     variantMapMustContain(variantMap, "BlockSize");
     variantMapMustContain(variantMap, "Blocks");
@@ -311,6 +311,33 @@ void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& b
     DecodeBlockResults results;
     results.reserve(decodeBlockJobs.size());
 
+    //SerializationPlan decodePlan;
+
+    //SerializationPlan::Jobs decodeJobs;
+
+    //for (const auto& decodeBlockJob : decodeBlockJobs) {
+    //    decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobs.indexOf(decodeBlockJob))), [decodeBlockJob, &results, createCodec](SerializationPlan::Job& job) {
+    //        try {
+    //            if (decodeBlockJob._uri.isEmpty()) {
+    //                auto result = decodeBlockFromBase64(decodeBlockJob, createCodec);
+    //                //results.push_back(std::move(result));
+    //            } else {
+    //                auto result = decodeBlockFromFile(decodeBlockJob, createCodec);
+    //                //results.push_back(std::move(result));
+    //            }   
+    //        }
+    //        catch (std::exception& e) {
+    //            Serializable::reportSerializationError("Data hierarchy manager", "Failed to load dataset: " + QString::fromStdString(e.what()));
+    //        }
+    //        catch (...) {
+    //            Serializable::reportSerializationError("Data hierarchy manager", "Failed to load dataset");
+    //        }
+    //    });
+    //}
+
+    //decodePlan.addStage("Load datasets", SerializationPlan::ConcurrencyMode::Sequential, decodeJobs);
+    //decodePlan.execute(*mv::projects().getSerializationPlanExecutor());
+
     for (const auto& job : decodeBlockJobs) {
 	    if (job._uri.isEmpty())
 	    	results.push_back(decodeBlockFromBase64(job, createCodec));
@@ -353,7 +380,7 @@ void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& b
     }
 }
 
-void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, SerializationPlan::ConcurrencyMode concurrencyMode)
+void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, WorkflowPlan::ConcurrencyMode concurrencyMode)
 {
     if (bytes == nullptr)
         throw std::runtime_error("Destination buffer is null");

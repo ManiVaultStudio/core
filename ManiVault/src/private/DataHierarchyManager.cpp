@@ -257,15 +257,13 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
     fromPlan.addSequentialStage("Populate data hierarchy", [this, variantMap](SerializationPlan::Job& job) -> void {
         try {
             const auto loadDataHierarchyItem = [variantMap](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
-                const auto dataset = dataHierarchyItemMap["Dataset"].toMap();
-                const auto datasetId = dataset["ID"].toString();
-                const auto datasetName = dataset["Name"].toString();
-                const auto pluginKind = dataset["PluginKind"].toString();
-                const auto isDerived = dataset["Derived"].toBool();
-                const auto isFull = dataset["Full"].toBool();
-                const auto sourceDatasetID = dataset["SourceDatasetID"].toString();
-
-                auto subtaskName = QString("Loading dataset hierarchy item: %1").arg(datasetName);
+                const auto dataset              = dataHierarchyItemMap["Dataset"].toMap();
+                const auto datasetId            = dataset["ID"].toString();
+                const auto datasetName          = dataset["Name"].toString();
+                const auto pluginKind           = dataset["PluginKind"].toString();
+                const auto isDerived            = dataset["Derived"].toBool();
+                const auto isFull               = dataset["Full"].toBool();
+                const auto sourceDatasetID      = dataset["SourceDatasetID"].toString();
 
                 auto loadedDataset = (isDerived || !isFull) ? mv::data().createDatasetWithoutSelection(pluginKind, guiName, parent, datasetId) : mv::data().createDataset(pluginKind, guiName, parent, datasetId);
 
@@ -275,7 +273,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
                 loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);
 
                 return loadedDataset;
-                };
+            };
 
             const std::function<void(const QVariantMap&, Dataset<DatasetImpl>)> populateDataHierarchy = [&populateDataHierarchy, loadDataHierarchyItem](const QVariantMap& variantMap, Dataset<DatasetImpl> parent) -> void {
                 QVector<QPair<QString, std::int32_t>> sortedDatasets;

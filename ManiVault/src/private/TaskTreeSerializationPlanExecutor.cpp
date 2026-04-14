@@ -11,21 +11,38 @@
 	#define TASK_TREE_SERIALIZATION_VERBOSE
 #endif
 
+void TaskTreeSerializationPlanExecutor::runWorkflowOnOwnerThread(const mv::util::SerializationPlan& serializationPlan)
+{
+}
+
 void TaskTreeSerializationPlanExecutor::execute(mv::util::SerializationPlan& serializationPlan)
 {
-    _workflow = std::make_unique<SerializePlanWorkflow>(serializationPlan, this, mv::util::OperationContextScope::getShared());
+    std::promise<mv::util::AbstractWorkflow::WorkflowOutcome> donePromise;
+    auto doneFuture = donePromise.get_future();
 
-    QEventLoop loop;
+    std::exception_ptr errorPtr;
+    QString errorMessage;
 
-    connect(_workflow.get(), &SerializePlanWorkflow::finished, &loop, &QEventLoop::quit);
+    _workflow = std::make_unique<SerializePlanWorkflow>(
+        serializationPlan,
+        mv::util::OperationContextScope::getShared()
+    );
 
-    connect(_workflow.get(), &SerializePlanWorkflow::finished, this, [this, workflowPtr = _workflow.get()](bool success, const QString& error) {
-#ifdef TASK_TREE_SERIALIZATION_VERBOSE
-        qDebug() << "Workflow finished with success:" << success << "error:" << error;
-#endif
-    });
+    _workflow->setDoneCallback(
+        [&](bool success, const QString& error) {
+            if (!success) {
+                errorMessage = error;
+            }
+
+            donePromise.set_value({ success, error });
+        }
+    );
 
     _workflow->start();
 
-    loop.exec();
+    doneFuture.wait();
+
+    if (!errorMessage.isEmpty()) {
+        throw std::runtime_error(errorMessage.toStdString());
+    }
 }

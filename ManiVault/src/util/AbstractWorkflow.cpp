@@ -11,12 +11,10 @@
 namespace mv::util
 {
 
-AbstractWorkflow::AbstractWorkflow(UniqueWorkflowContext workflowContext, QString title, QObject* parent, SharedOperationContext operationContext /*= {}*/) :
-	QObject(parent),
+AbstractWorkflow::AbstractWorkflow(UniqueWorkflowContext workflowContext, QString title, SharedOperationContext operationContext /*= {}*/) :
 	_title(std::move(title)),
 	_duration(0),
     _initialWorkflowContext(std::move(workflowContext)),
-    _task(this, _title, Task::Status::Idle, true),
     _operationContext(operationContext ? std::move(operationContext) : std::make_shared<OperationContext>())
 {
 #ifdef ABSTRACT_WORKFLOW_VERBOSE
@@ -37,9 +35,7 @@ void AbstractWorkflow::start()
 
     _duration = 0;
 
-	_timer.restart();
-
-    _task.setRunning();
+    //_task.setRunning();
 
     initResult(_result);
 
@@ -67,13 +63,21 @@ quint64 AbstractWorkflow::getDuration() const
 	return _duration;
 }
 
+void AbstractWorkflow::setDoneCallback(DoneCallback callback)
+{
+    _doneCallback = std::move(callback);
+}
+
 void AbstractWorkflow::handleDone(QtTaskTree::DoneWith doneWith)
 {
-    _duration = static_cast<quint64>(_timer.elapsed());
+    //_duration = static_cast<quint64>(_timer.elapsed());
 
     const bool success = (doneWith == QtTaskTree::DoneWith::Success);
 
-    _task.setFinished();
+    //_task.setFinished();
+
+    if (_doneCallback)
+        _doneCallback(success, success ? QString{} : _result->_errorMessage);
 }
 
 void AbstractWorkflow::setupTree(QtTaskTree::QTaskTree& context)

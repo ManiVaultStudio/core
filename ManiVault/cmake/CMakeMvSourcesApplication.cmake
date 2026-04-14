@@ -127,28 +127,28 @@ set(PRIVATE_DATA_HIERARCHY_MANAGER_FILES
     ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
 )
 
-set(PRIVATE_SERIALIZATION_HEADERS
-    src/private/ProjectSaveWorkflow.h
-    src/private/ProjectSaveContext.h
-    src/private/ProjectSaveResult.h
-    src/private/ProjectOpenWorkflow.h
-    src/private/ProjectOpenContext.h
-    src/private/ProjectOpenResult.h
-)
+# set(PRIVATE_SERIALIZATION_HEADERS
+#     src/private/ProjectSaveWorkflow.h
+#     src/private/ProjectSaveContext.h
+#     src/private/ProjectSaveResult.h
+#     src/private/ProjectOpenWorkflow.h
+#     src/private/ProjectOpenContext.h
+#     src/private/ProjectOpenResult.h
+# )
 
-set(PRIVATE_SERIALIZATION_SOURCES
-    src/private/ProjectSaveWorkflow.cpp
-    src/private/ProjectSaveContext.cpp
-    src/private/ProjectSaveResult.cpp
-    src/private/ProjectOpenWorkflow.cpp
-    src/private/ProjectOpenContext.cpp
-    src/private/ProjectOpenResult.cpp
-)
+# set(PRIVATE_SERIALIZATION_SOURCES
+#     src/private/ProjectSaveWorkflow.cpp
+#     src/private/ProjectSaveContext.cpp
+#     src/private/ProjectSaveResult.cpp
+#     src/private/ProjectOpenWorkflow.cpp
+#     src/private/ProjectOpenContext.cpp
+#     src/private/ProjectOpenResult.cpp
+# )
 
-set(PRIVATE_SERIALIZATION_FILES
-    ${PRIVATE_SERIALIZATION_HEADERS}
-    ${PRIVATE_SERIALIZATION_SOURCES}
-)
+# set(PRIVATE_SERIALIZATION_FILES
+#     ${PRIVATE_SERIALIZATION_HEADERS}
+#     ${PRIVATE_SERIALIZATION_SOURCES}
+# )
 
 set(PRIVATE_EVENT_MANAGER_HEADERS
     src/private/EventManager.h
@@ -329,7 +329,7 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/ZstdBlobCodec.h
     src/private/ZstdBlobCodecFactory.h
     src/private/TaskTreeSerializationPlanExecutor.h
-    src/private/SerializePlanWorkflow.h
+    # src/private/SerializePlanWorkflow.h
 )
 
 if(MV_USE_ERROR_LOGGING)
@@ -354,7 +354,7 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/ZstdBlobCodec.cpp
     src/private/ZstdBlobCodecFactory.cpp
     src/private/TaskTreeSerializationPlanExecutor.cpp
-    src/private/SerializePlanWorkflow.cpp
+    # src/private/SerializePlanWorkflow.cpp
 )
 
 if(MV_USE_ERROR_LOGGING)
@@ -514,4 +514,4 @@ source_group(Pages\\StartPage FILES ${PRIVATE_START_PAGE_FILES})
 source_group(Pages\\Learning FILES ${PRIVATE_LEARNING_PAGE_FILES})
 source_group(Miscellaneous FILES ${PRIVATE_MISCELLANEOUS_FILES})
 source_group(Actions FILES ${PRIVATE_ACTIONS_FILES})
-source_group(Serialization FILES ${PRIVATE_SERIALIZATION_FILES})
+# source_group(Serialization FILES ${PRIVATE_SERIALIZATION_FILES})

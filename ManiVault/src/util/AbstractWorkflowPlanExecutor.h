@@ -11,13 +11,13 @@
 namespace mv::util
 {
 
-class SerializationPlan;
+class WorkflowPlan;
 
-class CORE_EXPORT AbstractSerializationPlanExecutor : public QObject
+class CORE_EXPORT AbstractWorkflowPlanExecutor : public QObject
 {
 public:
 
-    virtual void execute(SerializationPlan& serializationPlan) = 0;
+    virtual void execute(WorkflowPlan& workflowPlan) = 0;
 };
 
 }

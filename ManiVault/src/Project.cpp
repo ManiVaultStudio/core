@@ -150,9 +150,6 @@ QVariantMap Project::toVariantMap() const
 
     plugins().insertIntoVariantMap(variantMap);
 
-    dataHierarchyTask.setParentTask(&mv::projects().getActiveWorkflow()->getTask());
-
-	dataHierarchy().setTask(&mv::projects().getActiveWorkflow()->getTask());
     dataHierarchy().insertIntoVariantMap(variantMap);
     actions().insertIntoVariantMap(variantMap);
     events().insertIntoVariantMap(variantMap);

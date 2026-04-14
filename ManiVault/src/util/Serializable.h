@@ -7,7 +7,6 @@
 #include "ManiVaultGlobals.h"
 
 #include "Serialization.h"
-#include "SerializationPlan.h"
 
 #include <QString>
 #include <QJsonDocument>
@@ -16,6 +15,7 @@
 namespace mv
 {
     class Task;
+    class WorkflowPlan;
 }
 
 namespace mv::util {
@@ -156,8 +156,8 @@ public:
      */
     std::int32_t getSerializationCountTo() const;
 
-    static SerializationPlan makeFromPlan();
-    static SerializationPlan makeToPlan();
+    static WorkflowPlan makeFromPlan();
+    static WorkflowPlan makeToPlan();
 
 public: // Task related
 

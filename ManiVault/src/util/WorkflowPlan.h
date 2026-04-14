@@ -5,7 +5,7 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
-#include "AbstractSerializationPlanExecutor.h"
+#include "AbstractWorkflowPlanExecutor.h"
 
 #include <QString>
 #include <QJsonDocument>
@@ -13,9 +13,9 @@
 namespace mv::util
 {
 
-class AbstractSerializationPlanExecutor;
+class AbstractWorkflowPlanExecutor;
 
-class CORE_EXPORT SerializationPlan
+class CORE_EXPORT WorkflowPlan
 {
 public:
 
@@ -122,7 +122,7 @@ public:
 	void addParallelStage(QString name, Jobs jobs);
     void addStage(QString name, ConcurrencyMode mode, Jobs jobs);
 
-	void execute(AbstractSerializationPlanExecutor& serializationPlanExecutor);
+	void execute(AbstractWorkflowPlanExecutor& WorkflowPlanExecutor);
 
     Stages getStages() const { return _stages; }
     SharedState getSharedState() const { return _sharedState; }

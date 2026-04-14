@@ -32,9 +32,6 @@
 
 #include <exception>
 
-#include "ProjectOpenWorkflow.h"
-#include "ProjectSaveWorkflow.h"
-
 #include "Task.h"
 
 #ifdef _DEBUG
@@ -373,17 +370,17 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
         setState(State::OpeningProject);
 
-        auto workflow = std::make_unique<ProjectOpenWorkflow>(filePath, this);
+        auto workflow = std::make_unique<ProjectOpenWorkflow>(filePath);
 
-        connect(workflow.get(), &ProjectOpenWorkflow::finished, this, [this, filePath, workflowPtr = workflow.get()](bool success, const QString& error) {
-            setState(State::Idle);
+        //connect(workflow.get(), &ProjectOpenWorkflow::finished, this, [this, filePath, workflowPtr = workflow.get()](bool success, const QString& error) {
+        //    setState(State::Idle);
 
-            if (success) {
-                emit projectOpened(*_project);
-            }
+        //    if (success) {
+        //        emit projectOpened(*_project);
+        //    }
 
-            resetActiveWorkflow();
-        });
+        //    resetActiveWorkflow();
+        //});
 
         setActiveWorkflow(std::move(workflow));
         getActiveWorkflow()->start();
@@ -790,20 +787,20 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
 
-            auto workflow = std::make_unique<ProjectSaveWorkflow>(filePath, this);
+            auto workflow = std::make_unique<ProjectSaveWorkflow>(filePath);
 
             setTemporaryDirPath(TemporaryDirType::Save, workflow->getTemporaryDirPath());
 
-            connect(workflow.get(), &ProjectSaveWorkflow::finished, this, [this, filePath, workflowPtr = workflow.get()](bool success, const QString& error) {
-                setState(State::Idle);
+            //connect(workflow.get(), &ProjectSaveWorkflow::finished, this, [this, filePath, workflowPtr = workflow.get()](bool success, const QString& error) {
+            //    setState(State::Idle);
 
-                if (success) {
-                    setState(State::Idle);
-                    emit projectOpened(*_project);
-                }
+            //    if (success) {
+            //        setState(State::Idle);
+            //        emit projectOpened(*_project);
+            //    }
 
-                resetActiveWorkflow();
-            });
+            //    resetActiveWorkflow();
+            //});
 
             setActiveWorkflow(std::move(workflow));
             getActiveWorkflow()->start();

@@ -17,8 +17,8 @@ using namespace QtTaskTree;
 	#define PROJECT_OPEN_WORKFLOW_VERBOSE
 #endif
 
-ProjectOpenWorkflow::ProjectOpenWorkflow(const QString& filePath, QObject* parent) :
-	AbstractWorkflow(createContext(filePath), "Open Project", parent)
+ProjectOpenWorkflow::ProjectOpenWorkflow(const QString& filePath) :
+	AbstractWorkflow(createContext(filePath), "Open Project")
 {
 }
 
@@ -133,7 +133,7 @@ void ProjectOpenWorkflow::handleDone(QtTaskTree::DoneWith status)
         }
     }
 
-    emit finished(status == DoneWith::Success, QString{});
+    //emit finished(status == DoneWith::Success, QString{});
 }
 
 void ProjectOpenWorkflow::initResult(UniqueWorkflowResultBase& result)

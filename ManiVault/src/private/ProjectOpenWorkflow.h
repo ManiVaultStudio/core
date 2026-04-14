@@ -10,10 +10,8 @@
 
 class ProjectOpenWorkflow final : public mv::util::AbstractWorkflow
 {
-    Q_OBJECT
-
 public:
-    explicit ProjectOpenWorkflow(const QString& filePath, QObject* parent = nullptr);
+    explicit ProjectOpenWorkflow(const QString& filePath);
 
 protected:
 

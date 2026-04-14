@@ -12,7 +12,6 @@
 #include "ModalTask.h"
 
 #include <QtTaskTree>
-#include <QObject>
 
 namespace mv::util
 {
@@ -26,20 +25,25 @@ namespace mv::util
  *
  * @author T. Kroes
  */
-class CORE_EXPORT AbstractWorkflow : public QObject
+class CORE_EXPORT AbstractWorkflow
 {
-    Q_OBJECT
-
 public:
+
+    using DoneCallback = std::function<void(bool success, const QString& error)>;
+
+    struct WorkflowOutcome
+    {
+        bool success = true;
+        QString error;
+    };
 
     /*
      * Constructs an AbstractWorkflow with the given workflow context and title. The workflow context is a unique pointer to a WorkflowContextBase, which can be used for storing any necessary information for the workflow that needs to be accessed by the tasks in the workflow. The title is a descriptive name for the workflow that indicates what the workflow does, and it can be used for displaying the workflow in the UI or for logging purposes. The constructor initializes the workflow with the provided context and title, and it also initializes the duration to 0 and sets up the runner for executing the workflow.
      * @param workflowContext A unique pointer to a WorkflowContextBase, which can be used for storing any necessary information for the workflow that needs to be accessed by the tasks in the workflow. The workflow context will be initialized before the recipe is created and finalized after the recipe is done, allowing for better control over when the context is initialized and finalized. The workflow context can be used by tasks in the recipe to access any necessary information for their execution, and it can also be used by derived classes of AbstractWorkflow to implement custom logic in the setup and finalize methods based on the information stored in the context.
      * @param title A descriptive name for the workflow that indicates what the workflow does, which can be used for displaying the workflow in the UI or for logging purposes. The title should be a descriptive name for the workflow that indicates what the workflow does, for example "Project Save Workflow" or "Data Import Workflow".
-     * @param parent Optional parent QObject for ownership and memory management. If not provided, it defaults to nullptr.
      * @param operationContext Optional shared pointer to an OperationContext, which can be used for reporting warnings and errors during the execution of the workflow. The OperationContext allows for better error handling and reporting during the execution of the workflow, and it can be shared across multiple workflows or tasks to provide a centralized way of reporting issues that occur during the execution of the workflow.
      */
-    explicit AbstractWorkflow(UniqueWorkflowContext workflowContext, QString title, QObject* parent = nullptr, SharedOperationContext operationContext = {});
+    explicit AbstractWorkflow(UniqueWorkflowContext workflowContext, QString title, SharedOperationContext operationContext = {});
 
     /**
      * Returns the title of the workflow, which can be used for displaying the workflow in the UI or for logging purposes. The title is set in the constructor and can be accessed using this method. The title should be a descriptive name for the workflow that indicates what the workflow does, for example "Project Save Workflow" or "Data Import Workflow".
@@ -70,15 +74,6 @@ public:
     quint64 getDuration() const;
 
     /**
-     * Utility method for accessing the task associated with the workflow. This method allows tasks in the recipe to access the task associated with the workflow, which can be useful for updating the progress of the workflow or for checking the status of the workflow. The getTask method will return a reference to the Task object associated with the workflow, allowing tasks in the recipe to access it and use it for their execution.
-     * @return A reference to the Task object associated with the workflow, allowing tasks in the recipe to access it and use it for their execution. This can be useful for updating the progress of the workflow or for checking the status of the workflow.
-     */
-    Task& getTask()
-    {
-        return _task;
-    }
-
-    /**
      * Utility method for accessing the workflow context stored in the WorkflowRuntimeContextStorage. This method allows tasks in the recipe to access the workflow context and use the data stored in it for their execution, while also allowing for type safety when accessing the context. The contextAs method will attempt to dynamically cast the workflow context stored in the WorkflowRuntimeContextStorage to the specified type T, and it will return a pointer to the casted context if the cast is successful, or nullptr if the cast fails. This allows tasks in the recipe to access the workflow context and use the data stored in it for their execution, while also allowing for type safety when accessing the context.
      * @tparam T The type to which the workflow context should be cast. This should be a type that derives from WorkflowContextBase and is used for storing any necessary information for the workflow that needs to be accessed by the tasks in the workflow. The contextAs method will attempt to dynamically cast the workflow context stored in the WorkflowRuntimeContextStorage to the specified type T, and it will return a pointer to the casted context if the cast is successful, or nullptr if the cast fails. This allows tasks in the recipe to access the workflow context and use the data stored in it for their execution, while also allowing for type safety when accessing the context.
      * @param storage Reference to the workflow runtime context storage, used for passing data between tasks. The contextAs method will access the workflow context stored in the WorkflowRuntimeContextStorage and attempt to dynamically cast it to the specified type T, returning a pointer to the casted context if the cast is successful, or nullptr if the cast fails. This allows tasks in the recipe to access the workflow context and use the data stored in it for their execution, while also allowing for type safety when accessing the context.
@@ -101,6 +96,12 @@ public:
     {
         return dynamic_cast<const T*>(storage->_workflowContext.get());
     }
+
+    /**
+     * Sets the callback function that will be called when the workflow is done, with a boolean indicating whether the workflow finished successfully and a QString containing any error message if the workflow finished with an error. This allows for notifying the caller of the workflow about the completion status of the workflow, and it can be used for performing any necessary handling based on whether the workflow finished successfully or with an error, for example by displaying a notification to the user or by logging the result of the workflow.
+     * @param callback The callback function that will be called when the workflow is done, with a boolean indicating whether the workflow finished successfully and a QString containing any error message if the workflow finished with an error. This allows for notifying the caller of the workflow about the completion status of the workflow, and it can be used for performing any necessary handling based on whether the workflow finished successfully or with an error, for example by displaying a notification to the user or by logging the result of the workflow.
+     */
+    void setDoneCallback(DoneCallback callback);
 
 protected:
 
@@ -183,25 +184,24 @@ private:
      */
     void registerStorageHandlers(QtTaskTree::QTaskTree& tree);
 
-signals:
-
-    /**
-     * Signals that the workflow has finished, with a success flag and an optional error message. This can be used by external code to react to the completion of the workflow, for example by showing a success message or an error dialog to the user.
-     * @param success Indicates whether the workflow finished successfully or with an error. This can be used by external code to determine how to react to the completion of the workflow, for example by showing a success message or an error dialog to the user.
-     * @param errorMessage An optional error message that provides more details about the error if the workflow finished with an error. This can be used by external code to show a more detailed error dialog to the user, or to log the error for debugging purposes.
-     */
-    void finished(bool success, const QString& errorMessage);
+//signals:
+//
+//    /**
+//     * Signals that the workflow has finished, with a success flag and an optional error message. This can be used by external code to react to the completion of the workflow, for example by showing a success message or an error dialog to the user.
+//     * @param success Indicates whether the workflow finished successfully or with an error. This can be used by external code to determine how to react to the completion of the workflow, for example by showing a success message or an error dialog to the user.
+//     * @param errorMessage An optional error message that provides more details about the error if the workflow finished with an error. This can be used by external code to show a more detailed error dialog to the user, or to log the error for debugging purposes.
+//     */
+//    void finished(bool success, const QString& errorMessage);
 
 private:
     const QString                       _title;                     /** The title of the workflow, used for displaying the workflow in the UI or for logging purposes. */
     QtTaskTree::QSingleTaskTreeRunner   _runner;                    /** The runner is not re-usable after cancel, but since we don't need to restart workflows, it's fine. */
-    QElapsedTimer                       _timer;                     /** Used for measuring workflow duration. */
     quint64                             _duration;                  /** Stored duration after workflow done. */
     UniqueWorkflowContext               _initialWorkflowContext;    /** Initial workflow context, used for storing any necessary information for the workflow that needs to be accessed by the tasks in the workflow. */
     WorkflowRuntimeContextStorage       _contextStorage;            /** Storage for the workflow context, used for passing data between tasks. */
     UniqueWorkflowResultBase            _result;                    /** Result of the workflow, used for storing the success flag and error message after the workflow is done. It is the responsibility of the concrete workflow to populate this result. */
-    ModalTask                           _task;                      /** Modal task for showing the workflow progress in a modal dialog. This is used for workflows that need to run modally, and it will automatically show a modal dialog with the workflow progress when the workflow is started. The modal task will be set up with the title of the workflow, and it can be used for showing the progress of the workflow in the UI. */
     SharedOperationContext              _operationContext;          /* Operation context for the workflow, used for storing any necessary information about the operation being performed by the workflow. This can be used for providing additional context to the tasks in the recipe, for example by allowing them to access information about the operation being performed by the workflow. The operation context is stored as a shared pointer, allowing it to be shared between the workflow and the tasks in the recipe, and it can be used for storing any necessary information about the operation being performed by the workflow that needs to be accessed by the tasks in the recipe. */
+    DoneCallback                        _doneCallback;              /** Optional callback that can be set to be called when the workflow is done, with a success flag and an error message. This can be used by external code to react to the completion of the workflow, for example by showing a success message or an error dialog to the user. */
 };
 
 using UniqueAbstractWorkflow = std::unique_ptr<AbstractWorkflow>;

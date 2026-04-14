@@ -4,18 +4,18 @@
 
 #pragma once
 
-#include <util/AbstractSerializationPlanExecutor.h>
-#include <util/SerializationPlan.h>
+#include <util/AbstractWorkflowPlanExecutor.h>
+#include <util/WorkflowPlan.h>
 
 #include "SerializePlanWorkflow.h"
 
 #include <QString>
 
-class TaskTreeSerializationPlanExecutor final : public mv::util::AbstractSerializationPlanExecutor
+class TaskTreeWorkflowPlanExecutor final : public mv::util::AbstractWorkflowPlanExecutor
 {
 public:
 
-    void execute(mv::util::SerializationPlan& serializationPlan) override;
+    void execute(mv::util::WorkflowPlan& workflowPlan) override;
 
 private:
     std::unique_ptr<SerializePlanWorkflow>      _workflow;

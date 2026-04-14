@@ -2,28 +2,28 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
-#include "SerializationPlan.h"
+#include "WorkflowPlan.h"
 
 namespace mv::util
 {
 
-SerializationPlan::Job::Job(QString name, JobFunction function) :
+WorkflowPlan::Job::Job(QString name, JobFunction function) :
     _name(std::move(name)),
     _function(std::move(function))
 {
 }
 
-QString SerializationPlan::Job::getName() const
+QString WorkflowPlan::Job::getName() const
 {
 	return _name;
 }
 
-const SerializationPlan::JobFunction& SerializationPlan::Job::getFunction() const
+const WorkflowPlan::JobFunction& WorkflowPlan::Job::getFunction() const
 {
 	return _function;
 }
 
-void SerializationPlan::Job::run()
+void WorkflowPlan::Job::run()
 {
     clearError();
     clearResult();
@@ -32,84 +32,84 @@ void SerializationPlan::Job::run()
 		_function(*this);
 }
 
-void SerializationPlan::Job::setResult(QVariant result)
+void WorkflowPlan::Job::setResult(QVariant result)
 {
 	_result = std::move(result);
 }
 
-const QVariant& SerializationPlan::Job::getResult() const
+const QVariant& WorkflowPlan::Job::getResult() const
 {
 	return _result;
 }
 
-void SerializationPlan::Job::clearResult()
+void WorkflowPlan::Job::clearResult()
 {
 	_result.clear();
 }
 
-void SerializationPlan::Job::setError(QString error)
+void WorkflowPlan::Job::setError(QString error)
 {
 	_error = std::move(error);
 }
 
-bool SerializationPlan::Job::hasError() const
+bool WorkflowPlan::Job::hasError() const
 {
 	return _error.has_value();
 }
 
-const QString& SerializationPlan::Job::getError() const
+const QString& WorkflowPlan::Job::getError() const
 {
 	return *_error;
 }
 
-void SerializationPlan::Job::clearError()
+void WorkflowPlan::Job::clearError()
 {
 	_error.reset();
 }
 
-void SerializationPlan::Job::setException(const std::exception& e)
+void WorkflowPlan::Job::setException(const std::exception& e)
 {
 	_error = QString::fromUtf8(e.what());
 }
 
-void SerializationPlan::Job::setUnknownException()
+void WorkflowPlan::Job::setUnknownException()
 {
 	_error = QStringLiteral("Unknown exception");
 }
 
-void SerializationPlan::Job::fail(QString error)
+void WorkflowPlan::Job::fail(QString error)
 {
 	setError(std::move(error));
 }
 
-SerializationPlan::Stage::Stage(QString name, ConcurrencyMode concurrencyMode, Jobs jobs) :
+WorkflowPlan::Stage::Stage(QString name, ConcurrencyMode concurrencyMode, Jobs jobs) :
     _name(std::move(name)),
     _concurrencyMode(concurrencyMode),
     _jobs(std::move(jobs))
 {
 }
 
-SerializationPlan::ConcurrencyMode SerializationPlan::Stage::getMode() const
+WorkflowPlan::ConcurrencyMode WorkflowPlan::Stage::getMode() const
 {
 	return _concurrencyMode;
 }
 
-QString SerializationPlan::Stage::getName() const
+QString WorkflowPlan::Stage::getName() const
 {
 	return _name;
 }
 
-SerializationPlan::Jobs SerializationPlan::Stage::getJobs() const
+WorkflowPlan::Jobs WorkflowPlan::Stage::getJobs() const
 {
 	return _jobs;
 }
 
-void SerializationPlan::addStage(Stage stage)
+void WorkflowPlan::addStage(Stage stage)
 {
     _stages.emplace_back(std::move(stage));
 }
 
-void SerializationPlan::addSequentialStage(QString name, Jobs jobs)
+void WorkflowPlan::addSequentialStage(QString name, Jobs jobs)
 {
     if (jobs.empty()) {
         qWarning() << "Attempted to add empty sequential stage:" << name;
@@ -119,7 +119,7 @@ void SerializationPlan::addSequentialStage(QString name, Jobs jobs)
     _stages.emplace_back(std::move(name), ConcurrencyMode::Sequential, std::move(jobs));
 }
 
-void SerializationPlan::addParallelStage(QString name, Jobs jobs)
+void WorkflowPlan::addParallelStage(QString name, Jobs jobs)
 {
     if (jobs.empty()) {
         qWarning() << "Attempted to add empty parallel stage:" << name;
@@ -129,7 +129,7 @@ void SerializationPlan::addParallelStage(QString name, Jobs jobs)
     _stages.emplace_back(std::move(name), ConcurrencyMode::Parallel, std::move(jobs));
 }
 
-void SerializationPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs)
+void WorkflowPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs)
 {
 	switch (mode) {
 		case ConcurrencyMode::Sequential:
@@ -142,9 +142,9 @@ void SerializationPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs)
 	}
 }
 
-void SerializationPlan::execute(AbstractSerializationPlanExecutor& serializationPlanExecutor)
+void WorkflowPlan::execute(AbstractWorkflowPlanExecutor& WorkflowPlanExecutor)
 {
-    serializationPlanExecutor.execute(*this);
+    WorkflowPlanExecutor.execute(*this);
 }
 
 }

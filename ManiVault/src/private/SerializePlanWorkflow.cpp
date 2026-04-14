@@ -19,8 +19,8 @@ using namespace mv::util;
 
 #define SERIALIZE_PLAN_WORKFLOW_VERBOSE
 
-SerializePlanWorkflow::SerializePlanWorkflow(SerializationPlan serializationPlan, QObject* parent, SharedOperationContext operationContext /*= {}*/) :
-    AbstractWorkflow(createContext(serializationPlan), "Serialize Plan", parent, operationContext),
+SerializePlanWorkflow::SerializePlanWorkflow(SerializationPlan serializationPlan, SharedOperationContext operationContext /*= {}*/) :
+    AbstractWorkflow(createContext(serializationPlan), "Serialize Plan", operationContext),
     _serializationPlan(std::move(serializationPlan))
 {
 }
@@ -70,10 +70,10 @@ void SerializePlanWorkflow::handleDone(QtTaskTree::DoneWith status)
 
     const auto result = resultAs<ProjectSaveResult>();
 
-    if (result->_success)
-        emit finished(status == DoneWith::Success, QString{});
-    else
-        emit finished(status == DoneWith::Error, result->_errorMessage);
+    //if (result->_success)
+    //    emit finished(status == DoneWith::Success, QString{});
+    //else
+    //    emit finished(status == DoneWith::Error, result->_errorMessage);
 
     //if (const auto result = resultAs<ProjectSaveResult>()) {
     //    const auto duration = getDuration();

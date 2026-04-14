@@ -600,10 +600,10 @@ set(PUBLIC_UTIL_HEADERS
     src/util/WorkflowRuntimeContext.h
     src/util/WorkflowContextBase.h
     src/util/WorkflowResultBase.h
-    src/util/AbstractWorkflow.h
+    src/util/Workflow.h
     src/util/DecodeRequestState.h
-    src/util/SerializationPlan.h
-    src/util/AbstractSerializationPlanExecutor.h
+    src/util/WorkflowPlan.h
+    src/util/AbstractWorkflowPlanExecutor.h
     src/util/OperationContext.h
     src/util/OperationContextScope.h
 )
@@ -677,10 +677,10 @@ set(PUBLIC_UTIL_SOURCES
     src/util/WorkflowContextBase.cpp
     src/util/WorkflowResultBase.cpp
     src/util/WorkflowRuntimeContext.cpp
-    src/util/AbstractWorkflow.cpp
+    src/util/Workflow.cpp
     src/util/DecodeRequestState.cpp
-    src/util/SerializationPlan.cpp
-    src/util/AbstractSerializationPlanExecutor.cpp
+    src/util/WorkflowPlan.cpp
+    src/util/AbstractWorkflowPlanExecutor.cpp
     src/util/OperationContext.cpp
     src/util/OperationContextScope.cpp
 )

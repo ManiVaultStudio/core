@@ -162,7 +162,10 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
             QByteArray decodedBytes;
             decodeDataBufferFromVariantMap(rawDataMap, decodedBytes);
 
-            std::memcpy(getDataVoidPtr(), decodedBytes.data(), decodedBytes.size());
+            //if (decodedBytes.size() != getRawDataSize())
+            //    throw std::runtime_error("Decoded data size does not match expected raw data size.");
+
+        	//std::memcpy(getDataVoidPtr(), decodedBytes.data(), decodedBytes.size());
         }
         catch (const std::exception& e) {
             qCritical() << "Failed to load point data: " << e.what();
