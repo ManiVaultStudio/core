@@ -124,95 +124,23 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 
     const auto dataMap = variantMap["Data"].toMap();
 
-    QByteArray clustersByteArray;
+    try {
+        QByteArray decodedBytes;
 
-    const auto clustersRawDataSize = dataMap["ClustersRawDataSize"].value<quint64>();
-    clustersByteArray.resize(clustersRawDataSize);
+        decodeDataBufferFromVariantMap(dataMap["ClustersRawData"].toMap(), decodedBytes);
 
-    //prettyPrintVariantMap(dataMap["ClustersRawData"].toMap());
-    populateDataBufferFromVariantMap(dataMap["ClustersRawData"].toMap(), clustersByteArray.data());
+        QDataStream clustersDataStream(&decodedBytes, QIODevice::ReadOnly);
 
-    QDataStream clustersDataStream(&clustersByteArray, QIODevice::ReadOnly);
-    clustersDataStream.setVersion(QDataStream::Qt_6_5);
+        clustersDataStream.setVersion(QDataStream::Qt_6_5);
 
-    clustersDataStream >> _clusters;
+        clustersDataStream >> _clusters;
 
-    if (clustersDataStream.status() != QDataStream::Ok)
-        throw std::runtime_error("Failed to deserialize cluster payload");
-
- //   const auto dataMap = variantMap["Data"].toMap();
-
- //   variantMapMustContain(dataMap, "IndicesRawData");
- //   variantMapMustContain(dataMap, "NumberOfIndices");
-
- //   // Packed indices for all clusters
- //   QVector<std::uint32_t> packedIndices;
-
- //   packedIndices.resize(dataMap["NumberOfIndices"].toInt());
-
- //   populateDataBufferFromVariantMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), ConcurrencyMode::Sequential);
-
-	//if (dataMap.contains("ClustersRawData")) {
- //       QByteArray clustersByteArray;
-
- //       QDataStream clustersDataStream(&clustersByteArray, QIODevice::ReadOnly);
-
- //       const auto clustersRawDataSize = dataMap["ClustersRawDataSize"].toInt();
-
- //       clustersByteArray.resize(clustersRawDataSize);
- //       
- //       populateDataBufferFromVariantMap(dataMap["ClustersRawData"].toMap(), (char*)clustersByteArray.data());
-
- //       //QVariantList clusters;
-
- //       //clusters.reserve(250000);
-
- //       //clustersDataStream >> clusters;
-
- //       //_clusters.resize(clusters.count());
-
- //       //long clusterIndex = 0;
-
- //       //for (const auto& clusterVariant : clusters) {
- //       //    const auto clusterMap = clusterVariant.toMap();
-
- //       //    auto& cluster = _clusters[clusterIndex];
-
- //       //    //cluster.setName(clusterMap["Name"].toString());
- //       //    //cluster.setId(clusterMap["ID"].toString());
- //       //    //cluster.setColor(clusterMap["Color"].toString());
-
- //       //    const auto globalIndicesOffset  = clusterMap["GlobalIndicesOffset"].toInt();
- //       //    const auto numberOfIndices      = clusterMap["NumberOfIndices"].toInt();
-
- //       //    //cluster.getIndices() = std::vector<std::uint32_t>(packedIndices.begin() + globalIndicesOffset, packedIndices.begin() + globalIndicesOffset + numberOfIndices);
-
- //       //    ++clusterIndex;
- //       //}
- //   }
-    
-    // For backwards compatibility
-    //if (dataMap.contains("Clusters")) {
-    //    const auto clustersList = dataMap["Clusters"].toList();
-
-    //    _clusters.resize(clustersList.count());
-
-    //    for (const auto& clusterVariant : clustersList) {
-    //        const auto clusterMap   = clusterVariant.toMap();
-    //        const auto clusterIndex = clustersList.indexOf(clusterMap);
-
-    //        auto& cluster = _clusters[clusterIndex];
-
-    //        cluster.setName(clusterMap["Name"].toString());
-    //        cluster.setId(clusterMap["ID"].toString());
-    //        cluster.setColor(clusterMap["Color"].toString());
-
-    //        const auto globalIndicesOffset  = clusterMap["GlobalIndicesOffset"].toInt();
-    //        const auto numberOfIndices      = clusterMap["NumberOfIndices"].toInt();
-
-    //        cluster.getIndices() = std::vector<std::uint32_t>(packedIndices.begin() + globalIndicesOffset, packedIndices.begin() + globalIndicesOffset + numberOfIndices);
-    //    }
-    //}
+        if (clustersDataStream.status() != QDataStream::Ok)
+            throw std::runtime_error("Failed to deserialize cluster payload");
+    }
+    catch (const std::exception& e) {
+        qCritical() << "Failed to load cluster data: " << e.what();
+    }
 }
 
 QVariantMap ClusterData::toVariantMap() const

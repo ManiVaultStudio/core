@@ -355,30 +355,6 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         }
     });
 
-    
-
-    //if (Application::isSerializationAborted())
-    //    return;
-
-    //// Cancel any existing load
-    //if (_activeLoadWorkflow)
-    //    _activeLoadWorkflow->cancel();
-
-    //_activeLoadWorkflow = std::make_unique<DataHierarchyLoadWorkflow>(*this, this);
-
-    //connect(_activeLoadWorkflow.get(), &DataHierarchyLoadWorkflow::finished,
-    //    this,
-    //    [this](bool success, const QString& error) {
-    //        if (!success) {
-    //            qWarning() << "Failed to load data hierarchy:" << error;
-    //        }
-
-    //        _activeLoadWorkflow.reset();
-    //    });
-
-    //_activeLoadWorkflow->setInput(variantMap);
-    //_activeLoadWorkflow->start();
-
     fromPlan.execute(*mv::projects().getSerializationPlanExecutor());
 }
 
