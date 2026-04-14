@@ -39,6 +39,7 @@ struct EncodeBlockResult
 struct DecodeBlockJob
 {
     quint64 _offset = 0;            /** Offset of the block in the original data buffer */
+    quint64 _size = 0;              /** Size of the block in the original data buffer */
     quint64 _compressedSize = 0;    /** Size of the compressed data block */
     QString _uri;                   /** URI of the file containing the compressed data block (if applicable) */
     QString _encodedData;           /** Base64 encoded string containing the compressed data block (if applicable) */
@@ -50,9 +51,8 @@ using DecodeBlockJobs = QVector<DecodeBlockJob>;
 struct DecodeBlockResult
 {
     std::uint64_t   _offset = 0;    /** Offset of the block in the original data buffer */
-    std::uint64_t   _size = 0;      /** Size of the decoded data block */
+    std::uint64_t   _size = 0;      /** Size of the block in the original data buffer */
     QByteArray      _decodedData;   /** Decoded data block */
-    QString         _error;         /** Error message if decoding failed (empty if decoding was successful) */
 };
 
 using DecodeBlockResults = QVector<DecodeBlockResult>;
@@ -85,28 +85,37 @@ CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64
 /**
  * Decode a block of data from a file on disk and populate the provided output buffer with the decoded data
  * @param decodeBlockJob DecodeBlockJob containing the block information
- * @param bytes Pointer to output buffer
  * @param createCodec Function that creates a blob codec
  * @return DecodeBlockResult containing the decoded data or an error message
  */
-CORE_EXPORT DecodeBlockResult decodeBlockFromFile(const DecodeBlockJob& decodeBlockJob, char* bytes, const std::function<std::shared_ptr<BlobCodec>()>& createCodec);
+CORE_EXPORT DecodeBlockResult decodeBlockFromFile(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec);
 
 /**
  * Decode a block of data from a base64 encoded string and populate the provided output buffer with the decoded data
  * @param decodeBlockJob DecodeBlockJob containing the block information
- * @param bytes Pointer to output buffer
+ * @param createCodec Function that creates a blob codec
  * @return DecodeBlockResult containing the decoded data or an error message
  */
-CORE_EXPORT DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, char* bytes);
+CORE_EXPORT DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec);
 
 /**
  * Convert variant map to raw data buffer (blocks are loaded from disk and decoded if necessary)
  * @param variantMap Variant map containing the raw data or file information
- * @param bytes Pointer to output buffer
+ * @param bytes Output buffer to which the raw data is copied (resizes to fit the decoded data)
  * @param concurrencyMode Whether to decode the blocks sequentially or in parallel (defaults to sequential)
- * @return True if the data buffer was successfully populated, false otherwise
  */
-CORE_EXPORT bool populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, SerializationPlan::ConcurrencyMode concurrencyMode = SerializationPlan::ConcurrencyMode::Parallel);
+CORE_EXPORT void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& bytes, SerializationPlan::ConcurrencyMode concurrencyMode = SerializationPlan::ConcurrencyMode::Parallel);
+
+/**
+ * Convert variant map to raw data buffer (blocks are loaded from disk and decoded if necessary)
+ * @param variantMap Variant map containing the raw data or file information
+ * @param bytes Output buffer to which the raw data is copied
+ * @param concurrencyMode Whether to decode the blocks sequentially or in parallel (defaults to sequential)
+ * @warning This function does not perform any bounds checking on the output buffer, so it is the caller's responsibility to ensure that the buffer is
+ * large enough to hold the decoded data. It is recommended to use \p decodeDataBufferFromVariantMap(...) that takes a QByteArray as output buffer, which automatically resizes
+ * to fit the decoded data.
+ */
+CORE_EXPORT void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, SerializationPlan::ConcurrencyMode concurrencyMode = SerializationPlan::ConcurrencyMode::Parallel);
 
 /**
  * Raises an exception if an item with key is not found in a variant map

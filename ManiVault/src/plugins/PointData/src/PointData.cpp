@@ -142,50 +142,31 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
     const auto numberOfPoints       = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
     const auto numberOfDimensions   = variantMap["NumberOfDimensions"].toUInt();
     const auto numberOfElements     = numberOfPoints * numberOfDimensions;
-    const auto elementTypeIndex     = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
-    const auto rawData              = data["Raw"].toMap();
+    const auto elementTypeIndex     = static_cast<ElementTypeSpecifier>(data["TypeIndex"].toInt());
+    const auto rawDataMap           = data["Raw"].toMap();
 
     bool isDense = true;
 
     if (variantMap.contains("Dense"))
         isDense = variantMap["Dense"].toBool();
 
-    _isDense = isDense;
-    _numDimensions = numberOfDimensions;
+    _isDense        = isDense;
+    _numDimensions  = numberOfDimensions;
 
     if (_isDense)
     {
         setElementTypeSpecifier(elementTypeIndex);
         resizeVector(numberOfElements);
 
-        populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr());
-    }
-    else
-    {
-        variantMapMustContain(variantMap, "NumberOfNonZeroElements");
+        try {
+            QByteArray decodedBytes;
+            decodeDataBufferFromVariantMap(rawDataMap, decodedBytes);
 
-        const auto numberOfNonZeroElements = variantMap["NumberOfNonZeroElements"].toULongLong();
-
-        std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
-
-        populateDataBufferFromVariantMap(rawData, bytes.data());
-        _numRows = static_cast<unsigned int>(numberOfPoints); // FIXME should be redundant
-
-        size_t offset = 0;
-        std::vector<size_t> rowPointers(numberOfPoints + 1);
-        std::memcpy(rowPointers.data(), bytes.data() + offset, rowPointers.size() * sizeof(size_t));
-
-        offset += rowPointers.size() * sizeof(size_t);
-        std::vector<size_t> colIndices(numberOfNonZeroElements);
-        std::memcpy(colIndices.data(), bytes.data() + offset, colIndices.size() * sizeof(size_t));
-
-        offset += colIndices.size() * sizeof(float);
-        std::vector<float> values(numberOfNonZeroElements);
-        std::memcpy(values.data(), bytes.data() + offset, values.size() * sizeof(float));
-
-        _sparseData.setData(numberOfPoints, numberOfDimensions, std::move(rowPointers), std::move(colIndices), std::move(values));
-
-        qDebug() << "Loaded sparse data with" << _numRows << "points and" << _numDimensions << "dimensions.";
+            std::memcpy(getDataVoidPtr(), decodedBytes.data(), decodedBytes.size());
+        }
+        catch (const std::exception& e) {
+            qCritical() << "Failed to load point data: " << e.what();
+        }
     }
 }
 
@@ -981,8 +962,6 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 {
     DatasetImpl::fromVariantMap(variantMap);
 
-    qDebug() << "Loading points dataset from variant map with name" << getGuiName();
-
     variantMapMustContain(variantMap, "DimensionNames");
     variantMapMustContain(variantMap, "Selection");
 
@@ -995,6 +974,8 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
             "Please save the project again to ensure compatibility with newer ManiVault versions. "
             "Future releases may not be able to load this projects otherwise. ";
     }
+
+    
 
     // Load raw point data
     if (isFull())
@@ -1009,7 +990,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
         populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
     }
-    
+
     // Load dimension names
     QStringList dimensionNameList;
     std::vector<QString> dimensionNames;
@@ -1063,7 +1044,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         _dimensionsPickerAction->fromParentVariantMap(variantMap);
     }
 
-    events().notifyDatasetDataChanged(this);
+    //events().notifyDatasetDataChanged(this);
 
 	// Handle saved selection
     if (isFull()) {

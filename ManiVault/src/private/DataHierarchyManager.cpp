@@ -336,7 +336,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
         loadDatasetJobs.emplace_back(datasetName, [datasetId, dataVariantMap](SerializationPlan::Job& job) {
             try {
-                qDebug() << "Loading dataset" << datasetId;
+                //qDebug() << "Loading dataset" << datasetId;
                 mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
             }
             catch (std::exception& e) {
@@ -348,7 +348,14 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         });
     }
 
-    fromPlan.addParallelStage("Load datasets", loadDatasetJobs);
+    fromPlan.addStage("Load datasets", SerializationPlan::ConcurrencyMode::Parallel, loadDatasetJobs);
+    fromPlan.addSequentialStage("Notify datasets", [this](SerializationPlan::Job& job) {
+        for (const auto& item : _items) {
+            events().notifyDatasetDataChanged(item->getDataset());
+        }
+    });
+
+    
 
     //if (Application::isSerializationAborted())
     //    return;
@@ -418,7 +425,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
             sortIndex++;
         }
 
-        toPlan.addParallelStage("Create item maps", createItemMapJobs);
+        toPlan.addSequentialStage("Create item maps", createItemMapJobs);
 
         toPlan.addSequentialStage("Assemble item maps", [this, &toPlan](SerializationPlan::Job& job) -> void {
             try {

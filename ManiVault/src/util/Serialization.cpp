@@ -188,82 +188,70 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
      return {};
 }
 
-DecodeBlockResult decodeBlockFromFile(const DecodeBlockJob& decodeBlockJob, char* bytes, const std::function<std::shared_ptr<BlobCodec>()>& createCodec)
+DecodeBlockResult decodeBlockFromFile(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec)
 {
     DecodeBlockResult result;
 
-    try {
-        auto codec = createCodec();
+    result._offset  = decodeBlockJob._offset;
+    result._size    = decodeBlockJob._size;
 
-        if (!decodeBlockJob._uri.isEmpty()) {
-            const auto decodeResult = codec->decodeFromFileTo(
-                decodeBlockJob._uri,
-                bytes + decodeBlockJob._offset,
-                static_cast<std::uint64_t>(decodeBlockJob._compressedSize)
-            );
+    result._decodedData.resize(static_cast<qsizetype>(result._size));
 
-            if (!decodeResult.isSuccess()) {
-                throw std::runtime_error(
-                    QString("Failed to decode block from file: %1").arg(decodeBlockJob._uri).toStdString()
-                );
-            }
+    auto codec = createCodec();
 
-            return result;
-        }
+    if (decodeBlockJob._uri.isEmpty())
+        throw std::runtime_error("Block URI is empty");
 
-        if (!decodeBlockJob._encodedData.isEmpty()) {
-            const QByteArray encodedBytes = QByteArray::fromBase64(decodeBlockJob._encodedData.toUtf8());
+    const auto decodeResult = codec->decodeFromFileTo(decodeBlockJob._uri, result._decodedData.data(), result._size);
 
-            const auto decodeResult = codec->decodeTo(
-                encodedBytes,
-                bytes + decodeBlockJob._offset,
-                static_cast<std::uint64_t>(decodeBlockJob._compressedSize)
-            );
-
-            if (!decodeResult.isSuccess()) {
-                throw std::runtime_error(
-                    QString("Failed to decode inline block at offset %1").arg(decodeBlockJob._offset).toStdString()
-                );
-            }
-
-            return result;
-        }
-
-        throw std::runtime_error("Block contains neither URI nor Data");
-    }
-    catch (const std::exception& e) {
-        result._error = QString::fromUtf8(e.what());
-    }
+    if (!decodeResult.isSuccess())
+        throw std::runtime_error(QString("Failed to decode block from file: %1").arg(decodeBlockJob._uri).toStdString());
 
     return result;
 }
 
-DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, char* bytes)
+DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec)
 {
     DecodeBlockResult result;
 
-    try {
-    }
-    catch (const std::exception& e) {
-        result._error = QString::fromUtf8(e.what());
-    }
+    result._offset  = decodeBlockJob._offset;
+    result._size    = decodeBlockJob._size;
+
+    result._decodedData.resize(static_cast<qsizetype>(result._size));
+
+    auto codec = createCodec();
+
+    if (decodeBlockJob._encodedData.isEmpty())
+        throw std::runtime_error("Block encoded data is empty");
+	
+    const QByteArray encodedBytes = QByteArray::fromBase64(decodeBlockJob._encodedData.toUtf8());
+
+    const auto decodeResult = codec->decodeTo(encodedBytes, result._decodedData.data(), decodeBlockJob._size);
+
+    if (!decodeResult.isSuccess())
+        throw std::runtime_error(QString("Failed to decode inline block at offset %1").arg(decodeBlockJob._offset).toStdString());
 
     return result;
 }
 
-bool populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, SerializationPlan::ConcurrencyMode concurrencyMode /*= SerializationPlan::ConcurrencyMode::Parallel*/)
+void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& bytes, SerializationPlan::ConcurrencyMode concurrencyMode /*= SerializationPlan::ConcurrencyMode::Parallel*/)
 {
     variantMapMustContain(variantMap, "BlockSize");
     variantMapMustContain(variantMap, "Blocks");
+    variantMapMustContain(variantMap, "Size");
 
     const auto blocks       = variantMap.value("Blocks").toList();
     const bool hasCodec     = variantMap.contains("Codec");
     const auto codecName    = hasCodec ? variantMap.value("Codec").toString() : QStringLiteral("none");
+    const auto totalSize    = variantMap.value("Size").toULongLong();
+
+    bytes.resize(static_cast<qsizetype>(totalSize));
 
     if (hasCodec && !codecRegistry().isRegistered(codecName)) {
         throw std::runtime_error(QStringLiteral("Unable to load raw data, codec %1 is not registered").arg(codecName).toStdString());
     }
 
+    //qDebug() << "Decoding raw data with codec:" << (hasCodec ? codecName : "none") << ", number of blocks:" << blocks.size();
     auto createCodec = [hasCodec, codecName]() -> std::shared_ptr<BlobCodec> {
         if (hasCodec)
             return codecRegistry().createCodec(nullptr, codecName);
@@ -279,12 +267,14 @@ bool populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
 
         variantMapMustContain(blockMap, "Offset");
         variantMapMustContain(blockMap, "Size");
+        variantMapMustContain(blockMap, "CompressedSize");
 
         DecodeBlockJob job;
 
         job._offset         = blockMap.value("Offset").value<quint64>();
+        job._size           = blockMap.value("Size").value<quint64>();
         job._compressedSize = blockMap.value("CompressedSize").value<quint64>();
-
+        
         if (blockMap.contains("URI"))
             job._uri = blockMap.value("URI").toString();
 
@@ -294,17 +284,101 @@ bool populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
         decodeBlockJobs.push_back(std::move(job));
     }
 
+    // Overlap check
+    std::sort(decodeBlockJobs.begin(), decodeBlockJobs.end(),
+        [](const DecodeBlockJob& a, const DecodeBlockJob& b) {
+            return a._offset < b._offset;
+    });
+
+    quint64 expectedOffset = 0;
+
+    for (int i = 0; i < decodeBlockJobs.size(); ++i) {
+        const auto& job = decodeBlockJobs[i];
+        const quint64 end = job._offset + job._size;
+
+        if (job._offset < expectedOffset) {
+            throw std::runtime_error(QString("Raw-data block overlap detected at offset %1").arg(job._offset).toStdString());
+        }
+
+        // Optional: require contiguous packing
+        if (job._offset != expectedOffset) {
+            throw std::runtime_error(QString("Raw-data block gap detected: expected offset %1, got %2").arg(expectedOffset).arg(job._offset).toStdString());
+        }
+
+        expectedOffset = end;
+    }
+
     DecodeBlockResults results;
     results.reserve(decodeBlockJobs.size());
 
     for (const auto& job : decodeBlockJobs) {
 	    if (job._uri.isEmpty())
-	    	results.push_back(decodeBlockFromBase64(job, bytes));
-        else
-            results.push_back(decodeBlockFromFile(job, bytes, createCodec));
+	    	results.push_back(decodeBlockFromBase64(job, createCodec));
+	    else
+	    	results.push_back(decodeBlockFromFile(job, createCodec));
     }
 
-    return true;
+    for (const auto& result : results) {
+        if (result._size == 0)
+            throw std::runtime_error("Decoded block has zero size");
+
+        if (result._decodedData.isEmpty())
+            throw std::runtime_error(
+                QString("Decoded block at offset %1 produced no data")
+                .arg(result._offset)
+                .toStdString()
+            );
+
+        if (result._decodedData.size() != static_cast<qsizetype>(result._size)) {
+            throw std::runtime_error(
+                QString("Decoded block size mismatch at offset %1: expected %2, got %3")
+                .arg(result._offset)
+                .arg(result._size)
+                .arg(result._decodedData.size())
+                .toStdString()
+            );
+        }
+
+        if (result._offset > totalSize || result._size > totalSize - result._offset) {
+            throw std::runtime_error(
+                QString("Decoded block exceeds destination buffer at offset %1, size %2, total %3")
+                .arg(result._offset)
+                .arg(result._size)
+                .arg(totalSize)
+                .toStdString()
+            );
+        }
+
+        std::memcpy(bytes.data() + result._offset, result._decodedData.constData(), result._size);
+    }
+}
+
+void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, SerializationPlan::ConcurrencyMode concurrencyMode)
+{
+    if (bytes == nullptr)
+        throw std::runtime_error("Destination buffer is null");
+
+    variantMapMustContain(variantMap, "Size");
+
+    const auto totalSize = variantMap.value("Size").value<quint64>();
+
+    if (totalSize == 0)
+        throw std::runtime_error("Decoded buffer size is zero");
+
+    QByteArray decodedBytes(static_cast<qsizetype>(totalSize), Qt::Uninitialized);
+
+    decodeDataBufferFromVariantMap(variantMap, decodedBytes, concurrencyMode);
+
+    if (decodedBytes.size() != static_cast<qsizetype>(totalSize)) {
+        throw std::runtime_error(
+            QString("Decoded byte size mismatch: expected %1, got %2")
+            .arg(totalSize)
+            .arg(decodedBytes.size())
+            .toStdString()
+        );
+    }
+
+    std::memcpy(bytes, decodedBytes.constData(), static_cast<size_t>(decodedBytes.size()));
 }
 
 void variantMapMustContain(const QVariantMap& variantMap, const QString& key)
@@ -366,14 +440,14 @@ QVariant loadQVariant(const QVariant& variant)
         totalSize += map["Size"].value<uint64_t>();
     }
     // Next create a temporary buffer and load the data
-    std::vector<char> bytes(totalSize);
-    populateDataBufferFromVariantMap(variantMap, bytes.data());
+    //std::vector<char> bytes(totalSize);
+    //populateDataBufferFromVariantMap(variantMap, bytes.data());
 
     // Finally convert the data to a QVariant.
     QVariant result;;
-    QByteArray byteArray(bytes.data(), bytes.size());
-    QDataStream stream(&byteArray, QIODevice::ReadOnly);
-    stream >> result;
+    //QByteArray byteArray(bytes.data(), bytes.size());
+    //QDataStream stream(&byteArray, QIODevice::ReadOnly);
+    //stream >> result;
     return result;
 }
 
@@ -397,20 +471,20 @@ QVariantMap storeOnDisk(const QVector<uint32_t>& vec)
 
 void loadFromDisk(const QVariantMap& variantMap, QStringList& list)
 {
-    std::vector<char> bytes(variantMap["Size"].value<uint64_t>());
-    populateDataBufferFromVariantMap(variantMap, (char*)bytes.data());
-    QByteArray byteArray(bytes.data(), bytes.size());
-    QDataStream dataStream(byteArray);
-    dataStream >> list;
+    //std::vector<char> bytes(variantMap["Size"].value<uint64_t>());
+    //populateDataBufferFromVariantMap(variantMap, (char*)bytes.data());
+    //QByteArray byteArray(bytes.data(), bytes.size());
+    //QDataStream dataStream(byteArray);
+    //dataStream >> list;
 }
 
 void loadFromDisk(const QVariantMap& variantMap, QVector<uint32_t>& vec)
 {
-    std::vector<char> bytes(variantMap["Size"].value<uint64_t>());
-    populateDataBufferFromVariantMap(variantMap, (char*)bytes.data());
-    QByteArray byteArray(bytes.data(), bytes.size());
-    QDataStream dataStream(byteArray);
-    dataStream >> vec;
+    //std::vector<char> bytes(variantMap["Size"].value<uint64_t>());
+    //populateDataBufferFromVariantMap(variantMap, (char*)bytes.data());
+    //QByteArray byteArray(bytes.data(), bytes.size());
+    //QDataStream dataStream(byteArray);
+    //dataStream >> vec;
 }
 
 QVariantMap loadJsonToVariantMap(const QString& filePath)

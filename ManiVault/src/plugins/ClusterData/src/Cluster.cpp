@@ -51,8 +51,8 @@ namespace
 QDataStream& operator<<(QDataStream& out, const Cluster& cluster)
 {
     // Simple format version for forward compatibility
-    constexpr quint32 kClusterStreamVersion = 1;
-    out << kClusterStreamVersion;
+    //constexpr quint32 kClusterStreamVersion = 1;
+    //out << kClusterStreamVersion;
 
     out << cluster._name;
     out << cluster._id;
@@ -64,32 +64,36 @@ QDataStream& operator<<(QDataStream& out, const Cluster& cluster)
     writeStdVector(out, cluster._stddev);
 
     return out;
+
 }
 
 QDataStream& operator>>(QDataStream& in, Cluster& cluster)
 {
-    quint32 version = 0;
-    in >> version;
+    //quint32 version = 0;
+    //in >> version;
 
     if (in.status() != QDataStream::Ok)
         return in;
 
-    switch (version) {
-    case 1:
-        in >> cluster._name;
-        in >> cluster._id;
-        in >> cluster._color;
+    //qDebug() << "=====" << version;
+    //switch (version) {
+    //case 1:
+    in >> cluster._name;
+    in >> cluster._id;
+    in >> cluster._color;
 
-        readStdVector(in, cluster._indices);
-        readStdVector(in, cluster._median);
-        readStdVector(in, cluster._mean);
-        readStdVector(in, cluster._stddev);
-        break;
+    readStdVector(in, cluster._indices);
+    readStdVector(in, cluster._median);
+    readStdVector(in, cluster._mean);
+    readStdVector(in, cluster._stddev);
+    //    break;
 
-    default:
-        in.setStatus(QDataStream::ReadCorruptData);
-        break;
-    }
+    //default:
+    //    in.setStatus(QDataStream::ReadCorruptData);
+    //    break;
+    //}
+
+    //qDebug() << "=====" << in.status();
 
     return in;
 }

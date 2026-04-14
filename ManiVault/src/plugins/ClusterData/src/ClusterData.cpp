@@ -126,11 +126,10 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 
     QByteArray clustersByteArray;
 
-    const auto clustersRawDataSize = dataMap["ClustersRawDataSize"].toInt();
+    const auto clustersRawDataSize = dataMap["ClustersRawDataSize"].value<quint64>();
     clustersByteArray.resize(clustersRawDataSize);
 
-    prettyPrintVariantMap(dataMap);
-
+    //prettyPrintVariantMap(dataMap["ClustersRawData"].toMap());
     populateDataBufferFromVariantMap(dataMap["ClustersRawData"].toMap(), clustersByteArray.data());
 
     QDataStream clustersDataStream(&clustersByteArray, QIODevice::ReadOnly);
@@ -138,7 +137,8 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 
     clustersDataStream >> _clusters;
 
-    
+    if (clustersDataStream.status() != QDataStream::Ok)
+        throw std::runtime_error("Failed to deserialize cluster payload");
 
  //   const auto dataMap = variantMap["Data"].toMap();
 

@@ -222,7 +222,10 @@ void Serializable::reportSerializationError(QString scope, QString message)
 {
     if (auto context = OperationContextScope::get()) {
 	    context->reportError(std::move(scope), std::move(message));
-        return;
+    }
+    else
+    {
+        qCritical() << "No active OperationContext for serialization error:" << scope << message;
     }
 
 #ifdef _DEBUG
