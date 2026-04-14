@@ -4,6 +4,8 @@
 
 #include "NavigationAction.h"
 
+#include "CoreInterface.h"
+
 #include "GroupSectionTreeItem.h"
 
 #include "util/StyledIcon.h"
