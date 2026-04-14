@@ -372,6 +372,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         auto projectOpenWorkflowPlan = createProjectOpenWorkflowPlan(filePath);
 
         projectOpenWorkflowPlan.execute(_workflowPlanExecutor);
+        setState(State::Idle);
+        emit projectOpened(*_project);
         //auto workflow = std::make_unique<ProjectOpenWorkflow>(filePath);
 
         //connect(workflow.get(), &ProjectOpenWorkflow::finished, this, [this, filePath, workflowPtr = workflow.get()](bool success, const QString& error) {
