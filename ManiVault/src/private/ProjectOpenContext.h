@@ -6,6 +6,8 @@
 
 #include <util/WorkflowContextBase.h>
 
+using UniqueTemporaryDir = std::unique_ptr<QTemporaryDir>;
+
 class ProjectOpenContext : public WorkflowContextBase
 {
 public:

@@ -181,16 +181,6 @@ std::int32_t Serializable::getSerializationCountTo() const
     return getSerializationCount(Direction::To);
 }
 
-SerializationPlan Serializable::makeFromPlan()
-{
-    return {};
-}
-
-SerializationPlan Serializable::makeToPlan()
-{
-    return {};
-}
-
 QPointer<Task> Serializable::getTask() const
 {
     return _task;

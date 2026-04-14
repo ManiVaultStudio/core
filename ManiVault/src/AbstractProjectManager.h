@@ -31,9 +31,9 @@ namespace mv {
 namespace util
 {
     class BlobCodec;
-    class AbstractWorkflow;
+    class Workflow;
 
-    using UniqueAbstractWorkflow = std::unique_ptr<AbstractWorkflow>;
+    using UniqueWorkflow = std::unique_ptr<Workflow>;
     class AbstractSerializationPlanExecutor;
 }
 
@@ -236,10 +236,10 @@ public:
     virtual const ProjectsTreeModel& getProjectsTreeModel() const = 0;
 
     /**
-     * Get serialization plan executor
-     * @return Pointer to the serialization plan executor (nullptr if not available)
+     * Get workflow plan executor
+     * @return Pointer to the workflow plan executor (nullptr if not available)
      */
-    virtual util::AbstractSerializationPlanExecutor* getSerializationPlanExecutor() = 0;
+    virtual util::AbstractWorkflowPlanExecutor* getWorkflowPlanExecutor() = 0;
 
 public: // Project download
 
@@ -395,7 +395,7 @@ public: // Workflow
      * Get active workflow
      * @return Pointer to the active workflow, or nullptr if no active workflow exists
      */
-    virtual util::AbstractWorkflow* getActiveWorkflow() = 0;
+    virtual util::Workflow* getActiveWorkflow() = 0;
 
     /**
      * Get whether there is an active workflow
@@ -407,7 +407,7 @@ public: // Workflow
      * Set active workflow to \p activeWorkflow
      * @param activeWorkflow Unique pointer to the active workflow
      */
-    virtual void setActiveWorkflow(util::UniqueAbstractWorkflow activeWorkflow) = 0;
+    virtual void setActiveWorkflow(util::UniqueWorkflow activeWorkflow) = 0;
 
     /** Reset active workflow (set it to nullptr) */
     virtual void resetActiveWorkflow() = 0;

@@ -328,8 +328,8 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/PassthroughBlobCodecFactory.h
     src/private/ZstdBlobCodec.h
     src/private/ZstdBlobCodecFactory.h
-    src/private/TaskTreeSerializationPlanExecutor.h
-    # src/private/SerializePlanWorkflow.h
+    src/private/WorkflowPlanExecutor.h
+    src/private/ProjectOpenWorkflowPlan.h
 )
 
 if(MV_USE_ERROR_LOGGING)
@@ -353,8 +353,8 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/PassthroughBlobCodecFactory.cpp
     src/private/ZstdBlobCodec.cpp
     src/private/ZstdBlobCodecFactory.cpp
-    src/private/TaskTreeSerializationPlanExecutor.cpp
-    # src/private/SerializePlanWorkflow.cpp
+    src/private/WorkflowPlanExecutor.cpp
+    src/private/ProjectOpenWorkflowPlan.cpp
 )
 
 if(MV_USE_ERROR_LOGGING)

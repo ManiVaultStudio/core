@@ -6,9 +6,11 @@
 
 #include "ManiVaultGlobals.h"
 #include "AbstractWorkflowPlanExecutor.h"
+#include "WorkflowContextBase.h"
 
 #include <QString>
 #include <QJsonDocument>
+#include <QVariant>
 
 namespace mv::util
 {
@@ -95,6 +97,8 @@ public:
 
     using Stages = std::vector<Stage>;
 
+    WorkflowPlan(const QString& title, SharedWorkflowContext context = SharedWorkflowContext());
+
     void addStage(Stage stage);
 
     template<typename Function>
@@ -118,6 +122,7 @@ public:
         }
     }
 
+    QString getTitle() const { return _title; }
     void addSequentialStage(QString name, Jobs jobs);
 	void addParallelStage(QString name, Jobs jobs);
     void addStage(QString name, ConcurrencyMode mode, Jobs jobs);
@@ -126,10 +131,20 @@ public:
 
     Stages getStages() const { return _stages; }
     SharedState getSharedState() const { return _sharedState; }
+    SharedWorkflowContext getWorkflowContext() const { return _workflowContext; }
+
+    template<typename WorkflowContextType>
+    std::shared_ptr<WorkflowContextType> getWorkflowContextAs() const
+    {
+       	static_assert(std::derived_from<WorkflowContextType, WorkflowContextBase>, "WorkflowContextType must derive from WorkflowContextBase");
+        return std::dynamic_pointer_cast<WorkflowContextType>(_workflowContext);
+    }
 
 private:
+    QString _title;
     Stages  _stages;
     SharedState _sharedState = std::make_shared<QVariantMap>();
+    SharedWorkflowContext   _workflowContext;
 };
 
 }

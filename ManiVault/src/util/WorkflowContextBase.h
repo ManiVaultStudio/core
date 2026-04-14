@@ -14,5 +14,5 @@ public:
     QString     _errorMessage;
 };
 
-using UniqueTemporaryDir = std::unique_ptr<QTemporaryDir>;
 using UniqueWorkflowContext = std::unique_ptr<WorkflowContextBase>;
+using SharedWorkflowContext = std::shared_ptr<WorkflowContextBase>;

@@ -15,7 +15,6 @@
 namespace mv
 {
     class Task;
-    class WorkflowPlan;
 }
 
 namespace mv::util {
@@ -155,9 +154,6 @@ public:
      * @return Serialization count to
      */
     std::int32_t getSerializationCountTo() const;
-
-    static WorkflowPlan makeFromPlan();
-    static WorkflowPlan makeToPlan();
 
 public: // Task related
 

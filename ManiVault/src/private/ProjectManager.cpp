@@ -7,11 +7,11 @@
 #include "ProjectSettingsDialog.h"
 #include "NewProjectDialog.h"
 #include "Archiver.h"
+#include "ProjectOpenWorkflowPlan.h"
 
 #include <CoreInterface.h>
 #include <ProjectMetaAction.h>
 
-#include <ModalTask.h>
 #include <ModalTaskHandler.h>
 
 #include <models/HardwareSpecTreeModel.h>
@@ -19,7 +19,6 @@
 #include <util/Exception.h>
 #include <util/Serialization.h>
 #include <util/StandardPaths.h>
-
 
 #include <widgets/FileDialog.h>
 
@@ -370,7 +369,10 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
         setState(State::OpeningProject);
 
-        auto workflow = std::make_unique<ProjectOpenWorkflow>(filePath);
+        auto projectOpenWorkflowPlan = createProjectOpenWorkflowPlan(filePath);
+
+        projectOpenWorkflowPlan.execute(_workflowPlanExecutor);
+        //auto workflow = std::make_unique<ProjectOpenWorkflow>(filePath);
 
         //connect(workflow.get(), &ProjectOpenWorkflow::finished, this, [this, filePath, workflowPtr = workflow.get()](bool success, const QString& error) {
         //    setState(State::Idle);
@@ -382,8 +384,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         //    resetActiveWorkflow();
         //});
 
-        setActiveWorkflow(std::move(workflow));
-        getActiveWorkflow()->start();
+        //setActiveWorkflow(std::move(workflow));
+        //getActiveWorkflow()->start();
     }
     catch (const std::exception& e) {
         setState(State::Idle);
@@ -787,9 +789,9 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
 
-            auto workflow = std::make_unique<ProjectSaveWorkflow>(filePath);
+            //auto workflow = std::make_unique<ProjectSaveWorkflow>(filePath);
 
-            setTemporaryDirPath(TemporaryDirType::Save, workflow->getTemporaryDirPath());
+            //setTemporaryDirPath(TemporaryDirType::Save, workflow->getTemporaryDirPath());
 
             //connect(workflow.get(), &ProjectSaveWorkflow::finished, this, [this, filePath, workflowPtr = workflow.get()](bool success, const QString& error) {
             //    setState(State::Idle);
@@ -802,8 +804,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             //    resetActiveWorkflow();
             //});
 
-            setActiveWorkflow(std::move(workflow));
-            getActiveWorkflow()->start();
+            //setActiveWorkflow(std::move(workflow));
+            //getActiveWorkflow()->start();
         }
         emit projectSaved(*_project);
     }
@@ -1218,12 +1220,12 @@ QDir ProjectManager::getDownloadedProjectsDir() const
     return resultDir;
 }
 
-AbstractSerializationPlanExecutor* ProjectManager::getSerializationPlanExecutor()
+util::AbstractWorkflowPlanExecutor* ProjectManager::getWorkflowPlanExecutor()
 {
-    return &_serializationPlanExecutor;
+    return &_workflowPlanExecutor;
 }
 
-AbstractWorkflow* ProjectManager::getActiveWorkflow()
+Workflow* ProjectManager::getActiveWorkflow()
 {
 	return _activeWorkflow.get();
 }
@@ -1233,7 +1235,7 @@ bool ProjectManager::hasActiveWorkflow() const
 	return _activeWorkflow != nullptr;
 }
 
-void ProjectManager::setActiveWorkflow(util::UniqueAbstractWorkflow activeWorkflow)
+void ProjectManager::setActiveWorkflow(util::UniqueWorkflow activeWorkflow)
 {
 	if (_activeWorkflow)
 		throw std::runtime_error("Cannot set active workflow, another workflow is already active");

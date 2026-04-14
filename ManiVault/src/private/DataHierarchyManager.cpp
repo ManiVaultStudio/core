@@ -252,9 +252,9 @@ QFuture<void> fromVariantMapAsync(WidgetAction* action, const QVariantMap& varia
 
 void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    auto fromPlan = makeFromPlan();
+    WorkflowPlan fromPlan(__FUNCTION__);
 
-    fromPlan.addSequentialStage("Populate data hierarchy", [this, variantMap](SerializationPlan::Job& job) -> void {
+    fromPlan.addSequentialStage("Populate data hierarchy", [this, variantMap](WorkflowPlan::Job& job) -> void {
         try {
             const auto loadDataHierarchyItem = [variantMap](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
                 const auto dataset              = dataHierarchyItemMap["Dataset"].toMap();
@@ -326,13 +326,13 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         return !element.second;
     });
 
-    SerializationPlan::Jobs loadDatasetJobs;
+    WorkflowPlan::Jobs loadDatasetJobs;
 
     for (const auto& [dataVariantMap, isDerived] : datasetList) {
         const auto datasetId    = dataVariantMap["ID"].toString();
         const auto datasetName  = dataVariantMap["Name"].toString();
 
-        loadDatasetJobs.emplace_back(datasetName, [datasetId, dataVariantMap](SerializationPlan::Job& job) {
+        loadDatasetJobs.emplace_back(datasetName, [datasetId, dataVariantMap](WorkflowPlan::Job& job) {
             try {
                 //qDebug() << "Loading dataset" << datasetId;
                 mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
@@ -346,22 +346,22 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         });
     }
 
-    fromPlan.addStage("Load datasets", SerializationPlan::ConcurrencyMode::Parallel, loadDatasetJobs);
-    fromPlan.addSequentialStage("Notify datasets", [this](SerializationPlan::Job& job) {
+    fromPlan.addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Parallel, loadDatasetJobs);
+    fromPlan.addSequentialStage("Notify datasets", [this](WorkflowPlan::Job& job) {
         for (const auto& item : _items) {
             events().notifyDatasetDataChanged(item->getDataset());
         }
     });
 
-    fromPlan.execute(*mv::projects().getSerializationPlanExecutor());
+    fromPlan.execute(*mv::projects().getWorkflowPlanExecutor());
 }
 
 QVariantMap DataHierarchyManager::toVariantMap() const
 {
     if (!_items.empty()) {
-        auto toPlan = makeToPlan();
+        WorkflowPlan toPlan(__FUNCTION__);
 
-        toPlan.addSequentialStage("Enumerate datasets", [this](SerializationPlan::Job& job) -> void {
+        toPlan.addSequentialStage("Enumerate datasets", [this](WorkflowPlan::Job& job) -> void {
             try {
 	            
             } catch (std::exception& e) {
@@ -372,7 +372,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
             }
         });
 
-        SerializationPlan::Jobs createItemMapJobs;
+        WorkflowPlan::Jobs createItemMapJobs;
 
         std::int32_t sortIndex = 0;
 
@@ -381,7 +381,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
             const auto datasetId        = dataset->getId();
             const auto datasetGuiName   = dataset->getGuiName();
 
-            createItemMapJobs.emplace_back(datasetGuiName, [&toPlan, datasetId, &datasetGuiName, &sortIndex, &dataHierarchyItem](SerializationPlan::Job& job) {
+            createItemMapJobs.emplace_back(datasetGuiName, [&toPlan, datasetId, &datasetGuiName, &sortIndex, &dataHierarchyItem](WorkflowPlan::Job& job) {
                 try {
                     const auto itemMap = dataHierarchyItem->toVariantMap();
 
@@ -401,7 +401,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
 
         toPlan.addSequentialStage("Create item maps", createItemMapJobs);
 
-        toPlan.addSequentialStage("Assemble item maps", [this, &toPlan](SerializationPlan::Job& job) -> void {
+        toPlan.addSequentialStage("Assemble item maps", [this, &toPlan](WorkflowPlan::Job& job) -> void {
             try {
                 QVariantMap variantMap;
 
@@ -460,7 +460,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
             }
         });
 
-        toPlan.execute(*mv::projects().getSerializationPlanExecutor());
+        toPlan.execute(*mv::projects().getWorkflowPlanExecutor());
 
         return (*toPlan.getSharedState())["Hierarchy"].toMap();
     }

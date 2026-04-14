@@ -6,12 +6,10 @@
 
 #include <AbstractProjectManager.h>
 
-#include "TaskTreeSerializationPlanExecutor.h"
+#include "WorkflowPlanExecutor.h"
 
 #include <models/ProjectsListModel.h>
 #include <models/ProjectsTreeModel.h>
-
-#include <util/AbstractWorkflow.h>
 
 #include <QObject>
 
@@ -179,10 +177,10 @@ public:
     QDir getDownloadedProjectsDir() const override;
 
     /**
-     * Get serialization plan executor
-     * @return Pointer to the serialization plan executor (nullptr if not available)
+     * Get workflow plan executor
+     * @return Pointer to the workflow plan executor (nullptr if not available)
      */
-    util::AbstractSerializationPlanExecutor* getSerializationPlanExecutor() override;
+    util::AbstractWorkflowPlanExecutor* getWorkflowPlanExecutor() override;
 
 public: // Workflow
 
@@ -190,7 +188,7 @@ public: // Workflow
      * Get active workflow
      * @return Pointer to the active workflow, or nullptr if no active workflow exists
      */
-    util::AbstractWorkflow* getActiveWorkflow() override;
+    util::Workflow* getActiveWorkflow() override;
 
     /**
      * Get whether there is an active workflow
@@ -202,7 +200,7 @@ public: // Workflow
      * Set active workflow to \p activeWorkflow
      * @param activeWorkflow Unique pointer to the active workflow
      */
-    void setActiveWorkflow(util::UniqueAbstractWorkflow activeWorkflow) override;
+    void setActiveWorkflow(util::UniqueWorkflow activeWorkflow) override;
 
     /** Reset active workflow (set it to nullptr) */
     void resetActiveWorkflow() override;
@@ -290,26 +288,26 @@ public: // Action getters
     mv::gui::TriggerAction& getBackToProjectAction() override { return _backToProjectAction; }
 
 private:
-    QScopedPointer<mv::Project>                 _project;                           /** Current project */
-    gui::TriggerAction                          _newBlankProjectAction;             /** Action for creating a blank project (without view plugins and data) */
-    gui::TriggerAction                          _newProjectFromWorkspaceAction;     /** Action for creating a new project from a workspace */
-    gui::TriggerAction                          _openProjectAction;                 /** Action for opening a project */
-    gui::TriggerAction                          _importProjectAction;               /** Action for importing a project */
-    gui::TriggerAction                          _saveProjectAction;                 /** Action for saving a project */
-    gui::TriggerAction                          _saveProjectAsAction;               /** Action for saving a project under a new name */
-    gui::TriggerAction                          _editProjectSettingsAction;         /** Action for triggering the project settings dialog */
-    gui::RecentFilesAction                      _recentProjectsAction;              /** Menu for loading recent projects */
-    QMenu                                       _newProjectMenu;                    /** Menu for creating a new project */
-    QMenu                                       _importDataMenu;                    /** Menu for importing data */
-    gui::TriggerAction                          _publishAction;                     /** Action for publishing the project to an end-user */
-    gui::TriggerAction                          _pluginManagerAction;               /** Action for showing the loaded plugins dialog */
-    gui::ToggleAction                           _showStartPageAction;               /** Action for toggling the start page */
-    gui::TriggerAction                          _backToProjectAction;               /** Action for going back to the project */
-    ProjectsListModel                           _projectsListModel;                 /** Projects list model */
-    ProjectsTreeModel                           _projectsTreeModel;                 /** Projects tree model */
-    QtTaskTree::QSingleTaskTreeRunner           _openRunner;                        /** Task tree runner for opening projects */
-    util::UniqueAbstractWorkflow                _activeWorkflow;                    /** Active workflow */
-    TaskTreeSerializationPlanExecutor           _serializationPlanExecutor;         /** Executor for serialization plans, used for project opening/saving/publishing */
+    QScopedPointer<mv::Project>             _project;                           /** Current project */
+    gui::TriggerAction                      _newBlankProjectAction;             /** Action for creating a blank project (without view plugins and data) */
+    gui::TriggerAction                      _newProjectFromWorkspaceAction;     /** Action for creating a new project from a workspace */
+    gui::TriggerAction                      _openProjectAction;                 /** Action for opening a project */
+    gui::TriggerAction                      _importProjectAction;               /** Action for importing a project */
+    gui::TriggerAction                      _saveProjectAction;                 /** Action for saving a project */
+    gui::TriggerAction                      _saveProjectAsAction;               /** Action for saving a project under a new name */
+    gui::TriggerAction                      _editProjectSettingsAction;         /** Action for triggering the project settings dialog */
+    gui::RecentFilesAction                  _recentProjectsAction;              /** Menu for loading recent projects */
+    QMenu                                   _newProjectMenu;                    /** Menu for creating a new project */
+    QMenu                                   _importDataMenu;                    /** Menu for importing data */
+    gui::TriggerAction                      _publishAction;                     /** Action for publishing the project to an end-user */
+    gui::TriggerAction                      _pluginManagerAction;               /** Action for showing the loaded plugins dialog */
+    gui::ToggleAction                       _showStartPageAction;               /** Action for toggling the start page */
+    gui::TriggerAction                      _backToProjectAction;               /** Action for going back to the project */
+    ProjectsListModel                       _projectsListModel;                 /** Projects list model */
+    ProjectsTreeModel                       _projectsTreeModel;                 /** Projects tree model */
+    QtTaskTree::QSingleTaskTreeRunner       _openRunner;                        /** Task tree runner for opening projects */
+    util::UniqueWorkflow                    _activeWorkflow;                    /** Active workflow */
+    WorkflowPlanExecutor                    _workflowPlanExecutor;              /** Executor for workflow plans, used for project opening/saving/publishing */
 };
 
 }

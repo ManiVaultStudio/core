@@ -4,6 +4,12 @@
 
 #include "WorkflowPlan.h"
 
+#ifdef _DEBUG
+	#define WORKFLOW_PLAN_VERBOSE
+#endif
+
+#define WORKFLOW_PLAN_VERBOSE
+
 namespace mv::util
 {
 
@@ -25,6 +31,10 @@ const WorkflowPlan::JobFunction& WorkflowPlan::Job::getFunction() const
 
 void WorkflowPlan::Job::run()
 {
+#ifdef WORKFLOW_PLAN_VERBOSE
+    qDebug() << "Running job:" << _name;
+#endif
+
     clearError();
     clearResult();
 
@@ -102,6 +112,12 @@ QString WorkflowPlan::Stage::getName() const
 WorkflowPlan::Jobs WorkflowPlan::Stage::getJobs() const
 {
 	return _jobs;
+}
+
+WorkflowPlan::WorkflowPlan(const QString& title, SharedWorkflowContext context) :
+    _title(title),
+    _workflowContext(std::move(context))
+{
 }
 
 void WorkflowPlan::addStage(Stage stage)
