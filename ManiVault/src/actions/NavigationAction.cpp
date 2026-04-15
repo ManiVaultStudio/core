@@ -5,6 +5,7 @@
 #include "NavigationAction.h"
 
 #include "GroupSectionTreeItem.h"
+#include "CoreInterface.h"
 
 #include "util/StyledIcon.h"
 #include "util/Icon.h"
