@@ -103,6 +103,10 @@ target_link_libraries(${POINTDATA} PRIVATE Qt6::Widgets)
 target_link_libraries(${POINTDATA} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${POINTDATA} PRIVATE ${MV_PUBLIC_LIB})
 
+# Backing data library
+find_package(MData CONFIG REQUIRED)
+target_link_libraries(${POINTDATA} PUBLIC MData::MData)
+
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${POINTDATA} ${MV_USE_AVX})
 

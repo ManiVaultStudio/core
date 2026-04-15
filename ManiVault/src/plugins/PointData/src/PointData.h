@@ -7,6 +7,9 @@
 #include "pointdata_export.h"
 
 #include "RawData.h"
+#include <MData/Frame.h>
+#include <MData/View.h>
+#include <MData/DenseStore.h>
 
 #include "LinkedData.h"
 #include "PointDataRange.h"
@@ -27,6 +30,8 @@
 #include <utility>
 #include <variant>
 #include <vector>
+#include <iostream>
+#include <unordered_set>
 
 using namespace mv::plugin;
 
@@ -80,6 +85,60 @@ private:
         std::vector<std::int8_t>,
         std::vector<std::uint8_t> >;
 
+public: // Data setting
+    /// Convenience overload to allow clearing the data by setData(nullptr, 0, numDimensions). 
+    void setData(std::nullptr_t data, std::size_t numPoints, std::size_t numDimensions);
+
+
+    /// Copies the data from the specified vector into the internal data, sets
+    /// the number of dimensions as specified, and sets the selected internal
+    /// data type according to the specified data type T.
+    template <typename T>
+    void setData(const std::vector<T>& data, const std::size_t numDimensions)
+    {
+        //_variantOfVectors = VariantOfVectors(data);
+        _numDimensions = static_cast<unsigned int>(numDimensions);
+
+        size_t numPoints = data.size() / numDimensions;
+        std::cout << "VECTOR: " << data.size() << std::endl;
+        std::cout << "Num data points: " << numPoints << std::endl;
+
+        auto store = MData::DenseStore::create(MData::DenseStore::Storage{ data }, numPoints, numDimensions);
+
+        _data.setStore(std::move(store));
+    }
+
+    /// Efficiently "moves" the data from the specified vector into the internal
+    /// data, sets the number of dimensions as specified, and sets the selected
+    /// internal data type according to the specified data type T.
+    template <typename T>
+    void setData(std::vector<T>&& data, const std::size_t numDimensions)
+    {
+        //_variantOfVectors = VariantOfVectors(std::move(data));
+        _numDimensions = static_cast<unsigned int>(numDimensions);
+
+        size_t numPoints = data.size() / numDimensions;
+        std::cout << "VECTOR: " << data.size() << std::endl;
+        std::cout << "Num data points: " << numPoints << std::endl;
+        auto store = MData::DenseStore::create(MData::DenseStore::Storage{ std::move(data) }, numPoints, numDimensions);
+
+        _data.setStore(std::move(store));
+    }
+
+public: // Basic API
+    std::vector<float> column(std::size_t col) const;
+    std::vector<mv::Vector2f> columns(std::size_t col1, std::size_t col2) const;
+
+public: // Advanced API
+    template <typename F>
+    void visitRow(std::size_t rowIndex, F&& f) const
+    {
+        _data.visitRow(rowIndex, [&](std::span<const float> row) {
+            std::forward<F>(f)(row.data(), row.size());
+            });
+    }
+
+private:
     // Sets the index of the specified variant. If the new index is different from the previous one, the value will be reset. 
     // Inspired by `expand_type` from kmbeutel at
     // https://www.reddit.com/r/cpp/comments/f8cbzs/creating_stdvariant_based_on_index_at_runtime/?rdt=52905
@@ -169,17 +228,17 @@ private:
     void convertData(const T* const data, const std::size_t numberOfElements)
     {
         std::visit([data, numberOfElements](auto& vec)
-        {
-            vec.resize(numberOfElements);
-
-            std::size_t i{};
-            for (auto& elem: vec)
             {
-                elem = static_cast<std::remove_reference_t<decltype(elem)>>(data[i]);
-                ++i;
-            }
-        },
-        _variantOfVectors);
+                vec.resize(numberOfElements);
+
+                std::size_t i{};
+                for (auto& elem : vec)
+                {
+                    elem = static_cast<std::remove_reference_t<decltype(elem)>>(data[i]);
+                    ++i;
+                }
+            },
+            _variantOfVectors);
     }
 
 
@@ -205,7 +264,7 @@ public:
     template <std::size_t N>
     using ElementTypeAt = typename std::variant_alternative_t<N, VariantOfVectors>::value_type;
 
-    PointData(PluginFactory* factory) : RawData(factory, PointType) { }
+    PointData(PluginFactory* factory) : RawData(factory, PointType) {}
     ~PointData(void) override;
 
     void init() override;
@@ -270,52 +329,51 @@ public:
     void extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
     void extractFullDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
     void extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices) const;
-    
+
     template <typename ResultContainer, typename DimensionIndices>
     void populateFullDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
     {
-        CheckDimensionIndices(dimensionIndices);
-        std::visit([&resultContainer, this, &dimensionIndices](const auto& vec)
-            {
-                const std::ptrdiff_t numPoints{ getNumPoints() };
-                std::ptrdiff_t resultIndex{};
+        //if (!_data)
+        //    throw std::runtime_error("PointData frame is not initialized");
 
-                for (std::ptrdiff_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
+        std::size_t resultIndex = 0;
+        const std::size_t numRows = _data.rowCount();
+
+        for (std::size_t rowIndex = 0; rowIndex < numRows; ++rowIndex)
+        {
+            _data.visitRow(rowIndex, [&](std::span<const float> row)
                 {
-                    const std::ptrdiff_t n{ pointIndex * _numDimensions };
-
-                    for (const std::ptrdiff_t dimensionIndex : dimensionIndices)
+                    for (std::size_t dim : dimensionIndices)
                     {
-                        resultContainer[resultIndex] = vec[n + dimensionIndex];
+                        resultContainer[resultIndex] = row[dim];
                         ++resultIndex;
                     }
-                }
-            },
-            _variantOfVectors);
+                });
+        }
     }
 
     template <typename ResultContainer, typename DimensionIndices, typename Indices>
-    void populateDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices, const Indices& indices) const
+    void populateDataForDimensions(ResultContainer& resultContainer,
+        const DimensionIndices& dimensionIndices,
+        const Indices& indices) const
     {
         CheckDimensionIndices(dimensionIndices);
 
-        std::visit([&resultContainer, this, &dimensionIndices, &indices](const auto& vec)
-            {
-                const std::ptrdiff_t numPoints{ static_cast<std::uint32_t>(indices.size()) };
-                std::ptrdiff_t resultIndex{};
+        std::size_t resultIndex = 0;
 
-                for (std::ptrdiff_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
+        for (std::size_t pointIndex = 0; pointIndex < indices.size(); ++pointIndex)
+        {
+            const std::size_t rowIndex = static_cast<std::size_t>(indices[pointIndex]);
+
+            _data.visitRow(rowIndex, [&](std::span<const float> row)
                 {
-                    const std::ptrdiff_t n{ indices[pointIndex] * _numDimensions };
-
-                    for (const std::ptrdiff_t dimensionIndex : dimensionIndices)
+                    for (const auto dimensionIndex : dimensionIndices)
                     {
-                        resultContainer[resultIndex] = vec[n + dimensionIndex];
+                        resultContainer[resultIndex] = row[static_cast<std::size_t>(dimensionIndex)];
                         ++resultIndex;
                     }
-                }
-            },
-            _variantOfVectors);
+                });
+        }
     }
 
     const std::vector<QString>& getDimensionNames() const;
@@ -365,48 +423,14 @@ public:
         _numDimensions = static_cast<std::uint32_t>(numDimensions);
     }
 
-    /// Copies the specified data into the internal data, sets the number of
-    /// dimensions as specified, and sets the selected internal data type
-    /// according to the specified data type T.
-    template <typename T>
-    void setData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
-    {
-         _variantOfVectors = VariantOfVectors( std::vector<T>(data, data + numPoints * numDimensions) );
-         _numDimensions = static_cast<std::uint32_t>(numDimensions);
-    }
-
-
-    /// Convenience overload to allow clearing the data by setData(nullptr, 0, numDimensions). 
-    void setData(std::nullptr_t data, std::size_t numPoints, std::size_t numDimensions);
-
-
-    /// Copies the data from the specified vector into the internal data, sets
-    /// the number of dimensions as specified, and sets the selected internal
-    /// data type according to the specified data type T.
-    template <typename T>
-    void setData(const std::vector<T>& data, const std::size_t numDimensions)
-    {
-        _variantOfVectors = VariantOfVectors(data);
-        _numDimensions = static_cast<unsigned int>(numDimensions);
-    }
-
-    /// Efficiently "moves" the data from the specified vector into the internal
-    /// data, sets the number of dimensions as specified, and sets the selected
-    /// internal data type according to the specified data type T.
-    template <typename T>
-    void setData(std::vector<T>&& data, const std::size_t numDimensions)
-    {
-        _variantOfVectors = VariantOfVectors(std::move(data));
-        _numDimensions = static_cast<unsigned int>(numDimensions);
-    }
-
     void setDimensionNames(const std::vector<QString>& dimNames);
 
     // Returns the value of the element at the specified position in the current
     // data vector, converted to float.
     // Will work fine, even when the internal data element type is not float.
     // However, may not perform well when retrieving a large number of values.
-    float getValueAt(std::size_t index) const;
+    //float getValueAt(std::size_t index) const;
+    float getValueAt(std::size_t row, std::size_t col) const;
 
     // Sets the value of the element at the specified position in the current
     // data vector, converted to the internal data element type. 
@@ -436,8 +460,8 @@ public: // Sparse data, test implementation
         }
 
         static SparseMatrix<size_t, size_t, float>& getSparseData(PointData* points)
-        { 
-            return points->_sparseData; 
+        {
+            return points->_sparseData;
         }
 
         static bool isDense(const PointData* points)
@@ -493,6 +517,11 @@ private: // Sparse data, experimental
     SparseMatrix<size_t, size_t, float> _sparseData = {};
 
     bool _isDense = true;
+
+private: // New backend
+    MData::Frame _data;
+
+    friend class Points;
 };
 
 // =============================================================================
@@ -501,6 +530,34 @@ private: // Sparse data, experimental
 
 class POINTDATA_EXPORT Points : public mv::DatasetImpl
 {
+public: // Selection API
+    std::vector<unsigned int> getLocalSelectionIndices()
+    {
+        auto& globalIndices = getSelectionIndices();
+        const std::vector<size_t>& rowIndices = _dataView.rowIndices();
+
+        if (rowIndices.empty())
+        {
+            // FIXME Handle derived data?
+            return globalIndices;
+        }
+
+        std::unordered_set<size_t> lookup(globalIndices.begin(), globalIndices.end());
+
+        std::vector<unsigned int> result;
+        for (size_t i = 0; i < rowIndices.size(); ++i) {
+            if (lookup.count(rowIndices[i])) {
+                result.push_back(static_cast<unsigned int>(i));
+            }
+        }
+        return result;
+    }
+
+    //const std::vector<size_t>& indices() const
+    //{
+    //    return _dataView.rowIndices();
+    //}
+
 private:
     /* Private helper function for visitData. Helps to reduces duplicate
     * code between const and non-const overloads of visitData.
@@ -509,34 +566,34 @@ private:
     static ReturnType privateVisitData(Points& points, const FunctionObject functionObject)
     {
         return points.template visitFromBeginToEnd<ReturnType>(
-                [&points, functionObject](const auto begin, const auto end) -> ReturnType
-                {
-                    const auto numberOfDimensions = points.getNumDimensions();
+            [&points, functionObject](const auto begin, const auto end) -> ReturnType
+            {
+                const auto numberOfDimensions = points.getNumDimensions();
 
-                    if (points.isFull())
-                    {
-                        const auto indexFunction = [](const auto index)
+                if (points.isFull())
+                {
+                    const auto indexFunction = [](const auto index)
                         {
                             // Simply return the index value that is passed as argument.
                             return index;
                         };
 
-                        return functionObject(mv::makePointDataRangeOfFullSet(
-                            begin, end, numberOfDimensions, indexFunction));
-                    }
-                    else
-                    {
-                        // In this case, this Points object represents a subset.
-                        const auto indexFunction = [](const auto indexIterator)
+                    return functionObject(mv::makePointDataRangeOfFullSet(
+                        begin, end, numberOfDimensions, indexFunction));
+                }
+                else
+                {
+                    // In this case, this Points object represents a subset.
+                    const auto indexFunction = [](const auto indexIterator)
                         {
                             // Get the index by dereferencing the iterator.
                             return *indexIterator;
                         };
 
-                        return functionObject(mv::makePointDataRangeOfSubset(
-                            begin, points.indices, numberOfDimensions, indexFunction));
-                    }
-                });
+                    return functionObject(mv::makePointDataRangeOfSubset(
+                        begin, points.indices, numberOfDimensions, indexFunction));
+                }
+            });
     }
 
 
@@ -565,10 +622,10 @@ private:
                     [&points, functionObject](const auto begin, const auto end) -> ReturnType
                     {
                         const auto indexFunction = [](const auto indexIterator)
-                        {
-                            // Get the index by dereferencing the iterator.
-                            return *indexIterator;
-                        };
+                            {
+                                // Get the index by dereferencing the iterator.
+                                return *indexIterator;
+                            };
 
                         // Its source data is a full set, so it is sufficient to use its own (points) indices.
                         return functionObject(mv::makePointDataRangeOfSubset(
@@ -581,9 +638,9 @@ private:
 
                 // Define an index function that translates a derived subset index to a source data index.
                 const auto indexFunction = [&sourceData](const auto indexIterator)
-                {
-                    return sourceData->indices[*indexIterator];
-                };
+                    {
+                        return sourceData->indices[*indexIterator];
+                    };
 
                 return sourceData->template visitFromBeginToEnd<ReturnType>(
                     [&points, functionObject, indexFunction](const auto begin, const auto end) -> ReturnType
@@ -690,8 +747,8 @@ public:
     void setData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
         const auto numDimensionsChanged = numDimensions != getRawData<PointData>()->getNumDimensions();
-
-        getRawData<PointData>()->setData(data, numPoints, numDimensions);
+        // FIXME Changed to copy to still support this function for compatibility
+        getRawData<PointData>()->setData(std::vector<T>(data, data + numPoints * numDimensions), numDimensions);
 
         if (numDimensionsChanged)
             handleNumberDimensionsChanged(numDimensions);
@@ -727,6 +784,9 @@ public:
     void extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
 
     void extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
+
+    std::vector<float> column(std::size_t col) const;
+    std::vector<mv::Vector2f> columns(std::size_t col1, std::size_t col2) const;
 
     /// Populates the specified result container with the data for the
     /// dimensions specified by the dimension indices.
@@ -803,8 +863,7 @@ public:
             return numberOfPoints;
         }
         else {
-            if (isFull()) return getRawData<PointData>()->getNumPoints();
-                else return static_cast<std::uint32_t>(indices.size());
+            return static_cast<unsigned int>(_dataView.rowCount());
         }
     }
 
@@ -814,7 +873,7 @@ public:
             return mv::Dataset<Points>(getProxyMembers().first())->getNumDimensions();
         }
         else {
-            return getRawData<PointData>()->getNumDimensions();
+            return static_cast<unsigned int>(_dataView.columnCount());
         }
     }
 
@@ -838,7 +897,7 @@ public:
     // data vector, converted to float.
     // Will work fine, even when the internal data element type is not float.
     // However, may not perform well when retrieving a large number of values.
-    float getValueAt(std::size_t index) const;
+    //float getValueAt(std::size_t index) const;
 
     // Sets the value of the element at the specified position in the current
     // data vector, converted to the internal data element type. 
@@ -846,7 +905,7 @@ public:
     // However, may not perform well when setting a large number of values.
     void setValueAt(std::size_t index, float newValue);
 
-    public: // Dense, test implementation
+public: // Dense, test implementation
     class Experimental {
         friend class Points;
     public:
@@ -1002,7 +1061,7 @@ public: // Linked data
     void resolveLinkedData(bool force = false) override;
 
 public:
-
+    MData::View _dataView;
     std::vector<unsigned int> indices;
 
     InfoAction*                 _infoAction;                    /** Non-owning pointer to info action */
@@ -1020,7 +1079,7 @@ class PointDataFactory : public RawDataFactory
     Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
         Q_OBJECT
         Q_PLUGIN_METADATA(IID   "studio.manivault.PointData"
-                          FILE  "PointData.json")
+            FILE  "PointData.json")
 
 public:
     PointDataFactory();

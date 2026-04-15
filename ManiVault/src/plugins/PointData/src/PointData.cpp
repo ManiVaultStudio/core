@@ -52,7 +52,12 @@ std::uint32_t PointData::getNumPoints() const
     }
 
     if (_isDense)
-        return static_cast<unsigned int>(getSizeOfVector() / _numDimensions);
+        return static_cast<unsigned int>(_data.rowCount());
+        //if (_data)
+        //    return static_cast<unsigned int>(_data->rowCount());
+        //else
+        //    return 0;
+        //return static_cast<unsigned int>(getSizeOfVector() / _numDimensions);
     else
         return _numRows;
 }
@@ -67,6 +72,28 @@ std::uint64_t PointData::getNumberOfElements() const
     return getSizeOfVector();
 }
 
+std::vector<float> PointData::column(std::size_t col) const
+{
+    return _data.column(col);
+}
+
+std::vector<Vector2f> PointData::columns(std::size_t col1, std::size_t col2) const
+{
+    //if (!_data)
+    //    throw std::runtime_error("PointData dense frame is not initialized");
+
+    std::vector<Vector2f> result(getNumPoints());
+
+    for (std::size_t rowIndex = 0; rowIndex < result.size(); ++rowIndex)
+    {
+        _data.visitRow(rowIndex, [&](std::span<const float> row)
+        {
+            result[rowIndex].set(row[col1], row[col2]);
+        });
+    }
+    
+    return result;
+}
 
 std::uint64_t PointData::getRawDataSize() const
 {
@@ -113,13 +140,19 @@ void PointData::setDimensionNames(const std::vector<QString>& dimNames)
         qWarning() << "PointData: Number of dimension names does not equal the number of data dimensions";
 }
 
-float PointData::getValueAt(const std::size_t index) const
+//float PointData::getValueAt(const std::size_t index) const
+//{
+//    //return std::visit([index](const auto& vec)
+//    //    {
+//    //        return static_cast<float>(vec[index]);
+//    //    },
+//    //    _variantOfVectors);
+//    return _data->valueAt(point, dim);
+//}
+
+float PointData::getValueAt(std::size_t row, std::size_t col) const
 {
-    return std::visit([index](const auto& vec)
-        {
-            return static_cast<float>(vec[index]);
-        },
-        _variantOfVectors);
+    return _data.valueAt(row, col);
 }
 
 void PointData::setValueAt(const std::size_t index, const float newValue)
@@ -258,18 +291,17 @@ void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, 
 
         result.resize(getNumPoints());
 
-        std::visit(
-            [&result, this, dimensionIndex1, dimensionIndex2](const auto& vec)
-            {
-                const auto resultSize = result.size();
+        const std::size_t dim1 = static_cast<std::size_t>(dimensionIndex1);
+        const std::size_t dim2 = static_cast<std::size_t>(dimensionIndex2);
 
-                for (std::size_t i{}; i < resultSize; ++i)
+        for (std::size_t rowIndex = 0; rowIndex < result.size(); ++rowIndex)
+        {
+            _data.visitRow(rowIndex, [&](std::span<const float> row)
                 {
-                    const auto n = i * _numDimensions;
-                    result[i].set(vec[n + dimensionIndex1], vec[n + dimensionIndex2]);
-                }
-            },
-            _variantOfVectors);
+                    result[rowIndex].set(row[dim1], row[dim2]);
+                });
+        }
+
     }
     else
     {
@@ -307,6 +339,7 @@ void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, cons
 
 Points::Points(QString dataName, bool mayUnderive /*= true*/, const QString& guid /*= ""*/) :
     DatasetImpl(dataName, mayUnderive, guid),
+    _dataView(&getRawData<PointData>()->_data),
     _infoAction(nullptr),
     _dimensionsPickerGroupAction(nullptr),
     _dimensionsPickerAction(nullptr)
@@ -477,6 +510,26 @@ void Points::extractDataForDimensions(std::vector<mv::Vector2f>& result, const i
     }
 }
 
+std::vector<float> Points::column(std::size_t col) const
+{
+    return _dataView.column(col);
+}
+
+std::vector<Vector2f> Points::columns(std::size_t col1, std::size_t col2) const
+{
+    std::vector<Vector2f> result(getNumPoints());
+
+    for (std::size_t rowIndex = 0; rowIndex < result.size(); ++rowIndex)
+    {
+        _dataView.visitRow(rowIndex, [&](std::span<const float> row)
+            {
+                result[rowIndex].set(row[col1], row[col2]);
+            });
+    }
+
+    return result;
+}
+
 bool Points::mayProxy(const Datasets& proxyDatasets) const
 {
     if (!DatasetImpl::mayProxy(proxyDatasets))
@@ -505,7 +558,15 @@ Dataset<DatasetImpl> Points::copy() const
 
 Dataset<DatasetImpl> Points::createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const bool& visible /*= true*/) const
 {
-    return mv::data().createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
+    mv::Dataset<Points> subset = mv::data().createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
+
+    auto selectionIndices = getSelection()->getSelectionIndices();
+    std::vector<size_t> rowIndices(selectionIndices.size());
+    for (int i = 0; i < selectionIndices.size(); i++)
+        rowIndices[i] = selectionIndices[i];
+    subset->_dataView = MData::View(&getRawData<PointData>()->_data, rowIndices, {});
+
+    return subset;
 }
 
 Dataset<DatasetImpl> Points::createSubsetFromVisibleSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const bool& visible /*= true*/) const
@@ -545,7 +606,14 @@ Dataset<DatasetImpl> Points::createSubsetFromVisibleSelection(const QString& gui
 
     subsetSelection->indices = localSelectionIndices;
 
-    return mv::data().createSubsetFromSelection(subsetSelection, toSmartPointer(), guiName, parentDataSet, visible);
+    mv::Dataset<Points> subset = mv::data().createSubsetFromSelection(subsetSelection, toSmartPointer(), guiName, parentDataSet, visible);
+
+    std::vector<size_t> rowIndices(selectionIndices.size());
+    for (int i = 0; i < selectionIndices.size(); i++)
+        rowIndices[i] = selectionIndices[i];
+    subset->_dataView = MData::View(&getRawData<PointData>()->_data, rowIndices, {});
+
+    return subset;
 }
 
 void Points::setProxyMembers(const Datasets& proxyMembers)
@@ -649,7 +717,8 @@ void Points::getGlobalIndices(std::vector<unsigned int>& globalIndices) const
         for (const Dataset<Points>& subset : subsetChain)
         {
             for (int i = 0; i < globalIndices.size(); i++)
-                globalIndices[i] = subset->indices[globalIndices[i]];
+                //globalIndices[i] = subset->indices[globalIndices[i]];
+                globalIndices[i] = static_cast<unsigned int>(subset->_dataView.rowIndices()[globalIndices[i]]);
         }
     }
 }
@@ -780,10 +849,10 @@ void Points::setDimensionNames(const std::vector<QString>& dimNames)
     mv::events().notifyDatasetDataDimensionsChanged(this);
 }
 
-float Points::getValueAt(const std::size_t index) const
-{
-    return getRawData<PointData>()->getValueAt(index);
-}
+//float Points::getValueAt(const std::size_t index) const
+//{
+//    return getRawData<PointData>()->getValueAt(index);
+//}
 
 void Points::setValueAt(const std::size_t index, const float newValue)
 {
