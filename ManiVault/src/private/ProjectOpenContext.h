@@ -11,7 +11,8 @@ using UniqueTemporaryDir = std::unique_ptr<QTemporaryDir>;
 struct ProjectOpenContext : public WorkflowContextBase
 {
     explicit ProjectOpenContext(const QString& filePath) :
-		_filePath(filePath)
+		_filePath(filePath),
+        _temporaryDirectory(new QTemporaryDir(QDir::cleanPath(mv::Application::current()->getTemporaryDir().path() + QDir::separator() + "OpenProject")))
     {
     }
 
