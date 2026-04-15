@@ -13,30 +13,19 @@
 
 using namespace mv::util;
 
-void WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan)
+WorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan)
 {
-    _workflow = std::make_unique<Workflow>(
-        workflowPlan,
-        OperationContextScope::getShared()
-    );
+    Workflow workflow(workflowPlan, OperationContextScope::getShared());
 
-    //_workflow->setDoneCallback(
-    //    [&](bool success, const QString& error) {
-    //        if (!success) {
-    //            errorMessage = error;
-    //        }
-
-    //        donePromise.set_value({ success, error });
-    //    }
-    //);
-
-    _workflow->beginRun();
+    workflow.beginRun();
     {
         for (const auto& stage : workflowPlan.getStages()) {
             runStage(stage);
         }
     }
-    _workflow->endRun();
+    workflow.endRun();
+
+    return workflow.getResult();
 }
 
 void WorkflowPlanExecutor::runStage(const mv::util::WorkflowPlan::Stage& stage)

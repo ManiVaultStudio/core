@@ -158,9 +158,9 @@ void WorkflowPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs)
 	}
 }
 
-void WorkflowPlan::execute(AbstractWorkflowPlanExecutor& WorkflowPlanExecutor)
+WorkflowResult WorkflowPlan::execute(AbstractWorkflowPlanExecutor& workflowPlanExecutor)
 {
-    WorkflowPlanExecutor.execute(*this);
+    return workflowPlanExecutor.execute(*this);
 }
 
 }

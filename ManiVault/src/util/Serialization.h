@@ -34,20 +34,6 @@ struct EncodeBlockResult
     QVariantMap     _block;
 };
 
-/** Information about a block of data to decode */
-struct DecodeBlockJob
-{
-    quint64 _offset = 0;            /** Offset of the block in the original data buffer */
-    quint64 _size = 0;              /** Size of the block in the original data buffer */
-    quint64 _compressedSize = 0;    /** Size of the compressed data block */
-    QString _uri;                   /** URI of the file containing the compressed data block (if applicable) */
-    QString _encodedData;           /** Base64 encoded string containing the compressed data block (if applicable) */
-
-    bool operator==(const DecodeBlockJob& other) const = default;
-};
-
-using DecodeBlockJobs = QVector<DecodeBlockJob>;
-
 /** Result of decoding a block of data */
 struct DecodeBlockResult
 {
@@ -57,6 +43,19 @@ struct DecodeBlockResult
 };
 
 using DecodeBlockResults = QVector<DecodeBlockResult>;
+
+/** Information about a block of data to decode */
+struct DecodeBlockJob
+{
+    quint64             _offset = 0;            /** Offset of the block in the original data buffer */
+    quint64             _size = 0;              /** Size of the block in the original data buffer */
+    quint64             _compressedSize = 0;    /** Size of the compressed data block */
+    QString             _uri;                   /** URI of the file containing the compressed data block (if applicable) */
+    QString             _encodedData;           /** Base64 encoded string containing the compressed data block (if applicable) */
+    DecodeBlockResult   _result;                /** Result of decoding the block, populated after the block is decoded */
+};
+
+using DecodeBlockJobs = QVector<DecodeBlockJob>;
 
 /**
  * Save raw data to binary file on disk

@@ -308,44 +308,38 @@ void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& b
         expectedOffset = end;
     }
 
-    DecodeBlockResults results;
-    results.reserve(decodeBlockJobs.size());
+    WorkflowPlan decodeWorkflowPlan("Decode Blocks");
 
-    //SerializationPlan decodePlan;
+    WorkflowPlan::Jobs decodeJobs;
 
-    //SerializationPlan::Jobs decodeJobs;
+    std::int32_t decodeBlockJobIndex = 0;
 
-    //for (const auto& decodeBlockJob : decodeBlockJobs) {
-    //    decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobs.indexOf(decodeBlockJob))), [decodeBlockJob, &results, createCodec](SerializationPlan::Job& job) {
-    //        try {
-    //            if (decodeBlockJob._uri.isEmpty()) {
-    //                auto result = decodeBlockFromBase64(decodeBlockJob, createCodec);
-    //                //results.push_back(std::move(result));
-    //            } else {
-    //                auto result = decodeBlockFromFile(decodeBlockJob, createCodec);
-    //                //results.push_back(std::move(result));
-    //            }   
-    //        }
-    //        catch (std::exception& e) {
-    //            Serializable::reportSerializationError("Data hierarchy manager", "Failed to load dataset: " + QString::fromStdString(e.what()));
-    //        }
-    //        catch (...) {
-    //            Serializable::reportSerializationError("Data hierarchy manager", "Failed to load dataset");
-    //        }
-    //    });
-    //}
+    for (auto& decodeBlockJob : decodeBlockJobs) {
+        decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [&decodeBlockJob, createCodec](WorkflowPlan::Job& job) {
+            try {
+                if (decodeBlockJob._uri.isEmpty()) {
+                    decodeBlockJob._result = decodeBlockFromBase64(decodeBlockJob, createCodec);
+                } else {
+                    decodeBlockJob._result = decodeBlockFromFile(decodeBlockJob, createCodec);
+                }   
+            }
+            catch (std::exception& e) {
+                Serializable::reportSerializationError("Data hierarchy manager", "Failed to load dataset: " + QString::fromStdString(e.what()));
+            }
+            catch (...) {
+                Serializable::reportSerializationError("Data hierarchy manager", "Failed to load dataset");
+            }
+        });
 
-    //decodePlan.addStage("Load datasets", SerializationPlan::ConcurrencyMode::Sequential, decodeJobs);
-    //decodePlan.execute(*mv::projects().getSerializationPlanExecutor());
-
-    for (const auto& job : decodeBlockJobs) {
-	    if (job._uri.isEmpty())
-	    	results.push_back(decodeBlockFromBase64(job, createCodec));
-	    else
-	    	results.push_back(decodeBlockFromFile(job, createCodec));
+        ++decodeBlockJobIndex;
     }
 
-    for (const auto& result : results) {
+    decodeWorkflowPlan.addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Parallel, decodeJobs);
+    decodeWorkflowPlan.execute(*mv::projects().getWorkflowPlanExecutor());
+
+    for (auto& decodeBlockJob : decodeBlockJobs) {
+        const auto& result = decodeBlockJob._result;
+
         if (result._size == 0)
             throw std::runtime_error("Decoded block has zero size");
 

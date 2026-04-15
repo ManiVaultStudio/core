@@ -6,6 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 #include "WorkflowContextBase.h"
+#include "WorkflowResult.h"
 
 #include <QString>
 #include <QJsonDocument>
@@ -126,7 +127,7 @@ public:
 	void addParallelStage(QString name, Jobs jobs);
     void addStage(QString name, ConcurrencyMode mode, Jobs jobs);
 
-	void execute(AbstractWorkflowPlanExecutor& WorkflowPlanExecutor);
+    WorkflowResult execute(AbstractWorkflowPlanExecutor& WorkflowPlanExecutor);
 
     Stages getStages() const { return _stages; }
     SharedState getSharedState() const { return _sharedState; }

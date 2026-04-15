@@ -6,12 +6,15 @@
 
 #include "ManiVaultGlobals.h"
 
+#include <QString>
+
 class CORE_EXPORT WorkflowContextBase
 {
 public:
     virtual ~WorkflowContextBase() = default;
 
     QString     _errorMessage;
+
 };
 
 using UniqueWorkflowContext = std::unique_ptr<WorkflowContextBase>;

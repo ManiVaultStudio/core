@@ -369,25 +369,20 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
         setState(State::OpeningProject);
 
-        auto projectOpenWorkflowPlan = createProjectOpenWorkflowPlan(filePath);
+        auto projectOpenWorkflowPlan    = createProjectOpenWorkflowPlan(filePath);
+        auto workflowResult             = projectOpenWorkflowPlan.execute(_workflowPlanExecutor);
 
-        projectOpenWorkflowPlan.execute(_workflowPlanExecutor);
+        if (auto currentProject = mv::projects().getCurrentProject()) {
+            const auto duration     = workflowResult._duration;
+            const auto successText  = (duration < 1000) ? QString("%1 completed successfully in %2 ms").arg(projectOpenWorkflowPlan.getTitle()).arg(duration) : QString("%1 opened successfully in %2 s").arg(currentProject->getFilePath()).arg(duration / 1000.0, 0, 'f', 1);
+            //const auto errorText    = getTitle() + result->_errorMessage;
+
+            help().addNotification("Project opened", successText, StyledIcon("folder-open"));
+            qDebug() << successText;
+        }
+
         setState(State::Idle);
         emit projectOpened(*_project);
-        //auto workflow = std::make_unique<ProjectOpenWorkflow>(filePath);
-
-        //connect(workflow.get(), &ProjectOpenWorkflow::finished, this, [this, filePath, workflowPtr = workflow.get()](bool success, const QString& error) {
-        //    setState(State::Idle);
-
-        //    if (success) {
-        //        emit projectOpened(*_project);
-        //    }
-
-        //    resetActiveWorkflow();
-        //});
-
-        //setActiveWorkflow(std::move(workflow));
-        //getActiveWorkflow()->start();
     }
     catch (const std::exception& e) {
         setState(State::Idle);

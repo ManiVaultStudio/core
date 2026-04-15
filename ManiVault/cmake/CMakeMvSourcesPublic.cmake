@@ -599,7 +599,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/DecodeExecutor.h
     src/util/WorkflowRuntimeContext.h
     src/util/WorkflowContextBase.h
-    src/util/WorkflowResultBase.h
+    src/util/WorkflowResult.h
     src/util/Workflow.h
     src/util/DecodeRequestState.h
     src/util/WorkflowPlan.h
@@ -675,7 +675,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/CodecActionBinding.cpp
     src/util/DecodeExecutor.cpp
     src/util/WorkflowContextBase.cpp
-    src/util/WorkflowResultBase.cpp
+    src/util/WorkflowResult.cpp
     src/util/WorkflowRuntimeContext.cpp
     src/util/Workflow.cpp
     src/util/DecodeRequestState.cpp

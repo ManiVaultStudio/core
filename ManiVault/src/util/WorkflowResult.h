@@ -8,13 +8,19 @@
 
 #include <QString>
 
-class CORE_EXPORT WorkflowResultBase
+namespace mv::util
+{
+
+class CORE_EXPORT WorkflowResult
 {
 public:
-    virtual ~WorkflowResultBase() = default;
+    virtual ~WorkflowResult() = default;
 
-    bool        _success = false;
-    QString     _errorMessage;
+    bool            _success = false;
+    QString         _errorMessage;
+    std::uint64_t   _duration;
 };
 
-using UniqueWorkflowResultBase = std::unique_ptr<WorkflowResultBase>;
+using UniqueWorkflowResult = std::unique_ptr<WorkflowResult>;
+
+} // namespace mv::util
