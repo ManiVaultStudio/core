@@ -12,6 +12,14 @@
 
 namespace mv::util {
 
+namespace
+{
+    constexpr bool isMacOS()
+    {
+        return QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS;
+    }
+}
+
 QString StandardPaths::get(StandardLocation location)
 {
 	switch (location) {
@@ -105,11 +113,6 @@ QString StandardPaths::getLogsDirectory()
         return QDir::homePath();
 
     return documentLocationsDir.filePath(dirSuffix);
-}
-
-bool StandardPaths::isMacOS()
-{
-    return QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS;
 }
 
 }

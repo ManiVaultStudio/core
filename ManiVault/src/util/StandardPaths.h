@@ -46,13 +46,6 @@ public: // Specific getters for convenience
     static QString getProjectsDirectory();
     static QString getLogsDirectory();
 
-private:
-
-    /**
-     * Determine if the OS is macOS
-     * @return True if the OS is macOS
-     */
-    static bool isMacOS();
 };
 
 }
