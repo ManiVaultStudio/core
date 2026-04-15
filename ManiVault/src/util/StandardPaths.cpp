@@ -115,4 +115,17 @@ QString StandardPaths::getLogsDirectory()
     return documentLocationsDir.filePath(dirSuffix);
 }
 
+QString StandardPaths::getPluginDependenciesDirectory()
+{
+    const auto applicationDir = QDir(QCoreApplication::applicationDirPath());
+    const auto dirName = QString("PluginDependencies");
+
+    auto pathSuffix = QString("/%1/").arg(dirName);
+
+    if constexpr (isMacOS())
+        pathSuffix = applicationDir.dirName() == "MacOS" ? QString("../../../../%1").arg(dirName) : QString("/../%1").arg(dirName);
+
+    return QDir::cleanPath(applicationDir.path() + pathSuffix);
+}
+
 }
