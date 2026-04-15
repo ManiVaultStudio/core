@@ -17,35 +17,35 @@ using namespace mv::util;
 
 WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 {
-    ProjectOpenContext context;
+    auto context = std::make_shared<ProjectOpenContext>(filePath);
 
-    context._filePath = filePath;
-
-    WorkflowPlan plan("Open project workflow", std::make_shared<ProjectOpenContext>(std::move(context)));
+    WorkflowPlan plan("Open project workflow", context);
 
     plan.addSequentialStage("Setup", [&plan]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
         printLine("Recipe stage", "Setup", 2);
 #endif
 
-    	auto projectOpenContext = plan.getWorkflowContextAs<ProjectOpenContext>();
+    	auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
 
-        if (QFileInfo(projectOpenContext->_filePath).isDir())
+        if (QFileInfo(context->_filePath).isDir())
             throw std::runtime_error("Project file path may not be a directory");
 
-        QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "OpenProject"));
+        context->_temporaryDirectory.reset(new QTemporaryDir(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "SaveProject")));
 
-        if (!temporaryDirectory.isValid())
-            throw std::runtime_error("Unable to create temporary open-project directory");
+        auto temporaryDirPath = context->_temporaryDirectory->path();
 
-        projectOpenContext->_temporaryDirectoryPath = temporaryDirectory.path();
-        projectOpenContext->_workspaceJsonPath      = QFileInfo(projectOpenContext->_temporaryDirectoryPath, "workspace.json").absoluteFilePath();
-        projectOpenContext->_projectJsonPath        = QFileInfo(projectOpenContext->_temporaryDirectoryPath, "project.json").absoluteFilePath();
+        if (!QFileInfo(temporaryDirPath).exists())
+            throw std::runtime_error("Temporary directory does not exist");
+
+        context->_temporaryDirectoryPath = temporaryDirPath;
+        context->_workspaceJsonPath      = QFileInfo(context->_temporaryDirectoryPath, "workspace.json").absoluteFilePath();
+        context->_projectJsonPath        = QFileInfo(context->_temporaryDirectoryPath, "project.json").absoluteFilePath();
 
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
-        printLine("Temp. Dir", projectOpenContext->_temporaryDirectoryPath, 3);
-        printLine("Workspace JSON", projectOpenContext->_workspaceJsonPath, 3);
-        printLine("Project JSON", projectOpenContext->_projectJsonPath, 3);
+        printLine("Temp. Dir", context->_temporaryDirectoryPath, 3);
+        printLine("Workspace JSON", context->_workspaceJsonPath, 3);
+        printLine("Project JSON", context->_projectJsonPath, 3);
 #endif
 
         Application::setSerializationAborted(false);
@@ -56,7 +56,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
         Application::requestOverrideCursor(Qt::WaitCursor);
 
-        mv::projects().getCurrentProject()->setFilePath(projectOpenContext->_filePath);
+        mv::projects().getCurrentProject()->setFilePath(context->_filePath);
     });
 
     plan.addSequentialStage("Extract project archive", [&plan]() -> void {
@@ -64,12 +64,12 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
     printLine("Recipe stage", "Extract project archive", 2);
 #endif
 
-	    auto projectOpenContext = plan.getWorkflowContextAs<ProjectOpenContext>();
+	    auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
 
 	    Archiver archiver;
 
-	    archiver.extractSingleFile(projectOpenContext->_filePath, "project.json", projectOpenContext->_projectJsonPath);
-		archiver.extractSingleFile(projectOpenContext->_filePath, "workspace.json", projectOpenContext->_workspaceJsonPath);
+	    archiver.extractSingleFile(context->_filePath, "project.json", context->_projectJsonPath);
+		archiver.extractSingleFile(context->_filePath, "workspace.json", context->_workspaceJsonPath);
     });
 
     plan.addSequentialStage("Open project JSON", [&plan]() -> void {
@@ -77,13 +77,13 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         printLine("Recipe stage", "Open project JSON", 2);
 #endif
 
-        auto projectOpenContext = plan.getWorkflowContextAs<ProjectOpenContext>();
+        auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
 
-        if (!QFileInfo(projectOpenContext->_projectJsonPath).exists())
+        if (!QFileInfo(context->_projectJsonPath).exists())
             throw std::runtime_error("Project JSON file does not exist");
     
         if (auto currentProject = mv::projects().getCurrentProject()) {
-            currentProject->fromJsonFile(projectOpenContext->_projectJsonPath);
+            currentProject->fromJsonFile(context->_projectJsonPath);
         } else {
             throw std::runtime_error("No current project found");
         }
@@ -94,12 +94,12 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         printLine("Recipe stage", "Open workspace JSON", 2);
 #endif
 
-        auto projectOpenContext = plan.getWorkflowContextAs<ProjectOpenContext>();
+        auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
 
-        if (!QFileInfo(projectOpenContext->_workspaceJsonPath).exists())
+        if (!QFileInfo(context->_workspaceJsonPath).exists())
             throw std::runtime_error("Workspace JSON file does not exist");
     
-        workspaces().loadWorkspace(projectOpenContext->_workspaceJsonPath);
+        workspaces().loadWorkspace(context->_workspaceJsonPath);
     });
 
     plan.addSequentialStage("Finalize", [&plan]() -> void {
@@ -107,12 +107,12 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         printLine("Recipe stage", "Finalize", 2);
 #endif
 
-        auto projectOpenContext = plan.getWorkflowContextAs<ProjectOpenContext>();
+        auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
 
-        if (!projectOpenContext->_errorMessage.isEmpty())
-            throw std::runtime_error(projectOpenContext->_errorMessage.toStdString());
+        if (!context->_errorMessage.isEmpty())
+            throw std::runtime_error(context->_errorMessage.toStdString());
     
-        mv::projects().getRecentProjectsAction().addRecentFilePath(projectOpenContext->_filePath);
+        mv::projects().getRecentProjectsAction().addRecentFilePath(context->_filePath);
     
         auto project = mv::projects().getCurrentProject();
     

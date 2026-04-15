@@ -8,6 +8,7 @@
 #include "NewProjectDialog.h"
 #include "Archiver.h"
 #include "ProjectOpenWorkflowPlan.h"
+#include "ProjectSaveWorkflowPlan.h"
 
 #include <CoreInterface.h>
 #include <ProjectMetaAction.h>
@@ -31,6 +32,7 @@
 
 #include <exception>
 
+#include "ProjectSaveContext.h"
 #include "Task.h"
 
 #ifdef _DEBUG
@@ -786,23 +788,23 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
 
-            //auto workflow = std::make_unique<ProjectSaveWorkflow>(filePath);
+            auto workflowPlan   = createProjectSaveWorkflowPlan(filePath);
 
-            //setTemporaryDirPath(TemporaryDirType::Save, workflow->getTemporaryDirPath());
+            setTemporaryDirPath(TemporaryDirType::Save, workflowPlan.getWorkflowContextAs<ProjectSaveContext>()->_temporaryDirectory->path());
 
-            //connect(workflow.get(), &ProjectSaveWorkflow::finished, this, [this, filePath, workflowPtr = workflow.get()](bool success, const QString& error) {
-            //    setState(State::Idle);
+            auto workflowResult = workflowPlan.execute(_workflowPlanExecutor);
 
-            //    if (success) {
-            //        setState(State::Idle);
-            //        emit projectOpened(*_project);
-            //    }
+            if (auto currentProject = mv::projects().getCurrentProject()) {
+                const auto duration     = workflowResult._duration;
+                const auto successText  = (duration < 1000) ? QString("%1 completed successfully in %2 ms").arg(workflowPlan.getTitle()).arg(duration) : QString("%1 saved successfully in %2 s").arg(currentProject->getFilePath()).arg(duration / 1000.0, 0, 'f', 1);
+                //const auto errorText    = getTitle() + result->_errorMessage;
 
-            //    resetActiveWorkflow();
-            //});
+                help().addNotification("Project saved", successText, StyledIcon("file"));
+                qDebug() << successText;
+            }
 
-            //setActiveWorkflow(std::move(workflow));
-            //getActiveWorkflow()->start();
+            setState(State::Idle);
+            emit projectSaved(*_project);
         }
         emit projectSaved(*_project);
     }

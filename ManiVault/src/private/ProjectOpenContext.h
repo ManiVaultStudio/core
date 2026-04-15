@@ -8,9 +8,13 @@
 
 using UniqueTemporaryDir = std::unique_ptr<QTemporaryDir>;
 
-class ProjectOpenContext : public WorkflowContextBase
+struct ProjectOpenContext : public WorkflowContextBase
 {
-public:
+    explicit ProjectOpenContext(const QString& filePath) :
+		_filePath(filePath)
+    {
+    }
+
     QString             _filePath;
     bool                _loadWorkspace = true;
     bool                _importDataOnly = false;
@@ -20,5 +24,3 @@ public:
     QString             _workspaceJsonPath;
     QString             _projectJsonPath;
 };
-
-using ProjectOpenContextStorage = QtTaskTree::Storage<ProjectOpenContext>;

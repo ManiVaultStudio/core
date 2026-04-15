@@ -179,9 +179,9 @@ QVariantMap PointData::toVariantMap() const
 
     if (_isDense)
     {
-        const auto typeSpecifier = getElementTypeSpecifier();
-        const auto typeSpecifierName = getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
-        const auto typeIndex = static_cast<std::int32_t>(typeSpecifier);
+        const auto typeSpecifier        = getElementTypeSpecifier();
+        const auto typeSpecifierName    = getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
+        const auto typeIndex            = static_cast<std::int32_t>(typeSpecifier);
 
         QVariantMap rawData = rawDataToVariantMap((const char*)getDataConstVoidPtr(), getRawDataSize());
 

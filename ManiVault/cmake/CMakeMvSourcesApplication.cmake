@@ -330,6 +330,7 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/ZstdBlobCodecFactory.h
     src/private/WorkflowPlanExecutor.h
     src/private/ProjectOpenWorkflowPlan.h
+    src/private/ProjectSaveWorkflowPlan.h
 )
 
 if(MV_USE_ERROR_LOGGING)
@@ -355,6 +356,7 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/ZstdBlobCodecFactory.cpp
     src/private/WorkflowPlanExecutor.cpp
     src/private/ProjectOpenWorkflowPlan.cpp
+    src/private/ProjectSaveWorkflowPlan.cpp
 )
 
 if(MV_USE_ERROR_LOGGING)

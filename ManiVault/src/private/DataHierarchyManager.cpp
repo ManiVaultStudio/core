@@ -361,17 +361,6 @@ QVariantMap DataHierarchyManager::toVariantMap() const
     if (!_items.empty()) {
         WorkflowPlan toPlan(__FUNCTION__);
 
-        toPlan.addSequentialStage("Enumerate datasets", [this](WorkflowPlan::Job& job) -> void {
-            try {
-	            
-            } catch (std::exception& e) {
-                Serializable::reportSerializationError("Data hierarchy manager", "Failed to Enumerate datasets: " + QString::fromStdString(e.what()));
-            }
-            catch (...) {
-                Serializable::reportSerializationError("Data hierarchy manager", "Failed to Enumerate datasets");
-            }
-        });
-
         WorkflowPlan::Jobs createItemMapJobs;
 
         std::int32_t sortIndex = 0;

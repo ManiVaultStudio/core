@@ -6,16 +6,23 @@
 
 #include <util/WorkflowContextBase.h>
 
+#include "Application.h"
 #include "Archiver.h"
 
-class ProjectSaveContext : public WorkflowContextBase
+using UniqueTemporaryDir = std::unique_ptr<QTemporaryDir>;
+
+struct ProjectSaveContext : public WorkflowContextBase
 {
-public:
+    explicit ProjectSaveContext(const QString& filePath) :
+		_filePath(filePath),
+		_temporaryDirectory(new QTemporaryDir(QDir::cleanPath(mv::Application::current()->getTemporaryDir().path() + QDir::separator() + "SaveProject")))
+    {
+    }
+
     QString             _filePath;              /** Path to the project file */
     QString             _workspaceJsonPath;     /** Path to the workspace JSON file */
     QString             _projectJsonPath;       /** Path to the project JSON file */
     QString             _metaJsonPath;          /** Path to the project meta JSON file */
+    UniqueTemporaryDir  _temporaryDirectory;    /** Temporary directory for saving the project */
     mv::util::Archiver  _archiver;              /** Archiver for handling the project archive */
 };
-
-using ProjectSaveContextStorage = QtTaskTree::Storage<ProjectSaveContext>;
