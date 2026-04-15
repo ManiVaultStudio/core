@@ -40,7 +40,7 @@ QString StandardPaths::getPluginsDirectory()
 
     auto pathSuffix = QString("/%1/").arg(dirName);
 
-    if (isMacOS())
+    if constexpr (isMacOS())
         pathSuffix = applicationDir.dirName() == "MacOS" ? QString("../../../../%1").arg(dirName) : QString("/../%1").arg(dirName);
 
     return QDir::cleanPath(applicationDir.path() + pathSuffix);
@@ -52,7 +52,7 @@ QString StandardPaths::getDownloadsDirectory()
     const auto applicationDataDir   = QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     const auto dirName              = QString("Downloads");
 
-    if (isMacOS()) {
+    if constexpr (isMacOS()) {
         const auto pathSuffix = applicationDir.dirName() == "MacOS" ? QString("../../../../%1").arg(dirName) : QString("/../%1").arg(dirName);
         const auto finalPath = QDir::cleanPath(applicationDir.path() + pathSuffix);
 
@@ -73,7 +73,7 @@ QString StandardPaths::getCustomizationDirectory()
 
     QString pathSuffix = QString("/%1").arg(dirName);
 
-    if (isMacOS())
+    if constexpr (isMacOS())
         pathSuffix = applicationDir.dirName() == "MacOS" ? QString("../../../../%1").arg(dirName) : QString("/../%1").arg(dirName);
 
     const auto finalPath = QDir::cleanPath(applicationDir.path() + pathSuffix);
