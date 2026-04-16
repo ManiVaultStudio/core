@@ -282,7 +282,7 @@ QStringList PluginManager::resolveDependencies(QDir pluginDir) const
      * immediately add it to the list of resolved plugins. Dependencies are given by a list of plugin kinds
      * under the 'dependencies' key in the accompanying .json metadata file.
      */
-    for (QString fileName: pluginDir.entryList(QDir::Files))
+    for (const QString& fileName: pluginDir.entryList(QDir::Files))
     {
         QPluginLoader pluginLoader(pluginDir.absoluteFilePath(fileName));
 
