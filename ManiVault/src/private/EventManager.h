@@ -37,7 +37,7 @@ public:
     void reset() override;
 
     std::vector<KeyBasedSelectionGroup>& getSelectionGroups() override { return _selectionGroups; }
-
+    bool areDatasetsPartOfSelectionGroup(Dataset<DatasetImpl> d1, Dataset<DatasetImpl> d2);
     void addSelectionGroup(KeyBasedSelectionGroup& selectionGroup) override { _selectionGroups.push_back(std::move(selectionGroup)); }
 
     /**
