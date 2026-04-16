@@ -12,6 +12,14 @@
 
 namespace mv::util {
 
+namespace
+{
+    constexpr bool isMacOS()
+    {
+        return QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS;
+    }
+}
+
 QString StandardPaths::get(StandardLocation location)
 {
 	switch (location) {
@@ -32,7 +40,7 @@ QString StandardPaths::getPluginsDirectory()
 
     auto pathSuffix = QString("/%1/").arg(dirName);
 
-    if (isMacOS())
+    if constexpr (isMacOS())
         pathSuffix = applicationDir.dirName() == "MacOS" ? QString("../../../../%1").arg(dirName) : QString("/../%1").arg(dirName);
 
     return QDir::cleanPath(applicationDir.path() + pathSuffix);
@@ -44,7 +52,7 @@ QString StandardPaths::getDownloadsDirectory()
     const auto applicationDataDir   = QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     const auto dirName              = QString("Downloads");
 
-    if (isMacOS()) {
+    if constexpr (isMacOS()) {
         const auto pathSuffix = applicationDir.dirName() == "MacOS" ? QString("../../../../%1").arg(dirName) : QString("/../%1").arg(dirName);
         const auto finalPath = QDir::cleanPath(applicationDir.path() + pathSuffix);
 
@@ -65,7 +73,7 @@ QString StandardPaths::getCustomizationDirectory()
 
     QString pathSuffix = QString("/%1").arg(dirName);
 
-    if (isMacOS())
+    if constexpr (isMacOS())
         pathSuffix = applicationDir.dirName() == "MacOS" ? QString("../../../../%1").arg(dirName) : QString("/../%1").arg(dirName);
 
     const auto finalPath = QDir::cleanPath(applicationDir.path() + pathSuffix);
@@ -107,9 +115,17 @@ QString StandardPaths::getLogsDirectory()
     return documentLocationsDir.filePath(dirSuffix);
 }
 
-bool StandardPaths::isMacOS()
+QString StandardPaths::getPluginDependenciesDirectory()
 {
-    return QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS;
+    const auto applicationDir = QDir(QCoreApplication::applicationDirPath());
+    const auto dirName = QString("PluginDependencies");
+
+    auto pathSuffix = QString("/%1/").arg(dirName);
+
+    if constexpr (isMacOS())
+        pathSuffix = applicationDir.dirName() == "MacOS" ? QString("../../../../%1").arg(dirName) : QString("/../%1").arg(dirName);
+
+    return QDir::cleanPath(applicationDir.path() + pathSuffix);
 }
 
 }

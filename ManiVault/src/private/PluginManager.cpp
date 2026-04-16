@@ -101,22 +101,16 @@ void PluginManager::loadPluginFactories()
     qDebug() << "Loading plugin factories";
 #endif
 
-    QDir pluginsDir(StandardPaths::getPluginsDirectory());
+    const QDir pluginsDir(StandardPaths::getPluginsDirectory());
+    const QDir pluginsDependenciesDir(StandardPaths::getPluginDependenciesDirectory());
     
     _pluginFactories.clear();
 
     auto getPluginDependencyDir = [](const QDir& dir, const QString& name) -> std::pair<QDir, bool> {
         QDir dependenciesDir = dir;
 
-        dependenciesDir.cdUp();
-
-    	if (!dependenciesDir.cd("PluginDependencies"))  // name by convention
-            return { dependenciesDir, false };
-
     	if (!dependenciesDir.cd(name))
             return { dependenciesDir, false };
-
-    	dependenciesDir.cd(name);
 
     	return { dependenciesDir, true };
     };
@@ -140,10 +134,10 @@ void PluginManager::loadPluginFactories()
         return baseName;
         };
 
-    auto loadPluginDependencies = [&getLibraryName, &getPluginDependencyDir](const QDir& pluginDir, const QString& fileName) -> void {
+    auto loadPluginDependencies = [&getLibraryName, &getPluginDependencyDir](const QDir& pluginsDependenciesDir, const QString& fileName) -> void {
 
         const auto pluginName = getLibraryName(fileName);
-        const auto [pluginDependenciesDir, pluginDependenciesExists] = getPluginDependencyDir(pluginDir, pluginName);
+        const auto [pluginDependenciesDir, pluginDependenciesExists] = getPluginDependencyDir(pluginsDependenciesDir, pluginName);
 
         if (!pluginDependenciesExists)
             return;
@@ -189,7 +183,7 @@ void PluginManager::loadPluginFactories()
     for (const auto& fileName: resolvedPlugins)
     {
         // Load plugin dependencies, if there are any
-        loadPluginDependencies(pluginsDir, fileName);
+        loadPluginDependencies(pluginsDependenciesDir, fileName);
 
         // Dynamic loader of plugin shared library
         QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
@@ -288,7 +282,7 @@ QStringList PluginManager::resolveDependencies(QDir pluginDir) const
      * immediately add it to the list of resolved plugins. Dependencies are given by a list of plugin kinds
      * under the 'dependencies' key in the accompanying .json metadata file.
      */
-    for (QString fileName: pluginDir.entryList(QDir::Files))
+    for (const QString& fileName: pluginDir.entryList(QDir::Files))
     {
         QPluginLoader pluginLoader(pluginDir.absoluteFilePath(fileName));
 
