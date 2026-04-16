@@ -18,28 +18,33 @@ namespace mv::util {
 
 class BlobCodec;
 
-struct EncodeBlockJob
-{
-    std::uint64_t _offset = 0;
-    std::uint64_t _size = 0;
-    QByteArray _rawData;
-};
-
 struct EncodeBlockResult
 {
-    std::uint64_t   _offset = 0;
-    std::uint64_t   _size = 0;
-    QByteArray      _encodedData;
-    QString         _error;
-    QVariantMap     _block;
+    std::uint64_t       _offset = 0;            /** Offset of the block in the original data buffer */
+    std::uint64_t       _size = 0;              /** Size of the block in the original data buffer */
+    QByteArray          _encodedData;           /** Base64 encoded string containing the encoded data block (empty if encoding failed) */
+    QString             _error;                 /** Error message in case encoding the block failed (empty if encoding was successful) */
+    QVariantMap         _block;                 /** Variant map containing the block information to be included in the final variant map (e.g. file URI or base64 encoded data) */
 };
+
+using EncodeBlockResults = QVector<EncodeBlockResult>;
+
+struct EncodeBlockJob
+{
+    std::uint64_t       _offset = 0;            /** Offset of the block in the original data buffer */
+    std::uint64_t       _size = 0;              /** Size of the block in the original data buffer */
+    QByteArray          _rawData;               /** Raw data block to encode */
+    EncodeBlockResult   _result;                 /** Result of encoding the block, populated after the block is encoded */
+};
+
+using EncodeBlockJobs = QVector<EncodeBlockJob>;
 
 /** Result of decoding a block of data */
 struct DecodeBlockResult
 {
-    std::uint64_t   _offset = 0;    /** Offset of the block in the original data buffer */
-    std::uint64_t   _size = 0;      /** Size of the block in the original data buffer */
-    QByteArray      _decodedData;   /** Decoded data block */
+    std::uint64_t       _offset = 0;            /** Offset of the block in the original data buffer */
+    std::uint64_t       _size = 0;              /** Size of the block in the original data buffer */
+    QByteArray          _decodedData;           /** Decoded data block */
 };
 
 using DecodeBlockResults = QVector<DecodeBlockResult>;

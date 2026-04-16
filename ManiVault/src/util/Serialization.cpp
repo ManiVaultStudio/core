@@ -119,7 +119,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
 	    const auto numberOfBlocks = (numberOfBytes + maxBlockSizeInBytes - 1) / maxBlockSizeInBytes;
 
-	    QVector<EncodeBlockJob> encodeBlockJobs;
+        EncodeBlockJobs encodeBlockJobs;
 
 	    encodeBlockJobs.reserve(static_cast<int>(numberOfBlocks));
 
@@ -142,29 +142,39 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
 	    const auto saveDir = QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Save));
 
-        QVector<EncodeBlockResult> encodeBlockResults;
+        WorkflowPlan encodeWorkflowPlan("Encode Blocks");
+        WorkflowPlan::Jobs encodeJobs;
 
-        encodeBlockResults.resize(encodeBlockJobs.size());
+        std::int32_t encodeBlockJobIndex = 0;
 
-        for (int i = 0; i < encodeBlockJobs.size(); ++i) {
-            encodeBlockResults[i] = encodeBlock(encodeBlockJobs[i], saveDir, createCodec);
+        for (auto& encodeBlockJob : encodeBlockJobs) {
+            encodeJobs.emplace_back(QString("Encode Block %1").arg(QString::number(encodeBlockJobIndex)), [&encodeBlockJob, saveDir, createCodec](WorkflowPlan::Job& job) {
+                try {
+                    encodeBlockJob._result = encodeBlock(encodeBlockJob, saveDir, createCodec);
+                }
+                catch (std::exception& e) {
+                    Serializable::reportSerializationError("Encoder", "Failed to encode block: " + QString::fromStdString(e.what()));
+                }
+                catch (...) {
+                    Serializable::reportSerializationError("Encoder", "Failed to encode block");
+                }
+            });
+
+            ++encodeBlockJobIndex;
         }
 
-        //SerializationPlan encodePlan;
-        //SerializationPlan::Jobs encodeJobs;
-
-        //encodePlan.addStage("EncodeBlocks", SerializationPlan::ConcurrencyMode::Sequential, std::move(encodeJobs));
-        //encodePlan.execute(*mv::projects().getSerializationPlanExecutor());
+        encodeWorkflowPlan.addStage("Encode Blocks", WorkflowPlan::ConcurrencyMode::Parallel, encodeJobs);
+        encodeWorkflowPlan.execute(*mv::projects().getWorkflowPlanExecutor());
 
         QVariantList blocks;
 
-        blocks.reserve(encodeBlockResults.size());
+        blocks.reserve(encodeBlockJobs.size());
 
-        for (const auto& result : encodeBlockResults) {
-            if (!result._error.isEmpty())
-                throw std::runtime_error(result._error.toStdString());
+        for (const auto& encodeBlockJob : encodeBlockJobs) {
+            if (!encodeBlockJob._result._error.isEmpty())
+                throw std::runtime_error(encodeBlockJob._result._error.toStdString());
 
-            blocks.push_back(result._block);
+            blocks.push_back(encodeBlockJob._result._block);
         }
 
         rawData["NumberOfBlocks"]   = QVariant::fromValue(numberOfBlocks);
