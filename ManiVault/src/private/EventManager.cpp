@@ -111,7 +111,19 @@ void EventManager::reset()
     }
     endReset();
 }
+
+bool EventManager::areDatasetsPartOfSelectionGroup(Dataset<DatasetImpl> d1, Dataset<DatasetImpl> d2)
+{
+    bool foundGroup = false;
     
+    for (KeyBasedSelectionGroup& selectionGroup : _selectionGroups)
+    {
+        if (selectionGroup.areDatasetsPartOfGroup(d1, d2))
+            foundGroup = true;
+    }
+    return foundGroup;
+}
+
 void EventManager::registerEventListener(EventListener* eventListener)
 {
     _eventListeners.push_back(eventListener);
