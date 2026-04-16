@@ -331,6 +331,8 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/WorkflowPlanExecutor.h
     src/private/ProjectOpenWorkflowPlan.h
     src/private/ProjectSaveWorkflowPlan.h
+    src/private/ProjectPublishWorkflowPlan.h
+    src/private/ProjectPublishContext.h
 )
 
 if(MV_USE_ERROR_LOGGING)
@@ -357,6 +359,8 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/WorkflowPlanExecutor.cpp
     src/private/ProjectOpenWorkflowPlan.cpp
     src/private/ProjectSaveWorkflowPlan.cpp
+    src/private/ProjectPublishWorkflowPlan.cpp
+    src/private/ProjectPublishContext.cpp
 )
 
 if(MV_USE_ERROR_LOGGING)
