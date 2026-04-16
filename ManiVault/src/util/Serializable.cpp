@@ -90,9 +90,6 @@ QJsonDocument Serializable::toJsonDocument() const
 
 void Serializable::fromJsonFile(const QString& filePath /*= ""*/)
 {
-    if (Application::isSerializationAborted())
-        return;
-
     try
     {
         if (!QFileInfo(filePath).exists())
@@ -126,9 +123,6 @@ void Serializable::fromJsonFile(const QString& filePath /*= ""*/)
 
 void Serializable::toJsonFile(const QString& filePath /*= ""*/) const
 {
-    if (Application::isSerializationAborted())
-        return;
-
     try
     {
         QFile jsonFile(filePath);

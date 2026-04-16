@@ -48,8 +48,6 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         printLine("Project JSON", context->_projectJsonPath, 3);
 #endif
 
-        Application::setSerializationAborted(false);
-
         workspaces().reset();
 
         mv::projects().newProject();

@@ -349,8 +349,6 @@ void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*
 
     const auto temporaryDirectoryPath = temporaryDirectory.path();
 
-    Application::setSerializationAborted(false);
-
     if (projectFilePath.isEmpty()) {
         FileOpenDialog fileOpenDialog;
 

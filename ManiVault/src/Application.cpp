@@ -38,7 +38,6 @@ Application::Application(int& argc, char** argv) :
     Serializable("Application"),
     _core(nullptr),
     _version(MV_VERSION_MAJOR, MV_VERSION_MINOR, MV_VERSION_PATCH, std::string(MV_VERSION_SUFFIX.data())),
-    _serializationAborted(false),
     _startupProjectMetaAction(nullptr),
     _startupTask(nullptr),
     _temporaryDir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + QString("%1.%2").arg("ManiVault Studio", getId().mid(0, 6)))),
@@ -204,16 +203,6 @@ void Application::setSetting(const QString& path, const QVariant& value)
 Logger& Application::getLogger()
 {
     return current()->_logger;
-}
-
-bool Application::isSerializationAborted()
-{
-    return current()->_serializationAborted;
-}
-
-void Application::setSerializationAborted(bool serializationAborted)
-{
-    current()->_serializationAborted = serializationAborted;
 }
 
 void Application::initialize()

@@ -19,10 +19,6 @@ namespace mv::util {
 
 void saveRawDataToBinaryFile(const char* bytes, const std::uint64_t& numberOfBytes, const QString& filePath)
 {
-    // Exit prematurely if the serialization process was aborted
-    if (Application::isSerializationAborted())
-        return;
-
     // Output directory
     const auto outputDirectory = QFileInfo(filePath).dir();
 
@@ -43,10 +39,6 @@ void saveRawDataToBinaryFile(const char* bytes, const std::uint64_t& numberOfByt
 
 void loadRawDataFromBinaryFile(char* bytes, const std::uint64_t& numberOfBytes, const QString& filePath)
 {
-    // Exit prematurely if the serialization process was aborted
-    if (Application::isSerializationAborted())
-        return;
-
     // Exit prematurely if the target file does not exist
     if (!QFileInfo(filePath).exists())
         throw std::runtime_error(QString("Unable to load binary file, %1 does not exist").arg(filePath).toLatin1());

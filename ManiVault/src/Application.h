@@ -207,18 +207,6 @@ public: // Logging
 public: // Serialization
 
     /**
-     * Get whether serialization was aborted
-     * @return Boolean indicating whether serialization was aborted
-     */
-    static bool isSerializationAborted();
-
-    /**
-     * Set whether serialization was aborted
-     * @param serializationAborted Boolean indicating whether serialization was aborted
-     */
-    static void setSerializationAborted(bool serializationAborted);
-
-    /**
      * Get temporary dir
      * @return Directory where application temporary files reside
      */
@@ -334,7 +322,6 @@ protected:
     const util::Version                 _version;                         /** Application version */
     QSettings                           _settings;                        /** Settings */
     QString                             _serializationTemporaryDirectory; /** Temporary directory for serialization */
-    bool                                _serializationAborted;            /** Whether serialization was aborted */
     util::Logger                        _logger;                          /** Logger instance */
     gui::TriggerAction*                 _exitAction;                      /** Action for exiting the application */
     QUrl                                _startupProjectUrl;               /** URL of the project to automatically open upon startup (if set) */

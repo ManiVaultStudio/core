@@ -48,8 +48,6 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
         printLine("Workspace JSON", context->_workspaceJsonPath, 3);
         printLine("Project JSON", context->_projectJsonPath, 3);
 #endif
-
-        //Application::setSerializationAborted(false);
     });
 
     plan.addSequentialStage("Save project JSON", [&plan]() -> void {
