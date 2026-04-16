@@ -1201,39 +1201,37 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
     fileOpenDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory",StandardPaths::getProjectsDirectory()).toString());
     fileOpenDialog.setOption(QFileDialog::DontUseNativeDialog, true);
 
+    VerticalGroupAction settingsAction(&fileOpenDialog, "Settings");
     ToggleAction disableReadOnlyAction(&fileOpenDialog, "Allow edit of published project");
     StringAction titleAction(&fileOpenDialog, "Title");
     StringAction descriptionAction(&fileOpenDialog, "Description");
     StringAction tagsAction(&fileOpenDialog, "Tags");
     StringAction commentsAction(&fileOpenDialog, "Comments");
     StringAction contributorsAction(&fileOpenDialog, "Contributors");
+    ToggleAction multiThreadingAction(&fileOpenDialog, "Multi-threading");
 
-    titleAction.setEnabled(false);
+    settingsAction.setShowLabels(true);
+    settingsAction.setLabelSizingType(VerticalGroupAction::LabelSizingType::Auto);
+
+	titleAction.setEnabled(false);
     descriptionAction.setEnabled(false);
     tagsAction.setEnabled(false);
     commentsAction.setEnabled(false);
     contributorsAction.setEnabled(false);
     disableReadOnlyAction.setEnabled(false);
+    multiThreadingAction.setEnabled(true);
+
+    settingsAction.addAction(&titleAction);
+    settingsAction.addAction(&descriptionAction);
+    settingsAction.addAction(&tagsAction);
+    settingsAction.addAction(&commentsAction);
+    settingsAction.addAction(&contributorsAction);
+    settingsAction.addAction(&disableReadOnlyAction);
+    settingsAction.addAction(&multiThreadingAction);
 
     auto* fileDialogLayout = dynamic_cast<QGridLayout*>(fileOpenDialog.layout());
-    const int rowCount = fileDialogLayout->rowCount();
 
-    fileDialogLayout->addWidget(titleAction.createLabelWidget(&fileOpenDialog), rowCount, 0);
-    fileDialogLayout->addWidget(titleAction.createWidget(&fileOpenDialog), rowCount, 1, 1, 2);
-
-    fileDialogLayout->addWidget(descriptionAction.createLabelWidget(&fileOpenDialog), rowCount + 1, 0);
-    fileDialogLayout->addWidget(descriptionAction.createWidget(&fileOpenDialog), rowCount + 1, 1, 1, 2);
-
-    fileDialogLayout->addWidget(tagsAction.createLabelWidget(&fileOpenDialog), rowCount + 2, 0);
-    fileDialogLayout->addWidget(tagsAction.createWidget(&fileOpenDialog), rowCount + 2, 1, 1, 2);
-
-    fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileOpenDialog), rowCount + 3, 0);
-    fileDialogLayout->addWidget(commentsAction.createWidget(&fileOpenDialog), rowCount + 3, 1, 1, 2);
-
-    fileDialogLayout->addWidget(contributorsAction.createLabelWidget(&fileOpenDialog), rowCount + 4, 0);
-    fileDialogLayout->addWidget(contributorsAction.createWidget(&fileOpenDialog), rowCount + 4, 1, 1, 2);
-
-    fileDialogLayout->addWidget(disableReadOnlyAction.createWidget(&fileOpenDialog), rowCount + 5, 1, 1, 2);
+    fileDialogLayout->addWidget(settingsAction.createWidget(&fileOpenDialog), fileDialogLayout->rowCount() + 1, 0, 1, 3);
 
     connect(&fileOpenDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) {
         if (!QFileInfo(filePath).isFile())
@@ -1260,7 +1258,8 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
     if (fileOpenDialog.selectedFiles().count() != 1)
         throw std::runtime_error("Only one file may be selected");
 
-    parameters._filePath = fileOpenDialog.selectedFiles().first();
+    parameters._filePath        = fileOpenDialog.selectedFiles().first();
+    parameters._concurrencyMode = multiThreadingAction.isChecked() ? WorkflowPlan::ConcurrencyMode::Parallel : WorkflowPlan::ConcurrencyMode::Sequential;
 
     Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(parameters._filePath).absolutePath());
 
@@ -1277,6 +1276,8 @@ AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSavePara
     saveFileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
     saveFileDialog.setDefaultSuffix(".mv");
     saveFileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", StandardPaths::getProjectsDirectory()).toString());
+
+    ToggleAction multiThreadingAction(&saveFileDialog, "Multi-threading");
 
     auto fileDialogLayout   = dynamic_cast<QGridLayout*>(saveFileDialog.layout());
     auto rowCount           = fileDialogLayout->rowCount();
@@ -1299,6 +1300,7 @@ AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSavePara
     settingsGroupAction.addAction(&_project->getDescriptionAction());
     settingsGroupAction.addAction(&_project->getTagsAction());
     settingsGroupAction.addAction(&_project->getCommentsAction());
+    settingsGroupAction.addAction(&multiThreadingAction);
 
     auto titleLayout = new QHBoxLayout();
 
@@ -1315,7 +1317,8 @@ AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSavePara
     if (saveFileDialog.selectedFiles().count() != 1)
         throw std::runtime_error("Only one file may be selected");
 
-    parameters._filePath = saveFileDialog.selectedFiles().first();
+    parameters._filePath        = saveFileDialog.selectedFiles().first();
+    parameters._concurrencyMode = multiThreadingAction.isChecked() ? WorkflowPlan::ConcurrencyMode::Parallel : WorkflowPlan::ConcurrencyMode::Sequential;
 
     Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(parameters._filePath).absolutePath());
 

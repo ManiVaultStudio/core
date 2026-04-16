@@ -103,8 +103,8 @@ public:
     /** Parameters for opening a project */
     struct ProjectOpenParameters
     {
-        QString _filePath;                                      /** File path of the project (choose file path when empty) */
-        util::WorkflowPlan::ConcurrencyMode _concurrencyMode;   /** Concurrency mode for opening the project (sequential or parallel) */
+        QString _filePath = "";                                                                                 /** File path of the project (choose file path when empty) */
+        util::WorkflowPlan::ConcurrencyMode _concurrencyMode = util::WorkflowPlan::ConcurrencyMode::Parallel;   /** Concurrency mode for opening the project (sequential or parallel) */
 
         /**
          * Determine whether the parameters are valid
@@ -119,8 +119,8 @@ public:
     /** Parameters for downloading a project */
     struct ProjectSaveParameters
     {
-        QString _filePath;                                      /** File path of the project (choose file path when empty) */
-        util::WorkflowPlan::ConcurrencyMode _concurrencyMode;   /** Concurrency mode for saving the project (sequential or parallel) */
+        QString _filePath = "";                                                                                 /** File path of the project (choose file path when empty) */
+        util::WorkflowPlan::ConcurrencyMode _concurrencyMode = util::WorkflowPlan::ConcurrencyMode::Parallel;   /** Concurrency mode for saving the project (sequential or parallel) */
 
         /**
          * Determine whether the parameters are valid
