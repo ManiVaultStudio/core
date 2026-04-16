@@ -370,6 +370,9 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 filePath = parameters._filePath;
         }
 
+        if (filePath.isEmpty())
+            return;
+
         emit projectAboutToBeOpened(filePath);
 	    {
 		    setState(State::OpeningProject);
@@ -1086,6 +1089,8 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
 
     VerticalGroupAction settingsAction(&fileDialog, "Settings");
     ToggleAction disableReadOnlyAction(&fileDialog, "Allow edit of published project");
+    HorizontalGroupAction projectSettingsAction(&fileDialog, "Project settings");
+    VerticalGroupAction additionalProjectSettingsAction(&fileDialog, "Additional settings");
     StringAction titleAction(&fileDialog, "Title");
     StringAction descriptionAction(&fileDialog, "Description");
     StringAction tagsAction(&fileDialog, "Tags");
@@ -1096,6 +1101,12 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
     settingsAction.setShowLabels(true);
     settingsAction.setLabelSizingType(VerticalGroupAction::LabelSizingType::Auto);
 
+    projectSettingsAction.setShowLabels(false);
+
+    additionalProjectSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    additionalProjectSettingsAction.setIconByName("ellipsis");
+    additionalProjectSettingsAction.setPopupSizeHint(QSize(400, 0));
+
 	titleAction.setEnabled(false);
     descriptionAction.setEnabled(false);
     tagsAction.setEnabled(false);
@@ -1104,16 +1115,20 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
     disableReadOnlyAction.setEnabled(false);
     multiThreadingAction.setEnabled(true);
 
-    settingsAction.addAction(&titleAction);
-    settingsAction.addAction(&descriptionAction);
-    settingsAction.addAction(&tagsAction);
-    settingsAction.addAction(&commentsAction);
-    settingsAction.addAction(&contributorsAction);
+    additionalProjectSettingsAction.addAction(&descriptionAction);
+    additionalProjectSettingsAction.addAction(&tagsAction);
+    additionalProjectSettingsAction.addAction(&commentsAction);
+    additionalProjectSettingsAction.addAction(&contributorsAction);
+
+    projectSettingsAction.addAction(&titleAction);
+    projectSettingsAction.addAction(&additionalProjectSettingsAction);
+
+    settingsAction.addAction(&projectSettingsAction);
     settingsAction.addAction(&disableReadOnlyAction);
     settingsAction.addAction(&multiThreadingAction);
 
-    if (auto fileDialogLayout = dynamic_cast<QGridLayout*>(fileDialog.layout()))
-		fileDialogLayout->addWidget(settingsAction.createWidget(&fileDialog), fileDialogLayout->rowCount() + 1, 0, 1, 3);
+    for (auto action : settingsAction.getActions())
+        addActionToFileDialog(action, &fileDialog);
 
     connect(&fileDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) {
         if (!QFileInfo(filePath).isFile())
@@ -1162,7 +1177,7 @@ AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSavePara
     GroupAction settingsAction(&fileDialog, "Settings");
     ToggleAction multiThreadingAction(&fileDialog, "Multi-threading");
     HorizontalGroupAction projectSettingsAction(&fileDialog, "Project settings");
-    VerticalGroupAction additionalSettingsAction(&fileDialog, "Additional settings");
+    VerticalGroupAction additionalProjectSettingsAction(&fileDialog, "Additional settings");
 
     settingsAction.setIconByName("gear");
     settingsAction.setToolTip("Edit project settings");
@@ -1171,15 +1186,16 @@ AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSavePara
 
     projectSettingsAction.setShowLabels(false);
 
-    additionalSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    additionalSettingsAction.setIconByName("ellipsis");
+    additionalProjectSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    additionalProjectSettingsAction.setIconByName("ellipsis");
+    additionalProjectSettingsAction.setPopupSizeHint(QSize(400, 0));
 
-    additionalSettingsAction.addAction(&_project->getDescriptionAction());
-    additionalSettingsAction.addAction(&_project->getTagsAction());
-    additionalSettingsAction.addAction(&_project->getCommentsAction());
+    additionalProjectSettingsAction.addAction(&_project->getDescriptionAction());
+    additionalProjectSettingsAction.addAction(&_project->getTagsAction());
+    additionalProjectSettingsAction.addAction(&_project->getCommentsAction());
 
     projectSettingsAction.addAction(&_project->getTitleAction());
-    projectSettingsAction.addAction(&additionalSettingsAction);
+    projectSettingsAction.addAction(&additionalProjectSettingsAction);
 
     settingsAction.addAction(&_project->getCompressionAction());
 	settingsAction.addAction(&projectSettingsAction);
@@ -1217,6 +1233,8 @@ AbstractProjectManager::ProjectPublishParameters ProjectManager::getProjectPubli
     fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory/Publish", StandardPaths::getProjectsDirectory()).toString());
 
     GroupAction settingsAction(&fileDialog, "Settings");
+    HorizontalGroupAction projectSettingsAction(&fileDialog, "Project settings");
+    VerticalGroupAction additionalProjectSettingsAction(&fileDialog, "Additional settings");
     ToggleAction multiThreadingAction(&fileDialog, "Multi-threading");
 
     settingsAction.setIconByName("gear");
@@ -1224,18 +1242,29 @@ AbstractProjectManager::ProjectPublishParameters ProjectManager::getProjectPubli
     settingsAction.setPopupSizeHint(QSize(420, 0));
     settingsAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-    settingsAction.addAction(&_project->getTitleAction());
-    settingsAction.addAction(&_project->getDescriptionAction());
-    settingsAction.addAction(&_project->getTagsAction());
-    settingsAction.addAction(&_project->getCommentsAction());
-    settingsAction.addAction(&_project->getProjectVersionAction());
-    settingsAction.addAction(&_project->getAllowedPluginsOnlyAction());
-    settingsAction.addAction(&_project->getAllowedPluginsAction());
-    settingsAction.addAction(&_project->getAllowProjectSwitchingAction());
+    projectSettingsAction.setShowLabels(false);
+
+    additionalProjectSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    additionalProjectSettingsAction.setIconByName("ellipsis");
+    additionalProjectSettingsAction.setPopupSizeHint(QSize(400, 0));
+
+    additionalProjectSettingsAction.addAction(&_project->getDescriptionAction());
+    additionalProjectSettingsAction.addAction(&_project->getTagsAction());
+    additionalProjectSettingsAction.addAction(&_project->getCommentsAction());
+    additionalProjectSettingsAction.addAction(&_project->getProjectVersionAction());
+    additionalProjectSettingsAction.addAction(&_project->getAllowedPluginsOnlyAction());
+    additionalProjectSettingsAction.addAction(&_project->getAllowedPluginsAction());
+    additionalProjectSettingsAction.addAction(&_project->getAllowProjectSwitchingAction());
+
+    projectSettingsAction.addAction(&_project->getTitleAction());
+    projectSettingsAction.addAction(&additionalProjectSettingsAction);
+
+    settingsAction.addAction(&_project->getCompressionAction());
+    settingsAction.addAction(&projectSettingsAction);
     settingsAction.addAction(&multiThreadingAction);
 
-    if (auto fileDialogLayout = dynamic_cast<QGridLayout*>(fileDialog.layout()))
-		fileDialogLayout->addWidget(settingsAction.createWidget(&fileDialog), fileDialogLayout->rowCount() + 1, 0, 1, 3);
+    for (auto action : settingsAction.getActions())
+        addActionToFileDialog(action, &fileDialog);
 
     connect(&fileDialog, &QFileDialog::currentChanged, this, [this](const QString& filePath) -> void {
         if (!QFileInfo(filePath).isFile())

@@ -12,8 +12,8 @@ CodecSettingsAction::CodecSettingsAction(QObject* parent, const QString& title) 
     _blockSizeAction(this, "Block size (MiB)", 1, 1024, 32)
 {
     setIconByName("gear");
-
     setConfigurationFlag(ConfigurationFlag::ForceCollapsedInGroup);
+    setPopupSizeHint(QSize(400, 0));
 
     _typeAction.setToolTip("Type of compression codec");
     _blockSizeAction.setToolTip("Block size (MiB) for compression");

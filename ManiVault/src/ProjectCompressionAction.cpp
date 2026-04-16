@@ -17,6 +17,7 @@ ProjectCompressionAction::ProjectCompressionAction(QObject* parent /*= nullptr*/
     _codecTypeAction(this, "Codec")
 {
     setShowLabels(false);
+
     addAction(&_codecTypeAction);
 
     QMap<QString, QString> typeNameForDisplayName;
