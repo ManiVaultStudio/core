@@ -128,6 +128,36 @@ public:
         BaseException* clone() const override { return new ProjectDownloadException(*this); }
     };
 
+    /** Parameters for opening a project */
+    struct ProjectOpenParameters
+    {
+        QString _filePath;  /** File path of the project (choose file path when empty) */
+
+        /**
+         * Determine whether the parameters are valid
+         * @return Boolean determining whether the parameters are valid (currently only checks whether the file path is not empty, but can be extended in the future if necessary)
+         */
+        [[nodiscard]] bool isValid() const
+        {
+            return !_filePath.isEmpty();
+        }
+    };
+
+    /** Parameters for downloading a project */
+    struct ProjectSaveParameters
+    {
+        QString _filePath;  /** File path of the project (choose file path when empty) */
+
+        /**
+         * Determine whether the parameters are valid
+         * @return Boolean determining whether the parameters are valid (currently only checks whether the file path is not empty, but can be extended in the future if necessary)
+         */
+        [[nodiscard]] bool isValid() const
+        {
+            return !_filePath.isEmpty();
+        }
+    };
+
 public:
 
     /**
@@ -428,6 +458,20 @@ public: // Miscellaneous
     const Task& getProjectDownloadTask() const {
         return _projectDownloadTask;
     }
+
+protected: // Operations parameters
+
+    /**
+     * Get parameters for opening a project (parameters will be obtained from a file dialog)
+     * @return Parameters for opening a project
+     */
+    virtual ProjectOpenParameters getProjectOpenParameters() const = 0;
+
+    /**
+     * Get parameters for saving a project (parameters will be obtained from a file dialog)
+     * @return Parameters for saving a project
+     */
+    virtual ProjectSaveParameters getProjectSaveParameters() const = 0;
 
 protected:
 

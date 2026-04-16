@@ -59,7 +59,7 @@ public:
      * @param parent Pointer to parent object
      * @param codecSettingsAction Codec settings action for this codec (must be a valid pointer)
      */
-    BlobCodec(QObject* parent, gui::CodecSettingsAction* codecSettingsAction);
+    BlobCodec(QObject* parent, const gui::CodecSettingsActionPtr& codecSettingsAction);
 
     /* Virtual destructor for proper cleanup in derived classes */
 	virtual ~BlobCodec() = default;
@@ -141,7 +141,7 @@ public:
     gui::CodecSettingsAction* getSettingsAction() const;
 
 private:
-    QPointer<gui::CodecSettingsAction>  _codecSettingsAction;    /* Cached settings action instance (if any) for this codec */
+    gui::CodecSettingsActionPtr  _codecSettingsAction;    /* Cached settings action instance (if any) for this codec */
 };
 
 using SharedCodec = std::shared_ptr<BlobCodec>;

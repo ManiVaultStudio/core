@@ -716,79 +716,16 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             setTemporaryDirPath(TemporaryDirType::Save, temporaryDirectory.path());
 
             if (filePath.isEmpty()) {
+                const auto parameters = getProjectSaveParameters();
 
-                FileSaveDialog saveFileDialog;
-
-                saveFileDialog.setWindowTitle("Save ManiVault Project");
-                saveFileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
-                saveFileDialog.setDefaultSuffix(".mv");
-                saveFileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", StandardPaths::getProjectsDirectory()).toString());
-
-                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(saveFileDialog.layout());
-                auto rowCount           = fileDialogLayout->rowCount();
-
-                fileDialogLayout->addWidget(_project->getCompressionAction().createLabelWidget(&saveFileDialog), rowCount + 2, 0);
-                fileDialogLayout->addWidget(_project->getCompressionAction().createWidget(&saveFileDialog), rowCount + 2, 1, 1, 2);
-
-                auto& titleAction = _project->getTitleAction();
-
-                fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount + 3, 0);
-
-                GroupAction settingsGroupAction(this, "Settings");
-
-                settingsGroupAction.setIconByName("gear");
-                settingsGroupAction.setToolTip("Edit project settings");
-                settingsGroupAction.setPopupSizeHint(QSize(420, 320));
-                settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
-
-                settingsGroupAction.addAction(&_project->getTitleAction());
-                settingsGroupAction.addAction(&_project->getDescriptionAction());
-                settingsGroupAction.addAction(&_project->getTagsAction());
-                settingsGroupAction.addAction(&_project->getCommentsAction());
-
-                auto titleLayout = new QHBoxLayout();
-
-                titleLayout->addWidget(titleAction.createWidget(&saveFileDialog));
-                titleLayout->addWidget(settingsGroupAction.createCollapsedWidget(&saveFileDialog));
-
-                fileDialogLayout->addLayout(titleLayout, rowCount + 3, 1, 1, 2);
-
-                /*
-                connect(&saveFileDialog, &QFileDialog::currentChanged, this, [this](const QString& filePath) -> void {
-                    if (!QFileInfo(filePath).isFile())
-                        return;
-
-                    const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(filePath);
-
-                    if (projectMetaAction.isNull())
-                        return;
-
-                    //_project->getCompressionAction().getEnabledAction().setChecked(projectMetaAction->getCompressionAction().getEnabledAction().isChecked());
-                    //_project->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
-                });
-                */
-
-                saveFileDialog.open();
-
-                QEventLoop eventLoop;
-                QObject::connect(&saveFileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
-                eventLoop.exec();
-
-                if (saveFileDialog.result() != QDialog::Accepted)
-                    return;
-
-                if (saveFileDialog.selectedFiles().count() != 1)
-                    throw std::runtime_error("Only one file may be selected");
-
-                filePath = saveFileDialog.selectedFiles().first();
-
-                Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(filePath).absolutePath());
+                if (parameters.isValid())
+                    filePath = parameters._filePath;
             }
             
             if (filePath.isEmpty() || QFileInfo(filePath).isDir())
                 return;
 
-            auto workflowPlan   = createProjectSaveWorkflowPlan(filePath);
+            auto workflowPlan = createProjectSaveWorkflowPlan(filePath);
 
             setTemporaryDirPath(TemporaryDirType::Save, workflowPlan.getWorkflowContextAs<ProjectSaveContext>()->_temporaryDirectory->path());
 
@@ -1330,6 +1267,65 @@ QString ProjectManager::chooseProjectFileViaDialog()
 		QFileInfo(filePath).absolutePath());
 
 	return filePath;
+}
+
+AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenParameters() const
+{
+}
+
+AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSaveParameters() const
+{
+    ProjectSaveParameters parameters;
+
+    FileSaveDialog saveFileDialog;
+
+    saveFileDialog.setWindowTitle("Save ManiVault Project");
+    saveFileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+    saveFileDialog.setDefaultSuffix(".mv");
+    saveFileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", StandardPaths::getProjectsDirectory()).toString());
+
+    auto fileDialogLayout   = dynamic_cast<QGridLayout*>(saveFileDialog.layout());
+    auto rowCount           = fileDialogLayout->rowCount();
+
+    fileDialogLayout->addWidget(_project->getCompressionAction().createLabelWidget(&saveFileDialog), rowCount + 2, 0);
+    fileDialogLayout->addWidget(_project->getCompressionAction().createWidget(&saveFileDialog), rowCount + 2, 1, 1, 2);
+
+    auto& titleAction = _project->getTitleAction();
+
+    fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount + 3, 0);
+
+    GroupAction settingsGroupAction(&saveFileDialog, "Settings");
+
+    settingsGroupAction.setIconByName("gear");
+    settingsGroupAction.setToolTip("Edit project settings");
+    settingsGroupAction.setPopupSizeHint(QSize(420, 320));
+    settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
+
+    settingsGroupAction.addAction(&_project->getTitleAction());
+    settingsGroupAction.addAction(&_project->getDescriptionAction());
+    settingsGroupAction.addAction(&_project->getTagsAction());
+    settingsGroupAction.addAction(&_project->getCommentsAction());
+
+    auto titleLayout = new QHBoxLayout();
+
+    titleLayout->addWidget(titleAction.createWidget(&saveFileDialog));
+    titleLayout->addWidget(settingsGroupAction.createCollapsedWidget(&saveFileDialog));
+
+    fileDialogLayout->addLayout(titleLayout, rowCount + 3, 1, 1, 2);
+
+    saveFileDialog.open();
+
+    if (saveFileDialog.result() != QDialog::Accepted)
+        return parameters;
+
+    if (saveFileDialog.selectedFiles().count() != 1)
+        throw std::runtime_error("Only one file may be selected");
+
+    parameters._filePath = saveFileDialog.selectedFiles().first();
+
+    Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(parameters._filePath).absolutePath());
+
+    return parameters;
 }
 
 QMenu& ProjectManager::getNewProjectMenu()

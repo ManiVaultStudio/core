@@ -205,10 +205,6 @@ public: // Workflow
     /** Reset active workflow (set it to nullptr) */
     void resetActiveWorkflow() override;
 
-private:
-
-    QString chooseProjectFileViaDialog();
-
 public: // Menus
 
     /**
@@ -257,6 +253,23 @@ private:
      * @return Future containing the resolved project file name
      */
     static QFuture<QString> resolveProjectFileNameAsync(const QUrl& url);
+
+
+    static QString chooseProjectFileViaDialog();
+
+protected: // Operations parameters
+
+    /**
+     * Get parameters for opening a project (parameters will be obtained from a file dialog)
+     * @return Parameters for opening a project
+     */
+    ProjectOpenParameters getProjectOpenParameters() const override;
+
+    /**
+     * Get parameters for saving a project (parameters will be obtained from a file dialog)
+     * @return Parameters for saving a project
+     */
+    ProjectSaveParameters getProjectSaveParameters() const override;
 
 public: // Serialization
 

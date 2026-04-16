@@ -12,9 +12,11 @@
 	#define CODEC_VERBOSE
 #endif
 
+using namespace mv::gui;
+
 namespace mv::util {
 
-BlobCodec::BlobCodec(QObject* parent, gui::CodecSettingsAction* codecSettingsAction) :
+BlobCodec::BlobCodec(QObject* parent, const CodecSettingsActionPtr& codecSettingsAction) :
     QObject(parent),
     _codecSettingsAction(codecSettingsAction)
 {
@@ -130,6 +132,9 @@ QString BlobCodec::typeToString(Type type)
 	    case Type::None:        return QStringLiteral("none");
 	    case Type::QtCompress:  return QStringLiteral("qcompress");
 	    case Type::Zstd:        return QStringLiteral("zstd");
+
+        case Type::Count:
+            break; // not a valid type, just a count of the number of types
     }
 
     return {};

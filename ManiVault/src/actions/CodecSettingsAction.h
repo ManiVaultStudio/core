@@ -39,6 +39,8 @@ private:
     IntegralAction  _blockSizeAction;   /** Block size for compression (MiB) */
 };
 
+using CodecSettingsActionPtr = QPointer<CodecSettingsAction>;
+
 }
 
 Q_DECLARE_METATYPE(mv::gui::CodecSettingsAction)
