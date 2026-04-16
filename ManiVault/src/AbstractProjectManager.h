@@ -82,35 +82,6 @@ public:
         return temporaryDirTypeNames[temporaryDirType];
     };
 
-    /** Set state for the duration of the enveloping scope, reverts to idle when the object gets out of scope */
-    class CORE_EXPORT ScopedState {
-    public:
-
-        /**
-         * Construct with initialization state
-         * @param projectManager Pointer to project manager for which to set the state
-         * @param state State at scope begin (reverts to idle when the object gets out of scope)
-         */
-        ScopedState(AbstractProjectManager* projectManager, const State& state) :
-            _projectManager(projectManager),
-            _state(state)
-        {
-            Q_ASSERT(_projectManager != nullptr);
-
-            _projectManager->setState(state);
-        }
-
-        /** Revert to idle when object goes out of scope */
-        ~ScopedState()
-        {
-            _projectManager->setState(State::Idle);
-        }
-
-    private:
-        AbstractProjectManager* _projectManager;    /** Pointer to project manager for which to set the state */
-        State                   _state;             /** State during the scope */
-    };
-
     /** Task for monitoring the progress of: */
     enum class ProjectSerializationTaskType {
         ProjectSerialization,
