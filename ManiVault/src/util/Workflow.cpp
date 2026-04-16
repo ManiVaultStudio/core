@@ -37,6 +37,7 @@ void Workflow::beginRun()
 void Workflow::endRun()
 {
     _result._duration = static_cast<quint64>(_elapsedTimer.elapsed());
+    _result._success = true;
 }
 
 void Workflow::cancel()

@@ -254,9 +254,6 @@ private:
      */
     static QFuture<QString> resolveProjectFileNameAsync(const QUrl& url);
 
-
-    static QString chooseProjectFileViaDialog();
-
 protected: // Operations parameters
 
     /**
