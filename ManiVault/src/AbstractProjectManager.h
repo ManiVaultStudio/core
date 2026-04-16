@@ -103,8 +103,8 @@ public:
     /** Parameters for opening a project */
     struct ProjectOpenParameters
     {
-        QString _filePath = "";                                                                                 /** File path of the project (choose file path when empty) */
-        util::WorkflowPlan::ConcurrencyMode _concurrencyMode = util::WorkflowPlan::ConcurrencyMode::Parallel;   /** Concurrency mode for opening the project (sequential or parallel) */
+        QString _filePath                                       = "";                                               /** File path of the project (choose file path when empty) */
+        util::WorkflowPlan::ConcurrencyMode _concurrencyMode    = util::WorkflowPlan::ConcurrencyMode::Parallel;   /** Concurrency mode for opening the project (sequential or parallel) */
 
         /**
          * Determine whether the parameters are valid
@@ -119,8 +119,24 @@ public:
     /** Parameters for downloading a project */
     struct ProjectSaveParameters
     {
-        QString _filePath = "";                                                                                 /** File path of the project (choose file path when empty) */
-        util::WorkflowPlan::ConcurrencyMode _concurrencyMode = util::WorkflowPlan::ConcurrencyMode::Parallel;   /** Concurrency mode for saving the project (sequential or parallel) */
+        QString                             _filePath           = "";                                           /** File path of the project (choose file path when empty) */
+        util::WorkflowPlan::ConcurrencyMode _concurrencyMode    = util::WorkflowPlan::ConcurrencyMode::Parallel;   /** Concurrency mode for saving the project (sequential or parallel) */
+
+        /**
+         * Determine whether the parameters are valid
+         * @return Boolean determining whether the parameters are valid (currently only checks whether the file path is not empty, but can be extended in the future if necessary)
+         */
+        [[nodiscard]] bool isValid() const
+        {
+            return !_filePath.isEmpty();
+        }
+    };
+
+    /** Parameters for publishing a project */
+    struct ProjectPublishParameters
+    {
+        QString                             _filePath           = "";                                               /** File path of the project (choose file path when empty) */
+        util::WorkflowPlan::ConcurrencyMode _concurrencyMode    = util::WorkflowPlan::ConcurrencyMode::Parallel;    /** Concurrency mode for saving the project (sequential or parallel) */
 
         /**
          * Determine whether the parameters are valid
@@ -446,6 +462,12 @@ protected: // Operations parameters
      * @return Parameters for saving a project
      */
     virtual ProjectSaveParameters getProjectSaveParameters() const = 0;
+
+    /**
+     * Get parameters for publishing a project (parameters will be obtained from a file dialog)
+     * @return Parameters for publishing a project
+     */
+    virtual ProjectPublishParameters getProjectPublishParameters() const = 0;
 
 protected:
 

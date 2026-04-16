@@ -5,6 +5,7 @@
 #pragma once
 
 #include <AbstractProjectManager.h>
+#include <QFileDialog>
 
 #include "WorkflowPlanExecutor.h"
 
@@ -254,6 +255,13 @@ private:
      */
     static QFuture<QString> resolveProjectFileNameAsync(const QUrl& url);
 
+    /**
+     * Add \p action to the file dialog \p fileDialog
+     * @param action Widget action to add to the file dialog
+     * @param fileDialog File dialog to which the action is added
+     */
+    static void addActionToFileDialog(gui::WidgetAction* action, QFileDialog* fileDialog);
+
 protected: // Operations parameters
 
     /**
@@ -267,6 +275,12 @@ protected: // Operations parameters
      * @return Parameters for saving a project
      */
     ProjectSaveParameters getProjectSaveParameters() const override;
+
+    /**
+     * Get parameters for publishing a project (parameters will be obtained from a file dialog)
+     * @return Parameters for publishing a project
+     */
+    ProjectPublishParameters getProjectPublishParameters() const override;
 
 public: // Serialization
 
