@@ -597,10 +597,15 @@ set(PUBLIC_UTIL_HEADERS
     src/util/CodecRegistry.h
     src/util/CodecActionBinding.h
     src/util/DecodeExecutor.h
-    src/util/WorkflowRuntimeContext.h
+    src/util/WorkflowExecutionContext.h
+    src/util/WorkflowExecutionScope.h
     src/util/WorkflowContextBase.h
     src/util/WorkflowResult.h
     src/util/Workflow.h
+    src/util/WorkflowMessage.h
+    src/util/WorkflowReportNode.h
+    src/util/WorkflowProgressNode.h
+    src/util/WorkflowReporter.h
     src/util/DecodeRequestState.h
     src/util/WorkflowPlan.h
     src/util/AbstractWorkflowPlanExecutor.h
@@ -676,8 +681,13 @@ set(PUBLIC_UTIL_SOURCES
     src/util/DecodeExecutor.cpp
     src/util/WorkflowContextBase.cpp
     src/util/WorkflowResult.cpp
-    src/util/WorkflowRuntimeContext.cpp
+    src/util/WorkflowExecutionContext.cpp
+    src/util/WorkflowExecutionScope.cpp
     src/util/Workflow.cpp
+    src/util/WorkflowMessage.cpp
+    src/util/WorkflowReportNode.cpp
+    src/util/WorkflowProgressNode.cpp
+    src/util/WorkflowReporter.cpp
     src/util/DecodeRequestState.cpp
     src/util/WorkflowPlan.cpp
     src/util/AbstractWorkflowPlanExecutor.cpp
