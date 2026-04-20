@@ -32,7 +32,7 @@ add_library(${DATAPROPERTIESPLUGIN} SHARED ${DATAPROPERTIES_SOURCES})
 
 target_include_directories(${DATAPROPERTIESPLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${DATAPROPERTIESPLUGIN} PRIVATE cxx_std_20)
+target_compile_features(${DATAPROPERTIESPLUGIN} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
 target_link_libraries(${DATAPROPERTIESPLUGIN} PRIVATE Qt6::Core)
 target_link_libraries(${DATAPROPERTIESPLUGIN} PRIVATE Qt6::Widgets)

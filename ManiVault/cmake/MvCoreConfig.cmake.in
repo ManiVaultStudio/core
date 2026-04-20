@@ -6,6 +6,8 @@ set(ManiVault_INCLUDE_DIR "${ManiVault_INSTALL_DIR}/$<CONFIGURATION>/include")
 set(ManiVault_LIB_DIR "${ManiVault_INSTALL_DIR}/$<CONFIGURATION>/lib")
 set_and_check(ManiVault_CMAKE_DIR "${PACKAGE_PREFIX_DIR}/cmake/mv" CACHE INTERNAL "")
 
+set(ManiVault_CXX_STANDARD @MV_CXX_STANDARD@)
+
 list(APPEND ManiVault_LINK_LIBS ManiVault::Core ManiVault::PointData ManiVault::ClusterData ManiVault::ImageData ManiVault::ColorData ManiVault::TextData)
 
 include("${ManiVault_CMAKE_DIR}/ManiVaultTargets.cmake")
