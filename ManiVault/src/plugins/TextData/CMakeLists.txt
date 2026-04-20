@@ -44,8 +44,11 @@ target_link_libraries(${TEXTDATA} PRIVATE Qt6::Widgets)
 target_link_libraries(${TEXTDATA} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${TEXTDATA} PRIVATE ${MV_PUBLIC_LIB})
 
-set_target_properties(${TEXTDATA} PROPERTIES PUBLIC_HEADER "${TEXTDATA_HEADERS}")
-set_target_properties(${TEXTDATA} PROPERTIES AUTOMOC ON)
+set_target_properties(${TEXTDATA} PROPERTIES
+    AUTOMOC ON
+    UNITY_BUILD ${MV_UNITY_BUILD}
+    PUBLIC_HEADER "${TEXTDATA_HEADERS}"
+)
 
 install(TARGETS ${TEXTDATA}
     EXPORT "ManiVaultPublicExport"

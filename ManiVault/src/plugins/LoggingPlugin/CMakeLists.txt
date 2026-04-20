@@ -40,7 +40,10 @@ target_link_libraries(${LOGGINGPLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${LOGGINGPLUGIN} ${MV_USE_AVX})
 
-set_target_properties(${LOGGINGPLUGIN} PROPERTIES AUTOMOC ON)
+set_target_properties(${LOGGINGPLUGIN} PROPERTIES
+    AUTOMOC ON
+    UNITY_BUILD ${MV_UNITY_BUILD}
+)
 
 install(TARGETS ${LOGGINGPLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll

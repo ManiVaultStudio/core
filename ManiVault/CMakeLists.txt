@@ -263,6 +263,7 @@ set_target_properties(${MV_PUBLIC_LIB} PROPERTIES
     AUTOMOC ON
     PROJECT_LABEL "MV_Public"       # Set the project name in VS different to the target name
     OUTPUT_NAME "MV_Public"         # Set the library output name different to the target name
+    UNITY_BUILD ${MV_UNITY_BUILD}
 )
 
 target_sources(${MV_PUBLIC_LIB}
@@ -307,10 +308,6 @@ if(MV_PRECOMPILE_HEADERS)
     )
 endif()
 
-if(MV_UNITY_BUILD)
-    set_target_properties(${MV_PUBLIC_LIB} PROPERTIES UNITY_BUILD ON)
-endif()
-
 # -----------------------------------------------------------------------------
 # Target MV_EXE
 # -----------------------------------------------------------------------------
@@ -319,6 +316,7 @@ add_executable(${MV_EXE} MACOSX_BUNDLE WIN32)
 set_target_properties(${MV_EXE} PROPERTIES
     AUTOMOC ON
     OUTPUT_NAME ${MV_APPLICATION_NAME}
+    UNITY_BUILD ${MV_UNITY_BUILD}
 )
 
 target_sources(${MV_EXE}
@@ -384,10 +382,6 @@ if(MV_PRECOMPILE_HEADERS)
     target_precompile_headers(${MV_EXE} PRIVATE 
         ${PRECOMPILE_HEADERS}
     )
-endif()
-
-if(MV_UNITY_BUILD)
-    set_target_properties(${MV_EXE} PROPERTIES UNITY_BUILD ON)
 endif()
 
 if(APPLE)

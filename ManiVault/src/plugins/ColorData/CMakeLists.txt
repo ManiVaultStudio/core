@@ -38,8 +38,11 @@ target_link_libraries(${COLORDATA} PRIVATE Qt6::Widgets)
 target_link_libraries(${COLORDATA} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${COLORDATA} PRIVATE ${MV_PUBLIC_LIB})
 
-set_target_properties(${COLORDATA} PROPERTIES PUBLIC_HEADER "${COLORDATA_HEADERS}")
-set_target_properties(${COLORDATA} PROPERTIES AUTOMOC ON)
+set_target_properties(${COLORDATA} PROPERTIES
+    AUTOMOC ON
+    UNITY_BUILD ${MV_UNITY_BUILD}
+    PUBLIC_HEADER "${COLORDATA_HEADERS}"
+)
 
 install(TARGETS ${COLORDATA}
     EXPORT "ManiVaultPublicExport"

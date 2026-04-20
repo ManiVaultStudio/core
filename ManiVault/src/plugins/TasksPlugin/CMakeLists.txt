@@ -35,7 +35,10 @@ target_link_libraries(${TASKS_PLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${TASKS_PLUGIN} ${MV_USE_AVX})
 
-set_target_properties(${TASKS_PLUGIN} PROPERTIES AUTOMOC ON)
+set_target_properties(${TASKS_PLUGIN} PROPERTIES
+    AUTOMOC ON
+    UNITY_BUILD ${MV_UNITY_BUILD}
+)
 
 install(TARGETS ${TASKS_PLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll

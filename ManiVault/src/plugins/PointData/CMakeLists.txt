@@ -111,12 +111,11 @@ if(UNIX AND NOT APPLE)
    target_link_libraries(${POINTDATA} PRIVATE TBB::tbb)
 endif()
 
-if(MV_UNITY_BUILD)
-    set_target_properties(${POINTDATA} PROPERTIES UNITY_BUILD ON)
-endif()
-
-set_target_properties(${POINTDATA} PROPERTIES PUBLIC_HEADER "${POINTS_HEADERS}")
-set_target_properties(${POINTDATA} PROPERTIES AUTOMOC ON)
+set_target_properties(${POINTDATA} PROPERTIES
+    AUTOMOC ON
+    UNITY_BUILD ${MV_UNITY_BUILD}
+    PUBLIC_HEADER "${POINTS_HEADERS}"
+)
 
 install(TARGETS ${POINTDATA}
     EXPORT "ManiVaultPublicExport"
