@@ -159,6 +159,7 @@ class HdpsCoreConan(ConanFile):
         MV_USE_ERROR_LOGGING = "ON"
         MV_PRECOMPILE_HEADERS = "ON"
         MV_UNITY_BUILD = "ON"
+        MV_RELWITHDEBUGINFO = "ON"
 
         # Do not use some options on the release builds 
         current_branch_name = self.get_current_branch_name()
@@ -174,6 +175,7 @@ class HdpsCoreConan(ConanFile):
         tc.variables["MV_PRECOMPILE_HEADERS"] = MV_PRECOMPILE_HEADERS
         tc.variables["MV_UNITY_BUILD"] = MV_UNITY_BUILD
         tc.variables["MV_USE_ERROR_LOGGING"] = MV_USE_ERROR_LOGGING
+        tc.variables["MV_RELWITHDEBUGINFO"] = MV_RELWITHDEBUGINFO
         
         try:
             tc.generate()
