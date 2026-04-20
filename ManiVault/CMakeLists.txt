@@ -555,6 +555,7 @@ install(FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_install_dependencies.cmake.in"
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_check_and_set_AVX.cmake"
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_plugin_meta_data.cmake"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_project_defaults.cmake"
         DESTINATION cmake/mv
         COMPONENT MVPUBLIC_CMAKE_HELPER
 )
