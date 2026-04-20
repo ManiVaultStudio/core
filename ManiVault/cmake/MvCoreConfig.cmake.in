@@ -18,6 +18,7 @@ check_required_components("@PROJECT_NAME@")
 include("${ManiVault_CMAKE_DIR}/mv_install_dependencies_utils.cmake")
 include("${ManiVault_CMAKE_DIR}/mv_check_and_set_AVX.cmake")
 include("${ManiVault_CMAKE_DIR}/mv_plugin_meta_data.cmake")
+include("${ManiVault_CMAKE_DIR}/mv_project_defaults.cmake")
 
 message(STATUS "Found ManiVault version ${ManiVault_VERSION}. Use for example as:")
 message(STATUS "   find_package(ManiVault COMPONENTS Core PointData ClusterData ImageData ColorData TextData CONFIG)")
