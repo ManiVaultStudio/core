@@ -391,14 +391,16 @@ if(MV_UNITY_BUILD)
 endif()
 
 if(APPLE)
-    # Find libraries relative to the executable in the macOS .app tree
-    set_target_properties(${MV_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
 
-    # Debug ManiVault Studio from the install directory
-    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_WORKING_DIRECTORY "$<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>")   
-    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING NO)
-    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_EXECUTABLE "${MV_INSTALL_DIR}/Debug/ManiVault Studio.app")
-    
+    set_target_properties(${MV_EXE} PROPERTIES
+        # Find libraries relative to the executable in the macOS .app tree
+        BUILD_WITH_INSTALL_RPATH True
+        # Debug ManiVault Studio from the install directory
+        XCODE_SCHEME_WORKING_DIRECTORY "$<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>"
+        XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING NO
+        XCODE_SCHEME_EXECUTABLE "${MV_INSTALL_DIR}/Debug/ManiVault Studio.app"
+    )
+
 endif()
 
 # -----------------------------------------------------------------------------
