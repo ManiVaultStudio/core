@@ -42,6 +42,10 @@ include(mv_install_dependencies_utils)
 # Helper function to handle plugin meta data
 include(mv_plugin_meta_data)
 
+# Set OS specific compiler and build settings
+include(mv_project_defaults)
+mv_project_defaults()
+
 # Generate a header file that contains the EXPORT macro for public libraries
 include(GenerateExportHeader)
 
@@ -55,67 +59,6 @@ if(${MV_USE_ERROR_LOGGING})
     # Check for size of long (used in sentry)
     include(CheckTypeSize)
     check_type_size("long" CMAKE_SIZEOF_LONG)
-endif()
-
-# -----------------------------------------------------------------------------
-# Apple settings
-# -----------------------------------------------------------------------------
-if(APPLE)
-    # These are the properties for the Info.plist in the mac bindle
-    set(MACOSX_BUNDLE_BUNDLE_NAME "ManiVault Studio")
-    set(MACOSX_BUNDLE_PATHNAME "ManiVault\ Studio")
-    set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
-    set(MACOSX_BUNDLE_LONG_VERSION_STRING "1.0")
-    set(MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0")
-    set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2023. All rights reserved.")
-    set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.biovault.mv")
-    set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
-
-    # use, i.e. don't skip the full RPATH for the build tree
-    set(CMAKE_SKIP_BUILD_RPATH  FALSE)
-
-    # when building, don't use the install RPATH already
-    # (but later on when installing)
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-
-    set(CMAKE_INSTALL_RPATH "@loader_path")
-
-    # add the automatically determined parts of the RPATH
-    # which point to directories outside the build tree to the install RPATH
-    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-    
-    set(CMAKE_XCODE_GENERATE_SCHEME ON)
-endif()
-
-
-# -----------------------------------------------------------------------------
-# Other Unix settings
-# -----------------------------------------------------------------------------
-if(UNIX AND NOT APPLE)
-    # use, i.e. don't skip the full RPATH for the build tree
-    set(CMAKE_SKIP_BUILD_RPATH  FALSE)
-
-    # when building, don't use the install RPATH already
-    # (but later on when installing)
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-
-    set(CMAKE_INSTALL_RPATH "${MV_INSTALL_DIR}/$<CONFIGURATION>/lib")
-
-    # add the automatically determined parts of the RPATH
-    # which point to directories outside the build tree to the install RPATH
-    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-endif()
-
-
-# -----------------------------------------------------------------------------
-# Windows compiler and linker flags
-# -----------------------------------------------------------------------------
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MD")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif()
 
 # -----------------------------------------------------------------------------
@@ -517,6 +460,16 @@ endforeach()
 
 # Install the ManiVault executable 
 if(APPLE)
+    # These are the properties for the Info.plist in the mac bundle
+    set(MACOSX_BUNDLE_BUNDLE_NAME "ManiVault Studio")
+    set(MACOSX_BUNDLE_PATHNAME "ManiVault\ Studio")
+    set(MACOSX_BUNDLE_BUNDLE_VERSION "${MV_VERSION_MAJOR}.${MV_VERSION_MINOR}")
+    set(MACOSX_BUNDLE_LONG_VERSION_STRING "${MV_VERSION_MAJOR}.${MV_VERSION_MINOR}.${MV_VERSION_PATCH}")
+    set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${MV_VERSION_MAJOR}.${MV_VERSION_MINOR}")
+    set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2023. All rights reserved.")
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.biovault.mv")
+    set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
+
     # set(BUNDLE_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
     set(BUNDLE_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/ManiVault Studio.app")
     set(WEBENGINEINSTALL_CMD "${CMAKE_CURRENT_SOURCE_DIR}/macos_webengineinstall.sh")
@@ -612,6 +565,12 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION .                COMPONENT MV_EXECUTABLE    CONFIGURATIONS "Debug" OPTIONAL)
     install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION $<CONFIGURATION> COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "RelWithDebInfo" OPTIONAL)
     install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION .                COMPONENT MV_EXECUTABLE    CONFIGURATIONS "RelWithDebInfo" OPTIONAL)
+
+    if(MV_RELWITHDEBUGINFO)
+        install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION $<CONFIGURATION> COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "Release" OPTIONAL)
+        install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION .                COMPONENT MV_EXECUTABLE    CONFIGURATIONS "Release" OPTIONAL)
+    endif()
+
 endif()
 
 # Generate the version file for use with find_package
