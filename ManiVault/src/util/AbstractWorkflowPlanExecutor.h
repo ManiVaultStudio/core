@@ -18,7 +18,11 @@ class CORE_EXPORT AbstractWorkflowPlanExecutor : public QObject
 {
 public:
 
-    [[nodiscard]] virtual WorkflowResult execute(WorkflowPlan& workflowPlan, Task* task = nullptr) = 0;
+    using ProgressCallback = std::function<void(double)>;
+
+public:
+
+    [[nodiscard]] virtual WorkflowResult execute(WorkflowPlan& workflowPlan, Task* task = nullptr, ProgressCallback progressCallback = {}) = 0;
 
 protected:
 
@@ -35,10 +39,10 @@ protected:
     }
 
 private:
-    virtual WorkflowResult executeRoot(const WorkflowPlan& workflowPlan, Task* task) = 0;
+    virtual WorkflowResult executeRoot(const WorkflowPlan& workflowPlan) = 0;
     virtual WorkflowResult executeChild(const WorkflowPlan& workflowPlan, WorkflowExecutionContext& parentContext) = 0;
     virtual void executeImpl(const WorkflowPlan& workflowPlan) = 0;
-    virtual void executeStage(const WorkflowPlan::Stage& stage) = 0;
+    virtual void executeStage(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) = 0;
     virtual void executeSequentialJobs(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) = 0;
     virtual void executeParallelJobs(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) = 0;
 

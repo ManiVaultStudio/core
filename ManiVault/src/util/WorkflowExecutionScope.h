@@ -15,15 +15,17 @@ class WorkflowExecutionScope
 public:
     explicit WorkflowExecutionScope(WorkflowExecutionContext& context)
         : _previous(WorkflowExecutionContext::current())
+        , _context(&context)
     {
-        WorkflowExecutionContext::setCurrent(&context);
+        WorkflowExecutionContext::setCurrent(_context);
     }
 
-    explicit WorkflowExecutionScope(const WorkflowExecutionContext& context)
+    explicit WorkflowExecutionScope(std::unique_ptr<WorkflowExecutionContext> ownedContext)
         : _previous(WorkflowExecutionContext::current())
-        , _ownedContext(std::make_unique<WorkflowExecutionContext>(context))
+        , _ownedContext(std::move(ownedContext))
+        , _context(_ownedContext.get())
     {
-        WorkflowExecutionContext::setCurrent(_ownedContext.get());
+        WorkflowExecutionContext::setCurrent(_context);
     }
 
     ~WorkflowExecutionScope()
@@ -31,15 +33,10 @@ public:
         WorkflowExecutionContext::setCurrent(_previous);
     }
 
-    WorkflowExecutionScope(const WorkflowExecutionScope&) = delete;
-    WorkflowExecutionScope& operator=(const WorkflowExecutionScope&) = delete;
-
-    WorkflowExecutionScope(WorkflowExecutionScope&&) = delete;
-    WorkflowExecutionScope& operator=(WorkflowExecutionScope&&) = delete;
-
 private:
     WorkflowExecutionContext* _previous = nullptr;
     std::unique_ptr<WorkflowExecutionContext> _ownedContext;
+    WorkflowExecutionContext* _context = nullptr;
 };
 
 }

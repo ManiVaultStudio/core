@@ -12,6 +12,11 @@
 #include <QJsonDocument>
 #include <QVariant>
 
+namespace mv
+{
+    class Task;
+}
+
 namespace mv::util
 {
 
@@ -138,12 +143,11 @@ public:
 	void addParallelStage(QString name, Jobs jobs);
     void addStage(QString name, ConcurrencyMode mode, Jobs jobs);
 
-    WorkflowResult execute(AbstractWorkflowPlanExecutor& workflowPlanExecutor);
+    WorkflowResult execute(AbstractWorkflowPlanExecutor& workflowPlanExecutor, Task* task = nullptr);
 
     Stages getStages() const { return _stages; }
     SharedState getSharedState() const { return _sharedState; }
     SharedWorkflowContext getWorkflowContext() const { return _workflowContext; }
-
     template<typename WorkflowContextType>
     std::shared_ptr<WorkflowContextType> getWorkflowContextAs() const
     {

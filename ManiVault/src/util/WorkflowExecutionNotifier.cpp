@@ -2,9 +2,20 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "WorkflowMessage.h"
+#include "WorkflowExecutionNotifier.h"
 
 namespace mv::util
 {
+
+WorkflowExecutionNotifier::WorkflowExecutionNotifier(QObject* parent): QObject(parent)
+{
+}
+
+void WorkflowExecutionNotifier::setTask(Task* task)
+{
+	connect(this, &WorkflowExecutionNotifier::progressChanged, task, [task](double overallProgress) {
+        task->setProgress(overallProgress);
+	}, Qt::QueuedConnection);
+}
 
 }

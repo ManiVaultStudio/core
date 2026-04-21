@@ -22,127 +22,40 @@ public:
     using ProgressNodePtr = WorkflowProgressNode::Ptr;
     using StatePtr = WorkflowExecutionState::Ptr;
 
-    WorkflowExecutionContext() = default;
+    WorkflowExecutionContext();
 
     WorkflowExecutionContext(const QString& name,
         const ReportNodePtr& reportNode,
         const ProgressNodePtr& progressNode,
-        const StatePtr& state, Task* task = nullptr)
-        : _name(name)
-        , _reportNode(reportNode)
-        , _progressNode(progressNode)
-        , _state(state)
-        , _task(task)
-    {
-    }
+        const StatePtr& state);
 
-    static WorkflowExecutionContext makeRoot(const QString& name, Task* task = nullptr)
-    {
-        auto reportRoot = std::make_shared<WorkflowReportNode>(name);
-        auto progressRoot = std::make_shared<WorkflowProgressNode>(1.0);
-        auto state = std::make_shared<WorkflowExecutionState>(reportRoot, progressRoot);
+    static WorkflowExecutionContext makeRoot(const QString& name);
 
-        return WorkflowExecutionContext(name, reportRoot, progressRoot, state);
-    }
+    WorkflowExecutionContext createChild(const QString& name, double weight = 1.0) const;
 
-    WorkflowExecutionContext createChild(const QString& name, double weight = 1.0) const
-    {
-        if (!_reportNode || !_progressNode || !_state)
-            return {};
+    bool hasProgressChildren() const;
 
-        return WorkflowExecutionContext(
-            name,
-            _reportNode->createChild(name),
-            _progressNode->createChild(weight),
-            _state,
-            _task
-        );
-    }
+    bool isValid() const;
 
-    bool isValid() const
-    {
-        return static_cast<bool>(_reportNode)
-            && static_cast<bool>(_progressNode)
-            && static_cast<bool>(_state);
-    }
+    QString getName() const;
 
-    QString getName() const
-    {
-        return _name;
-    }
+    void info(const QString& text, const QString& source = {}) const;
 
-    void info(const QString& text, const QString& source = {}) const
-    {
-        if (_reportNode)
-            _reportNode->addMessage(WorkflowMessageLevel::Info, source, text);
+    void warning(const QString& text, const QString& source = {}) const;
 
-        if (_state)
-            _state->notifyMessagesChanged();
+    void error(const QString& text, const QString& source = {}) const;
 
-        //if (_task)
-        //    _task->setStatusText(text);
-    }
+    void setProgress(double value) const;
 
-    void warning(const QString& text, const QString& source = {}) const
-    {
-        if (_reportNode)
-            _reportNode->addMessage(WorkflowMessageLevel::Warning, source, text);
+    double getProgress() const;
 
-        if (_state)
-            _state->notifyMessagesChanged();
+    ReportNodePtr getReportNode() const;
 
-        //if (_task)
-        //    _task->addWarning(text);
-    }
+    ProgressNodePtr getProgressNode() const;
 
-    void error(const QString& text, const QString& source = {}) const
-    {
-        if (_reportNode)
-            _reportNode->addMessage(WorkflowMessageLevel::Error, source, text);
+    StatePtr getState() const;
 
-        if (_state)
-            _state->notifyMessagesChanged();
-
-        //if (_task)
-        //    _task->addError(text);
-    }
-
-    void setProgress(double value) const
-    {
-        if (_progressNode)
-            _progressNode->setProgress(value);
-
-        if (_state)
-            _state->notifyProgressChanged();
-
-        if (_task && _state)
-            _task->setProgress(_state->getOverallProgress());
-    }
-
-    double getProgress() const
-    {
-        return _progressNode ? _progressNode->getProgress() : 0.0;
-    }
-
-    ReportNodePtr getReportNode() const
-    {
-        return _reportNode;
-    }
-
-    ProgressNodePtr getProgressNode() const
-    {
-        return _progressNode;
-    }
-
-    StatePtr getState() const
-    {
-        return _state;
-    }
-
-    Task* getTask() const
-    {
-        return _task;
-    }
+    Task& getTask();
 
     static WorkflowExecutionContext* current();
 
@@ -158,7 +71,7 @@ private:
     ReportNodePtr _reportNode;
     ProgressNodePtr _progressNode;
     StatePtr _state;
-    Task* _task = nullptr;
+    Task* _task;
 };
 
 

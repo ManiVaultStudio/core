@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #include "WorkflowPlan.h"
+#include "Task.h"
 
 #ifdef _DEBUG
 	#define WORKFLOW_PLAN_VERBOSE
@@ -158,9 +159,9 @@ void WorkflowPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs)
 	}
 }
 
-WorkflowResult WorkflowPlan::execute(AbstractWorkflowPlanExecutor& workflowPlanExecutor)
+WorkflowResult WorkflowPlan::execute(AbstractWorkflowPlanExecutor& workflowPlanExecutor, Task* task)
 {
-    return workflowPlanExecutor.execute(*this);
+    return workflowPlanExecutor.execute(*this, task);
 }
 
 }

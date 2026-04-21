@@ -12,6 +12,140 @@ namespace
     thread_local WorkflowExecutionContext* currentWorkflowExecutionContext = nullptr;
 }
 
+WorkflowExecutionContext::WorkflowExecutionContext() = default;
+
+WorkflowExecutionContext::WorkflowExecutionContext(const QString& name, const ReportNodePtr& reportNode, const ProgressNodePtr& progressNode, const StatePtr& state) :
+	_name(name)
+	, _reportNode(reportNode)
+	, _progressNode(progressNode)
+	, _state(state)
+    , _task(new Task(nullptr, name, { Task::GuiScope::Modal }))
+{
+    //_state->getNotifier()->setTask(task);
+}
+
+WorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString& name)
+{
+	auto reportRoot   = std::make_shared<WorkflowReportNode>(name);
+	auto progressRoot = std::make_shared<WorkflowProgressNode>(1.0);
+	auto state        = std::make_shared<WorkflowExecutionState>(reportRoot, progressRoot);
+
+	return {
+		name,
+		reportRoot,
+		progressRoot,
+		state
+	};
+}
+
+WorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& name, double weight) const
+{
+	if (!_reportNode || !_progressNode || !_state)
+		return {};
+
+	return {
+		name,
+		_reportNode->createChild(name),
+		_progressNode->createChild(weight),
+		_state
+    };
+}
+
+bool WorkflowExecutionContext::hasProgressChildren() const
+{
+	return _progressNode ? _progressNode->hasChildren() : false;
+}
+
+bool WorkflowExecutionContext::isValid() const
+{
+	return static_cast<bool>(_reportNode)
+		&& static_cast<bool>(_progressNode)
+		&& static_cast<bool>(_state);
+}
+
+QString WorkflowExecutionContext::getName() const
+{
+	return _name;
+}
+
+void WorkflowExecutionContext::info(const QString& text, const QString& source) const
+{
+	if (_reportNode)
+		_reportNode->addMessage(WorkflowMessageLevel::Info, source, text);
+
+	if (_state)
+		_state->notifyMessagesChanged();
+
+	//if (_task)
+	//    _task->setStatusText(text);
+}
+
+void WorkflowExecutionContext::warning(const QString& text, const QString& source) const
+{
+	if (_reportNode)
+		_reportNode->addMessage(WorkflowMessageLevel::Warning, source, text);
+
+	if (_state)
+		_state->notifyMessagesChanged();
+
+	//if (_task)
+	//    _task->addWarning(text);
+}
+
+void WorkflowExecutionContext::error(const QString& text, const QString& source) const
+{
+	if (_reportNode)
+		_reportNode->addMessage(WorkflowMessageLevel::Error, source, text);
+
+	if (_state)
+		_state->notifyMessagesChanged();
+
+	//if (_task)
+	//    _task->addError(text);
+}
+
+void WorkflowExecutionContext::setProgress(double value) const
+{
+	if (_progressNode)
+		_progressNode->setProgress(value);
+
+	const double overall = _state ? _state->getOverallProgress() : 0.0;
+
+	qDebug() << "Setting local progress of context" << _name << "to" << value
+		<< ", overall progress =" << overall;
+
+	if (_state)
+		_state->notifyProgressChanged();
+
+	//if (_task && _state)
+	//	_task->setProgress(overall);
+}
+
+double WorkflowExecutionContext::getProgress() const
+{
+	return _progressNode ? _progressNode->getProgress() : 0.0;
+}
+
+WorkflowExecutionContext::ReportNodePtr WorkflowExecutionContext::getReportNode() const
+{
+	return _reportNode;
+}
+
+WorkflowExecutionContext::ProgressNodePtr WorkflowExecutionContext::getProgressNode() const
+{
+	return _progressNode;
+}
+
+WorkflowExecutionContext::StatePtr WorkflowExecutionContext::getState() const
+{
+	return _state;
+}
+
+Task& WorkflowExecutionContext::getTask()
+{
+	return *_task;
+}
+
 WorkflowExecutionContext* WorkflowExecutionContext::current()
 {
 	return currentWorkflowExecutionContext;

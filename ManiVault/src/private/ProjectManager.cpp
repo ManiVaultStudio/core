@@ -21,6 +21,8 @@
 #include <util/Serialization.h>
 #include <util/StandardPaths.h>
 
+#include <ModalTask.h>
+
 #include <widgets/FileDialog.h>
 
 #include <QGridLayout>
@@ -379,8 +381,10 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             const auto stateGuard = qScopeGuard([this]() { setState(State::Idle); });
 
+            ModalTask task(this, "Opening project...");
+
         	auto projectOpenWorkflowPlan    = createProjectOpenWorkflowPlan(filePath);
-        	auto workflowResult             = projectOpenWorkflowPlan.execute(_workflowPlanExecutor);
+        	auto workflowResult             = projectOpenWorkflowPlan.execute(_workflowPlanExecutor, &task);
 
         	if (auto currentProject = mv::projects().getCurrentProject()) {
         		const auto duration     = workflowResult.getDuration();

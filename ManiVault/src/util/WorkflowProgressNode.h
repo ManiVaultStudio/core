@@ -8,6 +8,9 @@
 
 #include <QString>
 #include <QDateTime>
+#include <QMutex>
+#include <QVector>
+#include <QDebug>
 
 namespace mv::util
 {
@@ -17,64 +20,17 @@ class WorkflowProgressNode
 public:
     using Ptr = std::shared_ptr<WorkflowProgressNode>;
 
-    explicit WorkflowProgressNode(double weight = 1.0)
-        : _weight(weight)
-    {
-    }
+    explicit WorkflowProgressNode(double weight = 1.0);
 
-    Ptr createChild(double weight)
-    {
-        QMutexLocker lock(&_mutex);
+    Ptr createChild(double weight);
 
-        auto child = std::make_shared<WorkflowProgressNode>(weight);
-        _children.push_back(child);
-        return child;
-    }
+    bool hasChildren() const;
 
-    void setProgress(double value)
-    {
-        value = std::clamp(value, 0.0, 1.0);
+    void setProgress(double value);
 
-        QMutexLocker lock(&_mutex);
-        _selfProgress = value;
-    }
+    double getProgress() const;
 
-    double getProgress() const
-    {
-        QVector<Ptr> childrenCopy;
-        double selfProgress = 0.0;
-
-        {
-            QMutexLocker lock(&_mutex);
-
-            if (_children.isEmpty())
-                return _selfProgress;
-
-            childrenCopy = _children;
-            selfProgress = _selfProgress;
-            Q_UNUSED(selfProgress);
-        }
-
-        double weightSum = 0.0;
-        double weightedProgress = 0.0;
-
-        for (const auto& child : childrenCopy) {
-            const double weight = child->getWeight();
-            weightSum += weight;
-            weightedProgress += child->getProgress() * weight;
-        }
-
-        if (weightSum <= 0.0)
-            return 0.0;
-
-        return weightedProgress / weightSum;
-    }
-
-    double getWeight() const
-    {
-        QMutexLocker lock(&_mutex);
-        return _weight;
-    }
+    double getWeight() const;
 
 private:
     double _weight = 1.0;

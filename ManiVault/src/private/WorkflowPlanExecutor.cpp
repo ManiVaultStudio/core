@@ -16,7 +16,7 @@
 using namespace mv;
 using namespace mv::util;
 
-WorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, mv::Task* task /*= nullptr*/)
+WorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, mv::Task* task /*= nullptr*/, ProgressCallback progressCallback /*= {}*/)
 {
     WorkflowResult result;
 
@@ -25,23 +25,23 @@ WorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, mv::Tas
         if (auto* currentContext = WorkflowExecutionContext::current())
             result = executeChild(workflowPlan, *currentContext);
         else
-            result = executeRoot(workflowPlan, task);
+            result = executeRoot(workflowPlan);
     }
     endTimer(result);
 
     return result;
 }
 
-WorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workflowPlan, Task* task)
+WorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workflowPlan)
 {
-    auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task);
+    auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName());
     WorkflowExecutionScope rootScope(rootContext);
 
     WorkflowReporter::info("Workflow started", workflowPlan.getName());
 
     try {
         executeImpl(workflowPlan);
-        rootContext.setProgress(1.0);
+        //rootContext.setProgress(1.0);
         WorkflowReporter::info("Workflow finished", workflowPlan.getName());
     }
     catch (const std::exception& e) {
@@ -65,7 +65,7 @@ WorkflowResult WorkflowPlanExecutor::executeChild(const WorkflowPlan& workflowPl
 
     try {
         executeImpl(workflowPlan);
-        childContext.setProgress(1.0);
+        //childContext.setProgress(1.0);
         WorkflowReporter::info("Nested workflow finished", workflowPlan.getName());
     }
     catch (const std::exception& e) {
@@ -83,34 +83,48 @@ WorkflowResult WorkflowPlanExecutor::executeChild(const WorkflowPlan& workflowPl
 void WorkflowPlanExecutor::executeImpl(const WorkflowPlan& workflowPlan)
 {
     const auto& stages = workflowPlan.getStages();
+    const auto stageCount = stages.size();
 
-    for (const auto& stage : stages)
-        executeStage(stage);
-}
+    if (stageCount == 0)
+        return;
 
-void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage)
-{
     auto* currentContext = WorkflowExecutionContext::current();
     if (currentContext == nullptr)
         throw std::runtime_error("No active workflow execution context");
 
-    auto stageContext = currentContext->createChild(stage.getName(), stage.getWeight());
+    QVector<WorkflowExecutionContext> stageContexts;
+    stageContexts.reserve(stageCount);
+
+    for (int stageIndex = 0; stageIndex < stageCount; ++stageIndex) {
+        const auto& stage = stages[stageIndex];
+        stageContexts.push_back(currentContext->createChild(stage.getName(), stage.getWeight()));
+    }
+
+    for (int stageIndex = 0; stageIndex < stageCount; ++stageIndex) {
+        const auto& stage = stages[stageIndex];
+        auto& stageContext = stageContexts[stageIndex];
+
+        executeStage(stage, stageContext);
+    }
+}
+
+void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext)
+{
     WorkflowExecutionScope stageScope(stageContext);
 
     WorkflowReporter::info("Stage started", stage.getName());
 
     try {
         switch (stage.getConcurrencyMode()) {
-	        case WorkflowPlan::ConcurrencyMode::Sequential:
-	            executeSequentialJobs(stage, stageContext);
-	            break;
+        case WorkflowPlan::ConcurrencyMode::Sequential:
+            executeSequentialJobs(stage, stageContext);
+            break;
 
-	        case WorkflowPlan::ConcurrencyMode::Parallel:
-	            executeParallelJobs(stage, stageContext);
-	            break;
+        case WorkflowPlan::ConcurrencyMode::Parallel:
+            executeParallelJobs(stage, stageContext);
+            break;
         }
 
-        stageContext.setProgress(1.0);
         WorkflowReporter::info("Stage finished", stage.getName());
     }
     catch (const std::exception& e) {
@@ -130,31 +144,42 @@ void WorkflowPlanExecutor::executeSequentialJobs(const mv::util::WorkflowPlan::S
     const auto jobCount = jobs.size();
 
     if (jobCount == 0) {
-        stageContext.setProgress(1.0);
+        //stageContext.setProgress(1.0);
         return;
+    }
+
+    QVector<WorkflowExecutionContext> jobContexts;
+    jobContexts.reserve(jobCount);
+
+    for (int jobIndex = 0; jobIndex < jobCount; ++jobIndex) {
+        const auto& job = jobs[jobIndex];
+        jobContexts.push_back(stageContext.createChild(job.getName(), 1.0));
     }
 
     for (int jobIndex = 0; jobIndex < jobCount; ++jobIndex) {
         const auto& job = jobs[jobIndex];
+        auto& jobContext = jobContexts[jobIndex];
 
-        auto jobContext = stageContext.createChild(job.getName(), 1.0);
         WorkflowExecutionScope jobScope(jobContext);
 
         WorkflowReporter::info("Job started", job.getName());
 
         try {
             const_cast<WorkflowPlan::Job&>(job).run();
-            jobContext.setProgress(1.0);
-            WorkflowReporter::info("Job finished", job.getName());
+
+            if (!jobContext.hasProgressChildren())
+                jobContext.setProgress(1.0);
         }
         catch (const std::exception& e) {
-            WorkflowReporter::error(QString("Job failed: %1").arg(e.what()), job.getName());
-            jobContext.setProgress(1.0);
+            Q_UNUSED(e)
+
+            if (!jobContext.hasProgressChildren())
+                jobContext.setProgress(1.0);
             throw;
         }
         catch (...) {
-            WorkflowReporter::error("Job failed with unknown error", job.getName());
-            jobContext.setProgress(1.0);
+            if (!jobContext.hasProgressChildren())
+                jobContext.setProgress(1.0);
             throw;
         }
     }
@@ -165,7 +190,7 @@ void WorkflowPlanExecutor::executeParallelJobs(const mv::util::WorkflowPlan::Sta
     const auto& jobs = stage.getJobs();
 
     if (jobs.empty()) {
-        stageContext.setProgress(1.0);
+        //stageContext.setProgress(1.0);
         return;
     }
 
@@ -175,10 +200,20 @@ void WorkflowPlanExecutor::executeParallelJobs(const mv::util::WorkflowPlan::Sta
     std::exception_ptr firstException = nullptr;
     std::atomic_bool failureSeen = false;
 
+    QVector<WorkflowExecutionContext> jobContexts;
+    jobContexts.reserve(jobs.size());
+
+    for (int jobIndex = 0; jobIndex < jobs.size(); ++jobIndex) {
+        const auto& job = jobs[jobIndex];
+        jobContexts.push_back(stageContext.createChild(job.getName(), 1.0));
+    }
+
     for (int jobIndex = 0; jobIndex < jobs.size(); ++jobIndex) {
         const auto& job = jobs[jobIndex];
 
-        auto jobContext = stageContext.createChild(job.getName(), 1.0);
+        auto jobContext = jobContexts[jobIndex];
+
+        //auto jobContext = stageContext.createChild(job.getName(), 1.0);
 
         synchronizer.addFuture(QtConcurrent::run(
             [jobContext, &job, &exceptionMutex, &firstException, &failureSeen]() mutable {
@@ -188,7 +223,8 @@ void WorkflowPlanExecutor::executeParallelJobs(const mv::util::WorkflowPlan::Sta
 
                 try {
                     const_cast<WorkflowPlan::Job&>(job).run();
-                    jobContext.setProgress(1.0);
+                    if (!jobContext.hasProgressChildren())
+                        jobContext.setProgress(1.0);
                     WorkflowReporter::info("Job finished", job.getName());
                 }
                 catch (...) {

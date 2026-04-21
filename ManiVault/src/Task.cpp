@@ -1728,7 +1728,6 @@ void Task::privateSetProgressTextFormatter(const ProgressTextFormatter& progress
 void Task::privateEmitProgressChanged()
 {
     emit progressChanged(getProgress());
-    QCoreApplication::processEvents();
     return;
     //qDebug() << __FUNCTION__ << getProgress();
 
@@ -1738,8 +1737,8 @@ void Task::privateEmitProgressChanged()
         getTimer(TimerType::EmitProgressChanged).start();
     }
 
-    if (_alwaysProcessEvents)
-        QCoreApplication::processEvents();
+    //if (_alwaysProcessEvents)
+    //    QCoreApplication::processEvents();
 }
 
 void Task::privateEmitProgressDescriptionChanged()
@@ -1752,8 +1751,8 @@ void Task::privateEmitProgressDescriptionChanged()
         getTimer(TimerType::EmitProgressDescriptionChanged).start();
     }
 
-    if (_alwaysProcessEvents)
-        QCoreApplication::processEvents();
+    //if (_alwaysProcessEvents)
+    //    QCoreApplication::processEvents();
 }
 
 void Task::privateEmitProgressTextChanged()
@@ -1766,8 +1765,8 @@ void Task::privateEmitProgressTextChanged()
         getTimer(TimerType::EmitProgressTextChanged).start();
     }
 
-    if (_alwaysProcessEvents)
-        QCoreApplication::processEvents();
+    //if (_alwaysProcessEvents)
+    //    QCoreApplication::processEvents();
 }
 
 void Task::addToTaskManager()

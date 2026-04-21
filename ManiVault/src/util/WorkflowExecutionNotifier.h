@@ -17,10 +17,9 @@ class CORE_EXPORT WorkflowExecutionNotifier : public QObject
     Q_OBJECT
 
 public:
-    explicit WorkflowExecutionNotifier(QObject* parent = nullptr)
-        : QObject(parent)
-    {
-    }
+    explicit WorkflowExecutionNotifier(QObject* parent = nullptr);
+
+    void setTask(Task* task);
 
 signals:
     void progressChanged(double overallProgress);
