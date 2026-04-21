@@ -6,10 +6,9 @@
 #include "CoreInterface.h"
 #include "Application.h"
 #include "CodecRegistry.h"
-#include "DecodeRequestState.h"
+#include "WorkflowReporter.h"
 
 #include <QUuid>
-#include <QtConcurrent>
 
 #include <exception>
 
@@ -318,6 +317,8 @@ void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& b
 
     for (auto& decodeBlockJob : decodeBlockJobs) {
         decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [&decodeBlockJob, createCodec](WorkflowPlan::Job& job) {
+            WorkflowReporter::info(QString("Starting %1").arg(job.getName()), "Data hierarchy manager");
+
             try {
                 if (decodeBlockJob._uri.isEmpty()) {
                     decodeBlockJob._result = decodeBlockFromBase64(decodeBlockJob, createCodec);

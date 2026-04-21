@@ -6,8 +6,6 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "Serialization.h"
-
 #include <QString>
 #include <QJsonDocument>
 #include <QPointer>

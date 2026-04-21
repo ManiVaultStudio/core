@@ -7,6 +7,24 @@
 namespace mv::util
 {
 
-thread_local WorkflowExecutionContext* WorkflowExecutionContext::_current = nullptr;
+namespace
+{
+    thread_local WorkflowExecutionContext* currentWorkflowExecutionContext = nullptr;
+}
+
+WorkflowExecutionContext* WorkflowExecutionContext::current()
+{
+	return currentWorkflowExecutionContext;
+}
+
+const WorkflowExecutionContext* WorkflowExecutionContext::currentConst()
+{
+	return currentWorkflowExecutionContext;
+}
+
+void WorkflowExecutionContext::setCurrent(WorkflowExecutionContext* context)
+{
+    currentWorkflowExecutionContext = context;
+}
 
 }

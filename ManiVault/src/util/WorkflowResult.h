@@ -5,6 +5,7 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+#include "WorkflowExecutionContext.h"
 
 #include <QString>
 
@@ -14,11 +15,32 @@ namespace mv::util
 class CORE_EXPORT WorkflowResult
 {
 public:
-    virtual ~WorkflowResult() = default;
+    WorkflowResult();
 
-    bool            _success = false;
-    QString         _errorMessage;
+    explicit WorkflowResult(const WorkflowExecutionContext& context);
+
+    bool isValid() const;
+
+    bool hasErrors() const;
+
+    int getErrorCount() const;
+
+    int getWarningCount() const;
+
+    double getProgress() const;
+
+    const WorkflowExecutionContext& getContext() const;
+
+    std::uint64_t getDuration() const;
+
+    void setDuration(std::uint64_t duration);
+
+    QString getErrorMessage() const;
+
+private:
+    WorkflowExecutionContext _context;
     std::uint64_t   _duration;
+    bool            _success = false;
 };
 
 using UniqueWorkflowResult = std::unique_ptr<WorkflowResult>;

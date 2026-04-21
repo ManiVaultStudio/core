@@ -30,10 +30,11 @@ enum class WorkflowMessageLevel {
  */
 struct CORE_EXPORT WorkflowMessage
 {
-    WorkflowMessageLevel _level = WorkflowMessageLevel::Info;           /** Level of the message (info, warning or error) */
-    QString              _source;                                       /** Source of the message */
-    QString              _text;                                         /** Text of the message */
-    QDateTime            _timestamp = QDateTime::currentDateTime();     /** Timestamp of the message */
+    WorkflowMessageLevel _level = WorkflowMessageLevel::Info;
+    QString              _source;
+    QString              _text;
+    QString              _nodeName;
+    QDateTime            _timestamp = QDateTime::currentDateTime();
 };
 
 } // namespace mv::util

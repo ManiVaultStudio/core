@@ -42,7 +42,7 @@ class AbstractTaskHandler;
  * 
  * @author Thomas Kroes
  */
-class CORE_EXPORT Task : public QObject, public util::Serializable
+class CORE_EXPORT Task : public QObject, public mv::util::Serializable
 {
     Q_OBJECT
 

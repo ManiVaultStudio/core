@@ -89,10 +89,21 @@ public:
 
         Jobs    getJobs() const;
 
+        void setWeight(double weight)
+        {
+            _weight = weight;
+        }
+
+        double getWeight() const
+        {
+            return _weight;
+        }
+
     private:
         QString         _name;
         ConcurrencyMode _concurrencyMode;
         Jobs            _jobs;
+        double          _weight = 1.0;
     };
 
     using Stages = std::vector<Stage>;
@@ -122,12 +133,12 @@ public:
         }
     }
 
-    QString getTitle() const { return _title; }
+    QString getName() const { return _name; }
     void addSequentialStage(QString name, Jobs jobs);
 	void addParallelStage(QString name, Jobs jobs);
     void addStage(QString name, ConcurrencyMode mode, Jobs jobs);
 
-    WorkflowResult execute(AbstractWorkflowPlanExecutor& WorkflowPlanExecutor);
+    WorkflowResult execute(AbstractWorkflowPlanExecutor& workflowPlanExecutor);
 
     Stages getStages() const { return _stages; }
     SharedState getSharedState() const { return _sharedState; }
@@ -140,11 +151,22 @@ public:
         return std::dynamic_pointer_cast<WorkflowContextType>(_workflowContext);
     }
 
+    void setWeight(double weight)
+    {
+        _weight = weight;
+    }
+
+    double getWeight() const
+    {
+        return _weight;
+    }
+
 private:
-    QString _title;
+    QString _name;
     Stages  _stages;
     SharedState _sharedState = std::make_shared<QVariantMap>();
     SharedWorkflowContext   _workflowContext;
+    double _weight = 1.0;
 };
 
 }

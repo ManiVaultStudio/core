@@ -13,17 +13,17 @@ namespace mv::util
 class WorkflowExecutionScope
 {
 public:
-    explicit WorkflowExecutionScope(WorkflowExecutionContext& ctx)
+    explicit WorkflowExecutionScope(WorkflowExecutionContext& context)
         : _previous(WorkflowExecutionContext::current())
     {
-        WorkflowExecutionContext::setCurrent(&ctx);
+        WorkflowExecutionContext::setCurrent(&context);
     }
 
-    explicit WorkflowExecutionScope(const WorkflowExecutionContext& ctx)
+    explicit WorkflowExecutionScope(const WorkflowExecutionContext& context)
         : _previous(WorkflowExecutionContext::current())
-        , _currentCopy(std::make_unique<WorkflowExecutionContext>(ctx))
+        , _ownedContext(std::make_unique<WorkflowExecutionContext>(context))
     {
-        WorkflowExecutionContext::setCurrent(_currentCopy.get());
+        WorkflowExecutionContext::setCurrent(_ownedContext.get());
     }
 
     ~WorkflowExecutionScope()
@@ -39,7 +39,7 @@ public:
 
 private:
     WorkflowExecutionContext* _previous = nullptr;
-    std::unique_ptr<WorkflowExecutionContext> _currentCopy;
+    std::unique_ptr<WorkflowExecutionContext> _ownedContext;
 };
 
 }

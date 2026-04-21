@@ -9,18 +9,18 @@
 
 #include <QString>
 #include <QDateTime>
+#include <QMutex>
 
 namespace mv::util
 {
 
-class WorkflowReportNode
+class CORE_EXPORT WorkflowReportNode
 {
 public:
     using Ptr = std::shared_ptr<WorkflowReportNode>;
 
-    explicit WorkflowReportNode(const QString& name, WorkflowReportNode* parent = nullptr)
+    explicit WorkflowReportNode(const QString& name)
         : _name(name)
-        , _parent(parent)
     {
     }
 
@@ -28,26 +28,24 @@ public:
     {
         QMutexLocker lock(&_mutex);
 
-        auto child = std::make_shared<WorkflowReportNode>(name, this);
-
-    	_children.push_back(child);
-
+        auto child = std::make_shared<WorkflowReportNode>(name);
+        _children.push_back(child);
         return child;
     }
 
-    void addInfo(const QString& source, const QString& text)
+    void addMessage(WorkflowMessageLevel level,
+        const QString& source,
+        const QString& text)
     {
-        addMessage(WorkflowMessageLevel::Info, source, text);
-    }
+        QMutexLocker lock(&_mutex);
 
-    void addWarning(const QString& source, const QString& text)
-    {
-        addMessage(WorkflowMessageLevel::Warning, source, text);
-    }
-
-    void addError(const QString& source, const QString& text)
-    {
-        addMessage(WorkflowMessageLevel::Error, source, text);
+        _messages.push_back(WorkflowMessage{
+            level,
+            source,
+            text,
+            _name,
+            QDateTime::currentDateTime()
+            });
     }
 
     QString getName() const
@@ -68,24 +66,22 @@ public:
         return _children;
     }
 
-    WorkflowReportNode* getParent() const
-    {
-        return _parent;
-    }
-
     bool hasErrorsRecursive() const
     {
-        QMutexLocker lock(&_mutex);
+        QVector<Ptr> childrenCopy;
 
-        for (const auto& message : _messages) {
-            if (message._level == WorkflowMessageLevel::Error)
-                return true;
+        {
+            QMutexLocker lock(&_mutex);
+
+            for (const auto& message : _messages) {
+                if (message._level == WorkflowMessageLevel::Error)
+                    return true;
+            }
+
+            childrenCopy = _children;
         }
 
-        const auto children = _children;
-        lock.unlock();
-
-        for (const auto& child : children) {
+        for (const auto& child : childrenCopy) {
             if (child->hasErrorsRecursive())
                 return true;
         }
@@ -96,18 +92,20 @@ public:
     int getWarningCountRecursive() const
     {
         int result = 0;
+        QVector<Ptr> childrenCopy;
 
-        QMutexLocker lock(&_mutex);
+        {
+            QMutexLocker lock(&_mutex);
 
-        for (const auto& message : _messages) {
-            if (message._level == WorkflowMessageLevel::Warning)
-                ++result;
+            for (const auto& message : _messages) {
+                if (message._level == WorkflowMessageLevel::Warning)
+                    ++result;
+            }
+
+            childrenCopy = _children;
         }
 
-        const auto children = _children;
-        lock.unlock();
-
-        for (const auto& child : children)
+        for (const auto& child : childrenCopy)
             result += child->getWarningCountRecursive();
 
         return result;
@@ -116,42 +114,30 @@ public:
     int getErrorCountRecursive() const
     {
         int result = 0;
+        QVector<Ptr> childrenCopy;
 
-        QMutexLocker lock(&_mutex);
+        {
+            QMutexLocker lock(&_mutex);
 
-        for (const auto& message : _messages) {
-            if (message._level == WorkflowMessageLevel::Error)
-                ++result;
+            for (const auto& message : _messages) {
+                if (message._level == WorkflowMessageLevel::Error)
+                    ++result;
+            }
+
+            childrenCopy = _children;
         }
 
-        const auto children = _children;
-        lock.unlock();
-
-        for (const auto& child : children)
+        for (const auto& child : childrenCopy)
             result += child->getErrorCountRecursive();
 
         return result;
     }
 
 private:
-    void addMessage(WorkflowMessageLevel level, const QString& source, const QString& text)
-    {
-        QMutexLocker lock(&_mutex);
-        _messages.push_back(WorkflowMessage{
-            level,
-            source,
-            text,
-            QDateTime::currentDateTime()
-            });
-    }
-
-private:
-    QString              _name;
-    WorkflowReportNode* _parent = nullptr;
-
-    mutable QMutex       _mutex;
+    QString _name;
+    mutable QMutex _mutex;
     QVector<WorkflowMessage> _messages;
-    QVector<Ptr>             _children;
+    QVector<Ptr> _children;
 };
 
 } // namespace mv::util

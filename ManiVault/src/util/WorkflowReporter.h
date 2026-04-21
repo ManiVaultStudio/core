@@ -12,36 +12,36 @@
 namespace mv::util
 {
 
-class WorkflowReporter
+class CORE_EXPORT WorkflowReporter
 {
 public:
+    static bool hasContext()
+    {
+        return WorkflowExecutionContext::current() != nullptr;
+    }
+
     static void info(const QString& text, const QString& source = {})
     {
-        if (auto* ctx = WorkflowExecutionContext::current())
-            ctx->info(text, source);
+        if (auto* context = WorkflowExecutionContext::current())
+            context->info(text, source);
     }
 
     static void warning(const QString& text, const QString& source = {})
     {
-        if (auto* ctx = WorkflowExecutionContext::current())
-            ctx->warning(text, source);
+        if (auto* context = WorkflowExecutionContext::current())
+            context->warning(text, source);
     }
 
     static void error(const QString& text, const QString& source = {})
     {
-        if (auto* ctx = WorkflowExecutionContext::current())
-            ctx->error(text, source);
+        if (auto* context = WorkflowExecutionContext::current())
+            context->error(text, source);
     }
 
     static void setProgress(double value)
     {
-        if (auto* ctx = WorkflowExecutionContext::current())
-            ctx->setProgress(value);
-    }
-
-    static bool hasContext()
-    {
-        return WorkflowExecutionContext::current() != nullptr;
+        if (auto* context = WorkflowExecutionContext::current())
+            context->setProgress(value);
     }
 };
 

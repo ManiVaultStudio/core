@@ -115,7 +115,7 @@ WorkflowPlan::Jobs WorkflowPlan::Stage::getJobs() const
 }
 
 WorkflowPlan::WorkflowPlan(const QString& title, SharedWorkflowContext context) :
-    _title(title),
+    _name(title),
     _workflowContext(std::move(context))
 {
 }

@@ -7,73 +7,217 @@
 #include <util/OperationContext.h>
 #include <util/OperationContextScope.h>
 
+#include <Task.h>
+
 #ifdef _DEBUG
 	#define WORKFLOW_PLAN_EXECUTOR_VERBOSE
 #endif
 
+using namespace mv;
 using namespace mv::util;
 
-WorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan)
+WorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, mv::Task* task /*= nullptr*/)
 {
-    Workflow workflow(workflowPlan, OperationContextScope::getShared());
+    WorkflowResult result;
 
-    workflow.beginRun();
+    beginTimer();
     {
-        for (const auto& stage : workflowPlan.getStages()) {
-            runStage(stage);
+        if (auto* currentContext = WorkflowExecutionContext::current())
+            result = executeChild(workflowPlan, *currentContext);
+        else
+            result = executeRoot(workflowPlan, task);
+    }
+    endTimer(result);
+
+    return result;
+}
+
+WorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workflowPlan, Task* task)
+{
+    auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task);
+    WorkflowExecutionScope rootScope(rootContext);
+
+    WorkflowReporter::info("Workflow started", workflowPlan.getName());
+
+    try {
+        executeImpl(workflowPlan);
+        rootContext.setProgress(1.0);
+        WorkflowReporter::info("Workflow finished", workflowPlan.getName());
+    }
+    catch (const std::exception& e) {
+        WorkflowReporter::error(QString("Workflow failed: %1").arg(QString::fromUtf8(e.what())),
+            workflowPlan.getName());
+    }
+    catch (...) {
+        WorkflowReporter::error("Workflow failed with unknown error",
+            workflowPlan.getName());
+    }
+
+    return WorkflowResult(rootContext);
+}
+
+WorkflowResult WorkflowPlanExecutor::executeChild(const WorkflowPlan& workflowPlan, WorkflowExecutionContext& parentContext)
+{
+    auto childContext = parentContext.createChild(workflowPlan.getName(), 1.0);
+    WorkflowExecutionScope childScope(childContext);
+
+    WorkflowReporter::info("Nested workflow started", workflowPlan.getName());
+
+    try {
+        executeImpl(workflowPlan);
+        childContext.setProgress(1.0);
+        WorkflowReporter::info("Nested workflow finished", workflowPlan.getName());
+    }
+    catch (const std::exception& e) {
+        WorkflowReporter::error(QString("Nested workflow failed: %1").arg(QString::fromUtf8(e.what())),
+            workflowPlan.getName());
+    }
+    catch (...) {
+        WorkflowReporter::error("Nested workflow failed with unknown error",
+            workflowPlan.getName());
+    }
+
+    return WorkflowResult(childContext);
+}
+
+void WorkflowPlanExecutor::executeImpl(const WorkflowPlan& workflowPlan)
+{
+    const auto& stages = workflowPlan.getStages();
+
+    for (const auto& stage : stages)
+        executeStage(stage);
+}
+
+void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage)
+{
+    auto* currentContext = WorkflowExecutionContext::current();
+    if (currentContext == nullptr)
+        throw std::runtime_error("No active workflow execution context");
+
+    auto stageContext = currentContext->createChild(stage.getName(), stage.getWeight());
+    WorkflowExecutionScope stageScope(stageContext);
+
+    WorkflowReporter::info("Stage started", stage.getName());
+
+    try {
+        switch (stage.getConcurrencyMode()) {
+	        case WorkflowPlan::ConcurrencyMode::Sequential:
+	            executeSequentialJobs(stage, stageContext);
+	            break;
+
+	        case WorkflowPlan::ConcurrencyMode::Parallel:
+	            executeParallelJobs(stage, stageContext);
+	            break;
+        }
+
+        stageContext.setProgress(1.0);
+        WorkflowReporter::info("Stage finished", stage.getName());
+    }
+    catch (const std::exception& e) {
+        WorkflowReporter::error(QString("Stage failed: %1").arg(e.what()), stage.getName());
+        throw;
+    }
+    catch (...) {
+        WorkflowReporter::error("Stage failed with unknown error", stage.getName());
+        throw;
+    }
+}
+
+void WorkflowPlanExecutor::executeSequentialJobs(const mv::util::WorkflowPlan::Stage& stage, mv::util::WorkflowExecutionContext& stageContext)
+{
+    const auto& jobs = stage.getJobs();
+
+    const auto jobCount = jobs.size();
+
+    if (jobCount == 0) {
+        stageContext.setProgress(1.0);
+        return;
+    }
+
+    for (int jobIndex = 0; jobIndex < jobCount; ++jobIndex) {
+        const auto& job = jobs[jobIndex];
+
+        auto jobContext = stageContext.createChild(job.getName(), 1.0);
+        WorkflowExecutionScope jobScope(jobContext);
+
+        WorkflowReporter::info("Job started", job.getName());
+
+        try {
+            const_cast<WorkflowPlan::Job&>(job).run();
+            jobContext.setProgress(1.0);
+            WorkflowReporter::info("Job finished", job.getName());
+        }
+        catch (const std::exception& e) {
+            WorkflowReporter::error(QString("Job failed: %1").arg(e.what()), job.getName());
+            jobContext.setProgress(1.0);
+            throw;
+        }
+        catch (...) {
+            WorkflowReporter::error("Job failed with unknown error", job.getName());
+            jobContext.setProgress(1.0);
+            throw;
         }
     }
-    workflow.endRun();
-
-    return workflow.getResult();
 }
 
-void WorkflowPlanExecutor::runStage(const mv::util::WorkflowPlan::Stage& stage)
+void WorkflowPlanExecutor::executeParallelJobs(const mv::util::WorkflowPlan::Stage& stage, mv::util::WorkflowExecutionContext& stageContext)
 {
-    switch (stage.getConcurrencyMode()) {
-	    case WorkflowPlan::ConcurrencyMode::Sequential:
-	        runStageInSequence(stage);
-	        break;
+    const auto& jobs = stage.getJobs();
 
-	    case WorkflowPlan::ConcurrencyMode::Parallel:
-	        runStageInParallel(stage);
-	        break;
+    if (jobs.empty()) {
+        stageContext.setProgress(1.0);
+        return;
     }
-}
 
-void WorkflowPlanExecutor::runStageInSequence(const mv::util::WorkflowPlan::Stage& stage)
-{
-    for (auto& job : stage.getJobs()) {
-        job.run();
-    }
-}
+    QFutureSynchronizer<void> synchronizer;
 
-void WorkflowPlanExecutor::runStageInParallel(const mv::util::WorkflowPlan::Stage& stage)
-{
-    QList<QFuture<void>> futures;
-    futures.reserve(stage.getJobs().size());
-
-    QThreadPool* pool = QThreadPool::globalInstance();
-
-    std::mutex errorMutex;
+    std::mutex exceptionMutex;
     std::exception_ptr firstException = nullptr;
+    std::atomic_bool failureSeen = false;
 
-    for (auto job : stage.getJobs()) {  // copy
-        futures.push_back(QtConcurrent::run(pool, [job, &errorMutex, &firstException]() mutable {
-            try {
-                job.run();
-            }
-            catch (...) {
-                std::lock_guard<std::mutex> lock(errorMutex);
-                if (!firstException)
-                    firstException = std::current_exception();
-            }
-        }));
+    for (int jobIndex = 0; jobIndex < jobs.size(); ++jobIndex) {
+        const auto& job = jobs[jobIndex];
+
+        auto jobContext = stageContext.createChild(job.getName(), 1.0);
+
+        synchronizer.addFuture(QtConcurrent::run(
+            [jobContext, &job, &exceptionMutex, &firstException, &failureSeen]() mutable {
+                WorkflowExecutionScope jobScope(jobContext);
+
+                WorkflowReporter::info("Job started", job.getName());
+
+                try {
+                    const_cast<WorkflowPlan::Job&>(job).run();
+                    jobContext.setProgress(1.0);
+                    WorkflowReporter::info("Job finished", job.getName());
+                }
+                catch (...) {
+                    jobContext.setProgress(1.0);
+
+                    {
+                        std::lock_guard<std::mutex> lock(exceptionMutex);
+                        if (!firstException)
+                            firstException = std::current_exception();
+                    }
+
+                    failureSeen = true;
+
+                    try {
+                        throw;
+                    }
+                    catch (const std::exception& e) {
+                        WorkflowReporter::error(QString("Job failed: %1").arg(e.what()),
+                            job.getName());
+                    }
+                    catch (...) {
+                        WorkflowReporter::error("Job failed with unknown error",
+                            job.getName());
+                    }
+                }
+            }));
     }
 
-    for (auto& future : futures) {
-        future.waitForFinished();
-    }
+    synchronizer.waitForFinished();
 
     if (firstException)
         std::rethrow_exception(firstException);

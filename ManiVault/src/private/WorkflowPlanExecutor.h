@@ -10,6 +10,11 @@
 
 #include <QString>
 
+namespace mv
+{
+    class Task;
+}
+
 /*
  * TaskTreeWorkflowPlanExecutor is a concrete implementation of the AbstractWorkflowPlanExecutor interface that executes a workflow plan using a task tree workflow. It creates a SerializePlanWorkflow with the provided workflow plan and starts it, waiting for the workflow to complete. If the workflow finishes with an error, it throws a runtime error with the error message. The workflow is stored as a unique pointer, which ensures that it is properly cleaned up when it is no longer needed. The workflow will be created in the execute method when the workflow plan is executed, and it will be reset to nullptr when the workflow is done.
  *
@@ -19,15 +24,14 @@ class WorkflowPlanExecutor final : public mv::util::AbstractWorkflowPlanExecutor
 {
 public:
 
-	/**
-     * Executes the given workflow plan by creating a SerializePlanWorkflow with the provided workflow plan and starting it. The method will wait for the workflow to complete and will throw a runtime error if the workflow finished with an error. The workflow is stored as a unique pointer, which ensures that it is properly cleaned up when it is no longer needed. The workflow will be created in this method when the workflow plan is executed, and it will be reset to nullptr when the workflow is done.
-     * @param workflowPlan The workflow plan to execute, which contains the stages and jobs that define the workflow. The workflow plan will be passed to the SerializePlanWorkflow, which will execute the stages and jobs defined in the plan. The workflow plan can also contain shared state that can be accessed by the jobs in the workflow, allowing for better communication and data sharing between the jobs in the workflow.
-     * @return The workflow result that was produced, which can be used for accessing the success status and error message of the workflow. The workflow result is stored as a unique pointer, which ensures that it is properly cleaned up when it is no longer needed. The workflow result will be created in this method when the workflow plan is executed, and it will be reset to nullptr when the workflow is done.
-	 */
-	mv::util::WorkflowResult execute(mv::util::WorkflowPlan& workflowPlan) override;
+	mv::util::WorkflowResult execute(mv::util::WorkflowPlan& workflowPlan, mv::Task* task = nullptr) override;
 
-    void runStage(const mv::util::WorkflowPlan::Stage& stage) override;
-    void runStageInSequence(const mv::util::WorkflowPlan::Stage& stage) override;
-    void runStageInParallel(const mv::util::WorkflowPlan::Stage& stage) override;
+private:
+    mv::util::WorkflowResult executeRoot(const mv::util::WorkflowPlan& workflowPlan, mv::Task* task) override;
+    mv::util::WorkflowResult executeChild(const mv::util::WorkflowPlan& workflowPlan, mv::util::WorkflowExecutionContext& parentContext) override;
+    void executeImpl(const mv::util::WorkflowPlan& workflowPlan) override;
+    void executeStage(const mv::util::WorkflowPlan::Stage& stage) override;
+    void executeSequentialJobs(const mv::util::WorkflowPlan::Stage& stage, mv::util::WorkflowExecutionContext& stageContext) override;
+    void executeParallelJobs(const mv::util::WorkflowPlan::Stage& stage, mv::util::WorkflowExecutionContext& stageContext) override;
 };
 

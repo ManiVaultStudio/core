@@ -17,9 +17,8 @@ class WorkflowProgressNode
 public:
     using Ptr = std::shared_ptr<WorkflowProgressNode>;
 
-    explicit WorkflowProgressNode(double weight = 1.0, WorkflowProgressNode* parent = nullptr)
+    explicit WorkflowProgressNode(double weight = 1.0)
         : _weight(weight)
-        , _parent(parent)
     {
     }
 
@@ -27,7 +26,7 @@ public:
     {
         QMutexLocker lock(&_mutex);
 
-        auto child = std::make_shared<WorkflowProgressNode>(weight, this);
+        auto child = std::make_shared<WorkflowProgressNode>(weight);
         _children.push_back(child);
         return child;
     }
@@ -42,18 +41,24 @@ public:
 
     double getProgress() const
     {
-        QMutexLocker lock(&_mutex);
+        QVector<Ptr> childrenCopy;
+        double selfProgress = 0.0;
 
-        if (_children.isEmpty())
-            return _selfProgress;
+        {
+            QMutexLocker lock(&_mutex);
+
+            if (_children.isEmpty())
+                return _selfProgress;
+
+            childrenCopy = _children;
+            selfProgress = _selfProgress;
+            Q_UNUSED(selfProgress);
+        }
 
         double weightSum = 0.0;
         double weightedProgress = 0.0;
 
-        const auto children = _children;
-        lock.unlock();
-
-        for (const auto& child : children) {
+        for (const auto& child : childrenCopy) {
             const double weight = child->getWeight();
             weightSum += weight;
             weightedProgress += child->getProgress() * weight;
@@ -71,15 +76,9 @@ public:
         return _weight;
     }
 
-    WorkflowProgressNode* getParent() const
-    {
-        return _parent;
-    }
-
 private:
     double _weight = 1.0;
     double _selfProgress = 0.0;
-    WorkflowProgressNode* _parent = nullptr;
 
     mutable QMutex _mutex;
     QVector<Ptr> _children;

@@ -9,6 +9,7 @@
 
 #include <util/Exception.h>
 #include <util/Timer.h>
+#include <util/Serialization.h>
 
 #include <DataHierarchyItem.h>
 #include <Dataset.h>

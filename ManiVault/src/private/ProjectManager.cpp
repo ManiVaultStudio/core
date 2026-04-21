@@ -383,9 +383,9 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         	auto workflowResult             = projectOpenWorkflowPlan.execute(_workflowPlanExecutor);
 
         	if (auto currentProject = mv::projects().getCurrentProject()) {
-        		const auto duration     = workflowResult._duration;
-        		const auto successText  = (duration < 1000) ? QString("%1 completed successfully in %2 ms").arg(projectOpenWorkflowPlan.getTitle()).arg(duration) : QString("%1 opened successfully in %2 s").arg(currentProject->getFilePath()).arg(duration / 1000.0, 0, 'f', 1);
-        		//const auto errorText    = getTitle() + result->_errorMessage;
+        		const auto duration     = workflowResult.getDuration();
+        		const auto successText  = (duration < 1000) ? QString("%1 completed successfully in %2 ms").arg(projectOpenWorkflowPlan.getName()).arg(duration) : QString("%1 opened successfully in %2 s").arg(currentProject->getFilePath()).arg(duration / 1000.0, 0, 'f', 1);
+        		//const auto errorText    = getName() + result->_errorMessage;
 
         		help().addNotification("Project opened", successText, StyledIcon("folder-open"));
         	}
@@ -573,7 +573,7 @@ void ProjectManager::addActionToFileDialog(gui::WidgetAction* action, QFileDialo
 void ProjectManager::openProject(util::ProjectsModelProjectSharedPtr project, const QString& targetDirectory, bool importDataOnly, bool loadWorkspace)
 {
 #ifdef PROJECT_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__ << project->getTitle() << targetDirectory << importDataOnly << loadWorkspace;
+    qDebug() << __FUNCTION__ << project->getName() << targetDirectory << importDataOnly << loadWorkspace;
 #endif
 
     Application::requestOverrideCursor(Qt::WaitCursor);
@@ -748,7 +748,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 	        if (filePath.isEmpty() || QFileInfo(filePath).isDir())
 	            return;
 
-	        auto cleanup = qScopeGuard([] { /* code you want executed goes HERE; */ });
+	        //auto cleanup = qScopeGuard([] { /* code you want executed goes HERE; */ });
 
 	        auto workflowPlan = createProjectSaveWorkflowPlan(filePath);
 
@@ -756,13 +756,13 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
 	        auto workflowResult = workflowPlan.execute(_workflowPlanExecutor);
 
-	        if (!workflowResult._success)
-	            throw std::runtime_error(workflowResult._errorMessage.toStdString());
+	        if (!workflowResult.hasErrors())
+	            throw std::runtime_error(workflowResult.getErrorMessage().toStdString());
 
 	        if (auto currentProject = mv::projects().getCurrentProject()) {
-	            const auto duration     = workflowResult._duration;
-	            const auto successText  = (duration < 1000) ? QString("%1 completed successfully in %2 ms").arg(workflowPlan.getTitle()).arg(duration) : QString("%1 saved successfully in %2 s").arg(currentProject->getFilePath()).arg(duration / 1000.0, 0, 'f', 1);
-	            //const auto errorText    = getTitle() + result->_errorMessage;
+	            const auto duration     = workflowResult.getDuration();
+	            const auto successText  = (duration < 1000) ? QString("%1 completed successfully in %2 ms").arg(workflowPlan.getName()).arg(duration) : QString("%1 saved successfully in %2 s").arg(currentProject->getFilePath()).arg(duration / 1000.0, 0, 'f', 1);
+	            //const auto errorText    = getName() + result->_errorMessage;
 
 	            help().addNotification("Project saved", successText, StyledIcon("file"));
 	            qDebug() << successText;
@@ -779,7 +779,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
         exceptionMessageBox("Unable to save project");
     }
 
-    Application::current()->restoreOverrideCursor();
+    Application::restoreOverrideCursor();
 }
 
 void ProjectManager::saveProjectAs()

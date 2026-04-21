@@ -16,19 +16,19 @@ Workflow::Workflow(WorkflowPlan workflowPlan, SharedOperationContext operationCo
     _workflowPlan(std::move(workflowPlan))
 {
 #ifdef WORKFLOW_VERBOSE
-    printLine(_title, "Create");
+    printLine(_name, "Create");
 #endif
 }
 
 QString Workflow::getTitle() const
 {
-	return _workflowPlan.getTitle();
+	return _workflowPlan.getName();
 }
 
 void Workflow::beginRun()
 {
 #ifdef WORKFLOW_VERBOSE
-    printLine(_title, "Start", 1);
+    printLine(_name, "Start", 1);
 #endif
 
     _elapsedTimer.start();
@@ -36,14 +36,13 @@ void Workflow::beginRun()
 
 void Workflow::endRun()
 {
-    _result._duration = static_cast<quint64>(_elapsedTimer.elapsed());
-    _result._success = true;
+    _result.setDuration(static_cast<quint64>(_elapsedTimer.elapsed()));
 }
 
 void Workflow::cancel()
 {
 #ifdef WORKFLOW_VERBOSE
-    printLine(_title, "Cancel", 1);
+    printLine(_name, "Cancel", 1);
 #endif
 
 	//_runner.cancel();
