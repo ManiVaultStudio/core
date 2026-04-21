@@ -26,81 +26,31 @@ public:
     using Ptr = std::shared_ptr<WorkflowExecutionState>;
 
     WorkflowExecutionState(const WorkflowReportNode::Ptr& reportRoot,
-        const WorkflowProgressNode::Ptr& progressRoot)
-        : _reportRoot(reportRoot)
-        , _progressRoot(progressRoot)
-        , _notifier(new WorkflowExecutionNotifier())
-    {
-    }
+        const WorkflowProgressNode::Ptr& progressRoot);
 
-    WorkflowReportNode::Ptr getReportRoot() const
-    {
-        return _reportRoot;
-    }
+    WorkflowReportNode::Ptr getReportRoot() const;
 
-    WorkflowProgressNode::Ptr getProgressRoot() const
-    {
-        return _progressRoot;
-    }
+    WorkflowProgressNode::Ptr getProgressRoot() const;
 
-    WorkflowExecutionNotifier* getNotifier() const
-    {
-        return _notifier.get();
-    }
+    WorkflowExecutionNotifier* getNotifier() const;
 
-    WorkflowExecutionStatus getStatus() const
-    {
-        QMutexLocker lock(&_mutex);
-        return _status;
-    }
+    WorkflowExecutionStatus getStatus() const;
 
-    void setStatus(WorkflowExecutionStatus status)
-    {
-        {
-            QMutexLocker lock(&_mutex);
-            _status = status;
-        }
+    void setStatus(WorkflowExecutionStatus status);
 
-        emit _notifier->statusChanged();
-    }
+    double getOverallProgress() const;
 
-    double getOverallProgress() const
-    {
-        return _progressRoot ? _progressRoot->getProgress() : 0.0;
-    }
+    void notifyProgressChanged() const;
 
-    void notifyProgressChanged()
-    {
-        emit _notifier->progressChanged(getOverallProgress());
-    }
+    void notifyMessagesChanged() const;
 
-    void notifyMessagesChanged()
-    {
-        emit _notifier->messagesChanged();
-    }
+    QVector<WorkflowMessage> collectMessages() const;
 
-    QVector<WorkflowMessage> collectMessages() const
-    {
-        QVector<WorkflowMessage> result;
-        collectMessagesRecursive(_reportRoot, result);
-        return result;
-    }
+    Task& getTask();
 
 private:
     static void collectMessagesRecursive(const WorkflowReportNode::Ptr& node,
-        QVector<WorkflowMessage>& out)
-    {
-        if (!node)
-            return;
-
-        const auto messages = node->getMessages();
-        for (const auto& message : messages)
-            out.push_back(message);
-
-        const auto children = node->getChildren();
-        for (const auto& child : children)
-            collectMessagesRecursive(child, out);
-    }
+        QVector<WorkflowMessage>& out);
 
 private:
     WorkflowReportNode::Ptr _reportRoot;
@@ -109,6 +59,7 @@ private:
 
     mutable QMutex _mutex;
     WorkflowExecutionStatus _status = WorkflowExecutionStatus::Idle;
+    Task _task;
 };
 
 } // namespace mv::util

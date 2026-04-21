@@ -4,9 +4,6 @@
 
 #include "WorkflowPlanExecutor.h"
 
-#include <util/OperationContext.h>
-#include <util/OperationContextScope.h>
-
 #include <Task.h>
 
 #ifdef _DEBUG
@@ -16,25 +13,41 @@
 using namespace mv;
 using namespace mv::util;
 
-WorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, mv::Task* task /*= nullptr*/, ProgressCallback progressCallback /*= {}*/)
+WorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, bool showProgress)
 {
     WorkflowResult result;
 
     beginTimer();
-    {
-        if (auto* currentContext = WorkflowExecutionContext::current())
-            result = executeChild(workflowPlan, *currentContext);
-        else
-            result = executeRoot(workflowPlan);
-    }
+	{
+		if (auto* currentContext = WorkflowExecutionContext::current())
+			result = executeChild(workflowPlan, *currentContext);
+		else
+			result = executeRoot(workflowPlan, Task::GuiScope::Modal);
+	}
     endTimer(result);
 
     return result;
 }
 
-WorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workflowPlan)
+WorkflowResult WorkflowPlanExecutor::executeAsync(mv::util::WorkflowPlan& workflowPlan, bool showProgress)
 {
-    auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName());
+    WorkflowResult result;
+
+    //beginTimer();
+    //{
+    //    if (auto* currentContext = WorkflowExecutionContext::current())
+    //        result = executeChild(workflowPlan, *currentContext);
+    //    else
+    //        result = executeRoot(workflowPlan, taskGuiScope);
+    //}
+    //endTimer(result);
+
+    return result;
+}
+
+WorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workflowPlan, Task::GuiScope taskGuiScope)
+{
+    auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), taskGuiScope);
     WorkflowExecutionScope rootScope(rootContext);
 
     WorkflowReporter::info("Workflow started", workflowPlan.getName());

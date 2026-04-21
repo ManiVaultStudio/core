@@ -608,6 +608,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/WorkflowReporter.h
     src/util/WorkflowExecutionNotifier.h
     src/util/WorkflowExecutionState.h
+    src/util/WorkflowResultFuture.h
     src/util/DecodeRequestState.h
     src/util/WorkflowPlan.h
     src/util/AbstractWorkflowPlanExecutor.h
@@ -692,6 +693,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/WorkflowReporter.cpp
     src/util/WorkflowExecutionNotifier.cpp
     src/util/WorkflowExecutionState.cpp
+    src/util/WorkflowResultFuture.cpp
     src/util/DecodeRequestState.cpp
     src/util/WorkflowPlan.cpp
     src/util/AbstractWorkflowPlanExecutor.cpp

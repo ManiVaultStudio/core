@@ -16,22 +16,22 @@ WorkflowRunner::WorkflowRunner(mv::util::WorkflowPlan workflowPlan, mv::Task* ta
 
 void WorkflowRunner::run()
 {
-	try {
-		WorkflowPlanExecutor executor;
+	//try {
+	//	WorkflowPlanExecutor executor;
 
-		auto result = executor.execute(
-			_workflowPlan,
-			nullptr,
-			[this](double progress) {
-				emit progressChanged(progress);
-			});
+	//	auto result = executor.execute(
+	//		_workflowPlan,
+	//		nullptr,
+	//		[this](double progress) {
+	//			emit progressChanged(progress);
+	//		});
 
-		emit finished(result);
-	}
-	catch (const std::exception& e) {
-		emit failed(QString::fromUtf8(e.what()));
-	}
-	catch (...) {
-		emit failed("Unknown workflow error");
-	}
+	//	emit finished(result);
+	//}
+	//catch (const std::exception& e) {
+	//	emit failed(QString::fromUtf8(e.what()));
+	//}
+	//catch (...) {
+	//	emit failed("Unknown workflow error");
+	//}
 }

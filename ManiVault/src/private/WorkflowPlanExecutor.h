@@ -24,10 +24,11 @@ class WorkflowPlanExecutor final : public mv::util::AbstractWorkflowPlanExecutor
 {
 public:
 
-	mv::util::WorkflowResult execute(mv::util::WorkflowPlan& workflowPlan, mv::Task* task = nullptr, ProgressCallback progressCallback = {}) override;
+	mv::util::WorkflowResult execute(mv::util::WorkflowPlan& workflowPlan, bool showProgress) override;
+	mv::util::WorkflowResult executeAsync(mv::util::WorkflowPlan& workflowPlan, bool showProgress) override;
 
 private:
-    mv::util::WorkflowResult executeRoot(const mv::util::WorkflowPlan& workflowPlan) override;
+    mv::util::WorkflowResult executeRoot(const mv::util::WorkflowPlan& workflowPlan, mv::Task::GuiScope taskGuiScope) override;
     mv::util::WorkflowResult executeChild(const mv::util::WorkflowPlan& workflowPlan, mv::util::WorkflowExecutionContext& parentContext) override;
     void                     executeImpl(const mv::util::WorkflowPlan& workflowPlan) override;
     void                     executeStage(const mv::util::WorkflowPlan::Stage& stage, mv::util::WorkflowExecutionContext& stageContext) override;

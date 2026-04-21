@@ -20,14 +20,6 @@ public:
         WorkflowExecutionContext::setCurrent(_context);
     }
 
-    explicit WorkflowExecutionScope(std::unique_ptr<WorkflowExecutionContext> ownedContext)
-        : _previous(WorkflowExecutionContext::current())
-        , _ownedContext(std::move(ownedContext))
-        , _context(_ownedContext.get())
-    {
-        WorkflowExecutionContext::setCurrent(_context);
-    }
-
     ~WorkflowExecutionScope()
     {
         WorkflowExecutionContext::setCurrent(_previous);
@@ -35,7 +27,6 @@ public:
 
 private:
     WorkflowExecutionContext* _previous = nullptr;
-    std::unique_ptr<WorkflowExecutionContext> _ownedContext;
     WorkflowExecutionContext* _context = nullptr;
 };
 

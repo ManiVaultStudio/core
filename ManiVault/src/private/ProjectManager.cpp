@@ -36,6 +36,7 @@
 
 #include "ProjectSaveContext.h"
 #include "Task.h"
+#include "WorkflowAsyncLauncher.h"
 
 #ifdef _DEBUG
     #define PROJECT_MANAGER_VERBOSE
@@ -381,10 +382,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
             const auto stateGuard = qScopeGuard([this]() { setState(State::Idle); });
 
-            ModalTask task(this, "Opening project...");
-
         	auto projectOpenWorkflowPlan    = createProjectOpenWorkflowPlan(filePath);
-        	auto workflowResult             = projectOpenWorkflowPlan.execute(_workflowPlanExecutor, &task);
+        	auto workflowResult             = projectOpenWorkflowPlan.execute(_workflowPlanExecutor);
 
         	if (auto currentProject = mv::projects().getCurrentProject()) {
         		const auto duration     = workflowResult.getDuration();
@@ -393,6 +392,17 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
         		help().addNotification("Project opened", successText, StyledIcon("folder-open"));
         	}
+
+            /*WorkflowAsyncLauncher::startWorkflowAsync(
+                projectOpenWorkflowPlan,
+                &task,
+                this,
+                [this](const mv::util::WorkflowResult& result) {
+                    qDebug() << "Workflow finished";
+                },
+                [this](const QString& error) {
+                    qDebug() << "Workflow failed:" << error;
+                });*/
 	    }
         emit projectOpened(*_project);
     }

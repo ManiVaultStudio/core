@@ -29,7 +29,7 @@ public:
         const ProgressNodePtr& progressNode,
         const StatePtr& state);
 
-    static WorkflowExecutionContext makeRoot(const QString& name);
+    static WorkflowExecutionContext makeRoot(const QString& name, Task::GuiScope taskGuiScope);
 
     WorkflowExecutionContext createChild(const QString& name, double weight = 1.0) const;
 
@@ -55,8 +55,6 @@ public:
 
     StatePtr getState() const;
 
-    Task& getTask();
-
     static WorkflowExecutionContext* current();
 
     static const WorkflowExecutionContext* currentConst();
@@ -71,7 +69,6 @@ private:
     ReportNodePtr _reportNode;
     ProgressNodePtr _progressNode;
     StatePtr _state;
-    Task* _task;
 };
 
 

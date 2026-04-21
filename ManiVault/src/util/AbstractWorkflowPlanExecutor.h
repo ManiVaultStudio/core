@@ -22,7 +22,8 @@ public:
 
 public:
 
-    [[nodiscard]] virtual WorkflowResult execute(WorkflowPlan& workflowPlan, Task* task = nullptr, ProgressCallback progressCallback = {}) = 0;
+    [[nodiscard]] virtual WorkflowResult execute(WorkflowPlan& workflowPlan, bool showProgress) = 0;
+    [[nodiscard]] virtual WorkflowResult executeAsync(WorkflowPlan& workflowPlan, bool showProgress) = 0;
 
 protected:
 
@@ -39,7 +40,7 @@ protected:
     }
 
 private:
-    virtual WorkflowResult executeRoot(const WorkflowPlan& workflowPlan) = 0;
+    virtual WorkflowResult executeRoot(const WorkflowPlan& workflowPlan, Task::GuiScope taskGuiScope) = 0;
     virtual WorkflowResult executeChild(const WorkflowPlan& workflowPlan, WorkflowExecutionContext& parentContext) = 0;
     virtual void executeImpl(const WorkflowPlan& workflowPlan) = 0;
     virtual void executeStage(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) = 0;
@@ -49,5 +50,7 @@ private:
 private:
     QElapsedTimer   _elapsedTimer;
 };
+
+using SharedAbstractWorkflowPlanExecutor = std::shared_ptr<AbstractWorkflowPlanExecutor>;
 
 }

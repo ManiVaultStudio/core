@@ -15,20 +15,20 @@ namespace
 WorkflowExecutionContext::WorkflowExecutionContext() = default;
 
 WorkflowExecutionContext::WorkflowExecutionContext(const QString& name, const ReportNodePtr& reportNode, const ProgressNodePtr& progressNode, const StatePtr& state) :
-	_name(name)
-	, _reportNode(reportNode)
-	, _progressNode(progressNode)
-	, _state(state)
-    , _task(new Task(nullptr, name, { Task::GuiScope::Modal }))
+	_name(name),
+	_reportNode(reportNode),
+	_progressNode(progressNode),
+	_state(state)
 {
-    //_state->getNotifier()->setTask(task);
 }
 
-WorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString& name)
+WorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString& name, Task::GuiScope taskGuiScope)
 {
 	auto reportRoot   = std::make_shared<WorkflowReportNode>(name);
 	auto progressRoot = std::make_shared<WorkflowProgressNode>(1.0);
 	auto state        = std::make_shared<WorkflowExecutionState>(reportRoot, progressRoot);
+
+    state->getTask().setGuiScopes({ taskGuiScope });
 
 	return {
 		name,
@@ -58,9 +58,7 @@ bool WorkflowExecutionContext::hasProgressChildren() const
 
 bool WorkflowExecutionContext::isValid() const
 {
-	return static_cast<bool>(_reportNode)
-		&& static_cast<bool>(_progressNode)
-		&& static_cast<bool>(_state);
+	return static_cast<bool>(_reportNode) && static_cast<bool>(_progressNode) && static_cast<bool>(_state);
 }
 
 QString WorkflowExecutionContext::getName() const
@@ -139,11 +137,6 @@ WorkflowExecutionContext::ProgressNodePtr WorkflowExecutionContext::getProgressN
 WorkflowExecutionContext::StatePtr WorkflowExecutionContext::getState() const
 {
 	return _state;
-}
-
-Task& WorkflowExecutionContext::getTask()
-{
-	return *_task;
 }
 
 WorkflowExecutionContext* WorkflowExecutionContext::current()

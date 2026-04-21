@@ -159,9 +159,16 @@ void WorkflowPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs)
 	}
 }
 
-WorkflowResult WorkflowPlan::execute(AbstractWorkflowPlanExecutor& workflowPlanExecutor, Task* task)
+WorkflowResult WorkflowPlan::execute(AbstractWorkflowPlanExecutor& workflowPlanExecutor, bool showProgress)
 {
-    return workflowPlanExecutor.execute(*this, task);
+    return workflowPlanExecutor.execute(*this, showProgress);
+}
+
+WorkflowResultFuture WorkflowPlan::executeAsync(std::shared_ptr<AbstractWorkflowPlanExecutor> workflowPlanExecutor, bool showProgress)
+{
+    WorkflowResultFuture resultFuture;
+
+    return resultFuture;
 }
 
 }
