@@ -6,6 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 #include "WorkflowExecutionNotifier.h"
+#include "Task.h"
 
 #include <QString>
 #include <QDateTime>

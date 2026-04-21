@@ -166,9 +166,43 @@ WorkflowResult WorkflowPlan::execute(AbstractWorkflowPlanExecutor& workflowPlanE
 
 WorkflowResultFuture WorkflowPlan::executeAsync(std::shared_ptr<AbstractWorkflowPlanExecutor> workflowPlanExecutor, bool showProgress)
 {
-    WorkflowResultFuture resultFuture;
+    auto state = std::make_shared<WorkflowResultFuture::State>();
 
-    return resultFuture;
+    Task* task = nullptr;
+
+    if (showProgress) {
+        task = new Task(nullptr, "---------");
+        task->setStatus(Task::Status::Running);
+        task->setProgress(0.0f);
+    }
+
+    WorkflowPlan planCopy = *this;
+
+    state->task = task;
+
+    state->future = QtConcurrent::run([planCopy = std::move(planCopy), workflowPlanExecutor, task]() mutable {
+        return planCopy.execute(*workflowPlanExecutor, task);
+        });
+
+    auto* watcher = new QFutureWatcher<WorkflowResult>();
+    watcher->setFuture(state->future);
+
+    if (task) {
+        QObject::connect(watcher, &QFutureWatcher<WorkflowResult>::finished, task, [task, watcher]() {
+            const auto result = watcher->result();
+
+            task->setProgress(1.0f);
+
+            //if (result.hasErrors())
+            //    task->setStatus(Task::Status::Failed);
+            //else
+            //    task->setStatus(Task::Status::Finished);
+            });
+    }
+
+    state->watcher = watcher;
+
+    return WorkflowResultFuture(state);
 }
 
 }

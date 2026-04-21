@@ -14,47 +14,63 @@ namespace mv::util
 class CORE_EXPORT WorkflowResultFuture
 {
 public:
+    struct State
+    {
+        QFuture<WorkflowResult> future;
+        QPointer<Task> task;
+        QPointer<QFutureWatcher<WorkflowResult>> watcher;
+    };
+
+public:
     WorkflowResultFuture() = default;
 
-    WorkflowResultFuture(QFuture<WorkflowResult> future, Task* task = nullptr)
-        : _future(std::move(future))
-        , _task(task)
+    explicit WorkflowResultFuture(std::shared_ptr<State> state)
+        : _state(std::move(state))
     {
     }
 
     bool isValid() const
     {
-        return _future.isValid();
+        return _state && _state->future.isValid();
     }
 
     bool isFinished() const
     {
-        return _future.isFinished();
+        return _state && _state->future.isFinished();
     }
 
-    void waitForFinished()
+    void waitForFinished() const
     {
-        _future.waitForFinished();
+        if (_state)
+            _state->future.waitForFinished();
     }
 
     WorkflowResult result() const
     {
-        return _future.result();
+        if (!_state)
+            return {};
+
+        return _state->future.result();
     }
 
     const QFuture<WorkflowResult>& getFuture() const
     {
-        return _future;
+        Q_ASSERT(_state);
+        return _state->future;
     }
 
     Task* getTask() const
     {
-        return _task;
+        return _state ? _state->task.data() : nullptr;
+    }
+
+    QFutureWatcher<WorkflowResult>* getWatcher() const
+    {
+        return _state ? _state->watcher.data() : nullptr;
     }
 
 private:
-    QFuture<WorkflowResult> _future;
-    Task* _task = nullptr;
+    std::shared_ptr<State> _state;
 };
 
 } // namespace mv::util
