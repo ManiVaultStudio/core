@@ -768,9 +768,9 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
 	        setTemporaryDirPath(TemporaryDirType::Save, workflowPlan.getWorkflowContextAs<ProjectSaveContext>()->_temporaryDirectory->path());
 
-	        auto workflowResult = workflowPlan.execute(_workflowPlanExecutor);
+	        auto workflowResult = workflowPlan.execute(_workflowPlanExecutor, true);
 
-	        if (!workflowResult.hasErrors())
+	        if (workflowResult.hasErrors())
 	            throw std::runtime_error(workflowResult.getErrorMessage().toStdString());
 
 	        if (auto currentProject = mv::projects().getCurrentProject()) {

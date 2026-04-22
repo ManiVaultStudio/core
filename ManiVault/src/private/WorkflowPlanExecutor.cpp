@@ -88,10 +88,9 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflo
 
     state->task = task;
 
-    state->future = QtConcurrent::run(
-        [workflowPlan = std::move(workflowPlan), task]() mutable -> WorkflowResult {
-            WorkflowPlanExecutor executor;
-            return executor.executeOnCurrentThread(workflowPlan, task);
+    state->future = QtConcurrent::run([workflowPlan = std::move(workflowPlan), task]() mutable -> WorkflowResult {
+    	WorkflowPlanExecutor executor;
+        return executor.executeOnCurrentThread(workflowPlan, task);
 	});
 
     auto* watcher = new QFutureWatcher<WorkflowResult>();
