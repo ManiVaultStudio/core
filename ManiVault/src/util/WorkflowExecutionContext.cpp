@@ -14,11 +14,12 @@ namespace
 
 WorkflowExecutionContext::WorkflowExecutionContext() = default;
 
-WorkflowExecutionContext::WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state) :
+WorkflowExecutionContext::WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, Task* task /*= nullptr*/) :
 	_name(std::move(name)),
 	_reportNode(std::move(reportNode)),
 	_progressNode(std::move(progressNode)),
-	_state(std::move(state))
+	_state(std::move(state)),
+    _task(task)
 {
 }
 
@@ -32,7 +33,8 @@ WorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString& name,
         name,
         reportRoot,
         progressRoot,
-        state
+        state,
+        task
     };
 }
 
@@ -45,7 +47,8 @@ WorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& na
 		name,
 		_reportNode->createChild(name),
 		_progressNode->createChild(weight),
-		_state
+		_state,
+        _task
     };
 }
 
@@ -113,8 +116,8 @@ void WorkflowExecutionContext::setProgress(double value) const
 	if (_state)
 		_state->notifyProgressChanged();
 
-	//if (_task && _state)
-	//	_task->setProgress(overall);
+	if (_task && _state)
+		_task->setProgress(static_cast<float>(overall));
 }
 
 double WorkflowExecutionContext::getProgress() const

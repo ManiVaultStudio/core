@@ -383,7 +383,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             const auto stateGuard = qScopeGuard([this]() { setState(State::Idle); });
 
         	auto projectOpenWorkflowPlan    = createProjectOpenWorkflowPlan(filePath);
-        	auto workflowResult             = projectOpenWorkflowPlan.execute(_workflowPlanExecutor);
+        	auto workflowResult             = projectOpenWorkflowPlan.execute(_workflowPlanExecutor, true);
 
         	if (auto currentProject = mv::projects().getCurrentProject()) {
         		const auto duration     = workflowResult.getDuration();

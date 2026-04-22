@@ -55,7 +55,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         Application::requestOverrideCursor(Qt::WaitCursor);
 
         mv::projects().getCurrentProject()->setFilePath(context->_filePath);
-    });
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     plan.addSequentialStage("Extract project archive", [&plan]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
@@ -85,7 +85,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         } else {
             throw std::runtime_error("No current project found");
         }
-    });
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 10.0);
 
     plan.addSequentialStage("Open workspace JSON", [&plan]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
@@ -98,7 +98,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
             throw std::runtime_error("Workspace JSON file does not exist");
     
         workspaces().loadWorkspace(context->_workspaceJsonPath);
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     plan.addSequentialStage("Finalize", [&plan]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
@@ -117,7 +117,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         project->updateContributors();
     
         Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
     
     return plan;
 }

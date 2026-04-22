@@ -30,15 +30,14 @@ WorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, bool sh
 
                 auto* watcher = future.getWatcher();
 
-                QObject::connect(watcher, &QFutureWatcher<WorkflowResult>::finished, &loop, &QEventLoop::quit);
+                connect(watcher, &QFutureWatcher<WorkflowResult>::finished, &loop, &QEventLoop::quit);
 
-                loop.exec();  // <-- GUI stays responsive here
+                loop.exec();
             }
             else {
                 future.waitForFinished();
             }
 
-            //future.waitForFinished();
             result = future.result();
         }
     }
@@ -104,11 +103,7 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflo
             const auto result = watcher->result();
 
             task->setProgress(1.0f);
-
-            //if (result.hasErrors())
-            //    task->setStatus(Task::Status::Failed);
-            //else
-            //    task->setStatus(Task::Status::Finished);
+            task->setFinished();
         },
         Qt::QueuedConnection);
     }

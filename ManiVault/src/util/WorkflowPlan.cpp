@@ -99,10 +99,11 @@ WorkflowPlan::JobThreadAffinity WorkflowPlan::Job::getThreadAffinity() const
 	return _threadAffinity;
 }
 
-WorkflowPlan::Stage::Stage(QString name, ConcurrencyMode concurrencyMode, Jobs jobs) :
+WorkflowPlan::Stage::Stage(QString name, ConcurrencyMode concurrencyMode, Jobs jobs, double weight /*= 1.0*/) :
     _name(std::move(name)),
     _concurrencyMode(concurrencyMode),
-    _jobs(std::move(jobs))
+    _jobs(std::move(jobs)),
+    _weight(weight)
 {
 }
 
@@ -132,35 +133,35 @@ void WorkflowPlan::addStage(Stage stage)
     _stages.emplace_back(std::move(stage));
 }
 
-void WorkflowPlan::addSequentialStage(QString name, Jobs jobs)
+void WorkflowPlan::addSequentialStage(QString name, Jobs jobs, double weight /*= 1.0*/)
 {
     if (jobs.empty()) {
         qWarning() << "Attempted to add empty sequential stage:" << name;
 	    return;
     }
         
-    _stages.emplace_back(std::move(name), ConcurrencyMode::Sequential, std::move(jobs));
+    _stages.emplace_back(std::move(name), ConcurrencyMode::Sequential, std::move(jobs), weight);
 }
 
-void WorkflowPlan::addParallelStage(QString name, Jobs jobs)
+void WorkflowPlan::addParallelStage(QString name, Jobs jobs, double weight /*= 1.0*/)
 {
     if (jobs.empty()) {
         qWarning() << "Attempted to add empty parallel stage:" << name;
         return;
     }
 
-    _stages.emplace_back(std::move(name), ConcurrencyMode::Parallel, std::move(jobs));
+    _stages.emplace_back(std::move(name), ConcurrencyMode::Parallel, std::move(jobs), weight);
 }
 
-void WorkflowPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs)
+void WorkflowPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight /*= 1.0*/)
 {
 	switch (mode) {
 		case ConcurrencyMode::Sequential:
-            addSequentialStage(std::move(name), std::move(jobs));
+            addSequentialStage(std::move(name), std::move(jobs), weight);
             break;
 
         case ConcurrencyMode::Parallel:
-            addParallelStage(std::move(name), std::move(jobs));
+            addParallelStage(std::move(name), std::move(jobs), weight);
             break;
 	}
 }

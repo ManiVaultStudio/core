@@ -95,7 +95,7 @@ public:
     {
     public:
 
-        Stage(QString name, ConcurrencyMode concurrencyMode, Jobs jobs);
+        Stage(QString name, ConcurrencyMode concurrencyMode, Jobs jobs, double weight = 1.0);
 
         ConcurrencyMode getConcurrencyMode() const;
 
@@ -158,13 +158,13 @@ public:
     void addStage(Stage stage);
 
     template<typename Function>
-    void addSequentialStage(QString name, Function&& function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread)
+    void addSequentialStage(QString name, Function&& function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, double weight = 1.0)
     {
         if constexpr (std::is_invocable_v<Function, Job&>) {
-            _stages.emplace_back(Stage(name, ConcurrencyMode::Sequential, { Job(name, JobFunction(std::forward<Function>(function)), threadAffinity) }));
+            _stages.emplace_back(Stage(name, ConcurrencyMode::Sequential, { Job(name, JobFunction(std::forward<Function>(function)), threadAffinity) }, weight));
         }
         else if constexpr (std::is_invocable_v<Function>) {
-            _stages.emplace_back(Stage(name, ConcurrencyMode::Sequential, { Job(name, JobFunction([fn = std::forward<Function>(function)](Job&) mutable { fn(); }), threadAffinity) }));
+            _stages.emplace_back(Stage(name, ConcurrencyMode::Sequential, { Job(name, JobFunction([fn = std::forward<Function>(function)](Job&) mutable { fn(); }), threadAffinity) }, weight));
         }
         else {
             static_assert(std::is_invocable_v<Function, Job&> || std::is_invocable_v<Function>, "Stage function must be callable as void(Job&) or void()");
@@ -172,9 +172,9 @@ public:
     }
 
     QString getName() const { return _name; }
-    void addSequentialStage(QString name, Jobs jobs);
-	void addParallelStage(QString name, Jobs jobs);
-    void addStage(QString name, ConcurrencyMode mode, Jobs jobs);
+    void addSequentialStage(QString name, Jobs jobs, double weight = 1.0);
+	void addParallelStage(QString name, Jobs jobs, double weight = 1.0);
+    void addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight = 1.0);
 
     WorkflowResult execute(AbstractWorkflowPlanExecutor& workflowPlanExecutor, bool showProgress = false);
     WorkflowResultFuture executeAsync(std::shared_ptr<AbstractWorkflowPlanExecutor> workflowPlanExecutor, bool showProgress = false);

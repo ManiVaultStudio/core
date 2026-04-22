@@ -24,7 +24,7 @@ public:
 
     WorkflowExecutionContext();
 
-    WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state);
+    WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, Task* task = nullptr);
 
     static WorkflowExecutionContext makeRoot(const QString& name, Task* task);
 
@@ -66,6 +66,7 @@ private:
     ReportNodePtr _reportNode;
     ProgressNodePtr _progressNode;
     StatePtr _state;
+    QPointer<Task> _task;
 };
 
 
