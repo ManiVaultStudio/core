@@ -6,7 +6,6 @@
 
 #include "ManiVaultGlobals.h"
 #include "WorkflowExecutionNotifier.h"
-#include "Task.h"
 
 #include <QString>
 #include <QDateTime>
@@ -47,8 +46,6 @@ public:
 
     QVector<WorkflowMessage> collectMessages() const;
 
-    Task& getTask();
-
 private:
     static void collectMessagesRecursive(const WorkflowReportNode::Ptr& node,
         QVector<WorkflowMessage>& out);
@@ -60,7 +57,6 @@ private:
 
     mutable QMutex _mutex;
     WorkflowExecutionStatus _status = WorkflowExecutionStatus::Idle;
-    Task _task;
 };
 
 } // namespace mv::util

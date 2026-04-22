@@ -14,28 +14,26 @@ namespace
 
 WorkflowExecutionContext::WorkflowExecutionContext() = default;
 
-WorkflowExecutionContext::WorkflowExecutionContext(const QString& name, const ReportNodePtr& reportNode, const ProgressNodePtr& progressNode, const StatePtr& state) :
-	_name(name),
-	_reportNode(reportNode),
-	_progressNode(progressNode),
-	_state(state)
+WorkflowExecutionContext::WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state) :
+	_name(std::move(name)),
+	_reportNode(std::move(reportNode)),
+	_progressNode(std::move(progressNode)),
+	_state(std::move(state))
 {
 }
 
-WorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString& name, Task::GuiScope taskGuiScope)
+WorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString& name, Task* task /*= nullptr*/)
 {
 	auto reportRoot   = std::make_shared<WorkflowReportNode>(name);
 	auto progressRoot = std::make_shared<WorkflowProgressNode>(1.0);
 	auto state        = std::make_shared<WorkflowExecutionState>(reportRoot, progressRoot);
 
-    state->getTask().setGuiScopes({ taskGuiScope });
-
-	return {
-		name,
-		reportRoot,
-		progressRoot,
-		state
-	};
+    return {
+        name,
+        reportRoot,
+        progressRoot,
+        state
+    };
 }
 
 WorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& name, double weight) const

@@ -7,6 +7,8 @@
 #include "WorkflowResult.h"
 
 #include <QFuture>
+#include <QPointer>
+#include <QFutureWatcher>
 
 namespace mv::util
 {
@@ -67,6 +69,26 @@ public:
     QFutureWatcher<WorkflowResult>* getWatcher() const
     {
         return _state ? _state->watcher.data() : nullptr;
+    }
+
+    static WorkflowResultFuture makeReady(const WorkflowResult& result = {})
+    {
+        auto state = std::make_shared<State>();
+
+        QPromise<WorkflowResult> promise;
+        state->future = promise.future();
+        promise.start();
+        promise.addResult(result);
+        promise.finish();
+
+        return WorkflowResultFuture(state);
+    }
+
+    static WorkflowResultFuture fromFuture(QFuture<WorkflowResult> future)
+    {
+        auto state = std::make_shared<State>();
+        state->future = std::move(future);
+        return WorkflowResultFuture(state);
     }
 
 private:

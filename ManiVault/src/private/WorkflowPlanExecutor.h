@@ -25,14 +25,25 @@ class WorkflowPlanExecutor final : public mv::util::AbstractWorkflowPlanExecutor
 public:
 
 	mv::util::WorkflowResult execute(mv::util::WorkflowPlan& workflowPlan, bool showProgress) override;
-	mv::util::WorkflowResult executeAsync(mv::util::WorkflowPlan& workflowPlan, bool showProgress) override;
+	mv::util::WorkflowResultFuture executeAsync(mv::util::WorkflowPlan& workflowPlan, bool showProgress) override;
+
+protected:
+    mv::util::WorkflowResult       executeOnCurrentThread(mv::util::WorkflowPlan& workflowPlan, mv::Task* task = nullptr) override;
+    mv::util::WorkflowResultFuture executeAsyncImpl(mv::util::WorkflowPlan workflowPlan, mv::Task::GuiScope guiScope) override;
 
 private:
-    mv::util::WorkflowResult executeRoot(const mv::util::WorkflowPlan& workflowPlan, mv::Task::GuiScope taskGuiScope) override;
-    mv::util::WorkflowResult executeChild(const mv::util::WorkflowPlan& workflowPlan, mv::util::WorkflowExecutionContext& parentContext) override;
-    void                     executeImpl(const mv::util::WorkflowPlan& workflowPlan) override;
-    void                     executeStage(const mv::util::WorkflowPlan::Stage& stage, mv::util::WorkflowExecutionContext& stageContext) override;
+    mv::util::WorkflowResult       executeRoot(const mv::util::WorkflowPlan& workflowPlan, mv::Task* task) override;
+    mv::util::WorkflowResult       executeChild(const mv::util::WorkflowPlan& workflowPlan, mv::util::WorkflowExecutionContext& parentContext) override;
+    void                           executeImpl(const mv::util::WorkflowPlan& workflowPlan) override;
+    void                           executeStage(const mv::util::WorkflowPlan::Stage& stage, mv::util::WorkflowExecutionContext& stageContext) override;
+
+private: // Execute jobs in a stage
     void executeSequentialJobs(const mv::util::WorkflowPlan::Stage& stage, mv::util::WorkflowExecutionContext& stageContext) override;
     void executeParallelJobs(const mv::util::WorkflowPlan::Stage& stage, mv::util::WorkflowExecutionContext& stageContext) override;
+
+private: // Execute individual jobs
+	void executeJobOnGuiThread(mv::util::WorkflowPlan::Job& job, mv::util::WorkflowExecutionContext& jobContext) override;
+	void executeJobOnWorkerThread(mv::util::WorkflowPlan::Job& job, mv::util::WorkflowExecutionContext& jobContext);
+	void executeJob(mv::util::WorkflowPlan::Job& job, mv::util::WorkflowExecutionContext& jobContext) override;
 };
 

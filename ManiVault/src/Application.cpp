@@ -43,7 +43,8 @@ Application::Application(int& argc, char** argv) :
     _temporaryDir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + QString("%1.%2").arg("ManiVault Studio", getId().mid(0, 6)))),
     _temporaryDirs(this),
     _lockFile(QDir::cleanPath(_temporaryDir.path() + QDir::separator() + "app.lock")),
-    _configurationAction(this, "Configuration")
+    _configurationAction(this, "Configuration"),
+    _workflowGuiThreadDispatcher(this)
 {
     _lockFile.lock();
 
@@ -208,6 +209,11 @@ Logger& Application::getLogger()
 void Application::initialize()
 {
     _logger.initialize();
+}
+
+WorkflowGuiThreadDispatcher& Application::workflowGuiThreadDispatcher()
+{
+    return current()->_workflowGuiThreadDispatcher;
 }
 
 QMainWindow* Application::getMainWindow()

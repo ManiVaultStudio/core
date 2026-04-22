@@ -98,7 +98,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
             throw std::runtime_error("Workspace JSON file does not exist");
     
         workspaces().loadWorkspace(context->_workspaceJsonPath);
-    });
+    }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     plan.addSequentialStage("Finalize", [&plan]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
@@ -117,7 +117,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         project->updateContributors();
     
         Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
-    });
+    }, WorkflowPlan::JobThreadAffinity::GuiThread);
     
     return plan;
 }

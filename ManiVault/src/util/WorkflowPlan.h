@@ -33,6 +33,11 @@ public:
         Parallel
     };
 
+    enum class JobThreadAffinity {
+        CurrentWorkerThread,
+        GuiThread
+    };
+
     using SharedState = std::shared_ptr<QVariantMap>;
 
 public:
@@ -46,7 +51,7 @@ public:
     public:
         using ErrorString = QString;
 
-        Job(QString name, JobFunction function);
+        Job(QString name, JobFunction function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread);
 
         QString getName() const;
 
@@ -74,11 +79,14 @@ public:
 
         void fail(QString error);
 
+        JobThreadAffinity getThreadAffinity() const;
+
     private:
         QString     _name;
         JobFunction _function;
         QVariant    _result;
         std::optional<QString> _error;
+        JobThreadAffinity _threadAffinity;
     };
 
     using Jobs = std::vector<Job>;
@@ -105,6 +113,37 @@ public:
             return _weight;
         }
 
+        bool containsGuiThreadJobs() const
+        {
+            for (const auto& job : _jobs) {
+                if (job.getThreadAffinity() == WorkflowPlan::JobThreadAffinity::GuiThread)
+                    return true;
+            }
+
+            return false;
+        }
+
+        bool containsWorkerThreadJobs() const
+        {
+            for (const auto& job : _jobs) {
+                if (job.getThreadAffinity() == WorkflowPlan::JobThreadAffinity::CurrentWorkerThread)
+                    return true;
+            }
+
+            return false;
+        }
+
+        bool isThreadAffinityCompatible() const
+        {
+            if (_concurrencyMode == ConcurrencyMode::Sequential)
+                return true;
+
+            if (_concurrencyMode == ConcurrencyMode::Parallel && containsGuiThreadJobs())
+                return false;
+
+            return true;
+        }
+
     private:
         QString         _name;
         ConcurrencyMode _concurrencyMode;
@@ -119,23 +158,16 @@ public:
     void addStage(Stage stage);
 
     template<typename Function>
-    void addSequentialStage(QString name, Function&& function)
+    void addSequentialStage(QString name, Function&& function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread)
     {
         if constexpr (std::is_invocable_v<Function, Job&>) {
-            _stages.emplace_back(Stage(name, ConcurrencyMode::Sequential, {
-				Job(std::move(name), JobFunction(std::forward<Function>(function)))
-            }));
+            _stages.emplace_back(Stage(name, ConcurrencyMode::Sequential, { Job(name, JobFunction(std::forward<Function>(function)), threadAffinity) }));
         }
         else if constexpr (std::is_invocable_v<Function>) {
-            _stages.emplace_back(Stage(name, ConcurrencyMode::Sequential, {
-                Job(std::move(name), JobFunction([fn = std::forward<Function>(function)](Job&) mutable {
-	                fn();
-	            }))
-            }));
+            _stages.emplace_back(Stage(name, ConcurrencyMode::Sequential, { Job(name, JobFunction([fn = std::forward<Function>(function)](Job&) mutable { fn(); }), threadAffinity) }));
         }
         else {
-            static_assert(std::is_invocable_v<Function, Job&> || std::is_invocable_v<Function>,
-                "Stage function must be callable as void(Job&) or void()");
+            static_assert(std::is_invocable_v<Function, Job&> || std::is_invocable_v<Function>, "Stage function must be callable as void(Job&) or void()");
         }
     }
 

@@ -23,9 +23,11 @@ public:
 public:
 
     [[nodiscard]] virtual WorkflowResult execute(WorkflowPlan& workflowPlan, bool showProgress) = 0;
-    [[nodiscard]] virtual WorkflowResult executeAsync(WorkflowPlan& workflowPlan, bool showProgress) = 0;
+    [[nodiscard]] virtual WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, bool showProgress) = 0;
 
 protected:
+    virtual WorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task = nullptr) = 0;
+    virtual WorkflowResultFuture executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope) = 0;
 
     QElapsedTimer getElapsedTimer() const {
         return _elapsedTimer;
@@ -40,12 +42,19 @@ protected:
     }
 
 private:
-    virtual WorkflowResult executeRoot(const WorkflowPlan& workflowPlan, Task::GuiScope taskGuiScope) = 0;
+    virtual WorkflowResult executeRoot(const WorkflowPlan& workflowPlan, Task* task) = 0;
     virtual WorkflowResult executeChild(const WorkflowPlan& workflowPlan, WorkflowExecutionContext& parentContext) = 0;
     virtual void executeImpl(const WorkflowPlan& workflowPlan) = 0;
     virtual void executeStage(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) = 0;
+
+private: // Execute jobs in a stage
     virtual void executeSequentialJobs(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) = 0;
     virtual void executeParallelJobs(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) = 0;
+
+private: // Execute individual jobs
+    virtual void executeJobOnGuiThread(WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext) = 0;
+    virtual void executeJobOnWorkerThread(WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext) = 0;
+    virtual void executeJob(WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext) = 0;
 
 private:
     QElapsedTimer   _elapsedTimer;

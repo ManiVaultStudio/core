@@ -6,10 +6,10 @@
 
 namespace mv::util
 {
-WorkflowExecutionState::WorkflowExecutionState(const WorkflowReportNode::Ptr& reportRoot, const WorkflowProgressNode::Ptr& progressRoot): _reportRoot(reportRoot)
-                                                                                                                                          , _progressRoot(progressRoot)
-                                                                                                                                          , _notifier(new WorkflowExecutionNotifier()),
-                                                                                                                                          _task(nullptr, "asdas")
+WorkflowExecutionState::WorkflowExecutionState(const WorkflowReportNode::Ptr& reportRoot, const WorkflowProgressNode::Ptr& progressRoot) :
+	_reportRoot(reportRoot),
+	_progressRoot(progressRoot),
+	_notifier(new WorkflowExecutionNotifier())
 {
 }
 
@@ -78,11 +78,6 @@ void WorkflowExecutionState::collectMessagesRecursive(const WorkflowReportNode::
 	const auto children = node->getChildren();
 	for (const auto& child : children)
 		collectMessagesRecursive(child, out);
-}
-
-Task& WorkflowExecutionState::getTask()
-{
-    return _task;
 }
 
 }

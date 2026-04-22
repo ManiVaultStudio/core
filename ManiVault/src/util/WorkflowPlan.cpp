@@ -14,9 +14,10 @@
 namespace mv::util
 {
 
-WorkflowPlan::Job::Job(QString name, JobFunction function) :
+WorkflowPlan::Job::Job(QString name, JobFunction function, JobThreadAffinity threadAffinity /*= JobThreadAffinity::CurrentWorkerThread*/) :
     _name(std::move(name)),
-    _function(std::move(function))
+    _function(std::move(function)),
+    _threadAffinity(threadAffinity)
 {
 }
 
@@ -93,6 +94,11 @@ void WorkflowPlan::Job::fail(QString error)
 	setError(std::move(error));
 }
 
+WorkflowPlan::JobThreadAffinity WorkflowPlan::Job::getThreadAffinity() const
+{
+	return _threadAffinity;
+}
+
 WorkflowPlan::Stage::Stage(QString name, ConcurrencyMode concurrencyMode, Jobs jobs) :
     _name(std::move(name)),
     _concurrencyMode(concurrencyMode),
@@ -166,43 +172,7 @@ WorkflowResult WorkflowPlan::execute(AbstractWorkflowPlanExecutor& workflowPlanE
 
 WorkflowResultFuture WorkflowPlan::executeAsync(std::shared_ptr<AbstractWorkflowPlanExecutor> workflowPlanExecutor, bool showProgress)
 {
-    auto state = std::make_shared<WorkflowResultFuture::State>();
-
-    Task* task = nullptr;
-
-    if (showProgress) {
-        task = new Task(nullptr, "---------");
-        task->setStatus(Task::Status::Running);
-        task->setProgress(0.0f);
-    }
-
-    WorkflowPlan planCopy = *this;
-
-    state->task = task;
-
-    state->future = QtConcurrent::run([planCopy = std::move(planCopy), workflowPlanExecutor, task]() mutable {
-        return planCopy.execute(*workflowPlanExecutor, task);
-        });
-
-    auto* watcher = new QFutureWatcher<WorkflowResult>();
-    watcher->setFuture(state->future);
-
-    if (task) {
-        QObject::connect(watcher, &QFutureWatcher<WorkflowResult>::finished, task, [task, watcher]() {
-            const auto result = watcher->result();
-
-            task->setProgress(1.0f);
-
-            //if (result.hasErrors())
-            //    task->setStatus(Task::Status::Failed);
-            //else
-            //    task->setStatus(Task::Status::Finished);
-            });
-    }
-
-    state->watcher = watcher;
-
-    return WorkflowResultFuture(state);
+    return workflowPlanExecutor->executeAsync(*this, showProgress);
 }
 
 }
