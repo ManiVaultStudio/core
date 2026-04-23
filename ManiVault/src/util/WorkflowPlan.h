@@ -8,6 +8,7 @@
 #include "WorkflowContextBase.h"
 #include "WorkflowResult.h"
 #include "WorkflowResultFuture.h"
+#include "WorkflowExecutionOptions.h"
 
 #include <QString>
 #include <QJsonDocument>
@@ -151,8 +152,8 @@ public:
 	void    addParallelStage(QString name, Jobs jobs, double weight = 1.0);
     void    addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight = 1.0);
 
-    WorkflowResult execute(AbstractWorkflowPlanExecutor& workflowPlanExecutor, bool showProgress = false);
-    WorkflowResultFuture executeAsync(std::shared_ptr<AbstractWorkflowPlanExecutor> workflowPlanExecutor, bool showProgress = false);
+    WorkflowResult execute(AbstractWorkflowPlanExecutor& workflowPlanExecutor, bool showProgress = false, WorkflowExecutionOptions executionOptions = {});
+    WorkflowResultFuture executeAsync(std::shared_ptr<AbstractWorkflowPlanExecutor> workflowPlanExecutor, bool showProgress = false, WorkflowExecutionOptions executionOptions = {});
 
     Stages                getStages() const;
 

@@ -254,14 +254,14 @@ void WorkflowPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs, doubl
 	}
 }
 
-WorkflowResult WorkflowPlan::execute(AbstractWorkflowPlanExecutor& workflowPlanExecutor, bool showProgress)
+WorkflowResult WorkflowPlan::execute(AbstractWorkflowPlanExecutor& workflowPlanExecutor, bool showProgress, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
-    return workflowPlanExecutor.execute(*this, showProgress);
+    return workflowPlanExecutor.execute(*this, showProgress, executionOptions);
 }
 
-WorkflowResultFuture WorkflowPlan::executeAsync(std::shared_ptr<AbstractWorkflowPlanExecutor> workflowPlanExecutor, bool showProgress)
+WorkflowResultFuture WorkflowPlan::executeAsync(std::shared_ptr<AbstractWorkflowPlanExecutor> workflowPlanExecutor, bool showProgress, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
-    return workflowPlanExecutor->executeAsync(*this, showProgress);
+    return workflowPlanExecutor->executeAsync(*this, showProgress, executionOptions);
 }
 
 }
