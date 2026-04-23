@@ -102,10 +102,16 @@ public:
     };
 
     /** Parameters for opening a project */
-    struct ProjectOpenParameters
+    struct ProjectOperationParameters
     {
-        QString                         _filePath = "";                                                             /** File path of the project (choose file path when empty) */
         util::ParallelizationOverride   _parallelizationOverride = util::ParallelizationOverride::UsePlanSetting;   /** Concurrency mode for importing the project (sequential or parallel) */
+        std::int32_t                    _maxParallelThreads;                                                        /** Maximum number of threads to use for the operation (only used when parallelization override is set to ForceParallel) */    
+    };
+
+    /** Parameters for opening a project */
+    struct ProjectOpenParameters : ProjectOperationParameters
+    {
+        QString _filePath = "";     /** File path of the project to open (choose file path when empty) */
 
         /**
          * Determine whether the parameters are valid
@@ -118,10 +124,9 @@ public:
     };
 
     /** Parameters for importing a project */
-    struct ProjectImportParameters
+    struct ProjectImportParameters : ProjectOperationParameters
     {
-        QString                         _filePath = "";                                                             /** File path of the project (choose file path when empty) */
-        util::ParallelizationOverride   _parallelizationOverride = util::ParallelizationOverride::UsePlanSetting;   /** Concurrency mode for importing the project (sequential or parallel) */
+        QString _filePath = "";     /** File path of the project to import (choose file path when empty) */
 
     	/**
          * Determine whether the parameters are valid
@@ -134,10 +139,9 @@ public:
     };
 
     /** Parameters for downloading a project */
-    struct ProjectSaveParameters
+    struct ProjectSaveParameters : ProjectOperationParameters
     {
-        QString                         _filePath           = "";                                                   /** File path of the project (choose file path when empty) */
-        util::ParallelizationOverride   _parallelizationOverride = util::ParallelizationOverride::UsePlanSetting;   /** Concurrency mode for importing the project (sequential or parallel) */
+        QString _filePath = "";     /** File path of the project to save (choose file path when empty) */
 
         /**
          * Determine whether the parameters are valid
@@ -150,10 +154,9 @@ public:
     };
 
     /** Parameters for publishing a project */
-    struct ProjectPublishParameters
+    struct ProjectPublishParameters : ProjectOperationParameters
     {
-        QString                         _filePath           = "";                                                   /** File path of the project (choose file path when empty) */
-        util::ParallelizationOverride   _parallelizationOverride = util::ParallelizationOverride::UsePlanSetting;   /** Concurrency mode for importing the project (sequential or parallel) */
+        QString _filePath = "";     /** File path of the project to publish (choose file path when empty) */
 
         /**
          * Determine whether the parameters are valid

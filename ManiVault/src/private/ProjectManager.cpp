@@ -1086,12 +1086,24 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
 {
     ProjectOpenParameters parameters;
 
+    const auto getSettingsPrefix = [](const QString& setting) -> QString {
+        return "ProjectOpenParameters/Default/" + setting;
+    };
+
+    const auto getSetting = [getSettingsPrefix](const QString& setting, const QVariant& defaultValue = QVariant()) -> QVariant {
+        return Application::current()->getSetting(getSettingsPrefix(setting), defaultValue);
+    };
+
+    const auto setSetting = [getSettingsPrefix](const QString& setting, const QVariant& value) {
+        Application::current()->setSetting(getSettingsPrefix(setting), value);
+    };
+
     FileOpenDialog fileDialog;
 
     fileDialog.setWindowTitle("Open ManiVault Project");
     fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
     fileDialog.setDefaultSuffix(".mv");
-    fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory",StandardPaths::getProjectsDirectory()).toString());
+    fileDialog.setDirectory(getSetting("Directory", StandardPaths::getProjectsDirectory()).toString());
     fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
 
     VerticalGroupAction settingsAction(&fileDialog, "Settings");
@@ -1103,12 +1115,16 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
     StringAction tagsAction(&fileDialog, "Tags");
     StringAction commentsAction(&fileDialog, "Comments");
     StringAction contributorsAction(&fileDialog, "Contributors");
-    ToggleAction multiThreadingAction(&fileDialog, "Multi-threading", true);
+
+    HorizontalGroupAction parallelSettingsAction(&fileDialog, "Parallel settings");
+    ToggleAction parallelToggleAction(&fileDialog, "Parallel", getSetting("Parallel", true).toBool());
+    IntegralAction maximumNumberOfThreadsAction(&fileDialog, "Maximum number of threads", 1, QThread::idealThreadCount(), getSetting("MaxNumberOfThreads", QThread::idealThreadCount() - 1).toInt());
 
     settingsAction.setShowLabels(true);
     settingsAction.setLabelSizingType(VerticalGroupAction::LabelSizingType::Auto);
 
     projectSettingsAction.setShowLabels(false);
+    parallelSettingsAction.setShowLabels(false);
 
     additionalProjectSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     additionalProjectSettingsAction.setIconByName("ellipsis");
@@ -1120,7 +1136,10 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
     commentsAction.setEnabled(false);
     contributorsAction.setEnabled(false);
     disableReadOnlyAction.setEnabled(false);
-    multiThreadingAction.setEnabled(true);
+    parallelToggleAction.setEnabled(true);
+    maximumNumberOfThreadsAction.setEnabled(true);
+
+    maximumNumberOfThreadsAction.setSuffix(" threads");
 
     additionalProjectSettingsAction.addAction(&descriptionAction);
     additionalProjectSettingsAction.addAction(&tagsAction);
@@ -1132,7 +1151,10 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
 
     settingsAction.addAction(&projectSettingsAction);
     settingsAction.addAction(&disableReadOnlyAction);
-    settingsAction.addAction(&multiThreadingAction);
+    settingsAction.addAction(&parallelSettingsAction);
+
+    parallelSettingsAction.addAction(&parallelToggleAction);
+    parallelSettingsAction.addAction(&maximumNumberOfThreadsAction);
 
     for (auto action : settingsAction.getActions())
         addActionToFileDialog(action, &fileDialog);
@@ -1154,6 +1176,14 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
         disableReadOnlyAction.setEnabled(projectMetaAction->getReadOnlyAction().isChecked());
     });
 
+    const auto parallelToggled = [&]() {
+        maximumNumberOfThreadsAction.setEnabled(parallelToggleAction.isChecked());
+    };
+
+    parallelToggled();
+
+    connect(&parallelToggleAction, &ToggleAction::toggled, this, parallelToggled);
+
     fileDialog.exec();
 
     if (fileDialog.result() != QDialog::Accepted)
@@ -1163,9 +1193,12 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
         throw std::runtime_error("Only one file may be selected");
 
     parameters._filePath                = fileDialog.selectedFiles().first();
-    parameters._parallelizationOverride = multiThreadingAction.isChecked() ? ParallelizationOverride::UsePlanSetting : ParallelizationOverride::ForceSequential;
+    parameters._parallelizationOverride = parallelToggleAction.isChecked() ? ParallelizationOverride::UsePlanSetting : ParallelizationOverride::ForceSequential;
+    parameters._maxParallelThreads      = maximumNumberOfThreadsAction.getValue();
 
-    Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(parameters._filePath).absolutePath());
+    setSetting("Directory", QFileInfo(parameters._filePath).absolutePath());
+    setSetting("Parallel", parallelToggleAction.isChecked());
+    setSetting("MaxNumberOfThreads", parameters._maxParallelThreads);
 
     return parameters;
 }

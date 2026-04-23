@@ -275,7 +275,7 @@ void WorkflowPlanExecutor::executeSequentialJobs(const WorkflowPlan::Stage& stag
 void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext)
 {
     const auto& jobs = stage.getJobs();
-    const int jobCount = jobs.size();
+    const auto jobCount = jobs.size();
 
     if (jobCount == 0)
         return;
