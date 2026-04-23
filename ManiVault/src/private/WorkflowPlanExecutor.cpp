@@ -275,22 +275,25 @@ void WorkflowPlanExecutor::executeSequentialJobs(const WorkflowPlan::Stage& stag
 void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext)
 {
     const auto& jobs = stage.getJobs();
-    const auto jobCount = jobs.size();
+    const int jobCount = jobs.size();
 
     if (jobCount == 0)
         return;
 
     for (const auto& job : jobs) {
         if (job.getThreadAffinity() == WorkflowPlan::JobThreadAffinity::GuiThread) {
-            throw std::runtime_error(QString("GUI-thread job '%1' is not allowed in a parallel stage").arg(job.getName()).toStdString());
+            throw std::runtime_error(
+                QString("GUI-thread job '%1' is not allowed in a parallel stage")
+                .arg(job.getName())
+                .toStdString());
         }
     }
 
     QVector<WorkflowExecutionContext> jobContexts;
     jobContexts.reserve(jobCount);
 
-    for (int jobIndex = 0; jobIndex < jobCount; ++jobIndex) {
-        const auto& job = jobs[jobIndex];
+    for (int i = 0; i < jobCount; ++i) {
+        const auto& job = jobs[i];
         jobContexts.push_back(stageContext.createChild(job.getName(), job.getWeight()));
     }
 
@@ -298,21 +301,22 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
     std::mutex exceptionMutex;
     std::exception_ptr firstException = nullptr;
 
-    for (int jobIndex = 0; jobIndex < jobCount; ++jobIndex) {
-        const auto job = jobs[jobIndex];
+    for (int i = 0; i < jobCount; ++i) {
+        auto* job = &jobs[i];
+        auto jobContext = jobContexts[i];
 
-        auto jobContext = jobContexts[jobIndex];
-
-        synchronizer.addFuture(QtConcurrent::run([this, job, jobContext, &exceptionMutex, &firstException]() mutable {
-            try {
-                executeJob(job, jobContext);
-            }
-            catch (...) {
-                std::lock_guard<std::mutex> lock(exceptionMutex);
-                if (!firstException)
-                    firstException = std::current_exception();
-            }
-        }));
+        synchronizer.addFuture(QtConcurrent::run(
+            &threadPool(),
+            [this, job, jobContext, &exceptionMutex, &firstException]() mutable {
+                try {
+                    executeJob(*job, jobContext);
+                }
+                catch (...) {
+                    std::lock_guard<std::mutex> lock(exceptionMutex);
+                    if (!firstException)
+                        firstException = std::current_exception();
+                }
+            }));
     }
 
     synchronizer.waitForFinished();

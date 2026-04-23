@@ -3,7 +3,6 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #include "WorkflowPlan.h"
-#include "Task.h"
 
 #ifdef _DEBUG
 	#define WORKFLOW_PLAN_VERBOSE
@@ -45,7 +44,7 @@ void WorkflowPlan::Job::run() const
 #endif
 
     if (_function)
-		_function(*this);
+		_function(*const_cast<WorkflowPlan::Job*>(this));
 }
 
 void WorkflowPlan::Job::setResult(QVariant result)

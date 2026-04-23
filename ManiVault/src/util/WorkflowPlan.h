@@ -44,7 +44,7 @@ public:
 public:
     class Job;
 
-    using JobFunction   = std::function<void(const Job&)>;
+    using JobFunction   = std::function<void(Job&)>;
     using JobFunctions  = std::vector<JobFunction>;
 
     class CORE_EXPORT Job
