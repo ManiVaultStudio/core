@@ -38,7 +38,7 @@ const WorkflowPlan::JobFunction& WorkflowPlan::Job::getFunction() const
 	return _function;
 }
 
-void WorkflowPlan::Job::run()
+void WorkflowPlan::Job::run() const
 {
 #ifdef WORKFLOW_PLAN_VERBOSE
     qDebug() << "Running job:" << _name;

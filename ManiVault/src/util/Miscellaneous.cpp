@@ -737,4 +737,23 @@ void prettyPrintVariantMap(const QVariantMap& variantMap)
     qDebug().noquote() << QJsonDocument(QJsonObject::fromVariantMap(variantMap)).toJson(QJsonDocument::Indented);
 }
 
+QVariant findNested(const QVariantMap& root, const QStringList& path)
+{
+	QVariant current = root;
+
+	for (const QString& key : path) {
+		if (!current.canConvert<QVariantMap>())
+			return {};
+
+		const QVariantMap map = current.toMap();
+
+		auto it = map.find(key);
+		if (it == map.end())
+			return {};
+
+		current = it.value();
+	}
+
+	return current;
+}
 }

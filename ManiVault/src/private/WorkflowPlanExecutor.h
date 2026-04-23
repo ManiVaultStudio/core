@@ -42,8 +42,8 @@ private: // Execute jobs in a stage
     void executeParallelJobs(const mv::util::WorkflowPlan::Stage& stage, mv::util::WorkflowExecutionContext& stageContext) override;
 
 private: // Execute individual jobs
-	void executeJobOnGuiThread(mv::util::WorkflowPlan::Job& job, mv::util::WorkflowExecutionContext& jobContext) override;
-	void executeJobOnWorkerThread(mv::util::WorkflowPlan::Job& job, mv::util::WorkflowExecutionContext& jobContext);
-	void executeJob(mv::util::WorkflowPlan::Job& job, mv::util::WorkflowExecutionContext& jobContext) override;
+	void executeJobOnGuiThread(const mv::util::WorkflowPlan::Job& job, mv::util::WorkflowExecutionContext& jobContext) override;
+	void executeJobOnWorkerThread(const mv::util::WorkflowPlan::Job& job, mv::util::WorkflowExecutionContext& jobContext);
+	void executeJob(const mv::util::WorkflowPlan::Job& job, mv::util::WorkflowExecutionContext& jobContext) override;
 };
 

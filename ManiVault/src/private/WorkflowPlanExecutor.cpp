@@ -278,10 +278,11 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
     std::exception_ptr firstException = nullptr;
 
     for (int jobIndex = 0; jobIndex < jobCount; ++jobIndex) {
-        auto& job = const_cast<WorkflowPlan::Job&>(jobs[jobIndex]);
+        const auto job = jobs[jobIndex];
+
         auto jobContext = jobContexts[jobIndex];
 
-        synchronizer.addFuture(QtConcurrent::run([this, &job, jobContext, &exceptionMutex, &firstException]() mutable {
+        synchronizer.addFuture(QtConcurrent::run([this, job, jobContext, &exceptionMutex, &firstException]() mutable {
             try {
                 executeJob(job, jobContext);
             }
@@ -299,7 +300,7 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
         std::rethrow_exception(firstException);
 }
 
-void WorkflowPlanExecutor::executeJobOnGuiThread(WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext)
+void WorkflowPlanExecutor::executeJobOnGuiThread(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext)
 {
     auto& dispatcher = Application::workflowGuiThreadDispatcher();
     std::exception_ptr exceptionPtr;
@@ -324,7 +325,7 @@ void WorkflowPlanExecutor::executeJobOnGuiThread(WorkflowPlan::Job& job, Workflo
         std::rethrow_exception(exceptionPtr);
 }
 
-void WorkflowPlanExecutor::executeJobOnWorkerThread(WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext)
+void WorkflowPlanExecutor::executeJobOnWorkerThread(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext)
 {
     WorkflowExecutionScope scope(jobContext);
 
@@ -334,7 +335,7 @@ void WorkflowPlanExecutor::executeJobOnWorkerThread(WorkflowPlan::Job& job, Work
         jobContext.setProgress(1.0);
 }
 
-void WorkflowPlanExecutor::executeJob(WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext)
+void WorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext)
 {
     WorkflowReporter::info("Job started", job.getName());
 

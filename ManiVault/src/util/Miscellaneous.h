@@ -300,4 +300,12 @@ CORE_EXPORT void printLine(const QString& key, const QVariant& value = {}, int i
  */
 CORE_EXPORT void prettyPrintVariantMap(const QVariantMap& variantMap);
 
+/**
+ * Find a nested value in a QVariantMap by a dot-separated path (e.g. "a.b.c" to find root["a"]["b"]["c"])
+ * @param root Root map to search within
+ * @param path Dot-separated path to the value to find
+ * @return Value at the specified path, or an invalid QVariant if not found
+ */
+QVariant findNested(const QVariantMap& root, const QStringList& path);
+
 }

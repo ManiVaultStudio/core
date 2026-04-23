@@ -366,7 +366,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         if (isOpeningProject())
             throw std::runtime_error("Cannot open project while another project is being opened");
 
-        util::ParallelizationOverride parallelizationOverride = util::ParallelizationOverride::UsePlanSetting;
+        ParallelizationOverride parallelizationOverride = util::ParallelizationOverride::UsePlanSetting;
 
         if (filePath.isEmpty()) {
             const auto parameters = getProjectOpenParameters();
@@ -396,17 +396,6 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
         		help().addNotification("Project opened", successText, StyledIcon("folder-open"));
         	}
-
-            /*WorkflowAsyncLauncher::startWorkflowAsync(
-                projectOpenWorkflowPlan,
-                &task,
-                this,
-                [this](const mv::util::WorkflowResult& result) {
-                    qDebug() << "Workflow finished";
-                },
-                [this](const QString& error) {
-                    qDebug() << "Workflow failed:" << error;
-                });*/
 	    }
         emit projectOpened(*_project);
     }

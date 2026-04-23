@@ -250,6 +250,26 @@ QFuture<void> fromVariantMapAsync(WidgetAction* action, const QVariantMap& varia
     });
 }
 
+QVariant findNested(const QVariantMap& root, const QStringList& path)
+{
+    QVariant current = root;
+
+    for (const QString& key : path) {
+        if (!current.canConvert<QVariantMap>())
+            return {};
+
+        const QVariantMap map = current.toMap();
+
+        auto it = map.find(key);
+        if (it == map.end())
+            return {};
+
+        current = it.value();
+    }
+
+    return current;
+}
+
 void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 {
     WorkflowPlan fromPlan(__FUNCTION__);
@@ -327,6 +347,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
     });
 
     WorkflowPlan::Jobs loadDatasetJobs;
+
 
     for (const auto& [dataVariantMap, isDerived] : datasetList) {
         const auto datasetId    = dataVariantMap["ID"].toString();

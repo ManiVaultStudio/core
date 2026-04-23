@@ -59,7 +59,7 @@ public:
 
         const JobFunction& getFunction() const;
 
-        void run();
+        void run() const;
 
         void setResult(QVariant result);
 
