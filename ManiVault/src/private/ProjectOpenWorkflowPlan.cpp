@@ -68,7 +68,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
 	    archiver.extractSingleFile(context->_filePath, "project.json", context->_projectJsonPath);
 		archiver.extractSingleFile(context->_filePath, "workspace.json", context->_workspaceJsonPath);
-    });
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     plan.addSequentialStage("Open project JSON", [&plan]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
@@ -85,7 +85,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         } else {
             throw std::runtime_error("No current project found");
         }
-    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 10.0);
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 20.0);
 
     plan.addSequentialStage("Open workspace JSON", [&plan]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE

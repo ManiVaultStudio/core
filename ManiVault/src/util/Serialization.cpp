@@ -382,6 +382,7 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
     if (bytes == nullptr)
         throw std::runtime_error("Destination buffer is null");
 
+
     variantMapMustContain(variantMap, "Size");
 
     const auto totalSize = variantMap.value("Size").value<quint64>();

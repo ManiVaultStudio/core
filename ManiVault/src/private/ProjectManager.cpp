@@ -366,11 +366,15 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         if (isOpeningProject())
             throw std::runtime_error("Cannot open project while another project is being opened");
 
+        util::ParallelizationOverride parallelizationOverride = util::ParallelizationOverride::UsePlanSetting;
+
         if (filePath.isEmpty()) {
             const auto parameters = getProjectOpenParameters();
 
         	if (parameters.isValid())
                 filePath = parameters._filePath;
+
+            parallelizationOverride = parameters._parallelizationOverride;
         }
 
         if (filePath.isEmpty())
@@ -383,7 +387,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             const auto stateGuard = qScopeGuard([this]() { setState(State::Idle); });
 
         	auto projectOpenWorkflowPlan    = createProjectOpenWorkflowPlan(filePath);
-        	auto workflowResult             = projectOpenWorkflowPlan.execute(_workflowPlanExecutor, true);
+        	auto workflowResult             = projectOpenWorkflowPlan.execute(_workflowPlanExecutor, true, { parallelizationOverride });
 
         	if (auto currentProject = mv::projects().getCurrentProject()) {
         		const auto duration     = workflowResult.getDuration();
@@ -1175,6 +1179,12 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
     Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(parameters._filePath).absolutePath());
 
     return parameters;
+}
+
+AbstractProjectManager::ProjectImportParameters ProjectManager::getProjectImportParameters() const
+{
+    // TODO: Implement import parameters dialog (if needed, otherwise remove this function)
+    return {};
 }
 
 AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSaveParameters() const

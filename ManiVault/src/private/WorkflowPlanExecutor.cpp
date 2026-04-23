@@ -13,40 +13,40 @@
 using namespace mv;
 using namespace mv::util;
 
-WorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, bool showProgress)
+WorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, bool showProgress, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
     WorkflowResult result;
-
-    beginTimer();
-    {
-        if (auto* currentContext = WorkflowExecutionContext::current()) {
-            result = executeChild(workflowPlan, *currentContext);
-        }
-        else {
-            auto future = executeAsyncImpl(workflowPlan, showProgress ? Task::GuiScope::Modal : Task::GuiScope::None);
-
-            if (QThread::currentThread() == qApp->thread()) {
-                QEventLoop loop;
-
-                auto* watcher = future.getWatcher();
-
-                connect(watcher, &QFutureWatcher<WorkflowResult>::finished, &loop, &QEventLoop::quit);
-
-                loop.exec();
-            }
-            else {
-                future.waitForFinished();
-            }
-
-            result = future.result();
-        }
+    
+    if (auto* currentContext = WorkflowExecutionContext::current()) {
+        result = executeChild(workflowPlan, *currentContext);
     }
-    endTimer(result);
+    else {
+        beginTimer();
+	    {
+		    auto future = executeAsyncImpl(workflowPlan, showProgress ? Task::GuiScope::Modal : Task::GuiScope::None, std::move(executionOptions));
+
+        	if (QThread::currentThread() == qApp->thread()) {
+        		QEventLoop loop;
+
+        		auto* watcher = future.getWatcher();
+
+        		connect(watcher, &QFutureWatcher<WorkflowResult>::finished, &loop, &QEventLoop::quit);
+
+        		loop.exec();
+        	}
+        	else {
+        		future.waitForFinished();
+        	}
+
+        	result = future.result();
+	    }
+        endTimer(result);
+    }
 
     return result;
 }
 
-WorkflowResultFuture WorkflowPlanExecutor::executeAsync(mv::util::WorkflowPlan& workflowPlan, bool showProgress)
+WorkflowResultFuture WorkflowPlanExecutor::executeAsync(mv::util::WorkflowPlan& workflowPlan, bool showProgress, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
     if (WorkflowExecutionContext::current() != nullptr) {
         throw std::runtime_error("executeAsync() cannot be called from within an active workflow context");
@@ -57,23 +57,7 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsync(mv::util::WorkflowPlan& 
     return executeAsyncImpl(std::move(workflowPlanCopy), showProgress ? Task::GuiScope::Background : Task::GuiScope::None);
 }
 
-WorkflowResult WorkflowPlanExecutor::executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task)
-{
-    WorkflowResult result;
-
-    beginTimer();
-    {
-        if (auto* currentContext = WorkflowExecutionContext::current())
-            result = executeChild(workflowPlan, *currentContext);
-        else
-            result = executeRoot(workflowPlan, task);
-    }
-    endTimer(result);
-
-    return result;
-}
-
-WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope)
+WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, mv::util::WorkflowExecutionOptions executionOptions /*= {}*/)
 {
     auto state = std::make_shared<WorkflowResultFuture::State>();
 
@@ -88,9 +72,9 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflo
 
     state->task = task;
 
-    state->future = QtConcurrent::run([workflowPlan = std::move(workflowPlan), task]() mutable -> WorkflowResult {
+    state->future = QtConcurrent::run([workflowPlan = std::move(workflowPlan), task, executionOptions = std::move(executionOptions)]() mutable -> WorkflowResult {
     	WorkflowPlanExecutor executor;
-        return executor.executeOnCurrentThread(workflowPlan, task);
+        return executor.executeOnCurrentThread(workflowPlan, task, std::move(executionOptions));
 	});
 
     auto* watcher = new QFutureWatcher<WorkflowResult>();
@@ -112,9 +96,21 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflo
     return WorkflowResultFuture(state);
 }
 
-WorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workflowPlan, Task* task)
+WorkflowResult WorkflowPlanExecutor::executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
-    auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task);
+    WorkflowResult result;
+
+    if (auto* currentContext = WorkflowExecutionContext::current())
+        result = executeChild(workflowPlan, *currentContext);
+    else
+        result = executeRoot(workflowPlan, task, std::move(executionOptions));
+
+    return result;
+}
+
+WorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workflowPlan, Task* task, WorkflowExecutionOptions executionOptions /*= {}*/)
+{
+    auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task, std::move(executionOptions));
     WorkflowExecutionScope rootScope(rootContext);
 
     WorkflowReporter::info("Workflow started", workflowPlan.getName());
@@ -138,7 +134,7 @@ WorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workflowPla
 
 WorkflowResult WorkflowPlanExecutor::executeChild(const WorkflowPlan& workflowPlan, WorkflowExecutionContext& parentContext)
 {
-    auto childContext = parentContext.createChild(workflowPlan.getName(), 1.0);
+    auto childContext = parentContext.createChild(workflowPlan.getName(), workflowPlan.getWeight());
     WorkflowExecutionScope childScope(childContext);
 
     WorkflowReporter::info("Nested workflow started", workflowPlan.getName());
@@ -199,7 +195,17 @@ void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, Workfl
     WorkflowReporter::info("Stage started", stage.getName());
 
     try {
-        switch (stage.getConcurrencyMode()) {
+        WorkflowPlan::ConcurrencyMode effectiveMode = stage.getConcurrencyMode();
+
+        auto* currentContext = WorkflowExecutionContext::current();
+        if (currentContext != nullptr) {
+            const auto state = currentContext->getState();
+            if (state && state->getExecutionOptions()._parallelizationOverride == ParallelizationOverride::ForceSequential) {
+                effectiveMode = WorkflowPlan::ConcurrencyMode::Sequential;
+            }
+        }
+
+        switch (effectiveMode) {
 	        case WorkflowPlan::ConcurrencyMode::Sequential:
 	            executeSequentialJobs(stage, stageContext);
 	            break;
@@ -264,7 +270,7 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
 
     for (int jobIndex = 0; jobIndex < jobCount; ++jobIndex) {
         const auto& job = jobs[jobIndex];
-        jobContexts.push_back(stageContext.createChild(job.getName(), 1.0));
+        jobContexts.push_back(stageContext.createChild(job.getName(), job.getWeight()));
     }
 
     QFutureSynchronizer<void> synchronizer;

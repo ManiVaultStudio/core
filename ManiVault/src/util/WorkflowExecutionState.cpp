@@ -6,9 +6,10 @@
 
 namespace mv::util
 {
-WorkflowExecutionState::WorkflowExecutionState(const WorkflowReportNode::Ptr& reportRoot, const WorkflowProgressNode::Ptr& progressRoot) :
+WorkflowExecutionState::WorkflowExecutionState(const WorkflowReportNode::Ptr& reportRoot, const WorkflowProgressNode::Ptr& progressRoot, WorkflowExecutionOptions executionOptions /*= {}*/) :
 	_reportRoot(reportRoot),
 	_progressRoot(progressRoot),
+    _executionOptions(executionOptions),
 	_notifier(new WorkflowExecutionNotifier())
 {
 }
@@ -26,6 +27,11 @@ WorkflowProgressNode::Ptr WorkflowExecutionState::getProgressRoot() const
 WorkflowExecutionNotifier* WorkflowExecutionState::getNotifier() const
 {
 	return _notifier.get();
+}
+
+WorkflowExecutionOptions WorkflowExecutionState::getExecutionOptions() const
+{
+    return _executionOptions;
 }
 
 WorkflowExecutionStatus WorkflowExecutionState::getStatus() const

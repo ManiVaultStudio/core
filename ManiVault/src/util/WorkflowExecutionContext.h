@@ -26,7 +26,7 @@ public:
 
     WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, Task* task = nullptr);
 
-    static WorkflowExecutionContext makeRoot(const QString& name, Task* task);
+    static WorkflowExecutionContext makeRoot(const QString& name, Task* task, WorkflowExecutionOptions executionOptions = {});
 
     WorkflowExecutionContext createChild(const QString& name, double weight = 1.0) const;
 

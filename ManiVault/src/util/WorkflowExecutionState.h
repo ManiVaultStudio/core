@@ -6,6 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 #include "WorkflowExecutionNotifier.h"
+#include "WorkflowExecutionOptions.h"
 
 #include <QString>
 #include <QDateTime>
@@ -25,14 +26,15 @@ class CORE_EXPORT WorkflowExecutionState
 public:
     using Ptr = std::shared_ptr<WorkflowExecutionState>;
 
-    WorkflowExecutionState(const WorkflowReportNode::Ptr& reportRoot,
-        const WorkflowProgressNode::Ptr& progressRoot);
+    WorkflowExecutionState(const WorkflowReportNode::Ptr& reportRoot, const WorkflowProgressNode::Ptr& progressRoot, WorkflowExecutionOptions executionOptions = {});
 
     WorkflowReportNode::Ptr getReportRoot() const;
 
     WorkflowProgressNode::Ptr getProgressRoot() const;
 
     WorkflowExecutionNotifier* getNotifier() const;
+    
+    WorkflowExecutionOptions getExecutionOptions() const;
 
     WorkflowExecutionStatus getStatus() const;
 
@@ -53,6 +55,7 @@ private:
 private:
     WorkflowReportNode::Ptr _reportRoot;
     WorkflowProgressNode::Ptr _progressRoot;
+    WorkflowExecutionOptions _executionOptions;
     std::unique_ptr<WorkflowExecutionNotifier> _notifier;
 
     mutable QMutex _mutex;

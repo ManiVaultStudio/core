@@ -23,11 +23,11 @@ WorkflowExecutionContext::WorkflowExecutionContext(QString name, ReportNodePtr r
 {
 }
 
-WorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString& name, Task* task /*= nullptr*/)
+WorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString& name, Task* task /*= nullptr*/, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
 	auto reportRoot   = std::make_shared<WorkflowReportNode>(name);
 	auto progressRoot = std::make_shared<WorkflowProgressNode>(1.0);
-	auto state        = std::make_shared<WorkflowExecutionState>(reportRoot, progressRoot);
+	auto state        = std::make_shared<WorkflowExecutionState>(reportRoot, progressRoot, std::move(executionOptions));
 
     return {
         name,
@@ -110,8 +110,8 @@ void WorkflowExecutionContext::setProgress(double value) const
 
 	const double overall = _state ? _state->getOverallProgress() : 0.0;
 
-	qDebug() << "Setting local progress of context" << _name << "to" << value
-		<< ", overall progress =" << overall;
+	//qDebug() << "Setting local progress of context" << _name << "to" << value
+	//	<< ", overall progress =" << overall;
 
 	if (_state)
 		_state->notifyProgressChanged();

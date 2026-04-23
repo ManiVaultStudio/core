@@ -271,6 +271,12 @@ protected: // Operations parameters
     ProjectOpenParameters getProjectOpenParameters() const override;
 
     /**
+     * Get parameters for importing a project (parameters will be obtained from a file dialog)
+     * @return Parameters for importing a project
+     */
+    ProjectImportParameters getProjectImportParameters() const override;
+
+    /**
      * Get parameters for saving a project (parameters will be obtained from a file dialog)
      * @return Parameters for saving a project
      */

@@ -148,7 +148,7 @@ ProgressAction::BarWidget::BarWidget(QWidget* parent, ProgressAction* progressAc
 {
     setObjectName("ProgressBar");
     setStyleSheet("QProgressBar { font-size: 10px; }");
-
+    
     if (widgetFlags & WidgetFlag::HorizontalBar)
         setOrientation(Qt::Horizontal);
 

@@ -52,6 +52,7 @@ public:
         using ErrorString = QString;
 
         Job(QString name, JobFunction function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread);
+        Job(QString name, JobFunction function, double weight);
 
         QString getName() const;
 
@@ -81,12 +82,17 @@ public:
 
         JobThreadAffinity getThreadAffinity() const;
 
+        void setWeight(double weight);
+
+        double getWeight() const;
+
     private:
         QString     _name;
         JobFunction _function;
         QVariant    _result;
         std::optional<QString> _error;
-        JobThreadAffinity _threadAffinity;
+        JobThreadAffinity _threadAffinity = JobThreadAffinity::CurrentWorkerThread;
+        double          _weight = 1.0;
     };
 
     using Jobs = std::vector<Job>;
@@ -103,46 +109,15 @@ public:
 
         Jobs    getJobs() const;
 
-        void setWeight(double weight)
-        {
-            _weight = weight;
-        }
+        void setWeight(double weight);
 
-        double getWeight() const
-        {
-            return _weight;
-        }
+        double getWeight() const;
 
-        bool containsGuiThreadJobs() const
-        {
-            for (const auto& job : _jobs) {
-                if (job.getThreadAffinity() == WorkflowPlan::JobThreadAffinity::GuiThread)
-                    return true;
-            }
+        bool containsGuiThreadJobs() const;
 
-            return false;
-        }
+        bool containsWorkerThreadJobs() const;
 
-        bool containsWorkerThreadJobs() const
-        {
-            for (const auto& job : _jobs) {
-                if (job.getThreadAffinity() == WorkflowPlan::JobThreadAffinity::CurrentWorkerThread)
-                    return true;
-            }
-
-            return false;
-        }
-
-        bool isThreadAffinityCompatible() const
-        {
-            if (_concurrencyMode == ConcurrencyMode::Sequential)
-                return true;
-
-            if (_concurrencyMode == ConcurrencyMode::Parallel && containsGuiThreadJobs())
-                return false;
-
-            return true;
-        }
+        bool isThreadAffinityCompatible() const;
 
     private:
         QString         _name;
@@ -158,8 +133,7 @@ public:
     void addStage(Stage stage);
 
     template<typename Function>
-    void addSequentialStage(QString name, Function&& function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, double weight = 1.0)
-    {
+    void addSequentialStage(QString name, Function&& function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, double weight = 1.0) {
         if constexpr (std::is_invocable_v<Function, Job&>) {
             _stages.emplace_back(Stage(name, ConcurrencyMode::Sequential, { Job(name, JobFunction(std::forward<Function>(function)), threadAffinity) }, weight));
         }
@@ -171,33 +145,30 @@ public:
         }
     }
 
-    QString getName() const { return _name; }
-    void addSequentialStage(QString name, Jobs jobs, double weight = 1.0);
-	void addParallelStage(QString name, Jobs jobs, double weight = 1.0);
-    void addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight = 1.0);
+    QString getName() const;
+
+    void    addSequentialStage(QString name, Jobs jobs, double weight = 1.0);
+	void    addParallelStage(QString name, Jobs jobs, double weight = 1.0);
+    void    addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight = 1.0);
 
     WorkflowResult execute(AbstractWorkflowPlanExecutor& workflowPlanExecutor, bool showProgress = false);
     WorkflowResultFuture executeAsync(std::shared_ptr<AbstractWorkflowPlanExecutor> workflowPlanExecutor, bool showProgress = false);
 
-    Stages getStages() const { return _stages; }
-    SharedState getSharedState() const { return _sharedState; }
-    SharedWorkflowContext getWorkflowContext() const { return _workflowContext; }
+    Stages                getStages() const;
+
+    SharedState           getSharedState() const;
+
+    SharedWorkflowContext getWorkflowContext() const;
+
     template<typename WorkflowContextType>
-    std::shared_ptr<WorkflowContextType> getWorkflowContextAs() const
-    {
-       	static_assert(std::derived_from<WorkflowContextType, WorkflowContextBase>, "WorkflowContextType must derive from WorkflowContextBase");
+    std::shared_ptr<WorkflowContextType> getWorkflowContextAs() const {
+        static_assert(std::derived_from<WorkflowContextType, WorkflowContextBase>, "WorkflowContextType must derive from WorkflowContextBase");
         return std::dynamic_pointer_cast<WorkflowContextType>(_workflowContext);
     }
 
-    void setWeight(double weight)
-    {
-        _weight = weight;
-    }
+    void setWeight(double weight);
 
-    double getWeight() const
-    {
-        return _weight;
-    }
+    double getWeight() const;
 
 private:
     QString _name;

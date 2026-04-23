@@ -22,12 +22,12 @@ public:
 
 public:
 
-    [[nodiscard]] virtual WorkflowResult execute(WorkflowPlan& workflowPlan, bool showProgress) = 0;
-    [[nodiscard]] virtual WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, bool showProgress) = 0;
+    [[nodiscard]] virtual WorkflowResult execute(WorkflowPlan& workflowPlan, bool showProgress, WorkflowExecutionOptions executionOptions = {}) = 0;
+    [[nodiscard]] virtual WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, bool showProgress, WorkflowExecutionOptions executionOptions = {}) = 0;
 
 protected:
-    virtual WorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task = nullptr) = 0;
-    virtual WorkflowResultFuture executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope) = 0;
+    virtual WorkflowResultFuture executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, WorkflowExecutionOptions executionOptions = {}) = 0;
+    virtual WorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {}) = 0;
 
     QElapsedTimer getElapsedTimer() const {
         return _elapsedTimer;
@@ -42,7 +42,7 @@ protected:
     }
 
 private:
-    virtual WorkflowResult executeRoot(const WorkflowPlan& workflowPlan, Task* task) = 0;
+    virtual WorkflowResult executeRoot(const WorkflowPlan& workflowPlan, Task* task, WorkflowExecutionOptions executionOptions = {}) = 0;
     virtual WorkflowResult executeChild(const WorkflowPlan& workflowPlan, WorkflowExecutionContext& parentContext) = 0;
     virtual void executeImpl(const WorkflowPlan& workflowPlan) = 0;
     virtual void executeStage(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) = 0;

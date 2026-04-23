@@ -21,6 +21,13 @@ WorkflowPlan::Job::Job(QString name, JobFunction function, JobThreadAffinity thr
 {
 }
 
+WorkflowPlan::Job::Job(QString name, JobFunction function, double weight) :
+    _name(std::move(name)),
+    _function(std::move(function)),
+    _weight(weight)
+{
+}
+
 QString WorkflowPlan::Job::getName() const
 {
 	return _name;
@@ -97,6 +104,87 @@ void WorkflowPlan::Job::fail(QString error)
 WorkflowPlan::JobThreadAffinity WorkflowPlan::Job::getThreadAffinity() const
 {
 	return _threadAffinity;
+}
+
+void WorkflowPlan::Job::setWeight(double weight)
+{
+	_weight = weight;
+}
+
+double WorkflowPlan::Job::getWeight() const
+{
+	return _weight;
+}
+
+void WorkflowPlan::Stage::setWeight(double weight)
+{
+	_weight = weight;
+}
+
+double WorkflowPlan::Stage::getWeight() const
+{
+	return _weight;
+}
+
+bool WorkflowPlan::Stage::containsGuiThreadJobs() const
+{
+	for (const auto& job : _jobs) {
+		if (job.getThreadAffinity() == WorkflowPlan::JobThreadAffinity::GuiThread)
+			return true;
+	}
+
+	return false;
+}
+
+bool WorkflowPlan::Stage::containsWorkerThreadJobs() const
+{
+	for (const auto& job : _jobs) {
+		if (job.getThreadAffinity() == WorkflowPlan::JobThreadAffinity::CurrentWorkerThread)
+			return true;
+	}
+
+	return false;
+}
+
+bool WorkflowPlan::Stage::isThreadAffinityCompatible() const
+{
+	if (_concurrencyMode == ConcurrencyMode::Sequential)
+		return true;
+
+	if (_concurrencyMode == ConcurrencyMode::Parallel && containsGuiThreadJobs())
+		return false;
+
+	return true;
+}
+
+QString WorkflowPlan::getName() const
+{
+	return _name;
+}
+
+WorkflowPlan::Stages WorkflowPlan::getStages() const
+{
+	return _stages;
+}
+
+WorkflowPlan::SharedState WorkflowPlan::getSharedState() const
+{
+	return _sharedState;
+}
+
+SharedWorkflowContext WorkflowPlan::getWorkflowContext() const
+{
+	return _workflowContext;
+}
+
+void WorkflowPlan::setWeight(double weight)
+{
+	_weight = weight;
+}
+
+double WorkflowPlan::getWeight() const
+{
+	return _weight;
 }
 
 WorkflowPlan::Stage::Stage(QString name, ConcurrencyMode concurrencyMode, Jobs jobs, double weight /*= 1.0*/) :

@@ -18,6 +18,7 @@
 
 #include "util/Exception.h"
 #include "util/WorkflowPlan.h"
+#include "util/WorkflowExecutionOptions.h"
 
 #include <QObject>
 #include <QMenu>
@@ -103,10 +104,26 @@ public:
     /** Parameters for opening a project */
     struct ProjectOpenParameters
     {
-        QString _filePath                                       = "";                                               /** File path of the project (choose file path when empty) */
-        util::WorkflowPlan::ConcurrencyMode _concurrencyMode    = util::WorkflowPlan::ConcurrencyMode::Parallel;   /** Concurrency mode for opening the project (sequential or parallel) */
+        QString                         _filePath = "";                                                             /** File path of the project (choose file path when empty) */
+        util::ParallelizationOverride   _parallelizationOverride = util::ParallelizationOverride::UsePlanSetting;   /** Concurrency mode for importing the project (sequential or parallel) */
 
         /**
+         * Determine whether the parameters are valid
+         * @return Boolean determining whether the parameters are valid (currently only checks whether the file path is not empty, but can be extended in the future if necessary)
+         */
+        [[nodiscard]] bool isValid() const
+        {
+            return !_filePath.isEmpty();
+        }
+    };
+
+    /** Parameters for importing a project */
+    struct ProjectImportParameters
+    {
+        QString                         _filePath = "";                                                             /** File path of the project (choose file path when empty) */
+        util::ParallelizationOverride   _parallelizationOverride = util::ParallelizationOverride::UsePlanSetting;   /** Concurrency mode for importing the project (sequential or parallel) */
+
+    	/**
          * Determine whether the parameters are valid
          * @return Boolean determining whether the parameters are valid (currently only checks whether the file path is not empty, but can be extended in the future if necessary)
          */
@@ -119,8 +136,8 @@ public:
     /** Parameters for downloading a project */
     struct ProjectSaveParameters
     {
-        QString                             _filePath           = "";                                           /** File path of the project (choose file path when empty) */
-        util::WorkflowPlan::ConcurrencyMode _concurrencyMode    = util::WorkflowPlan::ConcurrencyMode::Parallel;   /** Concurrency mode for saving the project (sequential or parallel) */
+        QString                         _filePath           = "";                                                   /** File path of the project (choose file path when empty) */
+        util::ParallelizationOverride   _parallelizationOverride = util::ParallelizationOverride::UsePlanSetting;   /** Concurrency mode for importing the project (sequential or parallel) */
 
         /**
          * Determine whether the parameters are valid
@@ -135,8 +152,8 @@ public:
     /** Parameters for publishing a project */
     struct ProjectPublishParameters
     {
-        QString                             _filePath           = "";                                               /** File path of the project (choose file path when empty) */
-        util::WorkflowPlan::ConcurrencyMode _concurrencyMode    = util::WorkflowPlan::ConcurrencyMode::Parallel;    /** Concurrency mode for saving the project (sequential or parallel) */
+        QString                         _filePath           = "";                                                   /** File path of the project (choose file path when empty) */
+        util::ParallelizationOverride   _parallelizationOverride = util::ParallelizationOverride::UsePlanSetting;   /** Concurrency mode for importing the project (sequential or parallel) */
 
         /**
          * Determine whether the parameters are valid
@@ -456,6 +473,12 @@ protected: // Operations parameters
      * @return Parameters for opening a project
      */
     virtual ProjectOpenParameters getProjectOpenParameters() const = 0;
+
+    /**
+     * Get parameters for importing a project (parameters will be obtained from a file dialog)
+     * @return Parameters for importing a project
+     */
+    virtual ProjectImportParameters getProjectImportParameters() const = 0;
 
     /**
      * Get parameters for saving a project (parameters will be obtained from a file dialog)
