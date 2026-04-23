@@ -1114,7 +1114,7 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
     StringAction tagsAction(&fileDialog, "Tags");
     StringAction commentsAction(&fileDialog, "Comments");
     StringAction contributorsAction(&fileDialog, "Contributors");
-    ToggleAction multiThreadingAction(&fileDialog, "Multi-threading");
+    ToggleAction multiThreadingAction(&fileDialog, "Multi-threading", true);
 
     settingsAction.setShowLabels(true);
     settingsAction.setLabelSizingType(VerticalGroupAction::LabelSizingType::Auto);
@@ -1173,8 +1173,8 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
     if (fileDialog.selectedFiles().count() != 1)
         throw std::runtime_error("Only one file may be selected");
 
-    parameters._filePath        = fileDialog.selectedFiles().first();
-    parameters._concurrencyMode = multiThreadingAction.isChecked() ? WorkflowPlan::ConcurrencyMode::Parallel : WorkflowPlan::ConcurrencyMode::Sequential;
+    parameters._filePath                = fileDialog.selectedFiles().first();
+    parameters._parallelizationOverride = multiThreadingAction.isChecked() ? ParallelizationOverride::UsePlanSetting : ParallelizationOverride::ForceSequential;
 
     Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(parameters._filePath).absolutePath());
 
@@ -1236,8 +1236,8 @@ AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSavePara
     if (fileDialog.selectedFiles().count() != 1)
         throw std::runtime_error("Only one file may be selected");
 
-    parameters._filePath        = fileDialog.selectedFiles().first();
-    parameters._concurrencyMode = multiThreadingAction.isChecked() ? WorkflowPlan::ConcurrencyMode::Parallel : WorkflowPlan::ConcurrencyMode::Sequential;
+    parameters._filePath                = fileDialog.selectedFiles().first();
+    parameters._parallelizationOverride = multiThreadingAction.isChecked() ? ParallelizationOverride::UsePlanSetting : ParallelizationOverride::ForceSequential;
 
     Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(parameters._filePath).absolutePath());
 
@@ -1259,7 +1259,7 @@ AbstractProjectManager::ProjectPublishParameters ProjectManager::getProjectPubli
     GroupAction settingsAction(&fileDialog, "Settings");
     HorizontalGroupAction projectSettingsAction(&fileDialog, "Project settings");
     VerticalGroupAction additionalProjectSettingsAction(&fileDialog, "Additional settings");
-    ToggleAction multiThreadingAction(&fileDialog, "Multi-threading");
+    ToggleAction multiThreadingAction(&fileDialog, "Multi-threading", true);
 
     settingsAction.setIconByName("gear");
     settingsAction.setToolTip("Edit project settings");
@@ -1310,8 +1310,8 @@ AbstractProjectManager::ProjectPublishParameters ProjectManager::getProjectPubli
     if (fileDialog.selectedFiles().count() != 1)
         throw std::runtime_error("Only one file may be selected");
 
-    parameters._filePath        = fileDialog.selectedFiles().first();
-    parameters._concurrencyMode = multiThreadingAction.isChecked() ? WorkflowPlan::ConcurrencyMode::Parallel : WorkflowPlan::ConcurrencyMode::Sequential;
+    parameters._filePath                = fileDialog.selectedFiles().first();
+    parameters._parallelizationOverride = multiThreadingAction.isChecked() ? ParallelizationOverride::UsePlanSetting : ParallelizationOverride::ForceSequential;
 
     Application::current()->setSetting("Projects/WorkingDirectory/Publish", QFileInfo(parameters._filePath).absolutePath());
 
