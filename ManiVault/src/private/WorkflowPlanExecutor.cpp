@@ -13,6 +13,17 @@
 using namespace mv;
 using namespace mv::util;
 
+WorkflowPlanExecutor::WorkflowPlanExecutor()
+{
+    _threadPool.setObjectName("WorkflowPlanExecutorPool");
+
+    // Reasonable default. You can tune this.
+    _threadPool.setMaxThreadCount(QThread::idealThreadCount());
+
+    // Optional: keep threads warm a bit longer
+    _threadPool.setExpiryTimeout(30'000);
+}
+
 WorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, bool showProgress, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
     WorkflowResult result;
@@ -55,6 +66,16 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsync(mv::util::WorkflowPlan& 
     WorkflowPlan workflowPlanCopy = workflowPlan;
 
     return executeAsyncImpl(std::move(workflowPlanCopy), showProgress ? Task::GuiScope::Background : Task::GuiScope::None);
+}
+
+QThreadPool& WorkflowPlanExecutor::threadPool()
+{
+    return _threadPool;
+}
+
+const QThreadPool& WorkflowPlanExecutor::threadPool() const
+{
+    return _threadPool;
 }
 
 WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, mv::util::WorkflowExecutionOptions executionOptions /*= {}*/)
@@ -360,4 +381,14 @@ void WorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, WorkflowExec
         WorkflowReporter::error("Job failed with unknown error", job.getName());
         throw;
     }
+}
+
+void WorkflowPlanExecutor::setMaxWorkerThreadCount(int count)
+{
+    _threadPool.setMaxThreadCount(std::max(1, count));
+}
+
+int WorkflowPlanExecutor::getMaxWorkerThreadCount() const
+{
+    return _threadPool.maxThreadCount();
 }

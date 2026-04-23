@@ -25,6 +25,9 @@ public:
     [[nodiscard]] virtual WorkflowResult execute(WorkflowPlan& workflowPlan, bool showProgress, WorkflowExecutionOptions executionOptions = {}) = 0;
     [[nodiscard]] virtual WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, bool showProgress, WorkflowExecutionOptions executionOptions = {}) = 0;
 
+    virtual void setMaxWorkerThreadCount(int count) = 0;
+    virtual int getMaxWorkerThreadCount() const = 0;
+
 protected:
     virtual WorkflowResultFuture executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, WorkflowExecutionOptions executionOptions = {}) = 0;
     virtual WorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {}) = 0;

@@ -147,7 +147,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
         std::int32_t encodeBlockJobIndex = 0;
 
         for (auto& encodeBlockJob : encodeBlockJobs) {
-            encodeJobs.emplace_back(QString("Encode Block %1").arg(QString::number(encodeBlockJobIndex)), [&encodeBlockJob, saveDir, createCodec](WorkflowPlan::Job& job) {
+            encodeJobs.emplace_back(QString("Encode Block %1").arg(QString::number(encodeBlockJobIndex)), [&encodeBlockJob, saveDir, createCodec](const WorkflowPlan::Job& job) {
                 try {
                     encodeBlockJob._result = encodeBlock(encodeBlockJob, saveDir, createCodec);
                 }
@@ -316,7 +316,7 @@ void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& b
     std::int32_t decodeBlockJobIndex = 0;
 
     for (auto& decodeBlockJob : decodeBlockJobs) {
-        decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [&decodeBlockJob, createCodec](WorkflowPlan::Job& job) {
+        decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [&decodeBlockJob, createCodec](const WorkflowPlan::Job& job) {
             WorkflowReporter::info(QString("Starting %1").arg(job.getName()), "Data hierarchy manager");
 
             try {

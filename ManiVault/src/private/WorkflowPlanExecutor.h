@@ -9,6 +9,7 @@
 #include <util/WorkflowResult.h>
 
 #include <QString>
+#include <QThreadPool>
 
 namespace mv
 {
@@ -24,8 +25,13 @@ class WorkflowPlanExecutor final : public mv::util::AbstractWorkflowPlanExecutor
 {
 public:
 
+    WorkflowPlanExecutor();
+
 	mv::util::WorkflowResult       execute(mv::util::WorkflowPlan& workflowPlan, bool showProgress, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
 	mv::util::WorkflowResultFuture executeAsync(mv::util::WorkflowPlan& workflowPlan, bool showProgress, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
+
+    QThreadPool& threadPool();
+    const QThreadPool& threadPool() const;
 
 protected:
     mv::util::WorkflowResult       executeOnCurrentThread(mv::util::WorkflowPlan& workflowPlan, mv::Task* task = nullptr, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
@@ -45,5 +51,13 @@ private: // Execute individual jobs
 	void executeJobOnGuiThread(const mv::util::WorkflowPlan::Job& job, mv::util::WorkflowExecutionContext& jobContext) override;
 	void executeJobOnWorkerThread(const mv::util::WorkflowPlan::Job& job, mv::util::WorkflowExecutionContext& jobContext);
 	void executeJob(const mv::util::WorkflowPlan::Job& job, mv::util::WorkflowExecutionContext& jobContext) override;
+
+public: // Worker thread pool configuration
+
+    void setMaxWorkerThreadCount(int count) override;
+    int getMaxWorkerThreadCount() const override;
+
+private:
+    QThreadPool     _threadPool;
 };
 

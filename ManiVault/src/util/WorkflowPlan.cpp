@@ -44,9 +44,6 @@ void WorkflowPlan::Job::run() const
     qDebug() << "Running job:" << _name;
 #endif
 
-    clearError();
-    clearResult();
-
     if (_function)
 		_function(*this);
 }
