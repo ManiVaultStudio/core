@@ -65,12 +65,12 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsync(mv::util::WorkflowPlan& 
 
 QThreadPool& WorkflowPlanExecutor::threadPool()
 {
-    return WorkflowExecutionContext::current()->getState()->getThreadPool();
+    return WorkflowExecutionContext::current()->getThreadPool();
 }
 
 const QThreadPool& WorkflowPlanExecutor::threadPool() const
 {
-    return WorkflowExecutionContext::current()->getState()->getThreadPool();
+    return WorkflowExecutionContext::current()->getThreadPool();
 }
 
 WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, mv::util::WorkflowExecutionOptions executionOptions /*= {}*/)

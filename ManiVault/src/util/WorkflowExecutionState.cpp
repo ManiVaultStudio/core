@@ -12,13 +12,6 @@ WorkflowExecutionState::WorkflowExecutionState(const WorkflowReportNode::Ptr& re
     _executionOptions(executionOptions),
 	_notifier(new WorkflowExecutionNotifier())
 {
-    _threadPool.setObjectName("WorkflowExecutorPool");
-
-    // Reasonable default. You can tune this.
-    _threadPool.setMaxThreadCount(executionOptions._parallel ? executionOptions._maxWorkerThreadCount : 1);
-
-    // Optional: keep threads warm a bit longer
-    _threadPool.setExpiryTimeout(30'000);
 }
 
 WorkflowReportNode::Ptr WorkflowExecutionState::getReportRoot() const
@@ -77,11 +70,6 @@ QVector<WorkflowMessage> WorkflowExecutionState::collectMessages() const
 	QVector<WorkflowMessage> result;
 	collectMessagesRecursive(_reportRoot, result);
 	return result;
-}
-
-QThreadPool& WorkflowExecutionState::getThreadPool()
-{
-    return _threadPool;
 }
 
 void WorkflowExecutionState::collectMessagesRecursive(const WorkflowReportNode::Ptr& node, QVector<WorkflowMessage>& out)

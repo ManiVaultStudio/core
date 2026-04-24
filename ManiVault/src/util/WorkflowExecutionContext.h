@@ -11,6 +11,7 @@
 #include "Task.h"
 
 #include <QString>
+#include <QThreadPool>
 
 namespace mv::util
 {
@@ -21,10 +22,11 @@ public:
     using ReportNodePtr = WorkflowReportNode::Ptr;
     using ProgressNodePtr = WorkflowProgressNode::Ptr;
     using StatePtr = WorkflowExecutionState::Ptr;
+    using SharedThreadPool = std::shared_ptr<QThreadPool>;
 
     WorkflowExecutionContext();
 
-    WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, Task* task = nullptr);
+    WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, SharedThreadPool threadPool, Task* task = nullptr);
 
     static WorkflowExecutionContext makeRoot(const QString& name, Task* task, WorkflowExecutionOptions executionOptions = {});
 
@@ -52,6 +54,8 @@ public:
 
     StatePtr getState() const;
 
+    QThreadPool& getThreadPool();
+
     static WorkflowExecutionContext* current();
 
     static const WorkflowExecutionContext* currentConst();
@@ -66,6 +70,7 @@ private:
     ReportNodePtr _reportNode;
     ProgressNodePtr _progressNode;
     StatePtr _state;
+    SharedThreadPool _threadPool;
     QPointer<Task> _task;
 };
 
