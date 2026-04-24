@@ -323,50 +323,42 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         }
     });
 
-    std::vector<std::pair<QVariantMap, bool>> datasetList;
+    std::vector<QVariantMap> datasetMaps;
 
-    const std::function<void(const QVariantMap&)> enumerateDatasetNames = [&enumerateDatasetNames, &datasetList](const QVariantMap& variantMap) -> void {
+    const std::function<void(const QVariantMap&)> enumerateDatasetNames = [&enumerateDatasetNames, &datasetMaps](const QVariantMap& variantMap) -> void {
         for (const auto& variant : variantMap.values()) {
             enumerateDatasetNames(variant.toMap()["Children"].toMap());
 
-            const auto dataset = variant.toMap()["Dataset"].toMap();
-            const auto datasetId = dataset["ID"].toString();
+            const auto datasetMap = variant.toMap()["Dataset"].toMap();
 
-            datasetList.emplace_back(dataset, dataset["Derived"].toBool() || !dataset["ProxyMembers"].toStringList().isEmpty());
+            datasetMaps.emplace_back(datasetMap);
         }
     };
 
     enumerateDatasetNames(variantMap);
 
-    std::sort(datasetList.begin(), datasetList.end(), [](const auto& a, const auto& b)
-        {
-            const QVariantMap rawA = findRawBlockObject(a.first);
-            const QVariantMap rawB = findRawBlockObject(b.first);
+    std::sort(datasetMaps.begin(), datasetMaps.end(), [](const auto& a, const auto& b) {
+        const auto rawA = findRawBlockObject(a);
+        const auto rawB = findRawBlockObject(b);
+        const auto hasA = !rawA.isEmpty();
+        const auto hasB = !rawB.isEmpty();
 
-            const bool hasA = !rawA.isEmpty();
-            const bool hasB = !rawB.isEmpty();
+        if (hasA != hasB)
+            return hasA;
 
-            if (hasA != hasB)
-                return hasA; // objects with raw block data first
+        if (!hasA)
+            return false;
 
-            if (!hasA)
-                return false;
+        return rawA.value("Size").toLongLong() > rawB.value("Size").toLongLong();
+    });
 
-            return rawA.value("Size").toLongLong() > rawB.value("Size").toLongLong();
-        });
-
-    //// Maintain data hierarchy item order within partitions
-    //std::reverse(datasetList.begin(), datasetList.end());
-
-    //// First load non-derived datasets
-    //std::stable_partition(datasetList.begin(), datasetList.end(), [](const std::pair<QVariantMap, bool>& element) {
-    //    return !element.second;
-    //});
+    for (const auto& dataVariantMap : datasetMaps) {
+        qDebug() << dataVariantMap["ID"].toString() << dataVariantMap["Name"].toString() << findRawBlockObject(dataVariantMap).value("Size").toLongLong();
+    }
 
     WorkflowPlan::Jobs loadDatasetJobs;
 
-
-    for (const auto& [dataVariantMap, isDerived] : datasetList) {
+    for (const auto& dataVariantMap : datasetMaps) {
         const auto datasetId    = dataVariantMap["ID"].toString();
         const auto datasetName  = dataVariantMap["Name"].toString();
 
