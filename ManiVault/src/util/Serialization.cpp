@@ -332,7 +332,7 @@ void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& b
             catch (...) {
                 Serializable::reportSerializationError("Data hierarchy manager", "Failed to load dataset");
             }
-        });
+        }, decodeBlockJob._size);
 
         ++decodeBlockJobIndex;
     }
@@ -573,6 +573,30 @@ QVariantMap findRawBlockObject(const QVariant& value)
 	}
 
 	return {};
+}
+
+QByteArray serializeVariantMap(const QVariantMap& map)
+{
+	QByteArray  bytes;
+	QDataStream out(&bytes, QIODevice::WriteOnly);
+
+	out.setVersion(QDataStream::Qt_6_8); // match your Qt version if desired
+	out << map;
+
+	return bytes;
+}
+
+QVariantMap deserializeVariantMap(const QByteArray& bytes)
+{
+	QVariantMap map;
+
+	QByteArray  copy = bytes;
+	QDataStream in(&copy, QIODevice::ReadOnly);
+
+	in.setVersion(QDataStream::Qt_6_8);
+	in >> map;
+
+	return map;
 }
 
 }

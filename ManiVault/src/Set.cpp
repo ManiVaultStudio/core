@@ -191,9 +191,16 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
     if (variantMap.contains("Properties"))
     {
-        _properties = mv::util::loadQVariant(variantMap["Properties"]).toMap();
+        try {
+            QByteArray decodedBytes;
+            decodeDataBufferFromVariantMap(variantMap["Properties"].toMap(), decodedBytes);
+
+            _properties = deserializeVariantMap(decodedBytes);
+        }
+        catch (const std::exception& e) {
+            qCritical() << "Failed to load dataset properties: " << e.what();
+        }
     }
-    
 
     if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {
         Datasets proxyMembers;
@@ -227,6 +234,16 @@ QVariantMap DatasetImpl::toVariantMap() const
     for (const auto& ld : _linkedData)
         linkedDataList.push_back(ld.toVariantMap());
 
+    QVariantMap propertiesVariantMap;
+
+    try {
+        const auto encodedBytes = serializeVariantMap(_properties);
+        propertiesVariantMap = rawDataToVariantMap(encodedBytes.data(), encodedBytes.size());
+    }
+    catch (const std::exception& e) {
+        qCritical() << "Failed to write dataset properties: " << e.what();
+    }
+
     variantMap.insert({
         { "Name", QVariant::fromValue(text()) },
         { "Locked", QVariant::fromValue(_locked) },
@@ -242,7 +259,7 @@ QVariantMap DatasetImpl::toVariantMap() const
         { "FullDatasetID", isFull() ? "" : QVariant::fromValue(_fullDataset->getId()) },
         { "GroupIndex", QVariant::fromValue(getGroupIndex()) },
         { "LinkedData", linkedDataList },
-        { "Properties", mv::util::storeQVariant(_properties)}
+        { "Properties", propertiesVariantMap}
     });
 
     return variantMap;

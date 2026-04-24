@@ -176,4 +176,19 @@ CORE_EXPORT bool isVariantMapRawBlockObject(const QVariantMap& map);
  * @return QVariantMap containing the first found raw block object, or an empty QVariantMap if no raw block object is found
 */
 CORE_EXPORT QVariantMap findRawBlockObject(const QVariant& value);
+
+/**
+ * Serialize a QVariantMap to a QByteArray using QDataStream
+ * @param map QVariantMap to serialize
+ * @return QByteArray containing the serialized QVariantMap
+ */
+CORE_EXPORT QByteArray serializeVariantMap(const QVariantMap& map);
+
+/**
+ * Deserialize a QByteArray to a QVariantMap using QDataStream
+ * @param bytes QByteArray containing the serialized QVariantMap
+ * @return QVariantMap deserialized from the input QByteArray
+ */
+CORE_EXPORT QVariantMap deserializeVariantMap(const QByteArray& bytes);
+
 }
