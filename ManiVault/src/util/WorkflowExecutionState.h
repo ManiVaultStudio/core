@@ -10,6 +10,7 @@
 
 #include <QString>
 #include <QDateTime>
+#include <QThreadPool>
 
 namespace mv::util
 {
@@ -48,6 +49,8 @@ public:
 
     QVector<WorkflowMessage> collectMessages() const;
 
+    QThreadPool& getThreadPool();
+
 private:
     static void collectMessagesRecursive(const WorkflowReportNode::Ptr& node,
         QVector<WorkflowMessage>& out);
@@ -60,6 +63,7 @@ private:
 
     mutable QMutex _mutex;
     WorkflowExecutionStatus _status = WorkflowExecutionStatus::Idle;
+    QThreadPool _threadPool;
 };
 
 } // namespace mv::util

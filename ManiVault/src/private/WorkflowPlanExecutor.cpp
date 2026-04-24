@@ -10,22 +10,17 @@
 	#define WORKFLOW_PLAN_EXECUTOR_VERBOSE
 #endif
 
+//#define WORKFLOW_PLAN_EXECUTOR_VERBOSE
+
 using namespace mv;
 using namespace mv::util;
 
-WorkflowPlanExecutor::WorkflowPlanExecutor()
-{
-    _threadPool.setObjectName("WorkflowPlanExecutorPool");
-
-    // Reasonable default. You can tune this.
-    _threadPool.setMaxThreadCount(QThread::idealThreadCount());
-
-    // Optional: keep threads warm a bit longer
-    _threadPool.setExpiryTimeout(30'000);
-}
-
 WorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, bool showProgress, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
+#ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
+    qDebug() << "Executing workflow plan:" << workflowPlan.getName() << "with" << workflowPlan.getStages().size() << "stage(s)";
+#endif
+
     WorkflowResult result;
     
     if (auto* currentContext = WorkflowExecutionContext::current()) {
@@ -34,7 +29,7 @@ WorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, bool sh
     else {
         beginTimer();
 	    {
-		    auto future = executeAsyncImpl(workflowPlan, showProgress ? Task::GuiScope::Modal : Task::GuiScope::None, std::move(executionOptions));
+		    auto future = executeAsyncImpl(workflowPlan, showProgress ? Task::GuiScope::Modal : Task::GuiScope::None, executionOptions);
 
         	if (QThread::currentThread() == qApp->thread()) {
         		QEventLoop loop;
@@ -70,12 +65,12 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsync(mv::util::WorkflowPlan& 
 
 QThreadPool& WorkflowPlanExecutor::threadPool()
 {
-    return _threadPool;
+    return WorkflowExecutionContext::current()->getState()->getThreadPool();
 }
 
 const QThreadPool& WorkflowPlanExecutor::threadPool() const
 {
-    return _threadPool;
+    return WorkflowExecutionContext::current()->getState()->getThreadPool();
 }
 
 WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, mv::util::WorkflowExecutionOptions executionOptions /*= {}*/)
@@ -93,9 +88,9 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflo
 
     state->task = task;
 
-    state->future = QtConcurrent::run([workflowPlan = std::move(workflowPlan), task, executionOptions = std::move(executionOptions)]() mutable -> WorkflowResult {
+    state->future = QtConcurrent::run([workflowPlan = std::move(workflowPlan), task, executionOptions = executionOptions]() mutable -> WorkflowResult {
     	WorkflowPlanExecutor executor;
-        return executor.executeOnCurrentThread(workflowPlan, task, std::move(executionOptions));
+        return executor.executeOnCurrentThread(workflowPlan, task, executionOptions);
 	});
 
     auto* watcher = new QFutureWatcher<WorkflowResult>();
@@ -124,15 +119,16 @@ WorkflowResult WorkflowPlanExecutor::executeOnCurrentThread(WorkflowPlan& workfl
     if (auto* currentContext = WorkflowExecutionContext::current())
         result = executeChild(workflowPlan, *currentContext);
     else
-        result = executeRoot(workflowPlan, task, std::move(executionOptions));
+        result = executeRoot(workflowPlan, task, executionOptions);
 
     return result;
 }
 
 WorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workflowPlan, Task* task, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
-    auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task, std::move(executionOptions));
-    WorkflowExecutionScope rootScope(rootContext);
+    auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task, executionOptions);
+
+	WorkflowExecutionScope rootScope(rootContext);
 
     WorkflowReporter::info("Workflow started", workflowPlan.getName());
 
@@ -156,6 +152,7 @@ WorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workflowPla
 WorkflowResult WorkflowPlanExecutor::executeChild(const WorkflowPlan& workflowPlan, WorkflowExecutionContext& parentContext)
 {
     auto childContext = parentContext.createChild(workflowPlan.getName(), workflowPlan.getWeight());
+
     WorkflowExecutionScope childScope(childContext);
 
     WorkflowReporter::info("Nested workflow started", workflowPlan.getName());
@@ -252,6 +249,10 @@ void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, Workfl
 
 void WorkflowPlanExecutor::executeSequentialJobs(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext)
 {
+#ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
+    qDebug() << "Executing sequential jobs for stage:" << stage.getName() << "in thread" << QThread::currentThread();
+#endif
+
     const auto& jobs = stage.getJobs();
     const auto jobCount = jobs.size();
 
@@ -276,6 +277,10 @@ void WorkflowPlanExecutor::executeSequentialJobs(const WorkflowPlan::Stage& stag
 
 void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext)
 {
+#ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
+    qDebug() << "Executing parallel jobs for stage:" << stage.getName() << "in thread" << QThread::currentThread();
+#endif
+
     const auto& jobs = stage.getJobs();
     const auto jobCount = jobs.size();
 
@@ -329,6 +334,10 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
 
 void WorkflowPlanExecutor::executeJobOnGuiThread(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext)
 {
+#ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
+    qDebug() << "Executing job on GUI thread:" << job.getName() << "in thread" << QThread::currentThread();
+#endif
+
     auto& dispatcher = Application::workflowGuiThreadDispatcher();
     std::exception_ptr exceptionPtr;
 
@@ -354,6 +363,10 @@ void WorkflowPlanExecutor::executeJobOnGuiThread(const WorkflowPlan::Job& job, W
 
 void WorkflowPlanExecutor::executeJobOnWorkerThread(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext)
 {
+#ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
+    qDebug() << "Executing job on worker thread:" << job.getName() << "in thread" << QThread::currentThread();
+#endif
+
     WorkflowExecutionScope scope(jobContext);
 
     job.run();
@@ -389,12 +402,16 @@ void WorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, WorkflowExec
     }
 }
 
-void WorkflowPlanExecutor::setMaxWorkerThreadCount(int count)
-{
-    _threadPool.setMaxThreadCount(std::max(1, count));
-}
-
-int WorkflowPlanExecutor::getMaxWorkerThreadCount() const
-{
-    return _threadPool.maxThreadCount();
-}
+//void WorkflowPlanExecutor::setMaxWorkerThreadCount(int count)
+//{
+//#ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
+//    qDebug() << "Setting max worker thread count to:" << count << "in thread" << QThread::currentThread();
+//#endif
+//
+//    _threadPool.setMaxThreadCount(std::max(1, count));
+//}
+//
+//int WorkflowPlanExecutor::getMaxWorkerThreadCount() const
+//{
+//    return _threadPool.maxThreadCount();
+//}

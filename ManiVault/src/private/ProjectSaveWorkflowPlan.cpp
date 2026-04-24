@@ -84,7 +84,7 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
         auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
 
         workspaces().saveWorkspace(context->_workspaceJsonPath, false);
-    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 2.0);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 2.0);
 
     plan.addSequentialStage("Archive", [&plan]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE

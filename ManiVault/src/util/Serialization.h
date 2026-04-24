@@ -83,9 +83,8 @@ CORE_EXPORT void loadRawDataFromBinaryFile(char* bytes, const std::uint64_t& num
  * @param bytes Pointer to input buffer
  * @param numberOfBytes Number of input bytes 
  * @param blobCodecOverride Optional blob codec to use for encoding the data blocks (defaults to nullptr, which means no compression)
- * @param concurrencyMode Whether to encode the blocks sequentially or in parallel (defaults to sequential)
  */
-CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, const BlobCodec* blobCodecOverride = nullptr, WorkflowPlan::ConcurrencyMode concurrencyMode = WorkflowPlan::ConcurrencyMode::Parallel);
+CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, const BlobCodec* blobCodecOverride = nullptr);
 
 /**
  * Decode a block of data from a file on disk and populate the provided output buffer with the decoded data
@@ -107,20 +106,18 @@ CORE_EXPORT DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decode
  * Convert variant map to raw data buffer (blocks are loaded from disk and decoded if necessary)
  * @param variantMap Variant map containing the raw data or file information
  * @param bytes Output buffer to which the raw data is copied (resizes to fit the decoded data)
- * @param concurrencyMode Whether to decode the blocks sequentially or in parallel (defaults to sequential)
  */
-CORE_EXPORT void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& bytes, WorkflowPlan::ConcurrencyMode concurrencyMode = WorkflowPlan::ConcurrencyMode::Parallel);
+CORE_EXPORT void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& bytes);
 
 /**
  * Convert variant map to raw data buffer (blocks are loaded from disk and decoded if necessary)
  * @param variantMap Variant map containing the raw data or file information
  * @param bytes Output buffer to which the raw data is copied
- * @param concurrencyMode Whether to decode the blocks sequentially or in parallel (defaults to sequential)
  * @warning This function does not perform any bounds checking on the output buffer, so it is the caller's responsibility to ensure that the buffer is
  * large enough to hold the decoded data. It is recommended to use \p decodeDataBufferFromVariantMap(...) that takes a QByteArray as output buffer, which automatically resizes
  * to fit the decoded data.
  */
-CORE_EXPORT void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, WorkflowPlan::ConcurrencyMode concurrencyMode = WorkflowPlan::ConcurrencyMode::Parallel);
+CORE_EXPORT void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes);
 
 /**
  * Raises an exception if an item with key is not found in a variant map

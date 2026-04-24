@@ -99,7 +99,7 @@ static EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& s
     return result;
 }
 
-QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, const BlobCodec* blobCodecOverride /*= nullptr*/, WorkflowPlan::ConcurrencyMode concurrencyMode /*= WorkflowPlan::ConcurrencyMode::Sequential*/)
+QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, const BlobCodec* blobCodecOverride /*= nullptr*/)
 {
     try {
         if (!mv::projects().hasProject())
@@ -162,7 +162,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
             ++encodeBlockJobIndex;
         }
 
-        encodeWorkflowPlan.addStage("Encode Blocks", WorkflowPlan::ConcurrencyMode::Parallel, encodeJobs);
+        encodeWorkflowPlan.addParallelStage("Encode Blocks", encodeJobs);
         encodeWorkflowPlan.execute(*mv::projects().getWorkflowPlanExecutor());
 
         QVariantList blocks;
@@ -235,7 +235,7 @@ DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, co
     return result;
 }
 
-void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& bytes, WorkflowPlan::ConcurrencyMode concurrencyMode /*= WorkflowPlan::ConcurrencyMode::Parallel*/)
+void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& bytes)
 {
     variantMapMustContain(variantMap, "BlockSize");
     variantMapMustContain(variantMap, "Blocks");
@@ -337,7 +337,7 @@ void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& b
         ++decodeBlockJobIndex;
     }
 
-    decodeWorkflowPlan.addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Parallel, decodeJobs);
+    decodeWorkflowPlan.addParallelStage("Decode blocks", decodeJobs);
     decodeWorkflowPlan.execute(*mv::projects().getWorkflowPlanExecutor());
 
     for (auto& decodeBlockJob : decodeBlockJobs) {
@@ -377,7 +377,7 @@ void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& b
     }
 }
 
-void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, WorkflowPlan::ConcurrencyMode concurrencyMode)
+void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes)
 {
     if (bytes == nullptr)
         throw std::runtime_error("Destination buffer is null");
@@ -392,7 +392,7 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
 
     QByteArray decodedBytes(static_cast<qsizetype>(totalSize), Qt::Uninitialized);
 
-    decodeDataBufferFromVariantMap(variantMap, decodedBytes, concurrencyMode);
+    decodeDataBufferFromVariantMap(variantMap, decodedBytes);
 
     if (decodedBytes.size() != static_cast<qsizetype>(totalSize)) {
         throw std::runtime_error(
