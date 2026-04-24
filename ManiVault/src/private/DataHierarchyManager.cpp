@@ -338,13 +338,30 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
     enumerateDatasetNames(variantMap);
 
-    // Maintain data hierarchy item order within partitions
-    std::reverse(datasetList.begin(), datasetList.end());
+    std::sort(datasetList.begin(), datasetList.end(), [](const auto& a, const auto& b)
+        {
+            const QVariantMap rawA = findRawBlockObject(a.first);
+            const QVariantMap rawB = findRawBlockObject(b.first);
 
-    // First load non-derived datasets
-    std::stable_partition(datasetList.begin(), datasetList.end(), [](const std::pair<QVariantMap, bool>& element) {
-        return !element.second;
-    });
+            const bool hasA = !rawA.isEmpty();
+            const bool hasB = !rawB.isEmpty();
+
+            if (hasA != hasB)
+                return hasA; // objects with raw block data first
+
+            if (!hasA)
+                return false;
+
+            return rawA.value("Size").toLongLong() > rawB.value("Size").toLongLong();
+        });
+
+    //// Maintain data hierarchy item order within partitions
+    //std::reverse(datasetList.begin(), datasetList.end());
+
+    //// First load non-derived datasets
+    //std::stable_partition(datasetList.begin(), datasetList.end(), [](const std::pair<QVariantMap, bool>& element) {
+    //    return !element.second;
+    //});
 
     WorkflowPlan::Jobs loadDatasetJobs;
 

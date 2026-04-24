@@ -101,11 +101,11 @@ public:
         BaseException* clone() const override { return new ProjectDownloadException(*this); }
     };
 
-    /** Parameters for opening a project */
+    /** Parameters for project operations (opening, importing, saving, publishing) */
     struct ProjectOperationParameters
     {
-        util::ParallelizationOverride   _parallelizationOverride = util::ParallelizationOverride::UsePlanSetting;   /** Concurrency mode for importing the project (sequential or parallel) */
-        std::int32_t                    _maxParallelThreads;                                                        /** Maximum number of threads to use for the operation (only used when parallelization override is set to ForceParallel) */    
+        bool            _parallel = true;       /** Whether to parallelize the operation (currently only used for opening a project, but can be extended in the future if necessary) */
+        std::uint32_t   _maxParallelThreads;    /** Maximum number of threads to use when parallelizing the operation (currently only used for opening a project, but can be extended in the future if necessary) */
     };
 
     /** Parameters for opening a project */
@@ -472,28 +472,32 @@ public: // Miscellaneous
 protected: // Operations parameters
 
     /**
-     * Get parameters for opening a project (parameters will be obtained from a file dialog)
+     * Get parameters for opening a project (parameters will be obtained from a file dialog if necessary)
+     * @param filePath File path of the project for which to get the parameters
      * @return Parameters for opening a project
      */
-    virtual ProjectOpenParameters getProjectOpenParameters() const = 0;
+    virtual ProjectOpenParameters getProjectOpenParameters(const QString& filePath) const = 0;
 
     /**
-     * Get parameters for importing a project (parameters will be obtained from a file dialog)
+     * Get parameters for importing a project (parameters will be obtained from a file dialog if necessary)
+     * @param filePath File path of the project for which to get the parameters
      * @return Parameters for importing a project
      */
-    virtual ProjectImportParameters getProjectImportParameters() const = 0;
+    virtual ProjectImportParameters getProjectImportParameters(const QString& filePath) const = 0;
 
     /**
-     * Get parameters for saving a project (parameters will be obtained from a file dialog)
+     * Get parameters for saving a project (parameters will be obtained from a file dialog if necessary)
+     * @param filePath File path of the project for which to get the parameters
      * @return Parameters for saving a project
      */
-    virtual ProjectSaveParameters getProjectSaveParameters() const = 0;
+    virtual ProjectSaveParameters getProjectSaveParameters(const QString& filePath) const = 0;
 
     /**
-     * Get parameters for publishing a project (parameters will be obtained from a file dialog)
+     * Get parameters for publishing a project (parameters will be obtained from a file dialog if necessary)
+     * @param filePath File path of the project for which to get the parameters
      * @return Parameters for publishing a project
      */
-    virtual ProjectPublishParameters getProjectPublishParameters() const = 0;
+    virtual ProjectPublishParameters getProjectPublishParameters(const QString& filePath) const = 0;
 
 protected:
 

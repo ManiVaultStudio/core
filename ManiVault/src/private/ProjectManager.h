@@ -265,28 +265,32 @@ private:
 protected: // Operations parameters
 
     /**
-     * Get parameters for opening a project (parameters will be obtained from a file dialog)
+     * Get parameters for opening a project (parameters will be obtained from a file dialog if necessary)
+     * @param filePath File path of the project for which to get the parameters
      * @return Parameters for opening a project
      */
-    ProjectOpenParameters getProjectOpenParameters() const override;
+    ProjectOpenParameters getProjectOpenParameters(const QString& filePath) const override;
 
     /**
-     * Get parameters for importing a project (parameters will be obtained from a file dialog)
+     * Get parameters for importing a project (parameters will be obtained from a file dialog if necessary)
+     * @param filePath File path of the project for which to get the parameters
      * @return Parameters for importing a project
      */
-    ProjectImportParameters getProjectImportParameters() const override;
+    ProjectImportParameters getProjectImportParameters(const QString& filePath) const override;
 
     /**
-     * Get parameters for saving a project (parameters will be obtained from a file dialog)
+     * Get parameters for saving a project (parameters will be obtained from a file dialog if necessary)
+     * @param filePath File path of the project for which to get the parameters
      * @return Parameters for saving a project
      */
-    ProjectSaveParameters getProjectSaveParameters() const override;
+    ProjectSaveParameters getProjectSaveParameters(const QString& filePath) const override;
 
     /**
-     * Get parameters for publishing a project (parameters will be obtained from a file dialog)
+     * Get parameters for publishing a project (parameters will be obtained from a file dialog if necessary)
+     * @param filePath File path of the project for which to get the parameters
      * @return Parameters for publishing a project
      */
-    ProjectPublishParameters getProjectPublishParameters() const override;
+    ProjectPublishParameters getProjectPublishParameters(const QString& filePath) const override;
 
 public: // Serialization
 

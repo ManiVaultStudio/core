@@ -748,6 +748,7 @@ QVariant findNested(const QVariantMap& root, const QStringList& path)
 		const QVariantMap map = current.toMap();
 
 		auto it = map.find(key);
+
 		if (it == map.end())
 			return {};
 

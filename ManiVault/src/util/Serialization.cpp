@@ -536,4 +536,43 @@ QVariantMap loadJsonToVariantMap(const QString& filePath)
 	return doc.object().toVariantMap();
 }
 
+bool isVariantMapRawBlockObject(const QVariantMap& map)
+{
+	return map.contains("BlockSize") &&
+		map.contains("Blocks") &&
+		map.contains("Codec") &&
+		map.contains("NumberOfBlocks") &&
+		map.contains("Size");
+}
+
+QVariantMap findRawBlockObject(const QVariant& value)
+{
+	if (value.canConvert<QVariantMap>()) {
+		const QVariantMap map = value.toMap();
+
+		if (isVariantMapRawBlockObject(map))
+			return map;
+
+		for (auto it = map.begin(); it != map.end(); ++it) {
+			const QVariantMap found = findRawBlockObject(it.value());
+
+			if (!found.isEmpty())
+				return found;
+		}
+	}
+
+	if (value.canConvert<QVariantList>()) {
+		const QVariantList list = value.toList();
+
+		for (const QVariant& item : list) {
+			const QVariantMap found = findRawBlockObject(item);
+
+			if (!found.isEmpty())
+				return found;
+		}
+	}
+
+	return {};
+}
+
 }

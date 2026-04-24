@@ -9,14 +9,12 @@
 namespace mv::util
 {
 
-enum class ParallelizationOverride {
-    UsePlanSetting,
-    ForceSequential
-};
+using MaxWorkerThreadCount = std::uint32_t;
 
 struct CORE_EXPORT WorkflowExecutionOptions
 {
-    ParallelizationOverride     _parallelizationOverride = ParallelizationOverride::UsePlanSetting;
+    bool                    _parallel;
+    MaxWorkerThreadCount    _maxWorkerThreadCount = 1;
 };
 
 } // namespace mv::util

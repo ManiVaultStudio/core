@@ -219,9 +219,11 @@ void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, Workfl
         WorkflowPlan::ConcurrencyMode effectiveMode = stage.getConcurrencyMode();
 
         auto* currentContext = WorkflowExecutionContext::current();
+
         if (currentContext != nullptr) {
             const auto state = currentContext->getState();
-            if (state && state->getExecutionOptions()._parallelizationOverride == ParallelizationOverride::ForceSequential) {
+
+            if (state && !state->getExecutionOptions()._parallel) {
                 effectiveMode = WorkflowPlan::ConcurrencyMode::Sequential;
             }
         }

@@ -162,4 +162,18 @@ CORE_EXPORT void loadFromDisk(const QVariantMap& variantMap, QStringList& list);
 CORE_EXPORT void loadFromDisk(const QVariantMap& variantMap, QVector<uint32_t>& vec);
 
 CORE_EXPORT QVariantMap loadJsonToVariantMap(const QString& filePath);
+
+/**
+ * Check whether a QVariantMap contains the necessary keys to be considered a raw block object (i.e. a block of raw data that is stored on disk or as base64 encoded string in the variant map)
+ * @param map QVariantMap to check
+ * @return true if the map contains the necessary keys, false otherwise
+ */
+CORE_EXPORT bool isVariantMapRawBlockObject(const QVariantMap& map);
+
+/**
+ * Recursively search for a raw block object in a QVariant (which can be a QVariantMap, QVariantList, or any other type) and return the first found raw block object as a QVariantMap. If no raw block object is found, an empty QVariantMap is returned.
+ * @param value QVariant to search
+ * @return QVariantMap containing the first found raw block object, or an empty QVariantMap if no raw block object is found
+*/
+CORE_EXPORT QVariantMap findRawBlockObject(const QVariant& value);
 }
