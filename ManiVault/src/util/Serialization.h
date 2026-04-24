@@ -95,6 +95,15 @@ CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64
 CORE_EXPORT DecodeBlockResult decodeBlockFromFile(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec);
 
 /**
+* Decode a block of data from a file on disk and populate the provided output buffer with the decoded data
+* @param decodeBlockJob DecodeBlockJob containing the block information
+* @param createCodec Function that creates a blob codec
+* @param destination Output buffer to which the decoded data is copied 
+* @return DecodeBlockResult containing the decoded data or an error message
+*/
+CORE_EXPORT DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec, char* destination);
+
+/**
  * Decode a block of data from a base64 encoded string and populate the provided output buffer with the decoded data
  * @param decodeBlockJob DecodeBlockJob containing the block information
  * @param createCodec Function that creates a blob codec

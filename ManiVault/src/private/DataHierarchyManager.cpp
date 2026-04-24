@@ -352,9 +352,9 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         return rawA.value("Size").toLongLong() > rawB.value("Size").toLongLong();
     });
 
-    for (const auto& dataVariantMap : datasetMaps) {
-        qDebug() << dataVariantMap["ID"].toString() << dataVariantMap["Name"].toString() << findRawBlockObject(dataVariantMap).value("Size").toLongLong();
-    }
+    //for (const auto& dataVariantMap : datasetMaps) {
+    //    qDebug() << dataVariantMap["ID"].toString() << dataVariantMap["Name"].toString() << findRawBlockObject(dataVariantMap).value("Size").toLongLong();
+    //}
 
     WorkflowPlan::Jobs loadDatasetJobs;
 
@@ -362,10 +362,11 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         const auto datasetId    = dataVariantMap["ID"].toString();
         const auto datasetName  = dataVariantMap["Name"].toString();
 
-        loadDatasetJobs.emplace_back(datasetName, [datasetId, dataVariantMap](WorkflowPlan::Job& job) {
+        loadDatasetJobs.emplace_back(datasetName, [datasetId, datasetName, dataVariantMap](WorkflowPlan::Job& job) {
             try {
-                //qDebug() << "Loading dataset" << datasetId;
+                qDebug() << "Loading dataset" << datasetName;
                 mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
+                qDebug() << "Finished loading dataset" << datasetName;
             }
             catch (std::exception& e) {
                 Serializable::reportSerializationError("Data hierarchy manager", "Failed to load dataset: " + QString::fromStdString(e.what()));

@@ -56,8 +56,8 @@ BlobCodec::Result BlobCodec::decodeTo(const QByteArray& encodedData, char* desti
     memcpy(destination, decodeResult._data.constData(), static_cast<size_t>(decodedSize));
 
     result._success = true;
-    // result._decodedSize = decodedSize;
-    return result;
+
+	return result;
 }
 
 BlobCodec::Result BlobCodec::encodeToFile(const QByteArray& input, const QString& filePath) const
@@ -116,14 +116,12 @@ BlobCodec::Result BlobCodec::decodeFromFileTo(const QString& filePath, char* des
         return result;
     }
 
-    const QByteArray encodedData = file.readAll();
-
     if (file.error() != QFileDevice::NoError) {
         result._error = QString("Failed to read file: %1").arg(filePath);
         return result;
     }
 
-    return decodeTo(encodedData, destination, destinationSize);
+    return decodeTo(file.readAll(), destination, destinationSize);
 }
 
 QString BlobCodec::typeToString(Type type)

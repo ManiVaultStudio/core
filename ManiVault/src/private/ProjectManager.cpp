@@ -388,6 +388,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         		//const auto errorText    = getName() + result->_errorMessage;
 
         		help().addNotification("Project opened", successText, StyledIcon("folder-open"));
+                qDebug() << successText;
         	}
 	    }
         emit projectOpened(*_project);

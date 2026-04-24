@@ -28,8 +28,8 @@ public:
 	mv::util::WorkflowResult       execute(mv::util::WorkflowPlan& workflowPlan, bool showProgress, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
 	mv::util::WorkflowResultFuture executeAsync(mv::util::WorkflowPlan& workflowPlan, bool showProgress, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
 
-    QThreadPool& threadPool();
-    const QThreadPool& threadPool() const;
+    QThreadPool& getThreadPool();
+    const QThreadPool& getThreadPool() const;
 
 protected:
     mv::util::WorkflowResult       executeOnCurrentThread(mv::util::WorkflowPlan& workflowPlan, mv::Task* task = nullptr, mv::util::WorkflowExecutionOptions executionOptions = {}) override;

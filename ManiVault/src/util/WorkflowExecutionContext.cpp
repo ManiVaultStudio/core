@@ -82,9 +82,6 @@ void WorkflowExecutionContext::info(const QString& text, const QString& source) 
 	if (_reportNode)
 		_reportNode->addMessage(WorkflowMessageLevel::Info, source, text);
 
-	if (_state)
-		_state->notifyMessagesChanged();
-
 	//if (_task)
 	//    _task->setStatusText(text);
 }
@@ -94,9 +91,6 @@ void WorkflowExecutionContext::warning(const QString& text, const QString& sourc
 	if (_reportNode)
 		_reportNode->addMessage(WorkflowMessageLevel::Warning, source, text);
 
-	if (_state)
-		_state->notifyMessagesChanged();
-
 	//if (_task)
 	//    _task->addWarning(text);
 }
@@ -105,9 +99,6 @@ void WorkflowExecutionContext::error(const QString& text, const QString& source)
 {
 	if (_reportNode)
 		_reportNode->addMessage(WorkflowMessageLevel::Error, source, text);
-
-	if (_state)
-		_state->notifyMessagesChanged();
 
 	//if (_task)
 	//    _task->addError(text);
@@ -122,9 +113,6 @@ void WorkflowExecutionContext::setProgress(double value) const
 
 	//qDebug() << "Setting local progress of context" << _name << "to" << value
 	//	<< ", overall progress =" << overall;
-
-	if (_state)
-		_state->notifyProgressChanged();
 
 	if (_task && _state)
 		_task->setProgress(static_cast<float>(overall));

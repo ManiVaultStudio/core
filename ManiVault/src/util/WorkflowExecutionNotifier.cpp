@@ -14,6 +14,7 @@ WorkflowExecutionNotifier::WorkflowExecutionNotifier(QObject* parent): QObject(p
 void WorkflowExecutionNotifier::setTask(Task* task)
 {
 	connect(this, &WorkflowExecutionNotifier::progressChanged, task, [task](double overallProgress) {
+        qDebug() << "WorkflowExecutionNotifier: Emitting progressChanged with overallProgress =" << overallProgress;
         task->setProgress(overallProgress);
 	}, Qt::QueuedConnection);
 }

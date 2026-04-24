@@ -29,8 +29,6 @@ public:
 
     WorkflowProgressNode::Ptr getProgressRoot() const;
 
-    WorkflowExecutionNotifier* getNotifier() const;
-    
     WorkflowExecutionOptions getExecutionOptions() const;
 
     WorkflowExecutionStatus getStatus() const;
@@ -38,10 +36,6 @@ public:
     void setStatus(WorkflowExecutionStatus status);
 
     double getOverallProgress() const;
-
-    void notifyProgressChanged() const;
-
-    void notifyMessagesChanged() const;
 
     QVector<WorkflowMessage> collectMessages() const;
 
@@ -53,7 +47,6 @@ private:
     WorkflowReportNode::Ptr _reportRoot;
     WorkflowProgressNode::Ptr _progressRoot;
     WorkflowExecutionOptions _executionOptions;
-    std::unique_ptr<WorkflowExecutionNotifier> _notifier;
 
     mutable QMutex _mutex;
     WorkflowExecutionStatus _status = WorkflowExecutionStatus::Idle;

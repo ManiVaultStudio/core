@@ -39,9 +39,9 @@ const WorkflowPlan::JobFunction& WorkflowPlan::Job::getFunction() const
 
 void WorkflowPlan::Job::run() const
 {
-#ifdef WORKFLOW_PLAN_VERBOSE
-    qDebug() << "Running job:" << _name;
-#endif
+//#ifdef WORKFLOW_PLAN_VERBOSE
+//    qDebug() << "Running job:" << _name;
+//#endif
 
     if (_function)
 		_function(*const_cast<WorkflowPlan::Job*>(this));

@@ -63,12 +63,12 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsync(mv::util::WorkflowPlan& 
     return executeAsyncImpl(std::move(workflowPlanCopy), showProgress ? Task::GuiScope::Background : Task::GuiScope::None);
 }
 
-QThreadPool& WorkflowPlanExecutor::threadPool()
+QThreadPool& WorkflowPlanExecutor::getThreadPool()
 {
     return WorkflowExecutionContext::current()->getThreadPool();
 }
 
-const QThreadPool& WorkflowPlanExecutor::threadPool() const
+const QThreadPool& WorkflowPlanExecutor::getThreadPool() const
 {
     return WorkflowExecutionContext::current()->getThreadPool();
 }
@@ -281,7 +281,7 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
     qDebug() << "Executing parallel jobs for stage:" << stage.getName() << "in thread" << QThread::currentThread();
 #endif
 
-    const auto& jobs = stage.getJobs();
+    const auto& jobs = stage.getJobs(); 
     const auto jobCount = jobs.size();
 
     if (jobCount == 0)
@@ -313,7 +313,7 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
         auto jobContext = jobContexts[i];
 
         synchronizer.addFuture(QtConcurrent::run(
-            &threadPool(),
+            &getThreadPool(),
             [this, job, jobContext, &exceptionMutex, &firstException]() mutable {
                 try {
                     executeJob(*job, jobContext);

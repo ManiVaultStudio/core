@@ -9,8 +9,7 @@ namespace mv::util
 WorkflowExecutionState::WorkflowExecutionState(const WorkflowReportNode::Ptr& reportRoot, const WorkflowProgressNode::Ptr& progressRoot, WorkflowExecutionOptions executionOptions /*= {}*/) :
 	_reportRoot(reportRoot),
 	_progressRoot(progressRoot),
-    _executionOptions(executionOptions),
-	_notifier(new WorkflowExecutionNotifier())
+    _executionOptions(executionOptions)
 {
 }
 
@@ -22,11 +21,6 @@ WorkflowReportNode::Ptr WorkflowExecutionState::getReportRoot() const
 WorkflowProgressNode::Ptr WorkflowExecutionState::getProgressRoot() const
 {
 	return _progressRoot;
-}
-
-WorkflowExecutionNotifier* WorkflowExecutionState::getNotifier() const
-{
-	return _notifier.get();
 }
 
 WorkflowExecutionOptions WorkflowExecutionState::getExecutionOptions() const
@@ -46,23 +40,11 @@ void WorkflowExecutionState::setStatus(WorkflowExecutionStatus status)
 		QMutexLocker lock(&_mutex);
 		_status = status;
 	}
-
-	emit _notifier->statusChanged();
 }
 
 double WorkflowExecutionState::getOverallProgress() const
 {
 	return _progressRoot ? _progressRoot->getProgress() : 0.0;
-}
-
-void WorkflowExecutionState::notifyProgressChanged() const
-{
-	emit _notifier->progressChanged(getOverallProgress());
-}
-
-void WorkflowExecutionState::notifyMessagesChanged() const
-{
-	emit _notifier->messagesChanged();
 }
 
 QVector<WorkflowMessage> WorkflowExecutionState::collectMessages() const

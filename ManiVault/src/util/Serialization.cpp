@@ -211,6 +211,28 @@ DecodeBlockResult decodeBlockFromFile(const DecodeBlockJob& decodeBlockJob, cons
     return result;
 }
 
+DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec, char* destination)
+{
+    DecodeBlockResult result;
+
+    result._offset  = decodeBlockJob._offset;
+    result._size    = decodeBlockJob._size;
+
+    //result._decodedData.resize(static_cast<qsizetype>(result._size));
+
+    auto codec = createCodec();
+
+    if (decodeBlockJob._uri.isEmpty())
+        throw std::runtime_error("Block URI is empty");
+
+    const auto decodeResult = codec->decodeFromFileTo(decodeBlockJob._uri, destination + result._offset, result._size);
+
+    if (!decodeResult.isSuccess())
+        throw std::runtime_error(QString("Failed to decode block from file: %1").arg(decodeBlockJob._uri).toStdString());
+
+    return result;
+}
+
 DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec)
 {
     DecodeBlockResult result;
@@ -316,15 +338,15 @@ void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& b
     std::int32_t decodeBlockJobIndex = 0;
 
     for (auto& decodeBlockJob : decodeBlockJobs) {
-        decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [&decodeBlockJob, createCodec](const WorkflowPlan::Job& job) {
-            WorkflowReporter::info(QString("Starting %1").arg(job.getName()), "Data hierarchy manager");
+        const double progressWeight = std::max<double>(1.0, static_cast<double>(decodeBlockJob._size));
 
+        decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [&decodeBlockJob, &bytes, createCodec](const WorkflowPlan::Job& job) {
             try {
                 if (decodeBlockJob._uri.isEmpty()) {
                     decodeBlockJob._result = decodeBlockFromBase64(decodeBlockJob, createCodec);
                 } else {
                     decodeBlockJob._result = decodeBlockFromFile(decodeBlockJob, createCodec);
-                }   
+                }
             }
             catch (std::exception& e) {
                 Serializable::reportSerializationError("Data hierarchy manager", "Failed to load dataset: " + QString::fromStdString(e.what()));
@@ -332,49 +354,61 @@ void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& b
             catch (...) {
                 Serializable::reportSerializationError("Data hierarchy manager", "Failed to load dataset");
             }
-        }, decodeBlockJob._size);
+            });//s, progressWeight);
 
         ++decodeBlockJobIndex;
     }
 
     decodeWorkflowPlan.addParallelStage("Decode blocks", decodeJobs);
+
+    
+    decodeWorkflowPlan.addSequentialStage("Copy blocks", [&decodeBlockJobs, &bytes, totalSize](WorkflowPlan::Job& job) {
+
+        // Validate everything sequentially first.
+        for (const auto& decodeBlockJob : decodeBlockJobs) {
+            const auto& result = decodeBlockJob._result;
+
+            if (result._size == 0)
+                throw std::runtime_error("Decoded block has zero size");
+
+            if (result._decodedData.size() != static_cast<qsizetype>(result._size))
+                throw std::runtime_error("Decoded block size mismatch");
+
+            if (result._offset > totalSize || result._size > totalSize - result._offset)
+                throw std::runtime_error("Decoded block exceeds destination buffer");
+        }
+
+        for (const auto& decodeBlockJob : decodeBlockJobs) {
+            const auto& result = decodeBlockJob._result;
+
+            std::memcpy(bytes.data() + static_cast<qsizetype>(result._offset), result._decodedData.constData(), static_cast<std::size_t>(result._size));
+        }
+
+        /*
+    	QFutureSynchronizer<void> synchronizer;
+
+        QThreadPool copyBlocksThreadPool;
+
+        copyBlocksThreadPool.setMaxThreadCount(4);
+
+        auto destination = ;
+
+        for (const auto& decodeBlockJob : decodeBlockJobs) {
+            const auto& result = decodeBlockJob._result;
+            
+            synchronizer.addFuture(QtConcurrent::run(&copyBlocksThreadPool, [destination, &result]() {
+                std::memcpy(
+                    destination + static_cast<qsizetype>(result._offset),
+                    result._decodedData.constData(),
+                    static_cast<std::size_t>(result._size));
+                }));
+        }
+
+        synchronizer.waitForFinished();
+        */
+    });
+
     decodeWorkflowPlan.execute(*mv::projects().getWorkflowPlanExecutor());
-
-    for (auto& decodeBlockJob : decodeBlockJobs) {
-        const auto& result = decodeBlockJob._result;
-
-        if (result._size == 0)
-            throw std::runtime_error("Decoded block has zero size");
-
-        if (result._decodedData.isEmpty())
-            throw std::runtime_error(
-                QString("Decoded block at offset %1 produced no data")
-                .arg(result._offset)
-                .toStdString()
-            );
-
-        if (result._decodedData.size() != static_cast<qsizetype>(result._size)) {
-            throw std::runtime_error(
-                QString("Decoded block size mismatch at offset %1: expected %2, got %3")
-                .arg(result._offset)
-                .arg(result._size)
-                .arg(result._decodedData.size())
-                .toStdString()
-            );
-        }
-
-        if (result._offset > totalSize || result._size > totalSize - result._offset) {
-            throw std::runtime_error(
-                QString("Decoded block exceeds destination buffer at offset %1, size %2, total %3")
-                .arg(result._offset)
-                .arg(result._size)
-                .arg(totalSize)
-                .toStdString()
-            );
-        }
-
-        std::memcpy(bytes.data() + result._offset, result._decodedData.constData(), result._size);
-    }
 }
 
 void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes)
