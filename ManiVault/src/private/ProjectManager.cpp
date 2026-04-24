@@ -370,14 +370,14 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
         if (parameters.isValid())
             filePath = parameters._filePath;
+        else
+            return;
 
         emit projectAboutToBeOpened(filePath);
 	    {
 		    setState(State::OpeningProject);
 
             const auto stateGuard = qScopeGuard([this]() { setState(State::Idle); });
-
-            _workflowPlanExecutor.setMaxWorkerThreadCount(parameters._maxParallelThreads);
 
         	auto projectOpenWorkflowPlan    = createProjectOpenWorkflowPlan(filePath);
         	auto workflowResult             = projectOpenWorkflowPlan.execute(_workflowPlanExecutor, true, { parameters._parallel, parameters._maxParallelThreads });
@@ -745,13 +745,14 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
             else
 	            return;
 
-	        //auto cleanup = qScopeGuard([] { /* code you want executed goes HERE; */ });
+	        //auto cleanup = qScopeGuard([] { /* code you want executed goes HERE; */ })
 
-	        auto workflowPlan = createProjectSaveWorkflowPlan(filePath);
+	        auto workflowPlan   = createProjectSaveWorkflowPlan(filePath);
 
-	        setTemporaryDirPath(TemporaryDirType::Save, workflowPlan.getWorkflowContextAs<ProjectSaveContext>()->_temporaryDirectory->path());
+            setTemporaryDirPath(TemporaryDirType::Save, workflowPlan.getWorkflowContextAs<ProjectSaveContext>()->_temporaryDirectory->path());
 
-	        auto workflowResult = workflowPlan.execute(_workflowPlanExecutor, true);
+            qDebug() << parameters._parallel << parameters._maxParallelThreads;
+	        auto workflowResult = workflowPlan.execute(_workflowPlanExecutor, true, { parameters._parallel, parameters._maxParallelThreads });
 
 	        if (workflowResult.hasErrors())
 	            throw std::runtime_error(workflowResult.getErrorMessage().toStdString());
@@ -1085,11 +1086,8 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
 
     ProjectOpenParameters parameters {
         getSetting("Parallel", true).toBool(),
-        getSetting("MaxNumberOfThreads", QThread::idealThreadCount() - 1).toUInt(),
-        filePath
+        getSetting("MaxNumberOfThreads", QThread::idealThreadCount() - 1).toUInt()
     };
-
-    parameters._filePath = filePath;
 
     if (filePath.isEmpty()) {
 	    FileOpenDialog fileDialog;
@@ -1212,19 +1210,38 @@ AbstractProjectManager::ProjectImportParameters ProjectManager::getProjectImport
 
 AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSaveParameters(const QString& filePath) const
 {
-    ProjectSaveParameters parameters;
+    const auto getSettingsPrefix = [](const QString& setting) -> QString {
+        return "ProjectSaveParameters/Default/" + setting;
+    };
+
+    const auto getSetting = [getSettingsPrefix](const QString& setting, const QVariant& defaultValue = QVariant()) -> QVariant {
+        return Application::current()->getSetting(getSettingsPrefix(setting), defaultValue);
+    };
+
+    const auto setSetting = [getSettingsPrefix](const QString& setting, const QVariant& value) {
+        Application::current()->setSetting(getSettingsPrefix(setting), value);
+    };
+
+    ProjectSaveParameters parameters {
+        getSetting("Parallel", true).toBool(),
+        getSetting("MaxNumberOfThreads", QThread::idealThreadCount() - 1).toUInt(),
+        filePath
+    };
 
     FileSaveDialog fileDialog;
 
     fileDialog.setWindowTitle("Save ManiVault Project");
     fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
     fileDialog.setDefaultSuffix(".mv");
-    fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", StandardPaths::getProjectsDirectory()).toString());
+    fileDialog.setDirectory(getSetting("Directory", StandardPaths::getProjectsDirectory()).toString());
 
     GroupAction settingsAction(&fileDialog, "Settings");
-    ToggleAction multiThreadingAction(&fileDialog, "Multi-threading");
     HorizontalGroupAction projectSettingsAction(&fileDialog, "Project settings");
     VerticalGroupAction additionalProjectSettingsAction(&fileDialog, "Additional settings");
+
+	HorizontalGroupAction parallelSettingsAction(&fileDialog, "Parallel settings");
+    ToggleAction parallelToggleAction(&fileDialog, "Parallel", getSetting("Parallel", true).toBool());
+    IntegralAction maximumNumberOfThreadsAction(&fileDialog, "Maximum number of threads", 1, QThread::idealThreadCount(), getSetting("MaxNumberOfThreads", QThread::idealThreadCount() - 1).toInt());
 
     settingsAction.setIconByName("gear");
     settingsAction.setToolTip("Edit project settings");
@@ -1246,10 +1263,29 @@ AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSavePara
 
     settingsAction.addAction(&_project->getCompressionAction());
 	settingsAction.addAction(&projectSettingsAction);
-	settingsAction.addAction(&multiThreadingAction);
+	settingsAction.addAction(&parallelSettingsAction);
+
+    parallelSettingsAction.addAction(&parallelToggleAction);
+    parallelSettingsAction.addAction(&maximumNumberOfThreadsAction);
 
     for (auto action : settingsAction.getActions())
         addActionToFileDialog(action, &fileDialog);
+
+    const auto parallelToggled = [&]() {
+        maximumNumberOfThreadsAction.setEnabled(parallelToggleAction.isChecked());
+        };
+
+    parallelToggled();
+
+    connect(&parallelToggleAction, &ToggleAction::toggled, this, parallelToggled);
+
+    const auto updateSuffix = [&maximumNumberOfThreadsAction]() {
+        maximumNumberOfThreadsAction.setSuffix(QString(" thread%1").arg((maximumNumberOfThreadsAction.getValue() == 1 ? "" : "s")));
+    };
+
+    updateSuffix();
+
+    connect(&maximumNumberOfThreadsAction, &IntegralAction::valueChanged, this, updateSuffix);
 
     fileDialog.exec();
 
@@ -1259,10 +1295,13 @@ AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSavePara
     if (fileDialog.selectedFiles().count() != 1)
         throw std::runtime_error("Only one file may be selected");
 
-    parameters._filePath    = fileDialog.selectedFiles().first();
-    parameters._parallel    = multiThreadingAction.isChecked();
+    parameters._filePath            = fileDialog.selectedFiles().first();
+    parameters._parallel            = parallelToggleAction.isChecked();
+    parameters._maxParallelThreads  = maximumNumberOfThreadsAction.getValue();
 
-    Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(parameters._filePath).absolutePath());
+    setSetting("Directory", QFileInfo(parameters._filePath).absolutePath());
+    setSetting("Parallel", parallelToggleAction.isChecked());
+    setSetting("MaxNumberOfThreads", parameters._maxParallelThreads);
 
     return parameters;
 }
@@ -1333,8 +1372,8 @@ AbstractProjectManager::ProjectPublishParameters ProjectManager::getProjectPubli
     if (fileDialog.selectedFiles().count() != 1)
         throw std::runtime_error("Only one file may be selected");
 
-    parameters._filePath                = fileDialog.selectedFiles().first();
-    parameters._parallel = multiThreadingAction.isChecked();
+    parameters._filePath    = fileDialog.selectedFiles().first();
+    parameters._parallel    = multiThreadingAction.isChecked();
 
     Application::current()->setSetting("Projects/WorkingDirectory/Publish", QFileInfo(parameters._filePath).absolutePath());
 

@@ -252,11 +252,20 @@ void WorkflowPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs, doubl
 
 WorkflowResult WorkflowPlan::execute(AbstractWorkflowPlanExecutor& workflowPlanExecutor, bool showProgress, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
+    workflowPlanExecutor.setMaxWorkerThreadCount(executionOptions._maxWorkerThreadCount);
+
     return workflowPlanExecutor.execute(*this, showProgress, executionOptions);
 }
 
 WorkflowResultFuture WorkflowPlan::executeAsync(std::shared_ptr<AbstractWorkflowPlanExecutor> workflowPlanExecutor, bool showProgress, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
+    if (!workflowPlanExecutor) {
+        qWarning() << "No workflow plan executor provided for asynchronous execution";
+        return WorkflowResultFuture::makeReady(WorkflowResult());
+    }
+
+    workflowPlanExecutor->setMaxWorkerThreadCount(executionOptions._maxWorkerThreadCount);
+
     return workflowPlanExecutor->executeAsync(*this, showProgress, executionOptions);
 }
 

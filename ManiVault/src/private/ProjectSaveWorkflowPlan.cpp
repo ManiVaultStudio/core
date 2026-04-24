@@ -48,7 +48,7 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
         printLine("Workspace JSON", context->_workspaceJsonPath, 3);
         printLine("Project JSON", context->_projectJsonPath, 3);
 #endif
-    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);
 
     plan.addSequentialStage("Save project JSON", [&plan]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
@@ -60,7 +60,7 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
         auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
 
         projects().toJsonFile(context->_projectJsonPath);
-    }, WorkflowPlan::JobThreadAffinity::GuiThread, 10.0);
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 10.0);
 
     plan.addSequentialStage("Save project meta JSON", [&plan]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
@@ -74,7 +74,7 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
         if (auto project = projects().getCurrentProject()) {
             project->getProjectMetaAction().toJsonFile(context->_metaJsonPath);
         }
-    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);
 
     plan.addSequentialStage("Save workspace JSON", [&plan]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
@@ -84,7 +84,7 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
         auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
 
         workspaces().saveWorkspace(context->_workspaceJsonPath, false);
-    }, WorkflowPlan::JobThreadAffinity::GuiThread, 2.0);
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 2.0);
 
     plan.addSequentialStage("Archive", [&plan]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
