@@ -743,24 +743,29 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
 	        //auto cleanup = qScopeGuard([] { /* code you want executed goes HERE; */ })
 
-	        auto workflowPlan   = createProjectSaveWorkflowPlan(filePath);
+	        auto workflowPlan = createProjectSaveWorkflowPlan(filePath);
 
             setTemporaryDirPath(TemporaryDirType::Save, workflowPlan.getWorkflowContextAs<ProjectSaveContext>()->_temporaryDirectory->path());
 
-            qDebug() << parameters._parallel << parameters._maxParallelThreads;
 	        auto workflowResult = workflowPlan.execute(_workflowPlanExecutor, true, { parameters._parallel, parameters._maxParallelThreads });
 
-	        if (workflowResult.hasErrors())
-	            throw std::runtime_error(workflowResult.getErrorMessage().toStdString());
+            if (auto currentProject = mv::projects().getCurrentProject()) {
+                const auto duration = workflowResult.getDuration();
+                const auto successText = (duration < 1000) ? QString("%1 completed successfully in %2 ms").arg(workflowPlan.getName()).arg(duration) : QString("%1 saved successfully in %2 s").arg(currentProject->getFilePath()).arg(duration / 1000.0, 0, 'f', 1);
+                //const auto errorText    = getName() + result->_errorMessage;
 
-	        if (auto currentProject = mv::projects().getCurrentProject()) {
-	            const auto duration     = workflowResult.getDuration();
-	            const auto successText  = (duration < 1000) ? QString("%1 completed successfully in %2 ms").arg(workflowPlan.getName()).arg(duration) : QString("%1 saved successfully in %2 s").arg(currentProject->getFilePath()).arg(duration / 1000.0, 0, 'f', 1);
-	            //const auto errorText    = getName() + result->_errorMessage;
+                help().addNotification("Project saved", successText, StyledIcon("file"));
+                qDebug() << successText;
+            }
 
-	            help().addNotification("Project saved", successText, StyledIcon("file"));
-	            qDebug() << successText;
-	        }
+	        //if (auto currentProject = mv::projects().getCurrentProject()) {
+	        //    const auto duration     = workflowResult.getDuration();
+	        //    const auto successText  = (duration < 1000) ? QString("%1 completed successfully in %2 ms").arg(workflowPlan.getName()).arg(duration) : QString("%1 saved successfully in %2 s").arg(currentProject->getFilePath()).arg(duration / 1000.0, 0, 'f', 1);
+	        //    //const auto errorText    = getName() + result->_errorMessage;
+
+	        //    help().addNotification("Project saved", successText, StyledIcon("file"));
+	        //    qDebug() << successText;
+	        //}
         }
         emit projectSaved(*_project);
     }

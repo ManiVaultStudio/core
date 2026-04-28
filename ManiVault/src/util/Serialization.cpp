@@ -162,8 +162,10 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
             ++encodeBlockJobIndex;
         }
 
-        encodeWorkflowPlan.addParallelStage("Encode Blocks", encodeJobs);
-        encodeWorkflowPlan.execute(mv::projects().getWorkflowPlanExecutor());
+        if (!encodeJobs.empty()) {
+            encodeWorkflowPlan.addParallelStage("Encode Blocks", encodeJobs);
+            encodeWorkflowPlan.execute(mv::projects().getWorkflowPlanExecutor());
+        }
 
         QVariantList blocks;
 
@@ -378,11 +380,11 @@ void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& b
                 throw std::runtime_error("Decoded block exceeds destination buffer");
         }
 
-        //for (const auto& decodeBlockJob : decodeBlockJobs) {
-        //    const auto& result = decodeBlockJob._result;
+        for (const auto& decodeBlockJob : decodeBlockJobs) {
+            const auto& result = decodeBlockJob._result;
 
-        //    std::memcpy(bytes.data() + static_cast<qsizetype>(result._offset), result._decodedData.constData(), static_cast<std::size_t>(result._size));
-        //}
+            std::memcpy(bytes.data() + static_cast<qsizetype>(result._offset), result._decodedData.constData(), static_cast<std::size_t>(result._size));
+        }
 
         /*
     	QFutureSynchronizer<void> synchronizer;
@@ -408,7 +410,7 @@ void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& b
         */
     });
 
-    decodeWorkflowPlan.executeOnCurrentThread(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()));
+    decodeWorkflowPlan.execute(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()));
 }
 
 void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes)

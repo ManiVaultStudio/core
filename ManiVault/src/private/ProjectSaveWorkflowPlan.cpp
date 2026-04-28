@@ -26,8 +26,6 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
         printLine("Recipe stage", "Setup", 2);
 #endif
 
-        //OperationContextScope scope(getOperationContext());
-
         Application::requestOverrideCursor(Qt::WaitCursor);
 
         auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
@@ -48,33 +46,29 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
         printLine("Workspace JSON", context->_workspaceJsonPath, 3);
         printLine("Project JSON", context->_projectJsonPath, 3);
 #endif
-    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     plan.addSequentialStage("Save project JSON", [&plan]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
         printLine("Recipe stage", "Save project JSON", 2);
 #endif
 
-        //OperationContextScope scope(getOperationContext());
-
         auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
 
         projects().toJsonFile(context->_projectJsonPath);
-    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 10.0);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 10.0);
 
     plan.addSequentialStage("Save project meta JSON", [&plan]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
         printLine("Recipe stage", "Save project meta JSON", 2);
 #endif
 
-        //OperationContextScope scope(getOperationContext());
-
         auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
 
         if (auto project = projects().getCurrentProject()) {
             project->getProjectMetaAction().toJsonFile(context->_metaJsonPath);
         }
-    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     plan.addSequentialStage("Save workspace JSON", [&plan]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE

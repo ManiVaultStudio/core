@@ -369,12 +369,9 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
     for (const auto& dataVariantMap : datasetMaps) {
         const auto datasetId    = dataVariantMap["ID"].toString();
         const auto datasetName  = dataVariantMap["Name"].toString();
+        const auto rawBlockSize = getRawBlockObjectSize(dataVariantMap);
 
-        double weight = 1.0;
-
-        const auto rawA = findRawBlockObject(dataVariantMap);
-
-        loadDatasetJobs.emplace_back(datasetName, [datasetId, datasetName, dataVariantMap](WorkflowPlan::Job& job) {
+        loadDatasetJobs.emplace_back(datasetName, [datasetId, dataVariantMap](WorkflowPlan::Job& job) {
             try {
                 mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
             }
@@ -384,7 +381,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
             catch (...) {
                 Serializable::reportSerializationError("Data hierarchy manager", "Failed to load dataset");
             }
-        }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic).weighted(1.0);
+        }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic).weighted(rawBlockSize > 0 ? static_cast<double>(rawBlockSize) : 1.0);
     }
 
     fromPlan.addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Parallel, loadDatasetJobs, 25.0);
@@ -394,7 +391,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         }
     });
 
-    fromPlan.executeOnCurrentThread(mv::projects().getWorkflowPlanExecutor());
+    fromPlan.execute(mv::projects().getWorkflowPlanExecutor());
 }
 
 QVariantMap DataHierarchyManager::toVariantMap() const
@@ -424,7 +421,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
                 catch (...) {
                     Serializable::reportSerializationError("Data hierarchy manager", "Failed to save dataset: " + datasetGuiName);
                 }
-            });
+            }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 
             sortIndex++;
         }
