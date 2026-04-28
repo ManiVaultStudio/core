@@ -97,6 +97,8 @@ public:
 
         double getWeight() const;
 
+        Job weighted(double weight);
+
         JobProgressMode getProgressMode() const;
 
     private:

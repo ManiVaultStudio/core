@@ -24,72 +24,27 @@ public:
     };
 
 public:
-    WorkflowResultFuture() = default;
+    WorkflowResultFuture();
 
-    explicit WorkflowResultFuture(std::shared_ptr<State> state)
-        : _state(std::move(state))
-    {
-    }
+    explicit WorkflowResultFuture(std::shared_ptr<State> state);
 
-    bool isValid() const
-    {
-        return _state && _state->future.isValid();
-    }
+    bool isValid() const;
 
-    bool isFinished() const
-    {
-        return _state && _state->future.isFinished();
-    }
+    bool isFinished() const;
 
-    void waitForFinished() const
-    {
-        if (_state)
-            _state->future.waitForFinished();
-    }
+    void waitForFinished() const;
 
-    WorkflowResult result() const
-    {
-        if (!_state)
-            return {};
+    WorkflowResult result() const;
 
-        return _state->future.result();
-    }
+    const QFuture<WorkflowResult>& getFuture() const;
 
-    const QFuture<WorkflowResult>& getFuture() const
-    {
-        Q_ASSERT(_state);
-        return _state->future;
-    }
+    Task* getTask() const;
 
-    Task* getTask() const
-    {
-        return _state ? _state->task.data() : nullptr;
-    }
+    QFutureWatcher<WorkflowResult>* getWatcher() const;
 
-    QFutureWatcher<WorkflowResult>* getWatcher() const
-    {
-        return _state ? _state->watcher.data() : nullptr;
-    }
+    static WorkflowResultFuture makeReady(const WorkflowResult& result = {});
 
-    static WorkflowResultFuture makeReady(const WorkflowResult& result = {})
-    {
-        auto state = std::make_shared<State>();
-
-        QPromise<WorkflowResult> promise;
-        state->future = promise.future();
-        promise.start();
-        promise.addResult(result);
-        promise.finish();
-
-        return WorkflowResultFuture(state);
-    }
-
-    static WorkflowResultFuture fromFuture(QFuture<WorkflowResult> future)
-    {
-        auto state = std::make_shared<State>();
-        state->future = std::move(future);
-        return WorkflowResultFuture(state);
-    }
+    static WorkflowResultFuture fromFuture(QFuture<WorkflowResult> future);
 
 private:
     std::shared_ptr<State> _state;

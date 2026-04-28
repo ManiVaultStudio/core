@@ -108,6 +108,13 @@ double WorkflowPlan::Job::getWeight() const
 	return _weight;
 }
 
+WorkflowPlan::Job WorkflowPlan::Job::weighted(double weight)
+{
+    _weight = weight;
+
+    return *this;
+}
+
 WorkflowPlan::JobProgressMode WorkflowPlan::Job::getProgressMode() const
 {
     return _progressMode;

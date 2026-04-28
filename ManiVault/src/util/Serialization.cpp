@@ -609,6 +609,41 @@ QVariantMap findRawBlockObject(const QVariant& value)
 	return {};
 }
 
+std::uint64_t getRawBlockObjectSize(const QVariantMap& map)
+{
+	bool       ok   = false;
+	const auto size = map.value("Size").toULongLong(&ok);
+
+	return ok ? size : 0;
+}
+
+std::uint64_t estimateRawBlockTotalSize(const QVariant& value)
+{
+	std::uint64_t totalSize = 0;
+
+	if (value.canConvert<QVariantMap>()) {
+		const QVariantMap map = value.toMap();
+
+		if (isVariantMapRawBlockObject(map)) {
+            totalSize += getRawBlockObjectSize(map);
+		}
+
+		for (auto it = map.begin(); it != map.end(); ++it) {
+			totalSize += estimateRawBlockTotalSize(it.value());
+		}
+	}
+
+	if (value.canConvert<QVariantList>()) {
+		const QVariantList list = value.toList();
+
+		for (const QVariant& item : list) {
+			totalSize += estimateRawBlockTotalSize(item);
+		}
+	}
+
+	return totalSize;
+}
+
 QByteArray serializeVariantMap(const QVariantMap& map)
 {
 	QByteArray  bytes;

@@ -184,6 +184,20 @@ CORE_EXPORT bool isVariantMapRawBlockObject(const QVariantMap& map);
 CORE_EXPORT QVariantMap findRawBlockObject(const QVariant& value);
 
 /**
+ * Get the size of the raw block object contained in a QVariantMap (if the map is a raw block object), or return 0 if the map is not a raw block object or if the size information is not available. This function is useful to estimate the size of a raw block when only the variant map containing the block information is available (e.g. when estimating the total size of all raw blocks contained in a larger variant map).
+ * @param map QVariantMap containing the raw block object information
+ * @return Size of the raw block object in bytes, or 0 if the map is not a raw block object or if the size information is not available
+ */
+CORE_EXPORT std::uint64_t getRawBlockObjectSize(const QVariantMap& map);
+
+/**
+ * Recursively estimate the total size of all raw blocks contained in a QVariant (which can be a QVariantMap, QVariantList, or any other type). This function is useful to estimate the total size of the data that needs to be loaded from disk when decoding a variant map containing raw block objects.
+ * @param value QVariant to search
+ * @return Total size of all raw blocks contained in the input QVariant
+ */
+CORE_EXPORT std::uint64_t estimateRawBlockTotalSize(const QVariant& value);
+
+/**
  * Serialize a QVariantMap to a QByteArray using QDataStream
  * @param map QVariantMap to serialize
  * @return QByteArray containing the serialized QVariantMap
