@@ -301,6 +301,12 @@ CORE_EXPORT void printLine(const QString& key, const QVariant& value = {}, int i
 CORE_EXPORT void prettyPrintVariantMap(const QVariantMap& variantMap);
 
 /**
+ * Log memory usage of the current process with an optional label
+ * @param label Label to prefix the log message with (default is an empty string)
+ */
+CORE_EXPORT void logMemory(const QString& label);
+
+/**
  * Find a nested value in a QVariantMap by a dot-separated path (e.g. "a.b.c" to find root["a"]["b"]["c"])
  * @param root Root map to search within
  * @param path Dot-separated path to the value to find

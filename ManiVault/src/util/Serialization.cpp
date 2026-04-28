@@ -259,8 +259,14 @@ DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, co
     return result;
 }
 
-void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& bytes)
+void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes)
 {
+    if (variantMap.isEmpty())
+        throw std::runtime_error("Variant map is empty");
+
+    if (!bytes)
+        throw std::runtime_error("Destination buffer is null");
+
     variantMapMustContain(variantMap, "BlockSize");
     variantMapMustContain(variantMap, "Blocks");
     variantMapMustContain(variantMap, "Size");
@@ -268,15 +274,11 @@ void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& b
     const auto blocks       = variantMap.value("Blocks").toList();
     const bool hasCodec     = variantMap.contains("Codec");
     const auto codecName    = hasCodec ? variantMap.value("Codec").toString() : QStringLiteral("none");
-    const auto totalSize    = variantMap.value("Size").toULongLong();
-
-    bytes.resize(static_cast<qsizetype>(totalSize));
 
     if (hasCodec && !codecRegistry().isRegistered(codecName)) {
         throw std::runtime_error(QStringLiteral("Unable to load raw data, codec %1 is not registered").arg(codecName).toStdString());
     }
 
-    //qDebug() << "Decoding raw data with codec:" << (hasCodec ? codecName : "none") << ", number of blocks:" << blocks.size();
     auto createCodec = [hasCodec, codecName]() -> std::shared_ptr<BlobCodec> {
         if (hasCodec)
             return codecRegistry().createCodec(nullptr, codecName);
@@ -347,7 +349,7 @@ void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& b
                 if (decodeBlockJob._uri.isEmpty()) {
                     decodeBlockJob._result = decodeBlockFromBase64(decodeBlockJob, createCodec);
                 } else {
-                    decodeBlockJob._result = decodeBlockFromFile(decodeBlockJob, createCodec);
+                    decodeBlockFromFileTo(decodeBlockJob, createCodec, bytes);
                 }
             }
             catch (std::exception& e) {
@@ -362,84 +364,24 @@ void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& b
     }
 
     decodeWorkflowPlan.addParallelStage("Decode blocks", decodeJobs);
-
-    
-    decodeWorkflowPlan.addSequentialStage("Copy blocks", [&decodeBlockJobs, &bytes, totalSize](WorkflowPlan::Job& job) {
-
-        // Validate everything sequentially first.
-        for (const auto& decodeBlockJob : decodeBlockJobs) {
-            const auto& result = decodeBlockJob._result;
-
-            if (result._size == 0)
-                throw std::runtime_error("Decoded block has zero size");
-
-            if (result._decodedData.size() != static_cast<qsizetype>(result._size))
-                throw std::runtime_error("Decoded block size mismatch");
-
-            if (result._offset > totalSize || result._size > totalSize - result._offset)
-                throw std::runtime_error("Decoded block exceeds destination buffer");
-        }
-
-        for (const auto& decodeBlockJob : decodeBlockJobs) {
-            const auto& result = decodeBlockJob._result;
-
-            std::memcpy(bytes.data() + static_cast<qsizetype>(result._offset), result._decodedData.constData(), static_cast<std::size_t>(result._size));
-        }
-
-        /*
-    	QFutureSynchronizer<void> synchronizer;
-
-        QThreadPool copyBlocksThreadPool;
-
-        copyBlocksThreadPool.setMaxThreadCount(4);
-
-        auto destination = ;
-
-        for (const auto& decodeBlockJob : decodeBlockJobs) {
-            const auto& result = decodeBlockJob._result;
-            
-            synchronizer.addFuture(QtConcurrent::run(&copyBlocksThreadPool, [destination, &result]() {
-                std::memcpy(
-                    destination + static_cast<qsizetype>(result._offset),
-                    result._decodedData.constData(),
-                    static_cast<std::size_t>(result._size));
-                }));
-        }
-
-        synchronizer.waitForFinished();
-        */
-    });
-
     decodeWorkflowPlan.execute(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()));
 }
 
-void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes)
+void populateDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& bytes)
 {
-    if (bytes == nullptr)
-        throw std::runtime_error("Destination buffer is null");
-
+    if (variantMap.isEmpty())
+        throw std::runtime_error("Variant map is empty");
 
     variantMapMustContain(variantMap, "Size");
 
-    const auto totalSize = variantMap.value("Size").value<quint64>();
+    const auto totalSize = variantMap.value("Size").toULongLong();
 
     if (totalSize == 0)
         throw std::runtime_error("Decoded buffer size is zero");
 
-    QByteArray decodedBytes(static_cast<qsizetype>(totalSize), Qt::Uninitialized);
+    bytes.resize(static_cast<qsizetype>(totalSize));
 
-    decodeDataBufferFromVariantMap(variantMap, decodedBytes);
-
-    if (decodedBytes.size() != static_cast<qsizetype>(totalSize)) {
-        throw std::runtime_error(
-            QString("Decoded byte size mismatch: expected %1, got %2")
-            .arg(totalSize)
-            .arg(decodedBytes.size())
-            .toStdString()
-        );
-    }
-
-    std::memcpy(bytes, decodedBytes.constData(), static_cast<size_t>(decodedBytes.size()));
+    populateDataBufferFromVariantMap(variantMap, bytes.data());
 }
 
 void variantMapMustContain(const QVariantMap& variantMap, const QString& key)

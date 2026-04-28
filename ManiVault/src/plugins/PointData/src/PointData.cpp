@@ -159,13 +159,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
         resizeVector(numberOfElements);
 
         try {
-            QByteArray decodedBytes;
-            decodeDataBufferFromVariantMap(rawDataMap, decodedBytes);
-
-            if (decodedBytes.size() != getRawDataSize())
-                throw std::runtime_error("Decoded data size does not match expected raw data size.");
-
-        	std::memcpy(getDataVoidPtr(), decodedBytes.data(), decodedBytes.size());
+            populateDataBufferFromVariantMap(rawDataMap, static_cast<char*>(getDataVoidPtr()));
         }
         catch (const std::exception& e) {
             qCritical() << "Failed to load point data: " << e.what();
@@ -981,8 +975,11 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     
 
     // Load raw point data
-    if (isFull())
+    if (isFull()) {
+        logMemory(QString("before load %1").arg(getGuiName()));
         getRawData<PointData>()->fromVariantMap(variantMap);
+		logMemory(QString("after load %1").arg(getGuiName()));
+    }
     else
     {
         variantMapMustContain(variantMap, "Indices");

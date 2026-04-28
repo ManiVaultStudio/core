@@ -127,7 +127,7 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
     try {
         QByteArray decodedBytes;
 
-        decodeDataBufferFromVariantMap(dataMap["ClustersRawData"].toMap(), decodedBytes);
+        populateDataBufferFromVariantMap(dataMap["ClustersRawData"].toMap(), decodedBytes);
 
         QDataStream clustersDataStream(&decodedBytes, QIODevice::ReadOnly);
 

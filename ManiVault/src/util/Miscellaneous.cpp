@@ -29,6 +29,32 @@
 namespace mv::util
 {
 
+    struct MemoryStats
+    {
+        double rssMB = 0.0;        // Resident Set Size
+        double privateMB = 0.0;    // Private / committed (if available)
+    };
+
+#ifdef Q_OS_WIN
+	#include <windows.h>
+	#include <psapi.h>
+
+    MemoryStats getMemoryStats()
+    {
+        PROCESS_MEMORY_COUNTERS_EX pmc;
+        GetProcessMemoryInfo(
+            GetCurrentProcess(),
+            reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&pmc),
+            sizeof(pmc)
+        );
+
+        MemoryStats s;
+        s.rssMB = pmc.WorkingSetSize / 1024.0 / 1024.0;
+        s.privateMB = pmc.PrivateUsage / 1024.0 / 1024.0;
+        return s;
+    }
+#endif
+
 QString getIntegerCountHumanReadable(const double& count)
 {
     if (count >= 0 && count < 1000)
@@ -735,6 +761,16 @@ void printLine(const QString& key, const QVariant& value /*= {}*/, int indent /*
 void prettyPrintVariantMap(const QVariantMap& variantMap)
 {
     qDebug().noquote() << QJsonDocument(QJsonObject::fromVariantMap(variantMap)).toJson(QJsonDocument::Indented);
+}
+
+void logMemory(const QString& label)
+{
+    const auto stats = getMemoryStats();
+
+    qDebug().noquote()
+        << label
+        << "RSS MB:" << stats.rssMB
+        << "Private MB:" << stats.privateMB;
 }
 
 QVariant findNested(const QVariantMap& root, const QStringList& path)

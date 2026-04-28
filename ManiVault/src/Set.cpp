@@ -193,7 +193,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     {
         try {
             QByteArray decodedBytes;
-            decodeDataBufferFromVariantMap(variantMap["Properties"].toMap(), decodedBytes);
+            populateDataBufferFromVariantMap(variantMap["Properties"].toMap(), decodedBytes);
 
             _properties = deserializeVariantMap(decodedBytes);
         }
