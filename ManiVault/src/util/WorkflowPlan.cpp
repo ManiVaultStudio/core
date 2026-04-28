@@ -13,10 +13,11 @@
 namespace mv::util
 {
 
-WorkflowPlan::Job::Job(QString name, JobFunction function, JobThreadAffinity threadAffinity /*= JobThreadAffinity::CurrentWorkerThread*/) :
+WorkflowPlan::Job::Job(QString name, JobFunction function, JobThreadAffinity threadAffinity /*= JobThreadAffinity::CurrentWorkerThread*/, JobProgressMode progressMode /*= JobProgressMode::Automatic*/) :
     _name(std::move(name)),
     _function(std::move(function)),
-    _threadAffinity(threadAffinity)
+    _threadAffinity(threadAffinity),
+    _progressMode(progressMode)
 {
 }
 
@@ -105,6 +106,11 @@ WorkflowPlan::JobThreadAffinity WorkflowPlan::Job::getThreadAffinity() const
 double WorkflowPlan::Job::getWeight() const
 {
 	return _weight;
+}
+
+WorkflowPlan::JobProgressMode WorkflowPlan::Job::getProgressMode() const
+{
+    return _progressMode;
 }
 
 void WorkflowPlan::Stage::setWeight(double weight)

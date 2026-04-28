@@ -321,7 +321,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         catch (...) {
             Serializable::reportSerializationError("Data hierarchy manager", "Failed to Populate data hierarchy");
         }
-    });
+    }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     std::vector<QVariantMap> datasetMaps;
 
@@ -364,6 +364,9 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
         loadDatasetJobs.emplace_back(datasetName, [datasetId, datasetName, dataVariantMap](WorkflowPlan::Job& job) {
             try {
+                qDebug() << "Current workflow context:"
+                    << (WorkflowExecutionContext::current() ? WorkflowExecutionContext::current()->getName() : "<none>");
+
                 qDebug() << "Loading dataset" << datasetName;
                 mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
                 qDebug() << "Finished loading dataset" << datasetName;
@@ -374,7 +377,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
             catch (...) {
                 Serializable::reportSerializationError("Data hierarchy manager", "Failed to load dataset");
             }
-        });
+        }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
     }
 
     fromPlan.addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Parallel, loadDatasetJobs, 25.0);
@@ -384,7 +387,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         }
     });
 
-    fromPlan.execute(mv::projects().getWorkflowPlanExecutor());
+    fromPlan.executeOnCurrentThread(mv::projects().getWorkflowPlanExecutor());
 }
 
 QVariantMap DataHierarchyManager::toVariantMap() const

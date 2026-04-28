@@ -11,7 +11,6 @@
 #include "WorkflowExecutionOptions.h"
 
 #include <QString>
-#include <QJsonDocument>
 #include <QVariant>
 
 namespace mv
@@ -41,6 +40,17 @@ public:
         GuiThread
     };
 
+    enum class JobCompletionPolicy {
+        Auto,
+        ManualOrNested
+    };
+
+    enum class JobProgressMode {
+        Automatic,  /** Default: leaf job auto-completes if no children */
+        Atomic,     /** Ignore nested workflow progress; job is one unit */
+        Nested      /** Nested workflows contribute fine-grained progress */
+    };
+
     using SharedState = std::shared_ptr<QVariantMap>;
 
 public:
@@ -54,7 +64,7 @@ public:
     public:
         using ErrorString = QString;
 
-        Job(QString name, JobFunction function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread);
+        Job(QString name, JobFunction function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, JobProgressMode progressMode = JobProgressMode::Automatic);
         Job(QString name, JobFunction function, double weight);
 
         QString getName() const;
@@ -87,6 +97,8 @@ public:
 
         double getWeight() const;
 
+        JobProgressMode getProgressMode() const;
+
     private:
         QString     _name;
         JobFunction _function;
@@ -94,6 +106,7 @@ public:
         std::optional<QString> _error;
         JobThreadAffinity _threadAffinity = JobThreadAffinity::CurrentWorkerThread;
         double          _weight = 1.0;
+        JobProgressMode _progressMode = JobProgressMode::Automatic;
     };
 
     using Jobs = std::vector<Job>;
@@ -177,6 +190,7 @@ private:
     SharedState _sharedState = std::make_shared<QVariantMap>();
     SharedWorkflowContext   _workflowContext;
     double _weight = 1.0;
+    
 };
 
 }

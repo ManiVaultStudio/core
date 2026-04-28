@@ -146,32 +146,25 @@ WorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workflowPla
             workflowPlan.getName());
     }
 
-    return WorkflowResult(rootContext);
+    return WorkflowResult(&rootContext);
 }
 
 WorkflowResult WorkflowPlanExecutor::executeChild(const WorkflowPlan& workflowPlan, WorkflowExecutionContext& parentContext)
 {
-    auto childContext = parentContext.createChild(workflowPlan.getName(), workflowPlan.getWeight());
+    auto childContext = parentContext.createChild(
+        workflowPlan.getName(),
+        workflowPlan.getWeight(),
+        WorkflowPlan::JobProgressMode::Automatic);
 
     WorkflowExecutionScope childScope(childContext);
 
     WorkflowReporter::info("Nested workflow started", workflowPlan.getName());
 
-    try {
-        executeImpl(workflowPlan);
-        //childContext.setProgress(1.0);
-        WorkflowReporter::info("Nested workflow finished", workflowPlan.getName());
-    }
-    catch (const std::exception& e) {
-        WorkflowReporter::error(QString("Nested workflow failed: %1").arg(QString::fromUtf8(e.what())),
-            workflowPlan.getName());
-    }
-    catch (...) {
-        WorkflowReporter::error("Nested workflow failed with unknown error",
-            workflowPlan.getName());
-    }
+    executeImpl(workflowPlan);
 
-    return WorkflowResult(childContext);
+    WorkflowReporter::info("Nested workflow finished", workflowPlan.getName());
+
+    return WorkflowResult(&childContext);
 }
 
 void WorkflowPlanExecutor::executeImpl(const WorkflowPlan& workflowPlan)
@@ -264,7 +257,7 @@ void WorkflowPlanExecutor::executeSequentialJobs(const WorkflowPlan::Stage& stag
 
     for (int jobIndex = 0; jobIndex < jobCount; ++jobIndex) {
         const auto& job = jobs[jobIndex];
-        jobContexts.push_back(stageContext.createChild(job.getName(), 1.0));
+        jobContexts.push_back(stageContext.createChild(job.getName(), job.getWeight(), job.getProgressMode()));
     }
 
     for (int jobIndex = 0; jobIndex < jobCount; ++jobIndex) {
@@ -301,7 +294,7 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
 
     for (int i = 0; i < jobCount; ++i) {
         const auto& job = jobs[i];
-        jobContexts.push_back(stageContext.createChild(job.getName(), job.getWeight()));
+        jobContexts.push_back(stageContext.createChild(job.getName(), job.getWeight(), job.getProgressMode()));
     }
 
     QFutureSynchronizer<void> synchronizer;
@@ -347,9 +340,6 @@ void WorkflowPlanExecutor::executeJobOnGuiThread(const WorkflowPlan::Job& job, W
             try {
                 WorkflowExecutionScope scope(jobContext);
                 job.run();
-
-                if (!jobContext.hasProgressChildren())
-                    jobContext.setProgress(1.0);
             }
             catch (...) {
                 exceptionPtr = std::current_exception();
@@ -370,9 +360,6 @@ void WorkflowPlanExecutor::executeJobOnWorkerThread(const WorkflowPlan::Job& job
     WorkflowExecutionScope scope(jobContext);
 
     job.run();
-
-    //if (!jobContext.hasProgressChildren())
-    //    jobContext.setProgress(1.0);
 }
 
 void WorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext)
@@ -390,14 +377,21 @@ void WorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, WorkflowExec
 	            break;
         }
 
+        if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Atomic) {
+            jobContext.setProgress(1.0);
+        }
+        else if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Automatic &&
+            !jobContext.hasProgressChildren()) {
+            jobContext.setProgress(1.0);
+        }
+
         WorkflowReporter::info("Job finished", job.getName());
     }
-    catch (const std::exception& e) {
-        WorkflowReporter::error(QString("Job failed: %1").arg(e.what()), job.getName());
-        throw;
-    }
     catch (...) {
-        WorkflowReporter::error("Job failed with unknown error", job.getName());
+        if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Atomic || (job.getProgressMode() == WorkflowPlan::JobProgressMode::Automatic && !jobContext.hasProgressChildren())) {
+            jobContext.setProgress(1.0);
+        }
+
         throw;
     }
 }

@@ -62,7 +62,8 @@ ProjectManager::ProjectManager(QObject* parent) :
     _pluginManagerAction(nullptr, "Plugin Browser..."),
     _showStartPageAction(nullptr, "Start Page...", true),
     _backToProjectAction(nullptr, "Back to project"),
-    _projectsListModel(StandardItemModel::PopulationMode::AutomaticSynchronous, this)
+    _projectsListModel(StandardItemModel::PopulationMode::AutomaticSynchronous, this),
+    _workflowPlanExecutor(std::make_shared<WorkflowPlanExecutor>())
 {
     //_newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     //_newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);

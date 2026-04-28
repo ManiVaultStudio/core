@@ -8,6 +8,7 @@
 #include "WorkflowReportNode.h"
 #include "WorkflowProgressNode.h"
 #include "WorkflowExecutionState.h"
+#include "WorkflowPlan.h"
 #include "Task.h"
 
 #include <QString>
@@ -26,11 +27,11 @@ public:
 
     WorkflowExecutionContext();
 
-    WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, SharedThreadPool threadPool, Task* task = nullptr);
+    WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, SharedThreadPool threadPool, Task* task = nullptr, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
 
     static WorkflowExecutionContext makeRoot(const QString& name, Task* task, WorkflowExecutionOptions executionOptions = {});
 
-    WorkflowExecutionContext createChild(const QString& name, double weight = 1.0) const;
+    WorkflowExecutionContext createChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic) const;
 
     bool hasProgressChildren() const;
 
@@ -60,6 +61,8 @@ public:
 
     static const WorkflowExecutionContext* currentConst();
 
+    WorkflowPlan::JobProgressMode getProgressMode() const;
+
 private:
     friend class WorkflowExecutionScope;
 
@@ -72,8 +75,7 @@ private:
     StatePtr _state;
     SharedThreadPool _threadPool;
     QPointer<Task> _task;
+    WorkflowPlan::JobProgressMode _progressMode = WorkflowPlan::JobProgressMode::Automatic;
 };
-
-
 
 } // namespace mv::util

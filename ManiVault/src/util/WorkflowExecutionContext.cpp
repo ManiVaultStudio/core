@@ -14,15 +14,15 @@ namespace
 
 WorkflowExecutionContext::WorkflowExecutionContext() = default;
 
-WorkflowExecutionContext::WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, SharedThreadPool threadPool, Task* task /*= nullptr*/) :
+WorkflowExecutionContext::WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, SharedThreadPool threadPool, Task* task /*= nullptr*/, WorkflowPlan::JobProgressMode progressMode /*= WorkflowPlan::JobProgressMode::Automatic*/) :
 	_name(std::move(name)),
 	_reportNode(std::move(reportNode)),
 	_progressNode(std::move(progressNode)),
 	_state(std::move(state)),
     _threadPool(std::move(threadPool)),
-    _task(task)
+    _task(task),
+    _progressMode(progressMode)
 {
-    
 }
 
 WorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString& name, Task* task /*= nullptr*/, WorkflowExecutionOptions executionOptions /*= {}*/)
@@ -47,7 +47,7 @@ WorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString& name,
     };
 }
 
-WorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& name, double weight) const
+WorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
 {
 	if (!_reportNode || !_progressNode || !_state)
 		return {};
@@ -58,13 +58,21 @@ WorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& na
             << "child weight =" << weight;
     }
 
+    WorkflowProgressNode::Ptr progressChild;
+
+    if (_progressMode == WorkflowPlan::JobProgressMode::Atomic)
+        progressChild = std::make_shared<WorkflowProgressNode>(weight);
+    else
+        progressChild = _progressNode->createChild(weight);
+
 	return {
 		name,
 		_reportNode->createChild(name),
-		_progressNode->createChild(weight),
+        progressChild,
 		_state,
         _threadPool,
-        _task
+        _task,
+        progressMode
     };
 }
 
@@ -159,6 +167,11 @@ WorkflowExecutionContext* WorkflowExecutionContext::current()
 const WorkflowExecutionContext* WorkflowExecutionContext::currentConst()
 {
 	return currentWorkflowExecutionContext;
+}
+
+WorkflowPlan::JobProgressMode WorkflowExecutionContext::getProgressMode() const
+{
+	return _progressMode;
 }
 
 void WorkflowExecutionContext::setCurrent(WorkflowExecutionContext* context)

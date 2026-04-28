@@ -5,19 +5,20 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
-#include "WorkflowExecutionContext.h"
 
 #include <QString>
 
 namespace mv::util
 {
 
+class WorkflowExecutionContext;
+
 class CORE_EXPORT WorkflowResult
 {
 public:
     WorkflowResult();
 
-    explicit WorkflowResult(const WorkflowExecutionContext& context);
+    explicit WorkflowResult(WorkflowExecutionContext* context);
 
     bool isValid() const;
 
@@ -29,7 +30,7 @@ public:
 
     double getProgress() const;
 
-    const WorkflowExecutionContext& getContext() const;
+    WorkflowExecutionContext* getContext() const;
 
     std::uint64_t getDuration() const;
 
@@ -38,7 +39,7 @@ public:
     QString getErrorMessage() const;
 
 private:
-    WorkflowExecutionContext _context;
+    WorkflowExecutionContext* _context;
     std::uint64_t   _duration;
     bool            _success = false;
 };

@@ -9,41 +9,41 @@ namespace mv::util
 
 WorkflowResult::WorkflowResult() = default;
 
-WorkflowResult::WorkflowResult(const WorkflowExecutionContext& context):
+WorkflowResult::WorkflowResult(WorkflowExecutionContext* context):
 	_context(context)
 {
 }
 
 bool WorkflowResult::isValid() const
 {
-	return _context.isValid();
+	return _context ? _context->isValid() : false;
 }
 
 bool WorkflowResult::hasErrors() const
 {
-	const auto reportNode = _context.getReportNode();
+	const auto reportNode = _context ? _context->getReportNode() : nullptr;
 	return reportNode ? reportNode->hasErrorsRecursive() : false;
 }
 
 int WorkflowResult::getErrorCount() const
 {
-	const auto reportNode = _context.getReportNode();
+	const auto reportNode = _context ? _context->getReportNode() : nullptr;
 	return reportNode ? reportNode->getErrorCountRecursive() : 0;
 }
 
 int WorkflowResult::getWarningCount() const
 {
-	const auto reportNode = _context.getReportNode();
+	const auto reportNode = _context ? _context->getReportNode() : nullptr;
 	return reportNode ? reportNode->getWarningCountRecursive() : 0;
 }
 
 double WorkflowResult::getProgress() const
 {
-	return _context.getProgress();
+	return _context ? _context->getProgress() : 0.0;
 }
 
-const WorkflowExecutionContext& WorkflowResult::getContext() const
-{
+WorkflowExecutionContext* WorkflowResult::getContext() const
+{   
 	return _context;
 }
 

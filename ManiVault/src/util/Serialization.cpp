@@ -354,7 +354,7 @@ void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& b
             catch (...) {
                 Serializable::reportSerializationError("Data hierarchy manager", "Failed to load dataset");
             }
-            });//s, progressWeight);
+        }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread);//s, progressWeight);
 
         ++decodeBlockJobIndex;
     }
