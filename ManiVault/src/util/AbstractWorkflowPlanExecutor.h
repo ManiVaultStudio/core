@@ -10,6 +10,7 @@
 #include "Task.h"
 
 #include <QObject>
+#include <QElapsedTimer>
 
 namespace mv::util
 {

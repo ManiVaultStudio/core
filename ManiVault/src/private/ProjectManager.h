@@ -183,29 +183,6 @@ public:
      */
     util::SharedWorkflowPlanExecutor getWorkflowPlanExecutor() override;
 
-public: // Workflow
-
-    /**
-     * Get active workflow
-     * @return Pointer to the active workflow, or nullptr if no active workflow exists
-     */
-    util::Workflow* getActiveWorkflow() override;
-
-    /**
-     * Get whether there is an active workflow
-     * @return Boolean determining whether there is an active workflow
-     */
-    bool hasActiveWorkflow() const override;
-
-    /**
-     * Set active workflow to \p activeWorkflow
-     * @param activeWorkflow Unique pointer to the active workflow
-     */
-    void setActiveWorkflow(util::UniqueWorkflow activeWorkflow) override;
-
-    /** Reset active workflow (set it to nullptr) */
-    void resetActiveWorkflow() override;
-
 public: // Menus
 
     /**

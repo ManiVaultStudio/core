@@ -24,6 +24,8 @@ namespace mv::util
 
 class AbstractWorkflowPlanExecutor;
 
+using SharedWorkflowPlanExecutor = std::shared_ptr<AbstractWorkflowPlanExecutor>;
+
 class CORE_EXPORT WorkflowPlan
 {
 public:
@@ -150,9 +152,9 @@ public:
 	void    addParallelStage(QString name, Jobs jobs, double weight = 1.0);
     void    addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight = 1.0);
 
-    WorkflowResult execute(AbstractWorkflowPlanExecutor& workflowPlanExecutor, bool showProgress = false, WorkflowExecutionOptions executionOptions = {});
-    WorkflowResultFuture executeAsync(std::shared_ptr<AbstractWorkflowPlanExecutor> workflowPlanExecutor, bool showProgress = false, WorkflowExecutionOptions executionOptions = {});
-    WorkflowResult executeOnCurrentThread(std::shared_ptr<AbstractWorkflowPlanExecutor> workflowPlanExecutor, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {});
+    WorkflowResult execute(const SharedWorkflowPlanExecutor& workflowPlanExecutor, bool showProgress = false, WorkflowExecutionOptions executionOptions = {});
+    WorkflowResultFuture executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, bool showProgress = false, WorkflowExecutionOptions executionOptions = {});
+    WorkflowResult executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {});
     Stages                getStages() const;
 
     SharedState           getSharedState() const;

@@ -19,6 +19,7 @@
 #include "util/Exception.h"
 #include "util/WorkflowPlan.h"
 #include "util/WorkflowExecutionOptions.h"
+#include "util/AbstractWorkflowPlanExecutor.h"
 
 #include <QObject>
 #include <QMenu>
@@ -279,7 +280,7 @@ public:
      * Get workflow plan executor
      * @return Pointer to the workflow plan executor (nullptr if not available)
      */
-    virtual util::AbstractWorkflowPlanExecutor* getWorkflowPlanExecutor() = 0;
+    virtual util::SharedWorkflowPlanExecutor getWorkflowPlanExecutor() = 0;
 
 public: // Project download
 
@@ -428,29 +429,6 @@ public: // State
     bool isPublishingProject() const {
         return _state == State::PublishingProject;
     }
-
-public: // Workflow
-
-	/**
-     * Get active workflow
-     * @return Pointer to the active workflow, or nullptr if no active workflow exists
-     */
-    virtual util::Workflow* getActiveWorkflow() = 0;
-
-    /**
-     * Get whether there is an active workflow
-     * @return Boolean determining whether there is an active workflow
-     */
-    virtual bool hasActiveWorkflow() const = 0;
-
-    /**
-     * Set active workflow to \p activeWorkflow
-     * @param activeWorkflow Unique pointer to the active workflow
-     */
-    virtual void setActiveWorkflow(util::UniqueWorkflow activeWorkflow) = 0;
-
-    /** Reset active workflow (set it to nullptr) */
-    virtual void resetActiveWorkflow() = 0;
 
 public: // Miscellaneous
 

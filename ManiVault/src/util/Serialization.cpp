@@ -163,7 +163,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
         }
 
         encodeWorkflowPlan.addParallelStage("Encode Blocks", encodeJobs);
-        encodeWorkflowPlan.execute(*mv::projects().getWorkflowPlanExecutor());
+        encodeWorkflowPlan.execute(mv::projects().getWorkflowPlanExecutor());
 
         QVariantList blocks;
 
