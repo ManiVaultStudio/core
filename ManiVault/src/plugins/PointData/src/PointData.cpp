@@ -155,11 +155,17 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
     if (_isDense)
     {
+        logMemory("Point data: before resizeVector " + getGuiName());
+
         setElementTypeSpecifier(elementTypeIndex);
         resizeVector(numberOfElements);
 
+        logMemory("Point data: after resizeVector " + getGuiName());
+        qDebug() << "PointData: Resized vector to hold " << numberOfElements << " raw size: " << getRawDataSize();
         try {
+            
             populateDataBufferFromVariantMap(rawDataMap, static_cast<char*>(getDataVoidPtr()));
+            //logMemory("Point data: after populateDataBufferFromVariantMap" + getGuiName());
         }
         catch (const std::exception& e) {
             qCritical() << "Failed to load point data: " << e.what();
@@ -976,9 +982,9 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
     // Load raw point data
     if (isFull()) {
-        logMemory(QString("before load %1").arg(getGuiName()));
+        //logMemory(QString("before load %1").arg(getGuiName()));
         getRawData<PointData>()->fromVariantMap(variantMap);
-		logMemory(QString("after load %1").arg(getGuiName()));
+		//logMemory(QString("after load %1").arg(getGuiName()));
     }
     else
     {
@@ -1007,8 +1013,6 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
 
         dimensionNames.reserve(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
-        QElapsedTimer dimensionsTimer;
-        dimensionsTimer.start();
 
         populateDataBufferFromVariantMap(variantMap["DimensionNames"].toMap(), (char*)dimensionsByteArray.data());
 

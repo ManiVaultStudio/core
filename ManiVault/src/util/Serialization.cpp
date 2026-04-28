@@ -235,26 +235,28 @@ DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, co
     return result;
 }
 
-DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec)
+DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec, char* destination)
 {
     DecodeBlockResult result;
-
-    result._offset  = decodeBlockJob._offset;
-    result._size    = decodeBlockJob._size;
-
-    result._decodedData.resize(static_cast<qsizetype>(result._size));
+    result._offset = decodeBlockJob._offset;
+    result._size = decodeBlockJob._size;
 
     auto codec = createCodec();
 
-    if (decodeBlockJob._encodedData.isEmpty())
-        throw std::runtime_error("Block encoded data is empty");
-	
-    const QByteArray encodedBytes = QByteArray::fromBase64(decodeBlockJob._encodedData.toUtf8());
+    const QByteArray encodedBytes =
+        QByteArray::fromBase64(decodeBlockJob._encodedData.toUtf8());
 
-    const auto decodeResult = codec->decodeTo(encodedBytes, result._decodedData.data(), decodeBlockJob._size);
+    const auto decodeResult = codec->decodeTo(encodedBytes,destination + result._offset,
+            result._size
+        );
 
-    if (!decodeResult.isSuccess())
-        throw std::runtime_error(QString("Failed to decode inline block at offset %1").arg(decodeBlockJob._offset).toStdString());
+    if (!decodeResult.isSuccess()) {
+        throw std::runtime_error(
+            QString("Failed to decode inline block at offset %1")
+            .arg(decodeBlockJob._offset)
+            .toStdString()
+        );
+    }
 
     return result;
 }
@@ -347,7 +349,7 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
         decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [&decodeBlockJob, &bytes, createCodec](const WorkflowPlan::Job& job) {
             try {
                 if (decodeBlockJob._uri.isEmpty()) {
-                    decodeBlockJob._result = decodeBlockFromBase64(decodeBlockJob, createCodec);
+                    decodeBlockFromBase64To(decodeBlockJob, createCodec, bytes);
                 } else {
                     decodeBlockFromFileTo(decodeBlockJob, createCodec, bytes);
                 }

@@ -189,18 +189,18 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     if (variantMap.contains("MayUnderive"))
         _mayUnderive = variantMap["MayUnderive"].toBool();
 
-    if (variantMap.contains("Properties"))
-    {
-        try {
-            QByteArray decodedBytes;
-            populateDataBufferFromVariantMap(variantMap["Properties"].toMap(), decodedBytes);
+    //if (variantMap.contains("Properties"))
+    //{
+    //    try {
+    //        QByteArray decodedBytes;
+    //        populateDataBufferFromVariantMap(variantMap["Properties"].toMap(), decodedBytes);
 
-            _properties = deserializeVariantMap(decodedBytes);
-        }
-        catch (const std::exception& e) {
-            qCritical() << "Failed to load dataset properties: " << e.what();
-        }
-    }
+    //        _properties = deserializeVariantMap(decodedBytes);
+    //    }
+    //    catch (const std::exception& e) {
+    //        qCritical() << "Failed to load dataset properties: " << e.what();
+    //    }
+    //}
 
     if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {
         Datasets proxyMembers;

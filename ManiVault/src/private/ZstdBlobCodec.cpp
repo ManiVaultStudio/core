@@ -140,11 +140,19 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decodeTo(const QByteArray& encodedDat
         destination,
         static_cast<size_t>(destinationSize),
         encodedData.constData(),
-        static_cast<size_t>(encodedData.size()));
+        static_cast<size_t>(encodedData.size())
+    );
 
     if (ZSTD_isError(decodedSize)) {
         result._error = QString("ZSTD decompression failed: %1")
             .arg(ZSTD_getErrorName(decodedSize));
+        return result;
+    }
+
+    if (decodedSize != destinationSize) {
+        result._error = QString("Decoded size mismatch: expected %1 bytes, got %2 bytes")
+            .arg(destinationSize)
+            .arg(static_cast<std::uint64_t>(decodedSize));
         return result;
     }
 

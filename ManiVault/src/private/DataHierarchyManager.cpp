@@ -373,9 +373,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
         loadDatasetJobs.emplace_back(datasetName, [datasetId, dataVariantMap](WorkflowPlan::Job& job) {
             try {
-                //logMemory(QString("before load %1").arg(datasetId));
                 mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
-                //logMemory(QString("after load %1").arg(datasetId));
             }
             catch (std::exception& e) {
                 Serializable::reportSerializationError("Data hierarchy manager", "Failed to load dataset: " + QString::fromStdString(e.what()));

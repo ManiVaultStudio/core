@@ -88,13 +88,17 @@ public:
     [[nodiscard]] virtual Result decode(const QByteArray& input, qsizetype expectedSize = -1) const = 0;
 
     /**
-     * Decode a previously encoded block of bytes directly to a provided output buffer.
-     *
-     * @param encodedData Encoded input bytes
-     * @param destination Output buffer to which the decoded data is copied
-     * @param destinationSize Size of the output buffer in bytes
-     * @return Decoded bytes or an error
-     */
+	 * Decode a previously encoded block of bytes directly into a provided output buffer.
+	 *
+	 * The default implementation may allocate a temporary decoded buffer and copy it
+	 * into the destination. Codecs should override this method when they can decode
+	 * directly into the destination buffer.
+	 *
+	 * @param encodedData Encoded input bytes.
+	 * @param destination Output buffer that receives the decoded bytes.
+	 * @param destinationSize Size of the output buffer in bytes.
+	 * @return Success or an error.
+	 */
     [[nodiscard]] virtual Result decodeTo(const QByteArray& encodedData, char* destination, std::uint64_t destinationSize) const;
 
     /*
