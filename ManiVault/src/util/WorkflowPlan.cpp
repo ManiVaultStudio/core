@@ -102,11 +102,6 @@ WorkflowPlan::JobThreadAffinity WorkflowPlan::Job::getThreadAffinity() const
 	return _threadAffinity;
 }
 
-void WorkflowPlan::Job::setWeight(double weight)
-{
-	_weight = weight;
-}
-
 double WorkflowPlan::Job::getWeight() const
 {
 	return _weight;
@@ -255,7 +250,7 @@ WorkflowResult WorkflowPlan::execute(AbstractWorkflowPlanExecutor& workflowPlanE
     return workflowPlanExecutor.execute(*this, showProgress, executionOptions);
 }
 
-WorkflowResultFuture WorkflowPlan::executeAsync(std::shared_ptr<AbstractWorkflowPlanExecutor> workflowPlanExecutor, bool showProgress, WorkflowExecutionOptions executionOptions /*= {}*/)
+WorkflowResultFuture WorkflowPlan::executeAsync(SharedWorkflowPlanExecutor workflowPlanExecutor, bool showProgress, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
     if (!workflowPlanExecutor) {
         qWarning() << "No workflow plan executor provided for asynchronous execution";
@@ -263,6 +258,16 @@ WorkflowResultFuture WorkflowPlan::executeAsync(std::shared_ptr<AbstractWorkflow
     }
 
     return workflowPlanExecutor->executeAsync(*this, showProgress, executionOptions);
+}
+
+WorkflowResult WorkflowPlan::executeOnCurrentThread(SharedWorkflowPlanExecutor workflowPlanExecutor, Task* task, WorkflowExecutionOptions executionOptions)
+{
+    if (!workflowPlanExecutor) {
+        qWarning() << "No workflow plan executor provided for asynchronous execution";
+        return{};
+    }
+
+    return workflowPlanExecutor->executeOnCurrentThread(*this, task, executionOptions);
 }
 
 }

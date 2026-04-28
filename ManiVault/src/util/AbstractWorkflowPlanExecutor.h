@@ -58,8 +58,10 @@ private: // Execute individual jobs
 
 private:
     QElapsedTimer   _elapsedTimer;
+
+    friend class WorkflowPlan;
 };
 
-using SharedAbstractWorkflowPlanExecutor = std::shared_ptr<AbstractWorkflowPlanExecutor>;
+using SharedWorkflowPlanExecutor = std::shared_ptr<AbstractWorkflowPlanExecutor>;
 
 }

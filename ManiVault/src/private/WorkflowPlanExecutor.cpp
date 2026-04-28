@@ -371,8 +371,8 @@ void WorkflowPlanExecutor::executeJobOnWorkerThread(const WorkflowPlan::Job& job
 
     job.run();
 
-    if (!jobContext.hasProgressChildren())
-        jobContext.setProgress(1.0);
+    //if (!jobContext.hasProgressChildren())
+    //    jobContext.setProgress(1.0);
 }
 
 void WorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext)

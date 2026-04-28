@@ -52,6 +52,12 @@ WorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& na
 	if (!_reportNode || !_progressNode || !_state)
 		return {};
 
+    if (getProgress() > 0.0) {
+        qWarning() << "Adding child to progress node after progress already started"
+            << "current progress =" << getProgress()
+            << "child weight =" << weight;
+    }
+
 	return {
 		name,
 		_reportNode->createChild(name),

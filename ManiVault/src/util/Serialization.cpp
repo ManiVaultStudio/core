@@ -378,11 +378,11 @@ void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& b
                 throw std::runtime_error("Decoded block exceeds destination buffer");
         }
 
-        for (const auto& decodeBlockJob : decodeBlockJobs) {
-            const auto& result = decodeBlockJob._result;
+        //for (const auto& decodeBlockJob : decodeBlockJobs) {
+        //    const auto& result = decodeBlockJob._result;
 
-            std::memcpy(bytes.data() + static_cast<qsizetype>(result._offset), result._decodedData.constData(), static_cast<std::size_t>(result._size));
-        }
+        //    std::memcpy(bytes.data() + static_cast<qsizetype>(result._offset), result._decodedData.constData(), static_cast<std::size_t>(result._size));
+        //}
 
         /*
     	QFutureSynchronizer<void> synchronizer;
@@ -408,7 +408,7 @@ void decodeDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& b
         */
     });
 
-    decodeWorkflowPlan.execute(*mv::projects().getWorkflowPlanExecutor());
+    decodeWorkflowPlan.executeOnCurrentThread(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()));
 }
 
 void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes)

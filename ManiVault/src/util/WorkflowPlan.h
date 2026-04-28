@@ -83,8 +83,6 @@ public:
 
         JobThreadAffinity getThreadAffinity() const;
 
-        void setWeight(double weight);
-
         double getWeight() const;
 
     private:
@@ -154,7 +152,7 @@ public:
 
     WorkflowResult execute(AbstractWorkflowPlanExecutor& workflowPlanExecutor, bool showProgress = false, WorkflowExecutionOptions executionOptions = {});
     WorkflowResultFuture executeAsync(std::shared_ptr<AbstractWorkflowPlanExecutor> workflowPlanExecutor, bool showProgress = false, WorkflowExecutionOptions executionOptions = {});
-
+    WorkflowResult executeOnCurrentThread(std::shared_ptr<AbstractWorkflowPlanExecutor> workflowPlanExecutor, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {});
     Stages                getStages() const;
 
     SharedState           getSharedState() const;

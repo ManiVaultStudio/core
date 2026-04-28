@@ -1043,32 +1043,9 @@ QDir ProjectManager::getDownloadedProjectsDir() const
     return resultDir;
 }
 
-util::AbstractWorkflowPlanExecutor* ProjectManager::getWorkflowPlanExecutor()
+SharedWorkflowPlanExecutor ProjectManager::getWorkflowPlanExecutor()
 {
-    return &_workflowPlanExecutor;
-}
-
-Workflow* ProjectManager::getActiveWorkflow()
-{
-	return _activeWorkflow.get();
-}
-
-bool ProjectManager::hasActiveWorkflow() const
-{
-	return _activeWorkflow != nullptr;
-}
-
-void ProjectManager::setActiveWorkflow(util::UniqueWorkflow activeWorkflow)
-{
-	if (_activeWorkflow)
-		throw std::runtime_error("Cannot set active workflow, another workflow is already active");
-
-	_activeWorkflow = std::move(activeWorkflow);
-}
-
-void ProjectManager::resetActiveWorkflow()
-{
-    _activeWorkflow.reset();
+    return _workflowPlanExecutor;
 }
 
 AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenParameters(const QString& filePath) const
