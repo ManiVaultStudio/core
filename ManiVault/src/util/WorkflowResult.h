@@ -5,6 +5,7 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+#include "WorkflowMetric.h"
 
 #include <QString>
 
@@ -38,10 +39,19 @@ public:
 
     QString getErrorMessage() const;
 
+public: // Metrics
+
+    void setMetrics(QVector<WorkflowMetric> metrics);
+
+    QVector<WorkflowMetric> getMetrics() const;
+
+    std::optional<WorkflowMetric> getMetric(const QString& name) const;
+
 private:
     WorkflowExecutionContext* _context;
-    std::uint64_t   _duration;
-    bool            _success = false;
+    std::uint64_t               _duration;
+    bool                        _success = false;
+    QVector<WorkflowMetric> _metrics;
 };
 
 using UniqueWorkflowResult = std::unique_ptr<WorkflowResult>;

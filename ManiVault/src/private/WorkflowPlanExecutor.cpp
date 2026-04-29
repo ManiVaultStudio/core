@@ -146,7 +146,12 @@ WorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workflowPla
             workflowPlan.getName());
     }
 
-    return WorkflowResult(&rootContext);
+    WorkflowResult result(&rootContext);
+
+    if (auto state = rootContext.getState())
+        result.setMetrics(state->metrics().snapshot());
+
+    return result;
 }
 
 WorkflowResult WorkflowPlanExecutor::executeChild(const WorkflowPlan& workflowPlan, WorkflowExecutionContext& parentContext)

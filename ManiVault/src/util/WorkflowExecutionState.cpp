@@ -54,6 +54,26 @@ QVector<WorkflowMessage> WorkflowExecutionState::collectMessages() const
 	return result;
 }
 
+void WorkflowExecutionState::addBytesLoaded(std::uint64_t bytes)
+{
+	_bytesLoaded.fetch_add(bytes, std::memory_order_relaxed);
+}
+
+std::uint64_t WorkflowExecutionState::getBytesLoaded() const
+{
+	return _bytesLoaded.load(std::memory_order_relaxed);
+}
+
+WorkflowExecutionMetrics& WorkflowExecutionState::metrics()
+{
+	return _metrics;
+}
+
+const WorkflowExecutionMetrics& WorkflowExecutionState::metrics() const
+{
+	return _metrics;
+}
+
 void WorkflowExecutionState::collectMessagesRecursive(const WorkflowReportNode::Ptr& node, QVector<WorkflowMessage>& out)
 {
 	if (!node)

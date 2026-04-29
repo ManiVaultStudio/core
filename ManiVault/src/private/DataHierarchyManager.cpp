@@ -352,17 +352,17 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         return getRawBlockObjectSize(rawA) > getRawBlockObjectSize(rawB);
     });
 
-    std::uint64_t totalRawSize = 0;
+    //std::uint64_t totalRawSize = 0;
 
-    for (const auto& dataVariantMap : datasetMaps) {
-        const auto rawSize = getRawBlockObjectSize(findRawBlockObject(dataVariantMap));
+    //for (const auto& dataVariantMap : datasetMaps) {
+    //    const auto rawSize = getRawBlockObjectSize(findRawBlockObject(dataVariantMap));
 
-    	totalRawSize += rawSize;
+    //	totalRawSize += rawSize;
 
-        qDebug() << dataVariantMap["ID"].toString() << dataVariantMap["Name"].toString() << getNoBytesHumanReadable(rawSize);
-    }
+    //    qDebug() << dataVariantMap["ID"].toString() << dataVariantMap["Name"].toString() << getNoBytesHumanReadable(rawSize);
+    //}
 
-    qDebug() << "Total raw size:" << getNoBytesHumanReadable(totalRawSize);
+    //qDebug() << "Total raw size:" << getNoBytesHumanReadable(totalRawSize);
 
     WorkflowPlan::Jobs loadDatasetJobs;
 

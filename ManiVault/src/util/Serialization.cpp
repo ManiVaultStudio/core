@@ -276,6 +276,7 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
     const auto blocks       = variantMap.value("Blocks").toList();
     const bool hasCodec     = variantMap.contains("Codec");
     const auto codecName    = hasCodec ? variantMap.value("Codec").toString() : QStringLiteral("none");
+    const auto totalSize    = variantMap.value("Size").toULongLong();
 
     if (hasCodec && !codecRegistry().isRegistered(codecName)) {
         throw std::runtime_error(QStringLiteral("Unable to load raw data, codec %1 is not registered").arg(codecName).toStdString());
@@ -367,6 +368,15 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
 
     decodeWorkflowPlan.addParallelStage("Decode blocks", decodeJobs);
     decodeWorkflowPlan.execute(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()));
+
+    if (auto wokflowExecutionContext = WorkflowExecutionContext::current()) {
+        auto state = wokflowExecutionContext->getState();
+
+        if (!state)
+            return;
+
+        state->metrics().addInteger("project.data.bytes_loaded", totalSize);
+    }
 }
 
 void populateDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& bytes)

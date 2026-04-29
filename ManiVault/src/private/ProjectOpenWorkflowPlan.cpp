@@ -26,6 +26,21 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         printLine("Recipe stage", "Setup", 2);
 #endif
 
+        if (auto wokflowExecutionContext = WorkflowExecutionContext::current()) {
+            auto state = wokflowExecutionContext->getState();
+
+            if (!state)
+                return;
+
+            state->metrics().registerInteger(
+                "project.data.bytes_loaded",
+                "bytes",
+                {
+                    { "displayName", "Total number of bytes loaded" }
+                }
+            );
+        }
+
     	auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
 
         if (QFileInfo(context->_filePath).isDir())
@@ -115,7 +130,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         auto project = mv::projects().getCurrentProject();
     
         project->updateContributors();
-    
+
         Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
     

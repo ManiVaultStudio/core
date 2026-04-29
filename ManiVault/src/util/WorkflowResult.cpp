@@ -4,6 +4,8 @@
 
 #include "WorkflowResult.h"
 
+#include <optional>
+
 namespace mv::util
 {
 
@@ -72,4 +74,25 @@ QString WorkflowResult::getErrorMessage() const
 	//}
 	return errorMessages.join("\n");
 }
+
+void WorkflowResult::setMetrics(QVector<WorkflowMetric> metrics)
+{
+    _metrics = std::move(metrics);
+}
+
+QVector<WorkflowMetric> WorkflowResult::getMetrics() const
+{
+    return _metrics;
+}
+
+std::optional<WorkflowMetric> WorkflowResult::getMetric(const QString& name) const
+{
+    for (const auto& metric : _metrics) {
+        if (metric._name == name)
+            return metric;
+    }
+
+    return std::nullopt;
+}
+
 }

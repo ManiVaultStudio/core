@@ -5,6 +5,7 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+#include "WorkflowExecutionMetrics.h"
 #include "WorkflowExecutionNotifier.h"
 #include "WorkflowExecutionOptions.h"
 
@@ -38,6 +39,14 @@ public:
     double getOverallProgress() const;
 
     QVector<WorkflowMessage> collectMessages() const;
+    
+    void addBytesLoaded(std::uint64_t bytes);
+
+    std::uint64_t getBytesLoaded() const;
+
+    WorkflowExecutionMetrics& metrics();
+
+    const WorkflowExecutionMetrics& metrics() const;
 
 private:
     static void collectMessagesRecursive(const WorkflowReportNode::Ptr& node,
@@ -50,6 +59,8 @@ private:
 
     mutable QMutex _mutex;
     WorkflowExecutionStatus _status = WorkflowExecutionStatus::Idle;
+    std::atomic<std::uint64_t> _bytesLoaded = 0;
+    WorkflowExecutionMetrics _metrics;
 };
 
 } // namespace mv::util

@@ -616,6 +616,8 @@ set(PUBLIC_UTIL_HEADERS
     src/util/OperationContext.h
     src/util/OperationContextScope.h
     src/util/WorkflowExecutionOptions.h
+    src/util/WorkflowMetric.h
+    src/util/WorkflowExecutionMetrics.h
 )
 
 if(APPLE)
@@ -703,6 +705,8 @@ set(PUBLIC_UTIL_SOURCES
     src/util/OperationContext.cpp
     src/util/OperationContextScope.cpp
     src/util/WorkflowExecutionOptions.cpp
+    src/util/WorkflowMetric.cpp
+    src/util/WorkflowExecutionMetrics.cpp
 )
 
 if(APPLE)
