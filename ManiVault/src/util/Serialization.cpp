@@ -739,6 +739,12 @@ QVariant saveStringList(const QVariantList& list)
         static_cast<std::uint64_t>(bytes.size())
     );
 
+    QDir dir(QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Save)));
+
+    QStringList entries = dir.entryList(
+        QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot
+    );
+
     return block;
 }
 
@@ -883,39 +889,80 @@ QVariantList loadBoolList(const QByteArray& bytes, qsizetype count)
     return list;
 }
 
-QVariant loadOptimizedVariantList(const QVariantMap& map)
+QVariant loadStringList(const QVariantMap& block)
 {
-	const QString type  = map.value("Type").toString();
-	const auto    count = static_cast<qsizetype>(map.value("Count").toULongLong());
+    if (!block.value("__OptimizedVariantList").toBool())
+        return block;
 
-	const QVariantMap dataMap = map.value("Data").toMap();
+    if (block.value("Type").toString() != "QStringList")
+        return block;
 
+    const auto expectedCount =
+        static_cast<qsizetype>(block.value("Count").toULongLong());
+
+    const QVariantMap dataMap = block.value("Data").toMap();
     QByteArray bytes;
 
-	populateDataBufferFromVariantMap(dataMap, bytes);
+    populateDataBufferFromVariantMap(dataMap, bytes);
 
-	if (type == "BoolArray")
-		return loadBoolList(bytes, count);
+	QDataStream stream(bytes);
+    stream.setVersion(QDataStream::Qt_6_8);
 
-	if (type == "Int32Array")
-		return loadTypedList<int>(bytes, count);
+    QStringList strings;
+    stream >> strings;
 
-	if (type == "UInt32Array")
-		return loadTypedList<uint>(bytes, count);
+    if (stream.status() != QDataStream::Ok)
+        throw std::runtime_error("Failed to load optimized QStringList block");
 
-	if (type == "Int64Array")
-		return loadTypedList<qlonglong>(bytes, count);
+    if (strings.size() != expectedCount)
+        throw std::runtime_error("Optimized QStringList count mismatch");
 
-	if (type == "UInt64Array")
-		return loadTypedList<qulonglong>(bytes, count);
+    QVariantList list;
+    list.reserve(strings.size());
 
-	if (type == "Float32Array")
-		return loadTypedList<float>(bytes, count);
+    for (const QString& string : strings)
+        list.append(string);
 
-	if (type == "Float64Array")
-		return loadTypedList<double>(bytes, count);
+    return list;
+}
 
-	return map;
+QVariant loadOptimizedVariantList(const QVariantMap& map)
+{
+    const QString type = map.value("Type").toString();
+
+    if (type == "QStringList")
+        return loadStringList(map);
+
+    const auto count =
+        static_cast<qsizetype>(map.value("Count").toULongLong());
+
+    const QVariantMap dataMap = map.value("Data").toMap();
+
+    QByteArray bytes;
+    populateDataBufferFromVariantMap(dataMap, bytes);
+
+    if (type == "BoolArray")
+        return loadBoolList(bytes, count);
+
+    if (type == "Int32Array")
+        return loadTypedList<int>(bytes, count);
+
+    if (type == "UInt32Array")
+        return loadTypedList<uint>(bytes, count);
+
+    if (type == "Int64Array")
+        return loadTypedList<qlonglong>(bytes, count);
+
+    if (type == "UInt64Array")
+        return loadTypedList<qulonglong>(bytes, count);
+
+    if (type == "Float32Array")
+        return loadTypedList<float>(bytes, count);
+
+    if (type == "Float64Array")
+        return loadTypedList<double>(bytes, count);
+
+    return map;
 }
 
 }

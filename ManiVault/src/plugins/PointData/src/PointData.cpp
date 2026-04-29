@@ -155,17 +155,11 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
     if (_isDense)
     {
-        logMemory("Point data: before resizeVector " + getGuiName());
-
         setElementTypeSpecifier(elementTypeIndex);
         resizeVector(numberOfElements);
 
-        logMemory("Point data: after resizeVector " + getGuiName());
-        qDebug() << "PointData: Resized vector to hold " << numberOfElements << " raw size: " << getRawDataSize();
         try {
-            
             populateDataBufferFromVariantMap(rawDataMap, static_cast<char*>(getDataVoidPtr()));
-            //logMemory("Point data: after populateDataBufferFromVariantMap" + getGuiName());
         }
         catch (const std::exception& e) {
             qCritical() << "Failed to load point data: " << e.what();
@@ -978,13 +972,9 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
             "Future releases may not be able to load this projects otherwise. ";
     }
 
-    
-
     // Load raw point data
     if (isFull()) {
-        logMemory(QString("before load %1").arg(getGuiName()));
         getRawData<PointData>()->fromVariantMap(variantMap);
-		//logMemory(QString("after load %1").arg(getGuiName()));
     }
     else
     {
