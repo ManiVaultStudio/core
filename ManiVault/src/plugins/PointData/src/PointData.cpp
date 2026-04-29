@@ -982,7 +982,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
     // Load raw point data
     if (isFull()) {
-        //logMemory(QString("before load %1").arg(getGuiName()));
+        logMemory(QString("before load %1").arg(getGuiName()));
         getRawData<PointData>()->fromVariantMap(variantMap);
 		//logMemory(QString("after load %1").arg(getGuiName()));
     }

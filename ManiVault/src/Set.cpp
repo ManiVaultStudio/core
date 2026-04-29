@@ -189,18 +189,25 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     if (variantMap.contains("MayUnderive"))
         _mayUnderive = variantMap["MayUnderive"].toBool();
 
-    //if (variantMap.contains("Properties"))
-    //{
-    //    try {
-    //        QByteArray decodedBytes;
-    //        populateDataBufferFromVariantMap(variantMap["Properties"].toMap(), decodedBytes);
+    if (variantMap.contains("Properties"))
+    {
+        try {
+            //QByteArray decodedBytes;
+            //populateDataBufferFromVariantMap(, decodedBytes);
 
-    //        _properties = deserializeVariantMap(decodedBytes);
-    //    }
-    //    catch (const std::exception& e) {
-    //        qCritical() << "Failed to load dataset properties: " << e.what();
-    //    }
-    //}
+            //qDebug() << "Decoded properties for dataset " << text() << ": " << getNoBytesHumanReadable(decodedBytes.size());
+            _properties = loadOptimizedVariant(variantMap["Properties"].toMap()).toMap();
+
+
+
+
+
+            //prettyPrintVariantMap(_properties);
+        }
+        catch (const std::exception& e) {
+            qCritical() << "Failed to load dataset properties: " << e.what();
+        }
+    }
 
     if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {
         Datasets proxyMembers;
@@ -237,8 +244,9 @@ QVariantMap DatasetImpl::toVariantMap() const
     QVariantMap propertiesVariantMap;
 
     try {
-        const auto encodedBytes = serializeVariantMap(_properties);
-        propertiesVariantMap = rawDataToVariantMap(encodedBytes.data(), encodedBytes.size());
+        //const auto encodedBytes = serializeVariantMap(_properties);
+        //propertiesVariantMap = rawDataToVariantMap(encodedBytes.data(), encodedBytes.size());
+        propertiesVariantMap = saveOptimizedVariantMap(_properties);
     }
     catch (const std::exception& e) {
         qCritical() << "Failed to write dataset properties: " << e.what();
