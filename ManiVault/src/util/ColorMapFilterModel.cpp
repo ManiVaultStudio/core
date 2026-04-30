@@ -33,8 +33,7 @@ void ColorMapFilterModel::setType(const ColorMap::Type& type)
 
     _type = type;
 
-    beginFilterChange();
-    endFilterChange();
+    invalidateFilter();
 }
 
 }

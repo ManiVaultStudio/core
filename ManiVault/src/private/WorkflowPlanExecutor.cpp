@@ -6,6 +6,8 @@
 
 #include <Task.h>
 
+#include <QtConcurrent>
+
 #ifdef _DEBUG
 	#define WORKFLOW_PLAN_EXECUTOR_VERBOSE
 #endif

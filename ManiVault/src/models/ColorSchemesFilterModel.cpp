@@ -21,10 +21,7 @@ ColorSchemesFilterModel::ColorSchemesFilterModel(QObject* parent /*= nullptr*/) 
 {
     setRecursiveFilteringEnabled(true);
 
-    connect(&_modeFilterAction, &gui::OptionsAction::selectedOptionsChanged, this, [this]() {
-        beginFilterChange();
-        endFilterChange(QSortFilterProxyModel::Direction::Rows);
-    });
+    connect(&_modeFilterAction, &gui::OptionsAction::selectedOptionsChanged, this, &ColorSchemesFilterModel::invalidateFilter);
 }
 
 bool ColorSchemesFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const

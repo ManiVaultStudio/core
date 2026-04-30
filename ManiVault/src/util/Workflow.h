@@ -8,8 +8,6 @@
 #include "WorkflowResult.h"
 #include "OperationContext.h"
 
-#include <QtTaskTree>
-
 namespace mv::util
 {
 
