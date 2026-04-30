@@ -448,10 +448,10 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray&
     if (totalSize == 0)
         throw std::runtime_error("Decoded buffer size is zero");
 
+    bytes.resize(static_cast<qsizetype>(totalSize));
+
     if (totalSize != static_cast<std::uint64_t>(bytes.size()))
         throw std::runtime_error(QString("Provided buffer size does not match expected size. Expected %1 bytes, got %2 bytes").arg(totalSize).arg(bytes.size()).toStdString());
-
-    bytes.resize(static_cast<qsizetype>(totalSize));
 
     populateDataBufferFromVariantMap(variantMap, bytes.data());
 }
