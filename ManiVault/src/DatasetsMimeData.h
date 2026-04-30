@@ -27,19 +27,33 @@ public:
      * Construct with \p datasets
      * @param datasets Mime data datasets for dropping
      */
-    DatasetsMimeData(Datasets datasets);
+    explicit DatasetsMimeData(Datasets datasets);
 
     /**
      * Get supported mime types
      * @return List of string of supported mime types
      */
-    QStringList formats() const override;
+    [[nodiscard]] QStringList formats() const override;
 
     /**
      * Get stored datasets
      * @return Stored datasets
      */
-    Datasets getDatasets() const;
+    [[nodiscard]] Datasets getDatasets() const;
+
+    /**
+     * Get stored datasets as a const reference
+     * @return Stored datasets reference
+     */
+    [[nodiscard]] const Datasets& getDatasetsRef() const;
+
+    /**
+     * Get count of stored datasets
+     * @return Datasets count
+     */
+    [[nodiscard]] size_t getDatasetsCount() const {
+        return _datasets.size();
+    }
 
     /** Supported mime type */
     static QString format();

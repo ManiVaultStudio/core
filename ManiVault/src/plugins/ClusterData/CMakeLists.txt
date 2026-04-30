@@ -79,7 +79,7 @@ add_library(ManiVault::${CLUSTERDATA} ALIAS ${CLUSTERDATA})
 
 target_include_directories(${CLUSTERDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${CLUSTERDATA} PRIVATE cxx_std_20)
+target_compile_features(${CLUSTERDATA} PUBLIC cxx_std_${MV_CXX_STANDARD})
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)

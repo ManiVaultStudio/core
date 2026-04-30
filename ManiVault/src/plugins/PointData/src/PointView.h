@@ -23,7 +23,7 @@ namespace mv
         PointView(
             const iterator begin,
             const iterator end,
-            const unsigned index)
+            const std::uint64_t index)
             :
             _begin{ begin },
             _end{ end },
@@ -75,6 +75,6 @@ namespace mv
     private:
         iterator _begin{};
         iterator _end{};
-        unsigned _index{};
+        std::uint64_t _index{};
     };
 }

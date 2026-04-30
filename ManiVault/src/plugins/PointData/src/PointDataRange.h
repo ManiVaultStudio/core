@@ -25,7 +25,7 @@ namespace mv
     auto makePointDataRangeOfSubset(
         const ValueIteratorType beginOfValueContainer,
         const IndexContainerType& indices,
-        const unsigned numberOfDimensions,
+        const std::uint64_t numberOfDimensions,
         const IndexFunctionType indexFunction)
     {
         using IndexIteratorType = decltype(begin(indices));
@@ -45,13 +45,13 @@ namespace mv
     auto makePointDataRangeOfFullSet(
         const ValueIteratorType beginOfValueContainer,
         const ValueIteratorType endOfValueContainer,
-        const unsigned numberOfDimensions,
+        const std::uint64_t numberOfDimensions,
         const IndexFunctionType indexFunction)
     {
-        using PointDataIteratorType = PointDataIterator<ValueIteratorType, unsigned, IndexFunctionType>;
-        const auto numberOfPoints = static_cast<unsigned>( (endOfValueContainer - beginOfValueContainer) / numberOfDimensions);
+        using PointDataIteratorType = PointDataIterator<ValueIteratorType, std::uint64_t, IndexFunctionType>;
+        const auto numberOfPoints = static_cast<uint64_t>( (endOfValueContainer - beginOfValueContainer) / numberOfDimensions);
 
-        return PointDataRange<ValueIteratorType, unsigned, IndexFunctionType>
+        return PointDataRange<ValueIteratorType, uint64_t, IndexFunctionType>
         {
             PointDataIteratorType(beginOfValueContainer, 0U, numberOfDimensions, indexFunction),
                 PointDataIteratorType(beginOfValueContainer, numberOfPoints, numberOfDimensions, indexFunction)

@@ -21,7 +21,7 @@ namespace
 
 namespace mv
 {
-    DimensionsPickerHolder::DimensionsPickerHolder(const unsigned numberOfDimensions) :
+    DimensionsPickerHolder::DimensionsPickerHolder(const std::uint64_t numberOfDimensions) :
         _enabledDimensions(makeArrayOfTrueValues(numberOfDimensions)),
         _numberOfDimensions{ numberOfDimensions }
     {
@@ -44,13 +44,13 @@ namespace mv
     }
 
 
-    unsigned DimensionsPickerHolder::getNumberOfDimensions() const noexcept
+    std::uint64_t DimensionsPickerHolder::getNumberOfDimensions() const noexcept
     {
         return _numberOfDimensions;
     }
 
 
-    unsigned DimensionsPickerHolder::getNumberOfSelectedDimensions() const noexcept
+    std::uint64_t DimensionsPickerHolder::getNumberOfSelectedDimensions() const noexcept
     {
         const bool* const enabledDimensions = _enabledDimensions.get();
         return _numberOfDimensions == 0 ? 0 :

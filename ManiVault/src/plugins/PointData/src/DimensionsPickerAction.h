@@ -228,7 +228,7 @@ public:
         }
         else
         {
-            for (unsigned i{}; i < n; ++i)
+            for (std::uint32_t i{}; i < n; ++i)
                 _holder.setDimensionEnabled(i, _proxyModel->filterAcceptsRow(i, QModelIndex()) == selectVisible);
 
             const ModelResetter modelResetter(_proxyModel.get());
