@@ -135,7 +135,7 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 
 	        QDataStream clustersDataStream(&decodedBytes, QIODevice::ReadOnly);
 
-	        clustersDataStream.setVersion(QDataStream::Qt_6_5);
+	        //clustersDataStream.setVersion(QDataStream::Qt_6_5);
 
 	        clustersDataStream >> _clusters;
 

@@ -91,34 +91,75 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decode(const QByteArray& input, qsize
         return { true, {}, {} };
     }
 
-    unsigned long long frameContentSize = ZSTD_getFrameContentSize(input.constData(),
-        static_cast<size_t>(input.size()));
+    if (expectedSize < -1) {
+        return { false, {}, QStringLiteral("Invalid expected decoded size") };
+    }
 
-    if (frameContentSize == ZSTD_CONTENTSIZE_ERROR)
+    unsigned long long frameContentSize = ZSTD_getFrameContentSize(
+        input.constData(),
+        static_cast<size_t>(input.size())
+    );
+
+    if (frameContentSize == ZSTD_CONTENTSIZE_ERROR) {
         return { false, {}, QStringLiteral("Input is not a valid zstd frame") };
+    }
 
     if (frameContentSize == ZSTD_CONTENTSIZE_UNKNOWN) {
-        if (expectedSize < 0)
+        if (expectedSize < 0) {
             return { false, {}, QStringLiteral("Expected decoded size is required for this zstd frame") };
+        }
 
         frameContentSize = static_cast<unsigned long long>(expectedSize);
+    }
+
+    if (frameContentSize > static_cast<unsigned long long>(std::numeric_limits<qsizetype>::max())) {
+        return { false, {}, QStringLiteral("Decoded size exceeds maximum QByteArray size") };
+    }
+
+    if (expectedSize >= 0 &&
+        frameContentSize != static_cast<unsigned long long>(expectedSize)) {
+        return {
+            false,
+            {},
+            QStringLiteral("Zstd frame decoded size mismatch. Frame reports %1 bytes, expected %2 bytes")
+                .arg(frameContentSize)
+                .arg(expectedSize)
+        };
     }
 
     QByteArray output;
     output.resize(static_cast<qsizetype>(frameContentSize));
 
-    const auto decompressedSize = ZSTD_decompress(output.data(),
+    if (output.size() != static_cast<qsizetype>(frameContentSize)) {
+        return { false, {}, QStringLiteral("Failed to allocate decoded output buffer") };
+    }
+
+    const auto decompressedSize = ZSTD_decompress(
+        output.data(),
         static_cast<size_t>(output.size()),
         input.constData(),
-        static_cast<size_t>(input.size()));
+        static_cast<size_t>(input.size())
+    );
 
-    if (ZSTD_isError(decompressedSize))
+    if (ZSTD_isError(decompressedSize)) {
         return { false, {}, getZstdErrorString("ZSTD_decompress failed", decompressedSize) };
+    }
+
+    if (decompressedSize > static_cast<size_t>(output.size())) {
+        return { false, {}, QStringLiteral("ZSTD_decompress returned more bytes than output buffer size") };
+    }
 
     output.resize(static_cast<qsizetype>(decompressedSize));
 
-    if (expectedSize >= 0 && output.size() != expectedSize)
-        return { false, {}, QStringLiteral("Decoded size mismatch") };
+    if (expectedSize >= 0 && output.size() != expectedSize) {
+        return {
+            false,
+            {},
+            QStringLiteral("Decoded size mismatch. Decoded %1 bytes, expected %2 bytes")
+                .arg(output.size())
+                .arg(expectedSize)
+        };
+    }
 
     return { true, output, {} };
 }

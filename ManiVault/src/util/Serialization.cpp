@@ -13,6 +13,7 @@
 #include <exception>
 
 #include <math.h>
+#include <limits>
 
 namespace mv::util {
 
@@ -191,69 +192,99 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
      return {};
 }
 
-DecodeBlockResult decodeBlockFromFile(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec)
+DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec, char* destination, std::uint64_t destinationSize)
 {
     DecodeBlockResult result;
 
-    result._offset  = decodeBlockJob._offset;
-    result._size    = decodeBlockJob._size;
-
-    result._decodedData.resize(static_cast<qsizetype>(result._size));
-
-    auto codec = createCodec();
-
-    if (decodeBlockJob._uri.isEmpty())
-        throw std::runtime_error("Block URI is empty");
-
-    const auto decodeResult = codec->decodeFromFileTo(decodeBlockJob._uri, result._decodedData.data(), result._size);
-
-    if (!decodeResult.isSuccess())
-        throw std::runtime_error(QString("Failed to decode block from file: %1").arg(decodeBlockJob._uri).toStdString());
-
-    return result;
-}
-
-DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec, char* destination)
-{
-    DecodeBlockResult result;
-
-    result._offset  = decodeBlockJob._offset;
-    result._size    = decodeBlockJob._size;
-
-    //result._decodedData.resize(static_cast<qsizetype>(result._size));
-
-    auto codec = createCodec();
-
-    if (decodeBlockJob._uri.isEmpty())
-        throw std::runtime_error("Block URI is empty");
-
-    const auto decodeResult = codec->decodeFromFileTo(decodeBlockJob._uri, destination + result._offset, result._size);
-
-    if (!decodeResult.isSuccess())
-        throw std::runtime_error(QString("Failed to decode block from file: %1").arg(decodeBlockJob._uri).toStdString());
-
-    return result;
-}
-
-DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec, char* destination)
-{
-    DecodeBlockResult result;
     result._offset = decodeBlockJob._offset;
     result._size = decodeBlockJob._size;
 
+    if (!destination)
+        throw std::runtime_error("Destination buffer is null");
+
+    if (destinationSize < 0)
+        throw std::runtime_error("Destination buffer size is invalid");
+
+    if (decodeBlockJob._offset > static_cast<quint64>(std::numeric_limits<qsizetype>::max()) ||
+        decodeBlockJob._size > static_cast<quint64>(std::numeric_limits<qsizetype>::max())) {
+        throw std::runtime_error("Decode block offset or size exceeds qsizetype range");
+    }
+
+    const auto offset   = static_cast<std::uint64_t>(decodeBlockJob._offset);
+    const auto size     = static_cast<std::uint64_t>(decodeBlockJob._size);
+
+    if (offset < 0 || size < 0 || offset > destinationSize || size > destinationSize - offset) {
+        throw std::runtime_error(QString("Decode block destination range out of bounds. offset=%1, size=%2, destinationSize=%3, uri=%4")
+            .arg(offset)
+            .arg(size)
+            .arg(destinationSize)
+            .arg(decodeBlockJob._uri)
+            .toStdString()
+        );
+    }
+
     auto codec = createCodec();
 
-    const QByteArray encodedBytes =
-        QByteArray::fromBase64(decodeBlockJob._encodedData.toUtf8());
+    if (!codec)
+        throw std::runtime_error("Failed to create blob codec");
 
-    const auto decodeResult = codec->decodeTo(encodedBytes,destination + result._offset,
-            result._size
-        );
+    if (decodeBlockJob._uri.isEmpty())
+        throw std::runtime_error("Block URI is empty");
+
+    const auto decodeResult = codec->decodeFromFileTo(
+        decodeBlockJob._uri,
+        destination + offset,
+        size
+    );
 
     if (!decodeResult.isSuccess()) {
-        throw std::runtime_error(
-            QString("Failed to decode inline block at offset %1")
+        throw std::runtime_error(QString("Failed to decode block from file '%1': %2").arg(decodeBlockJob._uri, decodeResult._error).toStdString());
+    }
+
+    return result;
+}
+
+DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec, char* destination, std::uint64_t destinationSize)
+{
+    DecodeBlockResult result;
+
+    result._offset  = decodeBlockJob._offset;
+    result._size    = decodeBlockJob._size;
+
+    if (!destination)
+        throw std::runtime_error("Destination buffer is null");
+
+    const auto offset   = static_cast<std::uint64_t>(decodeBlockJob._offset);
+    const auto size     = static_cast<std::uint64_t>(decodeBlockJob._size);
+
+    if (offset < 0 || size < 0 || offset > destinationSize || size > destinationSize - offset) {
+        throw std::runtime_error(QString("Inline decode block out of bounds. offset=%1, size=%2, destinationSize=%3")
+            .arg(offset)
+            .arg(size)
+            .arg(destinationSize)
+            .toStdString()
+        );
+    }
+
+    auto codec = createCodec();
+
+    if (!codec)
+        throw std::runtime_error("Failed to create blob codec");
+
+    const QByteArray encodedBytes = QByteArray::fromBase64(
+        decodeBlockJob._encodedData.toUtf8()
+    );
+
+    const auto decodeResult = codec->decodeTo(
+        encodedBytes,
+        destination + offset,
+        size
+    );
+
+    if (!decodeResult.isSuccess()) {
+        throw std::runtime_error(QString("Failed to decode inline block at offset %1: %2")
             .arg(decodeBlockJob._offset)
+            .arg(decodeResult._error)
             .toStdString()
         );
     }
@@ -276,7 +307,7 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
     const auto blocks       = variantMap.value("Blocks").toList();
     const bool hasCodec     = variantMap.contains("Codec");
     const auto codecName    = hasCodec ? variantMap.value("Codec").toString() : QStringLiteral("none");
-    const auto totalSize    = variantMap.value("Size").toULongLong();
+    const auto totalSize    = static_cast<std::uint64_t>(variantMap.value("Size").toULongLong());
 
     if (hasCodec && !codecRegistry().isRegistered(codecName)) {
         throw std::runtime_error(QStringLiteral("Unable to load raw data, codec %1 is not registered").arg(codecName).toStdString());
@@ -346,12 +377,12 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
     for (auto& decodeBlockJob : decodeBlockJobs) {
         const double progressWeight = std::max<double>(1.0, static_cast<double>(decodeBlockJob._size));
 
-        decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [&decodeBlockJob, &bytes, createCodec](const WorkflowPlan::Job& job) {
+        decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [&decodeBlockJob, bytes, totalSize, createCodec](const WorkflowPlan::Job& job) {
             try {
                 if (decodeBlockJob._uri.isEmpty()) {
-                    decodeBlockFromBase64To(decodeBlockJob, createCodec, bytes);
+                    decodeBlockFromBase64To(decodeBlockJob, createCodec, bytes, totalSize);
                 } else {
-                    decodeBlockFromFileTo(decodeBlockJob, createCodec, bytes);
+                    decodeBlockFromFileTo(decodeBlockJob, createCodec, bytes, totalSize);
                 }
             }
             catch (std::exception& e) {
