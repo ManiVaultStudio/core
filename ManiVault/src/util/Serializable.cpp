@@ -257,7 +257,14 @@ void Serializable::fromVariantMap(Serializable* serializable, const QVariantMap&
 void Serializable::fromVariantMap(Serializable& serializable, const QVariantMap& variantMap, const QString& key)
 {
     if (!variantMap.contains(key)) {
-        const auto errorMessage = QString("%1 not found in map: %2").arg(key, variantMap);
+        const auto errorMessage = QString(
+            "Required key '%1' was not found in QVariantMap. "
+            "Available keys (%2 total): %3"
+        ).arg(
+            key,
+            QString::number(variantMap.size()),
+            describeVariantMapKeys(variantMap)
+        );
 
         if (settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
             qCritical() << errorMessage; 
@@ -277,7 +284,14 @@ void Serializable::fromParentVariantMap(const QVariantMap& parentVariantMap, boo
             throw std::runtime_error("Serialization name may not be empty");
 
         if (!parentVariantMap.contains(getSerializationName())) {
-            const auto errorMessage = QString("%1 not found in map: %2").arg(getSerializationName());
+            const auto errorMessage = QString(
+                "Required key '%1' was not found in QVariantMap. "
+                "Available keys (%2 total): %3"
+            ).arg(
+                getSerializationName(),
+                QString::number(parentVariantMap.size()),
+                describeVariantMapKeys(parentVariantMap)
+            );
 
             if (!ignoreLoadingErrors) {
                 if (core() != nullptr && settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())

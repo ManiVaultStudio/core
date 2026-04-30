@@ -312,6 +312,13 @@ CORE_EXPORT void logMemory(const QString& label);
  * @param path Dot-separated path to the value to find
  * @return Value at the specified path, or an invalid QVariant if not found
  */
-QVariant findNested(const QVariantMap& root, const QStringList& path);
+CORE_EXPORT QVariant findNested(const QVariantMap& root, const QStringList& path);
 
+/**
+ * Describe the keys of a QVariantMap in a human-readable string, showing up to \p maxKeys keys and indicating if there are more
+ * @param map Map whose keys to describe
+ * @param maxKeys Maximum number of keys to show (default is 20)
+ * @return String describing the keys of the map
+ */
+CORE_EXPORT QString describeVariantMapKeys(const QVariantMap& map, qsizetype maxKeys = 20);
 }
