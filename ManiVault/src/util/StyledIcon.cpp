@@ -342,10 +342,6 @@ QString StyledIcon::getIconCharacter(const QString& iconName, const QString& ico
             const auto candidateIconFontVersion = iconFontCandidate.second;
             const auto iconFontResourceName     = getIconFontResourceName(candidateIconFontName, candidateIconFontVersion);
 
-#ifdef STYLED_ICON_VERBOSE
-            qDebug() << "Trying" << candidateIconFontName << candidateIconFontVersion;
-#endif
-
             iconFontResourceNames << iconFontResourceName;
 
             if (!fontMetadata.keys().contains(iconFontResourceName)) {
