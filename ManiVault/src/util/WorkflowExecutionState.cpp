@@ -47,7 +47,7 @@ double WorkflowExecutionState::getOverallProgress() const
 	return _progressRoot ? _progressRoot->getProgress() : 0.0;
 }
 
-QVector<WorkflowMessage> WorkflowExecutionState::collectMessages() const
+WorkflowMessages WorkflowExecutionState::collectMessages() const
 {
 	QVector<WorkflowMessage> result;
 	collectMessagesRecursive(_reportRoot, result);

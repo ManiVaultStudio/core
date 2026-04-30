@@ -9,6 +9,8 @@
 
 #include <QString>
 
+#include "WorkflowMessage.h"
+
 namespace mv::util
 {
 
@@ -38,6 +40,8 @@ public:
     void setDuration(std::uint64_t duration);
 
     QString getErrorMessage() const;
+
+    WorkflowMessages getMessages() const;
 
 public: // Metrics
 

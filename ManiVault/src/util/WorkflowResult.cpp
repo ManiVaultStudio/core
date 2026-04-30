@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "WorkflowResult.h"
+#include "WorkflowExecutionState.h"
 
 #include <optional>
 
@@ -63,16 +64,23 @@ QString WorkflowResult::getErrorMessage() const
 {
 	QStringList errorMessages;
 
-	//if (const auto reportNode = _context.getReportNode()) {
-	//	QVector<WorkflowMessage> messages;
-	//	WorkflowReportNode::collectMessagesRecursive(reportNode, messages);
-	//	for (const auto& message : messages)
-	//	{
-	//		if (message._level == WorkflowMessageLevel::Error)
-	//			errorMessages.append(QString("[%1] %2").arg(message._source, message._text));
-	//	}
-	//}
+	for (const auto& message : getMessages())
+	{
+		if (message._level == WorkflowMessageLevel::Error)
+			errorMessages.append(QString("[%1] %2").arg(message._source, message._text));
+	}
+	
 	return errorMessages.join("\n");
+}
+
+WorkflowMessages WorkflowResult::getMessages() const
+{
+    Q_ASSERT(_context);
+
+    if (_context)
+        return _context->getState()->collectMessages();
+
+    return {};
 }
 
 void WorkflowResult::setMetrics(QVector<WorkflowMetric> metrics)

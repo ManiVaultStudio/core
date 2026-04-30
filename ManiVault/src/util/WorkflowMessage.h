@@ -24,6 +24,8 @@ enum class WorkflowMessageLevel {
     Critical
 };
 
+using WorkflowMessageLevels = QVector<WorkflowMessageLevel>;
+
 /**
  * Workflow message
  *
@@ -37,5 +39,7 @@ struct CORE_EXPORT WorkflowMessage
     QString              _nodeName;
     QDateTime            _timestamp = QDateTime::currentDateTime();
 };
+
+using WorkflowMessages = QVector<WorkflowMessage>;
 
 } // namespace mv::util

@@ -38,7 +38,7 @@ public:
 
     double getOverallProgress() const;
 
-    QVector<WorkflowMessage> collectMessages() const;
+    WorkflowMessages collectMessages() const;
     
     void addBytesLoaded(std::uint64_t bytes);
 
