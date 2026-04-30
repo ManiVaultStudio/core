@@ -58,9 +58,9 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
         projects().toJsonFile(context->_projectJsonPath);
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 10.0);
 
-    plan.addSequentialStage("Save project meta JSON", [&plan]() -> void {
+    plan.addSequentialStage("Save meta JSON", [&plan]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
-        printLine("Recipe stage", "Save project meta JSON", 2);
+        printLine("Recipe stage", "Save meta JSON", 2);
 #endif
 
         auto context = plan.getWorkflowContextAs<ProjectSaveContext>();

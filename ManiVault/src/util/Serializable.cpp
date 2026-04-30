@@ -257,7 +257,7 @@ void Serializable::fromVariantMap(Serializable* serializable, const QVariantMap&
 void Serializable::fromVariantMap(Serializable& serializable, const QVariantMap& variantMap, const QString& key)
 {
     if (!variantMap.contains(key)) {
-        const auto errorMessage = QString("%1 not found in map: %2").arg(key);
+        const auto errorMessage = QString("%1 not found in map: %2").arg(key, variantMap);
 
         if (settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
             qCritical() << errorMessage; 

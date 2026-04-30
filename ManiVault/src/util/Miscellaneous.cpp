@@ -793,4 +793,22 @@ QVariant findNested(const QVariantMap& root, const QStringList& path)
 
 	return current;
 }
+
+QString describeVariantMapKeys(const QVariantMap& map, qsizetype maxKeys)
+{
+	QStringList keys = map.keys();
+
+	std::sort(keys.begin(), keys.end());
+
+	QStringList shownKeys = keys.mid(0, maxKeys);
+
+	QString suffix;
+
+	if (keys.size() > maxKeys) {
+		suffix = QString(" ... and %1 more").arg(keys.size() - maxKeys);
+	}
+
+	return QString("[%1%2]").arg(shownKeys.join(", "), suffix);
+}
+
 }
