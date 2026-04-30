@@ -384,7 +384,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         		const auto duration             = workflowResult.getDuration();
                 const auto bytesLoadedMetric    = workflowResult.getMetric("project.data.bytes_loaded");
                 const auto bytesLoaded          = bytesLoadedMetric.has_value() ? bytesLoadedMetric.value()._value.toULongLong() : 0;
-        		const auto successText          = QString("%1 (%2) loaded successfully in %3 %4").arg(currentProject->getFilePath(), getNoBytesHumanReadable(bytesLoaded), QString::number(duration, 'f', 1), duration < 1000 ? "ms" : "s");
+        		const auto successText          = QString("%1 (%2) loaded successfully in %3").arg(currentProject->getFilePath(), getNoBytesHumanReadable(bytesLoaded), getElapsedTimeHumanReadable(duration));
         		//const auto errorText    = getName() + result->_errorMessage;
 
         		help().addNotification("Project opened", successText, StyledIcon("folder-open"));
@@ -752,8 +752,8 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 	        auto workflowResult = workflowPlan.execute(_workflowPlanExecutor, true, { parameters._parallel, parameters._maxParallelThreads });
 
             if (auto currentProject = mv::projects().getCurrentProject()) {
-                const auto duration = workflowResult.getDuration();
-                const auto successText = (duration < 1000) ? QString("%1 completed successfully in %2 ms").arg(workflowPlan.getName()).arg(duration) : QString("%1 saved successfully in %2 s").arg(currentProject->getFilePath()).arg(duration / 1000.0, 0, 'f', 1);
+                const auto duration     = workflowResult.getDuration();
+                const auto successText  = QString("%1 saved successfully in %2 ms").arg(workflowPlan.getName(), getElapsedTimeHumanReadable(duration));
                 //const auto errorText    = getName() + result->_errorMessage;
 
                 help().addNotification("Project saved", successText, StyledIcon("file"));

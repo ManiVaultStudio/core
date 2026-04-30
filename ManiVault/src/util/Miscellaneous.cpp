@@ -127,6 +127,38 @@ QString getNoBytesHumanReadable(std::uint64_t byteCount, bool useIEC /*= true*/)
     return QString::number(size, 'f', 2) + " " + units[i];
 }
 
+QString getElapsedTimeHumanReadable(std::uint64_t ms, bool compact)
+{
+    const std::uint64_t totalSeconds    = ms / 1000;
+    const std::uint64_t milliseconds    = ms % 1000;
+    const std::uint64_t seconds         = totalSeconds % 60;
+    const std::uint64_t minutes         = (totalSeconds / 60) % 60;
+    const std::uint64_t hours           = (totalSeconds / 3600) % 24;
+    const std::uint64_t days            = totalSeconds / 86400;
+
+    QStringList parts;
+
+    if (days > 0)
+        parts << QString("%1d").arg(days);
+
+    if (hours > 0)
+        parts << QString("%1h").arg(hours);
+
+    if (minutes > 0)
+        parts << QString("%1m").arg(minutes);
+
+    if (seconds > 0 || (!compact && parts.isEmpty()))
+        parts << QString("%1s").arg(seconds);
+
+    // Only show ms if duration is very small or verbose requested
+    if (!compact && ms < 1000)
+        parts << QString("%1ms").arg(milliseconds);
+
+    if (parts.isEmpty())
+        return "0ms";
+
+    return parts.join(" ");
+}
 
 QString getTabIndentedMessage(QString message, const std::uint32_t& tabIndex)
 {

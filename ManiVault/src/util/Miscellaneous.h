@@ -48,6 +48,14 @@ CORE_EXPORT std::uint64_t parseByteSize(const QString& input);
 CORE_EXPORT QString getNoBytesHumanReadable(std::uint64_t noBytes, bool useIEC = true);
 
 /**
+* Returns a human-readable string of an elapsed time duration
+* @param ms Duration in milliseconds
+* @param compact Whether to use compact formatting (e.g. "1h 2m") or verbose ("1h 2m 3s")
+* @return Human-readable elapsed time string
+*/
+CORE_EXPORT QString getElapsedTimeHumanReadable(std::uint64_t ms, bool compact = true);
+
+/**
  * Sort action based on their text
  * @param actions Actions to sort
  */
