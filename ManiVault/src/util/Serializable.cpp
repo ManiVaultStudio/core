@@ -5,7 +5,7 @@
 #include "Serializable.h"
 #include "Application.h"
 #include "CoreInterface.h"
-#include "OperationContextScope.h"
+#include "WorkflowExecutionContext.h"
 
 #include "actions/WidgetAction.h"
 
@@ -190,43 +190,32 @@ void Serializable::setTask(Task* task)
     _task = task;
 }
 
-void Serializable::reportSerializationWarning(QString scope, QString message)
+void Serializable::reportSerializationWarning(const QString& scope, const QString& message)
 {
-    if (auto context = OperationContextScope::get()) {
-	    context->reportWarning(std::move(scope), std::move(message));
-        return;
+    if (auto context = WorkflowExecutionContext::current()) {
+	    context->getReportNode()->addMessage(WorkflowMessageLevel::Warning, scope, message);
+    } else {
+        qWarning() << "Warning: " << message << "(" << scope << ")";
     }
-
-#ifdef _DEBUG
-    qWarning() << "No active OperationContext for serialization error:" << scope << message;
-#endif
 }
 
 void Serializable::reportSerializationError(QString scope, QString message)
 {
-    if (auto context = OperationContextScope::get()) {
-	    context->reportError(std::move(scope), std::move(message));
+    if (auto context = WorkflowExecutionContext::current()) {
+        context->getReportNode()->addMessage(WorkflowMessageLevel::Error, scope, message);
+    } else {
+        qWarning() << "Error: " << message << "(" << scope << ")";
     }
-    else
-    {
-        qCritical() << "No active OperationContext for serialization error:" << scope << message;
-    }
-
-#ifdef _DEBUG
-    qWarning() << "No active OperationContext for serialization error:" << scope << message;
-#endif
 }
 
 void Serializable::reportFatalSerializationError(QString scope, QString message)
 {
-    if (auto context = OperationContextScope::get()) {
-	    context->reportFatal(std::move(scope), std::move(message));
-        return;
+    if (auto context = WorkflowExecutionContext::current()) {
+	    context->getReportNode()->addMessage(WorkflowMessageLevel::Critical, scope, message);
     }
-
-#ifdef _DEBUG
-    qWarning() << "No active OperationContext for serialization error:" << scope << message;
-#endif
+    else {
+        qWarning() << "Critical: " << message << "(" << scope << ")";
+    }
 }
 
 void Serializable::fromVariantMap(Serializable* serializable, const QVariantMap& variantMap)
@@ -267,9 +256,9 @@ void Serializable::fromVariantMap(Serializable& serializable, const QVariantMap&
         );
 
         if (settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
-            qCritical() << errorMessage; 
+            serializable.reportSerializationWarning(serializable.getSerializationName(), errorMessage);
         else
-            throw std::runtime_error(errorMessage.toLatin1());
+            serializable.reportFatalSerializationError(serializable.getSerializationName(), errorMessage);
     }
     else {
         serializable.fromVariantMap(variantMap[key].toMap());
@@ -294,10 +283,10 @@ void Serializable::fromParentVariantMap(const QVariantMap& parentVariantMap, boo
             );
 
             if (!ignoreLoadingErrors) {
-                if (core() != nullptr && settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
-                    qCritical() << errorMessage;
+                if (settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
+                    reportSerializationWarning(getSerializationName(), errorMessage);
                 else
-                    throw std::runtime_error(errorMessage.toStdString());
+                    reportFatalSerializationError(getSerializationName(), errorMessage);
             }
         }
         else {

@@ -180,7 +180,7 @@ public:
      * @param scope Scope of the warning (e.g. the name of the serializable object or the name of the property that is being serialized)
      * @param message Warning message
      */
-    static void reportSerializationWarning(QString scope, QString message);
+    static void reportSerializationWarning(const QString& scope, const QString& message);
 
     /**
      * Convenience wrapper that reports to the currently active operation context, if any.

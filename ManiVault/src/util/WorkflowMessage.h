@@ -20,7 +20,8 @@ namespace mv::util
 enum class WorkflowMessageLevel {
     Info,
     Warning,
-    Error
+    Error,
+    Critical
 };
 
 /**

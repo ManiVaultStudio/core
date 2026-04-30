@@ -756,6 +756,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 const auto successText  = QString("%1 saved successfully in %2").arg(workflowPlan.getName(), getElapsedTimeHumanReadable(duration));
                 //const auto errorText    = getName() + result->_errorMessage;
 
+                qDebug() << workflowResult.getErrorMessage();
                 help().addNotification("Project saved", successText, StyledIcon("file"));
                 qDebug() << successText;
             }
