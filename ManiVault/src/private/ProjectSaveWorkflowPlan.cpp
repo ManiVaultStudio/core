@@ -23,7 +23,7 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 
     plan.addSequentialStage("Setup", [&plan]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
-        printLine("Recipe stage", "Setup", 2);
+        qDebug() << "Setup";
 #endif
 
         Application::requestOverrideCursor(Qt::WaitCursor);
@@ -42,15 +42,16 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
         context->_projectJsonPath   = QFileInfo(temporaryDirPath, "project.json").absoluteFilePath();
         context->_metaJsonPath      = QFileInfo(temporaryDirPath, "meta.json").absoluteFilePath();
 
-#ifdef PROJECT_SAVE_WORKFLOW_VERBOSE
-        printLine("Workspace JSON", context->_workspaceJsonPath, 3);
-        printLine("Project JSON", context->_projectJsonPath, 3);
+#ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
+        qDebug() << "Workspace JSON" << context->_workspaceJsonPath;
+        qDebug() << "Project JSON" << context->_projectJsonPath;
+        qDebug() << "Meta JSON" << context->_metaJsonPath;
 #endif
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     plan.addSequentialStage("Save project JSON", [&plan]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
-        printLine("Recipe stage", "Save project JSON", 2);
+        qDebug() << "Save project JSON";
 #endif
 
         auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
@@ -60,7 +61,7 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 
     plan.addSequentialStage("Save meta JSON", [&plan]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
-        printLine("Recipe stage", "Save meta JSON", 2);
+        qDebug() << "Save meta JSON";
 #endif
 
         auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
@@ -74,7 +75,7 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 
     plan.addSequentialStage("Save workspace JSON", [&plan]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
-        printLine("Recipe stage", "Finalize", 2);
+        qDebug() << "Save workspace JSON";
 #endif
 
         auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
@@ -84,7 +85,7 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 
     plan.addSequentialStage("Archive", [&plan]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
-        printLine("Recipe stage", "Archive", 2);
+        qDebug() << "Archive";
 #endif
 
         auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
@@ -94,7 +95,7 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 
     plan.addSequentialStage("Finalize", [&plan]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
-        printLine("Recipe stage", "Finalize", 2);
+        qDebug() << "Finalize";
 #endif
 
         auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
