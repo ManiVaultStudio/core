@@ -181,6 +181,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
             qCritical() << "Failed to load point data: " << e.what();
         }
 	} else {
+        /*
         const auto numberOfNonZeroElements = variantMap["NumberOfNonZeroElements"].toULongLong();
 
         std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
@@ -203,6 +204,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
         _sparseData.setData(numberOfPoints, numberOfDimensions, std::move(rowPointers), std::move(colIndices), std::move(values));
 
         qDebug() << "Loaded sparse data with" << _numRows << "points and" << _numDimensions << "dimensions.";
+        */
     }
 }
 
@@ -1135,7 +1137,7 @@ QVariantMap Points::toVariantMap() const
     variantMap["NumberOfPoints"]        = QVariant::fromValue<std::uint64_t>(getNumPoints());
     variantMap["Indices"]               = indices;
     variantMap["Selection"]             = selection;
-    variantMap["DimensionNames"]        = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true) : QVariant::fromValue(dimensionNames);
+    variantMap["DimensionNames"]        = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size()) : QVariant::fromValue(dimensionNames);
     variantMap["NumberOfDimensions"]    = QVariant::fromValue<std::uint64_t>(getNumDimensions());
     variantMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
     variantMap["Dense"]                 = Experimental::isDense(this);

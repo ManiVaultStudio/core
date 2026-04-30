@@ -124,22 +124,107 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 
     const auto dataMap = variantMap["Data"].toMap();
 
-    try {
-        QByteArray decodedBytes;
+    const auto applicationVersion           = mv::Application::current()->getVersion();
+    const auto projectApplicationVersion    = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
-        populateDataBufferFromVariantMap(dataMap["ClustersRawData"].toMap(), decodedBytes);
+    if (projectApplicationVersion < Version(5, 0, 0)) {
+        fromVariantMapPre500(variantMap);
+    } else {
+	    try {
+	        QByteArray decodedBytes;
 
-        QDataStream clustersDataStream(&decodedBytes, QIODevice::ReadOnly);
+	        populateDataBufferFromVariantMap(dataMap["ClustersRawData"].toMap(), decodedBytes);
 
-        clustersDataStream.setVersion(QDataStream::Qt_6_5);
+	        QDataStream clustersDataStream(&decodedBytes, QIODevice::ReadOnly);
 
-        clustersDataStream >> _clusters;
+	        clustersDataStream.setVersion(QDataStream::Qt_6_5);
 
-        if (clustersDataStream.status() != QDataStream::Ok)
-            throw std::runtime_error("Failed to deserialize cluster payload");
+	        clustersDataStream >> _clusters;
+
+	        if (clustersDataStream.status() != QDataStream::Ok)
+	            throw std::runtime_error("Failed to deserialize cluster payload");
+	    }
+	    catch (const std::exception& e) {
+	        qCritical() << "Failed to load cluster data: " << e.what();
+	    }
     }
-    catch (const std::exception& e) {
-        qCritical() << "Failed to load cluster data: " << e.what();
+}
+
+void ClusterData::fromVariantMapPre500(const QVariantMap& variantMap)
+{
+    WidgetAction::fromVariantMap(variantMap);
+
+    const auto dataMap = variantMap["Data"].toMap();
+
+    variantMapMustContain(dataMap, "IndicesRawData");
+    variantMapMustContain(dataMap, "NumberOfIndices");
+
+    // Packed indices for all clusters
+    QVector<std::uint32_t> packedIndices;
+
+    packedIndices.resize(dataMap["NumberOfIndices"].toInt());
+
+    // Convert raw data to indices
+    populateDataBufferFromVariantMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data());
+
+    if (dataMap.contains("ClustersRawData")) {
+        QByteArray clustersByteArray;
+
+        QDataStream clustersDataStream(&clustersByteArray, QIODevice::ReadOnly);
+
+        const auto clustersRawDataSize = dataMap["ClustersRawDataSize"].toInt();
+
+        clustersByteArray.resize(clustersRawDataSize);
+
+        populateDataBufferFromVariantMap(dataMap["ClustersRawData"].toMap(), (char*)clustersByteArray.data());
+
+        QVariantList clusters;
+
+        clustersDataStream >> clusters;
+
+        _clusters.resize(clusters.count());
+
+        long clusterIndex = 0;
+
+        for (const auto& clusterVariant : clusters) {
+            const auto clusterMap = clusterVariant.toMap();
+
+            auto& cluster = _clusters[clusterIndex];
+
+            cluster.setName(clusterMap["Name"].toString());
+            cluster.setId(clusterMap["ID"].toString());
+            cluster.setColor(clusterMap["Color"].toString());
+
+            const auto globalIndicesOffset = clusterMap["GlobalIndicesOffset"].toInt();
+            const auto numberOfIndices = clusterMap["NumberOfIndices"].toInt();
+
+            cluster.getIndices() = std::vector<std::uint32_t>(packedIndices.begin() + globalIndicesOffset, packedIndices.begin() + globalIndicesOffset + numberOfIndices);
+
+            ++clusterIndex;
+        }
+    }
+
+    // For backwards compatibility
+    if (dataMap.contains("Clusters")) {
+        const auto clustersList = dataMap["Clusters"].toList();
+
+        _clusters.resize(clustersList.count());
+
+        for (const auto& clusterVariant : clustersList) {
+            const auto clusterMap = clusterVariant.toMap();
+            const auto clusterIndex = clustersList.indexOf(clusterMap);
+
+            auto& cluster = _clusters[clusterIndex];
+
+            cluster.setName(clusterMap["Name"].toString());
+            cluster.setId(clusterMap["ID"].toString());
+            cluster.setColor(clusterMap["Color"].toString());
+
+            const auto globalIndicesOffset = clusterMap["GlobalIndicesOffset"].toInt();
+            const auto numberOfIndices = clusterMap["NumberOfIndices"].toInt();
+
+            cluster.getIndices() = std::vector<std::uint32_t>(packedIndices.begin() + globalIndicesOffset, packedIndices.begin() + globalIndicesOffset + numberOfIndices);
+        }
     }
 }
 

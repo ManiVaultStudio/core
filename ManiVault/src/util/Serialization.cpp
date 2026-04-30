@@ -297,13 +297,12 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
 
         variantMapMustContain(blockMap, "Offset");
         variantMapMustContain(blockMap, "Size");
-        variantMapMustContain(blockMap, "CompressedSize");
 
         DecodeBlockJob job;
 
         job._offset         = blockMap.value("Offset").value<quint64>();
         job._size           = blockMap.value("Size").value<quint64>();
-        job._compressedSize = blockMap.value("CompressedSize").value<quint64>();
+        job._compressedSize = blockMap.value("CompressedSize", 0).value<quint64>();
         
         if (blockMap.contains("URI"))
             job._uri = blockMap.value("URI").toString();
