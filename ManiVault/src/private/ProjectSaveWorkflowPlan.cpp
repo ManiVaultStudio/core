@@ -67,6 +67,8 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 
         if (auto project = projects().getCurrentProject()) {
             project->getProjectMetaAction().toJsonFile(context->_metaJsonPath);
+
+            prettyPrintVariantMap(project->getProjectMetaAction().getApplicationVersionAction().toVariantMap());
         }
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 

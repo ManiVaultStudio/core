@@ -109,8 +109,6 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
-    //_projectMetaAction.fromJsonFile("meta.json");
-
     if (variantMap.contains(_selectionGroupingAction.getSerializationName()))
         _selectionGroupingAction.fromParentVariantMap(variantMap);
     else

@@ -146,7 +146,6 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         if (!context->_errorMessage.isEmpty())
             throw std::runtime_error(context->_errorMessage.toStdString());
 
-        qDebug() << "Project opened successfully:" << context->_filePath;
         mv::projects().getRecentProjectsAction().addRecentFilePath(context->_filePath);
     
         auto project = mv::projects().getCurrentProject();
