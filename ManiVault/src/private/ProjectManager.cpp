@@ -1174,6 +1174,8 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
         setSetting("Directory", QFileInfo(parameters._filePath).absolutePath());
         setSetting("Parallel", parallelToggleAction.isChecked());
         setSetting("MaxNumberOfThreads", parameters._maxParallelThreads);
+    } else {
+        parameters._filePath = filePath;
     }
 
     return parameters;
