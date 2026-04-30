@@ -6,22 +6,17 @@
 
 #include "ManiVaultGlobals.h"
 #include "WorkflowMetric.h"
+#include "WorkflowMessage.h"
 
 #include <QString>
 
-#include "WorkflowMessage.h"
 
 namespace mv::util
 {
 
-class WorkflowExecutionContext;
-
 class CORE_EXPORT WorkflowResult
 {
 public:
-    WorkflowResult();
-
-    explicit WorkflowResult(WorkflowExecutionContext* context);
 
     bool isValid() const;
 
@@ -33,15 +28,16 @@ public:
 
     double getProgress() const;
 
-    WorkflowExecutionContext* getContext() const;
-
     std::uint64_t getDuration() const;
 
     void setDuration(std::uint64_t duration);
 
+public: // Messages
+
     QString getErrorMessage() const;
 
     WorkflowMessages getMessages() const;
+    void setMessages(const WorkflowMessages& workflowMessages);
 
 public: // Metrics
 
@@ -52,10 +48,10 @@ public: // Metrics
     std::optional<WorkflowMetric> getMetric(const QString& name) const;
 
 private:
-    WorkflowExecutionContext* _context;
-    std::uint64_t               _duration;
+    std::uint64_t               _duration = 0;
     bool                        _success = false;
-    QVector<WorkflowMetric> _metrics;
+    WorkflowMessages            _workflowMessages;
+    QVector<WorkflowMetric>     _metrics;
 };
 
 using UniqueWorkflowResult = std::unique_ptr<WorkflowResult>;

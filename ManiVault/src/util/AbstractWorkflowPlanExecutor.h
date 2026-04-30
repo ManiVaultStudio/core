@@ -6,6 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 #include "WorkflowPlan.h"
+#include "WorkflowExecutionContext.h"
 #include "WorkflowResult.h"
 #include "Task.h"
 

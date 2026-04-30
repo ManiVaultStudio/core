@@ -386,7 +386,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 const auto bytesLoaded          = bytesLoadedMetric.has_value() ? bytesLoadedMetric.value()._value.toULongLong() : 0;
         		const auto successText          = QString("%1 (%2) loaded successfully in %3").arg(currentProject->getFilePath(), getNoBytesHumanReadable(bytesLoaded), getElapsedTimeHumanReadable(duration));
         		//const auto errorText    = getName() + result->_errorMessage;
-
+                qDebug() << workflowResult.getErrorMessage();
         		help().addNotification("Project opened", successText, StyledIcon("folder-open"));
                 qDebug() << successText;
         	}

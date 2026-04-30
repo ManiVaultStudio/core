@@ -136,7 +136,7 @@ WorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workflowPla
 
     try {
         executeImpl(workflowPlan);
-        //rootContext.setProgress(1.0);
+        
         WorkflowReporter::info("Workflow finished", workflowPlan.getName());
     }
     catch (const std::exception& e) {
@@ -148,10 +148,12 @@ WorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workflowPla
             workflowPlan.getName());
     }
 
-    WorkflowResult result(&rootContext);
+    WorkflowResult result;
 
-    if (auto state = rootContext.getState())
-        result.setMetrics(state->metrics().snapshot());
+    if (auto state = rootContext.getState()) {
+	    result.setMetrics(state->metrics().snapshot());
+    	result.setMessages(WorkflowExecutionContext::current()->getState()->collectMessages());
+    }
 
     return result;
 }
@@ -171,7 +173,7 @@ WorkflowResult WorkflowPlanExecutor::executeChild(const WorkflowPlan& workflowPl
 
     WorkflowReporter::info("Nested workflow finished", workflowPlan.getName());
 
-    return WorkflowResult(&childContext);
+    return {};
 }
 
 void WorkflowPlanExecutor::executeImpl(const WorkflowPlan& workflowPlan)

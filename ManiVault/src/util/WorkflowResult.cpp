@@ -10,44 +10,31 @@
 namespace mv::util
 {
 
-WorkflowResult::WorkflowResult() = default;
-
-WorkflowResult::WorkflowResult(WorkflowExecutionContext* context):
-	_context(context)
-{
-}
-
-bool WorkflowResult::isValid() const
-{
-	return _context ? _context->isValid() : false;
-}
-
 bool WorkflowResult::hasErrors() const
 {
-	const auto reportNode = _context ? _context->getReportNode() : nullptr;
-	return reportNode ? reportNode->hasErrorsRecursive() : false;
+    return false;
+	//const auto reportNode = _context ? _context->getReportNode() : nullptr;
+	//return reportNode ? reportNode->hasErrorsRecursive() : false;
 }
 
 int WorkflowResult::getErrorCount() const
 {
-	const auto reportNode = _context ? _context->getReportNode() : nullptr;
-	return reportNode ? reportNode->getErrorCountRecursive() : 0;
+    return {};
+	//const auto reportNode = _context ? _context->getReportNode() : nullptr;
+	//return reportNode ? reportNode->getErrorCountRecursive() : 0;
 }
 
 int WorkflowResult::getWarningCount() const
 {
-	const auto reportNode = _context ? _context->getReportNode() : nullptr;
-	return reportNode ? reportNode->getWarningCountRecursive() : 0;
+    return {};
+	//const auto reportNode = _context ? _context->getReportNode() : nullptr;
+	//return reportNode ? reportNode->getWarningCountRecursive() : 0;
 }
 
 double WorkflowResult::getProgress() const
 {
-	return _context ? _context->getProgress() : 0.0;
-}
-
-WorkflowExecutionContext* WorkflowResult::getContext() const
-{   
-	return _context;
+    return {};
+	//return _context ? _context->getProgress() : 0.0;
 }
 
 std::uint64_t WorkflowResult::getDuration() const
@@ -66,7 +53,7 @@ QString WorkflowResult::getErrorMessage() const
 
 	for (const auto& message : getMessages())
 	{
-		if (message._level == WorkflowMessageLevel::Error)
+		//if (message._level == WorkflowMessageLevel::Error)
 			errorMessages.append(QString("[%1] %2").arg(message._source, message._text));
 	}
 	
@@ -75,12 +62,12 @@ QString WorkflowResult::getErrorMessage() const
 
 WorkflowMessages WorkflowResult::getMessages() const
 {
-    Q_ASSERT(_context);
+    return _workflowMessages;
+}
 
-    if (_context)
-        return _context->getState()->collectMessages();
-
-    return {};
+void WorkflowResult::setMessages(const WorkflowMessages& workflowMessages)
+{
+    _workflowMessages = workflowMessages;
 }
 
 void WorkflowResult::setMetrics(QVector<WorkflowMetric> metrics)
