@@ -126,7 +126,7 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
     const auto projectApplicationVersion    = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
     if (projectApplicationVersion < Version(1, 5, 0)) {
-        fromVariantMapPre500(variantMap);
+        fromVariantMapPre150(variantMap);
     } else {
 	    try {
 	        QByteArray decodedBytes;
@@ -135,7 +135,7 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 
 	        QDataStream clustersDataStream(&decodedBytes, QIODevice::ReadOnly);
 
-	        //clustersDataStream.setVersion(QDataStream::Qt_6_5);
+	        clustersDataStream.setVersion(QDataStream::Qt_6_5);
 
 	        clustersDataStream >> _clusters;
 
@@ -148,11 +148,9 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
     }
 }
 
-void ClusterData::fromVariantMapPre500(const QVariantMap& variantMap)
+void ClusterData::fromVariantMapPre150(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
-
-    return;
 
     const auto dataMap = variantMap["Data"].toMap();
 
@@ -322,7 +320,7 @@ std::vector<std::uint32_t> Clusters::getSelectedIndices() const
 void Clusters::fromVariantMap(const QVariantMap& variantMap)
 {
     DatasetImpl::fromVariantMap(variantMap);
-    return;
+    
     getRawData<ClusterData>()->fromVariantMap(variantMap);
 
     events().notifyDatasetDataChanged(this);

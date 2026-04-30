@@ -148,9 +148,11 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
         std::int32_t encodeBlockJobIndex = 0;
 
         for (auto& encodeBlockJob : encodeBlockJobs) {
-            encodeJobs.emplace_back(QString("Encode Block %1").arg(QString::number(encodeBlockJobIndex)), [&encodeBlockJob, saveDir, createCodec](const WorkflowPlan::Job& job) {
+            auto* encodeBlockJobPtr = &encodeBlockJob;
+
+            encodeJobs.emplace_back(QString("Encode Block %1").arg(QString::number(encodeBlockJobIndex)), [encodeBlockJobPtr, saveDir, createCodec](const WorkflowPlan::Job& job) {
                 try {
-                    encodeBlockJob._result = encodeBlock(encodeBlockJob, saveDir, createCodec);
+                    encodeBlockJobPtr->_result = encodeBlock(*encodeBlockJobPtr, saveDir, createCodec);
                 }
                 catch (std::exception& e) {
                     Serializable::reportSerializationError("Encoder", "Failed to encode block: " + QString::fromStdString(e.what()));
@@ -196,8 +198,8 @@ DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, co
 {
     DecodeBlockResult result;
 
-    result._offset = decodeBlockJob._offset;
-    result._size = decodeBlockJob._size;
+    result._offset  = decodeBlockJob._offset;
+    result._size    = decodeBlockJob._size;
 
     if (!destination)
         throw std::runtime_error("Destination buffer is null");
@@ -205,9 +207,8 @@ DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, co
     if (destinationSize < 0)
         throw std::runtime_error("Destination buffer size is invalid");
 
-    if (decodeBlockJob._offset > static_cast<quint64>(std::numeric_limits<qsizetype>::max()) ||
-        decodeBlockJob._size > static_cast<quint64>(std::numeric_limits<qsizetype>::max())) {
-        throw std::runtime_error("Decode block offset or size exceeds qsizetype range");
+    if (decodeBlockJob._offset > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max()) || decodeBlockJob._size > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max())) {
+        throw std::runtime_error("Decode block offset or size exceeds std::uint64_t range");
     }
 
     const auto offset   = static_cast<std::uint64_t>(decodeBlockJob._offset);
@@ -283,15 +284,9 @@ DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, 
     if (!codec)
         throw std::runtime_error("Failed to create blob codec");
 
-    const QByteArray encodedBytes = QByteArray::fromBase64(
-        decodeBlockJob._encodedData.toUtf8()
-    );
+    const QByteArray encodedBytes = QByteArray::fromBase64(decodeBlockJob._encodedData.toUtf8());
 
-    const auto decodeResult = codec->decodeTo(
-        encodedBytes,
-        destination + offset,
-        size
-    );
+    const auto decodeResult = codec->decodeTo(encodedBytes, destination + offset, size);
 
     if (!decodeResult.isSuccess()) {
         throw std::runtime_error(QString("Failed to decode inline block at offset %1: %2")
@@ -397,13 +392,14 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
 
     for (auto& decodeBlockJob : decodeBlockJobs) {
         const double progressWeight = std::max<double>(1.0, static_cast<double>(decodeBlockJob._size));
+        auto* decodeBlockJobPtr = &decodeBlockJob;
 
-        decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [&decodeBlockJob, bytes, totalSize, createCodec](const WorkflowPlan::Job& job) {
+        decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [decodeBlockJobPtr, bytes, totalSize, createCodec](const WorkflowPlan::Job& job) {
             try {
-                if (decodeBlockJob._uri.isEmpty()) {
-                    decodeBlockFromBase64To(decodeBlockJob, createCodec, bytes, totalSize);
+                if (decodeBlockJobPtr->_uri.isEmpty()) {
+                    decodeBlockFromBase64To(*decodeBlockJobPtr, createCodec, bytes, totalSize);
                 } else {
-                    decodeBlockFromFileTo(decodeBlockJob, createCodec, bytes, totalSize);
+                    decodeBlockFromFileTo(*decodeBlockJobPtr, createCodec, bytes, totalSize);
                 }
             }
             catch (std::exception& e) {
