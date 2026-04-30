@@ -137,10 +137,14 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 
 	        clustersDataStream.setVersion(QDataStream::Qt_6_5);
 
-	        clustersDataStream >> _clusters;
+            QVector<Cluster> loadedClusters;
+
+	        clustersDataStream >> loadedClusters;
 
 	        if (clustersDataStream.status() != QDataStream::Ok)
 	            throw std::runtime_error("Failed to deserialize cluster payload");
+
+            _clusters = std::move(loadedClusters);
 	    }
 	    catch (const std::exception& e) {
 	        qCritical() << "Failed to load cluster data: " << e.what();
