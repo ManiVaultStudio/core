@@ -24,4 +24,5 @@ struct ProjectOpenContext : public WorkflowContextBase
     QString             _temporaryDirectoryPath;
     QString             _workspaceJsonPath;
     QString             _projectJsonPath;
+    QString             _metaJsonPath;
 };

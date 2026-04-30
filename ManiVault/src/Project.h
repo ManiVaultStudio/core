@@ -172,10 +172,6 @@ private:
     gui::ToggleAction       _overrideApplicationStatusBarAction;    /** Action for toggling whether the project inherits the status bar settings from the application or not */
     gui::ToggleAction       _statusBarVisibleAction;                /** Action for toggling the status bar visibility */
     gui::OptionsAction      _statusBarOptionsAction;                /** Options action for toggling status bar items on/off */
-
-protected:
-    static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
-    static constexpr std::uint32_t  DEFAULT_COMPRESSION_LEVEL   = 2;        /** Default compression level*/
 };
 
 }

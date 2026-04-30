@@ -23,7 +23,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
     plan.addSequentialStage("Setup", [&plan]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
-        printLine("Recipe stage", "Setup", 2);
+        qDebug() << "Setup";
 #endif
 
         if (auto wokflowExecutionContext = WorkflowExecutionContext::current()) {
@@ -53,14 +53,16 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         if (!QFileInfo(temporaryDirPath).exists())
             throw std::runtime_error("Temporary directory does not exist");
 
-        context->_temporaryDirectoryPath = temporaryDirPath;
-        context->_workspaceJsonPath      = QFileInfo(context->_temporaryDirectoryPath, "workspace.json").absoluteFilePath();
-        context->_projectJsonPath        = QFileInfo(context->_temporaryDirectoryPath, "project.json").absoluteFilePath();
+        context->_temporaryDirectoryPath    = temporaryDirPath;
+        context->_workspaceJsonPath         = QFileInfo(context->_temporaryDirectoryPath, "workspace.json").absoluteFilePath();
+        context->_projectJsonPath           = QFileInfo(context->_temporaryDirectoryPath, "project.json").absoluteFilePath();
+        context->_metaJsonPath       = QFileInfo(context->_temporaryDirectoryPath, "meta.json").absoluteFilePath();
 
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
         printLine("Temp. Dir", context->_temporaryDirectoryPath, 3);
         printLine("Workspace JSON", context->_workspaceJsonPath, 3);
         printLine("Project JSON", context->_projectJsonPath, 3);
+        printLine("Project meta JSON", context->_projectMetaJsonPath, 3);
 #endif
 
         workspaces().reset();
@@ -74,7 +76,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
     plan.addSequentialStage("Extract project archive", [&plan]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
-    printLine("Recipe stage", "Extract project archive", 2);
+        qDebug() << "Extract project archive";
 #endif
 
 	    auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
@@ -82,12 +84,31 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 	    Archiver archiver;
 
 	    archiver.extractSingleFile(context->_filePath, "project.json", context->_projectJsonPath);
+	    archiver.extractSingleFile(context->_filePath, "meta.json", context->_metaJsonPath);
 		archiver.extractSingleFile(context->_filePath, "workspace.json", context->_workspaceJsonPath);
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
+    plan.addSequentialStage("Open meta JSON", [&plan]() -> void {
+#ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
+        qDebug() << "Open meta JSON";
+#endif
+
+        auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
+
+        if (!QFileInfo(context->_metaJsonPath).exists())
+            throw std::runtime_error("Meta JSON file does not exist");
+
+        if (auto currentProject = mv::projects().getCurrentProject()) {
+            currentProject->getProjectMetaAction().fromJsonFile(context->_metaJsonPath);
+        }
+        else {
+            throw std::runtime_error("No current project found");
+        }
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1);
+
     plan.addSequentialStage("Open project JSON", [&plan]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
-        printLine("Recipe stage", "Open project JSON", 2);
+        qDebug() << "Open project JSON";
 #endif
 
         auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
@@ -104,7 +125,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
     plan.addSequentialStage("Open workspace JSON", [&plan]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
-        printLine("Recipe stage", "Open workspace JSON", 2);
+        qDebug() << "Open workspace JSON";
 #endif
 
         auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
@@ -117,7 +138,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
     plan.addSequentialStage("Finalize", [&plan]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
-        printLine("Recipe stage", "Finalize", 2);
+        qDebug() << "Finalize";
 #endif
 
         auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
