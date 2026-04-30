@@ -122,12 +122,10 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    const auto dataMap = variantMap["Data"].toMap();
-
-    const auto applicationVersion           = mv::Application::current()->getVersion();
+    const auto dataMap                      = variantMap["Data"].toMap();
     const auto projectApplicationVersion    = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
-    if (projectApplicationVersion < Version(5, 0, 0)) {
+    if (projectApplicationVersion < Version(1, 5, 0)) {
         fromVariantMapPre500(variantMap);
     } else {
 	    try {

@@ -150,38 +150,105 @@ void PointData::setValueAt(const std::size_t index, const float newValue)
 
 void PointData::fromVariantMap(const QVariantMap& variantMap)
 {
+    const auto projectApplicationVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
+
+    if (projectApplicationVersion < Version(1, 5, 0)) {
+        fromVariantMapPre500(variantMap);
+    }
+    else {
+        try {
+            variantMapMustContain(variantMap, "Data");
+            variantMapMustContain(variantMap, "NumberOfPoints");
+            variantMapMustContain(variantMap, "NumberOfDimensions");
+
+            const auto data = variantMap["Data"].toMap();
+            const auto numberOfPoints = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
+            const auto numberOfDimensions = variantMap["NumberOfDimensions"].toUInt();
+            const auto numberOfElements = numberOfPoints * numberOfDimensions;
+            const auto elementTypeIndex = static_cast<ElementTypeSpecifier>(data["TypeIndex"].toInt());
+            const auto rawDataMap = data["Raw"].toMap();
+
+            bool isDense = true;
+
+            if (variantMap.contains("Dense"))
+                isDense = variantMap["Dense"].toBool();
+
+            _isDense = isDense;
+            _numDimensions = numberOfDimensions;
+
+            if (_isDense)
+            {
+                setElementTypeSpecifier(elementTypeIndex);
+                resizeVector(numberOfElements);
+
+                try {
+                    populateDataBufferFromVariantMap(rawDataMap, static_cast<char*>(getDataVoidPtr()));
+                }
+                catch (const std::exception& e) {
+                    qCritical() << "Failed to load point data: " << e.what();
+                }
+            }/*
+            else {
+                const auto numberOfNonZeroElements = variantMap["NumberOfNonZeroElements"].toULongLong();
+
+                std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
+
+                populateDataBufferFromVariantMap(rawData, bytes.data());
+                _numRows = static_cast<std::uint64_t>(numberOfPoints); // FIXME should be redundant
+
+                size_t offset = 0;
+                std::vector<size_t> rowPointers(numberOfPoints + 1);
+                std::memcpy(rowPointers.data(), bytes.data() + offset, rowPointers.size() * sizeof(size_t));
+
+                offset += rowPointers.size() * sizeof(size_t);
+                std::vector<size_t> colIndices(numberOfNonZeroElements);
+                std::memcpy(colIndices.data(), bytes.data() + offset, colIndices.size() * sizeof(size_t));
+
+                offset += colIndices.size() * sizeof(float);
+                std::vector<float> values(numberOfNonZeroElements);
+                std::memcpy(values.data(), bytes.data() + offset, values.size() * sizeof(float));
+
+                _sparseData.setData(numberOfPoints, numberOfDimensions, std::move(rowPointers), std::move(colIndices), std::move(values));
+
+                qDebug() << "Loaded sparse data with" << _numRows << "points and" << _numDimensions << "dimensions.";
+            }*/
+        }
+        catch (const std::exception& e) {
+            qCritical() << "Failed to load cluster data: " << e.what();
+        }
+    }
+}
+
+void PointData::fromVariantMapPre500(const QVariantMap& variantMap)
+{
     variantMapMustContain(variantMap, "Data");
     variantMapMustContain(variantMap, "NumberOfPoints");
     variantMapMustContain(variantMap, "NumberOfDimensions");
 
-    const auto data                 = variantMap["Data"].toMap();
-    const auto numberOfPoints       = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
-    const auto numberOfDimensions   = variantMap["NumberOfDimensions"].toUInt();
-    const auto numberOfElements     = numberOfPoints * numberOfDimensions;
-    const auto elementTypeIndex     = static_cast<ElementTypeSpecifier>(data["TypeIndex"].toInt());
-    const auto rawDataMap           = data["Raw"].toMap();
+    const auto data = variantMap["Data"].toMap();
+    const auto numberOfPoints = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
+    const auto numberOfDimensions = variantMap["NumberOfDimensions"].toUInt();
+    const auto numberOfElements = numberOfPoints * numberOfDimensions;
+    const auto elementTypeIndex = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
+    const auto rawData = data["Raw"].toMap();
 
     bool isDense = true;
-
     if (variantMap.contains("Dense"))
-        isDense = variantMap["Dense"].toBool();
+        isDense = variantMap["Dense"].toBool();;
 
-    _isDense        = isDense;
-    _numDimensions  = numberOfDimensions;
+    _isDense = isDense;
+    _numDimensions = numberOfDimensions;
 
     if (_isDense)
     {
         setElementTypeSpecifier(elementTypeIndex);
         resizeVector(numberOfElements);
+        populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr());
+    }
+    else
+    {
+        variantMapMustContain(variantMap, "NumberOfNonZeroElements");
 
-        try {
-            populateDataBufferFromVariantMap(rawDataMap, static_cast<char*>(getDataVoidPtr()));
-        }
-        catch (const std::exception& e) {
-            qCritical() << "Failed to load point data: " << e.what();
-        }
-	} else {
-        /*
         const auto numberOfNonZeroElements = variantMap["NumberOfNonZeroElements"].toULongLong();
 
         std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
@@ -204,7 +271,6 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
         _sparseData.setData(numberOfPoints, numberOfDimensions, std::move(rowPointers), std::move(colIndices), std::move(values));
 
         qDebug() << "Loaded sparse data with" << _numRows << "points and" << _numDimensions << "dimensions.";
-        */
     }
 }
 
@@ -1096,6 +1162,10 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
             //events().notifyDatasetDataSelectionChanged(this);
         }
     }
+}
+
+void Points::fromVariantMapPre500(const QVariantMap& variantMap)
+{
 }
 
 QVariantMap Points::toVariantMap() const

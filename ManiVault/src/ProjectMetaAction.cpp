@@ -149,6 +149,8 @@ QVariantMap ProjectMetaAction::toVariantMap() const
 {
     auto variantMap = GroupAction::toVariantMap();
 
+    const_cast<ProjectMetaAction*>(this)->_applicationVersionAction.setVersion(Application::current()->getVersion());
+
     _applicationVersionAction.insertIntoVariantMap(variantMap);
     _projectVersionAction.insertIntoVariantMap(variantMap);
     _readOnlyAction.insertIntoVariantMap(variantMap);
