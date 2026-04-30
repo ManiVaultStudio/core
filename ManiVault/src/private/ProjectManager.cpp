@@ -574,7 +574,7 @@ void ProjectManager::addActionToFileDialog(gui::WidgetAction* action, QFileDialo
 void ProjectManager::openProject(util::ProjectsModelProjectSharedPtr project, const QString& targetDirectory, bool importDataOnly, bool loadWorkspace)
 {
 #ifdef PROJECT_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__ << project->getName() << targetDirectory << importDataOnly << loadWorkspace;
+    qDebug() << __FUNCTION__ << targetDirectory << importDataOnly << loadWorkspace;
 #endif
 
     Application::requestOverrideCursor(Qt::WaitCursor);
