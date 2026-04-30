@@ -152,6 +152,8 @@ void ClusterData::fromVariantMapPre500(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
+    return;
+
     const auto dataMap = variantMap["Data"].toMap();
 
     variantMapMustContain(dataMap, "IndicesRawData");
@@ -320,7 +322,7 @@ std::vector<std::uint32_t> Clusters::getSelectedIndices() const
 void Clusters::fromVariantMap(const QVariantMap& variantMap)
 {
     DatasetImpl::fromVariantMap(variantMap);
-
+    return;
     getRawData<ClusterData>()->fromVariantMap(variantMap);
 
     events().notifyDatasetDataChanged(this);

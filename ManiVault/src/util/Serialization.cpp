@@ -241,6 +241,18 @@ DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, co
         throw std::runtime_error(QString("Failed to decode block from file '%1': %2").arg(decodeBlockJob._uri, decodeResult._error).toStdString());
     }
 
+    //if (decodeResult._bytesWritten != size) {
+    //    throw std::runtime_error(
+    //        QString(
+    //            "Decode size mismatch for block '%1': expected %2 bytes, got %3 bytes"
+    //        )
+    //        .arg(decodeBlockJob._uri)
+    //        .arg(size)
+    //        .arg(decodeResult._bytesWritten)
+    //        .toStdString()
+    //    );
+    //}
+
     return result;
 }
 
@@ -368,6 +380,15 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
         expectedOffset = end;
     }
 
+    if (expectedOffset != totalSize) {
+        throw std::runtime_error(
+            QString("Raw-data blocks do not cover total size. Expected %1 bytes, got %2 bytes")
+            .arg(totalSize)
+            .arg(expectedOffset)
+            .toStdString()
+        );
+    }
+
     WorkflowPlan decodeWorkflowPlan("Decode Blocks");
 
     WorkflowPlan::Jobs decodeJobs;
@@ -386,12 +407,22 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
                 }
             }
             catch (std::exception& e) {
-                Serializable::reportSerializationError("Data hierarchy manager", "Failed to load dataset: " + QString::fromStdString(e.what()));
+                Serializable::reportSerializationError(
+                    "Data hierarchy manager",
+                    "Failed to load dataset: " + QString::fromStdString(e.what())
+                );
+
+                throw;
             }
             catch (...) {
-                Serializable::reportSerializationError("Data hierarchy manager", "Failed to load dataset");
+                Serializable::reportSerializationError(
+                    "Data hierarchy manager",
+                    "Failed to load dataset"
+                );
+
+                throw;
             }
-        }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread);//s, progressWeight);
+        }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread);
 
         ++decodeBlockJobIndex;
     }

@@ -433,10 +433,6 @@ QString StyledIcon::generateSha(const QString& iconName, const QString& iconFont
 
 void StyledIcon::updateIconFontVersions(const QString& iconFontName)
 {
-#ifdef STYLED_ICON_VERBOSE
-    qDebug() << "Updating" << iconFontName << "versions";
-#endif
-
     if (iconFontVersions.contains(iconFontName))
         return;
 
