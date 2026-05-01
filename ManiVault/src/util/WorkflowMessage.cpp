@@ -6,5 +6,13 @@
 
 namespace mv::util
 {
+QString getWorkflowMessageLevelName(WorkflowMessageLevel level)
+{
+    if (const auto it = workflowMessageLevelNames.find(level); it != workflowMessageLevelNames.end()) {
+        return it.value();
+    }
+
+	return "Unknown";
+}
 
 }

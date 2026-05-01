@@ -20,7 +20,7 @@ AbstractWorkflowMessagesModel::Item::Item(WorkflowMessage message) :
     setEditable(false);
 }
 
-const util::WorkflowMessage& AbstractWorkflowMessagesModel::Item::getWorkflowMessage() const
+const WorkflowMessage& AbstractWorkflowMessagesModel::Item::getWorkflowMessage() const
 {
     return _workflowMessage;
 }
@@ -28,11 +28,11 @@ const util::WorkflowMessage& AbstractWorkflowMessagesModel::Item::getWorkflowMes
 QVariant AbstractWorkflowMessagesModel::LevelItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
-        //case Qt::EditRole:
-        //    return static_cast<std::int32_t>(getWorkflowMessage().getLevel());
+        case Qt::EditRole:
+            return static_cast<std::int32_t>(getWorkflowMessage()._level);
 
-        //case Qt::DisplayRole:
-        //    return Script::getTypeName(getScript()->getType());
+        case Qt::DisplayRole:
+            return getWorkflowMessageLevelName(static_cast<WorkflowMessageLevel>(data(Qt::EditRole).toInt()));
 
         case Qt::ToolTipRole:
             return QString("%1").arg(data(Qt::DisplayRole).toString());
@@ -47,28 +47,12 @@ QVariant AbstractWorkflowMessagesModel::LevelItem::data(int role /*= Qt::UserRol
 QVariant AbstractWorkflowMessagesModel::SourceItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
-        //case Qt::EditRole:
-        //    return static_cast<std::int32_t>(getWorkflowMessage().getSource());
-
-        //case Qt::DisplayRole:
-        //    return Script::getLanguageName(getScript()->getLanguage());
+        case Qt::EditRole:
+        case Qt::DisplayRole:
+            return getWorkflowMessage()._source;
 
         case Qt::ToolTipRole:
             return QString("%1").arg(data(Qt::DisplayRole).toString());
-
-        case Qt::DecorationRole:
-        {
-            //switch (getScript()->getLanguage()) {
-            //    case Script::Language::Python:
-            //        return StyledIcon("python");
-
-            //    case Script::Language::R:
-            //        return StyledIcon("r");
-
-            //    default:
-            //        return QIcon();
-            //}
-        }
 
         default:
             break;
@@ -94,19 +78,21 @@ QVariant AbstractWorkflowMessagesModel::TextItem::data(int role /*= Qt::UserRole
     return Item::data(role);
 }
 
-QVariant AbstractWorkflowMessagesModel::DateTimeItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractWorkflowMessagesModel::TimeStampItem::data(int role /*= Qt::UserRole + 1*/) const
 {
-    //switch (role) {
-	   // case Qt::EditRole:
-	   // case Qt::DisplayRole:
-	   //     return getWorkflowMessage()._dateTime;
+    switch (role) {
+	    case Qt::EditRole:
+            return getWorkflowMessage()._timestamp;
 
-	   // case Qt::ToolTipRole:
-	   //     return QString("%1").arg(data(Qt::DisplayRole).toString());
+	    case Qt::DisplayRole:
+            return data(Qt::EditRole).toInt() == 0 ? "" : QDateTime::fromSecsSinceEpoch(data(Qt::EditRole).toInt()).toString("yyyy-MM-dd HH:mm:ss");
 
-	   // default:
-	   //     break;
-    //}
+	    case Qt::ToolTipRole:
+	        return QString("%1").arg(data(Qt::DisplayRole).toString());
+
+	    default:
+	        break;
+    }
 
     return Item::data(role);
 }
@@ -131,7 +117,7 @@ QVariant AbstractWorkflowMessagesModel::headerData(int section, Qt::Orientation 
             return TextItem::headerData(orientation, role);
 
         case Column::DateTime:
-            return DateTimeItem::headerData(orientation, role);
+            return TimeStampItem::headerData(orientation, role);
 
         default:
             break;

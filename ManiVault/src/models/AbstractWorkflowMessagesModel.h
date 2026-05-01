@@ -151,7 +151,7 @@ public:
     };
 
     /** Item class for displaying the workflow message date and time */
-    class CORE_EXPORT DateTimeItem final : public Item {
+    class CORE_EXPORT TimeStampItem final : public Item {
     public:
 
         /** No need for specialized constructor */
@@ -199,7 +199,7 @@ protected:
             append(new LevelItem(message));
             append(new SourceItem(message));
             append(new TextItem(message));
-            append(new DateTimeItem(message));
+            append(new TimeStampItem(message));
         }
     };
 

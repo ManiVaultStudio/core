@@ -17,14 +17,14 @@ WorkflowMessagesListModel::WorkflowMessagesListModel(QObject* parent /*= nullptr
 {
 }
 
-void WorkflowMessagesListModel::setWorkflowResult(const util::WorkflowResult& workflowResult)
+void WorkflowMessagesListModel::setWorkflowResult(const util::SharedWorkflowResult& workflowResult)
 {
-    for (const auto& message : workflowResult.getMessages()) {
+    for (const auto& message : workflowResult->getMessages()) {
         appendRow({
             new LevelItem(message),
             new SourceItem(message),
             new TextItem(message),
-            new DateTimeItem(message)
+            new TimeStampItem(message)
         });
     }
 }

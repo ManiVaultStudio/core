@@ -24,6 +24,15 @@ enum class WorkflowMessageLevel {
     Critical
 };
 
+const QMap<WorkflowMessageLevel, QString> workflowMessageLevelNames = {
+    { WorkflowMessageLevel::Info, "Info" },
+    { WorkflowMessageLevel::Warning, "Warning" },
+    { WorkflowMessageLevel::Error, "Error" },
+    { WorkflowMessageLevel::Critical, "Critical" }
+};
+
+QString CORE_EXPORT getWorkflowMessageLevelName(WorkflowMessageLevel level);
+
 using WorkflowMessageLevels = QVector<WorkflowMessageLevel>;
 
 /**

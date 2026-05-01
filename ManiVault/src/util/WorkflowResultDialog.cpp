@@ -8,7 +8,8 @@ namespace mv::util
 {
 
 WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowResult, QWidget* parent) :
-	QDialog(parent)
+	QDialog(parent),   
+	_hierarchyWidget(this, "Workflow message", _messagesListModel, &_messagesFilterModel)
 {
     Q_ASSERT(workflowResult);
 
@@ -20,7 +21,14 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     setWindowTitle("Workflow result - " + workflowResult->getWorkflowName());
     setWindowIcon(StyledIcon("scroll"));
 
+    _messagesListModel.setWorkflowResult(workflowResult);
+    _messagesFilterModel.setSourceModel(&_messagesListModel);
 
+    auto layout = new QVBoxLayout(this);
+
+    layout->addWidget(&_hierarchyWidget);
+
+    setLayout(layout);
 }
 
 }

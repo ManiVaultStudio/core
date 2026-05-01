@@ -7,6 +7,11 @@
 #include "ManiVaultGlobals.h"
 #include "WorkflowResult.h"
 
+#include "models/WorkflowMessagesListModel.h"
+#include "models/WorkflowMessagesFilterModel.h"
+
+#include "widgets/HierarchyWidget.h"
+
 #include <QDialog>
 #include <QHash>
 #include <QUuid>
@@ -23,6 +28,10 @@ public:
     WorkflowResultDialog(const SharedWorkflowResult& workflowResult, QWidget* parent = nullptr);
 
 private:
+    WorkflowMessagesListModel       _messagesListModel;
+    WorkflowMessagesFilterModel     _messagesFilterModel;
+    gui::HierarchyWidget            _hierarchyWidget;
+
 };
 
 } // namespace mv::util
