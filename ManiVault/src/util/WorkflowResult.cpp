@@ -3,71 +3,91 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "WorkflowResult.h"
-#include "WorkflowExecutionState.h"
 
 #include <optional>
+#include <ranges>
 
 namespace mv::util
 {
-
-bool WorkflowResult::hasErrors() const
-{
-    return false;
-	//const auto reportNode = _context ? _context->getReportNode() : nullptr;
-	//return reportNode ? reportNode->hasErrorsRecursive() : false;
-}
-
-int WorkflowResult::getErrorCount() const
-{
-    return {};
-	//const auto reportNode = _context ? _context->getReportNode() : nullptr;
-	//return reportNode ? reportNode->getErrorCountRecursive() : 0;
-}
-
-int WorkflowResult::getWarningCount() const
-{
-    return {};
-	//const auto reportNode = _context ? _context->getReportNode() : nullptr;
-	//return reportNode ? reportNode->getWarningCountRecursive() : 0;
-}
-
-double WorkflowResult::getProgress() const
-{
-    return {};
-	//return _context ? _context->getProgress() : 0.0;
-}
-
 std::uint64_t WorkflowResult::getDuration() const
 {
-	return _duration;
+    return _duration;
 }
 
 void WorkflowResult::setDuration(std::uint64_t duration)
 {
-	_duration = duration;
+    _duration = duration;
 }
 
-QString WorkflowResult::getErrorMessage() const
+bool WorkflowResult::hasWarnings() const
 {
-	QStringList errorMessages;
+    return getWarningCount() > 0;
+}
 
-	for (const auto& message : getMessages())
-	{
-		//if (message._level == WorkflowMessageLevel::Error)
-			errorMessages.append(QString("[%1] %2").arg(message._source, message._text));
-	}
-	
-	return errorMessages.join("\n");
+bool WorkflowResult::hasErrors() const
+{
+    return getErrorCount() > 0;
+}
+
+bool WorkflowResult::hasCriticalErrors() const
+{
+    return getCriticalErrorCount() > 0;
+}
+
+int WorkflowResult::getWarningCount() const
+{
+    return getMessageCountByLevels({ WorkflowMessageLevel::Warning });
+}
+
+int WorkflowResult::getErrorCount() const
+{
+    return getMessageCountByLevels({ WorkflowMessageLevel::Error });
+}
+
+int WorkflowResult::getCriticalErrorCount() const
+{
+	return getMessageCountByLevels({ WorkflowMessageLevel::Critical });
 }
 
 WorkflowMessages WorkflowResult::getMessages() const
 {
-    return _workflowMessages;
+    return _messages;
+}
+
+WorkflowMessages WorkflowResult::getWarningMessages() const
+{
+    return getMessagesByLevels({ WorkflowMessageLevel::Warning });
+}
+
+WorkflowMessages WorkflowResult::getErrorMessages() const
+{
+	return getMessagesByLevels({ WorkflowMessageLevel::Error });
+}
+
+WorkflowMessages WorkflowResult::getCriticalErrorMessages() const
+{
+	return getMessagesByLevels({ WorkflowMessageLevel::Critical });
 }
 
 void WorkflowResult::setMessages(const WorkflowMessages& workflowMessages)
 {
-    _workflowMessages = workflowMessages;
+    _messages = workflowMessages;
+}
+
+WorkflowMessages WorkflowResult::getMessagesByLevels(const WorkflowMessageLevels& workflowMessageLevels) const
+{
+    auto filteredView = _messages | std::views::filter([workflowMessageLevels](const WorkflowMessage& message) {
+        return workflowMessageLevels.contains(message._level);
+    });
+
+    return { filteredView.begin(), filteredView.end() };
+}
+
+int WorkflowResult::getMessageCountByLevels(const WorkflowMessageLevels& workflowMessageLevels) const
+{
+    return std::ranges::count_if(_messages, [workflowMessageLevels](const WorkflowMessage& message) {
+        return workflowMessageLevels.contains(message._level);
+    });
 }
 
 void WorkflowResult::setMetrics(QVector<WorkflowMetric> metrics)

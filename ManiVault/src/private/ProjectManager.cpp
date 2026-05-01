@@ -384,11 +384,21 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         		const auto duration             = workflowResult.getDuration();
                 const auto bytesLoadedMetric    = workflowResult.getMetric("project.data.bytes_loaded");
                 const auto bytesLoaded          = bytesLoadedMetric.has_value() ? bytesLoadedMetric.value()._value.toULongLong() : 0;
-        		const auto successText          = QString("%1 (%2) loaded successfully in %3").arg(currentProject->getFilePath(), getNoBytesHumanReadable(bytesLoaded), getElapsedTimeHumanReadable(duration));
+
+                QString message, reportString;
+
+                if (workflowResult.hasCriticalErrors()) {
+
+                    message = QString("Failed to open project due to a critical error: %1").arg(workflowResult.getCriticalErrorMessages()[0]);
+                    help().addNotification("Project opened", message, StyledIcon("folder-open"));
+                } else {
+                    help().addNotification("Project opened", message, StyledIcon("folder-open"));
+                }
+        		
         		//const auto errorText    = getName() + result->_errorMessage;
-                qDebug() << workflowResult.getErrorMessage();
-        		help().addNotification("Project opened", successText, StyledIcon("folder-open"));
-                qDebug() << successText;
+                
+        		
+                qDebug() << message;
         	}
 	    }
         emit projectOpened(*_project);

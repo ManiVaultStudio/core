@@ -16,17 +16,7 @@ namespace mv::util
 
 class CORE_EXPORT WorkflowResult
 {
-public:
-
-    bool isValid() const;
-
-    bool hasErrors() const;
-
-    int getErrorCount() const;
-
-    int getWarningCount() const;
-
-    double getProgress() const;
+public: // General
 
     std::uint64_t getDuration() const;
 
@@ -34,10 +24,19 @@ public:
 
 public: // Messages
 
-    QString getErrorMessage() const;
-
     WorkflowMessages getMessages() const;
+    WorkflowMessages getWarningMessages() const;
+    WorkflowMessages getErrorMessages() const;
+    WorkflowMessages getCriticalErrorMessages() const;
     void setMessages(const WorkflowMessages& workflowMessages);
+    WorkflowMessages getMessagesByLevels(const WorkflowMessageLevels& workflowMessageLevels) const;
+    int getMessageCountByLevels(const WorkflowMessageLevels& workflowMessageLevels) const;
+    bool hasWarnings() const;
+    bool hasErrors() const;
+    bool hasCriticalErrors() const;
+    int getWarningCount() const;
+    int getErrorCount() const;
+    int getCriticalErrorCount() const;
 
 public: // Metrics
 
@@ -50,7 +49,7 @@ public: // Metrics
 private:
     std::uint64_t               _duration = 0;
     bool                        _success = false;
-    WorkflowMessages            _workflowMessages;
+    WorkflowMessages            _messages;
     QVector<WorkflowMetric>     _metrics;
 };
 
