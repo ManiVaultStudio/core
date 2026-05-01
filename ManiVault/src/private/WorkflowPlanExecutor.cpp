@@ -170,30 +170,26 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
 	    const auto url = QString("app://workflow/results?workflowResultId=%1").arg(resultId.toString(QUuid::WithoutBraces));
 
     	QMetaObject::invokeMethod(&help(), [result, url, title = QString("%1 finished in %2").arg(workflowPlan.getName()).arg(getElapsedTimeHumanReadable(result->getDuration(), false))]() {
-            if (!result->hasWarnings() && !result->hasErrors()) {
-                help().addNotification(title, "Completed successfully");
+            QString message;
+
+    		if (!result->hasWarnings() && !result->hasErrors()) {
+                message = "Completed successfully";
             }
 
             if (result->hasWarnings() && !result->hasErrors()) {
-                const auto message = QString("Completed with <a href=\"%1\">%2 warnings</a>. Review the report.").arg(url).arg(result->getWarningCount());
-
-                help().addNotification(title, message);
+                message = QString("Completed with <a href=\"%1\">warnings</a>. Review the report.").arg(url);
             }
 
             if (!result->hasWarnings() && result->hasErrors()) {
-                const auto message = QString("Completed with <a href=\"%1\">%2 errors</a>. Review the report.").arg(url).arg(result->getErrorCount());
-
-                help().addNotification(title, message);
+                message = QString("Completed with <a href=\"%1\">errors</a>. Review the report.").arg(url);
             }
 
             if (result->hasWarnings() && result->hasErrors()) {
-                const auto message = QString("Completed with <a href=\"%1\">%2 warnings </a> and <a href=\"%1\">%3 errors </a>. Review the report.")
-            		.arg(url)
-            		.arg(result->getWarningCount())
-            		.arg(result->getErrorCount());
-
-                help().addNotification(title, message);
+                message = QString("Completed with <a href=\"%1\">warnings </a> and <a href=\"%1\">errors </a>. Review the report.").arg(url);
             }
+
+            if (!message.isEmpty())
+                help().addNotification(title, message);
 
     	}, Qt::QueuedConnection);
     }

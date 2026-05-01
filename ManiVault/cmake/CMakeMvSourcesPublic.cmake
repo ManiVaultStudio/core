@@ -1189,6 +1189,23 @@ set(PUBLIC_HUD_MODEL_FILES
     ${PUBLIC_HUD_MODEL_SOURCES}
 )
 
+set(PUBLIC_WORKFLOW_MESSAGES_MODEL_HEADERS
+    src/models/AbstractWorkflowMessagesModel.h
+    src/models/WorkflowMessagesListModel.h
+    src/models/WorkflowMessagesFilterModel.h
+)
+
+set(PUBLIC_WORKFLOW_MESSAGES_MODEL_SOURCES
+    src/models/AbstractWorkflowMessagesModel.cpp
+    src/models/WorkflowMessagesListModel.cpp
+    src/models/WorkflowMessagesFilterModel.cpp
+)
+
+set(PUBLIC_WORKFLOW_MESSAGES_MODEL_FILES
+    ${PUBLIC_WORKFLOW_MESSAGES_MODEL_HEADERS}
+    ${PUBLIC_WORKFLOW_MESSAGES_MODEL_SOURCES}
+)
+
 set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/GlobalSettingsGroupAction.h
     src/ParametersSettingsAction.h
@@ -1313,6 +1330,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_SCRIPTS_MODEL_HEADERS}
     ${PUBLIC_RECENT_FILES_MODEL_HEADERS}
     ${PUBLIC_HUD_MODEL_HEADERS}
+    ${PUBLIC_WORKFLOW_MESSAGES_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
     ${PUBLIC_NOTIFICATIONS_HEADERS}
@@ -1366,6 +1384,7 @@ set(PUBLIC_SOURCES
     ${PUBLIC_SCRIPTS_MODEL_SOURCES}
     ${PUBLIC_RECENT_FILES_MODEL_SOURCES}
     ${PUBLIC_HUD_MODEL_SOURCES}
+    ${PUBLIC_WORKFLOW_MESSAGES_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
     ${PUBLIC_TASK_SOURCES}
     ${PUBLIC_NOTIFICATIONS_SOURCES}
@@ -1429,6 +1448,7 @@ source_group(Models\\LearningCenter\\Tutorials FILES ${PUBLIC_LEARNING_CENTER_TU
 source_group(Models\\Projects FILES ${PUBLIC_PROJECTS_MODEL_FILES})
 source_group(Models\\ColorSchemes FILES ${PUBLIC_COLOR_SCHEMES_MODEL_FILES})
 source_group(Models\\Scripts FILES ${PUBLIC_SCRIPTS_MODEL_FILES})
+source_group(Models\\WorkflowMessages FILES ${PUBLIC_WORKFLOW_MESSAGES_MODEL_FILES})
 source_group(Models\\HardwareSpec FILES ${PUBLIC_HARDWARE_SPEC_MODEL_FILES})
 source_group(Models\\RecentFiles FILES ${PUBLIC_RECENT_FILES_MODEL_FILES})
 source_group(Models\\HUD FILES ${PUBLIC_HUD_MODEL_FILES})
