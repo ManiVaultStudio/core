@@ -384,32 +384,16 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 true,   // Show progress
                 true    // Add notification
         	});
-
-            /*
-        	if (auto currentProject = mv::projects().getCurrentProject()) {
-        		const auto duration             = workflowResult->getDuration();
-                const auto bytesLoadedMetric    = workflowResult->getMetric("project.data.bytes_loaded");
-                const auto bytesLoaded          = bytesLoadedMetric.has_value() ? bytesLoadedMetric.value()._value.toULongLong() : 0;
-
-                QString message, reportString;
-
-                if (workflowResult->hasCriticalErrors()) {
-
-                    //message = QString("Failed to open project due to a critical error: %1").arg(workflowResult.getCriticalErrorMessages()[0].);
-                    help().addNotification("Project opened", message, StyledIcon("folder-open"));
-                } else {
-                    help().addNotification("Project opened", message, StyledIcon("folder-open"));
-                }
-        		
-        		//const auto errorText    = getName() + result->_errorMessage;
-        	}
-            */
 	    }
         emit projectOpened(*_project);
     }
     catch (const std::exception& e) {
         setState(State::Idle);
         exceptionMessageBox("Unable to load ManiVault project", e);
+    }
+    catch (...) {
+        setState(State::Idle);
+        exceptionMessageBox("Unable to load ManiVault project");
     }
 }
 
@@ -756,8 +740,6 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 filePath = parameters._filePath;
             else
 	            return;
-
-	        //auto cleanup = qScopeGuard([] { /* code you want executed goes HERE; */ })
 
 	        auto workflowPlan = createProjectSaveWorkflowPlan(filePath);
 
