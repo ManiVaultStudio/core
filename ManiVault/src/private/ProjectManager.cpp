@@ -378,7 +378,12 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             const auto stateGuard = qScopeGuard([this]() { setState(State::Idle); });
 
         	auto projectOpenWorkflowPlan    = createProjectOpenWorkflowPlan(filePath);
-        	auto workflowResult             = projectOpenWorkflowPlan.execute(_workflowPlanExecutor, true, { parameters._parallel, parameters._maxParallelThreads });
+        	auto workflowResult             = projectOpenWorkflowPlan.execute(_workflowPlanExecutor, { 
+                parameters._parallel,
+        		parameters._maxParallelThreads,
+                true,   // Show progress
+                true    // Add notification
+        	});
 
             /*
         	if (auto currentProject = mv::projects().getCurrentProject()) {
@@ -758,7 +763,12 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             setTemporaryDirPath(TemporaryDirType::Save, workflowPlan.getWorkflowContextAs<ProjectSaveContext>()->_temporaryDirectory->path());
 
-	        auto workflowResult = workflowPlan.execute(_workflowPlanExecutor, true, { parameters._parallel, parameters._maxParallelThreads });
+	        auto workflowResult = workflowPlan.execute(_workflowPlanExecutor, {
+                parameters._parallel,
+	        	parameters._maxParallelThreads,
+                true,   // Show progress
+                true    // Add notification
+	        });
 
             if (auto currentProject = mv::projects().getCurrentProject()) {
                 const auto duration     = workflowResult->getDuration();

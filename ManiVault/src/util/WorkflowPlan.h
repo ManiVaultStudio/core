@@ -167,8 +167,8 @@ public:
 	void addParallelStage(QString name, Jobs jobs, double weight = 1.0);
     void addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight = 1.0);
 
-    SharedWorkflowResult execute(const SharedWorkflowPlanExecutor& workflowPlanExecutor, bool showProgress = false, WorkflowExecutionOptions executionOptions = {});
-    WorkflowResultFuture executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, bool showProgress = false, WorkflowExecutionOptions executionOptions = {});
+    SharedWorkflowResult execute(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions = {});
+    WorkflowResultFuture executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions = {});
     SharedWorkflowResult executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {});
     Stages getStages() const;
 

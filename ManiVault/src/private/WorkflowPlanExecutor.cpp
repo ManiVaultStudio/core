@@ -19,7 +19,7 @@
 using namespace mv;
 using namespace mv::util;
 
-SharedWorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, bool showProgress, WorkflowExecutionOptions executionOptions /*= {}*/)
+SharedWorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
 #ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
     qDebug() << "Executing workflow plan:" << workflowPlan.getName() << "with" << workflowPlan.getStages().size() << "stage(s)";
@@ -33,7 +33,7 @@ SharedWorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, b
     else {
         beginTimer();
 	    {
-		    auto future = executeAsyncImpl(workflowPlan, showProgress ? Task::GuiScope::Modal : Task::GuiScope::None, executionOptions);
+		    auto future = executeAsyncImpl(workflowPlan, executionOptions._reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, executionOptions);
 
         	if (QThread::currentThread() == qApp->thread()) {
         		QEventLoop loop;
@@ -56,7 +56,7 @@ SharedWorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, b
     return result;
 }
 
-WorkflowResultFuture WorkflowPlanExecutor::executeAsync(mv::util::WorkflowPlan& workflowPlan, bool showProgress, WorkflowExecutionOptions executionOptions /*= {}*/)
+WorkflowResultFuture WorkflowPlanExecutor::executeAsync(mv::util::WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
     if (WorkflowExecutionContext::current() != nullptr) {
         throw std::runtime_error("executeAsync() cannot be called from within an active workflow context");
@@ -64,7 +64,7 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsync(mv::util::WorkflowPlan& 
 
     WorkflowPlan workflowPlanCopy = workflowPlan;
 
-    return executeAsyncImpl(std::move(workflowPlanCopy), showProgress ? Task::GuiScope::Background : Task::GuiScope::None);
+    return executeAsyncImpl(std::move(workflowPlanCopy), executionOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None);
 }
 
 QThreadPool& WorkflowPlanExecutor::getThreadPool()

@@ -25,8 +25,8 @@ class WorkflowPlanExecutor final : public mv::util::AbstractWorkflowPlanExecutor
 {
 public:
 
-	mv::util::SharedWorkflowResult execute(mv::util::WorkflowPlan& workflowPlan, bool showProgress, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
-	mv::util::WorkflowResultFuture executeAsync(mv::util::WorkflowPlan& workflowPlan, bool showProgress, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
+	mv::util::SharedWorkflowResult execute(mv::util::WorkflowPlan& workflowPlan, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
+	mv::util::WorkflowResultFuture executeAsync(mv::util::WorkflowPlan& workflowPlan, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
 
     QThreadPool& getThreadPool();
     const QThreadPool& getThreadPool() const;

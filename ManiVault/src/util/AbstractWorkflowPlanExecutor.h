@@ -24,8 +24,8 @@ public:
 
 public:
 
-    [[nodiscard]] virtual SharedWorkflowResult execute(WorkflowPlan& workflowPlan, bool showProgress, WorkflowExecutionOptions executionOptions = {}) = 0;
-    [[nodiscard]] virtual WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, bool showProgress, WorkflowExecutionOptions executionOptions = {}) = 0;
+    [[nodiscard]] virtual SharedWorkflowResult execute(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions = {}) = 0;
+    [[nodiscard]] virtual WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions = {}) = 0;
 
 protected:
     virtual WorkflowResultFuture executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, WorkflowExecutionOptions executionOptions = {}) = 0;
