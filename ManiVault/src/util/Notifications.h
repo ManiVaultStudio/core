@@ -9,6 +9,7 @@
 #include "Notification.h"
 
 #include <QObject>
+#include <QUrl>
 
 namespace mv::util
 {
@@ -64,6 +65,14 @@ protected:
      * @return Whether the event was handled
      */
     bool eventFilter(QObject* watched, QEvent* event) override;
+
+signals:
+
+    /**
+     * Signal emitted when a notification link is activated with \p url
+     * @param url URL of the activated link
+     */
+    void notificationLinkActivated(const QUrl& url);
 
 private:
     QWidget*                _parentWidget;      /** Pointer to parent widget */

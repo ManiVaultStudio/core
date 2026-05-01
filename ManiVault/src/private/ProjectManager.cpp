@@ -389,7 +389,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
                 if (workflowResult.hasCriticalErrors()) {
 
-                    message = QString("Failed to open project due to a critical error: %1").arg(workflowResult.getCriticalErrorMessages()[0]);
+                    //message = QString("Failed to open project due to a critical error: %1").arg(workflowResult.getCriticalErrorMessages()[0].);
                     help().addNotification("Project opened", message, StyledIcon("folder-open"));
                 } else {
                     help().addNotification("Project opened", message, StyledIcon("folder-open"));
@@ -766,7 +766,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
                 const auto successText  = QString("%1 saved successfully in %2").arg(workflowPlan.getName(), getElapsedTimeHumanReadable(duration));
                 //const auto errorText    = getName() + result->_errorMessage;
 
-                qDebug() << workflowResult.getErrorMessage();
+                //qDebug() << workflowResult.getErrorMessage();
                 help().addNotification("Project saved", successText, StyledIcon("file"));
                 qDebug() << successText;
             }

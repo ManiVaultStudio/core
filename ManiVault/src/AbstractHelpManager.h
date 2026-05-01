@@ -33,6 +33,8 @@ class CORE_EXPORT AbstractHelpManager : public AbstractManager
 
 public:
 
+    using NotificationLinkHandler = std::function<void(const QUrl&)>;
+
     /**
      * Construct manager with pointer to \p parent object
      * @param parent Pointer to parent object
@@ -102,6 +104,19 @@ public:
      * @param delayMs Delay in milliseconds before the notification is shown
      */
     virtual void addNotification(const QString& title, const QString& description, const QIcon& icon = QIcon(), const util::Notification::DurationType& durationType = util::Notification::DurationType::Calculated, std::int32_t delayMs = 0) = 0;
+
+    /**
+     * Add notification link handler for \p route
+     * @param route Route to handle (e.g. "app://open/errors")
+     * @param handler Handler function to invoke when a link with the specified route is clicked
+     */
+    virtual void addNotificationLinkHandler(const QString& route, const NotificationLinkHandler& handler) = 0;
+
+    /**
+     * Handle notification link for \p url
+     * @param url URL of the clicked link
+     */
+    virtual void handleNotificationLink(const QUrl& url) = 0;
 
     /**
      * Initialize notifications manager with \p parentWidget widget

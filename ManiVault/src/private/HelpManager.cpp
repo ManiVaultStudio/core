@@ -235,6 +235,25 @@ void HelpManager::addNotification(const QString& title, const QString& descripti
     _notifications.showMessage(title, description, icon, durationType, delayMs);
 }
 
+void HelpManager::addNotificationLinkHandler(const QString& route, const NotificationLinkHandler& handler)
+{
+    _linkHandlers.insert(route, handler);
+}
+
+void HelpManager::handleNotificationLink(const QUrl& url)
+{
+    if (url.scheme() != "app")
+        return;
+
+    const QString route = url.host() + url.path();
+    // app://open/reporting -> "open/reporting"
+
+    const auto it = _linkHandlers.find(route);
+
+    if (it != _linkHandlers.end())
+        it.value()(url);
+}
+
 void HelpManager::addNotification(QPointer<Task> task)
 {
     _notifications.showTask(task);
