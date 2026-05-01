@@ -54,5 +54,6 @@ private:
 };
 
 using UniqueWorkflowResult = std::unique_ptr<WorkflowResult>;
+using SharedWorkflowResult = std::shared_ptr<WorkflowResult>;
 
 } // namespace mv::util

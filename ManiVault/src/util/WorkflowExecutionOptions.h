@@ -15,6 +15,8 @@ struct CORE_EXPORT WorkflowExecutionOptions
 {
     bool                    _parallel;
     MaxWorkerThreadCount    _maxWorkerThreadCount = 1;
+    bool                    _reportProgress = false;
+    bool                    _addNotification = false;
 };
 
 } // namespace mv::util

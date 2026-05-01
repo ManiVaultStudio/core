@@ -18,9 +18,9 @@ class CORE_EXPORT WorkflowResultFuture
 public:
     struct State
     {
-        QFuture<WorkflowResult> future;
+        QFuture<SharedWorkflowResult> future;
         QPointer<Task> task;
-        QPointer<QFutureWatcher<WorkflowResult>> watcher;
+        QPointer<QFutureWatcher<SharedWorkflowResult>> watcher;
     };
 
 public:
@@ -34,17 +34,16 @@ public:
 
     void waitForFinished() const;
 
-    WorkflowResult result() const;
+    SharedWorkflowResult result() const;
 
-    const QFuture<WorkflowResult>& getFuture() const;
+    const QFuture<SharedWorkflowResult>& getFuture() const;
 
     Task* getTask() const;
 
-    QFutureWatcher<WorkflowResult>* getWatcher() const;
+    QFutureWatcher<SharedWorkflowResult>* getWatcher() const;
+    static WorkflowResultFuture makeReady(const SharedWorkflowResult& result = {});
 
-    static WorkflowResultFuture makeReady(const WorkflowResult& result = {});
-
-    static WorkflowResultFuture fromFuture(QFuture<WorkflowResult> future);
+    static WorkflowResultFuture fromFuture(QFuture<SharedWorkflowResult> future);
 
 private:
     std::shared_ptr<State> _state;

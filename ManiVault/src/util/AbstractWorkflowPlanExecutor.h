@@ -24,28 +24,24 @@ public:
 
 public:
 
-    [[nodiscard]] virtual WorkflowResult execute(WorkflowPlan& workflowPlan, bool showProgress, WorkflowExecutionOptions executionOptions = {}) = 0;
+    [[nodiscard]] virtual SharedWorkflowResult execute(WorkflowPlan& workflowPlan, bool showProgress, WorkflowExecutionOptions executionOptions = {}) = 0;
     [[nodiscard]] virtual WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, bool showProgress, WorkflowExecutionOptions executionOptions = {}) = 0;
 
 protected:
     virtual WorkflowResultFuture executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, WorkflowExecutionOptions executionOptions = {}) = 0;
-    virtual WorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {}) = 0;
+    virtual SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {}) = 0;
 
-    QElapsedTimer getElapsedTimer() const {
-        return _elapsedTimer;
-    }
+protected: // Timing
 
-    virtual void beginTimer() {
-        _elapsedTimer.start();
-    }
+    QElapsedTimer getElapsedTimer() const;
 
-    virtual void endTimer(WorkflowResult& result) {
-        result.setDuration(static_cast<quint64>(_elapsedTimer.elapsed()));
-    }
+    virtual void beginTimer();
+
+    virtual void endTimer(SharedWorkflowResult result);
 
 private:
-    virtual WorkflowResult executeRoot(const WorkflowPlan& workflowPlan, Task* task, WorkflowExecutionOptions executionOptions = {}) = 0;
-    virtual WorkflowResult executeChild(const WorkflowPlan& workflowPlan, WorkflowExecutionContext& parentContext) = 0;
+    virtual SharedWorkflowResult executeRoot(const WorkflowPlan& workflowPlan, Task* task, WorkflowExecutionOptions executionOptions = {}) = 0;
+    virtual SharedWorkflowResult executeChild(const WorkflowPlan& workflowPlan, WorkflowExecutionContext& parentContext) = 0;
     virtual void executeImpl(const WorkflowPlan& workflowPlan) = 0;
     virtual void executeStage(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) = 0;
 

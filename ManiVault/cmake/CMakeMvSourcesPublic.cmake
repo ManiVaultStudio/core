@@ -618,6 +618,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/WorkflowExecutionOptions.h
     src/util/WorkflowMetric.h
     src/util/WorkflowExecutionMetrics.h
+    src/util/WorkflowResultRegistry.h
 )
 
 if(APPLE)
@@ -707,6 +708,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/WorkflowExecutionOptions.cpp
     src/util/WorkflowMetric.cpp
     src/util/WorkflowExecutionMetrics.cpp
+    src/util/WorkflowResultRegistry.cpp
 )
 
 if(APPLE)

@@ -28,7 +28,7 @@ void WorkflowResultFuture::waitForFinished() const
 		_state->future.waitForFinished();
 }
 
-WorkflowResult WorkflowResultFuture::result() const
+SharedWorkflowResult WorkflowResultFuture::result() const
 {
 	if (!_state)
 		return {};
@@ -36,7 +36,7 @@ WorkflowResult WorkflowResultFuture::result() const
 	return _state->future.result();
 }
 
-const QFuture<WorkflowResult>& WorkflowResultFuture::getFuture() const
+const QFuture<SharedWorkflowResult>& WorkflowResultFuture::getFuture() const
 {
 	Q_ASSERT(_state);
 	return _state->future;
@@ -47,16 +47,17 @@ Task* WorkflowResultFuture::getTask() const
 	return _state ? _state->task.data() : nullptr;
 }
 
-QFutureWatcher<WorkflowResult>* WorkflowResultFuture::getWatcher() const
+QFutureWatcher<SharedWorkflowResult>* WorkflowResultFuture::getWatcher() const
 {
 	return _state ? _state->watcher.data() : nullptr;
 }
 
-WorkflowResultFuture WorkflowResultFuture::makeReady(const WorkflowResult& result)
+WorkflowResultFuture WorkflowResultFuture::makeReady(const SharedWorkflowResult& result)
 {
 	auto state = std::make_shared<State>();
 
-	QPromise<WorkflowResult> promise;
+	QPromise<SharedWorkflowResult> promise;
+
 	state->future = promise.future();
 	promise.start();
 	promise.addResult(result);
@@ -65,7 +66,7 @@ WorkflowResultFuture WorkflowResultFuture::makeReady(const WorkflowResult& resul
 	return WorkflowResultFuture(state);
 }
 
-WorkflowResultFuture WorkflowResultFuture::fromFuture(QFuture<WorkflowResult> future)
+WorkflowResultFuture WorkflowResultFuture::fromFuture(QFuture<SharedWorkflowResult> future)
 {
 	auto state    = std::make_shared<State>();
 	state->future = std::move(future);

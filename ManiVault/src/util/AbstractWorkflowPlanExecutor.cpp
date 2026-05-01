@@ -6,6 +6,24 @@
 
 namespace mv::util
 {
-	
+
+QElapsedTimer AbstractWorkflowPlanExecutor::getElapsedTimer() const
+{
+	return _elapsedTimer;
+}
+
+void AbstractWorkflowPlanExecutor::beginTimer()
+{
+	_elapsedTimer.start();
+}
+
+void AbstractWorkflowPlanExecutor::endTimer(SharedWorkflowResult result)
+{
+    Q_ASSERT(result);
+
+    if (result)
+		result->setDuration(static_cast<std::uint64_t>(_elapsedTimer.elapsed()));
+}
+
 }
 

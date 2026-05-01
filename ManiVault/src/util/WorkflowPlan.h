@@ -163,16 +163,16 @@ public:
 
     QString getName() const;
 
-    void    addSequentialStage(QString name, Jobs jobs, double weight = 1.0);
-	void    addParallelStage(QString name, Jobs jobs, double weight = 1.0);
-    void    addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight = 1.0);
+    void addSequentialStage(QString name, Jobs jobs, double weight = 1.0);
+	void addParallelStage(QString name, Jobs jobs, double weight = 1.0);
+    void addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight = 1.0);
 
-    WorkflowResult execute(const SharedWorkflowPlanExecutor& workflowPlanExecutor, bool showProgress = false, WorkflowExecutionOptions executionOptions = {});
+    SharedWorkflowResult execute(const SharedWorkflowPlanExecutor& workflowPlanExecutor, bool showProgress = false, WorkflowExecutionOptions executionOptions = {});
     WorkflowResultFuture executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, bool showProgress = false, WorkflowExecutionOptions executionOptions = {});
-    WorkflowResult executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {});
-    Stages                getStages() const;
+    SharedWorkflowResult executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {});
+    Stages getStages() const;
 
-    SharedState           getSharedState() const;
+    SharedState getSharedState() const;
 
     SharedWorkflowContext getWorkflowContext() const;
 

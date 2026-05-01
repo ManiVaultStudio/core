@@ -25,19 +25,19 @@ class WorkflowPlanExecutor final : public mv::util::AbstractWorkflowPlanExecutor
 {
 public:
 
-	mv::util::WorkflowResult       execute(mv::util::WorkflowPlan& workflowPlan, bool showProgress, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
+	mv::util::SharedWorkflowResult execute(mv::util::WorkflowPlan& workflowPlan, bool showProgress, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
 	mv::util::WorkflowResultFuture executeAsync(mv::util::WorkflowPlan& workflowPlan, bool showProgress, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
 
     QThreadPool& getThreadPool();
     const QThreadPool& getThreadPool() const;
 
 protected:
-    mv::util::WorkflowResult       executeOnCurrentThread(mv::util::WorkflowPlan& workflowPlan, mv::Task* task = nullptr, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
+    mv::util::SharedWorkflowResult executeOnCurrentThread(mv::util::WorkflowPlan& workflowPlan, mv::Task* task = nullptr, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
     mv::util::WorkflowResultFuture executeAsyncImpl(mv::util::WorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
 
 private:
-    mv::util::WorkflowResult executeRoot(const mv::util::WorkflowPlan& workflowPlan, mv::Task* task, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
-    mv::util::WorkflowResult executeChild(const mv::util::WorkflowPlan& workflowPlan, mv::util::WorkflowExecutionContext& parentContext) override;
+    mv::util::SharedWorkflowResult executeRoot(const mv::util::WorkflowPlan& workflowPlan, mv::Task* task, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
+    mv::util::SharedWorkflowResult executeChild(const mv::util::WorkflowPlan& workflowPlan, mv::util::WorkflowExecutionContext& parentContext) override;
     void                     executeImpl(const mv::util::WorkflowPlan& workflowPlan) override;
     void                     executeStage(const mv::util::WorkflowPlan::Stage& stage, mv::util::WorkflowExecutionContext& stageContext) override;
 

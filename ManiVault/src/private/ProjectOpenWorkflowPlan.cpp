@@ -19,7 +19,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 {
     auto context = std::make_shared<ProjectOpenContext>(filePath);
 
-    WorkflowPlan plan("Open project workflow", context);
+    WorkflowPlan plan(QString("Open project %1").arg(filePath), context);
 
     plan.addSequentialStage("Setup", [&plan]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE

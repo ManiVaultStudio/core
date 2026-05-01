@@ -380,14 +380,15 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         	auto projectOpenWorkflowPlan    = createProjectOpenWorkflowPlan(filePath);
         	auto workflowResult             = projectOpenWorkflowPlan.execute(_workflowPlanExecutor, true, { parameters._parallel, parameters._maxParallelThreads });
 
+            /*
         	if (auto currentProject = mv::projects().getCurrentProject()) {
-        		const auto duration             = workflowResult.getDuration();
-                const auto bytesLoadedMetric    = workflowResult.getMetric("project.data.bytes_loaded");
+        		const auto duration             = workflowResult->getDuration();
+                const auto bytesLoadedMetric    = workflowResult->getMetric("project.data.bytes_loaded");
                 const auto bytesLoaded          = bytesLoadedMetric.has_value() ? bytesLoadedMetric.value()._value.toULongLong() : 0;
 
                 QString message, reportString;
 
-                if (workflowResult.hasCriticalErrors()) {
+                if (workflowResult->hasCriticalErrors()) {
 
                     //message = QString("Failed to open project due to a critical error: %1").arg(workflowResult.getCriticalErrorMessages()[0].);
                     help().addNotification("Project opened", message, StyledIcon("folder-open"));
@@ -396,10 +397,8 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 }
         		
         		//const auto errorText    = getName() + result->_errorMessage;
-                
-        		
-                qDebug() << message;
         	}
+            */
 	    }
         emit projectOpened(*_project);
     }
@@ -762,7 +761,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 	        auto workflowResult = workflowPlan.execute(_workflowPlanExecutor, true, { parameters._parallel, parameters._maxParallelThreads });
 
             if (auto currentProject = mv::projects().getCurrentProject()) {
-                const auto duration     = workflowResult.getDuration();
+                const auto duration     = workflowResult->getDuration();
                 const auto successText  = QString("%1 saved successfully in %2").arg(workflowPlan.getName(), getElapsedTimeHumanReadable(duration));
                 //const auto errorText    = getName() + result->_errorMessage;
 
