@@ -164,8 +164,32 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
     if (executionOptions._addNotification) {
 	    const auto url = QString("app://open/error-reporting?workflowResultId=%1").arg(resultId.toString(QUuid::WithoutBraces));
 
-    	QMetaObject::invokeMethod(&help(), [title = QString("%1 finished in %2").arg(workflowPlan.getName(), getElapsedTimeHumanReadable(result->getDuration(), false)), message = QString("Some errors occurred. <a href=\"%1\">Open error report</a>").arg(url)]() {
-			help().addNotification(title, message);
+    	QMetaObject::invokeMethod(&help(), [result, url, title = QString("%1 finished in %2").arg(workflowPlan.getName()).arg(getElapsedTimeHumanReadable(result->getDuration(), false)).arg(url)]() {
+            if (!result->hasWarnings() && !result->hasErrors()) {
+                help().addNotification(title, "Completed successfully");
+            }
+
+            if (result->hasWarnings() && !result->hasErrors()) {
+                const auto message = QString("Completed with <a href=\"%1\">%2 warnings</a>. Review the report.").arg(url).arg(result->getWarningCount());
+
+                help().addNotification(title, message);
+            }
+
+            if (!result->hasWarnings() && result->hasErrors()) {
+                const auto message = QString("Completed with <a href=\"%1\">%2 errors</a>. Review the report.").arg(url).arg(result->getErrorCount());
+
+                help().addNotification(title, message);
+            }
+
+            if (result->hasWarnings() && result->hasErrors()) {
+                const auto message = QString("Completed with <a href=\"%1\">%2 warnings </a> and <a href=\"%1\">%3 errors </a>. Review the report.")
+            		.arg(url)
+            		.arg(result->getWarningCount())
+            		.arg(result->getErrorCount());
+
+                help().addNotification(title, message);
+            }
+
     	}, Qt::QueuedConnection);
     }
 
