@@ -7,6 +7,7 @@
 #include <Task.h>
 
 #include <QtConcurrent>
+#include <QElapsedTimer>
 
 #include "util/WorkflowResultRegistry.h"
 
@@ -31,26 +32,22 @@ SharedWorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, W
         result = executeChild(workflowPlan, *currentContext);
     }
     else {
-        beginTimer();
-	    {
-		    auto future = executeAsyncImpl(workflowPlan, executionOptions._reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, executionOptions);
+	    auto future = executeAsyncImpl(workflowPlan, executionOptions._reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, executionOptions);
 
-        	if (QThread::currentThread() == qApp->thread()) {
-        		QEventLoop loop;
+        if (QThread::currentThread() == qApp->thread()) {
+        	QEventLoop loop;
 
-        		auto* watcher = future.getWatcher();
+        	auto* watcher = future.getWatcher();
 
-        		connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, &loop, &QEventLoop::quit);
+        	connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, &loop, &QEventLoop::quit);
 
-        		loop.exec();
-        	}
-        	else {
-        		future.waitForFinished();
-        	}
+        	loop.exec();
+        }
+        else {
+        	future.waitForFinished();
+        }
 
-        	result = future.result();
-	    }
-        endTimer(result);
+        result = future.result();
     }
 
     return result;
@@ -130,6 +127,10 @@ SharedWorkflowResult WorkflowPlanExecutor::executeOnCurrentThread(WorkflowPlan& 
 
 SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workflowPlan, Task* task, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
+    QElapsedTimer elapsedTimer;
+
+    elapsedTimer.start();
+
     auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task, executionOptions);
 
 	WorkflowExecutionScope rootScope(rootContext);
@@ -155,6 +156,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
     if (auto state = rootContext.getState()) {
 	    result->setMetrics(state->metrics().snapshot());
     	result->setMessages(WorkflowExecutionContext::current()->getState()->collectMessages());
+        result->setDuration(static_cast<std::uint64_t>(elapsedTimer.elapsed()));
     }
 
     const auto resultId = WorkflowResultRegistry::instance().add(result);
@@ -162,7 +164,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
     if (executionOptions._addNotification) {
 	    const auto url = QString("app://open/error-reporting?workflowResultId=%1").arg(resultId.toString(QUuid::WithoutBraces));
 
-    	QMetaObject::invokeMethod(&help(), [title = QString("%1 finished with errors").arg(workflowPlan.getName()), message = QString("Some errors occurred. <a href=\"%1\">Open error report</a>").arg(url)]() {
+    	QMetaObject::invokeMethod(&help(), [title = QString("%1 finished in %2").arg(workflowPlan.getName(), getElapsedTimeHumanReadable(result->getDuration(), false)), message = QString("Some errors occurred. <a href=\"%1\">Open error report</a>").arg(url)]() {
 			help().addNotification(title, message);
     	}, Qt::QueuedConnection);
     }
@@ -417,16 +419,3 @@ void WorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, WorkflowExec
     }
 }
 
-//void WorkflowPlanExecutor::setMaxWorkerThreadCount(int count)
-//{
-//#ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
-//    qDebug() << "Setting max worker thread count to:" << count << "in thread" << QThread::currentThread();
-//#endif
-//
-//    _threadPool.setMaxThreadCount(std::max(1, count));
-//}
-//
-//int WorkflowPlanExecutor::getMaxWorkerThreadCount() const
-//{
-//    return _threadPool.maxThreadCount();
-//}

@@ -11,7 +11,6 @@
 #include "Task.h"
 
 #include <QObject>
-#include <QElapsedTimer>
 
 namespace mv::util
 {
@@ -31,14 +30,6 @@ protected:
     virtual WorkflowResultFuture executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, WorkflowExecutionOptions executionOptions = {}) = 0;
     virtual SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {}) = 0;
 
-protected: // Timing
-
-    QElapsedTimer getElapsedTimer() const;
-
-    virtual void beginTimer();
-
-    virtual void endTimer(SharedWorkflowResult result);
-
 private:
     virtual SharedWorkflowResult executeRoot(const WorkflowPlan& workflowPlan, Task* task, WorkflowExecutionOptions executionOptions = {}) = 0;
     virtual SharedWorkflowResult executeChild(const WorkflowPlan& workflowPlan, WorkflowExecutionContext& parentContext) = 0;
@@ -55,7 +46,7 @@ private: // Execute individual jobs
     virtual void executeJob(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext) = 0;
 
 private:
-    QElapsedTimer   _elapsedTimer;
+    
 
     friend class WorkflowPlan;
 };
