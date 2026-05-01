@@ -16,7 +16,13 @@ namespace mv::util
 
 class CORE_EXPORT WorkflowResult
 {
+public:
+
+    WorkflowResult(const QString& workflowName);
+
 public: // General
+
+    QString getWorkflowName() const;
 
     std::uint64_t getDuration() const;
 
@@ -47,6 +53,7 @@ public: // Metrics
     std::optional<WorkflowMetric> getMetric(const QString& name) const;
 
 private:
+    QString                     _workflowName;
     std::uint64_t               _duration = 0;
     bool                        _success = false;
     WorkflowMessages            _messages;

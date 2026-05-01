@@ -25,6 +25,8 @@ class WorkflowPlanExecutor final : public mv::util::AbstractWorkflowPlanExecutor
 {
 public:
 
+    WorkflowPlanExecutor(QObject* parent = nullptr);
+
 	mv::util::SharedWorkflowResult execute(mv::util::WorkflowPlan& workflowPlan, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
 	mv::util::WorkflowResultFuture executeAsync(mv::util::WorkflowPlan& workflowPlan, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
 

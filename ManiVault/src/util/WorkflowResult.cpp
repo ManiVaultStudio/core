@@ -9,6 +9,17 @@
 
 namespace mv::util
 {
+
+WorkflowResult::WorkflowResult(const QString& workflowName) :
+    _workflowName(workflowName)
+{
+}
+
+QString WorkflowResult::getWorkflowName() const
+{
+    return _workflowName;
+}
+
 std::uint64_t WorkflowResult::getDuration() const
 {
     return _duration;

@@ -84,6 +84,8 @@ int main(int argc, char *argv[])
 
     core.createManagers();
 
+    AbstractWorkflowPlanExecutor::installNotificationLinkHandler();
+
     auto& splashScreenAction = application.getConfigurationAction().getBrandingConfigurationAction().getSplashScreenAction();
 
     splashScreenAction.getOpenAction().trigger();

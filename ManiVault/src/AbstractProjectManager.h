@@ -34,10 +34,6 @@ namespace mv {
 namespace util
 {
     class BlobCodec;
-    class Workflow;
-
-    using UniqueWorkflow = std::unique_ptr<Workflow>;
-    class AbstractSerializationPlanExecutor;
 }
 
 /**

@@ -6,9 +6,21 @@
 
 namespace mv::util
 {
-WorkflowResultDialog::WorkflowResultDialog(const QUuid& workflowResultId, QWidget* parent) :
+
+WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowResult, QWidget* parent) :
 	QDialog(parent)
 {
+    Q_ASSERT(workflowResult);
+
+    if (!workflowResult) {
+        qDebug() << "WorkflowResultDialog: Invalid workflow result provided";
+        return;
+    }
+
+    setWindowTitle("Workflow result - " + workflowResult->getWorkflowName());
+    setWindowIcon(StyledIcon("scroll"));
+
+
 }
 
 }

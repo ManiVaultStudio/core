@@ -19,12 +19,12 @@ class CORE_EXPORT AbstractWorkflowPlanExecutor : public QObject
 {
 public:
 
-    using ProgressCallback = std::function<void(double)>;
-
-public:
+    AbstractWorkflowPlanExecutor(QObject* parent = nullptr);
 
     [[nodiscard]] virtual SharedWorkflowResult execute(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions = {}) = 0;
     [[nodiscard]] virtual WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions = {}) = 0;
+
+    static void installNotificationLinkHandler();
 
 protected:
     virtual WorkflowResultFuture executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, WorkflowExecutionOptions executionOptions = {}) = 0;

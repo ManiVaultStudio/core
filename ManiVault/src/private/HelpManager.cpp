@@ -188,6 +188,8 @@ void HelpManager::initialize()
                 });
             }
         });
+
+        connect(&_notifications, &Notifications::notificationLinkActivated, this, &HelpManager::handleNotificationLink);
     }
     endInitialization();
 }
@@ -242,11 +244,14 @@ void HelpManager::addNotificationLinkHandler(const QString& route, const Notific
 
 void HelpManager::handleNotificationLink(const QUrl& url)
 {
+    qDebug() << "Handling notification link with URL:" << url;
     if (url.scheme() != "app")
         return;
 
     const QString route = url.host() + url.path();
     // app://open/reporting -> "open/reporting"
+
+    qDebug() << "Extracted route from URL:" << route << _linkHandlers.keys();
 
     const auto it = _linkHandlers.find(route);
 

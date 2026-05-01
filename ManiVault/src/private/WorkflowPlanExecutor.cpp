@@ -20,6 +20,11 @@
 using namespace mv;
 using namespace mv::util;
 
+WorkflowPlanExecutor::WorkflowPlanExecutor(QObject* parent) :
+	AbstractWorkflowPlanExecutor(parent)
+{
+}
+
 SharedWorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
 #ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
@@ -151,7 +156,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
             workflowPlan.getName());
     }
 
-    auto result = std::make_shared<WorkflowResult>();
+    auto result = std::make_shared<WorkflowResult>(workflowPlan.getName());
 
     if (auto state = rootContext.getState()) {
 	    result->setMetrics(state->metrics().snapshot());
@@ -162,9 +167,9 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
     const auto resultId = WorkflowResultRegistry::instance().add(result);
 
     if (executionOptions._addNotification) {
-	    const auto url = QString("app://open/error-reporting?workflowResultId=%1").arg(resultId.toString(QUuid::WithoutBraces));
+	    const auto url = QString("app://workflow/results?workflowResultId=%1").arg(resultId.toString(QUuid::WithoutBraces));
 
-    	QMetaObject::invokeMethod(&help(), [result, url, title = QString("%1 finished in %2").arg(workflowPlan.getName()).arg(getElapsedTimeHumanReadable(result->getDuration(), false)).arg(url)]() {
+    	QMetaObject::invokeMethod(&help(), [result, url, title = QString("%1 finished in %2").arg(workflowPlan.getName()).arg(getElapsedTimeHumanReadable(result->getDuration(), false))]() {
             if (!result->hasWarnings() && !result->hasErrors()) {
                 help().addNotification(title, "Completed successfully");
             }

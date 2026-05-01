@@ -601,7 +601,6 @@ set(PUBLIC_UTIL_HEADERS
     src/util/WorkflowExecutionScope.h
     src/util/WorkflowContextBase.h
     src/util/WorkflowResult.h
-    src/util/Workflow.h
     src/util/WorkflowMessage.h
     src/util/WorkflowReportNode.h
     src/util/WorkflowProgressNode.h
@@ -692,7 +691,6 @@ set(PUBLIC_UTIL_SOURCES
     src/util/WorkflowResult.cpp
     src/util/WorkflowExecutionContext.cpp
     src/util/WorkflowExecutionScope.cpp
-    src/util/Workflow.cpp
     src/util/WorkflowMessage.cpp
     src/util/WorkflowReportNode.cpp
     src/util/WorkflowProgressNode.cpp

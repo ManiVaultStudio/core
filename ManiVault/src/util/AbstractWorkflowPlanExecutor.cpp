@@ -4,8 +4,40 @@
 
 #include "AbstractWorkflowPlanExecutor.h"
 
+#include <QUrlQuery>
+
 namespace mv::util
 {
+AbstractWorkflowPlanExecutor::AbstractWorkflowPlanExecutor(QObject* parent):
+	QObject(parent)
+{
+}
+
+void AbstractWorkflowPlanExecutor::installNotificationLinkHandler()
+{
+    mv::help().addNotificationLinkHandler("workflow/results", [](const QUrl& url) {
+
+    	QUrlQuery query(url);
+
+    	const auto workflowResultId = query.queryItemValue("workflowResultId", QUrl::FullyDecoded);
+
+        if (workflowResultId.isEmpty()) {
+            qDebug() << "No workflowResultId query parameter found";
+            return;
+        }
+
+        const auto result = WorkflowResultRegistry::instance().get(QUuid(workflowResultId));
+
+        if (!result) {
+            qDebug() << "Workflow result not found for ID:" << workflowResultId;
+            return;
+        }
+
+        WorkflowResultDialog dialog(result);
+
+        dialog.exec();
+    });
+}
 
 }
 

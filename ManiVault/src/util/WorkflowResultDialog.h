@@ -5,6 +5,7 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+#include "WorkflowResult.h"
 
 #include <QDialog>
 #include <QHash>
@@ -19,7 +20,7 @@ class CORE_EXPORT WorkflowResultDialog : public QDialog
 
 public:
 
-    WorkflowResultDialog(const QUuid& workflowResultId, QWidget* parent = nullptr);
+    WorkflowResultDialog(const SharedWorkflowResult& workflowResult, QWidget* parent = nullptr);
 
 private:
 };
