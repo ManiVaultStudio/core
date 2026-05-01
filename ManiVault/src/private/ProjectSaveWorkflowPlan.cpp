@@ -19,7 +19,7 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 {
     auto context = std::make_shared<ProjectSaveContext>(filePath);
 
-    WorkflowPlan plan("Save project workflow", context);
+    WorkflowPlan plan(QStringLiteral("Save project"), context);
 
     plan.addSequentialStage("Setup", [&plan]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
