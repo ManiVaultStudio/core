@@ -211,8 +211,6 @@ public:
      */
     AbstractWorkflowMessagesModel(QObject* parent = nullptr);
 
-    QVariant data(const QModelIndex& index, int role) const override;
-
     /**
      * Get header data for \p section, \p orientation and display \p role
      * @param section Section

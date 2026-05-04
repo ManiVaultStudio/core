@@ -32,27 +32,28 @@ QVariant AbstractWorkflowMessagesModel::LevelItem::data(int role /*= Qt::UserRol
             return static_cast<std::int32_t>(getWorkflowMessage()._level);
 
         case Qt::DisplayRole:
-            return getWorkflowMessageLevelName(static_cast<WorkflowMessageLevel>(data(Qt::EditRole).toInt()));
+            return {};//getWorkflowMessageLevelName(static_cast<WorkflowMessageLevel>(data(Qt::EditRole).toInt()));
 
         case Qt::ToolTipRole:
             return QString("%1").arg(data(Qt::DisplayRole).toString());
 
-        default:
-            break;
-    }
+        case Qt::DecorationRole:
+        {
+	        switch (getWorkflowMessage()._level)
+	        {
+	        case WorkflowMessageLevel::Info:
+		        return StyledIcon("circle-info").withColor(QColor(220, 235, 255));
 
-    return Item::data(role);
-}
+	        case WorkflowMessageLevel::Warning:
+		        return StyledIcon("circle-exclamation").withColor(QColor(196, 162, 26));
 
-QVariant AbstractWorkflowMessagesModel::SourceItem::data(int role /*= Qt::UserRole + 1*/) const
-{
-    switch (role) {
-        case Qt::EditRole:
-        case Qt::DisplayRole:
-            return getWorkflowMessage()._source;
+	        case WorkflowMessageLevel::Error:
+		        return StyledIcon("triangle-exclamation").withColor(QColor(196, 98, 30));
 
-        case Qt::ToolTipRole:
-            return QString("%1").arg(data(Qt::DisplayRole).toString());
+	        case WorkflowMessageLevel::Critical:
+		        return StyledIcon("triangle-exclamation").withColor(QColor(196, 32, 32));
+	        }
+        }
 
         default:
             break;
@@ -97,35 +98,24 @@ QVariant AbstractWorkflowMessagesModel::TimeStampItem::data(int role /*= Qt::Use
     return Item::data(role);
 }
 
+QVariant AbstractWorkflowMessagesModel::SourceItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	    case Qt::DisplayRole:
+	        return getWorkflowMessage()._source;
+
+	    case Qt::ToolTipRole:
+	        return QString("%1").arg(data(Qt::DisplayRole).toString());
+    }
+
+    return Item::data(role);
+}
+
 AbstractWorkflowMessagesModel::AbstractWorkflowMessagesModel(QObject* parent) :
     StandardItemModel(parent)
 {
     setColumnCount(static_cast<int>(Column::Count));
-}
-
-QVariant AbstractWorkflowMessagesModel::data(const QModelIndex& index, int role) const
-{
-    if (const auto item = dynamic_cast<const Item*>(itemFromIndex(index))) {
-        if (role == Qt::BackgroundRole)
-        {
-            switch (item->getWorkflowMessage()._level)
-            {
-	            case WorkflowMessageLevel::Info:
-	                return QColor(220, 235, 255);   // light blue
-
-	            case WorkflowMessageLevel::Warning:
-	                return QColor(255, 245, 200);   // light yellow
-
-	            case WorkflowMessageLevel::Error:
-	                return QColor(255, 220, 220);   // light red
-
-	            case WorkflowMessageLevel::Critical:
-	                return QColor(255, 180, 180);   // stronger red
-            }
-        }
-    }
-
-	return StandardItemModel::data(index, role);
 }
 
 QVariant AbstractWorkflowMessagesModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
@@ -143,6 +133,9 @@ QVariant AbstractWorkflowMessagesModel::headerData(int section, Qt::Orientation 
 
         case Column::DateTime:
             return TimeStampItem::headerData(orientation, role);
+
+        case Column::Count:
+            break;
 
         default:
             break;

@@ -41,12 +41,13 @@ bool WorkflowMessagesFilterModel::filterAcceptsRow(int row, const QModelIndex& p
             return false;
     }
 
-    const auto level = index.siblingAtColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level)).data(Qt::DisplayRole).toString();
+    const auto levelIndex   = index.siblingAtColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level)).data(Qt::EditRole).toInt();
+    const auto levelName    = getWorkflowMessageLevelName(static_cast<WorkflowMessageLevel>(levelIndex));
 
     if (!_filterLevelAction.hasSelectedOptions())
         return false;
 
-    if (!_filterLevelAction.isOptionSelected(level))
+    if (!_filterLevelAction.isOptionSelected(levelName))
         return false;
 
     return true;
