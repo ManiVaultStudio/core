@@ -4,15 +4,54 @@
 
 #include "WorkflowMessagesFilterModel.h"
 
+#include "util/WorkflowMessage.h"
+
 #ifdef _DEBUG
     #define WORKFLOW_MESSAGES_FILTER_MODEL_VERBOSE
 #endif
 
+using namespace mv::util;
+
 namespace mv {
 
 WorkflowMessagesFilterModel::WorkflowMessagesFilterModel(QObject* parent /*= nullptr*/) :
-    SortFilterProxyModel(parent)
+    SortFilterProxyModel(parent),
+    _filterLevelAction(this, "Filter level", workflowMessageLevelNames.values(), {
+		getWorkflowMessageLevelName(WorkflowMessageLevel::Warning),
+        getWorkflowMessageLevelName(WorkflowMessageLevel::Error),
+        getWorkflowMessageLevelName(WorkflowMessageLevel::Critical)
+    })
 {
+    connect(&_filterLevelAction, &gui::OptionsAction::selectedOptionsChanged, this, &WorkflowMessagesFilterModel::invalidateFilter);
 }
 
+bool WorkflowMessagesFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
+{
+    const auto index = sourceModel()->index(row, 0, parent);
+
+    if (!index.isValid())
+        return true;
+
+    if (filterRegularExpression().isValid()) {
+        const auto key = sourceModel()->data(index.siblingAtColumn(filterKeyColumn()), filterRole()).toString();
+
+        if (!key.contains(filterRegularExpression()))
+            return false;
+    }
+
+    const auto level = index.siblingAtColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level)).data(Qt::DisplayRole).toString();
+
+    if (!_filterLevelAction.hasSelectedOptions())
+        return false;
+
+    if (!_filterLevelAction.isOptionSelected(level))
+        return false;
+
+    return true;
+}
+
+bool WorkflowMessagesFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
+{
+	return SortFilterProxyModel::lessThan(lhs, rhs);
+}
 }

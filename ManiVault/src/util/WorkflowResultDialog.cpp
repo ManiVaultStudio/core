@@ -24,6 +24,9 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     _messagesListModel.setWorkflowResult(workflowResult);
     _messagesFilterModel.setSourceModel(&_messagesListModel);
 
+    _hierarchyWidget.getToolbarAction().addAction(&_messagesFilterModel.getFilterLevelAction());
+    _hierarchyWidget.getFilterGroupAction().addAction(&_messagesFilterModel.getFilterLevelAction());
+
     auto layout = new QVBoxLayout(this);
 
     layout->addWidget(&_hierarchyWidget);
