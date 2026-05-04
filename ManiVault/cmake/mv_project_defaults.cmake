@@ -35,7 +35,7 @@ function(mv_project_defaults)
     # MSVC settings
     # -----------------------------------------------------------------------------
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE STRING "" FORCE)
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL" CACHE STRING "" FORCE)
 
         # /DWIN32 and /EHsc are already the defaults, see https://gitlab.kitware.com/cmake/cmake/-/blob/master/Modules/Platform/Windows-MSVC.cmake
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /MP /Zc:__cplusplus /Zc:preprocessor" CACHE STRING "" FORCE)
