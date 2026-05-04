@@ -71,7 +71,7 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 
             prettyPrintVariantMap(project->getProjectMetaAction().getApplicationVersionAction().toVariantMap());
         }
-    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);
 
     plan.addSequentialStage("Save workspace JSON", [&plan]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE

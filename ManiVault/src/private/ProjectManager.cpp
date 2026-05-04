@@ -1186,8 +1186,7 @@ AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSavePara
 
     ProjectSaveParameters parameters {
         getSetting("Parallel", true).toBool(),
-        getSetting("MaxNumberOfThreads", QThread::idealThreadCount() - 1).toUInt(),
-        filePath
+        getSetting("MaxNumberOfThreads", QThread::idealThreadCount() - 1).toUInt()
     };
 
     FileSaveDialog fileDialog;

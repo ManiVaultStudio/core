@@ -204,9 +204,6 @@ DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, co
     if (!destination)
         throw std::runtime_error("Destination buffer is null");
 
-    if (destinationSize < 0)
-        throw std::runtime_error("Destination buffer size is invalid");
-
     if (decodeBlockJob._offset > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max()) || decodeBlockJob._size > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max())) {
         throw std::runtime_error("Decode block offset or size exceeds std::uint64_t range");
     }
