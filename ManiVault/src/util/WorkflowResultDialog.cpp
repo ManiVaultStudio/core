@@ -39,4 +39,12 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     setLayout(layout);
 }
 
+QSize WorkflowResultDialog::sizeHint() const
+{
+	return {
+        600, // width
+        400 // height
+	};
+}
+
 }

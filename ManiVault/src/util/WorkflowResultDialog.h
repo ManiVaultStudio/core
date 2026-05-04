@@ -27,6 +27,8 @@ public:
 
     WorkflowResultDialog(const SharedWorkflowResult& workflowResult, QWidget* parent = nullptr);
 
+    QSize sizeHint() const override;
+
 private:
     WorkflowMessagesListModel       _messagesListModel;
     WorkflowMessagesFilterModel     _messagesFilterModel;
