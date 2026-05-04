@@ -4,6 +4,8 @@
 
 #include "WorkflowResultDialog.h"
 
+#include <QHeaderView>
+
 namespace mv::util
 {
 
@@ -31,6 +33,24 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
 
     treeView.setSortingEnabled(true);
     treeView.sortByColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::DateTime), Qt::AscendingOrder);
+    treeView.setRootIsDecorated(false);
+    
+    auto header = treeView.header();
+
+    header->setStretchLastSection(false);
+
+    header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level), QHeaderView::Fixed);
+    header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), QHeaderView::Interactive);
+    header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Text), QHeaderView::Stretch);
+    header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), QHeaderView::Fixed);
+
+    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level), 35);
+    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), 150);
+    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Text), 300);
+    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::DateTime), 60);
+
+    header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), true);
+    //header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::DateTime), true);
 
     auto layout = new QVBoxLayout(this);
 
@@ -42,8 +62,8 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
 QSize WorkflowResultDialog::sizeHint() const
 {
 	return {
-        600, // width
-        400 // height
+        800,
+        600
 	};
 }
 

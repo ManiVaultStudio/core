@@ -173,10 +173,10 @@ public:
             switch (role) {
 	            case Qt::DisplayRole:
 	            case Qt::EditRole:
-	                return "DateTime";
+	                return "Time";
 
 	            case Qt::ToolTipRole:
-	                return "Workflow message date and time";
+	                return "Workflow message timestamp";
             }
 
             return {};

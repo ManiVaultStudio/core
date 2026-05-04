@@ -32,7 +32,7 @@ QVariant AbstractWorkflowMessagesModel::LevelItem::data(int role /*= Qt::UserRol
             return static_cast<std::int32_t>(getWorkflowMessage()._level);
 
         case Qt::DisplayRole:
-            return {};//getWorkflowMessageLevelName(static_cast<WorkflowMessageLevel>(data(Qt::EditRole).toInt()));
+            return {};
 
         case Qt::ToolTipRole:
             return QString("%1").arg(data(Qt::DisplayRole).toString());
@@ -54,6 +54,9 @@ QVariant AbstractWorkflowMessagesModel::LevelItem::data(int role /*= Qt::UserRol
 		        return StyledIcon("triangle-exclamation").withColor(QColor(196, 32, 32));
 	        }
         }
+
+	    case Qt::TextAlignmentRole:
+	        return Qt::AlignLeft;
 
         default:
             break;
@@ -79,25 +82,6 @@ QVariant AbstractWorkflowMessagesModel::TextItem::data(int role /*= Qt::UserRole
     return Item::data(role);
 }
 
-QVariant AbstractWorkflowMessagesModel::TimeStampItem::data(int role /*= Qt::UserRole + 1*/) const
-{
-    switch (role) {
-	    case Qt::EditRole:
-            return getWorkflowMessage()._timestamp;
-
-	    case Qt::DisplayRole:
-            return data(Qt::EditRole).toDateTime().toString();
-
-	    case Qt::ToolTipRole:
-	        return QString("%1").arg(data(Qt::DisplayRole).toString());
-
-	    default:
-	        break;
-    }
-
-    return Item::data(role);
-}
-
 QVariant AbstractWorkflowMessagesModel::SourceItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
@@ -107,6 +91,25 @@ QVariant AbstractWorkflowMessagesModel::SourceItem::data(int role /*= Qt::UserRo
 
 	    case Qt::ToolTipRole:
 	        return QString("%1").arg(data(Qt::DisplayRole).toString());
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractWorkflowMessagesModel::TimeStampItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	        return getWorkflowMessage()._timestamp;
+
+	    case Qt::DisplayRole:
+            return data(Qt::EditRole).toDateTime().toString("hh:mm::ss");
+
+	    case Qt::ToolTipRole:
+	        return QString("%1").arg(data(Qt::DisplayRole).toString());
+
+	    default:
+	        break;
     }
 
     return Item::data(role);
