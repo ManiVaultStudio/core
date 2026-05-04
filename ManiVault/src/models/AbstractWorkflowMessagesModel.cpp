@@ -103,6 +103,31 @@ AbstractWorkflowMessagesModel::AbstractWorkflowMessagesModel(QObject* parent) :
     setColumnCount(static_cast<int>(Column::Count));
 }
 
+QVariant AbstractWorkflowMessagesModel::data(const QModelIndex& index, int role) const
+{
+    if (const auto item = dynamic_cast<const Item*>(itemFromIndex(index))) {
+        if (role == Qt::BackgroundRole)
+        {
+            switch (item->getWorkflowMessage()._level)
+            {
+	            case WorkflowMessageLevel::Info:
+	                return QColor(220, 235, 255);   // light blue
+
+	            case WorkflowMessageLevel::Warning:
+	                return QColor(255, 245, 200);   // light yellow
+
+	            case WorkflowMessageLevel::Error:
+	                return QColor(255, 220, 220);   // light red
+
+	            case WorkflowMessageLevel::Critical:
+	                return QColor(255, 180, 180);   // stronger red
+            }
+        }
+    }
+
+	return StandardItemModel::data(index, role);
+}
+
 QVariant AbstractWorkflowMessagesModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
 {
     switch (static_cast<Column>(section))
