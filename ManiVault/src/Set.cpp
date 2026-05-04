@@ -198,12 +198,12 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
             if (variantMap.contains("Properties"))
             {
-                try {
-                    _properties = loadOptimizedVariant(variantMap["Properties"].toMap()).toMap();
-                }
-                catch (const std::exception& e) {
-                    qCritical() << "Failed to load dataset properties: " << e.what();
-                }
+                //try {
+                //    _properties = loadOptimizedVariant(variantMap["Properties"].toMap()).toMap();
+                //}
+                //catch (const std::exception& e) {
+                //    qCritical() << "Failed to load dataset properties: " << e.what();
+                //}
             }
 
             if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {
@@ -224,7 +224,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
             }
         }
         catch (const std::exception& e) {
-            qCritical() << "Failed to load cluster data: " << e.what();
+            qCritical() << "Failed to load dataset from variant map: " << e.what();
             throw;
         }
     }
@@ -232,6 +232,8 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
 void DatasetImpl::fromVariantMapPre150(const QVariantMap& variantMap)
 {
+    qDebug() << "Loading dataset from variant map with pre-1.5.0 format, this may cause issues and should be avoided by updating the project to a newer version of the application";
+
     WidgetAction::fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "Name");

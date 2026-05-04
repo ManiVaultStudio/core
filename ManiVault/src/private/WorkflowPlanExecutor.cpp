@@ -167,9 +167,10 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
     const auto resultId = WorkflowResultRegistry::instance().add(result);
 
     if (executionOptions._addNotification) {
-	    const auto url = QString("app://workflow/results?workflowResultId=%1").arg(resultId.toString(QUuid::WithoutBraces));
+	    const auto url      = QString("app://workflow/results?workflowResultId=%1").arg(resultId.toString(QUuid::WithoutBraces));
+        const auto title    = QString("%1 finished in %2").arg(workflowPlan.getName()).arg(getElapsedTimeHumanReadable(result->getDuration(), false));
 
-    	QMetaObject::invokeMethod(&help(), [result, url, title = QString("%1 finished in %2").arg(workflowPlan.getName()).arg(getElapsedTimeHumanReadable(result->getDuration(), false))]() {
+    	QMetaObject::invokeMethod(&help(), [result, url, title]() {
             QString message;
 
     		if (!result->hasWarnings() && !result->hasErrors()) {
@@ -188,8 +189,10 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
                 message = QString("Completed with <a href=\"%1\">warnings </a> and <a href=\"%1\">errors </a>. Review the report.").arg(url);
             }
 
-            if (!message.isEmpty())
-                help().addNotification(title, message);
+            if (!message.isEmpty()) {
+	            help().addNotification(title, message);
+                qDebug() << message;
+            }
 
     	}, Qt::QueuedConnection);
     }
