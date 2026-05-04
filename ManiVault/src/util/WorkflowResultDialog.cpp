@@ -27,6 +27,11 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     _hierarchyWidget.getToolbarAction().addAction(&_messagesFilterModel.getFilterLevelAction());
     _hierarchyWidget.getFilterGroupAction().addAction(&_messagesFilterModel.getFilterLevelAction());
 
+    auto& treeView = _hierarchyWidget.getTreeView();
+
+    treeView.setSortingEnabled(true);
+    treeView.sortByColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::DateTime), Qt::AscendingOrder);
+
     auto layout = new QVBoxLayout(this);
 
     layout->addWidget(&_hierarchyWidget);

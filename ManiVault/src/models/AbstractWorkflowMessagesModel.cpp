@@ -85,7 +85,7 @@ QVariant AbstractWorkflowMessagesModel::TimeStampItem::data(int role /*= Qt::Use
             return getWorkflowMessage()._timestamp;
 
 	    case Qt::DisplayRole:
-            return data(Qt::EditRole).toInt() == 0 ? "" : QDateTime::fromSecsSinceEpoch(data(Qt::EditRole).toInt()).toString("yyyy-MM-dd HH:mm:ss");
+            return data(Qt::EditRole).toDateTime().toString();
 
 	    case Qt::ToolTipRole:
 	        return QString("%1").arg(data(Qt::DisplayRole).toString());

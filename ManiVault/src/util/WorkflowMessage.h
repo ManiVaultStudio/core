@@ -32,6 +32,7 @@ const QMap<WorkflowMessageLevel, QString> workflowMessageLevelNames = {
 };
 
 QString CORE_EXPORT getWorkflowMessageLevelName(WorkflowMessageLevel level);
+WorkflowMessageLevel CORE_EXPORT getWorkflowMessageLevelFromString(const QString& levelName);
 
 using WorkflowMessageLevels = QVector<WorkflowMessageLevel>;
 
