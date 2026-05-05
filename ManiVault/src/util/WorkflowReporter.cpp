@@ -6,5 +6,52 @@
 
 namespace mv::util
 {
-	
+
+bool WorkflowReporter::hasContext()
+{
+	return WorkflowExecutionContext::current() != nullptr;
+}
+
+void WorkflowReporter::info(const QString& text, const QString& source, const QString& scope, QVariantMap details)
+{
+	if (auto* context = WorkflowExecutionContext::current())
+		context->info(text, source, scope, details);
+}
+
+void WorkflowReporter::warning(const QString& text, const QString& source, const QString& scope, QVariantMap details)
+{
+	if (auto* context = WorkflowExecutionContext::current())
+		context->warning(text, source, scope, details);
+}
+
+void WorkflowReporter::error(const QString& text, const QString& source, const QString& scope, QVariantMap details)
+{
+	if (auto* context = WorkflowExecutionContext::current())
+		context->error(text, source, scope, details);
+}
+
+void WorkflowReporter::message(SeverityLevel severity, const QString& text, const QString& source, const QString& code, const QString& scope, QVariantMap details)
+{
+	if (auto context = WorkflowExecutionContext::current()) {
+		switch (severity) {
+		case SeverityLevel::Info:
+			context->info(text, source, scope, details);
+			break;
+		case SeverityLevel::Warning:
+			context->warning(text, source, scope, details);
+			break;
+		case SeverityLevel::Error:
+		case SeverityLevel::Critical:
+			context->error(text, source, scope, details);
+			break;
+		}
+	}
+}
+
+void WorkflowReporter::setProgress(double value)
+{
+	if (auto* context = WorkflowExecutionContext::current())
+		context->setProgress(value);
+}
+
 }

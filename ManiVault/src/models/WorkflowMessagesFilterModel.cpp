@@ -13,10 +13,6 @@
 using namespace mv::util;
 
 namespace mv {
-	namespace util
-	{
-		enum class WorkflowMessageLevel;
-	}
 
 	WorkflowMessagesFilterModel::WorkflowMessagesFilterModel(QObject* parent /*= nullptr*/) :
     SortFilterProxyModel(parent),
@@ -61,8 +57,8 @@ bool WorkflowMessagesFilterModel::lessThan(const QModelIndex& lhs, const QModelI
 {
 	switch (lhs.column()) {
 		case static_cast<int>(AbstractWorkflowMessagesModel::Column::Level): {
-            const auto lhsLevel = static_cast<WorkflowMessageLevel>(lhs.data(Qt::EditRole).toInt());
-            const auto rhsLevel = static_cast<WorkflowMessageLevel>(rhs.data(Qt::EditRole).toInt());
+            const auto lhsLevel = static_cast<SeverityLevel>(lhs.data(Qt::EditRole).toInt());
+            const auto rhsLevel = static_cast<SeverityLevel>(rhs.data(Qt::EditRole).toInt());
 
 			if (lhsLevel != rhsLevel)
                 return lhsLevel < rhsLevel;
@@ -90,13 +86,23 @@ bool WorkflowMessagesFilterModel::lessThan(const QModelIndex& lhs, const QModelI
             break;
         }
 
-        case static_cast<int>(AbstractWorkflowMessagesModel::Column::DateTime): {
+        case static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp): {
             const auto lhsDateTime = lhs.data(Qt::EditRole).toDateTime();
             const auto rhsDateTime = rhs.data(Qt::EditRole).toDateTime();
 
 			if (lhsDateTime != rhsDateTime)
                 return lhsDateTime < rhsDateTime;
 			
+            break;
+        }
+
+        case static_cast<int>(AbstractWorkflowMessagesModel::Column::Details): {
+            const auto lhsDetails = lhs.data(Qt::EditRole).toString();
+            const auto rhsDetails = rhs.data(Qt::EditRole).toString();
+
+            if (lhsDetails != rhsDetails)
+                return lhsDetails < rhsDetails;
+
             break;
         }
 	}

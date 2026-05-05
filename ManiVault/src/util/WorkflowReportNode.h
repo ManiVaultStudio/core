@@ -19,118 +19,23 @@ class CORE_EXPORT WorkflowReportNode
 public:
     using Ptr = std::shared_ptr<WorkflowReportNode>;
 
-    explicit WorkflowReportNode(const QString& name) :
-		_name(name)
-    {
-    }
+    explicit WorkflowReportNode(const QString& name);
 
-    Ptr createChild(const QString& name)
-    {
-        QMutexLocker lock(&_mutex);
+    Ptr createChild(const QString& name);
 
-        auto child = std::make_shared<WorkflowReportNode>(name);
-        _children.push_back(child);
-        return child;
-    }
+    void addMessage(SeverityLevel level, const QString& source, const QString& text, const QString& scope, const QVariantMap& details = {});
 
-    void addMessage(SeverityLevel level, const QString& source, const QString& text, const QVariantMap& details = {})
-    {
-        QMutexLocker lock(&_mutex);
+    QString getName() const;
 
-        _messages.push_back(WorkflowMessage{
-            level,
-            source,
-            text,
-            details,
-            _name,
-            QDateTime::currentDateTime()
-        });
-    }
+    QVector<WorkflowMessage> getMessages() const;
 
-    QString getName() const
-    {
-        QMutexLocker lock(&_mutex);
-        return _name;
-    }
+    QVector<Ptr> getChildren() const;
 
-    QVector<WorkflowMessage> getMessages() const
-    {
-        QMutexLocker lock(&_mutex);
-        return _messages;
-    }
+    bool hasErrorsRecursive() const;
 
-    QVector<Ptr> getChildren() const
-    {
-        QMutexLocker lock(&_mutex);
-        return _children;
-    }
+    int getWarningCountRecursive() const;
 
-    bool hasErrorsRecursive() const
-    {
-        QVector<Ptr> childrenCopy;
-
-        {
-            QMutexLocker lock(&_mutex);
-
-            for (const auto& message : _messages) {
-                if (message._level == SeverityLevel::Error)
-                    return true;
-            }
-
-            childrenCopy = _children;
-        }
-
-        for (const auto& child : childrenCopy) {
-            if (child->hasErrorsRecursive())
-                return true;
-        }
-
-        return false;
-    }
-
-    int getWarningCountRecursive() const
-    {
-        int result = 0;
-        QVector<Ptr> childrenCopy;
-
-        {
-            QMutexLocker lock(&_mutex);
-
-            for (const auto& message : _messages) {
-                if (message._level == SeverityLevel::Warning)
-                    ++result;
-            }
-
-            childrenCopy = _children;
-        }
-
-        for (const auto& child : childrenCopy)
-            result += child->getWarningCountRecursive();
-
-        return result;
-    }
-
-    int getErrorCountRecursive() const
-    {
-        int result = 0;
-        QVector<Ptr> childrenCopy;
-
-        {
-            QMutexLocker lock(&_mutex);
-
-            for (const auto& message : _messages) {
-                if (message._level == SeverityLevel::Error)
-                    ++result;
-            }
-
-            childrenCopy = _children;
-        }
-
-        for (const auto& child : childrenCopy)
-            result += child->getErrorCountRecursive();
-
-        return result;
-    }
+    int getErrorCountRecursive() const;
 
 private:
     QString _name;

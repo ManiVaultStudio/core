@@ -15,52 +15,17 @@ namespace mv::util
 class CORE_EXPORT WorkflowReporter
 {
 public:
-    static bool hasContext()
-    {
-        return WorkflowExecutionContext::current() != nullptr;
-    }
+    static bool hasContext();
 
-    static void info(const QString& text, const QString& source = {})
-    {
-        if (auto* context = WorkflowExecutionContext::current())
-            context->info(text, source);
-    }
+    static void info(const QString& text, const QString& source = {}, const QString& scope = {}, QVariantMap details = {});
 
-    static void warning(const QString& text, const QString& source = {})
-    {
-        if (auto* context = WorkflowExecutionContext::current())
-            context->warning(text, source);
-    }
+    static void warning(const QString& text, const QString& source = {}, const QString& scope = {}, QVariantMap details = {});
 
-    static void error(const QString& text, const QString& source = {})
-    {
-        if (auto* context = WorkflowExecutionContext::current())
-            context->error(text, source);
-    }
+    static void error(const QString& text, const QString& source = {}, const QString& scope = {}, QVariantMap details = {});
 
-    static void message(SeverityLevel severity, const QString& text, const QString& source = {}, const QString& code = {}, const QString& scope = {}, QVariantMap details = {})
-    {
-        if (auto context = WorkflowExecutionContext::current()) {
-            switch (severity) {
-                case SeverityLevel::Info:
-                    context->info(text, source);
-                    break;
-                case SeverityLevel::Warning:
-                    context->warning(text, source);
-                    break;
-                case SeverityLevel::Error:
-                case SeverityLevel::Critical:
-                    context->error(text, source);
-                    break;
-            }
-        }
-    }
+    static void message(SeverityLevel severity, const QString& text, const QString& source = {}, const QString& code = {}, const QString& scope = {}, QVariantMap details = {});
 
-    static void setProgress(double value)
-    {
-        if (auto* context = WorkflowExecutionContext::current())
-            context->setProgress(value);
-    }
+    static void setProgress(double value);
 };
 
 } // namespace mv::util

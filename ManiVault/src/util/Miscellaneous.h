@@ -309,6 +309,42 @@ CORE_EXPORT void printLine(const QString& key, const QVariant& value = {}, int i
 CORE_EXPORT void prettyPrintVariantMap(const QVariantMap& variantMap);
 
 /**
+ * Convert a QVariantMap to a pretty-printed string with indentation
+ * @param variantMap Map to convert
+ * @param indent Number of spaces to indent (default is 0)
+ * @return Pretty-printed string representation of the map
+ */
+CORE_EXPORT QString variantMapToPrettyString(const QVariantMap& variantMap, int indent = 0);
+
+/**
+ * Convert a QVariant to an HTML string representation, handling maps and lists recursively
+ * @param value QVariant to convert
+ * @return HTML string representation of the QVariant
+ */
+CORE_EXPORT QString variantToHtml(const QVariant& value);
+
+/**
+ * Convert a QVariantMap to an HTML string representation, showing key-value pairs in a table
+ * @param map Map to convert
+ * @return HTML string representation of the map
+ */
+CORE_EXPORT QString variantMapToHtml(const QVariantMap& map);
+
+/**
+ * Convert a QVariantList to an HTML string representation, showing items in an ordered list
+ * @param list List to convert
+ * @return HTML string representation of the list
+ */
+CORE_EXPORT QString variantListToHtml(const QVariantList& list);
+
+/**
+ * Convert a QVariant to an HTML string representation, handling maps and lists recursively
+ * @param value QVariant to convert
+ * @return HTML string representation of the QVariant
+ */
+CORE_EXPORT QString variantToHtml(const QVariant& value);
+
+/**
  * Log memory usage of the current process with an optional label
  * @param label Label to prefix the log message with (default is an empty string)
  */

@@ -176,7 +176,7 @@ void Serializable::setTask(Task* task)
 void Serializable::reportSerializationWarning(const QString& scope, const QString& message)
 {
     if (auto context = WorkflowExecutionContext::current()) {
-	    context->getReportNode()->addMessage(SeverityLevel::Warning, scope, message);
+	    context->getReportNode()->addMessage(SeverityLevel::Warning, "Serializable", message, scope);
     }
 
 	qWarning() << "Warning: " << message << "(" << scope << ")";
@@ -185,7 +185,7 @@ void Serializable::reportSerializationWarning(const QString& scope, const QStrin
 void Serializable::reportSerializationError(QString scope, QString message)
 {
     if (auto context = WorkflowExecutionContext::current()) {
-        context->getReportNode()->addMessage(SeverityLevel::Error, scope, message);
+        context->getReportNode()->addMessage(SeverityLevel::Error, "Serializable", message, scope);
     }
 
 	qWarning() << "Error: " << message << "(" << scope << ")";
@@ -194,7 +194,7 @@ void Serializable::reportSerializationError(QString scope, QString message)
 void Serializable::reportFatalSerializationError(QString scope, QString message)
 {
     if (auto context = WorkflowExecutionContext::current()) {
-	    context->getReportNode()->addMessage(SeverityLevel::Critical, scope, message);
+	    context->getReportNode()->addMessage(SeverityLevel::Critical, "Serializable", message, scope);
     }
     
     qWarning() << "Critical: " << message << "(" << scope << ")";

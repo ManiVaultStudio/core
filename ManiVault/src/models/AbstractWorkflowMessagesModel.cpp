@@ -115,6 +115,51 @@ QVariant AbstractWorkflowMessagesModel::TimeStampItem::data(int role /*= Qt::Use
     return Item::data(role);
 }
 
+QVariant AbstractWorkflowMessagesModel::DetailsItem::data(int role) const
+{
+    qDebug() << "DetailsItem::data: Requested role" << role;
+    switch (role) {
+	    case Qt::EditRole:
+            return QVariantMap({ {"key", 12 } });// getWorkflowMessage()._details;
+
+	    case Qt::DisplayRole:
+            return "--";//variantMapToPrettyString(data(Qt::EditRole).toMap());
+
+        case Qt::ToolTipRole: {
+            qDebug() << "DetailsItem::data: ToolTipRole requested, fetching details map";
+            const auto map = data(Qt::EditRole).toMap();
+
+            if (map.isEmpty())
+                return {};
+
+            return QString(
+                "<div style='font-family:monospace;'>"
+                "<b>Details</b><br/>%1"
+                "</div>"
+            ).arg(variantMapToHtml(map));
+        }
+
+	    default:
+	        break;
+    }
+
+	return Item::data(role);
+}
+
+QVariant AbstractWorkflowMessagesModel::DetailsItem::headerData(Qt::Orientation orientation, int role)
+{
+	switch (role) {
+		case Qt::DisplayRole:
+		case Qt::EditRole:
+			return "Details";
+
+		case Qt::ToolTipRole:
+			return "Workflow message details";
+	}
+
+	return {};
+}
+
 AbstractWorkflowMessagesModel::AbstractWorkflowMessagesModel(QObject* parent) :
     StandardItemModel(parent)
 {
@@ -134,11 +179,11 @@ QVariant AbstractWorkflowMessagesModel::headerData(int section, Qt::Orientation 
         case Column::Text:
             return TextItem::headerData(orientation, role);
 
-        case Column::DateTime:
+        case Column::TimeStamp:
             return TimeStampItem::headerData(orientation, role);
 
-        case Column::Count:
-            break;
+        case Column::Details:
+            return DetailsItem::headerData(orientation, role);
 
         default:
             break;

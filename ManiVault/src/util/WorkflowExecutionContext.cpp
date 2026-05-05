@@ -91,28 +91,28 @@ QString WorkflowExecutionContext::getName() const
 	return _name;
 }
 
-void WorkflowExecutionContext::info(const QString& text, const QString& source) const
+void WorkflowExecutionContext::info(const QString& text, const QString& source, const QString& scope, QVariantMap details) const
 {
 	if (_reportNode)
-		_reportNode->addMessage(SeverityLevel::Info, source, text);
+		_reportNode->addMessage(SeverityLevel::Info, source, text, scope, details);
 
 	//if (_task)
 	//    _task->setStatusText(text);
 }
 
-void WorkflowExecutionContext::warning(const QString& text, const QString& source) const
+void WorkflowExecutionContext::warning(const QString& text, const QString& source, const QString& scope, QVariantMap details) const
 {
 	if (_reportNode)
-		_reportNode->addMessage(SeverityLevel::Warning, source, text);
+		_reportNode->addMessage(SeverityLevel::Warning, source, text, scope, details);
 
 	//if (_task)
 	//    _task->addWarning(text);
 }
 
-void WorkflowExecutionContext::error(const QString& text, const QString& source) const
+void WorkflowExecutionContext::error(const QString& text, const QString& source, const QString& scope, QVariantMap details) const
 {
 	if (_reportNode)
-		_reportNode->addMessage(SeverityLevel::Error, source, text);
+		_reportNode->addMessage(SeverityLevel::Error, source, text, scope, details);
 
 	//if (_task)
 	//    _task->addError(text);

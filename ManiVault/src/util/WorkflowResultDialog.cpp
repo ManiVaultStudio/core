@@ -33,7 +33,6 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     for (const auto& level : levels)
         selectedOptions << getSeverityLevelName(level);
 
-    qDebug() << "WorkflowResultDialog: Setting selected filter levels to:" << selectedOptions;
     filterlevelAction.setSelectedOptions(selectedOptions);
 
     _hierarchyWidget.getToolbarAction().addAction(&filterlevelAction);
@@ -42,7 +41,7 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     auto& treeView = _hierarchyWidget.getTreeView();
 
     treeView.setSortingEnabled(true);
-    treeView.sortByColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::DateTime), Qt::AscendingOrder);
+    treeView.sortByColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), Qt::AscendingOrder);
     treeView.setRootIsDecorated(false);
     
     auto header = treeView.header();
@@ -53,14 +52,16 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), QHeaderView::Interactive);
     header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Text), QHeaderView::Stretch);
     header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), QHeaderView::Fixed);
+    header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), QHeaderView::Fixed);
 
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level), 35);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), 150);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Text), 300);
-    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::DateTime), 80);
+    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), 80);
+    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), 80);
 
     header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), true);
-    //header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::DateTime), true);
+    //header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), true);
 
     auto layout = new QVBoxLayout(this);
 

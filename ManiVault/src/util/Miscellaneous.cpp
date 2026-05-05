@@ -795,6 +795,57 @@ void prettyPrintVariantMap(const QVariantMap& variantMap)
     qDebug().noquote() << QJsonDocument(QJsonObject::fromVariantMap(variantMap)).toJson(QJsonDocument::Indented);
 }
 
+QString variantMapToPrettyString(const QVariantMap& variantMap, int indent)
+{
+    return QJsonDocument(QJsonObject::fromVariantMap(variantMap)).toJson(QJsonDocument::Indented);
+}
+
+QString variantMapToHtml(const QVariantMap& map)
+{
+	QString html = "<table style='border-collapse:collapse;'>";
+
+	for (auto it = map.begin(); it != map.end(); ++it) {
+		html += QString(
+			"<tr>"
+			"<td style='padding:2px 8px; font-weight:bold; vertical-align:top;'>%1</td>"
+			"<td style='padding:2px 8px;'>%2</td>"
+			"</tr>"
+		).arg(
+			it.key().toHtmlEscaped(),
+			variantToHtml(it.value())
+		);
+	}
+
+	html += "</table>";
+	return html;
+}
+
+QString variantListToHtml(const QVariantList& list)
+{
+	QString html = "<ul style='margin:0; padding-left:16px;'>";
+
+	for (const auto& v : list) {
+		html += QString("<li>%1</li>").arg(variantToHtml(v));
+	}
+
+	html += "</ul>";
+	return html;
+}
+
+QString variantToHtml(const QVariant& value)
+{
+	switch (value.typeId()) {
+	case QMetaType::QVariantMap:
+		return variantMapToHtml(value.toMap());
+
+	case QMetaType::QVariantList:
+		return variantListToHtml(value.toList());
+
+	default:
+		return value.toString().toHtmlEscaped();
+	}
+}
+
 void logMemory(const QString& label)
 {
     const auto stats = getMemoryStats();

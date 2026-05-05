@@ -39,11 +39,11 @@ public:
 
     QString getName() const;
 
-    void info(const QString& text, const QString& source = {}) const;
+    void info(const QString& text, const QString& source = {}, const QString& scope = {}, QVariantMap details = {}) const;
 
-    void warning(const QString& text, const QString& source = {}) const;
+    void warning(const QString& text, const QString& source = {}, const QString& scope = {}, QVariantMap details = {}) const;
 
-    void error(const QString& text, const QString& source = {}) const;
+    void error(const QString& text, const QString& source = {}, const QString& scope = {}, QVariantMap details = {}) const;
 
     void setProgress(double value) const;
 
