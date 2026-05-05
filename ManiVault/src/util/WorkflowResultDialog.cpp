@@ -9,7 +9,7 @@
 namespace mv::util
 {
 
-WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowResult, QWidget* parent) :
+WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowResult, WorkflowMessageLevels levels /*= allWorkflowMessageTypes*/, QWidget* parent) :
 	QDialog(parent),   
 	_hierarchyWidget(this, "Workflow message", _messagesListModel, &_messagesFilterModel)
 {
@@ -26,8 +26,17 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     _messagesListModel.setWorkflowResult(workflowResult);
     _messagesFilterModel.setSourceModel(&_messagesListModel);
 
-    _hierarchyWidget.getToolbarAction().addAction(&_messagesFilterModel.getFilterLevelAction());
-    _hierarchyWidget.getFilterGroupAction().addAction(&_messagesFilterModel.getFilterLevelAction());
+    auto& filterlevelAction = _messagesFilterModel.getFilterLevelAction();
+
+    QStringList selectedOptions;
+
+    for (const auto& level : levels)
+        selectedOptions << getWorkflowMessageLevelName(level);
+
+    filterlevelAction.setSelectedOptions(selectedOptions);
+
+    _hierarchyWidget.getToolbarAction().addAction(&filterlevelAction);
+    _hierarchyWidget.getFilterGroupAction().addAction(&filterlevelAction);
 
     auto& treeView = _hierarchyWidget.getTreeView();
 
@@ -47,7 +56,7 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level), 35);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), 150);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Text), 300);
-    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::DateTime), 60);
+    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::DateTime), 80);
 
     header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), true);
     //header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::DateTime), true);

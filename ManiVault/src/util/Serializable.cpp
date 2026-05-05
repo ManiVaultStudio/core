@@ -194,18 +194,18 @@ void Serializable::reportSerializationWarning(const QString& scope, const QStrin
 {
     if (auto context = WorkflowExecutionContext::current()) {
 	    context->getReportNode()->addMessage(WorkflowMessageLevel::Warning, scope, message);
-    } else {
-        qWarning() << "Warning: " << message << "(" << scope << ")";
     }
+
+	qWarning() << "Warning: " << message << "(" << scope << ")";
 }
 
 void Serializable::reportSerializationError(QString scope, QString message)
 {
     if (auto context = WorkflowExecutionContext::current()) {
         context->getReportNode()->addMessage(WorkflowMessageLevel::Error, scope, message);
-    } else {
-        qWarning() << "Error: " << message << "(" << scope << ")";
     }
+
+	qWarning() << "Error: " << message << "(" << scope << ")";
 }
 
 void Serializable::reportFatalSerializationError(QString scope, QString message)
@@ -213,52 +213,24 @@ void Serializable::reportFatalSerializationError(QString scope, QString message)
     if (auto context = WorkflowExecutionContext::current()) {
 	    context->getReportNode()->addMessage(WorkflowMessageLevel::Critical, scope, message);
     }
-    else {
-        qWarning() << "Critical: " << message << "(" << scope << ")";
-    }
+    
+    qWarning() << "Critical: " << message << "(" << scope << ")";
 }
 
 void Serializable::fromVariantMap(Serializable* serializable, const QVariantMap& variantMap)
 {
-#ifdef SERIALIZABLE_VERBOSE
-    qDebug().noquote() << QString("From variant map: %1").arg(serializable->getSerializationName());
-#endif
+	Q_ASSERT(serializable);
+
+    if (!serializable)
+        throw std::runtime_error("Serializable pointer is null");
 
     serializable->fromVariantMap(variantMap);
-
-    /*
-    auto object = dynamic_cast<const QObject*>(serializable);
-
-    if (object == nullptr)
-        return;
-
-    for (auto child : object->children()) {
-        auto childSerializable = dynamic_cast<Serializable*>(child);
-
-        if (!childSerializable)
-            continue;
-
-        fromVariantMap(childSerializable, variantMap[childSerializable->getSerializationName()].toMap());
-    }
-    */
 }
 
 void Serializable::fromVariantMap(Serializable& serializable, const QVariantMap& variantMap, const QString& key)
 {
     if (!variantMap.contains(key)) {
-        const auto errorMessage = QString(
-            "Required key '%1' was not found in QVariantMap. "
-            "Available keys (%2 total): %3"
-        ).arg(
-            key,
-            QString::number(variantMap.size()),
-            describeVariantMapKeys(variantMap)
-        );
-
-        if (settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
-            serializable.reportSerializationWarning(serializable.getSerializationName(), errorMessage);
-        else
-            serializable.reportFatalSerializationError(serializable.getSerializationName(), errorMessage);
+        serializable.handleKeyNotFoundInVariantMap(serializable, variantMap, key);
     }
     else {
         serializable.fromVariantMap(variantMap[key].toMap());
@@ -273,21 +245,7 @@ void Serializable::fromParentVariantMap(const QVariantMap& parentVariantMap, boo
             throw std::runtime_error("Serialization name may not be empty");
 
         if (!parentVariantMap.contains(getSerializationName())) {
-            const auto errorMessage = QString(
-                "Required key '%1' was not found in QVariantMap. "
-                "Available keys (%2 total): %3"
-            ).arg(
-                getSerializationName(),
-                QString::number(parentVariantMap.size()),
-                describeVariantMapKeys(parentVariantMap)
-            );
-
-            if (!ignoreLoadingErrors) {
-                if (settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
-                    reportSerializationWarning(getSerializationName(), errorMessage);
-                else
-                    reportFatalSerializationError(getSerializationName(), errorMessage);
-            }
+            handleKeyNotFoundInVariantMap(*this, parentVariantMap, getSerializationName());
         }
         else {
             fromVariantMap(parentVariantMap[getSerializationName()].toMap());
@@ -338,6 +296,25 @@ void Serializable::insertIntoVariantMap(QVariantMap& variantMap) const
         throw std::runtime_error(QString("%1 already exists in variant map (%2)").arg(getSerializationName()).toLatin1());
 
     variantMap.insert(getSerializationName(), toVariantMap());
+}
+
+void Serializable::handleKeyNotFoundInVariantMap(const Serializable& serializable, const QVariantMap& map, const QString& key)
+{
+    const auto errorMessage = QString(
+        "Required key '%1' was not found in QVariantMap. "
+        "Available keys (%2 total): %3"
+    ).arg(
+        key,
+        QString::number(map.size()),
+        describeVariantMapKeys(map)
+    );
+
+    qWarning() << errorMessage;
+
+    if (settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
+        Serializable::reportSerializationWarning(serializable.getSerializationName(), errorMessage);
+    else
+        Serializable::reportFatalSerializationError(serializable.getSerializationName(), errorMessage);
 }
 
 }

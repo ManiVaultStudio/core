@@ -33,7 +33,7 @@ public:
         return child;
     }
 
-    void addMessage(WorkflowMessageLevel level,
+    void addMessage(SeverityLevel level,
         const QString& source,
         const QString& text)
     {
@@ -45,7 +45,7 @@ public:
             text,
             _name,
             QDateTime::currentDateTime()
-            });
+        });
     }
 
     QString getName() const
@@ -74,7 +74,7 @@ public:
             QMutexLocker lock(&_mutex);
 
             for (const auto& message : _messages) {
-                if (message._level == WorkflowMessageLevel::Error)
+                if (message._level == SeverityLevel::Error)
                     return true;
             }
 
@@ -98,7 +98,7 @@ public:
             QMutexLocker lock(&_mutex);
 
             for (const auto& message : _messages) {
-                if (message._level == WorkflowMessageLevel::Warning)
+                if (message._level == SeverityLevel::Warning)
                     ++result;
             }
 
@@ -120,7 +120,7 @@ public:
             QMutexLocker lock(&_mutex);
 
             for (const auto& message : _messages) {
-                if (message._level == WorkflowMessageLevel::Error)
+                if (message._level == SeverityLevel::Error)
                     ++result;
             }
 

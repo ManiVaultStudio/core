@@ -103,7 +103,7 @@ QVariant AbstractWorkflowMessagesModel::TimeStampItem::data(int role /*= Qt::Use
 	        return getWorkflowMessage()._timestamp;
 
 	    case Qt::DisplayRole:
-            return data(Qt::EditRole).toDateTime().toString("hh:mm::ss");
+            return QLocale().toString(data(Qt::EditRole).toDateTime(), QLocale::ShortFormat);
 
 	    case Qt::ToolTipRole:
 	        return QString("%1").arg(data(Qt::DisplayRole).toString());

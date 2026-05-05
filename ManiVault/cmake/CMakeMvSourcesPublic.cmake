@@ -597,6 +597,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/CodecRegistry.h
     src/util/CodecActionBinding.h
     src/util/DecodeExecutor.h
+    src/util/SeverityLevel.h
     src/util/WorkflowExecutionContext.h
     src/util/WorkflowExecutionScope.h
     src/util/WorkflowContextBase.h
@@ -687,6 +688,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/CodecRegistry.cpp
     src/util/CodecActionBinding.cpp
     src/util/DecodeExecutor.cpp
+    src/util/SeverityLevel.cpp
     src/util/WorkflowContextBase.cpp
     src/util/WorkflowResult.cpp
     src/util/WorkflowExecutionContext.cpp
@@ -1274,6 +1276,21 @@ set(PUBLIC_TASK_FILES
     ${PUBLIC_TASK_SOURCES}
 )
 
+set(PUBLIC_EXCEPTION_HEADERS
+    src/Exception/ManiVaultException.h
+    src/Exception/SerializationException.h
+)
+
+set(PUBLIC_EXCEPTION_SOURCES
+    src/Exception/ManiVaultException.cpp
+    src/Exception/SerializationException.cpp
+)
+    
+set(PUBLIC_EXCEPTION_FILES
+    ${PUBLIC_EXCEPTION_HEADERS}
+    ${PUBLIC_EXCEPTION_SOURCES}
+)
+
 # Automatically generated during cmake config
 set(PUBLIC_VERSION_HEADERS
     src/ManiVaultVersion.h
@@ -1333,6 +1350,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_WORKFLOW_MESSAGES_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
+    ${PUBLIC_EXCEPTION_HEADERS}
     ${PUBLIC_NOTIFICATIONS_HEADERS}
     ${PUBLIC_VERSION_HEADERS}
     ${PUBLIC_GLOBALS_HEADERS}
@@ -1387,6 +1405,7 @@ set(PUBLIC_SOURCES
     ${PUBLIC_WORKFLOW_MESSAGES_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
     ${PUBLIC_TASK_SOURCES}
+    ${PUBLIC_EXCEPTION_SOURCES}
     ${PUBLIC_NOTIFICATIONS_SOURCES}
     ${PUBLIC_HEADERS}
 )
@@ -1454,4 +1473,5 @@ source_group(Models\\RecentFiles FILES ${PUBLIC_RECENT_FILES_MODEL_FILES})
 source_group(Models\\HUD FILES ${PUBLIC_HUD_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
 source_group(Task FILES ${PUBLIC_TASK_FILES})
+source_group(Exception FILES ${PUBLIC_EXCEPTION_FILES})
 source_group(Notifications FILES ${PUBLIC_NOTIFICATIONS_FILES})

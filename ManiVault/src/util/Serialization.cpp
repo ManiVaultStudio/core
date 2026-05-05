@@ -455,8 +455,11 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray&
 
 void variantMapMustContain(const QVariantMap& variantMap, const QString& key)
 {
-    if (!variantMap.contains(key))
+    if (!variantMap.contains(key)) {
+        //Serializable::reportSerializationError()
+        qDebug() << QString("--------------%1 not found in map: %2").arg(key, variantMap.keys().join(", "));
         throw std::runtime_error(QString("%1 not found in map: %2").arg(key, variantMap.keys().join(", ")).toLatin1());
+    }
 }
 
 QVariant storeQVariant(const QVariant& variant)

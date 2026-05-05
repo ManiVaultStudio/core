@@ -26,6 +26,18 @@ void AbstractWorkflowPlanExecutor::installNotificationLinkHandler()
             return;
         }
 
+        const auto queriedWorkflowMessageLevels = query.queryItemValue("levels", QUrl::FullyDecoded);
+
+        WorkflowMessageLevels workflowMessageLevels;
+
+        if (!queriedWorkflowMessageLevels.isEmpty()) {
+            workflowMessageLevels.clear();
+
+            for (const auto& workflowMessageLevel : queriedWorkflowMessageLevels.split(",")) {
+                workflowMessageLevels << getWorkflowMessageLevelFromString(workflowMessageLevel);
+            }
+        }
+
         const auto result = WorkflowResultRegistry::instance().get(QUuid(workflowResultId));
 
         if (!result) {
@@ -33,7 +45,7 @@ void AbstractWorkflowPlanExecutor::installNotificationLinkHandler()
             return;
         }
 
-        WorkflowResultDialog dialog(result);
+        WorkflowResultDialog dialog(result, workflowMessageLevels);
 
         dialog.exec();
     });

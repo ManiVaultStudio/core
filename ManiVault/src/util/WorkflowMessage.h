@@ -5,6 +5,7 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+#include "SeverityLevel.h"
 
 #include <QString>
 #include <QDateTime>
@@ -12,42 +13,13 @@
 namespace mv::util
 {
 
-/**
- * Workflow message level
- *
- * Enumeration for the level of a workflow message, which can be either informational, a warning or an error.
- */
-enum class WorkflowMessageLevel {
-    Info,
-    Warning,
-    Error,
-    Critical
-};
-
-const QMap<WorkflowMessageLevel, QString> workflowMessageLevelNames = {
-    { WorkflowMessageLevel::Info, "Info" },
-    { WorkflowMessageLevel::Warning, "Warning" },
-    { WorkflowMessageLevel::Error, "Error" },
-    { WorkflowMessageLevel::Critical, "Critical" }
-};
-
-QString CORE_EXPORT getWorkflowMessageLevelName(WorkflowMessageLevel level);
-WorkflowMessageLevel CORE_EXPORT getWorkflowMessageLevelFromString(const QString& levelName);
-
-using WorkflowMessageLevels = QVector<WorkflowMessageLevel>;
-
-/**
- * Workflow message
- *
- * Class for representing a workflow message, which contains a level, source, text and timestamp.
- */
 struct CORE_EXPORT WorkflowMessage
 {
-    WorkflowMessageLevel _level = WorkflowMessageLevel::Info;
-    QString              _source;
-    QString              _text;
-    QString              _nodeName;
-    QDateTime            _timestamp = QDateTime::currentDateTime();
+    SeverityLevel   _level = SeverityLevel::Info;
+    QString         _source;
+    QString         _text;
+    QString         _nodeName;
+    QDateTime       _timestamp = QDateTime::currentDateTime();
 };
 
 using WorkflowMessages = QVector<WorkflowMessage>;

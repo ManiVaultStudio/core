@@ -153,6 +153,14 @@ public:
      */
     std::int32_t getSerializationCountTo() const;
 
+    /**
+     * Handle the case where an item with a specific key is not found in a variant map (e.g. by throwing an exception with an informative error message)
+     * @param serializable Serializable object for which the key was not found in the map
+     * @param map QVariantMap that should contain the key
+     * @param key Item name that was not found in the map
+     */
+    static void handleKeyNotFoundInVariantMap(const Serializable& serializable, const QVariantMap& map, const QString& key);
+
 public: // Task related
 
     /**

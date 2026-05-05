@@ -47,17 +47,17 @@ bool WorkflowResult::hasCriticalErrors() const
 
 int WorkflowResult::getWarningCount() const
 {
-    return getMessageCountByLevels({ WorkflowMessageLevel::Warning });
+    return getMessageCountByLevels({ SeverityLevel::Warning });
 }
 
 int WorkflowResult::getErrorCount() const
 {
-    return getMessageCountByLevels({ WorkflowMessageLevel::Error });
+    return getMessageCountByLevels({ SeverityLevel::Error });
 }
 
 int WorkflowResult::getCriticalErrorCount() const
 {
-	return getMessageCountByLevels({ WorkflowMessageLevel::Critical });
+	return getMessageCountByLevels({ SeverityLevel::Critical });
 }
 
 WorkflowMessages WorkflowResult::getMessages() const
@@ -67,17 +67,17 @@ WorkflowMessages WorkflowResult::getMessages() const
 
 WorkflowMessages WorkflowResult::getWarningMessages() const
 {
-    return getMessagesByLevels({ WorkflowMessageLevel::Warning });
+    return getMessagesByLevels({ SeverityLevel::Warning });
 }
 
 WorkflowMessages WorkflowResult::getErrorMessages() const
 {
-	return getMessagesByLevels({ WorkflowMessageLevel::Error });
+	return getMessagesByLevels({ SeverityLevel::Error });
 }
 
 WorkflowMessages WorkflowResult::getCriticalErrorMessages() const
 {
-	return getMessagesByLevels({ WorkflowMessageLevel::Critical });
+	return getMessagesByLevels({ SeverityLevel::Critical });
 }
 
 void WorkflowResult::setMessages(const WorkflowMessages& workflowMessages)
@@ -85,19 +85,19 @@ void WorkflowResult::setMessages(const WorkflowMessages& workflowMessages)
     _messages = workflowMessages;
 }
 
-WorkflowMessages WorkflowResult::getMessagesByLevels(const WorkflowMessageLevels& workflowMessageLevels) const
+WorkflowMessages WorkflowResult::getMessagesByLevels(const SeverityLevels& severityLevels) const
 {
-    auto filteredView = _messages | std::views::filter([workflowMessageLevels](const WorkflowMessage& message) {
-        return workflowMessageLevels.contains(message._level);
+    auto filteredView = _messages | std::views::filter([severityLevels](const WorkflowMessage& message) {
+        return severityLevels.contains(message._level);
     });
 
     return { filteredView.begin(), filteredView.end() };
 }
 
-int WorkflowResult::getMessageCountByLevels(const WorkflowMessageLevels& workflowMessageLevels) const
+int WorkflowResult::getMessageCountByLevels(const SeverityLevels& severityLevels) const
 {
-    return std::ranges::count_if(_messages, [workflowMessageLevels](const WorkflowMessage& message) {
-        return workflowMessageLevels.contains(message._level);
+    return std::ranges::count_if(_messages, [severityLevels](const WorkflowMessage& message) {
+        return severityLevels.contains(message._level);
     });
 }
 
