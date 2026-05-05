@@ -13,13 +13,17 @@
 using namespace mv::util;
 
 namespace mv {
+	namespace util
+	{
+		enum class WorkflowMessageLevel;
+	}
 
-WorkflowMessagesFilterModel::WorkflowMessagesFilterModel(QObject* parent /*= nullptr*/) :
+	WorkflowMessagesFilterModel::WorkflowMessagesFilterModel(QObject* parent /*= nullptr*/) :
     SortFilterProxyModel(parent),
-    _filterLevelAction(this, "Filter level", workflowMessageLevelNames.values(), {
-		getWorkflowMessageLevelName(WorkflowMessageLevel::Warning),
-        getWorkflowMessageLevelName(WorkflowMessageLevel::Error),
-        getWorkflowMessageLevelName(WorkflowMessageLevel::Critical)
+    _filterLevelAction(this, "Filter level", severityLevelNames.values(), {
+		getSeverityLevelName(SeverityLevel::Warning),
+        getSeverityLevelName(SeverityLevel::Error),
+        getSeverityLevelName(SeverityLevel::Critical)
     })
 {
     connect(&_filterLevelAction, &gui::OptionsAction::selectedOptionsChanged, this, &WorkflowMessagesFilterModel::invalidateFilter);
@@ -42,7 +46,7 @@ bool WorkflowMessagesFilterModel::filterAcceptsRow(int row, const QModelIndex& p
     }
 
     const auto levelIndex   = index.siblingAtColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level)).data(Qt::EditRole).toInt();
-    const auto levelName    = getWorkflowMessageLevelName(static_cast<WorkflowMessageLevel>(levelIndex));
+    const auto levelName    = getSeverityLevelName(static_cast<SeverityLevel>(levelIndex));
 
     if (!_filterLevelAction.hasSelectedOptions())
         return false;

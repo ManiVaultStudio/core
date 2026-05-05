@@ -41,16 +41,16 @@ QVariant AbstractWorkflowMessagesModel::LevelItem::data(int role /*= Qt::UserRol
         {
 	        switch (getWorkflowMessage()._level)
 	        {
-	        case WorkflowMessageLevel::Info:
+	        case SeverityLevel::Info:
 		        return StyledIcon("circle-info").withColor(QColor(220, 235, 255));
 
-	        case WorkflowMessageLevel::Warning:
+	        case SeverityLevel::Warning:
 		        return StyledIcon("circle-exclamation").withColor(QColor(196, 162, 26));
 
-	        case WorkflowMessageLevel::Error:
+	        case SeverityLevel::Error:
 		        return StyledIcon("triangle-exclamation").withColor(QColor(196, 98, 30));
 
-	        case WorkflowMessageLevel::Critical:
+	        case SeverityLevel::Critical:
 		        return StyledIcon("triangle-exclamation").withColor(QColor(196, 32, 32));
 	        }
         }

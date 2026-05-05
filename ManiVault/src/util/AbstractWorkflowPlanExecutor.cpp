@@ -8,6 +8,7 @@
 
 namespace mv::util
 {
+
 AbstractWorkflowPlanExecutor::AbstractWorkflowPlanExecutor(QObject* parent):
 	QObject(parent)
 {
@@ -28,13 +29,13 @@ void AbstractWorkflowPlanExecutor::installNotificationLinkHandler()
 
         const auto queriedWorkflowMessageLevels = query.queryItemValue("levels", QUrl::FullyDecoded);
 
-        WorkflowMessageLevels workflowMessageLevels;
+        SeverityLevels severityLevels;
 
         if (!queriedWorkflowMessageLevels.isEmpty()) {
-            workflowMessageLevels.clear();
+            severityLevels.clear();
 
             for (const auto& workflowMessageLevel : queriedWorkflowMessageLevels.split(",")) {
-                workflowMessageLevels << getWorkflowMessageLevelFromString(workflowMessageLevel);
+                severityLevels << getSeverityLevel(workflowMessageLevel);
             }
         }
 
@@ -45,7 +46,7 @@ void AbstractWorkflowPlanExecutor::installNotificationLinkHandler()
             return;
         }
 
-        WorkflowResultDialog dialog(result, workflowMessageLevels);
+        WorkflowResultDialog dialog(result, severityLevels);
 
         dialog.exec();
     });

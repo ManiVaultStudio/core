@@ -94,7 +94,7 @@ QString WorkflowExecutionContext::getName() const
 void WorkflowExecutionContext::info(const QString& text, const QString& source) const
 {
 	if (_reportNode)
-		_reportNode->addMessage(WorkflowMessageLevel::Info, source, text);
+		_reportNode->addMessage(SeverityLevel::Info, source, text);
 
 	//if (_task)
 	//    _task->setStatusText(text);
@@ -103,7 +103,7 @@ void WorkflowExecutionContext::info(const QString& text, const QString& source) 
 void WorkflowExecutionContext::warning(const QString& text, const QString& source) const
 {
 	if (_reportNode)
-		_reportNode->addMessage(WorkflowMessageLevel::Warning, source, text);
+		_reportNode->addMessage(SeverityLevel::Warning, source, text);
 
 	//if (_task)
 	//    _task->addWarning(text);
@@ -112,7 +112,7 @@ void WorkflowExecutionContext::warning(const QString& text, const QString& sourc
 void WorkflowExecutionContext::error(const QString& text, const QString& source) const
 {
 	if (_reportNode)
-		_reportNode->addMessage(WorkflowMessageLevel::Error, source, text);
+		_reportNode->addMessage(SeverityLevel::Error, source, text);
 
 	//if (_task)
 	//    _task->addError(text);

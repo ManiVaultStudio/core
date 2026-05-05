@@ -25,7 +25,7 @@ class CORE_EXPORT WorkflowResultDialog : public QDialog
 
 public:
 
-    WorkflowResultDialog(const SharedWorkflowResult& workflowResult, WorkflowMessageLevels levels = allWorkflowMessageTypes, QWidget* parent = nullptr);
+    WorkflowResultDialog(const SharedWorkflowResult& workflowResult, SeverityLevels levels = allSeverityLevels, QWidget* parent = nullptr);
 
     QSize sizeHint() const override;
 

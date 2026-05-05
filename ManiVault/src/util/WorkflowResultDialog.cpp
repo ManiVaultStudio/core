@@ -9,7 +9,7 @@
 namespace mv::util
 {
 
-WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowResult, WorkflowMessageLevels levels /*= allWorkflowMessageTypes*/, QWidget* parent) :
+WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowResult, SeverityLevels levels /*= allSeverityLevels*/, QWidget* parent) :
 	QDialog(parent),   
 	_hierarchyWidget(this, "Workflow message", _messagesListModel, &_messagesFilterModel)
 {
@@ -31,7 +31,7 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     QStringList selectedOptions;
 
     for (const auto& level : levels)
-        selectedOptions << getWorkflowMessageLevelName(level);
+        selectedOptions << getSeverityLevelName(level);
 
     filterlevelAction.setSelectedOptions(selectedOptions);
 
