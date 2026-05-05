@@ -19,8 +19,8 @@ class CORE_EXPORT WorkflowReportNode
 public:
     using Ptr = std::shared_ptr<WorkflowReportNode>;
 
-    explicit WorkflowReportNode(const QString& name)
-        : _name(name)
+    explicit WorkflowReportNode(const QString& name) :
+		_name(name)
     {
     }
 
@@ -33,9 +33,7 @@ public:
         return child;
     }
 
-    void addMessage(SeverityLevel level,
-        const QString& source,
-        const QString& text)
+    void addMessage(SeverityLevel level, const QString& source, const QString& text, const QVariantMap& details = {})
     {
         QMutexLocker lock(&_mutex);
 
@@ -43,6 +41,7 @@ public:
             level,
             source,
             text,
+            details,
             _name,
             QDateTime::currentDateTime()
         });

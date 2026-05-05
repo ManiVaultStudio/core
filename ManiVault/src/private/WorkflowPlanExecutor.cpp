@@ -32,27 +32,44 @@ SharedWorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, W
 #endif
 
     SharedWorkflowResult result;
-    
-    if (auto* currentContext = WorkflowExecutionContext::current()) {
-        result = executeChild(workflowPlan, *currentContext);
+
+    try {
+	    if (auto* currentContext = WorkflowExecutionContext::current()) {
+	        result = executeChild(workflowPlan, *currentContext);
+	    }
+	    else {
+		    auto future = executeAsyncImpl(workflowPlan, executionOptions._reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, executionOptions);
+
+	        if (QThread::currentThread() == qApp->thread()) {
+        		QEventLoop loop;
+
+        		auto* watcher = future.getWatcher();
+
+        		connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, &loop, &QEventLoop::quit);
+
+        		loop.exec();
+	        }
+	        else {
+        		future.waitForFinished();
+	        }
+
+	        result = future.result();
+	    }
     }
-    else {
-	    auto future = executeAsyncImpl(workflowPlan, executionOptions._reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, executionOptions);
+    catch (const ManiVaultException& exception) {
+        WorkflowReporter::message(exception._severity, exception._message, workflowPlan.getName(), exception._code, exception._scope, exception._details);
 
-        if (QThread::currentThread() == qApp->thread()) {
-        	QEventLoop loop;
+        throw;
+    }
+    catch (const std::exception& exception) {
+        WorkflowReporter::error(QString("Workflow '%1' failed: %2").arg(workflowPlan.getName(), exception.what()),workflowPlan.getName());
 
-        	auto* watcher = future.getWatcher();
+        throw;
+    }
+    catch (...) {
+        WorkflowReporter::error(QString("Workflow '%1' failed with an unknown error.").arg(workflowPlan.getName()), workflowPlan.getName());
 
-        	connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, &loop, &QEventLoop::quit);
-
-        	loop.exec();
-        }
-        else {
-        	future.waitForFinished();
-        }
-
-        result = future.result();
+        throw;
     }
 
     return result;
@@ -249,7 +266,7 @@ void WorkflowPlanExecutor::executeImpl(const WorkflowPlan& workflowPlan)
 void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext)
 {
     if (stage.getConcurrencyMode() == WorkflowPlan::ConcurrencyMode::Parallel && stage.containsGuiThreadJobs()) {
-        throw std::runtime_error(QString("Parallel stage '%1' contains GUI-thread jobs, which is not allowed").arg(stage.getName()).toStdString());
+        throw ManiVaultException(SeverityLevel::Error, QString("Parallel stage '%1' contains GUI-thread jobs, which is not allowed.").arg(stage.getName()), "workflow.stage.parallel_gui_jobs", stage.getName());
     }
 
     WorkflowExecutionScope stageScope(stageContext);
