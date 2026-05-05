@@ -38,6 +38,24 @@ public:
             context->error(text, source);
     }
 
+    static void message(SeverityLevel severity, const QString& text, const QString& source = {}, const QString& code = {}, const QString& scope = {}, QVariantMap details = {})
+    {
+        if (auto context = WorkflowExecutionContext::current()) {
+            switch (severity) {
+                case SeverityLevel::Info:
+                    context->info(text, source);
+                    break;
+                case SeverityLevel::Warning:
+                    context->warning(text, source);
+                    break;
+                case SeverityLevel::Error:
+                case SeverityLevel::Critical:
+                    context->error(text, source);
+                    break;
+            }
+        }
+    }
+
     static void setProgress(double value)
     {
         if (auto* context = WorkflowExecutionContext::current())

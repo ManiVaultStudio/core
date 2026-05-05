@@ -8,6 +8,8 @@
 #include <util/WorkflowPlan.h>
 #include <util/WorkflowResult.h>
 
+#include <exception/ManiVaultException.h>
+
 #include <QString>
 #include <QThreadPool>
 
@@ -51,5 +53,10 @@ private: // Execute individual jobs
 	void executeJobOnGuiThread(const mv::util::WorkflowPlan::Job& job, mv::util::WorkflowExecutionContext& jobContext) override;
 	void executeJobOnWorkerThread(const mv::util::WorkflowPlan::Job& job, mv::util::WorkflowExecutionContext& jobContext);
 	void executeJob(const mv::util::WorkflowPlan::Job& job, mv::util::WorkflowExecutionContext& jobContext) override;
+
+private: // Helpers
+
+    static void handleStageException(const mv::util::WorkflowPlan::Stage& stage, const mv::util::ManiVaultException& exception);
+
 };
 

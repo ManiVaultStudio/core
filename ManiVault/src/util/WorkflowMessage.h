@@ -18,6 +18,7 @@ struct CORE_EXPORT WorkflowMessage
     SeverityLevel   _level = SeverityLevel::Info;
     QString         _source;
     QString         _text;
+    QVariantMap     _details;
     QString         _nodeName;
     QDateTime       _timestamp = QDateTime::currentDateTime();
 };

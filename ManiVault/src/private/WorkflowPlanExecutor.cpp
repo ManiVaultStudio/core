@@ -4,12 +4,12 @@
 
 #include "WorkflowPlanExecutor.h"
 
+#include <util/WorkflowResultRegistry.h>
+
 #include <Task.h>
 
 #include <QtConcurrent>
 #include <QElapsedTimer>
-
-#include "util/WorkflowResultRegistry.h"
 
 #ifdef _DEBUG
 	#define WORKFLOW_PLAN_EXECUTOR_VERBOSE
@@ -281,12 +281,17 @@ void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, Workfl
 
         WorkflowReporter::info("Stage finished", stage.getName());
     }
-    catch (const std::exception& e) {
-        WorkflowReporter::error(QString("Stage failed: %1").arg(e.what()), stage.getName());
+    catch (const ManiVaultException& exception) {
+        handleStageException(stage, exception);
+    }
+    catch (const std::exception& exception) {
+        WorkflowReporter::error(QString("Stage failed: %1").arg(exception.what()), stage.getName());
+
         throw;
     }
     catch (...) {
         WorkflowReporter::error("Stage failed with unknown error", stage.getName());
+
         throw;
     }
 }
@@ -445,5 +450,13 @@ void WorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, WorkflowExec
 
         throw;
     }
+}
+
+void WorkflowPlanExecutor::handleStageException(const WorkflowPlan::Stage& stage, const ManiVaultException& exception)
+{
+    WorkflowReporter::message(exception._severity, exception._message, stage.getName(), exception._code, exception._scope, exception._details);
+
+    if (exception._severity == SeverityLevel::Error || exception._severity == SeverityLevel::Critical)
+        throw;
 }
 
