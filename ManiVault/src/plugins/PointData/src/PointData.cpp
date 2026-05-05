@@ -156,7 +156,6 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
         fromVariantMapPre500(variantMap);
     }
     else {
-        try {
             variantMapMustContain(variantMap, "Data");
             variantMapMustContain(variantMap, "NumberOfPoints");
             variantMapMustContain(variantMap, "NumberOfDimensions");
@@ -212,10 +211,6 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
                 qDebug() << "Loaded sparse data with" << _numRows << "points and" << _numDimensions << "dimensions.";
             }*/
-        }
-        catch (const std::exception& e) {
-            qCritical() << "Failed to load cluster data: " << e.what();
-        }
     }
 }
 

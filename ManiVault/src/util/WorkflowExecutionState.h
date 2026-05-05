@@ -6,7 +6,6 @@
 
 #include "ManiVaultGlobals.h"
 #include "WorkflowExecutionMetrics.h"
-#include "WorkflowExecutionNotifier.h"
 #include "WorkflowExecutionOptions.h"
 
 namespace mv::util
@@ -40,10 +39,6 @@ public:
 
     WorkflowMessages collectMessages() const;
     
-    void addBytesLoaded(std::uint64_t bytes);
-
-    std::uint64_t getBytesLoaded() const;
-
     WorkflowExecutionMetrics& metrics();
 
     const WorkflowExecutionMetrics& metrics() const;
@@ -59,7 +54,6 @@ private:
 
     mutable QMutex _mutex;
     WorkflowExecutionStatus _status = WorkflowExecutionStatus::Idle;
-    std::atomic<std::uint64_t> _bytesLoaded = 0;
     WorkflowExecutionMetrics _metrics;
 };
 

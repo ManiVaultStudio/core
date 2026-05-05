@@ -54,16 +54,6 @@ WorkflowMessages WorkflowExecutionState::collectMessages() const
 	return result;
 }
 
-void WorkflowExecutionState::addBytesLoaded(std::uint64_t bytes)
-{
-	_bytesLoaded.fetch_add(bytes, std::memory_order_relaxed);
-}
-
-std::uint64_t WorkflowExecutionState::getBytesLoaded() const
-{
-	return _bytesLoaded.load(std::memory_order_relaxed);
-}
-
 WorkflowExecutionMetrics& WorkflowExecutionState::metrics()
 {
 	return _metrics;
@@ -80,10 +70,12 @@ void WorkflowExecutionState::collectMessagesRecursive(const WorkflowReportNode::
 		return;
 
 	const auto messages = node->getMessages();
+
 	for (const auto& message : messages)
 		out.push_back(message);
 
 	const auto children = node->getChildren();
+
 	for (const auto& child : children)
 		collectMessagesRecursive(child, out);
 }

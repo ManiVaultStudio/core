@@ -21,13 +21,7 @@ SerializationException SerializationException::missingKey(const QString& key, co
     details["availableKeys"]    = map.keys();
     details["variantMap"]       = map;
 
-    return SerializationException(
-        SeverityLevel::Error,
-        QString("Required key '%1' was not found.").arg(key),
-        "missing_key",
-        scope,
-        details
-    );
+    return SerializationException(SeverityLevel::Error, QString("Required key '%1' was not found.").arg(key), "missing_key", scope, details);
 }
 
 }

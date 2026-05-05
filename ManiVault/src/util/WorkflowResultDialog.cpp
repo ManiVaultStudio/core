@@ -33,6 +33,7 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     for (const auto& level : levels)
         selectedOptions << getSeverityLevelName(level);
 
+    qDebug() << "WorkflowResultDialog: Setting selected filter levels to:" << selectedOptions;
     filterlevelAction.setSelectedOptions(selectedOptions);
 
     _hierarchyWidget.getToolbarAction().addAction(&filterlevelAction);

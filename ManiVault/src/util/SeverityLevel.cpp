@@ -21,8 +21,9 @@ SeverityLevel getSeverityLevel(const QString& levelName)
     if (levelName.isEmpty())
         return SeverityLevel::Info;
 
-    if (severityLevelNames.values().contains(levelName)) {
-        return severityLevelNames.key(levelName);
+    for (auto it = severityLevelNames.cbegin(); it != severityLevelNames.cend(); ++it) {
+        if (it.value().compare(levelName, Qt::CaseInsensitive) == 0)
+            return it.key();
     }
 
     return SeverityLevel::Info;

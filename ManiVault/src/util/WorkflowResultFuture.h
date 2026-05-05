@@ -10,17 +10,30 @@
 #include <QPointer>
 #include <QFutureWatcher>
 
+#include <exception>
+
 namespace mv::util
 {
 
 class CORE_EXPORT WorkflowResultFuture
 {
 public:
-    struct State
-    {
+    struct CORE_EXPORT State {
         QFuture<SharedWorkflowResult> future;
-        QPointer<Task> task;
         QPointer<QFutureWatcher<SharedWorkflowResult>> watcher;
+
+        QPointer<Task> task;
+
+        mutable QMutex mutex;
+        std::exception_ptr exception;
+
+        void setException(std::exception_ptr e);
+
+        std::exception_ptr getException() const;
+
+        bool hasException() const;
+
+        void rethrowExceptionIfAny() const;
     };
 
 public:
@@ -45,6 +58,7 @@ public:
 
     static WorkflowResultFuture fromFuture(QFuture<SharedWorkflowResult> future);
 
+    std::shared_ptr<State> getState() const { return _state; }
 private:
     std::shared_ptr<State> _state;
 };

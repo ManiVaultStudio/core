@@ -29,6 +29,7 @@ void AbstractWorkflowPlanExecutor::installNotificationLinkHandler()
 
         const auto queriedWorkflowMessageLevels = query.queryItemValue("levels", QUrl::FullyDecoded);
 
+        qDebug() << "Handling workflow result notification for workflowResultId:" << workflowResultId << "with levels:" << queriedWorkflowMessageLevels;
         SeverityLevels severityLevels;
 
         if (!queriedWorkflowMessageLevels.isEmpty()) {
@@ -36,6 +37,7 @@ void AbstractWorkflowPlanExecutor::installNotificationLinkHandler()
 
             for (const auto& workflowMessageLevel : queriedWorkflowMessageLevels.split(",")) {
                 severityLevels << getSeverityLevel(workflowMessageLevel);
+                qDebug() << static_cast<int>(getSeverityLevel(workflowMessageLevel));
             }
         }
 
