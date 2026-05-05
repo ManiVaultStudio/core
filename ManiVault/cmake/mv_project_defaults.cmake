@@ -31,6 +31,8 @@ function(mv_project_defaults)
         return()
     endif()
 
+    message(STATUS "Setting ManiVault compilation defaults...")
+
     # -----------------------------------------------------------------------------
     # MSVC settings
     # -----------------------------------------------------------------------------
