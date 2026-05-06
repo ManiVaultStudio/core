@@ -121,17 +121,17 @@ QVariant AbstractWorkflowMessagesModel::DetailsItem::data(int role) const
 	    case Qt::EditRole:
             return getWorkflowMessage()._details;
 
-	    case Qt::DisplayRole:
-            return QString("%1").arg(data(Qt::EditRole).toMap().keys().join(", "));
+		case Qt::DisplayRole:
+            return QString("%1").arg(data(Qt::EditRole).toMap().isEmpty() ? "Not available..." : data(Qt::EditRole).toMap().keys().join(", "));
 
         case Qt::ToolTipRole:
             return getTooltip();
 
-        case Qt::FontRole: {
-            QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-            font.setItalic(true);
-            return font;
-        }
+        //case Qt::FontRole: {
+        //    QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+        //    font.setItalic(true);
+        //    return font;
+        //}
 
 	    default:
 	        break;
