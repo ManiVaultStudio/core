@@ -28,6 +28,20 @@ const WorkflowMessage& AbstractWorkflowMessagesModel::Item::getWorkflowMessage()
     return _workflowMessage;
 }
 
+QString AbstractWorkflowMessagesModel::Item::getTooltip() const
+{
+    const auto map = _workflowMessage._details;
+
+    if (map.isEmpty())
+        return {};
+
+    return QString(
+        "<div style='background:%1; color:%2; padding:6px; border: 1px solid %3;'>"
+        "<div style='margin-left:8px; margin-bottom: 1px; font-size:14px; font-weight:bold;'>%4</div><p style='margin-top:0px;'>%5</p>"
+        "</div>"
+    ).arg(QToolTip::palette().color(QPalette::ToolTipBase).name(), QToolTip::palette().color(QPalette::ToolTipText).name(), QToolTip::palette().color(QPalette::Text).name(), "Event details", variantMapToHtml(map));
+}
+
 QVariant AbstractWorkflowMessagesModel::LevelItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
@@ -37,23 +51,8 @@ QVariant AbstractWorkflowMessagesModel::LevelItem::data(int role /*= Qt::UserRol
         case Qt::DisplayRole:
             return {};
 
-        //case Qt::ToolTipRole:
-        //    return QString("%1").arg(data(Qt::DisplayRole).toString());
-
-        case Qt::ToolTipRole: {
-            qDebug() << "DetailsItem::data: ToolTipRole requested, fetching details map";
-            const auto map = data(Qt::EditRole).toMap();
-
-            if (map.isEmpty())
-                return {};
-
-            return QString(
-                "<div style='font-family:monospace;'>"
-                "<b>Details</b><br/>%1"
-                "</div>"
-            ).arg(variantMapToHtml(map));
-        }
-
+        case Qt::ToolTipRole:
+            return getTooltip();
 
         case Qt::DecorationRole:
         {
@@ -142,18 +141,8 @@ QVariant AbstractWorkflowMessagesModel::DetailsItem::data(int role) const
 	    case Qt::DisplayRole:
             return QString("{ %1 }").arg(data(Qt::EditRole).toMap().keys().join(", "));
 
-        case Qt::ToolTipRole: {
-            const auto map = data(Qt::EditRole).toMap();
-
-            if (map.isEmpty())
-                return {};
-
-            return QString(
-                "<div style='background:%1; color:%2; padding:6px; border: 1px solid %3;'>"
-					"<div style='margin-left:8px; margin-bottom: 1px; font-size:14px; font-weight:bold;'>%4</div><p style='margin-top:0px;'>%5</p>"
-                "</div>"
-            ).arg(QToolTip::palette().color(QPalette::ToolTipBase).name(), QToolTip::palette().color(QPalette::ToolTipText).name(), QToolTip::palette().color(QPalette::Text).name(), "Event details", variantMapToHtml(map));
-        }
+        case Qt::ToolTipRole:
+            return getTooltip();
 
         case Qt::FontRole: {
             QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);

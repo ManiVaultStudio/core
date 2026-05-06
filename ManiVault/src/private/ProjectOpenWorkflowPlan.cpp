@@ -136,11 +136,26 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         workspaces().loadWorkspace(context->_workspaceJsonPath);
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
-    plan.addSequentialStage("Finalize", [&plan]() -> void {
+    plan.addOnSuccessStage("Success", []() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
-        qDebug() << "Finalize";
+        qDebug() << "On success";
 #endif
-        qDebug() << "--";
+
+        qDebug() << "Project opened successfully";
+    });
+
+    plan.addOnFailureStage("Failure", []() -> void {
+#ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
+        qDebug() << "On failure";
+#endif
+
+        qDebug() << "Failed to open project";
+    });
+
+    plan.addFinallyStage("Finally", [&plan]() -> void {
+#ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
+        qDebug() << "Finally";
+#endif
 
         Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
 
@@ -150,13 +165,13 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
             throw std::runtime_error(context->_errorMessage.toStdString());
 
         mv::projects().getRecentProjectsAction().addRecentFilePath(context->_filePath);
-    
+
         auto project = mv::projects().getCurrentProject();
-    
+
         project->updateContributors();
-        
-        
+
+        qDebug() << "Project open workflow finished";
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
-    
+
     return plan;
 }

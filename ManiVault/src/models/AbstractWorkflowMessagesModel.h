@@ -48,6 +48,12 @@ public:
          */
         const util::WorkflowMessage& getWorkflowMessage() const;
 
+        /**
+         * Get tooltip for item
+         * @return Tooltip string
+         */
+        QString getTooltip() const;
+
     private:
         util::WorkflowMessage   _workflowMessage;  /** Pointer to script */
     };
