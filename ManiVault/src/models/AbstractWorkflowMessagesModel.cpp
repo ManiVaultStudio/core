@@ -67,7 +67,7 @@ QVariant AbstractWorkflowMessagesModel::LevelItem::data(int role /*= Qt::UserRol
 	        case SeverityLevel::Error:
 		        return StyledIcon("triangle-exclamation").withColor(QColor(196, 98, 30));
 
-	        case SeverityLevel::Critical:
+	        case SeverityLevel::Fatal:
 		        return StyledIcon("triangle-exclamation").withColor(QColor(196, 32, 32));
 	        }
         }

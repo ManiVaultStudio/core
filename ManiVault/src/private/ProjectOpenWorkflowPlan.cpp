@@ -6,6 +6,7 @@
 #include "ProjectOpenContext.h"
 #include "ProjectManager.h"
 #include "Archiver.h"
+#include "Exception/SerializationException.h"
 
 using namespace mv;
 using namespace mv::gui;
@@ -151,10 +152,12 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         qDebug() << "Failed to open project";
     });
 
-    plan.addFinallyStage("Finally", [&plan]() -> void {
+    plan.addFinalizationStage("Finally", [&plan]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Finally";
 #endif
+
+        qDebug() << "Cleaning up...";
 
         Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
 

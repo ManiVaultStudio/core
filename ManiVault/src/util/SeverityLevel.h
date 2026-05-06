@@ -20,7 +20,7 @@ enum class SeverityLevel {
     Info,
     Warning,
     Error,
-    Critical
+    Fatal
 };
 
 /** Map of severity levels to their string representations */
@@ -28,7 +28,7 @@ const QMap<SeverityLevel, QString> severityLevelNames = {
     { SeverityLevel::Info, "Info" },
     { SeverityLevel::Warning, "Warning" },
     { SeverityLevel::Error, "Error" },
-    { SeverityLevel::Critical, "Critical" }
+    { SeverityLevel::Fatal, "Fatal" }
 };
 
 /**
@@ -53,7 +53,7 @@ static const SeverityLevels allSeverityLevels = {
     SeverityLevel::Info,
     SeverityLevel::Warning,
     SeverityLevel::Error,
-    SeverityLevel::Critical
+    SeverityLevel::Fatal
 };
 
 }

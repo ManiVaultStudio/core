@@ -194,7 +194,7 @@ void Serializable::reportSerializationError(QString scope, QString message)
 void Serializable::reportFatalSerializationError(QString scope, QString message)
 {
     if (auto context = WorkflowExecutionContext::current()) {
-	    context->getReportNode()->addMessage(SeverityLevel::Critical, "Serializable", message, scope);
+	    context->getReportNode()->addMessage(SeverityLevel::Fatal, "Serializable", message, scope);
     }
     
     qWarning() << "Critical: " << message << "(" << scope << ")";

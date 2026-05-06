@@ -130,12 +130,23 @@ QString getNoBytesHumanReadable(std::uint64_t byteCount, bool useIEC /*= true*/)
 
 QString getElapsedTimeHumanReadable(std::uint64_t ms, bool compact)
 {
-    const std::uint64_t totalSeconds    = ms / 1000;
-    const std::uint64_t milliseconds    = ms % 1000;
-    const std::uint64_t seconds         = totalSeconds % 60;
-    const std::uint64_t minutes         = (totalSeconds / 60) % 60;
-    const std::uint64_t hours           = (totalSeconds / 3600) % 24;
-    const std::uint64_t days            = totalSeconds / 86400;
+    if (ms < 1000)
+    {
+        double seconds = ms / 1000.0;
+
+        QString s = QString::number(seconds, 'f', 2);
+
+        s.remove(QRegularExpression("0+$"));
+        s.remove(QRegularExpression("\\.$"));
+
+        return s + "s";
+    }
+
+    const std::uint64_t totalSeconds = ms / 1000;
+    const std::uint64_t seconds = totalSeconds % 60;
+    const std::uint64_t minutes = (totalSeconds / 60) % 60;
+    const std::uint64_t hours = (totalSeconds / 3600) % 24;
+    const std::uint64_t days = totalSeconds / 86400;
 
     QStringList parts;
 
@@ -151,12 +162,8 @@ QString getElapsedTimeHumanReadable(std::uint64_t ms, bool compact)
     if (seconds > 0 || (!compact && parts.isEmpty()))
         parts << QString("%1s").arg(seconds);
 
-    // Only show ms if duration is very small or verbose requested
-    if (!compact && ms < 1000)
-        parts << QString("%1ms").arg(milliseconds);
-
     if (parts.isEmpty())
-        return "0ms";
+        return "0s";
 
     return parts.join(" ");
 }

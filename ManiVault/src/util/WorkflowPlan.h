@@ -177,8 +177,8 @@ public:
     }
 
     template<typename Function>
-    void addFinallyStage(QString name, Function&& function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, double weight = 0.0) {
-        addStageTo(_finallyStages, std::move(name), std::forward<Function>(function), threadAffinity, weight);
+    void addFinalizationStage(QString name, Function&& function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, double weight = 0.0) {
+        addStageTo(_finalizationStages, std::move(name), std::forward<Function>(function), threadAffinity, weight);
     }
 
     SharedWorkflowResult execute(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions = {});
@@ -233,7 +233,7 @@ private:
     Stages  _stages;
     Stages _onSuccessStages;
     Stages _onFailureStages;
-    Stages _finallyStages;
+    Stages _finalizationStages;
     SharedState _sharedState = std::make_shared<QVariantMap>();
     SharedWorkflowContext   _workflowContext;
     double _weight = 1.0;

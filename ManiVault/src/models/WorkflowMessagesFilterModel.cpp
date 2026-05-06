@@ -19,7 +19,7 @@ namespace mv {
     _filterLevelAction(this, "Filter level", severityLevelNames.values(), {
 		getSeverityLevelName(SeverityLevel::Warning),
         getSeverityLevelName(SeverityLevel::Error),
-        getSeverityLevelName(SeverityLevel::Critical)
+        getSeverityLevelName(SeverityLevel::Fatal)
     })
 {
     connect(&_filterLevelAction, &gui::OptionsAction::selectedOptionsChanged, this, &WorkflowMessagesFilterModel::invalidateFilter);

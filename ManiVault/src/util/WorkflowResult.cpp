@@ -42,7 +42,7 @@ bool WorkflowResult::hasErrors() const
 
 bool WorkflowResult::hasCriticalErrors() const
 {
-    return getCriticalErrorCount() > 0;
+    return getFatalErrorCount() > 0;
 }
 
 int WorkflowResult::getWarningCount() const
@@ -55,9 +55,9 @@ int WorkflowResult::getErrorCount() const
     return getMessageCountByLevels({ SeverityLevel::Error });
 }
 
-int WorkflowResult::getCriticalErrorCount() const
+int WorkflowResult::getFatalErrorCount() const
 {
-	return getMessageCountByLevels({ SeverityLevel::Critical });
+	return getMessageCountByLevels({ SeverityLevel::Fatal });
 }
 
 WorkflowMessages WorkflowResult::getMessages() const
@@ -75,9 +75,9 @@ WorkflowMessages WorkflowResult::getErrorMessages() const
 	return getMessagesByLevels({ SeverityLevel::Error });
 }
 
-WorkflowMessages WorkflowResult::getCriticalErrorMessages() const
+WorkflowMessages WorkflowResult::getFatalErrorMessages() const
 {
-	return getMessagesByLevels({ SeverityLevel::Critical });
+	return getMessagesByLevels({ SeverityLevel::Fatal });
 }
 
 void WorkflowResult::setMessages(const WorkflowMessages& workflowMessages)

@@ -33,7 +33,7 @@ public: // Messages
     WorkflowMessages getMessages() const;
     WorkflowMessages getWarningMessages() const;
     WorkflowMessages getErrorMessages() const;
-    WorkflowMessages getCriticalErrorMessages() const;
+    WorkflowMessages getFatalErrorMessages() const;
     void setMessages(const WorkflowMessages& workflowMessages);
     WorkflowMessages getMessagesByLevels(const SeverityLevels& severityLevels) const;
     int getMessageCountByLevels(const SeverityLevels& severityLevels) const;
@@ -42,7 +42,7 @@ public: // Messages
     bool hasCriticalErrors() const;
     int getWarningCount() const;
     int getErrorCount() const;
-    int getCriticalErrorCount() const;
+    int getFatalErrorCount() const;
 
 public: // Metrics
 

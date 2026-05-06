@@ -41,7 +41,7 @@ void WorkflowReporter::message(SeverityLevel severity, const QString& text, cons
 			context->warning(text, source, scope, details);
 			break;
 		case SeverityLevel::Error:
-		case SeverityLevel::Critical:
+		case SeverityLevel::Fatal:
 			context->error(text, source, scope, details);
 			break;
 		}

@@ -33,6 +33,8 @@ SharedWorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, W
 
     SharedWorkflowResult result;
 
+    
+
     try {
 	    if (auto* currentContext = WorkflowExecutionContext::current()) {
 	        result = executeChild(workflowPlan, *currentContext);
@@ -70,21 +72,21 @@ SharedWorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, W
 	    }
     }
     catch (const ManiVaultException& exception) {
-        qDebug() << "ROOT CAUGHT ManiVaultException"
-            << exception._message
-            << exception._code;
-
         WorkflowReporter::message(exception._severity, exception._message, workflowPlan.getName(), exception._code, exception._scope, exception._details);
 
+        // displayFailure(exception._message);
         throw;
     }
     catch (const std::exception& exception) {
         WorkflowReporter::error(QString("Workflow '%1' failed: %2").arg(workflowPlan.getName(), exception.what()),workflowPlan.getName());
+        // displayFailure(exception.what());
 
         throw;
     }
     catch (...) {
         WorkflowReporter::error(QString("Workflow '%1' failed with an unknown error.").arg(workflowPlan.getName()), workflowPlan.getName());
+
+        // displayFailure("Unknown exception");
 
         throw;
     }
@@ -182,6 +184,18 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
 
     WorkflowReporter::info("Workflow started", workflowPlan.getName());
 
+    const auto displayFailure = [workflowPlan, executionOptions](const QString& message) -> void {
+        QMetaObject::invokeMethod(&help(), [workflowPlan, executionOptions, message]() {
+            const auto title = QString("%1 failed").arg(workflowPlan.getName());
+
+            if (executionOptions._addNotification) {
+                help().addNotification(title, message);
+            }
+
+            qDebug() << QString("%1: %2").arg(title, message);
+        });
+    };
+
     try {
         executeImpl(workflowPlan);
         
@@ -190,16 +204,20 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
     catch (const ManiVaultException& exception) {
         WorkflowReporter::message(exception._severity, exception._message, workflowPlan.getName(), exception._code, exception._scope, exception._details);
 
-        if (exception._severity == SeverityLevel::Critical)
+        displayFailure(exception._message);
+
+        if (exception._severity == SeverityLevel::Fatal)
             throw;
     }
     catch (const std::exception& exception) {
         WorkflowReporter::error(QString("Workflow failed: %1").arg(QString::fromUtf8(exception.what())), workflowPlan.getName());
 
+        displayFailure(QString::fromUtf8(exception.what()));
         throw;
     }
     catch (...) {
         WorkflowReporter::error("Workflow failed with unknown error", workflowPlan.getName());
+        displayFailure("Unknown error");
 
         throw;
     }
@@ -216,7 +234,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
 
     if (executionOptions._addNotification) {
 	    const auto url      = QString("app://workflow/results?workflowResultId=%1").arg(resultId.toString(QUuid::WithoutBraces));
-        const auto title    = QString("%1 finished in %2").arg(workflowPlan.getName()).arg(getElapsedTimeHumanReadable(result->getDuration(), false));
+        const auto title    = QString("%1 finished in %2").arg(workflowPlan.getName()).arg(getElapsedTimeHumanReadable(result->getDuration(), true));
 
     	QMetaObject::invokeMethod(&help(), [result, url, title]() {
             QString message;
@@ -336,7 +354,7 @@ void WorkflowPlanExecutor::executeStageGroup(const WorkflowPlan::Stages& stages)
             //WorkflowReporter::error("Stage finished", stage.getName());
             //ctx.setError(QString::fromStdString(e.what())); // or your reporting system
 
-            if (exception._severity == SeverityLevel::Critical) {
+            if (exception._severity == SeverityLevel::Fatal) {
                 throw; // abort entire workflow
             }
 
@@ -562,7 +580,7 @@ void WorkflowPlanExecutor::handleStageException(const WorkflowPlan::Stage& stage
 {
     WorkflowReporter::message(exception._severity, exception._message, stage.getName(), exception._code, exception._scope, exception._details);
 
-    if (exception._severity == SeverityLevel::Error || exception._severity == SeverityLevel::Critical)
+    if (exception._severity == SeverityLevel::Error || exception._severity == SeverityLevel::Fatal)
         throw;
 }
 
