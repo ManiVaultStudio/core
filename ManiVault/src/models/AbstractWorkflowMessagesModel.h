@@ -203,7 +203,18 @@ public:
          * @param role Data role
          * @return Header data
          */
-        static QVariant headerData(Qt::Orientation orientation, int role);
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Details";
+
+	            case Qt::ToolTipRole:
+	                return "Workflow message details";
+            }
+
+            return {};
+        }
     };
 
 protected:

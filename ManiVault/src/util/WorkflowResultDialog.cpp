@@ -23,6 +23,15 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     setWindowTitle("Workflow result - " + workflowResult->getWorkflowName());
     setWindowIcon(StyledIcon("scroll"));
 
+    setStyleSheet(R"(
+		QToolTip {
+		    border: none;
+		    background-color: palette(ToolTipBase);
+		    color: palette(ToolTipText);
+		    padding: 6px;
+		}
+	)");
+
     _messagesListModel.setWorkflowResult(workflowResult);
     _messagesFilterModel.setSourceModel(&_messagesListModel);
 
@@ -46,7 +55,7 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     
     auto header = treeView.header();
 
-    header->setStretchLastSection(false);
+    //header->setStretchLastSection(false);
 
     header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level), QHeaderView::Fixed);
     header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), QHeaderView::Interactive);
@@ -58,7 +67,7 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), 150);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Text), 300);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), 80);
-    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), 80);
+    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), 200);
 
     header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), true);
     //header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), true);

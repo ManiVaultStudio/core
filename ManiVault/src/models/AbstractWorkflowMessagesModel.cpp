@@ -4,6 +4,8 @@
 
 #include "AbstractWorkflowMessagesModel.h"
 
+#include <QToolTip>
+
 using namespace mv;
 
 #ifdef _DEBUG
@@ -34,8 +36,23 @@ QVariant AbstractWorkflowMessagesModel::LevelItem::data(int role /*= Qt::UserRol
         case Qt::DisplayRole:
             return {};
 
-        case Qt::ToolTipRole:
-            return QString("%1").arg(data(Qt::DisplayRole).toString());
+        //case Qt::ToolTipRole:
+        //    return QString("%1").arg(data(Qt::DisplayRole).toString());
+
+        case Qt::ToolTipRole: {
+            qDebug() << "DetailsItem::data: ToolTipRole requested, fetching details map";
+            const auto map = data(Qt::EditRole).toMap();
+
+            if (map.isEmpty())
+                return {};
+
+            return QString(
+                "<div style='font-family:monospace;'>"
+                "<b>Details</b><br/>%1"
+                "</div>"
+            ).arg(variantMapToHtml(map));
+        }
+
 
         case Qt::DecorationRole:
         {
@@ -117,26 +134,24 @@ QVariant AbstractWorkflowMessagesModel::TimeStampItem::data(int role /*= Qt::Use
 
 QVariant AbstractWorkflowMessagesModel::DetailsItem::data(int role) const
 {
-    qDebug() << "DetailsItem::data: Requested role" << role;
     switch (role) {
 	    case Qt::EditRole:
-            return QVariantMap({ {"key", 12 } });// getWorkflowMessage()._details;
+            return getWorkflowMessage()._details;
 
 	    case Qt::DisplayRole:
-            return "--";//variantMapToPrettyString(data(Qt::EditRole).toMap());
+            return QString("{ %1 }").arg(data(Qt::EditRole).toMap().keys().join(", "));
 
         case Qt::ToolTipRole: {
-            qDebug() << "DetailsItem::data: ToolTipRole requested, fetching details map";
             const auto map = data(Qt::EditRole).toMap();
 
             if (map.isEmpty())
                 return {};
 
             return QString(
-                "<div style='font-family:monospace;'>"
-                "<b>Details</b><br/>%1"
+                "<div style='background:%1; color:%2; padding:6px; border: 1px solid %3;'>"
+					"<div style='margin-left:8px; margin-bottom: 1px; font-size:14px; font-weight:bold;'>%4</div><p style='margin-top:0px;'>%5</p>"
                 "</div>"
-            ).arg(variantMapToHtml(map));
+            ).arg(QToolTip::palette().color(QPalette::ToolTipBase).name(), QToolTip::palette().color(QPalette::ToolTipText).name(), QToolTip::palette().color(QPalette::Text).name(), "Event details", variantMapToHtml(map));
         }
 
 	    default:
@@ -144,20 +159,6 @@ QVariant AbstractWorkflowMessagesModel::DetailsItem::data(int role) const
     }
 
 	return Item::data(role);
-}
-
-QVariant AbstractWorkflowMessagesModel::DetailsItem::headerData(Qt::Orientation orientation, int role)
-{
-	switch (role) {
-		case Qt::DisplayRole:
-		case Qt::EditRole:
-			return "Details";
-
-		case Qt::ToolTipRole:
-			return "Workflow message details";
-	}
-
-	return {};
 }
 
 AbstractWorkflowMessagesModel::AbstractWorkflowMessagesModel(QObject* parent) :

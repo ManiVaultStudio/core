@@ -20,12 +20,7 @@ WorkflowMessagesListModel::WorkflowMessagesListModel(QObject* parent /*= nullptr
 void WorkflowMessagesListModel::setWorkflowResult(const util::SharedWorkflowResult& workflowResult)
 {
     for (const auto& message : workflowResult->getMessages()) {
-        appendRow({
-            new LevelItem(message),
-            new SourceItem(message),
-            new TextItem(message),
-            new TimeStampItem(message)
-        });
+        appendRow(Row(message));
     }
 }
 

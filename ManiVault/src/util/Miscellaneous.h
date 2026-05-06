@@ -326,23 +326,29 @@ CORE_EXPORT QString variantToHtml(const QVariant& value);
 /**
  * Convert a QVariantMap to an HTML string representation, showing key-value pairs in a table
  * @param map Map to convert
+ * @param depth Current recursion depth (default is 0)
+ * @param maxDepth Maximum depth to recurse into nested maps/lists (default is 2)
  * @return HTML string representation of the map
  */
-CORE_EXPORT QString variantMapToHtml(const QVariantMap& map);
+CORE_EXPORT QString variantMapToHtml(const QVariantMap& map, int depth = 0, int maxDepth = 2);
 
 /**
  * Convert a QVariantList to an HTML string representation, showing items in an ordered list
  * @param list List to convert
+ * @param depth Current recursion depth (default is 0)
+ * @param maxDepth Maximum depth to recurse into nested maps/lists (default is 2)
  * @return HTML string representation of the list
  */
-CORE_EXPORT QString variantListToHtml(const QVariantList& list);
+CORE_EXPORT QString variantListToHtml(const QVariantList& list, int depth, int maxDepth);
 
 /**
  * Convert a QVariant to an HTML string representation, handling maps and lists recursively
  * @param value QVariant to convert
+ * @param depth Current recursion depth (default is 0)
+ * @param maxDepth Maximum depth to recurse into nested maps/lists (default is 2)
  * @return HTML string representation of the QVariant
  */
-CORE_EXPORT QString variantToHtml(const QVariant& value);
+CORE_EXPORT QString variantToHtml(const QVariant& value, int depth, int maxDepth);
 
 /**
  * Log memory usage of the current process with an optional label
