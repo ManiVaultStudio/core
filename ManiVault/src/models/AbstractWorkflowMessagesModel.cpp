@@ -86,11 +86,13 @@ QVariant AbstractWorkflowMessagesModel::TextItem::data(int role /*= Qt::UserRole
 {
     switch (role) {
         case Qt::EditRole:
-        case Qt::DisplayRole:
             return getWorkflowMessage()._text;
 
+        case Qt::DisplayRole:
+            return QString("%1: %2").arg(getSeverityLevelName(getWorkflowMessage()._level), data(Qt::EditRole).toString());
+
         case Qt::ToolTipRole:
-            return QString("%1").arg(data(Qt::DisplayRole).toString());
+            return data(Qt::DisplayRole).toString();
 
         default:
             break;
@@ -113,25 +115,6 @@ QVariant AbstractWorkflowMessagesModel::SourceItem::data(int role /*= Qt::UserRo
     return Item::data(role);
 }
 
-QVariant AbstractWorkflowMessagesModel::TimeStampItem::data(int role /*= Qt::UserRole + 1*/) const
-{
-    switch (role) {
-	    case Qt::EditRole:
-	        return getWorkflowMessage()._timestamp;
-
-	    case Qt::DisplayRole:
-            return QLocale().toString(data(Qt::EditRole).toDateTime(), QLocale::ShortFormat);
-
-	    case Qt::ToolTipRole:
-	        return QString("%1").arg(data(Qt::DisplayRole).toString());
-
-	    default:
-	        break;
-    }
-
-    return Item::data(role);
-}
-
 QVariant AbstractWorkflowMessagesModel::DetailsItem::data(int role) const
 {
     switch (role) {
@@ -139,7 +122,7 @@ QVariant AbstractWorkflowMessagesModel::DetailsItem::data(int role) const
             return getWorkflowMessage()._details;
 
 	    case Qt::DisplayRole:
-            return QString("{ %1 }").arg(data(Qt::EditRole).toMap().keys().join(", "));
+            return QString("%1").arg(data(Qt::EditRole).toMap().keys().join(", "));
 
         case Qt::ToolTipRole:
             return getTooltip();
@@ -155,6 +138,27 @@ QVariant AbstractWorkflowMessagesModel::DetailsItem::data(int role) const
     }
 
 	return Item::data(role);
+}
+
+QVariant AbstractWorkflowMessagesModel::TimeStampItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	        return getWorkflowMessage()._timestamp;
+
+	    case Qt::DisplayRole: {
+	        const auto dt = getWorkflowMessage()._timestamp;
+	        return QLocale().toString(dt.time(), "HH:mm:ss");
+	    }
+
+	    case Qt::ToolTipRole:
+	        return QString("%1").arg(data(Qt::DisplayRole).toString());
+
+	    default:
+	        break;
+    }
+
+    return Item::data(role);
 }
 
 AbstractWorkflowMessagesModel::AbstractWorkflowMessagesModel(QObject* parent) :
@@ -176,11 +180,11 @@ QVariant AbstractWorkflowMessagesModel::headerData(int section, Qt::Orientation 
         case Column::Text:
             return TextItem::headerData(orientation, role);
 
-        case Column::TimeStamp:
-            return TimeStampItem::headerData(orientation, role);
-
         case Column::Details:
             return DetailsItem::headerData(orientation, role);
+
+        case Column::TimeStamp:
+            return TimeStampItem::headerData(orientation, role);
 
         default:
             break;

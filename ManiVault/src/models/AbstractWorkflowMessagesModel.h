@@ -26,8 +26,8 @@ public:
         Level,
         Source,
         Text,
-        TimeStamp,
         Details,
+        TimeStamp,
 
         Count
     };
@@ -157,39 +157,6 @@ public:
         }
     };
 
-    /** Item class for displaying the workflow message timestamp */
-    class CORE_EXPORT TimeStampItem final : public Item {
-    public:
-
-        /** No need for specialized constructor */
-        using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get header data for \p orientation and \p role
-         * @param orientation Horizontal/vertical
-         * @param role Data role
-         * @return Header data
-         */
-        static QVariant headerData(Qt::Orientation orientation, int role) {
-            switch (role) {
-	            case Qt::DisplayRole:
-	            case Qt::EditRole:
-	                return "Time";
-
-	            case Qt::ToolTipRole:
-	                return "Workflow message timestamp";
-            }
-
-            return {};
-        }
-    };
-
     /** Item class for displaying the workflow message details */
     class CORE_EXPORT DetailsItem final : public Item {
     public:
@@ -223,6 +190,39 @@ public:
         }
     };
 
+    /** Item class for displaying the workflow message timestamp */
+    class CORE_EXPORT TimeStampItem final : public Item {
+    public:
+
+        /** No need for specialized constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Time";
+
+	            case Qt::ToolTipRole:
+	                return "Workflow message timestamp";
+            }
+
+            return {};
+        }
+    };
+
 protected:
 
     /** Convenience class for combining items in a row */
@@ -239,8 +239,8 @@ protected:
             append(new LevelItem(message));
             append(new SourceItem(message));
             append(new TextItem(message));
-            append(new TimeStampItem(message));
             append(new DetailsItem(message));
+            append(new TimeStampItem(message));
         }
     };
 

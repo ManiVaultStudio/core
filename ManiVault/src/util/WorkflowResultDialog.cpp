@@ -66,11 +66,11 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level), 35);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), 150);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Text), 300);
-    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), 80);
-    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), 200);
+    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), 60);
+    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), 100);
 
     header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), true);
-    //header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), true);
+    header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), true);
 
     auto layout = new QVBoxLayout(this);
 

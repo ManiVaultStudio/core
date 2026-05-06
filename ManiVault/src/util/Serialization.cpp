@@ -237,7 +237,7 @@ DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, co
     );
 
     if (!decodeResult.isSuccess()) {
-        throw std::runtime_error(QString("Failed to decode block from file '%1': %2").arg(decodeBlockJob._uri, decodeResult._error).toStdString());
+        throw SerializationException(SeverityLevel::Error, QString("Failed to decode block from file '%1': %2").arg(decodeBlockJob._uri, decodeResult._error), "serialization.decode.blocks");
     }
 
     //if (decodeResult._bytesWritten != size) {
@@ -393,29 +393,29 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
         auto* decodeBlockJobPtr = &decodeBlockJob;
 
         decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [decodeBlockJobPtr, bytes, totalSize, createCodec](const WorkflowPlan::Job& job) {
-            try {
+            //try {
                 if (decodeBlockJobPtr->_uri.isEmpty()) {
                     decodeBlockFromBase64To(*decodeBlockJobPtr, createCodec, bytes, totalSize);
                 } else {
                     decodeBlockFromFileTo(*decodeBlockJobPtr, createCodec, bytes, totalSize);
                 }
-            }
-            catch (std::exception& e) {
-                Serializable::reportSerializationError(
-                    "Data hierarchy manager",
-                    "Failed to load dataset: " + QString::fromStdString(e.what())
-                );
+            //}
+            //catch (std::exception& e) {
+            //    Serializable::reportSerializationError(
+            //        "Data hierarchy manager",
+            //        "Failed to load dataset: " + QString::fromStdString(e.what())
+            //    );
 
-                throw;
-            }
-            catch (...) {
-                Serializable::reportSerializationError(
-                    "Data hierarchy manager",
-                    "Failed to load dataset"
-                );
+            //    throw;
+            //}
+            //catch (...) {
+            //    Serializable::reportSerializationError(
+            //        "Data hierarchy manager",
+            //        "Failed to load dataset"
+            //    );
 
-                throw;
-            }
+            //    throw;
+            //}
         }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread);
 
         ++decodeBlockJobIndex;

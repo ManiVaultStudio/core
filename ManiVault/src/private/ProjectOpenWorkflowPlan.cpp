@@ -127,7 +127,6 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Open workspace JSON";
 #endif
-        qDebug() << "--";
         auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
 
         if (!QFileInfo(context->_workspaceJsonPath).exists())
@@ -170,7 +169,6 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
         project->updateContributors();
 
-        qDebug() << "Project open workflow finished";
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     return plan;

@@ -324,10 +324,31 @@ void WorkflowPlanExecutor::executeStageGroup(const WorkflowPlan::Stages& stages)
     }
 
     for (int i = 0; i < stageCount; ++i) {
+
         const auto& stage = stages[i];
         auto& ctx = stageContexts[i];
 
-        executeStage(stage, ctx);
+        try {
+            executeStage(stage, ctx);
+        }
+        catch (const ManiVaultException& exception) {
+
+            //WorkflowReporter::error("Stage finished", stage.getName());
+            //ctx.setError(QString::fromStdString(e.what())); // or your reporting system
+
+            if (exception._severity == SeverityLevel::Critical) {
+                throw; // abort entire workflow
+            }
+
+            // NON-FATAL  continue to next stage
+        }
+        catch (const std::exception& exception) {
+            Q_UNUSED(exception)
+            //ctx.setError(QString::fromStdString(e.what()));
+
+            // Treat unknown exceptions as fatal (recommended)
+            throw;
+        }
     }
 }
 

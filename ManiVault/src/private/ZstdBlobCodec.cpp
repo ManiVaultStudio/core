@@ -19,6 +19,16 @@ QString getZstdErrorString(const char* prefix, size_t code) {
     return QStringLiteral("%1: %2").arg(QString::fromUtf8(prefix), QString::fromUtf8(ZSTD_getErrorName(code)));
 }
 
+static ZSTD_DCtx* getThreadLocalDCtx()
+{
+    thread_local ZSTD_DCtx* dctx = ZSTD_createDCtx();
+
+    if (!dctx)
+        throw std::runtime_error("ZSTD_createDCtx failed");
+
+    return dctx;
+}
+
 }
 
 ZstdBlobCodec::ZstdBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction) :
@@ -177,12 +187,19 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decodeTo(const QByteArray& encodedDat
         return result;
     }
 
-    const size_t decodedSize = ZSTD_decompress(
+    ZSTD_DCtx* dctx = getThreadLocalDCtx();
+
+    QByteArray dest(destinationSize, Qt::Initialization::Uninitialized);
+
+    const size_t decodedSize = ZSTD_decompressDCtx(
+        dctx,
         destination,
         static_cast<size_t>(destinationSize),
-        encodedData.constData(),
-        static_cast<size_t>(encodedData.size())
+        dest.constData(),
+        static_cast<size_t>(dest.size())
     );
+
+    memcpy(destination, dest.constData(), dest.size());
 
     if (ZSTD_isError(decodedSize)) {
         result._error = QString("ZSTD decompression failed: %1")
