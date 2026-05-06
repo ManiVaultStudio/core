@@ -4,6 +4,7 @@
 
 #include "AbstractWorkflowMessagesModel.h"
 
+#include <QFontDatabase>
 #include <QToolTip>
 
 using namespace mv;
@@ -152,6 +153,12 @@ QVariant AbstractWorkflowMessagesModel::DetailsItem::data(int role) const
 					"<div style='margin-left:8px; margin-bottom: 1px; font-size:14px; font-weight:bold;'>%4</div><p style='margin-top:0px;'>%5</p>"
                 "</div>"
             ).arg(QToolTip::palette().color(QPalette::ToolTipBase).name(), QToolTip::palette().color(QPalette::ToolTipText).name(), QToolTip::palette().color(QPalette::Text).name(), "Event details", variantMapToHtml(map));
+        }
+
+        case Qt::FontRole: {
+            QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+            font.setItalic(true);
+            return font;
         }
 
 	    default:

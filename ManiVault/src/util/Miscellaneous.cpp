@@ -832,8 +832,8 @@ QString variantMapToHtml(const QVariantMap& map, int depth /*= 0*/, int maxDepth
 
         html += QString(
             "<tr style='background:%1;'>"
-	            "<td style='padding:4px 8px; font-weight:bold; color:%2; vertical-align:top; white-space:nowrap;'>%4</td>"
-	            "<td style='padding:4px 8px;color:%5; vertical-align:top;'>%6</td>"
+	            "<td style='padding:2px 8px; font-weight:bold; color:%2; vertical-align:top; white-space:nowrap;'>%4</td>"
+	            "<td style='padding:2px 8px;color:%5; vertical-align:top;'>%6</td>"
             "</tr>"
         ).arg(
             rowBg,

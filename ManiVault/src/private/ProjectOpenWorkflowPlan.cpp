@@ -127,7 +127,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Open workspace JSON";
 #endif
-
+        qDebug() << "--";
         auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
 
         if (!QFileInfo(context->_workspaceJsonPath).exists())
@@ -140,6 +140,9 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Finalize";
 #endif
+        qDebug() << "--";
+
+        Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
 
         auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
 
@@ -151,8 +154,8 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         auto project = mv::projects().getCurrentProject();
     
         project->updateContributors();
-
-        Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
+        
+        
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
     
     return plan;
