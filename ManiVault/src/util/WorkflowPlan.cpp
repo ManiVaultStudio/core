@@ -171,6 +171,21 @@ WorkflowPlan::Stages WorkflowPlan::getStages() const
 	return _stages;
 }
 
+WorkflowPlan::Stages WorkflowPlan::getOnSuccessStages() const
+{
+    return _onSuccessStages;
+}
+
+WorkflowPlan::Stages WorkflowPlan::getOnFailureStages() const
+{
+    return _onFailureStages;
+}
+
+WorkflowPlan::Stages WorkflowPlan::getFinallyStages() const
+{
+    return _finallyStages;
+}
+
 WorkflowPlan::SharedState WorkflowPlan::getSharedState() const
 {
 	return _sharedState;

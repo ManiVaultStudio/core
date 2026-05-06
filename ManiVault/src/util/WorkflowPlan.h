@@ -35,6 +35,13 @@ public:
         Parallel
     };
 
+    enum class StageExecutionPolicy {
+        Main,
+        OnSuccess,
+        OnFailure,
+        Finally
+    };
+
     enum class JobThreadAffinity {
         CurrentWorkerThread,
         GuiThread
@@ -150,15 +157,7 @@ public:
 
     template<typename Function>
     void addSequentialStage(QString name, Function&& function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, double weight = 1.0) {
-        if constexpr (std::is_invocable_v<Function, Job&>) {
-            _stages.emplace_back(Stage(name, ConcurrencyMode::Sequential, { Job(name, JobFunction(std::forward<Function>(function)), threadAffinity) }, weight));
-        }
-        else if constexpr (std::is_invocable_v<Function>) {
-            _stages.emplace_back(Stage(name, ConcurrencyMode::Sequential, { Job(name, JobFunction([fn = std::forward<Function>(function)](Job&) mutable { fn(); }), threadAffinity) }, weight));
-        }
-        else {
-            static_assert(std::is_invocable_v<Function, Job&> || std::is_invocable_v<Function>, "Stage function must be callable as void(Job&) or void()");
-        }
+        addStageTo(_stages, std::move(name), std::forward<Function>(function), threadAffinity, weight);
     }
 
     QString getName() const;
@@ -167,10 +166,30 @@ public:
 	void addParallelStage(QString name, Jobs jobs, double weight = 1.0);
     void addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight = 1.0);
 
+    template<typename Function>
+    void addOnSuccessStage(QString name, Function&& function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, double weight = 0.0) {
+        addStageTo(_onSuccessStages, std::move(name), std::forward<Function>(function), threadAffinity, weight);
+    }
+
+    template<typename Function>
+    void addOnFailureStage(QString name, Function&& function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, double weight = 0.0) {
+        addStageTo(_onFailureStages, std::move(name), std::forward<Function>(function), threadAffinity, weight);
+    }
+
+    template<typename Function>
+    void addFinallyStage(QString name, Function&& function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, double weight = 0.0) {
+        addStageTo(_finallyStages, std::move(name), std::forward<Function>(function), threadAffinity, weight);
+    }
+
     SharedWorkflowResult execute(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions = {});
     WorkflowResultFuture executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions = {});
     SharedWorkflowResult executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {});
-    Stages getStages() const;
+
+	Stages getStages() const;
+
+    Stages getOnSuccessStages() const;
+    Stages getOnFailureStages() const;
+    Stages getFinallyStages() const;
 
     SharedState getSharedState() const;
 
@@ -187,8 +206,34 @@ public:
     double getWeight() const;
 
 private:
+    template<typename Function>
+    void addStageTo(Stages& stages, QString name, Function&& function, JobThreadAffinity threadAffinity, double weight) {
+        if constexpr (std::is_invocable_v<Function, Job&>) {
+            stages.emplace_back(Stage(name, ConcurrencyMode::Sequential, {
+                Job(name, JobFunction(std::forward<Function>(function)), threadAffinity)
+                }, weight));
+        }
+        else if constexpr (std::is_invocable_v<Function>) {
+            stages.emplace_back(Stage(name, ConcurrencyMode::Sequential, {
+                Job(name, JobFunction([fn = std::forward<Function>(function)](Job&) mutable {
+                    fn();
+                }), threadAffinity)
+                }, weight));
+        }
+        else {
+            static_assert(
+                std::is_invocable_v<Function, Job&> || std::is_invocable_v<Function>,
+                "Stage function must be callable as void(Job&) or void()"
+                );
+        }
+    }
+
+private:
     QString _name;
     Stages  _stages;
+    Stages _onSuccessStages;
+    Stages _onFailureStages;
+    Stages _finallyStages;
     SharedState _sharedState = std::make_shared<QVariantMap>();
     SharedWorkflowContext   _workflowContext;
     double _weight = 1.0;

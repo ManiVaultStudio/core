@@ -35,6 +35,7 @@ private:
     virtual SharedWorkflowResult executeChild(const WorkflowPlan& workflowPlan, WorkflowExecutionContext& parentContext) = 0;
     virtual void executeImpl(const WorkflowPlan& workflowPlan) = 0;
     virtual void executeStage(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) = 0;
+    virtual void executeStageGroup(const WorkflowPlan::Stages& stages) = 0;
 
 private: // Execute jobs in a stage
     virtual void executeSequentialJobs(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) = 0;

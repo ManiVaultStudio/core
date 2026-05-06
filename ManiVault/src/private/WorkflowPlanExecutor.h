@@ -42,8 +42,9 @@ protected:
 private:
     mv::util::SharedWorkflowResult executeRoot(const mv::util::WorkflowPlan& workflowPlan, mv::Task* task, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
     mv::util::SharedWorkflowResult executeChild(const mv::util::WorkflowPlan& workflowPlan, mv::util::WorkflowExecutionContext& parentContext) override;
-    void                     executeImpl(const mv::util::WorkflowPlan& workflowPlan) override;
-    void                     executeStage(const mv::util::WorkflowPlan::Stage& stage, mv::util::WorkflowExecutionContext& stageContext) override;
+    void                           executeImpl(const mv::util::WorkflowPlan& workflowPlan) override;
+    void                           executeStage(const mv::util::WorkflowPlan::Stage& stage, mv::util::WorkflowExecutionContext& stageContext) override;
+    void                           executeStageGroup(const mv::util::WorkflowPlan::Stages& stages) override;
 
 private: // Execute jobs in a stage
     void executeSequentialJobs(const mv::util::WorkflowPlan::Stage& stage, mv::util::WorkflowExecutionContext& stageContext) override;

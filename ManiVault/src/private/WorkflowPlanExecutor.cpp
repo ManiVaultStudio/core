@@ -268,29 +268,66 @@ SharedWorkflowResult WorkflowPlanExecutor::executeChild(const WorkflowPlan& work
 
 void WorkflowPlanExecutor::executeImpl(const WorkflowPlan& workflowPlan)
 {
-    const auto& stages = workflowPlan.getStages();
+    std::exception_ptr primaryException;
+    bool mainSucceeded = false;
+
+    try {
+        executeStageGroup(workflowPlan.getStages());
+        mainSucceeded = true;
+    }
+    catch (...) {
+        primaryException = std::current_exception();
+    }
+
+    try {
+        if (mainSucceeded) {
+            executeStageGroup(workflowPlan.getOnSuccessStages());
+        }
+        else {
+            executeStageGroup(workflowPlan.getOnFailureStages());
+        }
+    }
+    catch (...) {
+        if (!primaryException)
+            primaryException = std::current_exception();
+    }
+
+    try {
+        executeStageGroup(workflowPlan.getFinallyStages());
+    }
+    catch (...) {
+        if (!primaryException)
+            primaryException = std::current_exception();
+    }
+
+    if (primaryException)
+        std::rethrow_exception(primaryException);
+}
+
+void WorkflowPlanExecutor::executeStageGroup(const WorkflowPlan::Stages& stages)
+{
     const auto stageCount = stages.size();
 
     if (stageCount == 0)
         return;
 
     auto* currentContext = WorkflowExecutionContext::current();
-    if (currentContext == nullptr)
+    if (!currentContext)
         throw std::runtime_error("No active workflow execution context");
 
     QVector<WorkflowExecutionContext> stageContexts;
     stageContexts.reserve(stageCount);
 
-    for (int stageIndex = 0; stageIndex < stageCount; ++stageIndex) {
-        const auto& stage = stages[stageIndex];
+    for (int i = 0; i < stageCount; ++i) {
+        const auto& stage = stages[i];
         stageContexts.push_back(currentContext->createChild(stage.getName(), stage.getWeight()));
     }
 
-    for (int stageIndex = 0; stageIndex < stageCount; ++stageIndex) {
-        const auto& stage = stages[stageIndex];
-        auto& stageContext = stageContexts[stageIndex];
+    for (int i = 0; i < stageCount; ++i) {
+        const auto& stage = stages[i];
+        auto& ctx = stageContexts[i];
 
-        executeStage(stage, stageContext);
+        executeStage(stage, ctx);
     }
 }
 
