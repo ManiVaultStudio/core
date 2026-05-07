@@ -379,10 +379,12 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
         	auto projectOpenWorkflowPlan    = createProjectOpenWorkflowPlan(filePath);
         	auto workflowResult             = projectOpenWorkflowPlan.executeBlocking(_workflowPlanExecutor, {
-                parameters._parallel,
-        		parameters._maxParallelThreads,
-                true,   // Show progress
-                true    // Add notification
+                ._parallel = parameters._parallel,
+        		._maxWorkerThreadCount = parameters._maxParallelThreads,
+                ._reportProgress = true,
+                ._addNotification = true,
+                ._traceSinkType = WorkflowTraceSinkType::ChromeJson,
+                ._traceOutputPath = QStringLiteral("D:/Temp/chrome_trace.json")
         	});
 	    }
         emit projectOpened(*_project);

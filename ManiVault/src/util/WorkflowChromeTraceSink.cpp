@@ -29,6 +29,39 @@ void WorkflowChromeTraceSink::trace(const WorkflowTraceEvent& event)
 	writeEvent(event);
 }
 
+QString WorkflowChromeTraceSink::displayName(const WorkflowTraceEvent& event)
+{
+    switch (event._type) {
+	    case WorkflowTraceEventType::WorkflowStarted:
+	    case WorkflowTraceEventType::WorkflowFinished:
+	    case WorkflowTraceEventType::WorkflowFailed:
+	        return QString("Workflow: %1").arg(event._name);
+
+	    case WorkflowTraceEventType::StageStarted:
+	    case WorkflowTraceEventType::StageFinished:
+	    case WorkflowTraceEventType::StageFailed:
+	        return QString("Stage: %1").arg(event._name);
+
+	    case WorkflowTraceEventType::JobStarted:
+	    case WorkflowTraceEventType::JobFinished:
+	    case WorkflowTraceEventType::JobFailed:
+	        return QString("Job: %1").arg(event._name);
+
+	    case WorkflowTraceEventType::GuiDispatchRequested:
+	    case WorkflowTraceEventType::GuiDispatchEntered:
+	    case WorkflowTraceEventType::GuiDispatchFinished:
+	        return QString("GUI: %1").arg(event._name);
+
+	    case WorkflowTraceEventType::ParallelJobSubmitted:
+	    case WorkflowTraceEventType::ParallelJobStarted:
+	    case WorkflowTraceEventType::ParallelJobFinished:
+	    case WorkflowTraceEventType::ParallelJobFailed:
+	        return QString("Parallel: %1").arg(event._name);
+    }
+
+    return event._name;
+}
+
 void WorkflowChromeTraceSink::writeEvent(const WorkflowTraceEvent& event)
 {
     QMutexLocker locker(&_mutex);
@@ -57,7 +90,7 @@ void WorkflowChromeTraceSink::writeEvent(const WorkflowTraceEvent& event)
 
     _stream
         << "{"
-        << "\"name\":\"" << event._name << "\","
+        << "\"name\":\"" << displayName(event) << "\","
         << "\"ph\":\"" << phase << "\","
         << "\"ts\":" << (event._timestampNs / 1000) << ","
         << "\"pid\":1,"

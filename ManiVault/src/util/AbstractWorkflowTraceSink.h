@@ -9,6 +9,14 @@
 
 namespace mv::util
 {
+
+enum class WorkflowTraceSinkType
+{
+    None,
+    Console,
+    ChromeJson
+};
+
 /**
  * Abstract base class for workflow trace sinks that can receive and process workflow trace events.
  *
@@ -34,5 +42,16 @@ public:
      */
     static std::int64_t currentTimestampNs();
 };
+
+using SharedWorkflowTraceSink = std::shared_ptr<AbstractWorkflowTraceSink>;
+
+/**
+ * Factory function to create a workflow trace sink based on the specified type and output path.
+ *
+ * @param type The type of workflow trace sink to create, specified by the WorkflowTraceSinkType enum.
+ * @param outputPath An optional output path for trace sinks that require it (e.g., file-based sinks). This parameter is ignored for sinks that do not require an output path.
+ * @return A shared pointer to the created AbstractWorkflowTraceSink instance. Returns nullptr if the specified type is None or if the type is unrecognized.
+ */
+CORE_EXPORT SharedWorkflowTraceSink createWorkflowTraceSink(WorkflowTraceSinkType type, const QString& outputPath = {});
 
 }

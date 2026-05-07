@@ -39,6 +39,13 @@ public:
 private:
 
     /**
+     * Converts a WorkflowTraceEvent to a human-readable display name for use in the trace file.
+     * @param event The workflow trace event to convert to a display name.
+     * @return A QString representing the display name for the event, which may include the event type and relevant metadata for easier identification in the trace viewer.
+     */
+    static QString displayName(const WorkflowTraceEvent& event);
+
+    /**
      * Writes a workflow trace event to the trace file in Chrome trace format.
      * @param event The workflow trace event to write to the file.
      */
