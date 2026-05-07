@@ -21,7 +21,7 @@ public:
 
     AbstractWorkflowPlanExecutor(QObject* parent = nullptr);
 
-    [[nodiscard]] virtual SharedWorkflowResult execute(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions = {}) = 0;
+    [[nodiscard]] virtual SharedWorkflowResult executeBlocking(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions = {}) = 0;
     [[nodiscard]] virtual WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions = {}) = 0;
 
     static void installNotificationLinkHandler();

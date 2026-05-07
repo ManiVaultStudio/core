@@ -25,7 +25,7 @@ WorkflowPlanExecutor::WorkflowPlanExecutor(QObject* parent) :
 {
 }
 
-SharedWorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions /*= {}*/)
+SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
 #ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
     qDebug() << "Executing workflow plan:" << workflowPlan.getName() << "with" << workflowPlan.getStages().size() << "stage(s)";
@@ -59,6 +59,8 @@ SharedWorkflowResult WorkflowPlanExecutor::execute(WorkflowPlan& workflowPlan, W
                     future.getTask()->setFinished();
                 },
                 Qt::QueuedConnection);
+
+                connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, &loop, &QEventLoop::quit);
 
         		loop.exec();
 	        }
@@ -102,7 +104,7 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsync(mv::util::WorkflowPlan& 
 
     WorkflowPlan workflowPlanCopy = workflowPlan;
 
-    return executeAsyncImpl(std::move(workflowPlanCopy), executionOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None);
+    return executeAsyncImpl(std::move(workflowPlanCopy), executionOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, executionOptions);
 }
 
 QThreadPool& WorkflowPlanExecutor::getThreadPool()

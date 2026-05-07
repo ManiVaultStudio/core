@@ -168,7 +168,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
         if (!encodeJobs.empty()) {
             encodeWorkflowPlan.addParallelStage("Encode Blocks", encodeJobs);
-            encodeWorkflowPlan.execute(mv::projects().getWorkflowPlanExecutor());
+            encodeWorkflowPlan.executeBlocking(mv::projects().getWorkflowPlanExecutor());
         }
 
         QVariantList blocks;
@@ -422,7 +422,7 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
     }
 
     decodeWorkflowPlan.addParallelStage("Decode blocks", decodeJobs);
-    decodeWorkflowPlan.execute(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()));
+    decodeWorkflowPlan.executeBlocking(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()));
 
     if (auto wokflowExecutionContext = WorkflowExecutionContext::current()) {
         auto state = wokflowExecutionContext->getState();

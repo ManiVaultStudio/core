@@ -181,7 +181,7 @@ public:
         addStageTo(_finalizationStages, std::move(name), std::forward<Function>(function), threadAffinity, weight);
     }
 
-    SharedWorkflowResult execute(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions = {});
+    SharedWorkflowResult executeBlocking(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions = {});
     WorkflowResultFuture executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions = {});
     SharedWorkflowResult executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {});
 

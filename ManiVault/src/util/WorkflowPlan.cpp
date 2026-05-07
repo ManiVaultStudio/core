@@ -273,14 +273,14 @@ void WorkflowPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs, doubl
 	}
 }
 
-SharedWorkflowResult WorkflowPlan::execute(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions /*= {}*/)
+SharedWorkflowResult WorkflowPlan::executeBlocking(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
     if (!workflowPlanExecutor) {
         qWarning() << "Unable to execute workflow plan: no executor provided!";
         return {};
     }
 
-    return workflowPlanExecutor->execute(*this, executionOptions);
+    return workflowPlanExecutor->executeBlocking(*this, executionOptions);
 }
 
 WorkflowResultFuture WorkflowPlan::executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions /*= {}*/)

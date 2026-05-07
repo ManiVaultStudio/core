@@ -29,7 +29,7 @@ public:
 
     WorkflowPlanExecutor(QObject* parent = nullptr);
 
-	mv::util::SharedWorkflowResult execute(mv::util::WorkflowPlan& workflowPlan, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
+	mv::util::SharedWorkflowResult executeBlocking(mv::util::WorkflowPlan& workflowPlan, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
 	mv::util::WorkflowResultFuture executeAsync(mv::util::WorkflowPlan& workflowPlan, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
 
     QThreadPool& getThreadPool();

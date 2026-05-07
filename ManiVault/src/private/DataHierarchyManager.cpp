@@ -390,7 +390,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         }
     });
 
-    fromPlan.execute(mv::projects().getWorkflowPlanExecutor());
+    fromPlan.executeBlocking(mv::projects().getWorkflowPlanExecutor());
 }
 
 QVariantMap DataHierarchyManager::toVariantMap() const
@@ -486,7 +486,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
             }
         });
 
-        toPlan.execute(mv::projects().getWorkflowPlanExecutor());
+        toPlan.executeBlockings(mv::projects().getWorkflowPlanExecutor());
 
         return (*toPlan.getSharedState())["Hierarchy"].toMap();
     }

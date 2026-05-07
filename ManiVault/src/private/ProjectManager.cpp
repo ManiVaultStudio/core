@@ -378,7 +378,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             const auto stateGuard = qScopeGuard([this]() { setState(State::Idle); });
 
         	auto projectOpenWorkflowPlan    = createProjectOpenWorkflowPlan(filePath);
-        	auto workflowResult             = projectOpenWorkflowPlan.execute(_workflowPlanExecutor, { 
+        	auto workflowResult             = projectOpenWorkflowPlan.executeBlocking(_workflowPlanExecutor, {
                 parameters._parallel,
         		parameters._maxParallelThreads,
                 true,   // Show progress
@@ -745,7 +745,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
             setTemporaryDirPath(TemporaryDirType::Save, workflowPlan.getWorkflowContextAs<ProjectSaveContext>()->_temporaryDirectory->path());
 
-	        auto workflowResult = workflowPlan.execute(_workflowPlanExecutor, {
+	        auto workflowResult = workflowPlan.executeBlocking(_workflowPlanExecutor, {
                 parameters._parallel,
 	        	parameters._maxParallelThreads,
                 true,   // Show progress
