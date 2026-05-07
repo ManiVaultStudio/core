@@ -373,17 +373,12 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
         loadDatasetJobs.emplace_back(datasetName, [datasetId, datasetName, dataVariantMap](WorkflowPlan::Job& job) {
             qDebug() << "Loading dataset" << datasetId << datasetName;
-
-            QMetaObject::invokeMethod(qApp, [datasetId, datasetName, dataVariantMap] {
-                qDebug() << "Loading dataset" << datasetId << datasetName;
-                mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
-            }, Qt::BlockingQueuedConnection);
-
+            mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
             
         }, WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Atomic).weighted(rawBlockSize > 0 ? static_cast<double>(rawBlockSize) : 1.0);
     }
 
-    fromPlan.addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Parallel, loadDatasetJobs, 25.0);
+    fromPlan.addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Sequential, loadDatasetJobs, 25.0);
     fromPlan.addSequentialStage("Notify datasets", [this](WorkflowPlan::Job& job) {
         for (const auto& item : _items) {
             events().notifyDatasetDataChanged(item->getDataset());
@@ -486,7 +481,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
             }
         });
 
-        toPlan.executeBlockings(mv::projects().getWorkflowPlanExecutor());
+        toPlan.executeBlocking(mv::projects().getWorkflowPlanExecutor());
 
         return (*toPlan.getSharedState())["Hierarchy"].toMap();
     }

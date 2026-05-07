@@ -63,10 +63,16 @@ public:
 
     WorkflowPlan::JobProgressMode getProgressMode() const;
 
+    void addPendingAsyncWork(WorkflowResultFuture future);
+
+    void waitForPendingAsyncWork();
+
 private:
     friend class WorkflowExecutionScope;
 
     static void setCurrent(WorkflowExecutionContext* context);
+
+    
 
 private:
     QString _name;
@@ -76,6 +82,7 @@ private:
     SharedThreadPool _threadPool;
     QPointer<Task> _task;
     WorkflowPlan::JobProgressMode _progressMode = WorkflowPlan::JobProgressMode::Automatic;
+    std::vector<WorkflowResultFuture> _pendingAsyncWork;
 };
 
 } // namespace mv::util

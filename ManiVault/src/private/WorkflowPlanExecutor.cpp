@@ -98,13 +98,17 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
 
 WorkflowResultFuture WorkflowPlanExecutor::executeAsync(mv::util::WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
-    if (WorkflowExecutionContext::current() != nullptr) {
-        throw std::runtime_error("executeAsync() cannot be called from within an active workflow context");
+    auto future = executeAsyncImpl(
+        WorkflowPlan(workflowPlan),
+        executionOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None,
+        executionOptions
+    );
+
+    if (auto* context = WorkflowExecutionContext::current()) {
+        context->addPendingAsyncWork(future);
     }
 
-    WorkflowPlan workflowPlanCopy = workflowPlan;
-
-    return executeAsyncImpl(std::move(workflowPlanCopy), executionOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, executionOptions);
+    return future;
 }
 
 QThreadPool& WorkflowPlanExecutor::getThreadPool()
@@ -391,6 +395,7 @@ void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, Workfl
             const auto state = currentContext->getState();
 
             if (state && !state->getExecutionOptions()._parallel) {
+                WorkflowReporter::warning("Parallel execution is disabled, switching to sequential mode", stage.getName());
                 effectiveMode = WorkflowPlan::ConcurrencyMode::Sequential;
             }
         }
@@ -447,6 +452,11 @@ void WorkflowPlanExecutor::executeSequentialJobs(const WorkflowPlan::Stage& stag
         auto& jobContext = jobContexts[jobIndex];
 
         executeJob(job, jobContext);
+    }
+
+    // Wait once, after all sequential jobs had a chance to register async work.
+    for (auto& jobContext : jobContexts) {
+        jobContext.waitForPendingAsyncWork();
     }
 }
 
@@ -509,25 +519,30 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
 
 void WorkflowPlanExecutor::executeJobOnGuiThread(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext)
 {
-#ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
-    qDebug() << "Executing job on GUI thread:" << job.getName() << "in thread" << QThread::currentThread();
-#endif
-
     auto& dispatcher = Application::workflowGuiThreadDispatcher();
+
     std::exception_ptr exceptionPtr;
 
-    QMetaObject::invokeMethod(
-        &dispatcher,
-        [&job, &jobContext, &exceptionPtr]() {
-            try {
-                WorkflowExecutionScope scope(jobContext);
-                job.run();
-            }
-            catch (...) {
-                exceptionPtr = std::current_exception();
-            }
-        },
-        Qt::BlockingQueuedConnection);
+    auto runOnGuiThread = [&job, &jobContext, &exceptionPtr]() {
+        try {
+            WorkflowExecutionScope scope(jobContext);
+            job.run();
+        }
+        catch (...) {
+            exceptionPtr = std::current_exception();
+        }
+        };
+
+    if (QThread::currentThread() == dispatcher.thread()) {
+        runOnGuiThread();
+    }
+    else {
+        QMetaObject::invokeMethod(
+            &dispatcher,
+            runOnGuiThread,
+            Qt::BlockingQueuedConnection
+        );
+    }
 
     if (exceptionPtr)
         std::rethrow_exception(exceptionPtr);

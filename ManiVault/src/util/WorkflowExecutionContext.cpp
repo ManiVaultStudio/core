@@ -179,4 +179,19 @@ void WorkflowExecutionContext::setCurrent(WorkflowExecutionContext* context)
     currentWorkflowExecutionContext = context;
 }
 
+void WorkflowExecutionContext::addPendingAsyncWork(WorkflowResultFuture future)
+{
+    _pendingAsyncWork.push_back(std::move(future));
+}
+
+void WorkflowExecutionContext::waitForPendingAsyncWork()
+{
+    for (auto& future : _pendingAsyncWork) {
+        future.waitForFinished();
+        future.getState()->rethrowExceptionIfAny();
+    }
+
+    _pendingAsyncWork.clear();
+}
+
 }

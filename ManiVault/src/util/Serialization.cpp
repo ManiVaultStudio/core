@@ -422,16 +422,17 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
     }
 
     decodeWorkflowPlan.addParallelStage("Decode blocks", decodeJobs);
-    decodeWorkflowPlan.executeBlocking(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()));
+    decodeWorkflowPlan.addSequentialStage("Finalize", [totalSize](WorkflowPlan::Job& job) {
+        if (auto wokflowExecutionContext = WorkflowExecutionContext::current()) {
+            auto state = wokflowExecutionContext->getState();
 
-    if (auto wokflowExecutionContext = WorkflowExecutionContext::current()) {
-        auto state = wokflowExecutionContext->getState();
+            if (!state)
+                return;
 
-        if (!state)
-            return;
-
-        state->metrics().addInteger("project.data.bytes_loaded", totalSize);
-    }
+            state->metrics().addInteger("project.data.bytes_loaded", totalSize);
+        }
+    });
+    decodeWorkflowPlan.executeOnCurrentThread(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()));
 }
 
 void populateDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& bytes)
