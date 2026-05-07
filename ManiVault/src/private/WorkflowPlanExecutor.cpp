@@ -354,7 +354,7 @@ void WorkflowPlanExecutor::executeStageGroup(const WorkflowPlan::Stages& stages)
             //WorkflowReporter::error("Stage finished", stage.getName());
             //ctx.setError(QString::fromStdString(e.what())); // or your reporting system
 
-            if (exception._severity == SeverityLevel::Fatal) {
+            if (exception._severity == SeverityLevel::Error || exception._severity == SeverityLevel::Fatal) {
                 throw; // abort entire workflow
             }
 

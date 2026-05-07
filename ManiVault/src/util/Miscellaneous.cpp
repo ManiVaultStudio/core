@@ -26,6 +26,7 @@
 #include <QToolTip>
 
 #include <exception>
+#include <algorithm>
 
 namespace mv::util
 {
@@ -932,6 +933,22 @@ QString describeVariantMapKeys(const QVariantMap& map, qsizetype maxKeys)
 	}
 
 	return QString("[%1%2]").arg(shownKeys.join(", "), suffix);
+}
+
+QString dumpHex(const QByteArray& bytes, qsizetype count)
+{
+	QStringList hex;
+
+	const qsizetype n = qMin(count, bytes.size());
+
+	for (qsizetype i = 0; i < n; ++i)
+	{
+		hex << QString("%1")
+		       .arg(static_cast<unsigned char>(bytes[i]), 2, 16, QLatin1Char('0'))
+		       .toUpper();
+	}
+
+	return hex.join(' ');
 }
 
 }

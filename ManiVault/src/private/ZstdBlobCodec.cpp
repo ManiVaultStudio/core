@@ -193,13 +193,13 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decodeTo(const QByteArray& encodedDat
 
     const size_t decodedSize = ZSTD_decompressDCtx(
         dctx,
-        destination,
+        dest.data(),
         static_cast<size_t>(destinationSize),
-        dest.constData(),
-        static_cast<size_t>(dest.size())
+        encodedData.constData(),
+        static_cast<size_t>(encodedData.size())
     );
 
-    memcpy(destination, dest.constData(), dest.size());
+    
 
     if (ZSTD_isError(decodedSize)) {
         result._error = QString("ZSTD decompression failed: %1")
@@ -213,6 +213,8 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decodeTo(const QByteArray& encodedDat
             .arg(static_cast<std::uint64_t>(decodedSize));
         return result;
     }
+
+    memcpy(destination, dest.constData(), dest.size());
 
     result._success = true;
     return result;

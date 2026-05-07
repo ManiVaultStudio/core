@@ -371,9 +371,16 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         const auto datasetName  = dataVariantMap["Name"].toString();
         const auto rawBlockSize = getRawBlockObjectSize(dataVariantMap);
 
-        loadDatasetJobs.emplace_back(datasetName, [datasetId, dataVariantMap](WorkflowPlan::Job& job) {
-            mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
-        }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic).weighted(rawBlockSize > 0 ? static_cast<double>(rawBlockSize) : 1.0);
+        loadDatasetJobs.emplace_back(datasetName, [datasetId, datasetName, dataVariantMap](WorkflowPlan::Job& job) {
+            qDebug() << "Loading dataset" << datasetId << datasetName;
+
+            QMetaObject::invokeMethod(qApp, [datasetId, datasetName, dataVariantMap] {
+                qDebug() << "Loading dataset" << datasetId << datasetName;
+                mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
+            }, Qt::BlockingQueuedConnection);
+
+            
+        }, WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Atomic).weighted(rawBlockSize > 0 ? static_cast<double>(rawBlockSize) : 1.0);
     }
 
     fromPlan.addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Parallel, loadDatasetJobs, 25.0);

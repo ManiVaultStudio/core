@@ -167,6 +167,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
             throw std::runtime_error(context->_errorMessage.toStdString());
 
         mv::projects().getRecentProjectsAction().addRecentFilePath(context->_filePath);
+        mv::projects().setState(AbstractProjectManager::State::Idle);
 
         auto project = mv::projects().getCurrentProject();
 

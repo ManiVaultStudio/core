@@ -160,12 +160,12 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
             variantMapMustContain(variantMap, "NumberOfPoints");
             variantMapMustContain(variantMap, "NumberOfDimensions");
 
-            const auto data = variantMap["Data"].toMap();
-            const auto numberOfPoints = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
-            const auto numberOfDimensions = variantMap["NumberOfDimensions"].toUInt();
-            const auto numberOfElements = numberOfPoints * numberOfDimensions;
-            const auto elementTypeIndex = static_cast<ElementTypeSpecifier>(data["TypeIndex"].toInt());
-            const auto rawDataMap = data["Raw"].toMap();
+            const auto data                 = variantMap["Data"].toMap();
+            const auto numberOfPoints       = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
+            const auto numberOfDimensions   = variantMap["NumberOfDimensions"].toUInt();
+            const auto numberOfElements     = numberOfPoints * numberOfDimensions;
+            const auto elementTypeIndex     = static_cast<ElementTypeSpecifier>(data["TypeIndex"].toInt());
+            const auto rawDataMap           = data["Raw"].toMap();
 
             bool isDense = true;
 

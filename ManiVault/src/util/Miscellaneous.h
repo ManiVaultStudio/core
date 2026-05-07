@@ -371,4 +371,13 @@ CORE_EXPORT QVariant findNested(const QVariantMap& root, const QStringList& path
  * @return String describing the keys of the map
  */
 CORE_EXPORT QString describeVariantMapKeys(const QVariantMap& map, qsizetype maxKeys = 20);
+
+/**
+ * Dump a byte array as a hex string, showing up to \p count bytes
+ * @param bytes Byte array to dump
+ * @param count Maximum number of bytes to show (default is 100)
+ * @return Hex string representation of the byte array
+ */
+CORE_EXPORT QString dumpHex(const QByteArray& bytes, qsizetype count = 100);;
+
 }
