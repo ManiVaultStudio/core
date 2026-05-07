@@ -19,32 +19,32 @@ void WorkflowConsoleTraceSink::trace(const WorkflowTraceEvent& event)
 QString WorkflowConsoleTraceSink::typeString(const WorkflowTraceEvent& event)
 {
 	switch (event._type) {
-	case WorkflowTraceEventType::WorkflowStarted:
-		return "WorkflowStarted";
+		case WorkflowTraceEventType::WorkflowStarted:
+			return "WorkflowStarted";
 
-	case WorkflowTraceEventType::WorkflowFinished:
-		return "WorkflowFinished";
+		case WorkflowTraceEventType::WorkflowFinished:
+			return "WorkflowFinished";
 
-	case WorkflowTraceEventType::StageStarted:
-		return "StageStarted";
+		case WorkflowTraceEventType::StageStarted:
+			return "StageStarted";
 
-	case WorkflowTraceEventType::StageFinished:
-		return "StageFinished";
+		case WorkflowTraceEventType::StageFinished:
+			return "StageFinished";
 
-	case WorkflowTraceEventType::JobStarted:
-		return "JobStarted";
+		case WorkflowTraceEventType::JobStarted:
+			return "JobStarted";
 
-	case WorkflowTraceEventType::JobFinished:
-		return "JobFinished";
+		case WorkflowTraceEventType::JobFinished:
+			return "JobFinished";
 
-	case WorkflowTraceEventType::JobFailed:
-		return "JobFailed";
+		case WorkflowTraceEventType::JobFailed:
+			return "JobFailed";
 
-	case WorkflowTraceEventType::GuiDispatchRequested:
-		return "GuiDispatchRequested";
+		case WorkflowTraceEventType::GuiDispatchRequested:
+			return "GuiDispatchRequested";
 
-	case WorkflowTraceEventType::GuiDispatchEntered:
-		return "GuiDispatchEntered";
+		case WorkflowTraceEventType::GuiDispatchEntered:
+			return "GuiDispatchEntered";
 	}
 
 	return "Unknown";

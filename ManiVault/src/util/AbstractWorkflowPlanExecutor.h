@@ -8,6 +8,7 @@
 #include "WorkflowPlan.h"
 #include "WorkflowExecutionContext.h"
 #include "WorkflowResult.h"
+#include "AbstractWorkflowTraceSink.h"
 #include "Task.h"
 
 #include <QObject>
@@ -25,6 +26,20 @@ public:
     [[nodiscard]] virtual WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions = {}) = 0;
 
     static void installNotificationLinkHandler();
+
+public: // Tracing
+
+    /**
+     * Installs a trace sink to receive workflow trace events emitted by this executor. If a trace sink is already installed, it will be replaced by the new one.
+     * @param sink The trace sink to install for receiving workflow trace events. Pass nullptr to uninstall any existing trace sink.
+     */
+    void setTraceSink(std::shared_ptr<AbstractWorkflowTraceSink> sink);
+
+    /**
+     * Emits a workflow trace event to the installed trace sink, if any.
+     * @param event The workflow trace event to emit to the trace sink.
+     */
+    void trace(WorkflowTraceEvent event);
 
 protected:
     virtual WorkflowResultFuture executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, WorkflowExecutionOptions executionOptions = {}) = 0;
@@ -47,7 +62,7 @@ private: // Execute individual jobs
     virtual void executeJob(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext) = 0;
 
 private:
-    
+    std::shared_ptr<AbstractWorkflowTraceSink> _traceSink;
 
     friend class WorkflowPlan;
 };

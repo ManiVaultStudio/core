@@ -623,6 +623,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/WorkflowTraceEvent.h
     src/util/AbstractWorkflowTraceSink.h
     src/util/WorkflowConsoleTraceSink.h
+    src/util/WorkflowChromeTraceSink.h
 )
 
 if(APPLE)
@@ -717,6 +718,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/WorkflowTraceEvent.cpp
     src/util/AbstractWorkflowTraceSink.cpp
     src/util/WorkflowConsoleTraceSink.cpp
+    src/util/WorkflowChromeTraceSink.cpp
 )
 
 if(APPLE)

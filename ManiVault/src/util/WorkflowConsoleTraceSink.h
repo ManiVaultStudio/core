@@ -12,18 +12,49 @@
 namespace mv::util
 {
 
-class WorkflowConsoleTraceSink : public AbstractWorkflowTraceSink
+/**
+ * A trace sink that writes workflow trace events to the console.
+ *
+ * @author T. Kroes (BioVault)
+ */
+class CORE_EXPORT WorkflowConsoleTraceSink : public AbstractWorkflowTraceSink
 {
 public:
-    void trace(const WorkflowTraceEvent& event) override;
+
+	/**
+     * Writes a workflow trace event to the console in a human-readable format.
+     * @param event The workflow trace event to write to the console.
+	 */
+	void trace(const WorkflowTraceEvent& event) override;
 
 private:
+
+    /**
+     * Converts a workflow trace event type to a human-readable string.
+     * @param event The workflow trace event for which to get the type string.
+     * @return A human-readable string representing the type of the workflow trace event.
+     */
     static QString typeString(const WorkflowTraceEvent& event);
 
+    /**
+     * Converts the timestamp of a workflow trace event to a human-readable string.
+     * @param event The workflow trace event for which to get the timestamp string.
+     * @return A human-readable string representing the timestamp of the workflow trace event.
+     */
     static QString timestampString(const WorkflowTraceEvent& event);
 
+    /**
+     * Converts the thread identifier of a workflow trace event to a human-readable string.
+     * @param event The workflow trace event for which to get the thread identifier string.
+     * @return A human-readable string representing the thread identifier of the workflow trace event.
+     */
     static QString threadString(const WorkflowTraceEvent& event);
 
+    /**
+     * Converts the metadata of a workflow trace event to a human-readable string.
+     * @param event The workflow trace event for which to get the metadata string.
+     * @return A human-readable string representing the metadata of the workflow trace event.
+     */
     static QString metadataString(const WorkflowTraceEvent& event);
 };
 
