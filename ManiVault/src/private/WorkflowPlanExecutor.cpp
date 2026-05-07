@@ -5,6 +5,7 @@
 #include "WorkflowPlanExecutor.h"
 
 #include <util/WorkflowResultRegistry.h>
+#include <util/WorkflowConsoleTraceSink.h>
 
 #include <Task.h>
 
@@ -23,6 +24,7 @@ using namespace mv::util;
 WorkflowPlanExecutor::WorkflowPlanExecutor(QObject* parent) :
 	AbstractWorkflowPlanExecutor(parent)
 {
+    setTraceSink(std::make_shared<WorkflowConsoleTraceSink>());
 }
 
 SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions /*= {}*/)
@@ -32,8 +34,6 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
 #endif
 
     SharedWorkflowResult result;
-
-    
 
     try {
 	    if (auto* currentContext = WorkflowExecutionContext::current()) {
@@ -191,6 +191,14 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
 	WorkflowExecutionScope rootScope(rootContext);
 
     WorkflowReporter::info("Workflow started", workflowPlan.getName());
+
+    trace(WorkflowTraceEvent{
+        ._type = WorkflowTraceEventType::WorkflowStarted,
+        ._name = workflowPlan.getName(),
+        ._contextId = rootContext.getId(),
+        ._threadId = QThread::currentThreadId(),
+        ._timestampNs = AbstractWorkflowTraceSink::currentTimestampNs()
+    });
 
     const auto displayFailure = [workflowPlan, executionOptions](const QString& message) -> void {
         QMetaObject::invokeMethod(&help(), [workflowPlan, executionOptions, message]() {

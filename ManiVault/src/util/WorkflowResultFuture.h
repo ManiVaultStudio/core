@@ -63,4 +63,6 @@ private:
     std::shared_ptr<State> _state;
 };
 
-} // namespace mv::util
+using WorkflowResultFutures = std::vector<WorkflowResultFuture>;
+
+}

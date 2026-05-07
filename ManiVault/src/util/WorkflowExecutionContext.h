@@ -13,6 +13,7 @@
 
 #include <QString>
 #include <QThreadPool>
+#include <QUuid>
 
 namespace mv::util
 {
@@ -67,6 +68,20 @@ public:
 
     void waitForPendingAsyncWork();
 
+public: // ID
+
+    /**
+     * Get the unique identifier of this workflow execution context. This ID is used for tracing and logging purposes, and can be used to correlate log messages and trace events with specific workflow executions.
+     * @return The unique identifier of this workflow execution context.
+     */
+    QUuid getId() const;
+
+    /**
+     * Get the unique identifier of the parent workflow execution context, if any. This can be used to correlate log messages and trace events with parent-child relationships between workflow executions.
+     * @return The unique identifier of the parent workflow execution context, or a null QUuid if this is a root context.
+     */
+    QUuid getParentId() const;
+
 private:
     friend class WorkflowExecutionScope;
 
@@ -75,14 +90,16 @@ private:
     
 
 private:
-    QString _name;
-    ReportNodePtr _reportNode;
-    ProgressNodePtr _progressNode;
-    StatePtr _state;
-    SharedThreadPool _threadPool;
-    QPointer<Task> _task;
-    WorkflowPlan::JobProgressMode _progressMode = WorkflowPlan::JobProgressMode::Automatic;
-    std::vector<WorkflowResultFuture> _pendingAsyncWork;
+    QString                         _name;                                                      /** Name of the workflow execution context, typically derived from the name of the workflow plan or job it represents */
+    QUuid                           _id;                                                        /** Unique identifier for this workflow execution context */
+    QUuid                           _parentId;                                                  /** Unique identifier of the parent workflow execution context, if any */
+    ReportNodePtr                   _reportNode;                                                /** Report node associated with this workflow execution context */
+    ProgressNodePtr                 _progressNode;                                              /** Progress node associated with this workflow execution context */
+    StatePtr                        _state;                                                     /** Execution state associated with this workflow execution context */
+    SharedThreadPool                _threadPool;                                                /** Thread pool used for executing tasks within this workflow execution context */
+    QPointer<Task>                  _task;                                                      /** Task associated with this workflow execution context */
+    WorkflowPlan::JobProgressMode   _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /** Progress mode for this workflow execution context */  
+    WorkflowResultFutures           _pendingAsyncWork;                                          /** List of pending asynchronous work (futures) that need to be completed before this workflow execution context can be considered finished */
 };
 
 } // namespace mv::util

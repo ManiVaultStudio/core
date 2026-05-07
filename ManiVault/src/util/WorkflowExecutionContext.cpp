@@ -12,10 +12,14 @@ namespace
     thread_local WorkflowExecutionContext* currentWorkflowExecutionContext = nullptr;
 }
 
-WorkflowExecutionContext::WorkflowExecutionContext() = default;
+WorkflowExecutionContext::WorkflowExecutionContext() :
+    _id(QUuid::createUuid())
+{
+}
 
 WorkflowExecutionContext::WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, SharedThreadPool threadPool, Task* task /*= nullptr*/, WorkflowPlan::JobProgressMode progressMode /*= WorkflowPlan::JobProgressMode::Automatic*/) :
 	_name(std::move(name)),
+    _id(QUuid::createUuid()),
 	_reportNode(std::move(reportNode)),
 	_progressNode(std::move(progressNode)),
 	_state(std::move(state)),
@@ -65,15 +69,19 @@ WorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& na
     else
         progressChild = _progressNode->createChild(weight);
 
-	return {
-		name,
-		_reportNode->createChild(name),
+    WorkflowExecutionContext child{
+        name,
+        _reportNode->createChild(name),
         progressChild,
-		_state,
+        _state,
         _threadPool,
         _task,
         progressMode
     };
+
+    child._parentId = _id;
+
+    return child;
 }
 
 bool WorkflowExecutionContext::hasProgressChildren() const
@@ -192,6 +200,16 @@ void WorkflowExecutionContext::waitForPendingAsyncWork()
     }
 
     _pendingAsyncWork.clear();
+}
+
+QUuid WorkflowExecutionContext::getId() const
+{
+    return _id;
+}
+
+QUuid WorkflowExecutionContext::getParentId() const
+{
+    return _parentId;
 }
 
 }
