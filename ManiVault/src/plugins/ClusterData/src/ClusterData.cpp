@@ -144,6 +144,7 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
             
             auto context = std::make_shared<ClustersLoadContext>(dataMap["ClustersRawData"].toMap());
 
+            /*
             WorkflowPlan plan(QStringLiteral("Load clusters"), context);
 
             plan.addSequentialStage("Load", [context]() -> void {
@@ -171,6 +172,7 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
             plan.addParallelStage("Load", jobs);
 
             plan.executeAsync(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()));
+            */
 	    }
 	    catch (const std::exception& e) {
 	        qCritical() << "Failed to load cluster data: " << e.what();

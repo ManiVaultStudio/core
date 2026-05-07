@@ -12,7 +12,7 @@ namespace mv::util
 WorkflowChromeTraceSink::WorkflowChromeTraceSink(const QString& filePath)
 {
 	_file.setFileName(filePath);
-	_file.open(QIODevice::WriteOnly | QIODevice::Text);
+    _file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text);
 
 	_stream.setDevice(&_file);
 
@@ -21,6 +21,9 @@ WorkflowChromeTraceSink::WorkflowChromeTraceSink(const QString& filePath)
 
 WorkflowChromeTraceSink::~WorkflowChromeTraceSink()
 {
+    QMutexLocker locker(&_mutex);
+
+
     _stream << "\n]\n";
 }
 
@@ -61,6 +64,19 @@ QString WorkflowChromeTraceSink::displayName(const WorkflowTraceEvent& event)
 	    case WorkflowTraceEventType::ParallelJobFinished:
 	    case WorkflowTraceEventType::ParallelJobFailed:
 	        return QString("Parallel: %1").arg(event._name);
+
+        case WorkflowTraceEventType::PendingAsyncWorkWaitStarted:
+        case WorkflowTraceEventType::PendingAsyncWorkWaitFinished:
+            return QString("Async wait: %1").arg(event._name);
+
+        case WorkflowTraceEventType::PendingAsyncWorkItemStarted:
+        case WorkflowTraceEventType::PendingAsyncWorkItemFinished:
+            return QString("Async item: %1").arg(event._name);
+
+        case WorkflowTraceEventType::ParallelStageStarted:
+        case WorkflowTraceEventType::ParallelStageFinished:
+        case WorkflowTraceEventType::ParallelStageFailed:
+            return QString("Parallel stage: %1").arg(event._name);
     }
 
     return event._name;
@@ -74,6 +90,8 @@ QString WorkflowChromeTraceSink::phaseString(const WorkflowTraceEvent& event)
 	    case WorkflowTraceEventType::JobStarted:
 	    case WorkflowTraceEventType::ParallelJobStarted:
 	    case WorkflowTraceEventType::PendingAsyncWorkWaitStarted:
+	    case WorkflowTraceEventType::PendingAsyncWorkItemStarted:
+	    case WorkflowTraceEventType::ParallelStageStarted:
 	        return "B";
 
 	    case WorkflowTraceEventType::WorkflowFinished:
@@ -85,6 +103,10 @@ QString WorkflowChromeTraceSink::phaseString(const WorkflowTraceEvent& event)
 	    case WorkflowTraceEventType::ParallelJobFinished:
 	    case WorkflowTraceEventType::ParallelJobFailed:
 	    case WorkflowTraceEventType::PendingAsyncWorkWaitFinished:
+	    case WorkflowTraceEventType::PendingAsyncWorkItemFinished:
+	    case WorkflowTraceEventType::PendingAsyncWorkItemFailed:
+	    case WorkflowTraceEventType::ParallelStageFinished:
+	    case WorkflowTraceEventType::ParallelStageFailed:
 	        return "E";
 
 	    case WorkflowTraceEventType::GuiDispatchRequested:

@@ -66,12 +66,30 @@ const WorkflowExecutionMetrics& WorkflowExecutionState::metrics() const
 
 void WorkflowExecutionState::setTraceSink(std::shared_ptr<AbstractWorkflowTraceSink> traceSink)
 {
-	_traceSink = std::move(traceSink);
+    Q_ASSERT(traceSink);
+
+    if (_traceSink) {
+        Q_ASSERT(_traceSink == traceSink);
+        return;
+    }
+
+    _traceSink = std::move(traceSink);
 }
 
 std::shared_ptr<AbstractWorkflowTraceSink> WorkflowExecutionState::getTraceSink() const
 {
 	return _traceSink;
+}
+
+void WorkflowExecutionState::trace(WorkflowTraceEvent event)
+{
+	if (!_traceSink)
+		return;
+
+	event._threadId    = QThread::currentThreadId();
+	event._timestampNs = AbstractWorkflowTraceSink::currentTimestampNs();
+
+	_traceSink->trace(event);
 }
 
 void WorkflowExecutionState::collectMessagesRecursive(const WorkflowReportNode::Ptr& node, QVector<WorkflowMessage>& out)

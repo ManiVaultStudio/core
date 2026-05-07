@@ -412,7 +412,20 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
         }
     });
 
-    decodeWorkflowPlan.executeAsync(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()));
+    auto options = WorkflowExecutionOptions{};
+
+    if (auto* context = WorkflowExecutionContext::current()) {
+        if (auto state = context->getState()) {
+            options = state->getExecutionOptions();
+        }
+    }
+
+    options._parallel = true;
+
+    decodeWorkflowPlan.executeAsync(
+        SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()),
+        options
+    );
 }
 
 void populateDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& bytes)

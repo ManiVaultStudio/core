@@ -20,6 +20,14 @@ namespace mv::util
 
 class CORE_EXPORT WorkflowExecutionContext
 {
+protected:
+
+    struct PendingAsyncWork
+    {
+        WorkflowResultFuture _future;
+        QString _label;
+    };
+
 public:
     using ReportNodePtr = WorkflowReportNode::Ptr;
     using ProgressNodePtr = WorkflowProgressNode::Ptr;
@@ -64,7 +72,7 @@ public:
 
     WorkflowPlan::JobProgressMode getProgressMode() const;
 
-    void addPendingAsyncWork(WorkflowResultFuture future);
+    void addPendingAsyncWork(WorkflowResultFuture future, const QString& label = {});
 
     void waitForPendingAsyncWork();
 
@@ -81,6 +89,12 @@ public: // ID
      * @return The unique identifier of the parent workflow execution context, or a null QUuid if this is a root context.
      */
     QUuid getParentId() const;
+
+    /**
+     * Get the number of pending asynchronous work items (futures) that have been added to this workflow execution context and have not yet completed. This can be used to determine if there are any outstanding asynchronous operations that need to complete before the workflow execution can be considered finished.
+     * @return The number of pending asynchronous work items.
+     */
+    std::size_t getPendingAsyncWorkCount() const;
 
 private:
     friend class WorkflowExecutionScope;
@@ -99,7 +113,7 @@ private:
     SharedThreadPool                _threadPool;                                                /** Thread pool used for executing tasks within this workflow execution context */
     QPointer<Task>                  _task;                                                      /** Task associated with this workflow execution context */
     WorkflowPlan::JobProgressMode   _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /** Progress mode for this workflow execution context */  
-    WorkflowResultFutures           _pendingAsyncWork;                                          /** List of pending asynchronous work (futures) that need to be completed before this workflow execution context can be considered finished */
+    std::vector<PendingAsyncWork>   _pendingAsyncWork;                                          /** List of pending asynchronous work (futures) that need to be completed before this workflow execution context can be considered finished */
 };
 
 } // namespace mv::util

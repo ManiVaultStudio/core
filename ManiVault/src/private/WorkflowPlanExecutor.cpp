@@ -95,16 +95,14 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
     return result;
 }
 
-WorkflowResultFuture WorkflowPlanExecutor::executeAsync(mv::util::WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions /*= {}*/)
+WorkflowResultFuture WorkflowPlanExecutor::executeAsync(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
-    auto future = executeAsyncImpl(
-        WorkflowPlan(workflowPlan),
-        executionOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None,
-        executionOptions
-    );
+    const auto pendingWorkLabel = QString("Async workflow: %1").arg(workflowPlan.getName());
 
-    if (auto* context = WorkflowExecutionContext::current()) {
-        context->addPendingAsyncWork(future);
+    auto future = executeAsyncImpl(WorkflowPlan(workflowPlan), executionOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, executionOptions);
+
+    if (auto context = WorkflowExecutionContext::current()) {
+        context->addPendingAsyncWork(future, pendingWorkLabel);
     }
 
     return future;
@@ -187,8 +185,8 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
 
     auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task, executionOptions);
 
-    if (auto state = rootContext.getState()) {
-        state->setTraceSink(createWorkflowTraceSink(
+    if (!rootContext.getState()->getTraceSink()) {
+        rootContext.getState()->setTraceSink(createWorkflowTraceSink(
             executionOptions._traceSinkType,
             executionOptions._traceOutputPath
         ));
@@ -430,13 +428,18 @@ void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, Workfl
 
     WorkflowReporter::info("Stage started", stage.getName());
 
+    auto state = stageContext.getState();
+
     trace({
 	    ._type = WorkflowTraceEventType::StageStarted,
 	    ._name = stage.getName(),
 	    ._contextId = stageContext.getId(),
 	    ._parentContextId = stageContext.getParentId(),
 	    ._metadata = {
-	        { "jobCount", stage.getJobs().size() }
+            { "jobCount", stage.getJobs().size() },
+		    { "concurrencyMode", static_cast<int>(stage.getConcurrencyMode()) },
+		    { "parallelEnabled", state ? state->getExecutionOptions()._parallel : false },
+		    { "containsGuiThreadJobs", stage.containsGuiThreadJobs() }
 	    }
     });
 
@@ -536,50 +539,84 @@ void WorkflowPlanExecutor::executeSequentialJobs(const WorkflowPlan::Stage& stag
         executeJob(job, jobContext);
     }
 
-    // Wait once, after all sequential jobs had a chance to register async work.
     for (auto& jobContext : jobContexts) {
-        trace({
-	        ._type = WorkflowTraceEventType::PendingAsyncWorkWaitStarted,
-	        ._name = jobContext.getName(),
-	        ._contextId = jobContext.getId(),
-	        ._parentContextId = jobContext.getParentId()
-        });
+        const auto pendingCount = jobContext.getPendingAsyncWorkCount();
 
+        if (pendingCount == 0)
+            continue;
+
+        trace({
+            ._type = WorkflowTraceEventType::PendingAsyncWorkWaitStarted,
+            ._name = jobContext.getName(),
+            ._contextId = jobContext.getId(),
+            ._parentContextId = jobContext.getParentId(),
+            ._metadata = {
+                { "pendingAsyncWorkCount", pendingCount }
+            }
+            });
 
         jobContext.waitForPendingAsyncWork();
 
         trace({
-	        ._type = WorkflowTraceEventType::PendingAsyncWorkWaitFinished,
-	        ._name = jobContext.getName(),
-	        ._contextId = jobContext.getId(),
-	        ._parentContextId = jobContext.getParentId()
-		});
+            ._type = WorkflowTraceEventType::PendingAsyncWorkWaitFinished,
+            ._name = jobContext.getName(),
+            ._contextId = jobContext.getId(),
+            ._parentContextId = jobContext.getParentId()
+            });
     }
 }
 
-void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext)
+void WorkflowPlanExecutor::executeParallelJobs(
+    const WorkflowPlan::Stage& stage,
+    WorkflowExecutionContext& stageContext)
 {
 #ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
-    qDebug() << "Executing parallel jobs for stage:" << stage.getName() << "in thread" << QThread::currentThread();
+    qDebug() << "Executing parallel jobs for stage:"
+        << stage.getName()
+        << "in thread"
+        << QThread::currentThread();
 #endif
 
-    const auto& jobs = stage.getJobs(); 
+    const auto& jobs = stage.getJobs();
     const auto jobCount = jobs.size();
 
     if (jobCount == 0)
         return;
 
     for (const auto& job : jobs) {
-        if (job.getThreadAffinity() == WorkflowPlan::JobThreadAffinity::GuiThread)
-            throw ManiVaultException(SeverityLevel::Error, QString("GUI-thread job '%1' is not allowed in a parallel stage").arg(job.getName()), "workflow.parallel.gui_thread_job", stage.getName());
+        if (job.getThreadAffinity() == WorkflowPlan::JobThreadAffinity::GuiThread) {
+            throw ManiVaultException(
+                SeverityLevel::Error,
+                QString("GUI-thread job '%1' is not allowed in a parallel stage")
+                .arg(job.getName()),
+                "workflow.parallel.gui_thread_job",
+                stage.getName());
+        }
     }
+
+    trace({
+        ._type = WorkflowTraceEventType::ParallelStageStarted,
+        ._name = stage.getName(),
+        ._contextId = stageContext.getId(),
+        ._parentContextId = stageContext.getParentId(),
+        ._metadata = {
+            { "jobCount", jobCount },
+            { "maxThreadCount", getThreadPool().maxThreadCount() },
+            { "activeThreadCount", getThreadPool().activeThreadCount() }
+        }
+        });
 
     QVector<WorkflowExecutionContext> jobContexts;
     jobContexts.reserve(jobCount);
 
     for (int i = 0; i < jobCount; ++i) {
         const auto& job = jobs[i];
-        jobContexts.push_back(stageContext.createChild(job.getName(), job.getWeight(), job.getProgressMode()));
+
+        jobContexts.push_back(
+            stageContext.createChild(
+                job.getName(),
+                job.getWeight(),
+                job.getProgressMode()));
     }
 
     QFutureSynchronizer<void> synchronizer;
@@ -591,45 +628,76 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
         auto jobContext = jobContexts[i];
 
         trace({
-		    ._type = WorkflowTraceEventType::ParallelJobSubmitted,
-		    ._name = job->getName(),
-		    ._contextId = jobContext.getId(),
-		    ._parentContextId = jobContext.getParentId()
+            ._type = WorkflowTraceEventType::ParallelJobSubmitted,
+            ._name = job->getName(),
+            ._contextId = jobContext.getId(),
+            ._parentContextId = jobContext.getParentId(),
+            ._metadata = {
+                { "stage", stage.getName() },
+                { "jobIndex", i },
+                { "jobCount", jobCount },
+                { "maxThreadCount", getThreadPool().maxThreadCount() },
+                { "activeThreadCount", getThreadPool().activeThreadCount() }
+            }
         });
 
         synchronizer.addFuture(QtConcurrent::run(
             &getThreadPool(),
-            [this, job, jobContext, &exceptionMutex, &firstException]() mutable {
+            [this,
+            job,
+            jobContext,
+            stageName = stage.getName(),
+            jobIndex = i,
+            jobCount,
+            &exceptionMutex,
+            &firstException]() mutable {
+                WorkflowExecutionScope jobScope(jobContext);
+
+                trace({
+                    ._type = WorkflowTraceEventType::ParallelJobStarted,
+                    ._name = job->getName(),
+                    ._contextId = jobContext.getId(),
+                    ._parentContextId = jobContext.getParentId(),
+                    ._metadata = {
+                        { "stage", stageName },
+                        { "jobIndex", jobIndex },
+                        { "jobCount", jobCount },
+                        { "maxThreadCount", getThreadPool().maxThreadCount() },
+                        { "activeThreadCount", getThreadPool().activeThreadCount() }
+                    }
+                });
+
                 try {
-                    WorkflowExecutionScope jobScope(jobContext);
-
-                    trace({
-			            ._type = WorkflowTraceEventType::ParallelJobStarted,
-			            ._name = job->getName(),
-			            ._contextId = jobContext.getId(),
-			            ._parentContextId = jobContext.getParentId()
-                    });
-
                     executeJob(*job, jobContext);
 
                     trace({
                         ._type = WorkflowTraceEventType::ParallelJobFinished,
                         ._name = job->getName(),
                         ._contextId = jobContext.getId(),
-                        ._parentContextId = jobContext.getParentId()
+                        ._parentContextId = jobContext.getParentId(),
+                        ._metadata = {
+                            { "stage", stageName },
+                            { "jobIndex", jobIndex }
+                        }
                     });
                 }
                 catch (...) {
-                    std::lock_guard<std::mutex> lock(exceptionMutex);
+                    {
+                        std::lock_guard<std::mutex> lock(exceptionMutex);
 
-                    if (!firstException)
-                        firstException = std::current_exception();
+                        if (!firstException)
+                            firstException = std::current_exception();
+                    }
 
                     trace({
                         ._type = WorkflowTraceEventType::ParallelJobFailed,
                         ._name = job->getName(),
                         ._contextId = jobContext.getId(),
-                        ._parentContextId = jobContext.getParentId()
+                        ._parentContextId = jobContext.getParentId(),
+                        ._metadata = {
+                            { "stage", stageName },
+                            { "jobIndex", jobIndex }
+                        }
                     });
                 }
             }
@@ -638,8 +706,28 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
 
     synchronizer.waitForFinished();
 
-    if (firstException)
+    if (firstException) {
+        trace({
+            ._type = WorkflowTraceEventType::ParallelStageFailed,
+            ._name = stage.getName(),
+            ._contextId = stageContext.getId(),
+            ._parentContextId = stageContext.getParentId()
+        });
+
         std::rethrow_exception(firstException);
+    }
+
+    trace({
+        ._type = WorkflowTraceEventType::ParallelStageFinished,
+        ._name = stage.getName(),
+        ._contextId = stageContext.getId(),
+        ._parentContextId = stageContext.getParentId(),
+        ._metadata = {
+            { "jobCount", jobCount },
+            { "maxThreadCount", getThreadPool().maxThreadCount() },
+            { "activeThreadCount", getThreadPool().activeThreadCount() }
+        }
+    });
 }
 
 void WorkflowPlanExecutor::executeJobOnGuiThread(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext)

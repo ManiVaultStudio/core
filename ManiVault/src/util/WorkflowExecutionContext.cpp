@@ -187,16 +187,57 @@ void WorkflowExecutionContext::setCurrent(WorkflowExecutionContext* context)
     currentWorkflowExecutionContext = context;
 }
 
-void WorkflowExecutionContext::addPendingAsyncWork(WorkflowResultFuture future)
+void WorkflowExecutionContext::addPendingAsyncWork(WorkflowResultFuture future, const QString& label /*= {}*/)
 {
-    _pendingAsyncWork.push_back(std::move(future));
+    _pendingAsyncWork.push_back({
+        ._future = std::move(future),
+        ._label = std::move(label)
+    });
 }
 
 void WorkflowExecutionContext::waitForPendingAsyncWork()
 {
-    for (auto& future : _pendingAsyncWork) {
-        future.waitForFinished();
-        future.getState()->rethrowExceptionIfAny();
+    for (auto& pendingWork : _pendingAsyncWork) {
+        if (auto state = getState()) {
+            state->trace({
+	            ._type = WorkflowTraceEventType::PendingAsyncWorkItemStarted,
+	            ._name = pendingWork._label,
+	            ._contextId = getId(),
+	            ._parentContextId = getParentId(),
+                ._threadId = QThread::currentThreadId(),
+				._timestampNs = AbstractWorkflowTraceSink::currentTimestampNs()
+            });
+        }
+
+        try {
+            pendingWork._future.waitForFinished();
+            pendingWork._future.getState()->rethrowExceptionIfAny();
+        }
+        catch (...) {
+            if (auto state = getState()) {
+                state->trace({
+                    ._type = WorkflowTraceEventType::PendingAsyncWorkItemFailed,
+                    ._name = pendingWork._label,
+                    ._contextId = getId(),
+                    ._parentContextId = getParentId(),
+	                ._threadId = QThread::currentThreadId(),
+	                ._timestampNs = AbstractWorkflowTraceSink::currentTimestampNs()
+                });
+            }
+
+            throw;
+        }
+
+        if (auto state = getState()) {
+            state->trace({
+	            ._type = WorkflowTraceEventType::PendingAsyncWorkItemFinished,
+	            ._name = pendingWork._label,
+	            ._contextId = getId(),
+	            ._parentContextId = getParentId(),
+                ._threadId = QThread::currentThreadId(),
+                ._timestampNs = AbstractWorkflowTraceSink::currentTimestampNs()
+            });
+        }
     }
 
     _pendingAsyncWork.clear();
@@ -210,6 +251,11 @@ QUuid WorkflowExecutionContext::getId() const
 QUuid WorkflowExecutionContext::getParentId() const
 {
     return _parentId;
+}
+
+std::size_t WorkflowExecutionContext::getPendingAsyncWorkCount() const
+{
+    return _pendingAsyncWork.size();
 }
 
 }

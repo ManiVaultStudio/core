@@ -49,6 +49,8 @@ public: // Tracing
 
     std::shared_ptr<AbstractWorkflowTraceSink> getTraceSink() const;
 
+    void trace(WorkflowTraceEvent event);
+
 private:
     static void collectMessagesRecursive(const WorkflowReportNode::Ptr& node, QVector<WorkflowMessage>& out);
 
