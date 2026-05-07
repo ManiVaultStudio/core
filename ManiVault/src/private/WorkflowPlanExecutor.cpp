@@ -187,10 +187,12 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
 
     auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task, executionOptions);
 
-    setTraceSink(createWorkflowTraceSink(
-        executionOptions._traceSinkType,
-        executionOptions._traceOutputPath
-    ));
+    if (auto state = rootContext.getState()) {
+        state->setTraceSink(createWorkflowTraceSink(
+            executionOptions._traceSinkType,
+            executionOptions._traceOutputPath
+        ));
+    }
 
 	WorkflowExecutionScope rootScope(rootContext);
 
@@ -536,7 +538,22 @@ void WorkflowPlanExecutor::executeSequentialJobs(const WorkflowPlan::Stage& stag
 
     // Wait once, after all sequential jobs had a chance to register async work.
     for (auto& jobContext : jobContexts) {
+        trace({
+	        ._type = WorkflowTraceEventType::PendingAsyncWorkWaitStarted,
+	        ._name = jobContext.getName(),
+	        ._contextId = jobContext.getId(),
+	        ._parentContextId = jobContext.getParentId()
+        });
+
+
         jobContext.waitForPendingAsyncWork();
+
+        trace({
+	        ._type = WorkflowTraceEventType::PendingAsyncWorkWaitFinished,
+	        ._name = jobContext.getName(),
+	        ._contextId = jobContext.getId(),
+	        ._parentContextId = jobContext.getParentId()
+		});
     }
 }
 

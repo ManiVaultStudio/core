@@ -43,18 +43,23 @@ public:
 
     const WorkflowExecutionMetrics& metrics() const;
 
-private:
-    static void collectMessagesRecursive(const WorkflowReportNode::Ptr& node,
-        QVector<WorkflowMessage>& out);
+public: // Tracing
+
+    void setTraceSink(std::shared_ptr<AbstractWorkflowTraceSink> traceSink);
+
+    std::shared_ptr<AbstractWorkflowTraceSink> getTraceSink() const;
 
 private:
-    WorkflowReportNode::Ptr _reportRoot;
-    WorkflowProgressNode::Ptr _progressRoot;
-    WorkflowExecutionOptions _executionOptions;
+    static void collectMessagesRecursive(const WorkflowReportNode::Ptr& node, QVector<WorkflowMessage>& out);
 
-    mutable QMutex _mutex;
-    WorkflowExecutionStatus _status = WorkflowExecutionStatus::Idle;
-    WorkflowExecutionMetrics _metrics;
+private:
+    WorkflowReportNode::Ptr     _reportRoot;                                /** Report nodes are stored in the execution state since they need to be accessible from the context and may be updated from multiple threads during execution. The execution context provides thread-safe access to these nodes, and they are designed to handle concurrent updates internally (e.g., by using mutexes). */
+    WorkflowProgressNode::Ptr   _progressRoot;                              /** Progress and report nodes are stored in the execution state since they need to be accessible from the context and may be updated from multiple threads during execution. The execution context provides thread-safe access to these nodes, and they are designed to handle concurrent updates internally (e.g., by using mutexes). */
+    WorkflowExecutionOptions    _executionOptions;                          /** Execution options are stored in the execution state since they may need to be accessed from multiple threads during execution and should be immutable after initialization. */
+    mutable QMutex              _mutex;                                     /** Mutex to protect access to mutable members that may be updated from multiple threads during execution. */
+    WorkflowExecutionStatus     _status = WorkflowExecutionStatus::Idle;    /** The execution status is protected by a mutex since it may be updated from multiple threads during execution and needs to be read and updated atomically. */
+    WorkflowExecutionMetrics    _metrics;                                   /** Metrics are stored in the execution state since they may be updated from multiple threads during execution and need to be accessible from the context. */
+    SharedWorkflowTraceSink     _traceSink;                                 /** Initialized based on _executionOptions._traceSinkType */
 };
 
 } // namespace mv::util

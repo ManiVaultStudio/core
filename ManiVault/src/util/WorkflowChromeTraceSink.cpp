@@ -16,12 +16,12 @@ WorkflowChromeTraceSink::WorkflowChromeTraceSink(const QString& filePath)
 
 	_stream.setDevice(&_file);
 
-	_stream << "[\n";
+    _stream << "[\n";
 }
 
 WorkflowChromeTraceSink::~WorkflowChromeTraceSink()
 {
-	_stream << "{}]\n";
+    _stream << "\n]\n";
 }
 
 void WorkflowChromeTraceSink::trace(const WorkflowTraceEvent& event)
@@ -47,10 +47,14 @@ QString WorkflowChromeTraceSink::displayName(const WorkflowTraceEvent& event)
 	    case WorkflowTraceEventType::JobFailed:
 	        return QString("Job: %1").arg(event._name);
 
-	    case WorkflowTraceEventType::GuiDispatchRequested:
-	    case WorkflowTraceEventType::GuiDispatchEntered:
-	    case WorkflowTraceEventType::GuiDispatchFinished:
-	        return QString("GUI: %1").arg(event._name);
+        case WorkflowTraceEventType::GuiDispatchRequested:
+            return QString("GUI requested: %1").arg(event._name);
+
+        case WorkflowTraceEventType::GuiDispatchEntered:
+            return QString("GUI entered: %1").arg(event._name);
+
+        case WorkflowTraceEventType::GuiDispatchFinished:
+            return QString("GUI finished: %1").arg(event._name);
 
 	    case WorkflowTraceEventType::ParallelJobSubmitted:
 	    case WorkflowTraceEventType::ParallelJobStarted:
@@ -62,62 +66,76 @@ QString WorkflowChromeTraceSink::displayName(const WorkflowTraceEvent& event)
     return event._name;
 }
 
+QString WorkflowChromeTraceSink::phaseString(const WorkflowTraceEvent& event)
+{
+    switch (event._type) {
+	    case WorkflowTraceEventType::WorkflowStarted:
+	    case WorkflowTraceEventType::StageStarted:
+	    case WorkflowTraceEventType::JobStarted:
+	    case WorkflowTraceEventType::ParallelJobStarted:
+	    case WorkflowTraceEventType::PendingAsyncWorkWaitStarted:
+	        return "B";
+
+	    case WorkflowTraceEventType::WorkflowFinished:
+	    case WorkflowTraceEventType::WorkflowFailed:
+	    case WorkflowTraceEventType::StageFinished:
+	    case WorkflowTraceEventType::StageFailed:
+	    case WorkflowTraceEventType::JobFinished:
+	    case WorkflowTraceEventType::JobFailed:
+	    case WorkflowTraceEventType::ParallelJobFinished:
+	    case WorkflowTraceEventType::ParallelJobFailed:
+	    case WorkflowTraceEventType::PendingAsyncWorkWaitFinished:
+	        return "E";
+
+	    case WorkflowTraceEventType::GuiDispatchRequested:
+	    case WorkflowTraceEventType::GuiDispatchEntered:
+	    case WorkflowTraceEventType::GuiDispatchFinished:
+	    case WorkflowTraceEventType::ParallelJobSubmitted:
+	        return "i";
+    }
+
+    return "i";
+}
+
 void WorkflowChromeTraceSink::writeEvent(const WorkflowTraceEvent& event)
 {
     QMutexLocker locker(&_mutex);
 
-    const auto threadId = reinterpret_cast<quintptr>(event._threadId);
+    if (!_firstEvent)
+        _stream << ",\n";
 
-    QString phase = "i";
+    _firstEvent = false;
 
-    switch (event._type) {
-	    case WorkflowTraceEventType::JobStarted:
-	    case WorkflowTraceEventType::StageStarted:
-	    case WorkflowTraceEventType::WorkflowStarted:
-	        phase = "B";
-	        break;
+    _stream << "{";
 
-	    case WorkflowTraceEventType::JobFinished:
-	    case WorkflowTraceEventType::StageFinished:
-	    case WorkflowTraceEventType::WorkflowFinished:
-	        phase = "E";
-	        break;
-
-	    default:
-	        phase = "i";
-	        break;
-    }
-
+    // write fields...
     _stream
-        << "{"
         << "\"name\":\"" << displayName(event) << "\","
-        << "\"ph\":\"" << phase << "\","
-        << "\"ts\":" << (event._timestampNs / 1000) << ","
+        << "\"ph\":\"" << phaseString(event) << "\","
+        << "\"ts\":" << event._timestampNs / 1000 << ","
         << "\"pid\":1,"
-        << "\"tid\":" << threadId;
+        << "\"tid\":" << reinterpret_cast<quintptr>(event._threadId);
 
     if (!event._metadata.isEmpty()) {
-
         _stream << ",\"args\":{";
 
-        bool first = true;
+        bool firstArg = true;
 
         for (auto it = event._metadata.begin(); it != event._metadata.end(); ++it) {
-
-            if (!first)
+            if (!firstArg)
                 _stream << ",";
+
+            firstArg = false;
 
             _stream
                 << "\"" << it.key() << "\":"
                 << "\"" << it.value().toString() << "\"";
-
-            first = false;
         }
 
         _stream << "}";
     }
 
-    _stream << "},\n";
+    _stream << "}";
 
     _stream.flush();
 }

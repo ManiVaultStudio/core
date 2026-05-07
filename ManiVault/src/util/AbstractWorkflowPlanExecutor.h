@@ -27,20 +27,6 @@ public:
 
     static void installNotificationLinkHandler();
 
-public: // Tracing
-
-    /**
-     * Installs a trace sink to receive workflow trace events emitted by this executor. If a trace sink is already installed, it will be replaced by the new one.
-     * @param sink The trace sink to install for receiving workflow trace events. Pass nullptr to uninstall any existing trace sink.
-     */
-    void setTraceSink(std::shared_ptr<AbstractWorkflowTraceSink> sink);
-
-    /**
-     * Emits a workflow trace event to the installed trace sink, if any.
-     * @param event The workflow trace event to emit to the trace sink.
-     */
-    void trace(WorkflowTraceEvent event);
-
 protected:
     virtual WorkflowResultFuture executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, WorkflowExecutionOptions executionOptions = {}) = 0;
     virtual SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {}) = 0;
@@ -61,9 +47,15 @@ private: // Execute individual jobs
     virtual void executeJobOnWorkerThread(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext) = 0;
     virtual void executeJob(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext) = 0;
 
-private:
-    std::shared_ptr<AbstractWorkflowTraceSink> _traceSink;
+protected: // Tracing
 
+    /**
+     * Traces a workflow event by sending it to the trace sink associated with the current workflow execution context, if available. The event's thread ID and timestamp are automatically set before tracing.
+     * @param event The WorkflowTraceEvent object containing details about the event to be traced.
+     */
+    static void trace(WorkflowTraceEvent event);
+
+private:
     friend class WorkflowPlan;
 };
 

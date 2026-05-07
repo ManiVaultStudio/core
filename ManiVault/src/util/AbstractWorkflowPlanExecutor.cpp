@@ -52,20 +52,18 @@ void AbstractWorkflowPlanExecutor::installNotificationLinkHandler()
     });
 }
 
-void AbstractWorkflowPlanExecutor::setTraceSink(std::shared_ptr<AbstractWorkflowTraceSink> sink)
-{
-	_traceSink = std::move(sink);
-}
-
 void AbstractWorkflowPlanExecutor::trace(WorkflowTraceEvent event)
 {
-	if (!_traceSink)
-		return;
+	if (auto context = WorkflowExecutionContext::current()) {
+        if (auto state = context->getState()) {
+            if (auto traceSink = state->getTraceSink()) {
+	            event._threadId     = QThread::currentThreadId();
+            	event._timestampNs  = AbstractWorkflowTraceSink::currentTimestampNs();
 
-	event._threadId    = QThread::currentThreadId();
-	event._timestampNs = AbstractWorkflowTraceSink::currentTimestampNs();
-
-	_traceSink->trace(event);
+            	traceSink->trace(event);
+            }
+        }
+	}
 }
 
 }

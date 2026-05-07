@@ -64,6 +64,16 @@ const WorkflowExecutionMetrics& WorkflowExecutionState::metrics() const
 	return _metrics;
 }
 
+void WorkflowExecutionState::setTraceSink(std::shared_ptr<AbstractWorkflowTraceSink> traceSink)
+{
+	_traceSink = std::move(traceSink);
+}
+
+std::shared_ptr<AbstractWorkflowTraceSink> WorkflowExecutionState::getTraceSink() const
+{
+	return _traceSink;
+}
+
 void WorkflowExecutionState::collectMessagesRecursive(const WorkflowReportNode::Ptr& node, QVector<WorkflowMessage>& out)
 {
 	if (!node)
