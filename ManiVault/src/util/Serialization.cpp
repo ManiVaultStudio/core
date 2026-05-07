@@ -390,14 +390,13 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
 
     for (auto& decodeBlockJob : decodeBlockJobs) {
         const double progressWeight = std::max<double>(1.0, static_cast<double>(decodeBlockJob._size));
-        auto* decodeBlockJobPtr = &decodeBlockJob;
 
-        decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [decodeBlockJobPtr, bytes, totalSize, createCodec](const WorkflowPlan::Job& job) {
+        decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [decodeBlockJob, bytes, totalSize, createCodec](const WorkflowPlan::Job& job) {
             //try {
-                if (decodeBlockJobPtr->_uri.isEmpty()) {
-                    decodeBlockFromBase64To(*decodeBlockJobPtr, createCodec, bytes, totalSize);
+                if (decodeBlockJob._uri.isEmpty()) {
+                    decodeBlockFromBase64To(decodeBlockJob, createCodec, bytes, totalSize);
                 } else {
-                    decodeBlockFromFileTo(*decodeBlockJobPtr, createCodec, bytes, totalSize);
+                    decodeBlockFromFileTo(decodeBlockJob, createCodec, bytes, totalSize);
                 }
             //}
             //catch (std::exception& e) {
@@ -423,8 +422,8 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
 
     decodeWorkflowPlan.addParallelStage("Decode blocks", decodeJobs);
     decodeWorkflowPlan.addSequentialStage("Finalize", [totalSize](WorkflowPlan::Job& job) {
-        if (auto wokflowExecutionContext = WorkflowExecutionContext::current()) {
-            auto state = wokflowExecutionContext->getState();
+        if (auto workflowExecutionContext = WorkflowExecutionContext::current()) {
+            auto state = workflowExecutionContext->getState();
 
             if (!state)
                 return;
@@ -432,7 +431,7 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
             state->metrics().addInteger("project.data.bytes_loaded", totalSize);
         }
     });
-    decodeWorkflowPlan.executeOnCurrentThread(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()));
+    decodeWorkflowPlan.executeAsync(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()));
 }
 
 void populateDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& bytes)

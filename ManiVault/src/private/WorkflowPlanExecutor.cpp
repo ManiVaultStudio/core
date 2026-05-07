@@ -148,8 +148,6 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflo
 	});
 
     auto* watcher = new QFutureWatcher<SharedWorkflowResult>();
-    watcher->setFuture(state->future);
-    state->watcher = watcher;
 
     if (task != nullptr) {
         connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, task, [watcher, task]() {
@@ -162,6 +160,10 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflo
     }
 
     connect(watcher, &QFutureWatcher<WorkflowResult>::finished, watcher,&QObject::deleteLater, Qt::QueuedConnection);
+
+    watcher->setFuture(state->future);
+
+	state->watcher = watcher;
 
     return WorkflowResultFuture(state);
 }

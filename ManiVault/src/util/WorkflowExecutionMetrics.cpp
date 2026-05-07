@@ -51,6 +51,9 @@ void WorkflowExecutionMetrics::addInteger( const QString& name, std::uint64_t am
 
     auto it = _metrics.find(name);
 
+    if (it == _metrics.end())
+        return;
+
     const auto before = it->second._intValue.load(std::memory_order_relaxed);
 
 	it->second._intValue.fetch_add(amount, std::memory_order_relaxed);

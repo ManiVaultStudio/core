@@ -118,6 +118,18 @@ std::int32_t ClusterData::getClusterIndex(const QString& clusterName) const
     return -1;
 }
 
+struct ClustersLoadContext : public WorkflowContextBase
+{
+    explicit ClustersLoadContext(const QVariantMap& rawDataMap) :
+		_rawDataMap(rawDataMap)
+    {
+    }
+
+    QVariantMap _rawDataMap;
+    QByteArray  _decodedBytes;
+    QVector<Cluster> _loadedClusters;
+};
+
 void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
@@ -129,22 +141,31 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
         fromVariantMapPre150(variantMap);
     } else {
 	    try {
-	        QByteArray decodedBytes;
+            auto context = std::make_shared<ClustersLoadContext>(dataMap["ClustersRawData"].toMap());
 
-	        populateDataBufferFromVariantMap(dataMap["ClustersRawData"].toMap(), decodedBytes);
+            WorkflowPlan plan(QStringLiteral("Load clusters"), context);
 
-	        QDataStream clustersDataStream(&decodedBytes, QIODevice::ReadOnly);
+            plan.addSequentialStage("Load", [context]() -> void {
+                populateDataBufferFromVariantMap(context->_rawDataMap, context->_decodedBytes);
+            });
 
-	        clustersDataStream.setVersion(QDataStream::Qt_6_5);
+            QPointer<ClusterData> clusterData(this);
 
-            QVector<Cluster> loadedClusters;
+            plan.addSequentialStage("Load", [context, clusterData]() -> void {
+                QDataStream clustersDataStream(&context->_decodedBytes, QIODevice::ReadOnly);
 
-	        clustersDataStream >> loadedClusters;
+                clustersDataStream.setVersion(QDataStream::Qt_6_5);
 
-	        if (clustersDataStream.status() != QDataStream::Ok)
-	            throw std::runtime_error("Failed to deserialize cluster payload");
+                clustersDataStream >> context->_loadedClusters;
 
-            _clusters = std::move(loadedClusters);
+                if (clustersDataStream.status() != QDataStream::Ok)
+                    throw std::runtime_error("Failed to deserialize cluster payload");
+
+                if (clusterData)
+                    clusterData->_clusters = std::move(context->_loadedClusters);
+            });
+
+            plan.executeAsync(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()));
 	    }
 	    catch (const std::exception& e) {
 	        qCritical() << "Failed to load cluster data: " << e.what();

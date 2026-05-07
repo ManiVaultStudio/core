@@ -182,18 +182,21 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decodeTo(const QByteArray& encodedDat
 
     Result result;
 
-    if (destination == nullptr) {
-        result._error = "Destination buffer is null";
+    if (encodedData.isEmpty()) {
+        result._error = "Encoded data is empty";
         return result;
     }
 
-    ZSTD_DCtx* dctx = getThreadLocalDCtx();
+    if (destinationSize == 0) {
+        result._error = "Destination buffer size is zero";
+        return result;
+    }
 
-    QByteArray dest(destinationSize, Qt::Initialization::Uninitialized);
+    auto dctx = getThreadLocalDCtx();
 
     const size_t decodedSize = ZSTD_decompressDCtx(
         dctx,
-        dest.data(),
+        destination,
         static_cast<size_t>(destinationSize),
         encodedData.constData(),
         static_cast<size_t>(encodedData.size())
@@ -213,8 +216,6 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decodeTo(const QByteArray& encodedDat
             .arg(static_cast<std::uint64_t>(decodedSize));
         return result;
     }
-
-    memcpy(destination, dest.constData(), dest.size());
 
     result._success = true;
     return result;
