@@ -202,8 +202,6 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decodeTo(const QByteArray& encodedDat
         static_cast<size_t>(encodedData.size())
     );
 
-    
-
     if (ZSTD_isError(decodedSize)) {
         result._error = QString("ZSTD decompression failed: %1")
             .arg(ZSTD_getErrorName(decodedSize));

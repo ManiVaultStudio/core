@@ -13,8 +13,8 @@ using MaxWorkerThreadCount = std::uint32_t;
 
 struct CORE_EXPORT WorkflowExecutionOptions
 {
-    bool                    _parallel;
-    MaxWorkerThreadCount    _maxWorkerThreadCount = 1;
+    bool                    _parallel = true;
+    MaxWorkerThreadCount    _maxWorkerThreadCount = 63;
     bool                    _reportProgress = false;
     bool                    _addNotification = false;
 };

@@ -620,6 +620,9 @@ set(PUBLIC_UTIL_HEADERS
     src/util/WorkflowExecutionMetrics.h
     src/util/WorkflowResultRegistry.h
     src/util/WorkflowResultDialog.h
+    src/util/WorkflowTraceEvent.h
+    src/util/AbstractWorkflowTraceSink.h
+    src/util/WorkflowConsoleTraceSink.h
 )
 
 if(APPLE)
@@ -711,6 +714,9 @@ set(PUBLIC_UTIL_SOURCES
     src/util/WorkflowExecutionMetrics.cpp
     src/util/WorkflowResultRegistry.cpp
     src/util/WorkflowResultDialog.cpp
+    src/util/WorkflowTraceEvent.cpp
+    src/util/AbstractWorkflowTraceSink.cpp
+    src/util/WorkflowConsoleTraceSink.cpp
 )
 
 if(APPLE)

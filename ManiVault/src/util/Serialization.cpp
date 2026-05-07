@@ -389,32 +389,12 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
     std::int32_t decodeBlockJobIndex = 0;
 
     for (auto& decodeBlockJob : decodeBlockJobs) {
-        const double progressWeight = std::max<double>(1.0, static_cast<double>(decodeBlockJob._size));
-
         decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [decodeBlockJob, bytes, totalSize, createCodec](const WorkflowPlan::Job& job) {
-            //try {
-                if (decodeBlockJob._uri.isEmpty()) {
-                    decodeBlockFromBase64To(decodeBlockJob, createCodec, bytes, totalSize);
-                } else {
-                    decodeBlockFromFileTo(decodeBlockJob, createCodec, bytes, totalSize);
-                }
-            //}
-            //catch (std::exception& e) {
-            //    Serializable::reportSerializationError(
-            //        "Data hierarchy manager",
-            //        "Failed to load dataset: " + QString::fromStdString(e.what())
-            //    );
-
-            //    throw;
-            //}
-            //catch (...) {
-            //    Serializable::reportSerializationError(
-            //        "Data hierarchy manager",
-            //        "Failed to load dataset"
-            //    );
-
-            //    throw;
-            //}
+            if (decodeBlockJob._uri.isEmpty()) {
+                decodeBlockFromBase64To(decodeBlockJob, createCodec, bytes, totalSize);
+            } else {
+                decodeBlockFromFileTo(decodeBlockJob, createCodec, bytes, totalSize);
+            }
         }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread);
 
         ++decodeBlockJobIndex;
@@ -431,6 +411,7 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
             state->metrics().addInteger("project.data.bytes_loaded", totalSize);
         }
     });
+
     decodeWorkflowPlan.executeAsync(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()));
 }
 

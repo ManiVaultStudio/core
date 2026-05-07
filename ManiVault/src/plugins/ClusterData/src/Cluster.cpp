@@ -13,37 +13,42 @@ namespace
 {
 
     template <typename T>
-    QDataStream& writeStdVector(QDataStream& out, const std::vector<T>& values)
-    {
-        static_assert(std::is_arithmetic_v<T>, "writeStdVector only supports arithmetic types here.");
-
-        out << static_cast<quint32>(values.size());
-
-        for (const auto& value : values)
-            out << value;
-
-        return out;
-    }
-
-    template <typename T>
     QDataStream& readStdVector(QDataStream& in, std::vector<T>& values)
     {
-        static_assert(std::is_arithmetic_v<T>, "readStdVector only supports arithmetic types here.");
+        static_assert(std::is_arithmetic_v<T>,
+            "readStdVector only supports arithmetic types.");
 
         quint32 size = 0;
         in >> size;
 
-        if (in.status() != QDataStream::Ok) {
-            values.clear();
-            return in;
+        values.resize(size);
+
+        if (size > 0) {
+            const qsizetype bytes = qsizetype(size) * qsizetype(sizeof(T));
+
+            if (in.readRawData(reinterpret_cast<char*>(values.data()), bytes) != bytes) {
+                in.setStatus(QDataStream::ReadPastEnd);
+            }
         }
 
-        values.resize(static_cast<std::size_t>(size));
-
-        for (quint32 i = 0; i < size; ++i)
-            in >> values[static_cast<std::size_t>(i)];
-
         return in;
+    }
+
+    template <typename T>
+    QDataStream& writeStdVector(QDataStream& out, const std::vector<T>& values)
+    {
+        static_assert(std::is_arithmetic_v<T>,"writeStdVector only supports arithmetic types.");
+
+        out << static_cast<quint32>(values.size());
+
+        if (!values.empty()) {
+            out.writeRawData(
+                reinterpret_cast<const char*>(values.data()),
+                qsizetype(values.size() * sizeof(T))
+            );
+        }
+
+        return out;
     }
 
 } // namespace
@@ -58,6 +63,7 @@ QDataStream& operator<<(QDataStream& out, const Cluster& cluster)
     out << cluster._id;
     out << cluster._color;
 
+    //qDebug() << "=====" << cluster._name << cluster._id << cluster._color;
     writeStdVector(out, cluster._indices);
     writeStdVector(out, cluster._median);
     writeStdVector(out, cluster._mean);
@@ -75,6 +81,7 @@ QDataStream& operator>>(QDataStream& in, Cluster& cluster)
     if (in.status() != QDataStream::Ok)
         return in;
 
+    //qDebug() << "=====" << in.status();
     //qDebug() << "=====" << version;
     //switch (version) {
     //case 1:

@@ -141,6 +141,7 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
         fromVariantMapPre150(variantMap);
     } else {
 	    try {
+            
             auto context = std::make_shared<ClustersLoadContext>(dataMap["ClustersRawData"].toMap());
 
             WorkflowPlan plan(QStringLiteral("Load clusters"), context);
@@ -151,19 +152,23 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 
             QPointer<ClusterData> clusterData(this);
 
-            plan.addSequentialStage("Load", [context, clusterData]() -> void {
-                QDataStream clustersDataStream(&context->_decodedBytes, QIODevice::ReadOnly);
+            WorkflowPlan::Jobs jobs;
+
+            jobs.emplace_back("Create clusters", [context, clusterData](const WorkflowPlan::Job& job) -> void {
+            	QDataStream clustersDataStream(&context->_decodedBytes, QIODevice::ReadOnly);
 
                 clustersDataStream.setVersion(QDataStream::Qt_6_5);
 
-                clustersDataStream >> context->_loadedClusters;
+                clustersDataStream >> clusterData->_clusters;
 
                 if (clustersDataStream.status() != QDataStream::Ok)
                     throw std::runtime_error("Failed to deserialize cluster payload");
 
-                if (clusterData)
-                    clusterData->_clusters = std::move(context->_loadedClusters);
+                //if (clusterData)
+                //    clusterData->_clusters = std::move(context->_loadedClusters);
             });
+
+            plan.addParallelStage("Load", jobs);
 
             plan.executeAsync(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()));
 	    }

@@ -372,8 +372,10 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         const auto rawBlockSize = getRawBlockObjectSize(dataVariantMap);
 
         loadDatasetJobs.emplace_back(datasetName, [datasetId, datasetName, dataVariantMap](WorkflowPlan::Job& job) {
-            qDebug() << "Loading dataset" << datasetId << datasetName;
+            
             mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
+
+            qDebug() << "Loaded dataset" << datasetId << datasetName;
             
         }, WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Atomic).weighted(rawBlockSize > 0 ? static_cast<double>(rawBlockSize) : 1.0);
     }
