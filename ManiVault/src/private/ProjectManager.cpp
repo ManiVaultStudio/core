@@ -383,8 +383,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         		._maxWorkerThreadCount = parameters._maxParallelThreads,
                 ._reportProgress = true,
                 ._addNotification = true,
-                ._traceSinkType = WorkflowTraceSinkType::ChromeJson,
-                ._traceOutputPath = QStringLiteral("D:/Temp/chrome_trace.json")
+                ._traceSink = std::make_shared<WorkflowChromeTraceSink>(QStringLiteral("D:/Temp/chrome_trace.json"))
         	});
 	    }
         emit projectOpened(*_project);

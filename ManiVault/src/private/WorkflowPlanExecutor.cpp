@@ -18,6 +18,8 @@
 
 //#define WORKFLOW_PLAN_EXECUTOR_VERBOSE
 
+#define USE_WORKFLOW_CONSOLE_TRACE_SINK
+
 using namespace mv;
 using namespace mv::util;
 
@@ -39,7 +41,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
 	        result = executeChild(workflowPlan, *currentContext);
 	    }
 	    else {
-		    auto future = executeAsyncImpl(workflowPlan, executionOptions._reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, executionOptions);
+		    auto future = executeAsyncImpl(workflowPlan, executionOptions._reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, executionOptions, nullptr);
 
 	        if (QThread::currentThread() == qApp->thread()) {
         		QEventLoop loop;
@@ -95,14 +97,16 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
     return result;
 }
 
-WorkflowResultFuture WorkflowPlanExecutor::executeAsync(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions /*= {}*/)
+WorkflowResultFuture WorkflowPlanExecutor::executeAsync(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions)
 {
     const auto pendingWorkLabel = QString("Async workflow: %1").arg(workflowPlan.getName());
 
-    auto future = executeAsyncImpl(WorkflowPlan(workflowPlan), executionOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, executionOptions);
+    auto* parentContext = WorkflowExecutionContext::current();
 
-    if (auto context = WorkflowExecutionContext::current()) {
-        context->addPendingAsyncWork(future, pendingWorkLabel);
+    auto future = executeAsyncImpl(WorkflowPlan(workflowPlan), executionOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, executionOptions, parentContext);
+
+    if (parentContext) {
+        parentContext->addPendingAsyncWork(future, pendingWorkLabel);
     }
 
     return future;
@@ -118,7 +122,7 @@ const QThreadPool& WorkflowPlanExecutor::getThreadPool() const
     return WorkflowExecutionContext::current()->getThreadPool();
 }
 
-WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, mv::util::WorkflowExecutionOptions executionOptions /*= {}*/)
+WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, mv::util::WorkflowExecutionOptions executionOptions, WorkflowExecutionContext* parentContext)
 {
     auto state = std::make_shared<WorkflowResultFuture::State>();
 
@@ -133,16 +137,21 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflo
 
     state->task = task;
 
-    state->future = QtConcurrent::run([state, workflowPlan = std::move(workflowPlan), task, executionOptions = executionOptions]() mutable -> SharedWorkflowResult {
+    state->future = QtConcurrent::run([state, workflowPlan = std::move(workflowPlan), task, executionOptions, parentContext]() mutable -> SharedWorkflowResult {
         try {
             WorkflowPlanExecutor executor;
-            return executor.executeOnCurrentThread(workflowPlan, task, executionOptions);
+
+            if (parentContext) {
+                return executor.executeChild(workflowPlan, *parentContext);
+            }
+
+            return executor.executeRoot(workflowPlan, task, executionOptions);
         }
         catch (...) {
             state->setException(std::current_exception());
             return {};
         }
-	});
+    });
 
     auto* watcher = new QFutureWatcher<SharedWorkflowResult>();
 
@@ -185,17 +194,11 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
 
     auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task, executionOptions);
 
-    if (!rootContext.getState()->getTraceSink()) {
-        rootContext.getState()->setTraceSink(createWorkflowTraceSink(
-            executionOptions._traceSinkType,
-            executionOptions._traceOutputPath
-        ));
-    }
-
 	WorkflowExecutionScope rootScope(rootContext);
 
     WorkflowReporter::info("Workflow started", workflowPlan.getName());
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
     trace(WorkflowTraceEvent{
         ._type = WorkflowTraceEventType::WorkflowStarted,
         ._name = workflowPlan.getName(),
@@ -203,6 +206,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
         ._threadId = QThread::currentThreadId(),
         ._timestampNs = AbstractWorkflowTraceSink::currentTimestampNs()
     });
+#endif
 
     const auto displayFailure = [workflowPlan, executionOptions](const QString& message) -> void {
         QMetaObject::invokeMethod(&help(), [workflowPlan, executionOptions, message]() {
@@ -221,6 +225,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
         
         WorkflowReporter::info("Workflow finished", workflowPlan.getName());
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace(WorkflowTraceEvent{
 	        ._type = WorkflowTraceEventType::WorkflowFinished,
 	        ._name = workflowPlan.getName(),
@@ -228,6 +233,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
 	        ._threadId = QThread::currentThreadId(),
 	        ._timestampNs = AbstractWorkflowTraceSink::currentTimestampNs()
         });
+#endif
     }
     catch (const ManiVaultException& exception) {
         WorkflowReporter::message(exception._severity, exception._message, workflowPlan.getName(), exception._code, exception._scope, exception._details);
@@ -305,6 +311,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeChild(const WorkflowPlan& work
 
     WorkflowReporter::info("Nested workflow started", workflowPlan.getName());
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
     trace({
 	    ._type = WorkflowTraceEventType::WorkflowStarted,
 	    ._name = workflowPlan.getName(),
@@ -314,11 +321,13 @@ SharedWorkflowResult WorkflowPlanExecutor::executeChild(const WorkflowPlan& work
 	        { "nested", true }
 	    }
     });
+#endif
 
     executeImpl(workflowPlan);
 
     WorkflowReporter::info("Nested workflow finished", workflowPlan.getName());
-
+    
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
     trace({
 	    ._type = WorkflowTraceEventType::WorkflowFinished,
 	    ._name = workflowPlan.getName(),
@@ -328,6 +337,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeChild(const WorkflowPlan& work
 	        { "nested", true }
 	    }
     });
+#endif
 
     return {};
 }
@@ -430,6 +440,7 @@ void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, Workfl
 
     auto state = stageContext.getState();
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
     trace({
 	    ._type = WorkflowTraceEventType::StageStarted,
 	    ._name = stage.getName(),
@@ -442,6 +453,7 @@ void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, Workfl
 		    { "containsGuiThreadJobs", stage.containsGuiThreadJobs() }
 	    }
     });
+#endif
 
     try {
         WorkflowPlan::ConcurrencyMode effectiveMode = stage.getConcurrencyMode();
@@ -469,44 +481,53 @@ void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, Workfl
 
         WorkflowReporter::info("Stage finished", stage.getName());
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({
 		    ._type = WorkflowTraceEventType::StageFinished,
 		    ._name = stage.getName(),
 		    ._contextId = stageContext.getId(),
 		    ._parentContextId = stageContext.getParentId()
         });
+#endif
+
     }
     catch (const ManiVaultException& exception) {
         handleStageException(stage, exception);
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({
             ._type = WorkflowTraceEventType::StageFinished,
             ._name = stage.getName(),
             ._contextId = stageContext.getId(),
             ._parentContextId = stageContext.getParentId()
         });
+#endif
     }
     catch (const std::exception& exception) {
         WorkflowReporter::error(QString("Stage failed: %1").arg(exception.what()), stage.getName());
-
+        
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({
             ._type = WorkflowTraceEventType::StageFinished,
             ._name = stage.getName(),
             ._contextId = stageContext.getId(),
             ._parentContextId = stageContext.getParentId()
         });
+#endif
 
         throw;
     }
     catch (...) {
         WorkflowReporter::error("Stage failed with unknown error", stage.getName());
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({
             ._type = WorkflowTraceEventType::StageFinished,
             ._name = stage.getName(),
             ._contextId = stageContext.getId(),
             ._parentContextId = stageContext.getParentId()
         });
+#endif
 
         throw;
     }
@@ -545,6 +566,7 @@ void WorkflowPlanExecutor::executeSequentialJobs(const WorkflowPlan::Stage& stag
         if (pendingCount == 0)
             continue;
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({
             ._type = WorkflowTraceEventType::PendingAsyncWorkWaitStarted,
             ._name = jobContext.getName(),
@@ -553,16 +575,19 @@ void WorkflowPlanExecutor::executeSequentialJobs(const WorkflowPlan::Stage& stag
             ._metadata = {
                 { "pendingAsyncWorkCount", pendingCount }
             }
-            });
+        });
+#endif
 
         jobContext.waitForPendingAsyncWork();
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({
             ._type = WorkflowTraceEventType::PendingAsyncWorkWaitFinished,
             ._name = jobContext.getName(),
             ._contextId = jobContext.getId(),
             ._parentContextId = jobContext.getParentId()
-            });
+        });
+#endif
     }
 }
 
@@ -594,6 +619,7 @@ void WorkflowPlanExecutor::executeParallelJobs(
         }
     }
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
     trace({
         ._type = WorkflowTraceEventType::ParallelStageStarted,
         ._name = stage.getName(),
@@ -604,7 +630,8 @@ void WorkflowPlanExecutor::executeParallelJobs(
             { "maxThreadCount", getThreadPool().maxThreadCount() },
             { "activeThreadCount", getThreadPool().activeThreadCount() }
         }
-        });
+    });
+#endif
 
     QVector<WorkflowExecutionContext> jobContexts;
     jobContexts.reserve(jobCount);
@@ -627,6 +654,7 @@ void WorkflowPlanExecutor::executeParallelJobs(
         auto* job = &jobs[i];
         auto jobContext = jobContexts[i];
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({
             ._type = WorkflowTraceEventType::ParallelJobSubmitted,
             ._name = job->getName(),
@@ -640,6 +668,7 @@ void WorkflowPlanExecutor::executeParallelJobs(
                 { "activeThreadCount", getThreadPool().activeThreadCount() }
             }
         });
+#endif
 
         synchronizer.addFuture(QtConcurrent::run(
             &getThreadPool(),
@@ -653,6 +682,7 @@ void WorkflowPlanExecutor::executeParallelJobs(
             &firstException]() mutable {
                 WorkflowExecutionScope jobScope(jobContext);
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
                 trace({
                     ._type = WorkflowTraceEventType::ParallelJobStarted,
                     ._name = job->getName(),
@@ -666,10 +696,12 @@ void WorkflowPlanExecutor::executeParallelJobs(
                         { "activeThreadCount", getThreadPool().activeThreadCount() }
                     }
                 });
+#endif
 
                 try {
                     executeJob(*job, jobContext);
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
                     trace({
                         ._type = WorkflowTraceEventType::ParallelJobFinished,
                         ._name = job->getName(),
@@ -680,6 +712,7 @@ void WorkflowPlanExecutor::executeParallelJobs(
                             { "jobIndex", jobIndex }
                         }
                     });
+#endif
                 }
                 catch (...) {
                     {
@@ -689,6 +722,7 @@ void WorkflowPlanExecutor::executeParallelJobs(
                             firstException = std::current_exception();
                     }
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
                     trace({
                         ._type = WorkflowTraceEventType::ParallelJobFailed,
                         ._name = job->getName(),
@@ -699,6 +733,7 @@ void WorkflowPlanExecutor::executeParallelJobs(
                             { "jobIndex", jobIndex }
                         }
                     });
+#endif
                 }
             }
         ));
@@ -707,16 +742,19 @@ void WorkflowPlanExecutor::executeParallelJobs(
     synchronizer.waitForFinished();
 
     if (firstException) {
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({
             ._type = WorkflowTraceEventType::ParallelStageFailed,
             ._name = stage.getName(),
             ._contextId = stageContext.getId(),
             ._parentContextId = stageContext.getParentId()
         });
+#endif
 
         std::rethrow_exception(firstException);
     }
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
     trace({
         ._type = WorkflowTraceEventType::ParallelStageFinished,
         ._name = stage.getName(),
@@ -728,6 +766,7 @@ void WorkflowPlanExecutor::executeParallelJobs(
             { "activeThreadCount", getThreadPool().activeThreadCount() }
         }
     });
+#endif
 }
 
 void WorkflowPlanExecutor::executeJobOnGuiThread(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext)
@@ -740,12 +779,14 @@ void WorkflowPlanExecutor::executeJobOnGuiThread(const WorkflowPlan::Job& job, W
         try {
             WorkflowExecutionScope scope(jobContext);
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
             trace({
 			    ._type = WorkflowTraceEventType::GuiDispatchEntered,
 			    ._name = job.getName(),
 			    ._contextId = jobContext.getId(),
 			    ._parentContextId = jobContext.getParentId()
             });
+#endif
 
             job.run();
         }
@@ -758,12 +799,14 @@ void WorkflowPlanExecutor::executeJobOnGuiThread(const WorkflowPlan::Job& job, W
         runOnGuiThread();
     }
     else {
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({
 		    ._type = WorkflowTraceEventType::GuiDispatchRequested,
 		    ._name = job.getName(),
 		    ._contextId = jobContext.getId(),
 		    ._parentContextId = jobContext.getParentId()
         });
+#endif
 
         QMetaObject::invokeMethod(
             &dispatcher,
@@ -791,12 +834,14 @@ void WorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, WorkflowExec
 {
     WorkflowReporter::info("Job started", job.getName());
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
     trace({
 	    ._type = WorkflowTraceEventType::JobStarted,
 	    ._name = job.getName(),
 	    ._contextId = jobContext.getId(),
 	    ._parentContextId = jobContext.getParentId()
     });
+#endif
 
     try {
         switch (job.getThreadAffinity()) {
@@ -819,25 +864,28 @@ void WorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, WorkflowExec
 
         WorkflowReporter::info("Job finished", job.getName());
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({
 		    ._type = WorkflowTraceEventType::JobFinished,
 		    ._name = job.getName(),
 		    ._contextId = jobContext.getId(),
 		    ._parentContextId = jobContext.getParentId()
         });
+#endif
     }
     catch (...) {
         if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Atomic || (job.getProgressMode() == WorkflowPlan::JobProgressMode::Automatic && !jobContext.hasProgressChildren())) {
             jobContext.setProgress(1.0);
         }
 
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({
 		    ._type = WorkflowTraceEventType::JobFinished,
 		    ._name = job.getName(),
 		    ._contextId = jobContext.getId(),
 		    ._parentContextId = jobContext.getParentId()
         });
-
+#endif
         throw;
     }
 }

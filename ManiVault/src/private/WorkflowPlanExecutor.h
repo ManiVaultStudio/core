@@ -37,7 +37,7 @@ public:
 
 protected:
     mv::util::SharedWorkflowResult executeOnCurrentThread(mv::util::WorkflowPlan& workflowPlan, mv::Task* task = nullptr, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
-    mv::util::WorkflowResultFuture executeAsyncImpl(mv::util::WorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
+    mv::util::WorkflowResultFuture executeAsyncImpl(mv::util::WorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, mv::util::WorkflowExecutionOptions executionOptions, mv::util::WorkflowExecutionContext* parentContext) override;
 
 private:
     mv::util::SharedWorkflowResult executeRoot(const mv::util::WorkflowPlan& workflowPlan, mv::Task* task, mv::util::WorkflowExecutionOptions executionOptions = {}) override;

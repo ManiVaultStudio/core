@@ -45,11 +45,9 @@ public:
 
 public: // Tracing
 
-    void setTraceSink(std::shared_ptr<AbstractWorkflowTraceSink> traceSink);
-
     std::shared_ptr<AbstractWorkflowTraceSink> getTraceSink() const;
 
-    void trace(WorkflowTraceEvent event);
+    void trace(WorkflowTraceEvent event) const;
 
 private:
     static void collectMessagesRecursive(const WorkflowReportNode::Ptr& node, QVector<WorkflowMessage>& out);
@@ -61,7 +59,6 @@ private:
     mutable QMutex              _mutex;                                     /** Mutex to protect access to mutable members that may be updated from multiple threads during execution. */
     WorkflowExecutionStatus     _status = WorkflowExecutionStatus::Idle;    /** The execution status is protected by a mutex since it may be updated from multiple threads during execution and needs to be read and updated atomically. */
     WorkflowExecutionMetrics    _metrics;                                   /** Metrics are stored in the execution state since they may be updated from multiple threads during execution and need to be accessible from the context. */
-    SharedWorkflowTraceSink     _traceSink;                                 /** Initialized based on _executionOptions._traceSinkType */
 };
 
 } // namespace mv::util

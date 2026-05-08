@@ -14,13 +14,11 @@ using MaxWorkerThreadCount = std::uint32_t;
 
 struct CORE_EXPORT WorkflowExecutionOptions
 {
-    bool                    _parallel = true;                               /** Whether to execute the workflow in parallel using multiple threads (if supported by the workflow plan) or sequentially on a single thread. */
-    MaxWorkerThreadCount    _maxWorkerThreadCount = 63;                     /** The maximum number of worker threads to use for parallel execution. This is ignored if _parallel is false. The default value of 63 allows for up to 64 threads total (including the main thread) on platforms with a maximum of 64 concurrent threads. Adjust this value based on the expected workload and system capabilities. */
-    bool                    _reportProgress = false;                        /** Whether to report progress during workflow execution. */
-    bool                    _addNotification = false;                       /** Whether to add notifications during workflow execution. */
-
-    WorkflowTraceSinkType   _traceSinkType = WorkflowTraceSinkType::None;   /** The type of trace sink to use for workflow execution. */
-    QString                 _traceOutputPath;                               /** The output path for the trace data. */
+    bool                        _parallel = true;               /** Whether to execute the workflow in parallel using multiple threads (if supported by the workflow plan) or sequentially on a single thread. */
+    MaxWorkerThreadCount        _maxWorkerThreadCount = 63;     /** The maximum number of worker threads to use for parallel execution. This is ignored if _parallel is false. The default value of 63 allows for up to 64 threads total (including the main thread) on platforms with a maximum of 64 concurrent threads. Adjust this value based on the expected workload and system capabilities. */
+    bool                        _reportProgress = false;        /** Whether to report progress during workflow execution. */
+    bool                        _addNotification = false;       /** Whether to add notifications during workflow execution. */
+    SharedWorkflowTraceSink     _traceSink;                     /** Initialized based on _executionOptions._traceSinkType */
 };
 
 } // namespace mv::util
