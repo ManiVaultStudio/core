@@ -4,6 +4,8 @@
 
 #include "Cluster.h"
 
+#include <CoreInterface.h>
+
 #include <QUuid>
 #include <QImage>
 
@@ -127,10 +129,7 @@ Cluster::Cluster(const QString& name /*= ""*/, const QColor& color /*= Qt::gray*
     _name(name),
     _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _color(color),
-    _indices(indices),
-    _median(),
-    _mean(),
-    _stddev()
+    _indices(indices)
 {
 }
 
@@ -216,5 +215,9 @@ void Cluster::colorizeClusters(QVector<Cluster>& clusters, const QImage& colorMa
 
 Cluster Cluster::copy() const
 {
-    return Cluster(_name, _color, _indices);
+    return {
+        _name,
+        _color,
+        _indices
+    };
 }

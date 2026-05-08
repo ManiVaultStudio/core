@@ -479,7 +479,7 @@ public: // Serialization
      * @param variantMap Variant representation of the widget action
      * @return Variant representation of the widget action
      */
-    void fromVariantMapPre500(const QVariantMap& variantMap);
+    void fromVariantMapPre150(const QVariantMap& variantMap);
 
     /**
      * Save point data to variant map
@@ -1000,7 +1000,7 @@ public: // Serialization
      * @param variantMap Variant representation of the widget action
      * @return Variant representation of the widget action
      */
-    void fromVariantMapPre500(const QVariantMap& variantMap);
+    void fromVariantMapPre150(const QVariantMap& variantMap);
 
     /**
         * Save widget action to variant

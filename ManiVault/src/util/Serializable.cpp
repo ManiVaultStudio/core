@@ -274,11 +274,14 @@ void Serializable::handleKeyNotFoundInVariantMap(const Serializable& serializabl
         describeVariantMapKeys(map)
     );
 
-    throw SerializationException::missingKey(key, serializable.getSerializationName(), map);
-    if (settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
-        Serializable::reportSerializationWarning(serializable.getSerializationName(), errorMessage);
-    else
-        Serializable::reportFatalSerializationError(serializable.getSerializationName(), errorMessage);
+    if (!settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
+		throw SerializationException::missingKey(key, serializable.getSerializationName(), map);
+
+
+    //if (settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
+    //    Serializable::reportSerializationWarning(serializable.getSerializationName(), errorMessage);
+    //else
+    //    Serializable::reportFatalSerializationError(serializable.getSerializationName(), errorMessage);
 }
 
 }

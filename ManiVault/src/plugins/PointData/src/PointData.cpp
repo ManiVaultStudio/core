@@ -153,7 +153,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
     const auto projectApplicationVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
     if (projectApplicationVersion < Version(1, 5, 0)) {
-        fromVariantMapPre500(variantMap);
+        fromVariantMapPre150(variantMap);
     }
     else {
             variantMapMustContain(variantMap, "Data");
@@ -214,7 +214,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
     }
 }
 
-void PointData::fromVariantMapPre500(const QVariantMap& variantMap)
+void PointData::fromVariantMapPre150(const QVariantMap& variantMap)
 {
     variantMapMustContain(variantMap, "Data");
     variantMapMustContain(variantMap, "NumberOfPoints");
@@ -229,10 +229,10 @@ void PointData::fromVariantMapPre500(const QVariantMap& variantMap)
 
     bool isDense = true;
     if (variantMap.contains("Dense"))
-        isDense = variantMap["Dense"].toBool();;
+        isDense = variantMap["Dense"].toBool();
 
-    _isDense = isDense;
-    _numDimensions = numberOfDimensions;
+    _isDense        = isDense;
+    _numDimensions  = numberOfDimensions;
 
     if (_isDense)
     {
@@ -1064,6 +1064,116 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "DimensionNames");
     variantMapMustContain(variantMap, "Selection");
 
+    const auto dataMap = variantMap["Data"].toMap();
+    const auto projectApplicationVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
+
+    if (projectApplicationVersion < Version(1, 5, 0)) {
+        fromVariantMapPre150(variantMap);
+    }
+    else {
+        // For backwards compatibility, check PluginVersion
+        if (variantMap["PluginVersion"] == "No Version" && !variantMap["Full"].toBool())
+        {
+            makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
+
+            qWarning() << "[ManiVault deprecation warning]: This project was saved with an older ManiVault version (<1.0). "
+                "Please save the project again to ensure compatibility with newer ManiVault versions. "
+                "Future releases may not be able to load this projects otherwise. ";
+        }
+
+        // Load raw point data
+        if (isFull()) {
+            getRawData<PointData>()->fromVariantMap(variantMap);
+        }
+        else
+        {
+            variantMapMustContain(variantMap, "Indices");
+
+            const auto& indicesMap = variantMap["Indices"].toMap();
+
+            indices.resize(indicesMap["Count"].toUInt());
+            populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
+        }
+
+        // Load dimension names
+        QStringList dimensionNameList;
+        std::vector<QString> dimensionNames;
+
+        // Fetch dimension names from map
+        const auto fetchDimensionNames = [&variantMap]() -> QStringList {
+            QStringList dimensionNames;
+
+            // Dimension names in byte array format
+            QByteArray dimensionsByteArray;
+
+            // Copy the dimension names raw data into the byte array
+            dimensionsByteArray.resize(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
+
+
+            dimensionNames.reserve(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
+
+            populateDataBufferFromVariantMap(variantMap["DimensionNames"].toMap(), (char*)dimensionsByteArray.data());
+
+            // Open input data stream
+            QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::ReadOnly);
+
+            // Stream the data to the dimension names
+            dimensionsDataStream >> dimensionNames;
+
+            return dimensionNames;
+            };
+
+        if (variantMap["NumberOfDimensions"].toUInt() > 1000)
+            dimensionNameList = fetchDimensionNames();
+        else
+            dimensionNameList = variantMap["DimensionNames"].toStringList();
+
+        if (dimensionNameList.size() == getNumDimensions())
+        {
+            for (const auto& dimensionName : dimensionNameList)
+                dimensionNames.push_back(dimensionName);
+        }
+        else
+        {
+            for (std::uint64_t dimensionIndex = 0; dimensionIndex < getNumDimensions(); dimensionIndex++)
+                dimensionNames.emplace_back(QString("Dim %1").arg(QString::number(dimensionIndex)));
+        }
+
+        //setDimensionNames(dimensionNames);
+        getRawData<PointData>()->setDimensionNames(dimensionNames);
+
+        if (variantMap.contains("Dimensions")) {
+            _dimensionsPickerAction->fromParentVariantMap(variantMap);
+        }
+
+        //events().notifyDatasetDataChanged(this);
+
+        // Handle saved selection
+        if (isFull()) {
+            const auto& selectionMap = variantMap["Selection"].toMap();
+
+            const auto count = selectionMap["Count"].toUInt();
+
+            if (count > 0) {
+                auto selectionSet = getSelection<Points>();
+
+                selectionSet->indices.resize(count);
+
+                populateDataBufferFromVariantMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data());
+
+                //events().notifyDatasetDataSelectionChanged(this);
+            }
+        }
+    }
+}
+
+void Points::fromVariantMapPre150(const QVariantMap& variantMap)
+{
+    DatasetImpl::fromVariantMap(variantMap);
+
+    variantMapMustContain(variantMap, "DimensionNames");
+    variantMapMustContain(variantMap, "Selection");
+
     // For backwards compatibility, check PluginVersion
     if (variantMap["PluginVersion"] == "No Version" && !variantMap["Full"].toBool())
     {
@@ -1075,16 +1185,16 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     }
 
     // Load raw point data
-    if (isFull()) {
-        getRawData<PointData>()->fromVariantMap(variantMap);
-    }
+    if (isFull())
+        getRawData<PointData>()->fromVariantMapPre150(variantMap);
     else
     {
         variantMapMustContain(variantMap, "Indices");
-    
+
         const auto& indicesMap = variantMap["Indices"].toMap();
-    
+
         indices.resize(indicesMap["Count"].toUInt());
+
         populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
     }
 
@@ -1101,10 +1211,6 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
         // Copy the dimension names raw data into the byte array
         dimensionsByteArray.resize(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
-
-
-        dimensionNames.reserve(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
-
         populateDataBufferFromVariantMap(variantMap["DimensionNames"].toMap(), (char*)dimensionsByteArray.data());
 
         // Open input data stream
@@ -1114,7 +1220,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         dimensionsDataStream >> dimensionNames;
 
         return dimensionNames;
-    };
+        };
 
     if (variantMap["NumberOfDimensions"].toUInt() > 1000)
         dimensionNameList = fetchDimensionNames();
@@ -1132,16 +1238,15 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
             dimensionNames.emplace_back(QString("Dim %1").arg(QString::number(dimensionIndex)));
     }
 
-    //setDimensionNames(dimensionNames);
-    getRawData<PointData>()->setDimensionNames(dimensionNames);
+    setDimensionNames(dimensionNames);
 
     if (variantMap.contains("Dimensions")) {
         _dimensionsPickerAction->fromParentVariantMap(variantMap);
     }
 
-    //events().notifyDatasetDataChanged(this);
+    events().notifyDatasetDataChanged(this);
 
-	// Handle saved selection
+    // Handle saved selection
     if (isFull()) {
         const auto& selectionMap = variantMap["Selection"].toMap();
 
@@ -1154,13 +1259,9 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
             populateDataBufferFromVariantMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data());
 
-            //events().notifyDatasetDataSelectionChanged(this);
+            events().notifyDatasetDataSelectionChanged(this);
         }
     }
-}
-
-void Points::fromVariantMapPre500(const QVariantMap& variantMap)
-{
 }
 
 QVariantMap Points::toVariantMap() const
