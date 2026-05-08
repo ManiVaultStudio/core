@@ -258,7 +258,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
 void DatasetImpl::fromVariantMapPre150(const QVariantMap& variantMap)
 {
-    qDebug() << "Loading dataset from variant map with pre-1.5.0 format, this may cause issues and should be avoided by updating the project to a newer version of the application";
+    qDebug() << "Loading " << getGuiName() << " from variant map with pre-1.5.0 format, this may cause issues and should be avoided by updating the project to a newer version of the application";
 
     WidgetAction::fromVariantMap(variantMap);
 
@@ -307,7 +307,7 @@ void DatasetImpl::fromVariantMapPre150(const QVariantMap& variantMap)
 
     if (variantMap.contains("Properties"))
     {
-        _properties = mv::util::loadQVariant(variantMap["Properties"]).toMap();
+        //_properties = mv::util::loadQVariant(variantMap["Properties"]).toMap();
     }
 
 

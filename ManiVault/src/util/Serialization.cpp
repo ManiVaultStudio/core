@@ -297,7 +297,7 @@ DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, 
     return result;
 }
 
-void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes)
+void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, std::uint64_t destinationSize)
 {
     if (variantMap.isEmpty())
         throw std::runtime_error("Variant map is empty");
@@ -313,6 +313,12 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
     const bool hasCodec     = variantMap.contains("Codec");
     const auto codecName    = hasCodec ? variantMap.value("Codec").toString() : QStringLiteral("none");
     const auto totalSize    = static_cast<std::uint64_t>(variantMap.value("Size").toULongLong());
+
+    if (totalSize == 0)
+        throw std::runtime_error("Decoded buffer size is zero");
+
+    if (totalSize != destinationSize)
+        throw std::runtime_error(QString("Provided buffer size does not match expected size. Expected %1 bytes, got %2 bytes").arg(totalSize).arg(destinationSize).toStdString());
 
     if (hasCodec && !codecRegistry().isRegistered(codecName)) {
         throw std::runtime_error(QStringLiteral("Unable to load raw data, codec %1 is not registered").arg(codecName).toStdString());
@@ -422,10 +428,7 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
 
     options._parallel = true;
 
-    decodeWorkflowPlan.executeAsync(
-        SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()),
-        options
-    );
+    decodeWorkflowPlan.executeAsync(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()), options);
 }
 
 void populateDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& bytes)
@@ -445,7 +448,7 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray&
     if (totalSize != static_cast<std::uint64_t>(bytes.size()))
         throw std::runtime_error(QString("Provided buffer size does not match expected size. Expected %1 bytes, got %2 bytes").arg(totalSize).arg(bytes.size()).toStdString());
 
-    populateDataBufferFromVariantMap(variantMap, bytes.data());
+    populateDataBufferFromVariantMap(variantMap, bytes.data(), totalSize);
 }
 
 void variantMapMustContain(const QVariantMap& variantMap, const QString& key)

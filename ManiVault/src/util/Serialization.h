@@ -115,11 +115,12 @@ CORE_EXPORT DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decode
  * Convert variant map to raw data buffer (blocks are loaded from disk and decoded if necessary)
  * @param variantMap Variant map containing the raw data or file information
  * @param bytes Output buffer to which the raw data is copied
+ * @param destinationSize Size of the output buffer in bytes
  * @warning This function does not perform any bounds checking on the output buffer, so it is the caller's responsibility to ensure that the buffer is
  * large enough to hold the decoded data. It is recommended to use \p decodeDataBufferFromVariantMap(...) that takes a QByteArray as output buffer, which automatically resizes
  * to fit the decoded data.
  */
-CORE_EXPORT void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes);
+CORE_EXPORT void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, std::uint64_t destinationSize);
 
 /**
 * Convert variant map to raw data buffer (blocks are loaded from disk and decoded if necessary)

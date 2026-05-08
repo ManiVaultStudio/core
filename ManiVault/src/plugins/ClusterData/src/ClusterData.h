@@ -274,6 +274,8 @@ public: // Serialization
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
+    void fromVariantMapPre150(const QVariantMap& variantMap);
+
     /**
      * Save widget action to variant
      * @return Variant representation of the widget action

@@ -76,17 +76,31 @@ mv::util::BlobCodec::Result PassthroughBlobCodec::decodeFromFileTo(const QString
     qDebug() << __FUNCTION__ << filePath;
 #endif
 
-    const QByteArray encodedData = mv::util::Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
+    try {
+        if (!destination)
+            throw std::runtime_error("Destination buffer is null");
 
-    if (encodedData.isEmpty())
-        return { false, {}, QStringLiteral("Failed to read encoded data from file") };
+        const QByteArray encodedData = mv::util::Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
 
-    if (encodedData.size() > static_cast<qsizetype>(destinationSize))
-        return { false, {}, QStringLiteral("Destination buffer is too small for decoded data") };
+        if (encodedData.isEmpty())
+            throw std::runtime_error("Encoded data is empty");
 
-    memcpy(destination, encodedData.constData(), encodedData.size());
+        if (encodedData.size() > static_cast<qsizetype>(destinationSize))
+            throw std::runtime_error(QString("Encoded data size exceeds destination buffer size. Encoded data size: %1 bytes, destination buffer size: %2 bytes")
+                .arg(encodedData.size())
+                .arg(destinationSize)
+                .toStdString()
+            );
 
-	return { true, {}, {} };
+        memcpy(destination, encodedData.constData(), encodedData.size());
+
+        return { true, {}, {} };
+    }
+    catch (const std::exception& e) {
+        return { false, {}, QString::fromUtf8(e.what()) };
+    }
+
+    return { false, {}, {} };
 }
 
 QString PassthroughBlobCodec::getFileExtension() const

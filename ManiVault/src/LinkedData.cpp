@@ -112,7 +112,7 @@ void SelectionMap::fromVariantMap(const QVariantMap& variantMap)
 
     std::vector<std::uint32_t> serializedMap;
     serializedMap.resize(static_cast<size_t>(variantMap["SerializedMapSize"].toInt()));
-    populateDataBufferFromVariantMap(variantMap["SerializedMap"].toMap(), (char*)serializedMap.data());
+    populateDataBufferFromVariantMap(variantMap["SerializedMap"].toMap(), (char*)serializedMap.data(), serializedMap.size() * sizeof(std::uint32_t));
 
     uint32_t key(0), size(0);
     for (auto it = serializedMap.begin(); it != serializedMap.end(); )

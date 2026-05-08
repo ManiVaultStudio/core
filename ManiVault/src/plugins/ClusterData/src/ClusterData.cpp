@@ -191,8 +191,13 @@ void ClusterData::fromVariantMapPre150(const QVariantMap& variantMap)
 
     packedIndices.resize(dataMap["NumberOfIndices"].toInt());
 
+    
+    
     // Convert raw data to indices
-    populateDataBufferFromVariantMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data());
+    qDebug() << "---ClusterData::fromVariantMapPre150---IndicesRawData";
+    populateDataBufferFromVariantMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), packedIndices.size() * sizeof(std::uint32_t));
+
+    return;
 
     if (dataMap.contains("ClustersRawData")) {
         QByteArray clustersByteArray;
@@ -202,8 +207,9 @@ void ClusterData::fromVariantMapPre150(const QVariantMap& variantMap)
         const auto clustersRawDataSize = dataMap["ClustersRawDataSize"].toInt();
 
         clustersByteArray.resize(clustersRawDataSize);
-
-        populateDataBufferFromVariantMap(dataMap["ClustersRawData"].toMap(), (char*)clustersByteArray.data());
+        
+        qDebug() << "---ClusterData::fromVariantMapPre150---ClustersRawData";
+        populateDataBufferFromVariantMap(dataMap["ClustersRawData"].toMap(), (char*)clustersByteArray.data(), clustersByteArray.size());
 
         QVariantList clusters;
 
@@ -348,9 +354,23 @@ std::vector<std::uint32_t> Clusters::getSelectedIndices() const
 
 void Clusters::fromVariantMap(const QVariantMap& variantMap)
 {
-    DatasetImpl::fromVariantMap(variantMap);
-    
-    getRawData<ClusterData>()->fromVariantMap(variantMap);
+    const auto projectApplicationVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
+
+    if (projectApplicationVersion < Version(1, 5, 0)) {
+        fromVariantMapPre150(variantMap);
+    }
+    else {
+        DatasetImpl::fromVariantMap(variantMap);
+
+        getRawData<ClusterData>()->fromVariantMap(variantMap);
+    }
+}
+
+void Clusters::fromVariantMapPre150(const QVariantMap& variantMap)
+{
+    DatasetImpl::fromVariantMapPre150(variantMap);
+
+    getRawData<ClusterData>()->fromVariantMapPre150(variantMap);
 
     events().notifyDatasetDataChanged(this);
 }
