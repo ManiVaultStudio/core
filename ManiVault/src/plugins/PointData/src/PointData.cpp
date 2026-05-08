@@ -181,7 +181,11 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
                 resizeVector(numberOfElements);
 
                 try {
-                    populateDataBufferFromVariantMap(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize());
+                    populateDataBufferFromVariantMapToRawBufferSync(
+                        rawDataMap,
+                        static_cast<char*>(getDataVoidPtr()),
+                        getRawDataSize()
+                    );
                 }
                 catch (const std::exception& e) {
                     qCritical() << "Failed to load point data: " << e.what();
@@ -239,8 +243,7 @@ void PointData::fromVariantMapPre150(const QVariantMap& variantMap)
         setElementTypeSpecifier(elementTypeIndex);
         resizeVector(numberOfElements);
 
-        qDebug() << "---PointData::fromVariantMapPre150---";
-        //populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr());
+        populateDataBufferFromVariantMapToRawBufferSync(rawData, (char*)getDataVoidPtr(), getRawDataSize());
     }
     else
     {
@@ -250,7 +253,7 @@ void PointData::fromVariantMapPre150(const QVariantMap& variantMap)
 
         std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
 
-        populateDataBufferFromVariantMap(rawData, bytes.data(), bytes.size());
+        populateDataBufferFromVariantMapToRawBufferSync(rawData, bytes.data(), bytes.size());
         _numRows = static_cast<std::uint64_t>(numberOfPoints); // FIXME should be redundant
 
         size_t offset = 0;
@@ -1094,7 +1097,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
             const auto& indicesMap = variantMap["Indices"].toMap();
 
             indices.resize(indicesMap["Count"].toUInt());
-            populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(std::uint32_t));
+            populateDataBufferFromVariantMapToRawBufferSync(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(std::uint32_t));
         }
 
         // Load dimension names
@@ -1114,7 +1117,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
             dimensionNames.reserve(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
 
-            populateDataBufferFromVariantMap(variantMap["DimensionNames"].toMap(), (char*)dimensionsByteArray.data(), dimensionsByteArray.size());
+            populateDataBufferFromVariantMapToRawBufferSync(variantMap["DimensionNames"].toMap(), (char*)dimensionsByteArray.data(), dimensionsByteArray.size());
 
             // Open input data stream
             QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::ReadOnly);
@@ -1161,7 +1164,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
                 selectionSet->indices.resize(count);
 
-                populateDataBufferFromVariantMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t));
+                populateDataBufferFromVariantMapToRawBufferSync(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t));
 
                 //events().notifyDatasetDataSelectionChanged(this);
             }
@@ -1197,8 +1200,7 @@ void Points::fromVariantMapPre150(const QVariantMap& variantMap)
 
         indices.resize(indicesMap["Count"].toUInt());
 
-        qDebug() << "---PointData::fromVariantMapPre150---indices";
-        populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(std::uint32_t));
+        populateDataBufferFromVariantMapToRawBufferSync(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(std::uint32_t));
     }
     /**/
     // Load dimension names
@@ -1215,8 +1217,7 @@ void Points::fromVariantMapPre150(const QVariantMap& variantMap)
         // Copy the dimension names raw data into the byte array
         dimensionsByteArray.resize(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
 
-        qDebug() << "---PointData::fromVariantMapPre150---DimensionNames";
-        populateDataBufferFromVariantMap(variantMap["DimensionNames"].toMap(), (char*)dimensionsByteArray.data(), dimensionsByteArray.size());
+        populateDataBufferFromVariantMapToRawBufferSync(variantMap["DimensionNames"].toMap(), (char*)dimensionsByteArray.data(), dimensionsByteArray.size());
 
         // Open input data stream
         QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::ReadOnly);
@@ -1262,8 +1263,7 @@ void Points::fromVariantMapPre150(const QVariantMap& variantMap)
 
             selectionSet->indices.resize(count);
 
-            qDebug() << "---PointData::fromVariantMapPre150---Selection";
-            populateDataBufferFromVariantMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t));
+            populateDataBufferFromVariantMapToRawBufferSync(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t));
 
             events().notifyDatasetDataSelectionChanged(this);
         }

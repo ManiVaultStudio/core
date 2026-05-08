@@ -444,9 +444,38 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
     return result;
 }
 
-PopulateDataBufferResult populateDataBufferFromVariantMapAsync(const QVariantMap& variantMap)
+PopulateDataBufferResult populateDataBufferFromVariantMapAsync(const QVariantMap& variantMap, QObject* context, PopulateDataReadyCallback populated)
 {
-    return populateDataBufferFromVariantMap(variantMap, WorkflowPlan::ConcurrencyMode::Parallel);
+    auto result = populateDataBufferFromVariantMap(
+        variantMap,
+        WorkflowPlan::ConcurrencyMode::Parallel
+    );
+
+    if (populated) {
+        auto watcher = new QFutureWatcher<SharedWorkflowResult>(context);
+
+        QObject::connect(
+            watcher,
+            &QFutureWatcher<SharedWorkflowResult>::finished,
+            context ? context : watcher,
+            [watcher, data = result._data, populated = std::move(populated)]() mutable {
+                watcher->deleteLater();
+
+                //const auto workflowResult = watcher->result();
+
+                //if (!workflowResult || !workflowResult->isSuccess()) {
+                //    qCritical() << "Failed to populate data buffer";
+                //    return;
+                //}
+
+                populated(data);
+            }
+        );
+
+        watcher->setFuture(result._future.getFuture());
+    }
+
+    return result;
 }
 
 QByteArray populateDataBufferFromVariantMapSync(const QVariantMap& variantMap)
@@ -456,6 +485,28 @@ QByteArray populateDataBufferFromVariantMapSync(const QVariantMap& variantMap)
     result._future.waitForFinished();
 
     return *result._data;
+}
+
+void populateDataBufferFromVariantMapToRawBufferSync(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize)
+{
+    if (!destination)
+        throw std::runtime_error("Destination buffer is null");
+
+    auto result = populateDataBufferFromVariantMap(
+        variantMap,
+        WorkflowPlan::ConcurrencyMode::Sequential
+    );
+
+    const auto decodedSize = static_cast<std::uint64_t>(result._data->size());
+
+    if (decodedSize != destinationSize)
+        throw std::runtime_error("Decoded point-data size does not match destination size");
+
+    std::memcpy(
+        destination,
+        result._data->constData(),
+        static_cast<size_t>(decodedSize)
+    );
 }
 
 void variantMapMustContain(const QVariantMap& variantMap, const QString& key)

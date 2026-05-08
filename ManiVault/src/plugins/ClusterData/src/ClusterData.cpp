@@ -140,40 +140,17 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
     if (projectApplicationVersion < Version(1, 5, 0)) {
         fromVariantMapPre150(variantMap);
     } else {
-	    try {
-            
-            auto context = std::make_shared<ClustersLoadContext>(dataMap["ClustersRawData"].toMap());
+        const auto populateResult = populateDataBufferFromVariantMapAsync(dataMap["ClustersRawData"].toMap(), this, [this](const SharedDataBuffer& data) {
+            QDataStream clustersDataStream(data.data(), QIODevice::ReadOnly);
+            clustersDataStream.setVersion(QDataStream::Qt_6_5);
 
-            
-            WorkflowPlan plan(QStringLiteral("Load clusters"), context);
+            clustersDataStream >> _clusters;
 
-            plan.addSequentialStage("Load", [context]() -> void {
-                populateDataBufferFromVariantMap(context->_rawDataMap, context->_decodedBytes);
-            });
-
-            QPointer<ClusterData> clusterData(this);
-
-            WorkflowPlan::Jobs jobs;
-
-            jobs.emplace_back("Create clusters", [context, clusterData](const WorkflowPlan::Job& job) -> void {
-            	QDataStream clustersDataStream(&context->_decodedBytes, QIODevice::ReadOnly);
-
-                clustersDataStream.setVersion(QDataStream::Qt_6_5);
-
-                clustersDataStream >> clusterData->_clusters;
-
-                if (clustersDataStream.status() != QDataStream::Ok)
-                    throw std::runtime_error("Failed to deserialize cluster payload");
-            });
-
-            plan.addParallelStage("Load", jobs);
-
-            plan.executeAsync(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()));
-            /**/
-	    }
-	    catch (const std::exception& e) {
-	        qCritical() << "Failed to load cluster data: " << e.what();
-	    }
+            if (clustersDataStream.status() != QDataStream::Ok) {
+                qCritical() << "Failed to deserialize cluster payload";
+                return;
+            }
+        });
     }
 }
 
@@ -194,10 +171,7 @@ void ClusterData::fromVariantMapPre150(const QVariantMap& variantMap)
     
     
     // Convert raw data to indices
-    qDebug() << "---ClusterData::fromVariantMapPre150---IndicesRawData";
-    populateDataBufferFromVariantMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), packedIndices.size() * sizeof(std::uint32_t));
-
-    return;
+    populateDataBufferFromVariantMapToRawBufferSync(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), packedIndices.size() * sizeof(std::uint32_t));
 
     if (dataMap.contains("ClustersRawData")) {
         QByteArray clustersByteArray;
@@ -209,7 +183,7 @@ void ClusterData::fromVariantMapPre150(const QVariantMap& variantMap)
         clustersByteArray.resize(clustersRawDataSize);
         
         qDebug() << "---ClusterData::fromVariantMapPre150---ClustersRawData";
-        populateDataBufferFromVariantMap(dataMap["ClustersRawData"].toMap(), (char*)clustersByteArray.data(), clustersByteArray.size());
+        populateDataBufferFromVariantMapToRawBufferSync(dataMap["ClustersRawData"].toMap(), (char*)clustersByteArray.data(), clustersByteArray.size());
 
         QVariantList clusters;
 

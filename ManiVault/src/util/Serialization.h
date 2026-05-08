@@ -72,6 +72,8 @@ struct CORE_EXPORT PopulateDataBufferResult
     bool                    _async = false;
 };
 
+using PopulateDataReadyCallback = std::function<void(const SharedDataBuffer& data)>;
+
 /**
  * Save raw data to binary file on disk
  * @param bytes Pointer to input buffer
@@ -122,8 +124,9 @@ CORE_EXPORT DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decode
 CORE_EXPORT DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec);
 
 CORE_EXPORT PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& variantMap, WorkflowPlan::ConcurrencyMode concurrencyMode);
-CORE_EXPORT PopulateDataBufferResult populateDataBufferFromVariantMapAsync(const QVariantMap& variantMap);
+CORE_EXPORT PopulateDataBufferResult populateDataBufferFromVariantMapAsync(const QVariantMap& variantMap, QObject* context, PopulateDataReadyCallback populated);
 CORE_EXPORT QByteArray populateDataBufferFromVariantMapSync(const QVariantMap& variantMap);
+CORE_EXPORT void populateDataBufferFromVariantMapToRawBufferSync(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize);
 
 /**
  * Raises an exception if an item with key is not found in a variant map
