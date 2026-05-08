@@ -9,98 +9,116 @@
 
 #include <stdexcept>
 
-namespace
-{
+namespace {
 
     template <typename T>
-    QDataStream& readStdVector(QDataStream& in, std::vector<T>& values)
+    concept RawStreamable = std::is_arithmetic_v<T> && std::is_trivially_copyable_v<T>;
+
+    constexpr quint32 kClusterStreamVersion = 1;
+
+    template <RawStreamable T>
+    QDataStream& writeRawVector(QDataStream& out, const std::vector<T>& values)
     {
-        static_assert(std::is_arithmetic_v<T>,
-            "readStdVector only supports arithmetic types.");
-
-        quint32 size = 0;
-        in >> size;
-
-        values.resize(size);
-
-        if (size > 0) {
-            const qsizetype bytes = qsizetype(size) * qsizetype(sizeof(T));
-
-            if (in.readRawData(reinterpret_cast<char*>(values.data()), bytes) != bytes) {
-                in.setStatus(QDataStream::ReadPastEnd);
-            }
+        if (values.size() > std::numeric_limits<quint32>::max()) {
+            out.setStatus(QDataStream::WriteFailed);
+            return out;
         }
 
-        return in;
-    }
+        const auto size = static_cast<quint32>(values.size());
+        out << size;
 
-    template <typename T>
-    QDataStream& writeStdVector(QDataStream& out, const std::vector<T>& values)
-    {
-        static_assert(std::is_arithmetic_v<T>,"writeStdVector only supports arithmetic types.");
+        if (size == 0)
+            return out;
 
-        out << static_cast<quint32>(values.size());
+        const qsizetype bytes =
+            qsizetype(values.size()) * qsizetype(sizeof(T));
 
-        if (!values.empty()) {
-            out.writeRawData(
-                reinterpret_cast<const char*>(values.data()),
-                qsizetype(values.size() * sizeof(T))
-            );
-        }
+        const auto written = out.writeRawData(
+            reinterpret_cast<const char*>(values.data()),
+            bytes
+        );
+
+        if (written != bytes)
+            out.setStatus(QDataStream::WriteFailed);
 
         return out;
     }
 
-} // namespace
+    template <RawStreamable T>
+    QDataStream& readRawVector(QDataStream& in, std::vector<T>& values)
+    {
+        quint32 size = 0;
+        in >> size;
+
+        if (in.status() != QDataStream::Ok)
+            return in;
+
+        const qsizetype bytes =
+            qsizetype(size) * qsizetype(sizeof(T));
+
+        if (size != 0 && bytes / qsizetype(sizeof(T)) != qsizetype(size)) {
+            in.setStatus(QDataStream::ReadCorruptData);
+            return in;
+        }
+
+        values.resize(size);
+
+        if (size == 0)
+            return in;
+
+        const auto read = in.readRawData(
+            reinterpret_cast<char*>(values.data()),
+            bytes
+        );
+
+        if (read != bytes)
+            in.setStatus(QDataStream::ReadPastEnd);
+
+        return in;
+    }
+
+}
 
 QDataStream& operator<<(QDataStream& out, const Cluster& cluster)
 {
-    // Simple format version for forward compatibility
-    //constexpr quint32 kClusterStreamVersion = 1;
-    //out << kClusterStreamVersion;
+    out << kClusterStreamVersion;
 
     out << cluster._name;
     out << cluster._id;
     out << cluster._color;
 
-    //qDebug() << "=====" << cluster._name << cluster._id << cluster._color;
-    writeStdVector(out, cluster._indices);
-    writeStdVector(out, cluster._median);
-    writeStdVector(out, cluster._mean);
-    writeStdVector(out, cluster._stddev);
+    writeRawVector(out, cluster._indices);
+    writeRawVector(out, cluster._median);
+    writeRawVector(out, cluster._mean);
+    writeRawVector(out, cluster._stddev);
 
     return out;
-
 }
 
 QDataStream& operator>>(QDataStream& in, Cluster& cluster)
 {
-    //quint32 version = 0;
-    //in >> version;
+    quint32 version = 0;
+    in >> version;
 
     if (in.status() != QDataStream::Ok)
         return in;
 
-    //qDebug() << "=====" << in.status();
-    //qDebug() << "=====" << version;
-    //switch (version) {
-    //case 1:
-    in >> cluster._name;
-    in >> cluster._id;
-    in >> cluster._color;
+    switch (version) {
+	    case 1:
+	        in >> cluster._name;
+	        in >> cluster._id;
+	        in >> cluster._color;
 
-    readStdVector(in, cluster._indices);
-    readStdVector(in, cluster._median);
-    readStdVector(in, cluster._mean);
-    readStdVector(in, cluster._stddev);
-    //    break;
+	        readRawVector(in, cluster._indices);
+	        readRawVector(in, cluster._median);
+	        readRawVector(in, cluster._mean);
+	        readRawVector(in, cluster._stddev);
+	        break;
 
-    //default:
-    //    in.setStatus(QDataStream::ReadCorruptData);
-    //    break;
-    //}
-
-    //qDebug() << "=====" << in.status();
+	    default:
+	        in.setStatus(QDataStream::ReadCorruptData);
+	        break;
+    }
 
     return in;
 }

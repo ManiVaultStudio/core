@@ -372,11 +372,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         const auto rawBlockSize = getRawBlockObjectSize(dataVariantMap);
 
         loadDatasetJobs.emplace_back(datasetName, [datasetId, datasetName, dataVariantMap](WorkflowPlan::Job& job) {
-            
             mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
-
-            qDebug() << "Loaded dataset" << datasetId << datasetName;
-            
         }, WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Atomic).weighted(rawBlockSize > 0 ? static_cast<double>(rawBlockSize) : 1.0);
     }
 
@@ -405,18 +401,11 @@ QVariantMap DataHierarchyManager::toVariantMap() const
             const auto datasetGuiName   = dataset->getGuiName();
 
             createItemMapJobs.emplace_back(datasetGuiName, [&toPlan, datasetId, &datasetGuiName, &sortIndex, &dataHierarchyItem](WorkflowPlan::Job& job) {
-                try {
-                    const auto itemMap = dataHierarchyItem->toVariantMap();
+                const auto itemMap = dataHierarchyItem->toVariantMap();
 
-                    itemMap["SortIndex"] = sortIndex;
+                itemMap["SortIndex"] = sortIndex;
 
-                    (*toPlan.getSharedState())[datasetId] = itemMap;
-                } catch (std::exception& e) {
-                    Serializable::reportSerializationError("Data hierarchy manager", "Failed to save dataset: " + datasetGuiName + ": " + QString::fromStdString(e.what()));
-                }
-                catch (...) {
-                    Serializable::reportSerializationError("Data hierarchy manager", "Failed to save dataset: " + datasetGuiName);
-                }
+                (*toPlan.getSharedState())[datasetId] = itemMap;
             }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 
             sortIndex++;

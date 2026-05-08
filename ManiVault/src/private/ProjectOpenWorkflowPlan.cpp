@@ -57,7 +57,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         context->_temporaryDirectoryPath    = temporaryDirPath;
         context->_workspaceJsonPath         = QFileInfo(context->_temporaryDirectoryPath, "workspace.json").absoluteFilePath();
         context->_projectJsonPath           = QFileInfo(context->_temporaryDirectoryPath, "project.json").absoluteFilePath();
-        context->_metaJsonPath       = QFileInfo(context->_temporaryDirectoryPath, "meta.json").absoluteFilePath();
+        context->_metaJsonPath              = QFileInfo(context->_temporaryDirectoryPath, "meta.json").absoluteFilePath();
 
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Temp. Dir" << context->_temporaryDirectoryPath;

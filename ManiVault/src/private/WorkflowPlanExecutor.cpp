@@ -78,20 +78,20 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
         WorkflowReporter::message(exception._severity, exception._message, workflowPlan.getName(), exception._code, exception._scope, exception._details);
 
         // displayFailure(exception._message);
-        throw;
+        //throw;
     }
     catch (const std::exception& exception) {
         WorkflowReporter::error(QString("Workflow '%1' failed: %2").arg(workflowPlan.getName(), exception.what()),workflowPlan.getName());
         // displayFailure(exception.what());
 
-        throw;
+        //throw;
     }
     catch (...) {
         WorkflowReporter::error(QString("Workflow '%1' failed with an unknown error.").arg(workflowPlan.getName()), workflowPlan.getName());
 
         // displayFailure("Unknown exception");
 
-        throw;
+        //throw;
     }
 
     return result;
