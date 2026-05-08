@@ -11,76 +11,7 @@
 
 #include <stdexcept>
 
-namespace {
-
-    template <typename T>
-    concept RawStreamable = std::is_arithmetic_v<T> && std::is_trivially_copyable_v<T>;
-
-    constexpr quint32 kClusterStreamVersion = 1;
-
-    template <RawStreamable T>
-    QDataStream& writeRawVector(QDataStream& out, const std::vector<T>& values)
-    {
-        if (values.size() > std::numeric_limits<quint32>::max()) {
-            out.setStatus(QDataStream::WriteFailed);
-            return out;
-        }
-
-        const auto size = static_cast<quint32>(values.size());
-        out << size;
-
-        if (size == 0)
-            return out;
-
-        const qsizetype bytes =
-            qsizetype(values.size()) * qsizetype(sizeof(T));
-
-        const auto written = out.writeRawData(
-            reinterpret_cast<const char*>(values.data()),
-            bytes
-        );
-
-        if (written != bytes)
-            out.setStatus(QDataStream::WriteFailed);
-
-        return out;
-    }
-
-    template <RawStreamable T>
-    QDataStream& readRawVector(QDataStream& in, std::vector<T>& values)
-    {
-        quint32 size = 0;
-        in >> size;
-
-        if (in.status() != QDataStream::Ok)
-            return in;
-
-        const qsizetype bytes =
-            qsizetype(size) * qsizetype(sizeof(T));
-
-        if (size != 0 && bytes / qsizetype(sizeof(T)) != qsizetype(size)) {
-            in.setStatus(QDataStream::ReadCorruptData);
-            return in;
-        }
-
-        values.resize(size);
-
-        if (size == 0)
-            return in;
-
-        const auto read = in.readRawData(
-            reinterpret_cast<char*>(values.data()),
-            bytes
-        );
-
-        if (read != bytes)
-            in.setStatus(QDataStream::ReadPastEnd);
-
-        return in;
-    }
-
-}
-
+/*
 QDataStream& operator<<(QDataStream& out, const Cluster& cluster)
 {
     out << kClusterStreamVersion;
@@ -124,6 +55,7 @@ QDataStream& operator>>(QDataStream& in, Cluster& cluster)
 
     return in;
 }
+*/
 
 Cluster::Cluster(const QString& name /*= ""*/, const QColor& color /*= Qt::gray*/, const std::vector<std::uint32_t>& indices /*= std::vector<std::uint32_t>()*/) :
     _name(name),

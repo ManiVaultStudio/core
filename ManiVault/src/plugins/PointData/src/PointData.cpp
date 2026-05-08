@@ -180,16 +180,9 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
                 setElementTypeSpecifier(elementTypeIndex);
                 resizeVector(numberOfElements);
 
-                try {
-                    populateDataBufferFromVariantMapToRawBufferSync(
-                        rawDataMap,
-                        static_cast<char*>(getDataVoidPtr()),
-                        getRawDataSize()
-                    );
-                }
-                catch (const std::exception& e) {
-                    qCritical() << "Failed to load point data: " << e.what();
-                }
+                const auto populateResult = populateDataBufferFromVariantMapToRawBufferAsync(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), this, [this]() {
+                    qDebug() << "Finished loading dense data with" << getNumPoints() << "points and" << _numDimensions << "dimensions.";
+                });
             }/*
             else {
                 const auto numberOfNonZeroElements = variantMap["NumberOfNonZeroElements"].toULongLong();
@@ -1097,7 +1090,10 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
             const auto& indicesMap = variantMap["Indices"].toMap();
 
             indices.resize(indicesMap["Count"].toUInt());
-            populateDataBufferFromVariantMapToRawBufferSync(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(std::uint32_t));
+
+            populateDataBufferFromVariantMapToRawBufferAsync(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(uint32_t), this, [this]() {
+                qDebug() << "Finished loading indices with" << indices.size() << "elements.";
+            });
         }
 
         // Load dimension names
@@ -1105,7 +1101,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         std::vector<QString> dimensionNames;
 
         // Fetch dimension names from map
-        const auto fetchDimensionNames = [&variantMap]() -> QStringList {
+        const auto fetchDimensionNames = [this, &variantMap]() -> QStringList {
             QStringList dimensionNames;
 
             // Dimension names in byte array format
@@ -1114,10 +1110,11 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
             // Copy the dimension names raw data into the byte array
             dimensionsByteArray.resize(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
 
-
             dimensionNames.reserve(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
 
-            populateDataBufferFromVariantMapToRawBufferSync(variantMap["DimensionNames"].toMap(), (char*)dimensionsByteArray.data(), dimensionsByteArray.size());
+            populateDataBufferFromVariantMapToRawBufferAsync(variantMap["DimensionNames"].toMap(), dimensionsByteArray.data(), dimensionsByteArray.size(), this, [this]() {
+                qDebug() << "Finished loading dimension names";
+            });
 
             // Open input data stream
             QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::ReadOnly);
@@ -1126,7 +1123,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
             dimensionsDataStream >> dimensionNames;
 
             return dimensionNames;
-            };
+        };
 
         if (variantMap["NumberOfDimensions"].toUInt() > 1000)
             dimensionNameList = fetchDimensionNames();
@@ -1140,8 +1137,8 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         }
         else
         {
-            for (std::uint64_t dimensionIndex = 0; dimensionIndex < getNumDimensions(); dimensionIndex++)
-                dimensionNames.emplace_back(QString("Dim %1").arg(QString::number(dimensionIndex)));
+            //for (std::uint64_t dimensionIndex = 0; dimensionIndex < getNumDimensions(); dimensionIndex++)
+            //    dimensionNames.emplace_back(QString("Dim %1").arg(QString::number(dimensionIndex)));
         }
 
         //setDimensionNames(dimensionNames);
@@ -1164,7 +1161,9 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
                 selectionSet->indices.resize(count);
 
-                populateDataBufferFromVariantMapToRawBufferSync(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t));
+                populateDataBufferFromVariantMapAsync(selectionMap["Raw"].toMap(), this, [this, selectionSet](const SharedDataBuffer& data) {
+                    std::memcpy(const_cast<uint32_t*>(selectionSet->indices.data()), data->data(), data->size());
+                });
 
                 //events().notifyDatasetDataSelectionChanged(this);
             }

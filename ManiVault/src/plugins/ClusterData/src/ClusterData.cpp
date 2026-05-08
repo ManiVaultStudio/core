@@ -24,6 +24,76 @@ Q_PLUGIN_METADATA(IID "studio.manivault.ClusterData")
 
 using namespace mv::util;
 
+namespace {
+
+    template <typename T>
+    concept RawStreamable = std::is_arithmetic_v<T> && std::is_trivially_copyable_v<T>;
+
+    constexpr quint32 kClusterStreamVersion = 1;
+
+    template <RawStreamable T>
+    QDataStream& writeRawVector(QDataStream& out, const std::vector<T>& values)
+    {
+        if (values.size() > std::numeric_limits<quint32>::max()) {
+            out.setStatus(QDataStream::WriteFailed);
+            return out;
+        }
+
+        const auto size = static_cast<quint32>(values.size());
+        out << size;
+
+        if (size == 0)
+            return out;
+
+        const qsizetype bytes =
+            qsizetype(values.size()) * qsizetype(sizeof(T));
+
+        const auto written = out.writeRawData(
+            reinterpret_cast<const char*>(values.data()),
+            bytes
+        );
+
+        if (written != bytes)
+            out.setStatus(QDataStream::WriteFailed);
+
+        return out;
+    }
+
+    template <RawStreamable T>
+    QDataStream& readRawVector(QDataStream& in, std::vector<T>& values)
+    {
+        quint32 size = 0;
+        in >> size;
+
+        if (in.status() != QDataStream::Ok)
+            return in;
+
+        const qsizetype bytes =
+            qsizetype(size) * qsizetype(sizeof(T));
+
+        if (size != 0 && bytes / qsizetype(sizeof(T)) != qsizetype(size)) {
+            in.setStatus(QDataStream::ReadCorruptData);
+            return in;
+        }
+
+        values.resize(size);
+
+        if (size == 0)
+            return in;
+
+        const auto read = in.readRawData(
+            reinterpret_cast<char*>(values.data()),
+            bytes
+        );
+
+        if (read != bytes)
+            in.setStatus(QDataStream::ReadPastEnd);
+
+        return in;
+    }
+
+}
+
 ClusterData::ClusterData(const mv::plugin::PluginFactory* factory) :
     mv::plugin::RawData(factory, ClusterType)
 {
@@ -118,16 +188,69 @@ std::int32_t ClusterData::getClusterIndex(const QString& clusterName) const
     return -1;
 }
 
-struct ClustersLoadContext : public WorkflowContextBase
-{
-    explicit ClustersLoadContext(const QVariantMap& rawDataMap) :
-		_rawDataMap(rawDataMap)
-    {
-    }
+//struct ClustersLoadContext : public WorkflowContextBase
+//{
+//    explicit ClustersLoadContext(const QVariantMap& rawDataMap) :
+//		_rawDataMap(rawDataMap)
+//    {
+//    }
+//
+//    QVariantMap _rawDataMap;
+//    QByteArray  _decodedBytes;
+//    QVector<Cluster> _loadedClusters;
+//};
 
-    QVariantMap _rawDataMap;
-    QByteArray  _decodedBytes;
-    QVector<Cluster> _loadedClusters;
+//QDataStream& operator>>(QDataStream& in, QVector<Cluster>& clusters)
+//{
+//    quint32 size = 0;
+//    in >> size;
+//
+//    if (in.status() != QDataStream::Ok)
+//        return in;
+//
+//    clusters.clear();
+//    clusters.reserve(size);
+//
+//    for (quint32 i = 0; i < size; ++i) {
+//        Cluster cluster;
+//        in >> cluster;
+//
+//        if (in.status() != QDataStream::Ok)
+//            return in;
+//
+//        clusters.emplace_back(std::move(cluster));
+//    }
+//
+//    return in;
+//}
+//
+//QDataStream& operator<<(QDataStream& out, const QVector<Cluster>& clusters)
+//{
+//    if (clusters.size() > std::numeric_limits<quint32>::max()) {
+//        out.setStatus(QDataStream::WriteFailed);
+//        return out;
+//    }
+//
+//    out << static_cast<quint32>(clusters.size());
+//
+//    for (const auto& cluster : clusters)
+//        out << cluster;
+//
+//    return out;
+//}
+
+struct SerializedClusterHeader
+{
+    QString name;
+    QString id;
+    QColor color;
+
+    quint64 indexOffset = 0;
+    quint64 indexCount = 0;
+
+    std::vector<float> median;
+    std::vector<float> mean;
+    std::vector<float> stddev;
 };
 
 void ClusterData::fromVariantMap(const QVariantMap& variantMap)
@@ -140,17 +263,121 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
     if (projectApplicationVersion < Version(1, 5, 0)) {
         fromVariantMapPre150(variantMap);
     } else {
-        const auto populateResult = populateDataBufferFromVariantMapAsync(dataMap["ClustersRawData"].toMap(), this, [this](const SharedDataBuffer& data) {
-            QDataStream clustersDataStream(data.data(), QIODevice::ReadOnly);
-            clustersDataStream.setVersion(QDataStream::Qt_6_5);
+        /*
+        QVector<Cluster> clusters;
 
-            clustersDataStream >> _clusters;
+        QByteArray headersBytes =
+            populateDataBufferFromVariantMapSync(
+                dataMap["ClustersMetaData"].toMap()
+            );
 
-            if (clustersDataStream.status() != QDataStream::Ok) {
-                qCritical() << "Failed to deserialize cluster payload";
-                return;
-            }
-        });
+        QDataStream headersStream(&headersBytes, QIODevice::ReadOnly);
+        headersStream.setVersion(QDataStream::Qt_6_5);
+
+        std::uint64_t clusterCount = 0;
+        headersStream >> clusterCount;
+
+        if (headersStream.status() != QDataStream::Ok)
+            throw std::runtime_error("Failed to read cluster metadata count");
+
+        std::vector<SerializedClusterHeader> headers;
+        headers.reserve(clusterCount);
+
+        for (std::uint64_t i = 0; i < clusterCount; ++i) {
+            SerializedClusterHeader header;
+
+            headersStream
+                >> header.name
+                >> header.id
+                >> header.color
+                >> header.indexOffset
+                >> header.indexCount;
+
+            readRawVector(headersStream, header.median);
+            readRawVector(headersStream, header.mean);
+            readRawVector(headersStream, header.stddev);
+
+            if (headersStream.status() != QDataStream::Ok)
+                throw std::runtime_error("Failed to deserialize cluster header");
+
+            headers.emplace_back(std::move(header));
+        }
+
+        //
+        // Load contiguous indices blob
+        //
+        */
+
+        QByteArray indicesBytes =
+            populateDataBufferFromVariantMapSync(
+                dataMap["ClustersIndicesRawData"].toMap()
+            );
+
+        if (indicesBytes.size() % qsizetype(sizeof(std::uint32_t)) != 0)
+            throw std::runtime_error("Cluster indices blob size is invalid");
+
+        std::vector<std::uint32_t> allIndices(
+            indicesBytes.size() / sizeof(std::uint32_t)
+        );
+
+        std::memcpy(
+            allIndices.data(),
+            indicesBytes.constData(),
+            size_t(indicesBytes.size())
+        );
+
+        //
+        // Reconstruct clusters
+        //
+        /*
+        clusters.reserve(headers.size());
+
+        for (const auto& header : headers) {
+            Cluster cluster;
+
+            cluster.setName(header.name);
+            cluster.setId(header.id);
+            cluster.setColor(header.color);
+
+            //cluster.setMedian(header.median);
+            //cluster.setMean(header.mean);
+            //cluster.setStandardDeviation(header.stddev);
+
+            const auto beginOffset =
+                static_cast<std::size_t>(header.indexOffset);
+
+            const auto count =
+                static_cast<std::size_t>(header.indexCount);
+
+            if (beginOffset + count > allIndices.size())
+                throw std::runtime_error("Cluster index range exceeds index buffer");
+
+            auto& indices = cluster.getIndices();
+
+            indices.assign(
+                allIndices.begin() + beginOffset,
+                allIndices.begin() + beginOffset + count
+            );
+
+            clusters.emplace_back(std::move(cluster));
+        }
+
+        _clusters = std::move(clusters);
+        */
+        //populateDataBufferFromVariantMapAsync(dataMap["ClustersRawData"].toMap(), this, [this](const SharedDataBuffer& data) {
+        //    QDataStream clustersDataStream(data.data(), QIODevice::ReadOnly);
+        //    clustersDataStream.setVersion(QDataStream::Qt_6_5);
+
+        //    QVector<Cluster> clusters;
+        //    clustersDataStream >> clusters;
+
+        //    if (clustersDataStream.status() != QDataStream::Ok) {
+        //        qCritical() << "Failed to deserialize cluster payload";
+        //        return;
+        //    }
+
+        //    _clusters = std::move(clusters);
+        //});
     }
 }
 
@@ -235,19 +462,75 @@ void ClusterData::fromVariantMapPre150(const QVariantMap& variantMap)
     }
 }
 
+
+
 QVariantMap ClusterData::toVariantMap() const
 {
     auto variantMap = RawData::toVariantMap();
 
-    QByteArray clustersByteArray;
-    QDataStream clustersDataStream(&clustersByteArray, QIODevice::WriteOnly);
+    //QByteArray clustersByteArray;
+    //QDataStream clustersDataStream(&clustersByteArray, QIODevice::WriteOnly);
 
-    clustersDataStream.setVersion(QDataStream::Qt_6_5);
+    //clustersDataStream.setVersion(QDataStream::Qt_6_5);
 
-    clustersDataStream << _clusters;
+    //clustersDataStream << _clusters;
 
-    variantMap["ClustersRawDataSize"]   = clustersByteArray.size();
-    variantMap["ClustersRawData"]       = rawDataToVariantMap(clustersByteArray.constData(), clustersByteArray.size(), nullptr);
+    //variantMap["ClustersRawDataSize"]   = clustersByteArray.size();
+    //variantMap["ClustersRawData"]       = rawDataToVariantMap(clustersByteArray.constData(), clustersByteArray.size(), nullptr);
+
+    std::vector<SerializedClusterHeader> headers;
+    std::vector<unsigned int> allIndices;
+
+    headers.reserve(_clusters.size());
+
+    QByteArray headersByteArray;
+    QDataStream headersStream(&headersByteArray, QIODevice::WriteOnly);
+    headersStream.setVersion(QDataStream::Qt_6_5);
+
+    headersStream << static_cast<quint32>(headers.size());
+
+    std::uint64_t indexOffset = 0;
+
+    for (const auto& cluster : _clusters) {
+        const auto indexCount = cluster.getIndices().size();
+
+        headersStream
+            << cluster.getName()
+            << cluster.getId()
+            << cluster.getColor()
+            << static_cast<quint64>(indexOffset)
+            << static_cast<quint64>(indexCount);
+
+        writeRawVector(headersStream, cluster.getMedian());
+        writeRawVector(headersStream, cluster.getMean());
+        writeRawVector(headersStream, cluster.getStandardDeviation());
+
+        indexOffset += indexCount;
+
+        allIndices.insert(allIndices.end(), cluster.getIndices().begin(), cluster.getIndices().end());
+    }
+
+    if (headersStream.status() != QDataStream::Ok)
+        throw std::runtime_error("Failed to serialize cluster metadata");
+
+    variantMap["ClustersFormatVersion"] = 2;
+
+    variantMap["ClustersMetaDataSize"] = headersByteArray.size();
+    variantMap["ClustersMetaData"] = rawDataToVariantMap(
+        headersByteArray.constData(),
+        headersByteArray.size(),
+        nullptr
+    );
+
+    const auto indicesByteSize =
+        allIndices.size() * sizeof(std::uint32_t);
+
+    variantMap["ClustersIndicesRawDataSize"] = static_cast<qulonglong>(indicesByteSize);
+    variantMap["ClustersIndicesRawData"] = rawDataToVariantMap(
+        reinterpret_cast<const char*>(allIndices.data()),
+        indicesByteSize,
+        nullptr
+    );
 
     return variantMap;
 }

@@ -88,7 +88,6 @@ public:
     	return true;
     }
 
-    friend CLUSTERDATA_EXPORT QDataStream& operator<<(QDataStream& out, const Cluster& cluster);
     friend CLUSTERDATA_EXPORT QDataStream& operator>>(QDataStream& in, Cluster& cluster);
 
 protected:

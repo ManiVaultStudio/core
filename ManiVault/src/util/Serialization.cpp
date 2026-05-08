@@ -425,7 +425,7 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
     }
 
     options._parallel = true;
-
+    options._maxWorkerThreadCount = 64;
     auto sharedExecutor = SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor());
 
     PopulateDataBufferResult result;
@@ -444,12 +444,9 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
     return result;
 }
 
-PopulateDataBufferResult populateDataBufferFromVariantMapAsync(const QVariantMap& variantMap, QObject* context, PopulateDataReadyCallback populated)
+PopulateDataBufferResult populateDataBufferFromVariantMapAsync(const QVariantMap& variantMap, QObject* context, PopulateDataReadyCallback populated /*= {}*/)
 {
-    auto result = populateDataBufferFromVariantMap(
-        variantMap,
-        WorkflowPlan::ConcurrencyMode::Parallel
-    );
+    auto result = populateDataBufferFromVariantMap(variantMap, WorkflowPlan::ConcurrencyMode::Parallel);
 
     if (populated) {
         auto watcher = new QFutureWatcher<SharedWorkflowResult>(context);
@@ -485,6 +482,231 @@ QByteArray populateDataBufferFromVariantMapSync(const QVariantMap& variantMap)
     result._future.waitForFinished();
 
     return *result._data;
+}
+
+WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, WorkflowPlan::ConcurrencyMode concurrencyMode)
+{
+    if (variantMap.isEmpty())
+        throw std::runtime_error("Variant map is empty");
+
+    if (!destination)
+        throw std::runtime_error("Destination buffer is null");
+
+    variantMapMustContain(variantMap, "BlockSize");
+    variantMapMustContain(variantMap, "Blocks");
+    variantMapMustContain(variantMap, "Size");
+
+    const auto blocks = variantMap.value("Blocks").toList();
+    const bool hasCodec = variantMap.contains("Codec");
+    const auto codecName = hasCodec
+        ? variantMap.value("Codec").toString()
+        : QStringLiteral("none");
+
+    const auto totalSize =
+        static_cast<std::uint64_t>(variantMap.value("Size").toULongLong());
+
+    if (totalSize == 0)
+        throw std::runtime_error("Decoded buffer size is zero");
+
+    if (totalSize != destinationSize) {
+        throw std::runtime_error(
+            QString("Destination buffer size mismatch. Expected %1 bytes, got %2 bytes")
+            .arg(totalSize)
+            .arg(destinationSize)
+            .toStdString()
+        );
+    }
+
+    if (hasCodec && !codecRegistry().isRegistered(codecName)) {
+        throw std::runtime_error(
+            QStringLiteral("Unable to load raw data, codec %1 is not registered")
+            .arg(codecName)
+            .toStdString()
+        );
+    }
+
+    auto createCodec = [hasCodec, codecName]() -> std::shared_ptr<BlobCodec> {
+        if (hasCodec)
+            return codecRegistry().createCodec(nullptr, codecName);
+
+        return codecRegistry().createCodec(nullptr, BlobCodec::Type::None);
+        };
+
+    DecodeBlockJobs decodeBlockJobs;
+    decodeBlockJobs.reserve(blocks.size());
+
+    for (const auto& block : blocks) {
+        const auto blockMap = block.toMap();
+
+        variantMapMustContain(blockMap, "Offset");
+        variantMapMustContain(blockMap, "Size");
+
+        DecodeBlockJob job;
+
+        job._offset = blockMap.value("Offset").value<quint64>();
+        job._size = blockMap.value("Size").value<quint64>();
+        job._compressedSize = blockMap.value("CompressedSize", 0).value<quint64>();
+
+        if (blockMap.contains("URI"))
+            job._uri = blockMap.value("URI").toString();
+
+        if (blockMap.contains("Data"))
+            job._encodedData = blockMap.value("Data").toString();
+
+        decodeBlockJobs.push_back(std::move(job));
+    }
+
+    std::sort(
+        decodeBlockJobs.begin(),
+        decodeBlockJobs.end(),
+        [](const DecodeBlockJob& a, const DecodeBlockJob& b) {
+            return a._offset < b._offset;
+        }
+    );
+
+    quint64 expectedOffset = 0;
+
+    for (const auto& job : decodeBlockJobs) {
+        if (job._size > std::numeric_limits<quint64>::max() - job._offset)
+            throw std::runtime_error("Raw-data block offset overflow detected");
+
+        const quint64 end = job._offset + job._size;
+
+        if (job._offset < expectedOffset) {
+            throw std::runtime_error(
+                QString("Raw-data block overlap detected at offset %1")
+                .arg(job._offset)
+                .toStdString()
+            );
+        }
+
+        if (job._offset != expectedOffset) {
+            throw std::runtime_error(
+                QString("Raw-data block gap detected: expected offset %1, got %2")
+                .arg(expectedOffset)
+                .arg(job._offset)
+                .toStdString()
+            );
+        }
+
+        if (end > destinationSize)
+            throw std::runtime_error("Raw-data block exceeds destination buffer size");
+
+        expectedOffset = end;
+    }
+
+    if (expectedOffset != totalSize) {
+        throw std::runtime_error(
+            QString("Raw-data blocks do not cover total size. Expected %1 bytes, got %2 bytes")
+            .arg(totalSize)
+            .arg(expectedOffset)
+            .toStdString()
+        );
+    }
+
+    WorkflowPlan decodeWorkflowPlan("Decode Raw Buffer Blocks");
+    WorkflowPlan::Jobs decodeJobs;
+
+    std::int32_t decodeBlockJobIndex = 0;
+
+    for (const auto& decodeBlockJob : decodeBlockJobs) {
+        decodeJobs.emplace_back(
+            QString("Decode Block %1").arg(decodeBlockJobIndex),
+            [decodeBlockJob, destination, destinationSize, createCodec](const WorkflowPlan::Job&) {
+                if (decodeBlockJob._uri.isEmpty()) {
+                    decodeBlockFromBase64To(
+                        decodeBlockJob,
+                        createCodec,
+                        destination,
+                        destinationSize
+                    );
+                }
+                else {
+                    decodeBlockFromFileTo(
+                        decodeBlockJob,
+                        createCodec,
+                        destination,
+                        destinationSize
+                    );
+                }
+            },
+            WorkflowPlan::JobThreadAffinity::CurrentWorkerThread
+        );
+
+        ++decodeBlockJobIndex;
+    }
+
+    decodeWorkflowPlan.addParallelStage("Decode blocks", decodeJobs);
+
+    decodeWorkflowPlan.addSequentialStage(
+        "Finalize",
+        [totalSize](WorkflowPlan::Job&) {
+            if (auto* workflowExecutionContext = WorkflowExecutionContext::current()) {
+                auto state = workflowExecutionContext->getState();
+
+                if (!state)
+                    return;
+
+                state->metrics().addInteger("project.data.bytes_loaded", totalSize);
+            }
+        }
+    );
+
+    auto options = WorkflowExecutionOptions{};
+
+    if (auto* context = WorkflowExecutionContext::current()) {
+        if (auto state = context->getState())
+            options = state->getExecutionOptions();
+    }
+
+    options._parallel = concurrencyMode == WorkflowPlan::ConcurrencyMode::Parallel;
+
+    const auto sharedExecutor =
+        SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor());
+
+    if (concurrencyMode == WorkflowPlan::ConcurrencyMode::Parallel)
+        return decodeWorkflowPlan.executeAsync(sharedExecutor, options);
+
+    const auto blockingResult =
+        decodeWorkflowPlan.executeBlocking(sharedExecutor, options);
+
+    return WorkflowResultFuture::makeReady(blockingResult);
+}
+
+WorkflowResultFuture populateDataBufferFromVariantMapToRawBufferAsync(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, QObject* context, PopulateDoneCallback onPopulated)
+{
+    auto future = populateDataBufferFromVariantMapToRawBuffer(
+        variantMap,
+        destination,
+        destinationSize,
+        WorkflowPlan::ConcurrencyMode::Parallel
+    );
+
+    if (onPopulated) {
+        auto watcher = new QFutureWatcher<SharedWorkflowResult>(context);
+
+        QObject::connect(
+            watcher,
+            &QFutureWatcher<SharedWorkflowResult>::finished,
+            context ? context : watcher,
+            [watcher, onPopulated = std::move(onPopulated)]() mutable {
+                watcher->deleteLater();
+
+                //const auto result = watcher->result();
+
+                //if (!result || !result->isSuccess()) {
+                //    qCritical() << "Failed to populate raw data buffer";
+                //    return;
+                //}
+
+                onPopulated();
+            }
+        );
+
+        watcher->setFuture(future.getFuture());
+    }
+
+    return future;
 }
 
 void populateDataBufferFromVariantMapToRawBufferSync(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize)
