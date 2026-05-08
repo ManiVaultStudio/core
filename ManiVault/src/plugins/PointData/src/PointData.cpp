@@ -1171,14 +1171,6 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
 void Points::fromVariantMapPre150(const QVariantMap& variantMap)
 {
-    auto context = std::make_shared<ClustersLoadContext>(dataMap["ClustersRawData"].toMap());
-
-    WorkflowPlan plan(QStringLiteral("Load clusters"), context);
-
-    plan.addSequentialStage("Load", [context]() -> void {
-        populateDataBufferFromVariantMap(context->_rawDataMap, context->_decodedBytes);
-    });
-
     DatasetImpl::fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "DimensionNames");

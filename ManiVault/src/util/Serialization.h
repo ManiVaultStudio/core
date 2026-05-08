@@ -62,6 +62,16 @@ struct DecodeBlockJob
 
 using DecodeBlockJobs = QVector<DecodeBlockJob>;
 
+using SharedDataBuffer = QSharedPointer<QByteArray>;
+
+struct CORE_EXPORT PopulateDataBufferResult
+{
+    SharedDataBuffer        _data;
+    WorkflowResultFuture    _future;
+    SharedWorkflowResult    _workflowResult;
+    bool                    _async = false;
+};
+
 /**
  * Save raw data to binary file on disk
  * @param bytes Pointer to input buffer
@@ -111,26 +121,9 @@ CORE_EXPORT DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decode
  */
 CORE_EXPORT DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec);
 
-/**
- * Convert variant map to raw data buffer (blocks are loaded from disk and decoded if necessary)
- * @param variantMap Variant map containing the raw data or file information
- * @param bytes Output buffer to which the raw data is copied
- * @param destinationSize Size of the output buffer in bytes
- * @warning This function does not perform any bounds checking on the output buffer, so it is the caller's responsibility to ensure that the buffer is
- * large enough to hold the decoded data. It is recommended to use \p decodeDataBufferFromVariantMap(...) that takes a QByteArray as output buffer, which automatically resizes
- * to fit the decoded data.
- */
-CORE_EXPORT void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, std::uint64_t destinationSize);
-
-/**
-* Convert variant map to raw data buffer (blocks are loaded from disk and decoded if necessary)
-* @param variantMap Variant map containing the raw data or file information
-* @param bytes Output buffer to which the raw data is copied
-* @warning This function does not perform any bounds checking on the output buffer, so it is the caller's responsibility to ensure that the buffer is
-* large enough to hold the decoded data. It is recommended to use \p decodeDataBufferFromVariantMap(...) that takes a QByteArray as output buffer, which automatically resizes
-* to fit the decoded data.
-*/
-CORE_EXPORT void populateDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& bytes);
+CORE_EXPORT PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& variantMap, WorkflowPlan::ConcurrencyMode concurrencyMode);
+CORE_EXPORT PopulateDataBufferResult populateDataBufferFromVariantMapAsync(const QVariantMap& variantMap);
+CORE_EXPORT QByteArray populateDataBufferFromVariantMapSync(const QVariantMap& variantMap);
 
 /**
  * Raises an exception if an item with key is not found in a variant map

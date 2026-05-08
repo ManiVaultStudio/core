@@ -297,13 +297,10 @@ DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, 
     return result;
 }
 
-void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes, std::uint64_t destinationSize)
+PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& variantMap, WorkflowPlan::ConcurrencyMode concurrencyMode)
 {
     if (variantMap.isEmpty())
         throw std::runtime_error("Variant map is empty");
-
-    if (!bytes)
-        throw std::runtime_error("Destination buffer is null");
 
     variantMapMustContain(variantMap, "BlockSize");
     variantMapMustContain(variantMap, "Blocks");
@@ -317,8 +314,9 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
     if (totalSize == 0)
         throw std::runtime_error("Decoded buffer size is zero");
 
-    if (totalSize != destinationSize)
-        throw std::runtime_error(QString("Provided buffer size does not match expected size. Expected %1 bytes, got %2 bytes").arg(totalSize).arg(destinationSize).toStdString());
+    auto sharedData = SharedDataBuffer::create();
+
+    sharedData->resize(totalSize);
 
     if (hasCodec && !codecRegistry().isRegistered(codecName)) {
         throw std::runtime_error(QStringLiteral("Unable to load raw data, codec %1 is not registered").arg(codecName).toStdString());
@@ -395,11 +393,11 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
     std::int32_t decodeBlockJobIndex = 0;
 
     for (auto& decodeBlockJob : decodeBlockJobs) {
-        decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [decodeBlockJob, bytes, totalSize, createCodec](const WorkflowPlan::Job& job) {
+        decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [decodeBlockJob, sharedData, totalSize, createCodec](const WorkflowPlan::Job& job) {
             if (decodeBlockJob._uri.isEmpty()) {
-                decodeBlockFromBase64To(decodeBlockJob, createCodec, bytes, totalSize);
+                decodeBlockFromBase64To(decodeBlockJob, createCodec, sharedData->data(), totalSize);
             } else {
-                decodeBlockFromFileTo(decodeBlockJob, createCodec, bytes, totalSize);
+                decodeBlockFromFileTo(decodeBlockJob, createCodec, sharedData->data(), totalSize);
             }
         }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread);
 
@@ -428,27 +426,36 @@ void populateDataBufferFromVariantMap(const QVariantMap& variantMap, char* bytes
 
     options._parallel = true;
 
-    decodeWorkflowPlan.executeAsync(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()), options);
+    auto sharedExecutor = SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor());
+
+    PopulateDataBufferResult result;
+
+    result._data = sharedData;
+
+    if (concurrencyMode == WorkflowPlan::ConcurrencyMode::Parallel) {
+        result._async = true;
+        result._future = decodeWorkflowPlan.executeAsync(sharedExecutor, options);
+    }
+    else {
+        result._async = false;
+        result._workflowResult = decodeWorkflowPlan.executeBlocking(sharedExecutor, options);
+    }
+
+    return result;
 }
 
-void populateDataBufferFromVariantMap(const QVariantMap& variantMap, QByteArray& bytes)
+PopulateDataBufferResult populateDataBufferFromVariantMapAsync(const QVariantMap& variantMap)
 {
-    if (variantMap.isEmpty())
-        throw std::runtime_error("Variant map is empty");
+    return populateDataBufferFromVariantMap(variantMap, WorkflowPlan::ConcurrencyMode::Parallel);
+}
 
-    variantMapMustContain(variantMap, "Size");
+QByteArray populateDataBufferFromVariantMapSync(const QVariantMap& variantMap)
+{
+    auto result = populateDataBufferFromVariantMap(variantMap, WorkflowPlan::ConcurrencyMode::Sequential);
 
-    const auto totalSize = variantMap.value("Size").toULongLong();
+    result._future.waitForFinished();
 
-    if (totalSize == 0)
-        throw std::runtime_error("Decoded buffer size is zero");
-
-    bytes.resize(static_cast<qsizetype>(totalSize));
-
-    if (totalSize != static_cast<std::uint64_t>(bytes.size()))
-        throw std::runtime_error(QString("Provided buffer size does not match expected size. Expected %1 bytes, got %2 bytes").arg(totalSize).arg(bytes.size()).toStdString());
-
-    populateDataBufferFromVariantMap(variantMap, bytes.data(), totalSize);
+    return *result._data;
 }
 
 void variantMapMustContain(const QVariantMap& variantMap, const QString& key)
@@ -967,9 +974,7 @@ QVariant loadStringList(const QVariantMap& block)
         static_cast<qsizetype>(block.value("Count").toULongLong());
 
     const QVariantMap dataMap = block.value("Data").toMap();
-    QByteArray bytes;
-
-    populateDataBufferFromVariantMap(dataMap, bytes);
+    QByteArray bytes = populateDataBufferFromVariantMapSync(dataMap);
 
 	QDataStream stream(bytes);
     stream.setVersion(QDataStream::Qt_6_8);
@@ -1004,8 +1009,7 @@ QVariant loadOptimizedVariantList(const QVariantMap& map)
 
     const QVariantMap dataMap = map.value("Data").toMap();
 
-    QByteArray bytes;
-    populateDataBufferFromVariantMap(dataMap, bytes);
+    QByteArray bytes = populateDataBufferFromVariantMapSync(dataMap);
 
     if (type == "BoolArray")
         return loadBoolList(bytes, count);
