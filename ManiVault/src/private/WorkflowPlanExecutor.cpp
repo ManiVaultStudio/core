@@ -650,19 +650,22 @@ void WorkflowPlanExecutor::executeParallelJobs(
     std::mutex exceptionMutex;
     std::exception_ptr firstException = nullptr;
 
-    for (int i = 0; i < jobCount; ++i) {
-        auto* job = &jobs[i];
-        auto jobContext = jobContexts[i];
+    for (int jobIndex = 0; jobIndex < jobCount; ++jobIndex) {
+        auto jobContext = jobContexts[jobIndex];
+        auto job        = jobs[jobIndex];
+
+        const auto stageNameCopy    = stage.getName();
+        const auto jobIndexCopy     = jobIndex;
 
 #ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({
             ._type = WorkflowTraceEventType::ParallelJobSubmitted,
-            ._name = job->getName(),
+            ._name = job.getName(),
             ._contextId = jobContext.getId(),
             ._parentContextId = jobContext.getParentId(),
             ._metadata = {
                 { "stage", stage.getName() },
-                { "jobIndex", i },
+                { "jobIndex", jobIndex },
                 { "jobCount", jobCount },
                 { "maxThreadCount", getThreadPool().maxThreadCount() },
                 { "activeThreadCount", getThreadPool().activeThreadCount() }
@@ -676,7 +679,7 @@ void WorkflowPlanExecutor::executeParallelJobs(
             job,
             jobContext,
             stageName = stage.getName(),
-            jobIndex = i,
+            jobIndex = jobIndex,
             jobCount,
             &exceptionMutex,
             &firstException]() mutable {
@@ -685,7 +688,7 @@ void WorkflowPlanExecutor::executeParallelJobs(
 #ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
                 trace({
                     ._type = WorkflowTraceEventType::ParallelJobStarted,
-                    ._name = job->getName(),
+                    ._name = job.getName(),
                     ._contextId = jobContext.getId(),
                     ._parentContextId = jobContext.getParentId(),
                     ._metadata = {
@@ -699,12 +702,12 @@ void WorkflowPlanExecutor::executeParallelJobs(
 #endif
 
                 try {
-                    executeJob(*job, jobContext);
+                    executeJob(job, jobContext);
 
 #ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
                     trace({
                         ._type = WorkflowTraceEventType::ParallelJobFinished,
-                        ._name = job->getName(),
+                        ._name = job.getName(),
                         ._contextId = jobContext.getId(),
                         ._parentContextId = jobContext.getParentId(),
                         ._metadata = {
@@ -725,7 +728,7 @@ void WorkflowPlanExecutor::executeParallelJobs(
 #ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
                     trace({
                         ._type = WorkflowTraceEventType::ParallelJobFailed,
-                        ._name = job->getName(),
+                        ._name = job.getName(),
                         ._contextId = jobContext.getId(),
                         ._parentContextId = jobContext.getParentId(),
                         ._metadata = {
@@ -769,7 +772,7 @@ void WorkflowPlanExecutor::executeParallelJobs(
 #endif
 }
 
-void WorkflowPlanExecutor::executeJobOnGuiThread(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext)
+void WorkflowPlanExecutor::executeJobOnGuiThread(mv::util::WorkflowPlan::Job job, WorkflowExecutionContext& jobContext)
 {
     auto& dispatcher = Application::workflowGuiThreadDispatcher();
 
@@ -819,7 +822,7 @@ void WorkflowPlanExecutor::executeJobOnGuiThread(const WorkflowPlan::Job& job, W
         std::rethrow_exception(exceptionPtr);
 }
 
-void WorkflowPlanExecutor::executeJobOnWorkerThread(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext)
+void WorkflowPlanExecutor::executeJobOnWorkerThread(mv::util::WorkflowPlan::Job job, WorkflowExecutionContext& jobContext)
 {
 #ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
     qDebug() << "Executing job on worker thread:" << job.getName() << "in thread" << QThread::currentThread();
@@ -830,7 +833,7 @@ void WorkflowPlanExecutor::executeJobOnWorkerThread(const WorkflowPlan::Job& job
     job.run();
 }
 
-void WorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext)
+void WorkflowPlanExecutor::executeJob(mv::util::WorkflowPlan::Job job, WorkflowExecutionContext& jobContext)
 {
     WorkflowReporter::info("Job started", job.getName());
 

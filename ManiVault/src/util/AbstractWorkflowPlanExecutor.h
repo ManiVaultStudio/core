@@ -43,9 +43,9 @@ private: // Execute jobs in a stage
     virtual void executeParallelJobs(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) = 0;
 
 private: // Execute individual jobs
-    virtual void executeJobOnGuiThread(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext) = 0;
-    virtual void executeJobOnWorkerThread(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext) = 0;
-    virtual void executeJob(const WorkflowPlan::Job& job, WorkflowExecutionContext& jobContext) = 0;
+    virtual void executeJobOnGuiThread(WorkflowPlan::Job job, WorkflowExecutionContext& jobContext) = 0;
+    virtual void executeJobOnWorkerThread(WorkflowPlan::Job job, WorkflowExecutionContext& jobContext) = 0;
+    virtual void executeJob(WorkflowPlan::Job, WorkflowExecutionContext& jobContext) = 0;
 
 protected: // Tracing
 

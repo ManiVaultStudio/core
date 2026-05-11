@@ -8,6 +8,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CLUSTERD_SOURCES
     src/ClusterData.h
     src/ClusterData.cpp
+    src/ClustersSerializer.h
+    src/ClustersSerializer.cpp
     src/Cluster.h
     src/Cluster.cpp
     src/ClusterData.json

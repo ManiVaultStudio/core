@@ -1145,7 +1145,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         getRawData<PointData>()->setDimensionNames(dimensionNames);
 
         if (variantMap.contains("Dimensions")) {
-            _dimensionsPickerAction->fromParentVariantMap(variantMap);
+            //_dimensionsPickerAction->fromParentVariantMap(variantMap);
         }
 
         //events().notifyDatasetDataChanged(this);
