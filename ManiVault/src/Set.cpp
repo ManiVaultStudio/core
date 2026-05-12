@@ -199,8 +199,6 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
             if (variantMap.contains("Properties")) {
                 PropertiesSerializer::fromVariantMap(variantMap["Properties"].toMap(), _properties);
-
-                qDebug() << "Loaded properties for " << getGuiName() << ": " << _properties.keys();
             }
 
             if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {

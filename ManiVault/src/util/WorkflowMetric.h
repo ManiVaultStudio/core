@@ -17,8 +17,20 @@ enum class WorkflowMetricValueType
     FloatingPoint
 };
 
-struct WorkflowMetric
+struct CORE_EXPORT WorkflowMetric
 {
+    static QString formatMetricValue(const WorkflowMetric& metric);
+
+    static QString toNotificationString(const WorkflowMetric& metric);
+
+    static QString toHtmlNotificationString(const WorkflowMetric& metric);
+    static QString toNotificationSummary(
+        const QList<WorkflowMetric>& metrics,
+        const QString& separator = "\n");
+
+    static QString getWorkflowMetricsHtmlNotificationSummary(
+        const QList<WorkflowMetric>& metrics);
+
     QString     _name;
     QString     _unit;
     QVariant    _value;

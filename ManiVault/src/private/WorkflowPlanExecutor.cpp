@@ -5,6 +5,7 @@
 #include "WorkflowPlanExecutor.h"
 
 #include <util/WorkflowResultRegistry.h>
+#include <util/WorkflowMetric.h>
 #include <util/WorkflowConsoleTraceSink.h>
 
 #include <Task.h>
@@ -97,18 +98,29 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
     return result;
 }
 
-WorkflowResultFuture WorkflowPlanExecutor::executeAsync(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions)
+WorkflowResultFuture WorkflowPlanExecutor::executeAsync(
+    WorkflowPlan& workflowPlan,
+    WorkflowExecutionOptions executionOptions)
 {
     const auto pendingWorkLabel = QString("Async workflow: %1").arg(workflowPlan.getName());
 
     auto* currentContext = WorkflowExecutionContext::current();
 
-    std::optional<WorkflowExecutionContext> parentContextCopy;
+    std::optional<WorkflowExecutionContext> executionContext;
 
-    if (currentContext)
-        parentContextCopy = *currentContext;
+    if (currentContext) {
+        // IMPORTANT: create child progress/report node now, while parent job is still active
+        executionContext = currentContext->createChild(
+            workflowPlan.getName(),
+            workflowPlan.getWeight(),
+            WorkflowPlan::JobProgressMode::Automatic);
+    }
 
-    auto future = executeAsyncImpl(WorkflowPlan(workflowPlan), executionOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, executionOptions, parentContextCopy);
+    auto future = executeAsyncImpl(
+        WorkflowPlan(workflowPlan),
+        executionOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None,
+        executionOptions,
+        executionContext);
 
     if (currentContext) {
         currentContext->addPendingAsyncWork(future, pendingWorkLabel);
@@ -147,7 +159,15 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflo
             WorkflowPlanExecutor executor;
 
             if (parentContext) {
-                return executor.executeChild(workflowPlan, *parentContext);
+                WorkflowExecutionScope scope(*parentContext);
+
+                WorkflowReporter::info("Nested workflow started", workflowPlan.getName());
+
+                executor.executeImpl(workflowPlan);
+
+                WorkflowReporter::info("Nested workflow finished", workflowPlan.getName());
+
+                return {};
             }
 
             return executor.executeRoot(workflowPlan, task, executionOptions);
@@ -293,6 +313,8 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
             if (result->hasWarnings() && result->hasErrors()) {
                 message = QString("Completed with <a href=\"%1\">warnings </a> and <a href=\"%1\">errors </a>. Review the report.").arg(QString("%1&levels=warning,error,critical").arg(url));
             }
+
+            //message += WorkflowMetric::getWorkflowMetricsHtmlNotificationSummary(result->getMetrics());
 
             if (!message.isEmpty()) {
 	            help().addNotification(title, message);
@@ -872,8 +894,7 @@ void WorkflowPlanExecutor::executeJob(mv::util::WorkflowPlan::Job job, WorkflowE
         if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Atomic) {
             jobContext.setProgress(1.0);
         }
-        else if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Automatic &&
-            !jobContext.hasProgressChildren()) {
+        else if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Automatic && !jobContext.hasProgressChildren()) {
             jobContext.setProgress(1.0);
         }
 

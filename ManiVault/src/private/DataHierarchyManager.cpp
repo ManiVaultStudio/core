@@ -365,7 +365,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
         loadDatasetJobs.emplace_back(datasetName, [datasetId, datasetName, dataVariantMap](WorkflowPlan::Job& job) {
             mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
-        }, WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Atomic).weighted(rawBlockSize > 0 ? static_cast<double>(rawBlockSize) : 1.0);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Atomic).weighted(rawBlockSize);
     }
 
     fromPlan.addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Sequential, loadDatasetJobs, 25.0);
