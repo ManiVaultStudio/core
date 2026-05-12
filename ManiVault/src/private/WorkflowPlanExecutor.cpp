@@ -41,7 +41,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
 	        result = executeChild(workflowPlan, *currentContext);
 	    }
 	    else {
-		    auto future = executeAsyncImpl(workflowPlan, executionOptions._reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, executionOptions, nullptr);
+		    auto future = executeAsyncImpl(workflowPlan, executionOptions._reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, executionOptions, std::nullopt);
 
 	        if (QThread::currentThread() == qApp->thread()) {
         		QEventLoop loop;
@@ -101,12 +101,17 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsync(WorkflowPlan& workflowPl
 {
     const auto pendingWorkLabel = QString("Async workflow: %1").arg(workflowPlan.getName());
 
-    auto* parentContext = WorkflowExecutionContext::current();
+    auto* currentContext = WorkflowExecutionContext::current();
 
-    auto future = executeAsyncImpl(WorkflowPlan(workflowPlan), executionOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, executionOptions, parentContext);
+    std::optional<WorkflowExecutionContext> parentContextCopy;
 
-    if (parentContext) {
-        parentContext->addPendingAsyncWork(future, pendingWorkLabel);
+    if (currentContext)
+        parentContextCopy = *currentContext;
+
+    auto future = executeAsyncImpl(WorkflowPlan(workflowPlan), executionOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, executionOptions, parentContextCopy);
+
+    if (parentContextCopy) {
+        parentContextCopy->addPendingAsyncWork(future, pendingWorkLabel);
     }
 
     return future;
@@ -122,7 +127,7 @@ const QThreadPool& WorkflowPlanExecutor::getThreadPool() const
     return WorkflowExecutionContext::current()->getThreadPool();
 }
 
-WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, mv::util::WorkflowExecutionOptions executionOptions, WorkflowExecutionContext* parentContext)
+WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, mv::util::WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext)
 {
     auto state = std::make_shared<WorkflowResultFuture::State>();
 
@@ -636,8 +641,8 @@ void WorkflowPlanExecutor::executeParallelJobs(
     QVector<WorkflowExecutionContext> jobContexts;
     jobContexts.reserve(jobCount);
 
-    for (int i = 0; i < jobCount; ++i) {
-        const auto& job = jobs[i];
+    for (int jobIndex = 0; jobIndex < jobCount; ++jobIndex) {
+        const auto& job = jobs[jobIndex];
 
         jobContexts.push_back(
             stageContext.createChild(
@@ -743,6 +748,13 @@ void WorkflowPlanExecutor::executeParallelJobs(
     }
 
     synchronizer.waitForFinished();
+
+    for (auto& jobContext : jobContexts) {
+        if (jobContext.getPendingAsyncWorkCount() == 0)
+            continue;
+
+        jobContext.waitForPendingAsyncWork();
+    }
 
     if (firstException) {
 #ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK

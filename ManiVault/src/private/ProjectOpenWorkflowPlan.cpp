@@ -27,8 +27,8 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         qDebug() << "Setup";
 #endif
 
-        if (auto wokflowExecutionContext = WorkflowExecutionContext::current()) {
-            auto state = wokflowExecutionContext->getState();
+        if (auto workflowExecutionContext = WorkflowExecutionContext::current()) {
+            auto state = workflowExecutionContext->getState();
 
             if (!state)
                 return;

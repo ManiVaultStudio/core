@@ -8,13 +8,7 @@
 
 #include "ClusterData.h"
 
-/**
- * Clusters class
- *
- * Storage class for cluster data
- *
- */
-class ClusterSerializer
+class ClusterSerializer : public QObject
 {
 public:
     static constexpr quint32 FormatVersion = 2;
@@ -35,6 +29,18 @@ private:
         std::vector<float> mean;
         std::vector<float> stddev;
     };
+
+    struct ClustersLoadContext : public WorkflowContextBase
+	{
+	    explicit ClustersLoadContext(QVariantMap map) :
+            _map(std::move(map))
+	    {
+	    }
+
+	    QVariantMap _map;
+        std::vector<Header> _headers;
+        std::vector<unsigned int> _allIndices;
+	};
 
     static QByteArray serializeHeaders(const std::vector<Header>& headers);
     static std::vector<Header> deserializeHeaders(const QByteArray& bytes);

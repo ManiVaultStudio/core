@@ -81,62 +81,82 @@ QVariantMap ClusterSerializer::toVariantMap(const QVector<Cluster>& clusters)
     QVariantMap map;
 
     std::vector<Header> headers;
+
     headers.reserve(static_cast<std::size_t>(clusters.size()));
 
-    std::vector<unsigned int> allIndices =
-        buildIndexBuffer(clusters, headers);
+    std::vector<unsigned int> allIndices = buildIndexBuffer(clusters, headers);
 
     const QByteArray headersBytes = serializeHeaders(headers);
 
-    map["ClustersFormatVersion"] = FormatVersion;
+    map["ClustersFormatVersion"]    = FormatVersion;
+    map["ClustersMetaDataSize"]     = headersBytes.size();
+    map["ClustersMetaData"]         = rawDataToVariantMap(headersBytes.constData(), headersBytes.size(), nullptr);
 
-    map["ClustersMetaDataSize"] = headersBytes.size();
-    map["ClustersMetaData"] = rawDataToVariantMap(
-        headersBytes.constData(),
-        headersBytes.size(),
-        nullptr
-    );
+	const auto indicesByteSize = allIndices.size() * sizeof(unsigned int);
 
-    const auto indicesByteSize =
-        allIndices.size() * sizeof(unsigned int);
-
-    map["ClustersIndicesRawDataSize"] =
-        static_cast<qulonglong>(indicesByteSize);
-
-    map["ClustersIndicesRawData"] = rawDataToVariantMap(
-        reinterpret_cast<const char*>(allIndices.data()),
-        indicesByteSize,
-        nullptr
-    );
+    map["ClustersIndicesRawDataSize"]   = static_cast<qulonglong>(indicesByteSize);
+    map["ClustersIndicesRawData"]       = rawDataToVariantMap(reinterpret_cast<const char*>(allIndices.data()), indicesByteSize, nullptr);
 
     return map;
 }
 
-void ClusterSerializer::fromVariantMap(
-    const QVariantMap& map,
-    QVector<Cluster>& clusters)
+void ClusterSerializer::fromVariantMap(const QVariantMap& map, QVector<Cluster>& clusters)
 {
     const auto version = map.value("ClustersFormatVersion").toUInt();
 
     if (version != FormatVersion)
         throw std::runtime_error("Unsupported cluster serialization format version");
+    
+    auto context = std::make_shared<ClustersLoadContext>(map);
 
-    const auto headersBytes = populateDataBufferFromVariantMapSync(map.value("ClustersMetaData").toMap());
-    const auto headers      = deserializeHeaders(headersBytes);
-    const auto indicesBytes = populateDataBufferFromVariantMapSync(map.value("ClustersIndicesRawData").toMap());
+    auto fromPlan = std::make_shared<WorkflowPlan>(__FUNCTION__, context);
 
-    if (indicesBytes.size() % qsizetype(sizeof(unsigned int)) != 0)
-        throw std::runtime_error("Cluster indices blob size is not aligned");
+    WorkflowPlan::Jobs preprocessingJobs;
 
-    std::vector<unsigned int> allIndices;
+	preprocessingJobs.emplace_back("Process headers", [map, fromPlan](WorkflowPlan::Job& job) {
+        if (auto clustersLoadContext = fromPlan->getWorkflowContextAs<ClustersLoadContext>()) {
+            qDebug() << "Headers data size:" << map.value("ClustersMetaDataSize").toUInt();
+			auto result = populateDataBufferFromVariantMap(map.value("ClustersMetaData").toMap(), WorkflowPlan::ConcurrencyMode::Parallel);
 
-    allIndices.resize(static_cast<std::size_t>(indicesBytes.size()) / sizeof(unsigned int));
+            result._future.waitForFinished();
 
-    if (!allIndices.empty()) {
-        std::memcpy(allIndices.data(), indicesBytes.constData(), static_cast<std::size_t>(indicesBytes.size()));
-    }
+            if (result._data->isEmpty())
+                throw std::runtime_error("Cluster headers data is empty");
 
-    clusters = rebuildClusters(headers, allIndices);
+			clustersLoadContext->_headers = deserializeHeaders(*result._data);
+        }
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
+
+    preprocessingJobs.emplace_back("Process indices", [map, fromPlan, context](WorkflowPlan::Job& job) {
+        if (auto clustersLoadContext = fromPlan->getWorkflowContextAs<ClustersLoadContext>()) {
+            qDebug() << "Indices data size:" << map.value("ClustersIndicesRawDataSize").toULongLong();
+	        auto result = populateDataBufferFromVariantMap(map.value("ClustersIndicesRawData").toMap(), WorkflowPlan::ConcurrencyMode::Parallel);
+
+			result._future.waitForFinished();
+
+			if (result._data->isEmpty())
+				throw std::runtime_error("Cluster indices data is empty");
+
+			if (result._data->size() % static_cast<qsizetype>(sizeof(unsigned int)) != 0)
+				throw std::runtime_error("Cluster indices blob size is not aligned");
+
+			context->_allIndices.resize(static_cast<std::size_t>(result._data->size()) / sizeof(unsigned int));
+
+			if (!context->_allIndices.empty()) {
+				std::memcpy(context->_allIndices.data(), result._data->constData(), static_cast<std::size_t>(result._data->size()));
+			}
+        }
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
+
+    fromPlan->addParallelStage("Preprocessing", preprocessingJobs);
+    fromPlan->addSequentialStage("Rebuild clusters", [&clusters, fromPlan]() -> void {
+        if (auto clustersLoadContext = fromPlan->getWorkflowContextAs<ClustersLoadContext>()) {
+            clusters = rebuildClusters(clustersLoadContext->_headers, clustersLoadContext->_allIndices);
+            qDebug() << "Rebuilt" << clusters.size() << "clusters";
+        }
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread);
+
+    fromPlan->executeAsync(mv::projects().getWorkflowPlanExecutor());
 }
 
 QByteArray ClusterSerializer::serializeHeaders(
