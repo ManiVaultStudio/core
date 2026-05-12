@@ -6,6 +6,7 @@
 
 #include "DimensionsPickerAction.h"
 #include "InfoAction.h"
+#include "DimensionsSerializer.h"
 
 #include <Application.h>
 
@@ -1096,59 +1097,17 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
             });
         }
 
-        // Load dimension names
-        QStringList dimensionNameList;
-        std::vector<QString> dimensionNames;
+        DimensionsSerializer::fromVariantMap(variantMap, getRawData<PointData>());
 
-        // Fetch dimension names from map
-        const auto fetchDimensionNames = [this, &variantMap]() -> QStringList {
-            QStringList dimensionNames;
-
-            // Dimension names in byte array format
-            QByteArray dimensionsByteArray;
-
-            // Copy the dimension names raw data into the byte array
-            dimensionsByteArray.resize(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
-
-            dimensionNames.reserve(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
-
-            populateDataBufferFromVariantMapToRawBufferAsync(variantMap["DimensionNames"].toMap(), dimensionsByteArray.data(), dimensionsByteArray.size(), this, [this]() {
-                qDebug() << "Finished loading dimension names";
-            });
-
-            // Open input data stream
-            QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::ReadOnly);
-
-            // Stream the data to the dimension names
-            dimensionsDataStream >> dimensionNames;
-
-            return dimensionNames;
-        };
-
-        if (variantMap["NumberOfDimensions"].toUInt() > 1000)
-            dimensionNameList = fetchDimensionNames();
-        else
-            dimensionNameList = variantMap["DimensionNames"].toStringList();
-
-        if (dimensionNameList.size() == getNumDimensions())
-        {
-            for (const auto& dimensionName : dimensionNameList)
-                dimensionNames.push_back(dimensionName);
-        }
-        else
-        {
-            //for (std::uint64_t dimensionIndex = 0; dimensionIndex < getNumDimensions(); dimensionIndex++)
-            //    dimensionNames.emplace_back(QString("Dim %1").arg(QString::number(dimensionIndex)));
-        }
-
-        //setDimensionNames(dimensionNames);
-        getRawData<PointData>()->setDimensionNames(dimensionNames);
 
         if (variantMap.contains("Dimensions")) {
             _dimensionsPickerAction->fromParentVariantMap(variantMap);
         }
 
-        //events().notifyDatasetDataChanged(this);
+        QTimer::singleShot(1000, this, [this]() {
+            events().notifyDatasetDataChanged(this);
+            events().notifyDatasetDataDimensionsChanged(this);
+        });
 
         // Handle saved selection
         if (isFull()) {
@@ -1273,6 +1232,7 @@ QVariantMap Points::toVariantMap() const
 {
     auto variantMap = DatasetImpl::toVariantMap();
 
+    /*
     QStringList dimensionNames;
     QByteArray dimensionsByteArray;
     QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::WriteOnly);
@@ -1288,6 +1248,7 @@ QVariantMap Points::toVariantMap() const
 
     if (dimensionNames.size() > 1000)
         dimensionsDataStream << dimensionNames;
+        */
 
     QVariantMap indices;
 
@@ -1308,7 +1269,7 @@ QVariantMap Points::toVariantMap() const
     variantMap["NumberOfPoints"]        = QVariant::fromValue<std::uint64_t>(getNumPoints());
     variantMap["Indices"]               = indices;
     variantMap["Selection"]             = selection;
-    variantMap["DimensionNames"]        = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size()) : QVariant::fromValue(dimensionNames);
+    variantMap["DimensionNames"]        = DimensionsSerializer::toVariantMap(getRawData<PointData>()->getDimensionNames());
     variantMap["NumberOfDimensions"]    = QVariant::fromValue<std::uint64_t>(getNumDimensions());
     variantMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
     variantMap["Dense"]                 = Experimental::isDense(this);

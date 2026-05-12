@@ -138,8 +138,6 @@ QVariantMap Project::toVariantMap() const
     
     _projectMetaAction.insertIntoVariantMap(variantMap);
 
-    prettyPrintVariantMap(variantMap);
-
     _selectionGroupingAction.insertIntoVariantMap(variantMap);
 
     _overrideApplicationStatusBarAction.insertIntoVariantMap(variantMap);

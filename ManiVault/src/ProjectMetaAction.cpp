@@ -143,8 +143,6 @@ void ProjectMetaAction::fromVariantMap(const QVariantMap& variantMap)
     _allowProjectSwitchingAction.fromParentVariantMap(variantMap, true);
     _allowedPluginsOnlyAction.fromParentVariantMap(variantMap, true);
     _allowedPluginsAction.fromParentVariantMap(variantMap, true);
-
-    qDebug() << _applicationVersionAction.getVersion().getVersionString();
 }
 
 QVariantMap ProjectMetaAction::toVariantMap() const
