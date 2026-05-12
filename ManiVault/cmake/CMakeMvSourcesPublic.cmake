@@ -810,6 +810,7 @@ set(PUBLIC_DATASET_HEADERS
     src/Dataset.h
     src/DatasetPrivate.h
     src/DatasetsMimeData.h
+    src/PropertiesSerializer.h
 )
 
 set(PUBLIC_DATASET_SOURCES
@@ -819,6 +820,7 @@ set(PUBLIC_DATASET_SOURCES
     src/Dataset.cpp
     src/DatasetPrivate.cpp
     src/DatasetsMimeData.cpp
+    src/PropertiesSerializer.cpp
 )
 
 set(PUBLIC_DATASET_FILES
