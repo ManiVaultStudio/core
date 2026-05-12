@@ -4,52 +4,39 @@
 
 #pragma once
 
-#include "clusterdata_export.h"
+namespace mv
+{
 
-#include "ClusterData.h"
-
-class ClusterSerializer : public QObject
+/**
+ * PropertiesSerializer is a utility class that provides static methods for serializing and deserializing (dataset) properties.
+ *
+ * It uses optimized QVariant serialization that is more efficient than the default QVariant serialization, and it includes a
+ * format version in the serialized data to ensure compatibility between different versions of the software.
+ *
+ * The toVariantMap method takes a QVariantMap and returns a new QVariantMap that contains the serialized properties, while the
+ * fromVariantMap method takes a source QVariantMap and a reference to a destination QVariantMap, and it populates the destination
+ * map with the deserialized properties from the source map. If the format version in the source map is not supported, it throws a runtime error.
+ *
+ * @note This class is temporary; it will most likely be removed in the future when a more robust solution for properties serialization is implemented.
+ *
+ * @author T. Kroes
+ */
+class PropertiesSerializer : public QObject
 {
 public:
+
+    /** Format version for the serialized properties */
     static constexpr quint32 FormatVersion = 2;
 
-    static QVariantMap toVariantMap(const QVector<Cluster>& clusters);
+    /** Serializes the given QVariantMap using optimized QVariant serialization and includes the format version in the resulting map. */
+    static QVariantMap toVariantMap(const QVariantMap& map);
 
-    static void fromVariantMap(const QVariantMap& map, QVector<Cluster>& clusters);
-
-private:
-    struct Header
-    {
-        QString name;
-        QString id;
-        QColor color;
-        quint64 indexOffset = 0;
-        quint64 indexCount = 0;
-        std::vector<float> median;
-        std::vector<float> mean;
-        std::vector<float> stddev;
-    };
-
-    struct ClustersLoadContext : public WorkflowContextBase
-	{
-	    explicit ClustersLoadContext(QVariantMap map) :
-            _map(std::move(map))
-	    {
-	    }
-
-	    QVariantMap _map;
-        std::vector<Header> _headers;
-        std::vector<unsigned int> _allIndices;
-	};
-
-    static QByteArray serializeHeaders(const std::vector<Header>& headers);
-    static std::vector<Header> deserializeHeaders(const QByteArray& bytes);
-
-    static std::vector<unsigned int> buildIndexBuffer(
-        const QVector<Cluster>& clusters,
-        std::vector<Header>& headers);
-
-    static QVector<Cluster> rebuildClusters(
-        const std::vector<Header>& headers,
-        const std::vector<unsigned int>& allIndices);
+    /**
+     * Deserializes the properties from the given source QVariantMap into the destination QVariantMap. It checks the format version and throws a runtime error if it is not supported.
+     * @param propertiesMap The source QVariantMap containing the serialized properties, which should include the "PropertiesFormatVersion" key with the format version.
+     * @param destinationPropertiesMap The reference to the QVariantMap that will be populated with the deserialized properties. This map will be cleared before populating it with the deserialized properties.
+     */
+    static void fromVariantMap(const QVariantMap& propertiesMap, QVariantMap& destinationPropertiesMap);
 };
+
+}

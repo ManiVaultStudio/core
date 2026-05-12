@@ -7,6 +7,7 @@
 #include "AnalysisPlugin.h"
 #include "CoreInterface.h"
 #include "DataHierarchyItem.h"
+#include "PropertiesSerializer.h"
 
 #include "util/Exception.h"
 #include "util/Serialization.h"
@@ -196,40 +197,10 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
             if (variantMap.contains("MayUnderive"))
                 _mayUnderive = variantMap["MayUnderive"].toBool();
 
-            if (variantMap.contains("Properties"))
-            {
-                /*auto context = std::make_shared<ClustersLoadContext>(dataMap["ClustersRawData"].toMap());
+            if (variantMap.contains("Properties")) {
+                PropertiesSerializer::fromVariantMap(variantMap["Properties"].toMap(), _properties);
 
-                WorkflowPlan plan(QStringLiteral("Load clusters"), context);
-
-                plan.addSequentialStage("Load", [context]() -> void {
-                    populateDataBufferFromVariantMap(context->_rawDataMap, context->_decodedBytes);
-                    });
-
-                QPointer<ClusterData> clusterData(this);
-
-                plan.addSequentialStage("Load", [context, clusterData]() -> void {
-                    QDataStream clustersDataStream(&context->_decodedBytes, QIODevice::ReadOnly);
-
-                    clustersDataStream.setVersion(QDataStream::Qt_6_5);
-
-                    clustersDataStream >> context->_loadedClusters;
-
-                    if (clustersDataStream.status() != QDataStream::Ok)
-                        throw std::runtime_error("Failed to deserialize cluster payload");
-
-                    if (clusterData)
-                        clusterData->_clusters = std::move(context->_loadedClusters);
-                    });
-
-                plan.executeAsync(SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor()));*/
-
-                try {
-                    //_properties = loadOptimizedVariant(variantMap["Properties"].toMap()).toMap();
-                }
-                catch (const std::exception& e) {
-                    qCritical() << "Failed to load dataset properties: " << e.what();
-                }
+                qDebug() << "Loaded properties for " << getGuiName() << ": " << _properties.keys();
             }
 
             if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {
@@ -343,8 +314,6 @@ QVariantMap DatasetImpl::toVariantMap() const
     for (const auto& ld : _linkedData)
         linkedDataList.push_back(ld.toVariantMap());
 
-    QVariantMap propertiesVariantMap = saveOptimizedVariantMap(_properties);
-
     variantMap.insert({
         { "Name", QVariant::fromValue(text()) },
         { "Locked", QVariant::fromValue(_locked) },
@@ -360,7 +329,7 @@ QVariantMap DatasetImpl::toVariantMap() const
         { "FullDatasetID", isFull() ? "" : QVariant::fromValue(_fullDataset->getId()) },
         { "GroupIndex", QVariant::fromValue(getGroupIndex()) },
         { "LinkedData", linkedDataList },
-        { "Properties", propertiesVariantMap}
+        { "Properties", PropertiesSerializer::toVariantMap(_properties)}
     });
 
     return variantMap;

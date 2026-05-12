@@ -110,8 +110,8 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsync(WorkflowPlan& workflowPl
 
     auto future = executeAsyncImpl(WorkflowPlan(workflowPlan), executionOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, executionOptions, parentContextCopy);
 
-    if (parentContextCopy) {
-        parentContextCopy->addPendingAsyncWork(future, pendingWorkLabel);
+    if (currentContext) {
+        currentContext->addPendingAsyncWork(future, pendingWorkLabel);
     }
 
     return future;
