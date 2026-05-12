@@ -6,7 +6,7 @@
 
 #include "DimensionsPickerAction.h"
 #include "InfoAction.h"
-#include "DimensionsSerializer.h"
+#include "DimensionNamesSerializer.h"
 
 #include <Application.h>
 
@@ -1097,8 +1097,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
             });
         }
 
-        DimensionsSerializer::fromVariantMap(variantMap, getRawData<PointData>());
-
+        DimensionNamesSerializer::fromVariantMap(variantMap, this);
 
         if (variantMap.contains("Dimensions")) {
             _dimensionsPickerAction->fromParentVariantMap(variantMap);
@@ -1269,7 +1268,7 @@ QVariantMap Points::toVariantMap() const
     variantMap["NumberOfPoints"]        = QVariant::fromValue<std::uint64_t>(getNumPoints());
     variantMap["Indices"]               = indices;
     variantMap["Selection"]             = selection;
-    variantMap["DimensionNames"]        = DimensionsSerializer::toVariantMap(getRawData<PointData>()->getDimensionNames());
+    variantMap["DimensionNames"]        = DimensionNamesSerializer::toVariantMap(getRawData<PointData>()->getDimensionNames());
     variantMap["NumberOfDimensions"]    = QVariant::fromValue<std::uint64_t>(getNumDimensions());
     variantMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
     variantMap["Dense"]                 = Experimental::isDense(this);

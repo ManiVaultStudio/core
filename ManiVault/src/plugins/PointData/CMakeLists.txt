@@ -14,8 +14,8 @@ set(POINTS_SOURCES
     src/PointView.h
     src/RandomAccessRange.h
     src/SparseMatrix.h
-	src/DimensionsSerializer.h
-	src/DimensionsSerializer.cpp
+	src/DimensionNamesSerializer.h
+	src/DimensionNamesSerializer.cpp
 )
 
 set(POINTS_HEADERS
@@ -40,7 +40,7 @@ set(POINTS_HEADERS
     src/ModelResetter.h
     src/CreateSetFromSelectionAction.h
     src/SparseMatrix.h
-	src/DimensionsSerializer.cpp
+	src/DimensionNamesSerializer.cpp
 )
 
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects
