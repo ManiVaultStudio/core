@@ -365,10 +365,10 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
         loadDatasetJobs.emplace_back(datasetName, [datasetId, datasetName, dataVariantMap](WorkflowPlan::Job& job) {
             mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
-        }, WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Atomic).weighted(rawBlockSize);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Nested).weighted(rawBlockSize);
     }
 
-    fromPlan.addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Sequential, loadDatasetJobs, 25.0);
+    fromPlan.addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Sequential, loadDatasetJobs);
     fromPlan.addSequentialStage("Notify datasets", [this](WorkflowPlan::Job& job) {
         for (const auto& item : _items) {
             events().notifyDatasetDataChanged(item->getDataset());

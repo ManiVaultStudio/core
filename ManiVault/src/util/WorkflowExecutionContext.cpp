@@ -53,21 +53,26 @@ WorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString& name,
 
 WorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
 {
-	if (!_reportNode || !_progressNode || !_state)
-		return {};
+    if (!_reportNode || !_progressNode || !_state)
+        return {};
 
-    if (getProgress() > 0.0) {
+    const auto effectiveWeight = std::max(1.0, weight);
+
+    if (getProgress() > 0.0 && effectiveWeight > 0.0) {
         qWarning() << "Adding child to progress node after progress already started"
             << "current progress =" << getProgress()
-            << "child weight =" << weight;
+            << "child weight =" << effectiveWeight
+            << "original weight =" << weight;
     }
 
     WorkflowProgressNode::Ptr progressChild;
 
-    if (_progressMode == WorkflowPlan::JobProgressMode::Atomic)
-        progressChild = std::make_shared<WorkflowProgressNode>(weight);
-    else
-        progressChild = _progressNode->createChild(weight);
+    if (_progressMode == WorkflowPlan::JobProgressMode::Atomic) {
+        progressChild = std::make_shared<WorkflowProgressNode>(effectiveWeight);
+    }
+    else {
+        progressChild = _progressNode->createChild(effectiveWeight);
+    }
 
     WorkflowExecutionContext child{
         name,
