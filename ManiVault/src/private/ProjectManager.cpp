@@ -735,7 +735,7 @@ void ProjectManager::saveProject(QString filePath)
 
 	        setTemporaryDirPath(TemporaryDirType::Save, temporaryDirectory.path());
 
-            const auto parameters = getProjectSaveParameters(hasProject() ? getCurrentProject()->getFilePath() : filePath);
+            const auto parameters = getProjectSaveParameters(filePath);
 
             if (parameters.isValid())
                 filePath = parameters._filePath;

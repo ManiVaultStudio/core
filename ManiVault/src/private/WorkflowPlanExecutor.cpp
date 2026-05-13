@@ -180,15 +180,15 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflo
 
     auto* watcher = new QFutureWatcher<SharedWorkflowResult>();
 
-    if (task != nullptr) {
-        connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, task, [watcher, task]() {
-            const auto result = watcher->result();
+    //if (task != nullptr) {
+    //    connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, task, [watcher, task]() {
+    //        const auto result = watcher->result();
 
-            task->setProgress(1.0f);
-            task->setFinished();
-        },
-        Qt::QueuedConnection);
-    }
+    //        //task->setProgress(1.0f);
+    //        //task->setFinished();
+    //    },
+    //    Qt::QueuedConnection);
+    //}
 
     connect(watcher, &QFutureWatcher<WorkflowResult>::finished, watcher,&QObject::deleteLater, Qt::QueuedConnection);
 
