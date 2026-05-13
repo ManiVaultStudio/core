@@ -407,20 +407,8 @@ QVariantMap DataHierarchyManager::toVariantMap() const
                     sharedState,
                     sharedStateMutex
                 ](WorkflowPlan::Job& job) {
-                    auto asyncResult = dataHierarchyItem->toVariantMapAsync();
+                    auto itemMap = dataHierarchyItem->toVariantMap();
 
-                    WorkflowExecutionOptions options;
-                    options._reportProgress = false;
-
-                    auto future = asyncResult._workflowPlan.executeAsync(
-                        mv::projects().getWorkflowPlanExecutor(),
-                        options
-                    );
-
-                    future.waitForFinished();
-                    future.getState()->rethrowExceptionIfAny();
-
-                    auto itemMap = *asyncResult._variantMap;
                     itemMap["SortIndex"] = itemSortIndex;
 
                     {
@@ -431,7 +419,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
                     qDebug() << "Finished create item map job" << datasetGuiName;
                 },
                 WorkflowPlan::JobThreadAffinity::CurrentWorkerThread,
-                WorkflowPlan::JobProgressMode::Nested
+                WorkflowPlan::JobProgressMode::Automatic
             );
         }
 
