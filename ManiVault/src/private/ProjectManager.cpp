@@ -735,7 +735,7 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
 
 	        setTemporaryDirPath(TemporaryDirType::Save, temporaryDirectory.path());
 
-            const auto parameters = getProjectSaveParameters(filePath);
+            const auto parameters = getProjectSaveParameters(hasProject() ? getCurrentProject()->getFilePath() : filePath);
 
             if (parameters.isValid())
                 filePath = parameters._filePath;
@@ -1190,79 +1190,84 @@ AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSavePara
         getSetting("MaxNumberOfThreads", QThread::idealThreadCount() - 1).toUInt()
     };
 
-    FileSaveDialog fileDialog;
+    if (filePath.isEmpty()) {
+	    FileSaveDialog fileDialog;
 
-    fileDialog.setWindowTitle("Save ManiVault Project");
-    fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
-    fileDialog.setDefaultSuffix(".mv");
-    fileDialog.setDirectory(getSetting("Directory", StandardPaths::getProjectsDirectory()).toString());
+    	fileDialog.setWindowTitle("Save ManiVault Project");
+    	fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+    	fileDialog.setDefaultSuffix(".mv");
+    	fileDialog.setDirectory(getSetting("Directory", StandardPaths::getProjectsDirectory()).toString());
 
-    GroupAction settingsAction(&fileDialog, "Settings");
-    HorizontalGroupAction projectSettingsAction(&fileDialog, "Project settings");
-    VerticalGroupAction additionalProjectSettingsAction(&fileDialog, "Additional settings");
+    	GroupAction settingsAction(&fileDialog, "Settings");
+    	HorizontalGroupAction projectSettingsAction(&fileDialog, "Project settings");
+    	VerticalGroupAction additionalProjectSettingsAction(&fileDialog, "Additional settings");
 
-	HorizontalGroupAction parallelSettingsAction(&fileDialog, "Parallel settings");
-    ToggleAction parallelToggleAction(&fileDialog, "Parallel", getSetting("Parallel", true).toBool());
-    IntegralAction maximumNumberOfThreadsAction(&fileDialog, "Maximum number of threads", 1, QThread::idealThreadCount(), getSetting("MaxNumberOfThreads", QThread::idealThreadCount() - 1).toInt());
+    	HorizontalGroupAction parallelSettingsAction(&fileDialog, "Parallel settings");
+    	ToggleAction parallelToggleAction(&fileDialog, "Parallel", getSetting("Parallel", true).toBool());
+    	IntegralAction maximumNumberOfThreadsAction(&fileDialog, "Maximum number of threads", 1, QThread::idealThreadCount(), getSetting("MaxNumberOfThreads", QThread::idealThreadCount() - 1).toInt());
 
-    settingsAction.setIconByName("gear");
-    settingsAction.setToolTip("Edit project settings");
-    settingsAction.setPopupSizeHint(QSize(420, 320));
-    settingsAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
+    	settingsAction.setIconByName("gear");
+    	settingsAction.setToolTip("Edit project settings");
+    	settingsAction.setPopupSizeHint(QSize(420, 320));
+    	settingsAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
 
-    projectSettingsAction.setShowLabels(false);
+    	projectSettingsAction.setShowLabels(false);
 
-    additionalProjectSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
-    additionalProjectSettingsAction.setIconByName("ellipsis");
-    additionalProjectSettingsAction.setPopupSizeHint(QSize(400, 0));
+    	additionalProjectSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    	additionalProjectSettingsAction.setIconByName("ellipsis");
+    	additionalProjectSettingsAction.setPopupSizeHint(QSize(400, 0));
 
-    additionalProjectSettingsAction.addAction(&_project->getDescriptionAction());
-    additionalProjectSettingsAction.addAction(&_project->getTagsAction());
-    additionalProjectSettingsAction.addAction(&_project->getCommentsAction());
+    	additionalProjectSettingsAction.addAction(&_project->getDescriptionAction());
+    	additionalProjectSettingsAction.addAction(&_project->getTagsAction());
+    	additionalProjectSettingsAction.addAction(&_project->getCommentsAction());
 
-    projectSettingsAction.addAction(&_project->getTitleAction());
-    projectSettingsAction.addAction(&additionalProjectSettingsAction);
+    	projectSettingsAction.addAction(&_project->getTitleAction());
+    	projectSettingsAction.addAction(&additionalProjectSettingsAction);
 
-    settingsAction.addAction(&_project->getCompressionAction());
-	settingsAction.addAction(&projectSettingsAction);
-	settingsAction.addAction(&parallelSettingsAction);
+    	settingsAction.addAction(&_project->getCompressionAction());
+    	settingsAction.addAction(&projectSettingsAction);
+    	settingsAction.addAction(&parallelSettingsAction);
 
-    parallelSettingsAction.addAction(&parallelToggleAction);
-    parallelSettingsAction.addAction(&maximumNumberOfThreadsAction);
+    	parallelSettingsAction.addAction(&parallelToggleAction);
+    	parallelSettingsAction.addAction(&maximumNumberOfThreadsAction);
 
-    for (auto action : settingsAction.getActions())
-        addActionToFileDialog(action, &fileDialog);
+    	for (auto action : settingsAction.getActions())
+    		addActionToFileDialog(action, &fileDialog);
 
-    const auto parallelToggled = [&]() {
-        maximumNumberOfThreadsAction.setEnabled(parallelToggleAction.isChecked());
-        };
+    	const auto parallelToggled = [&]() {
+    		maximumNumberOfThreadsAction.setEnabled(parallelToggleAction.isChecked());
+    	};
 
-    parallelToggled();
+    	parallelToggled();
 
-    connect(&parallelToggleAction, &ToggleAction::toggled, this, parallelToggled);
+    	connect(&parallelToggleAction, &ToggleAction::toggled, this, parallelToggled);
 
-    const auto updateSuffix = [&maximumNumberOfThreadsAction]() {
-        maximumNumberOfThreadsAction.setSuffix(QString(" thread%1").arg((maximumNumberOfThreadsAction.getValue() == 1 ? "" : "s")));
-    };
+    	const auto updateSuffix = [&maximumNumberOfThreadsAction]() {
+    		maximumNumberOfThreadsAction.setSuffix(QString(" thread%1").arg((maximumNumberOfThreadsAction.getValue() == 1 ? "" : "s")));
+    	};
 
-    updateSuffix();
+    	updateSuffix();
 
-    connect(&maximumNumberOfThreadsAction, &IntegralAction::valueChanged, this, updateSuffix);
+    	connect(&maximumNumberOfThreadsAction, &IntegralAction::valueChanged, this, updateSuffix);
 
-    fileDialog.exec();
+    	fileDialog.exec();
 
-    if (fileDialog.result() != QDialog::Accepted)
-        return parameters;
+    	if (fileDialog.result() != QDialog::Accepted)
+    		return parameters;
 
-    if (fileDialog.selectedFiles().count() != 1)
-        throw std::runtime_error("Only one file may be selected");
+    	if (fileDialog.selectedFiles().count() != 1)
+    		throw std::runtime_error("Only one file may be selected");
 
-    parameters._filePath            = fileDialog.selectedFiles().first();
-    parameters._parallel            = parallelToggleAction.isChecked();
-    parameters._maxParallelThreads  = maximumNumberOfThreadsAction.getValue();
+    	parameters._filePath = fileDialog.selectedFiles().first();
+        parameters._parallel = parallelToggleAction.isChecked();
+        parameters._maxParallelThreads = maximumNumberOfThreadsAction.getValue();
+
+        setSetting("Parallel", parallelToggleAction.isChecked());
+    } else {
+        parameters._filePath = filePath;
+    }
 
     setSetting("Directory", QFileInfo(parameters._filePath).absolutePath());
-    setSetting("Parallel", parallelToggleAction.isChecked());
     setSetting("MaxNumberOfThreads", parameters._maxParallelThreads);
 
     return parameters;
