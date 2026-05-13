@@ -8,17 +8,13 @@
 
 #include <QObject>
 
-namespace mv::util {
+using namespace mv::util;
+
+namespace mv {
 
 class CORE_EXPORT ManiVaultException : public std::runtime_error {
 public:
-    ManiVaultException(
-        SeverityLevel severity,
-        QString message,
-        QString code,
-        QString scope = {},
-        QVariantMap details = {}
-    );
+    ManiVaultException(SeverityLevel severity, QString message, QString code, QString scope = {}, QVariantMap details = {});
 
     SeverityLevel _severity;
     QString _message;

@@ -6,7 +6,8 @@
 
 #include <QDebug>
 
-namespace mv::util {
+namespace mv {
+
 ManiVaultException::ManiVaultException(SeverityLevel severity, QString message, QString code, QString scope, QVariantMap details) :
 	std::runtime_error(message.toStdString()),
 	_severity(severity),

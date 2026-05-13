@@ -28,13 +28,9 @@
 
 #include "Task.h"
 #include "ModalTask.h"
+#include "exception/ManiVaultException.h"
 
 namespace mv {
-
-namespace util
-{
-    class BlobCodec;
-}
 
 /**
  * Abstract project manager class
@@ -89,13 +85,13 @@ public:
     };
 
     /** Exception class for file project download issue */
-    class ProjectDownloadException : public util::BaseException {
+    class ProjectDownloadException : public ManiVaultException {
     public:
 
         explicit ProjectDownloadException(const QString& message) :
-            BaseException(message, util::StyledIcon("download")) {}
-
-        BaseException* clone() const override { return new ProjectDownloadException(*this); }
+	        ManiVaultException(SeverityLevel::Error, message, "ProjectDownload", "Project", { {"icon", util::StyledIcon("download")} })
+        {
+        }
     };
 
     /** Parameters for project operations (opening, importing, saving, publishing) */

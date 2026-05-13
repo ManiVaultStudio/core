@@ -151,8 +151,8 @@ void HelpManager::initialize()
                     emit videosModelPopulatedFromWebsite();
                 });
             }
-            catch (const BaseException& exception) {
-                qCritical() << "Unable to download videos JSON file" << ":" << exception.what();
+            catch (const ManiVaultException& maniVaultException) {
+                qCritical() << "Unable to download videos JSON file" << ":" << maniVaultException.what();
             }
             catch (const std::exception& exception) {
                 qCritical() << "Unable to download videos JSON file" << ":" << exception.what();

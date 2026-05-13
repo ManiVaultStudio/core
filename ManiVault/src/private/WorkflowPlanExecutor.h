@@ -57,7 +57,7 @@ private: // Execute individual jobs
 
 private: // Helpers
 
-    static void handleStageException(const mv::util::WorkflowPlan::Stage& stage, const mv::util::ManiVaultException& exception);
+    static void handleStageException(const mv::util::WorkflowPlan::Stage& stage, const mv::ManiVaultException& exception);
 
 };
 

@@ -329,8 +329,6 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/ZstdBlobCodec.h
     src/private/ZstdBlobCodecFactory.h
     src/private/WorkflowPlanExecutor.h
-    src/private/WorkflowRunner.h
-    src/private/WorkflowAsyncLauncher.h
     src/private/ProjectOpenWorkflowPlan.h
     src/private/ProjectSaveWorkflowPlan.h
     src/private/ProjectPublishWorkflowPlan.h
@@ -359,8 +357,6 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/ZstdBlobCodec.cpp
     src/private/ZstdBlobCodecFactory.cpp
     src/private/WorkflowPlanExecutor.cpp
-    src/private/WorkflowRunner.cpp
-    src/private/WorkflowAsyncLauncher.cpp
     src/private/ProjectOpenWorkflowPlan.cpp
     src/private/ProjectSaveWorkflowPlan.cpp
     src/private/ProjectPublishWorkflowPlan.cpp

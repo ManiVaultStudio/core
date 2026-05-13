@@ -36,7 +36,6 @@
 
 #include "ProjectSaveContext.h"
 #include "Task.h"
-#include "WorkflowAsyncLauncher.h"
 
 #ifdef _DEBUG
     #define PROJECT_MANAGER_VERBOSE
@@ -980,20 +979,20 @@ QFuture<bool> ProjectManager::isDownloadedProjectStaleAsync(QUrl url) const
                 }
                 else {
                     if (modifiedFuture.resultCount() == 0)
-                        throw BaseException("Failed to get last modified date and time headers from server");
+                        throw std::runtime_error("Failed to get last modified date and time headers from server");
 
                     if (sizeFuture.resultCount() == 0)
-                        throw BaseException("Failed to get size headers from server");
+                        throw std::runtime_error("Failed to get size headers from server");
 
                     if (finalNameFuture.resultCount() == 0)
-                        throw BaseException("Failed to get file name info from server");
+                        throw std::runtime_error("Failed to get file name info from server");
                 }
             }
             catch (const QException& e) {
-                promise->setException(std::make_exception_ptr(BaseException(QString("Failed to compare download state: %1").arg(e.what()))));
+                promise->setException(std::make_exception_ptr(std::runtime_error(QString("Failed to compare download state: %1").arg(e.what()).toStdString())));
             }
             catch (...) {
-                promise->setException(std::make_exception_ptr(BaseException("Unknown failure in stale check")));
+                promise->setException(std::make_exception_ptr(std::runtime_error("Unknown failure in stale check")));
             }
 
             promise->finish();
