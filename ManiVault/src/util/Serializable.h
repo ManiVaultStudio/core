@@ -43,17 +43,10 @@ public:
     };
 
     /** Result of an asynchronous toVariantMap() operation */
-    struct AsyncToVariantMapResult
-    {
-        //WorkflowPlan                    _workflow;      /** Workflow associated with the asynchronous operation */
-        std::shared_ptr<QVariantMap>    _result;        /** Resulting QVariantMap from the asynchronous operation */
-    };
+    struct AsyncToVariantMapResult;
 
     /** Result of an asynchronous fromVariantMap() operation */
-    struct AsyncFromVariantMapResult
-    {
-        //WorkflowPlan                    _workflow;      /** Workflow associated with the asynchronous operation */
-    };
+    struct AsyncFromVariantMapResult;
 
 public:
 

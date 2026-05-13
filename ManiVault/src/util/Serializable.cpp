@@ -11,6 +11,7 @@
 
 #include "util/Serialization.h"
 #include "util/Exception.h"
+#include "util/AsyncVariantMapResult.h"
 
 #include <QDebug>
 #include <QUuid>
