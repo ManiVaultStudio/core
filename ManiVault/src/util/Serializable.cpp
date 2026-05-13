@@ -65,6 +65,11 @@ void Serializable::fromVariantMap(const QVariantMap& variantMap)
     _serializationCounter[static_cast<int>(Direction::From)]++;
 }
 
+Serializable::AsyncFromVariantMapResult Serializable::fromVariantMapAsync(const QVariantMap& map)
+{
+    return {};
+}
+
 QVariantMap Serializable::toVariantMap() const
 {
     const_cast<Serializable*>(this)->_serializationCounter[static_cast<int>(Direction::To)]++;
@@ -72,6 +77,11 @@ QVariantMap Serializable::toVariantMap() const
     return {
         { "ID", _id }
     };
+}
+
+Serializable::AsyncToVariantMapResult Serializable::toVariantMapAsync() const
+{
+    return {};
 }
 
 void Serializable::fromJsonDocument(const QJsonDocument& jsonDocument)

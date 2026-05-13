@@ -5,6 +5,7 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+//#include "WorkflowPlan.h"
 
 #include <QString>
 #include <QJsonDocument>
@@ -40,6 +41,20 @@ public:
         From,   /** From variant map to serializable object */
         To      /** From serializable object to variant map */
     };
+
+    /** Result of an asynchronous toVariantMap() operation */
+    struct AsyncToVariantMapResult
+    {
+        //WorkflowPlan                    _workflow;      /** Workflow associated with the asynchronous operation */
+        std::shared_ptr<QVariantMap>    _result;        /** Resulting QVariantMap from the asynchronous operation */
+    };
+
+    /** Result of an asynchronous fromVariantMap() operation */
+    struct AsyncFromVariantMapResult
+    {
+        //WorkflowPlan                    _workflow;      /** Workflow associated with the asynchronous operation */
+    };
+
 public:
 
     /**
@@ -77,10 +92,63 @@ public:
     void setSerializationName(const QString& serializationName);
 
     /**
-     * Load from variant map
-     * @param variantMap Variant map
+     * Synchronously restores the object from a QVariantMap.
+     *
+     * This function blocks until deserialization has fully completed.
+     *
+     * Implementations may internally use parallelism or worker threads, but all
+     * work must complete before this function returns.
+     *
+     * Implementations must not start asynchronous work that outlives the function
+     * call. Use fromVariantMapAsync() for externally observable asynchronous
+     * execution.
+     *
+     * Deserialization semantics:
+     * - Implementations should focus on restoring persistent object state.
+     * - External side effects unrelated to state restoration should generally be
+     *   avoided during deserialization.
+     *
+     * @param variantMap Serialized object state.
      */
     virtual void fromVariantMap(const QVariantMap& variantMap);
+
+    /**
+     * Asynchronously restores the object from a QVariantMap.
+     *
+     * Unlike fromVariantMap(), this function may schedule concurrent or
+     * asynchronous work and return before deserialization has completed.
+     *
+     * The returned async result contains the workflow and/or completion handle
+     * required to track progress, cancellation, warnings/errors, and completion.
+     *
+     * The object must not be considered fully restored until the asynchronous
+     * operation has completed successfully.
+     *
+     * The default implementation wraps the synchronous fromVariantMap() call in
+     * a workflow job executed asynchronously.
+     *
+     * Implementations may internally use multiple threads, nested workflows,
+     * deferred decoding, background decompression, or staged reconstruction.
+     *
+     * Thread-safety:
+     * - Implementations must ensure that all asynchronous work remains valid for
+     *   the lifetime of the async operation.
+     * - Implementations must synchronize access to shared mutable state.
+     *
+     * Progress reporting:
+     * - Implementations are encouraged to expose nested workflow stages and
+     *   meaningful progress information where possible.
+     *
+     * Deserialization semantics:
+     * - Implementations should focus on restoring persistent object state.
+     * - External side effects unrelated to state restoration should generally be
+     *   avoided during deserialization.
+     *
+     * @param map Serialized object state.
+     *
+     * @return Async deserialization result containing workflow state.
+     */
+    virtual AsyncFromVariantMapResult fromVariantMapAsync(const QVariantMap& map);
 
     /**
      * Load from variant map located in \p parentVariantMap at the serialization name
@@ -90,10 +158,79 @@ public:
     virtual void fromParentVariantMap(const QVariantMap& parentVariantMap, bool ignoreLoadingErrors = false);
 
     /**
-     * Save to variant map
-     * @return Variant map
+     * Synchronously serializes the object to a QVariantMap.
+     *
+     * This function blocks until serialization has fully completed and returns
+     * a complete serialized representation of the object.
+     *
+     * Implementations may internally use parallelism, worker threads, temporary
+     * tasks, or concurrent processing, but all work must complete before this
+     * function returns.
+     *
+     * Implementations must not start asynchronous work that outlives the function
+     * call. Use toVariantMapAsync() for externally observable asynchronous
+     * serialization, progress reporting, cancellation, or workflow-based
+     * execution.
+     *
+     * The returned QVariantMap should contain all state required to restore the
+     * object using fromVariantMap().
+     *
+     * Thread-safety:
+     * - Implementations are responsible for synchronizing access to shared mutable
+     *   state during serialization.
+     * - Returned QVariantMap data must remain valid independently of temporary
+     *   buffers or background tasks created during serialization.
+     *
+     * Error handling:
+     * - Implementations may throw serialization-related exceptions or report
+     *   workflow messages when serialization fails.
+     *
+     * Serialization semantics:
+     * - Implementations should serialize persistent object state only.
+     * - Serialization should avoid mutating observable application state where
+     *   possible.
+     *
+     * @return Complete serialized object state.
      */
     virtual QVariantMap toVariantMap() const;
+
+    /**
+     * Asynchronously serializes the object to a QVariantMap.
+     *
+     * Unlike toVariantMap(), this function may schedule concurrent or asynchronous
+     * work and return before serialization has completed.
+     *
+     * The returned async result contains the workflow and/or completion handle
+     * required to track progress, cancellation, warnings/errors, and completion.
+     *
+     * Implementations may internally use multiple threads, nested workflows,
+     * deferred compression, streaming IO, or background encoding tasks.
+     *
+     * The serialized QVariantMap must not be accessed until the asynchronous
+     * operation has completed successfully.
+     *
+     * The default implementation wraps the synchronous toVariantMap() call in
+     * a workflow job executed asynchronously.
+     *
+     * Thread-safety:
+     * - Implementations must ensure that all asynchronous work remains valid for
+     *   the lifetime of the async operation.
+     * - Implementations must not access destroyed objects or temporary buffers
+     *   after returning from this function.
+     *
+     * Progress reporting:
+     * - Implementations are encouraged to expose nested workflow stages and
+     *   meaningful progress information where possible.
+     *
+     * Serialization semantics:
+     * - Implementations should serialize persistent object state only.
+     * - Serialization should avoid mutating observable application state where
+     *   possible.
+     *
+     * @return Async serialization result containing workflow state and the
+     *         serialized QVariantMap result.
+     */
+    virtual AsyncToVariantMapResult toVariantMapAsync() const;
 
     /**
      * Save into \p variantMap

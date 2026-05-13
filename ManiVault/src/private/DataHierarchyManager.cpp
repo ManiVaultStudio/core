@@ -387,18 +387,25 @@ QVariantMap DataHierarchyManager::toVariantMap() const
 
         std::int32_t sortIndex = 0;
 
+        auto sharedStateMutex = std::make_shared<QMutex>();
+
         for (auto& dataHierarchyItem : _items) {
             const auto dataset          = dataHierarchyItem->getDataset();
             const auto datasetId        = dataset->getId();
             const auto datasetGuiName   = dataset->getGuiName();
 
-            createItemMapJobs.emplace_back(datasetGuiName, [&toPlan, datasetId, &datasetGuiName, &sortIndex, &dataHierarchyItem](WorkflowPlan::Job& job) {
+            createItemMapJobs.emplace_back(datasetGuiName, [toPlan, datasetId, datasetGuiName, sortIndex, &dataHierarchyItem, sharedStateMutex](WorkflowPlan::Job& job) {
                 const auto itemMap = dataHierarchyItem->toVariantMap();
 
                 itemMap["SortIndex"] = sortIndex;
 
-                (*toPlan.getSharedState())[datasetId] = itemMap;
-            }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
+                {
+                    QMutexLocker lock(sharedStateMutex.get());
+                    (*toPlan.getSharedState())[datasetId] = itemMap;
+                }
+
+                qDebug() << "Finished create item map job" << datasetGuiName;
+            }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Automatic);
 
             sortIndex++;
         }

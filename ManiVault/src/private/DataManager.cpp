@@ -781,6 +781,7 @@ QVariantMap DataManager::toVariantMap() const
 {
     auto variantMap = AbstractDataManager::toVariantMap();
 
+	/*
     QVariantList savedDataList;
 
     struct DataSaveJob
@@ -805,7 +806,7 @@ QVariantMap DataManager::toVariantMap() const
 
         variantMap[dataSaveJob.dataset->getId()] = dataSaveResult;
     }
-
+    */
     return variantMap;
 }
 
