@@ -554,7 +554,6 @@ void Task::setRunningIndeterminate()
 
 void Task::setFinished()
 {
-    qDebug() << "Setting task" << getName() << "to finished";
     if (QThread::currentThread() == thread()) {
         privateSetFinished();
         return;
@@ -730,7 +729,6 @@ float Task::getProgress() const
 
 void Task::setProgress(float progress, const QString& subtaskDescription /*= ""*/)
 {
-    qDebug() << "Setting progress of task" << getName() << "to" << progress << "with subtask description" << subtaskDescription;
     if (QThread::currentThread() == thread()) {
         privateSetProgress(progress, subtaskDescription);
         return;
