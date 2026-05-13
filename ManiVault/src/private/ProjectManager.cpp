@@ -712,7 +712,7 @@ void ProjectManager::importProject(QString filePath /*= ""*/)
     }
 }
 
-void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& password /*= ""*/)
+void ProjectManager::saveProject(QString filePath)
 {
     try
     {

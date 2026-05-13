@@ -6,6 +6,7 @@
 #include "DataManager.h"
 
 #include <util/Exception.h>
+#include <util/AsyncVariantMapResult.h>
 
 #include <QtConcurrent>
 
@@ -388,26 +389,50 @@ QVariantMap DataHierarchyManager::toVariantMap() const
         std::int32_t sortIndex = 0;
 
         auto sharedStateMutex = std::make_shared<QMutex>();
+        auto sharedState = toPlan.getSharedState();
 
         for (auto& dataHierarchyItem : _items) {
-            const auto dataset          = dataHierarchyItem->getDataset();
-            const auto datasetId        = dataset->getId();
-            const auto datasetGuiName   = dataset->getGuiName();
+            const auto dataset = dataHierarchyItem->getDataset();
+            const auto datasetId = dataset->getId();
+            const auto datasetGuiName = dataset->getGuiName();
+            const auto itemSortIndex = sortIndex++;
 
-            createItemMapJobs.emplace_back(datasetGuiName, [toPlan, datasetId, datasetGuiName, sortIndex, &dataHierarchyItem, sharedStateMutex](WorkflowPlan::Job& job) {
-                const auto itemMap = dataHierarchyItem->toVariantMap();
+            createItemMapJobs.emplace_back(
+                datasetGuiName,
+                [
+                    &dataHierarchyItem,
+                    datasetId,
+                    datasetGuiName,
+                    itemSortIndex,
+                    sharedState,
+                    sharedStateMutex
+                ](WorkflowPlan::Job& job) {
+                    auto asyncResult = dataHierarchyItem->toVariantMapAsync();
 
-                itemMap["SortIndex"] = sortIndex;
+                    WorkflowExecutionOptions options;
+                    options._reportProgress = false;
 
-                {
-                    QMutexLocker lock(sharedStateMutex.get());
-                    (*toPlan.getSharedState())[datasetId] = itemMap;
-                }
+                    auto future = asyncResult._workflowPlan.executeAsync(
+                        mv::projects().getWorkflowPlanExecutor(),
+                        options
+                    );
 
-                qDebug() << "Finished create item map job" << datasetGuiName;
-            }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Automatic);
+                    future.waitForFinished();
+                    future.getState()->rethrowExceptionIfAny();
 
-            sortIndex++;
+                    auto itemMap = *asyncResult._variantMap;
+                    itemMap["SortIndex"] = itemSortIndex;
+
+                    {
+                        QMutexLocker lock(sharedStateMutex.get());
+                        (*sharedState)[datasetId] = itemMap;
+                    }
+
+                    qDebug() << "Finished create item map job" << datasetGuiName;
+                },
+                WorkflowPlan::JobThreadAffinity::CurrentWorkerThread,
+                WorkflowPlan::JobProgressMode::Nested
+            );
         }
 
         toPlan.addParallelStage("Create item maps", createItemMapJobs);

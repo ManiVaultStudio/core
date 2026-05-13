@@ -229,9 +229,8 @@ public:
     /**
      * Save a project to \p filePath
      * @param filePath File path of the project (choose file path when empty)
-     * @param password Encryption password
      */
-    virtual void saveProject(QString filePath = "", const QString& password = "") = 0;
+    virtual void saveProject(QString filePath) = 0;
 
     /** Save project to different file (user is prompted to choose the file location) */
     virtual void saveProjectAs() = 0;

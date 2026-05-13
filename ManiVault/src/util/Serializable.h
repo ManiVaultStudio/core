@@ -18,6 +18,12 @@ namespace mv
 
 namespace mv::util {
 
+/** Result of an asynchronous toVariantMap() operation */
+struct AsyncToVariantMapResult;
+
+/** Result of an asynchronous fromVariantMap() operation */
+struct AsyncFromVariantMapResult;
+
 /**
  * Serializable class
  * 
@@ -41,12 +47,6 @@ public:
         From,   /** From variant map to serializable object */
         To      /** From serializable object to variant map */
     };
-
-    /** Result of an asynchronous toVariantMap() operation */
-    struct AsyncToVariantMapResult;
-
-    /** Result of an asynchronous fromVariantMap() operation */
-    struct AsyncFromVariantMapResult;
 
 public:
 
@@ -137,6 +137,11 @@ public:
      * - External side effects unrelated to state restoration should generally be
      *   avoided during deserialization.
      *
+     * @note The default async implementation executes the synchronous deserialization function
+	 * on the GUI thread for QObject/thread-affinity safety. Implementations that are
+     * known to be thread-safe may override this function and schedule worker-thread
+	 * jobs for compute-heavy work.
+	 *
      * @param map Serialized object state.
      *
      * @return Async deserialization result containing workflow state.
@@ -183,6 +188,11 @@ public:
      * - Serialization should avoid mutating observable application state where
      *   possible.
      *
+     * @note The default async implementation executes the synchronous serialization function
+	 * on the GUI thread for QObject/thread-affinity safety. Implementations that are
+     * known to be thread-safe may override this function and schedule worker-thread
+	 * jobs for compute-heavy work.
+	 *
      * @return Complete serialized object state.
      */
     virtual QVariantMap toVariantMap() const;

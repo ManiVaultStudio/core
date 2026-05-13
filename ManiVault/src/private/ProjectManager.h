@@ -96,9 +96,8 @@ public:
     /**
      * Save a project to \p filePath
      * @param filePath File path of the project (choose file path when empty)
-     * @param password Encryption password
      */
-    void saveProject(QString filePath = "", const QString& password = "") override;
+    void saveProject(QString filePath) override;
 
     /** Save project to different file (user is prompted to choose the file location) */
     void saveProjectAs() override;

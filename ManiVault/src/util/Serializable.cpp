@@ -13,10 +13,10 @@
 #include "util/Exception.h"
 #include "util/AsyncVariantMapResult.h"
 
+#include "exception/SerializationException.h"
+
 #include <QDebug>
 #include <QUuid>
-
-#include "Exception/SerializationException.h"
 
 #ifdef _DEBUG
     //#define SERIALIZABLE_VERBOSE
@@ -66,9 +66,19 @@ void Serializable::fromVariantMap(const QVariantMap& variantMap)
     _serializationCounter[static_cast<int>(Direction::From)]++;
 }
 
-Serializable::AsyncFromVariantMapResult Serializable::fromVariantMapAsync(const QVariantMap& map)
+AsyncFromVariantMapResult Serializable::fromVariantMapAsync(const QVariantMap& map)
 {
-    return {};
+	WorkflowPlan plan(QString("Deserialize %1").arg(getSerializationName()));
+
+    WorkflowPlan::Jobs jobs;
+
+    jobs.emplace_back("fromVariantMap", [this, map](WorkflowPlan::Job&) {
+        fromVariantMap(map);
+	}, WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Automatic);
+
+    plan.addSequentialStage("fromVariantMap", std::move(jobs));
+
+    return { std::move(plan) };
 }
 
 QVariantMap Serializable::toVariantMap() const
@@ -80,9 +90,21 @@ QVariantMap Serializable::toVariantMap() const
     };
 }
 
-Serializable::AsyncToVariantMapResult Serializable::toVariantMapAsync() const
+AsyncToVariantMapResult Serializable::toVariantMapAsync() const
 {
-    return {};
+    WorkflowPlan plan(QString("Serialize %1").arg(getSerializationName()));
+
+    WorkflowPlan::Jobs jobs;
+
+    auto result = std::make_shared<QVariantMap>();
+
+    jobs.emplace_back("toVariantMap", [this, result](WorkflowPlan::Job&) {
+        *result = toVariantMap();
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Automatic);
+
+    plan.addSequentialStage("toVariantMap", std::move(jobs));
+
+    return { std::move(plan), result };
 }
 
 void Serializable::fromJsonDocument(const QJsonDocument& jsonDocument)
