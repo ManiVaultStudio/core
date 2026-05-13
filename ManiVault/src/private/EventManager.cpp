@@ -122,6 +122,18 @@ void EventManager::unregisterEventListener(EventListener* eventListener)
     _eventListeners.erase(std::remove(_eventListeners.begin(), _eventListeners.end(), eventListener), _eventListeners.end());
 }
 
+bool EventManager::areDatasetsPartOfSelectionGroup(Dataset<DatasetImpl> d1, Dataset<DatasetImpl> d2)
+{
+    bool foundGroup = false;
+
+    for (KeyBasedSelectionGroup& selectionGroup : _selectionGroups)
+    {
+        if (selectionGroup.areDatasetsPartOfGroup(d1, d2))
+            foundGroup = true;
+    }
+    return foundGroup;
+}
+
 void EventManager::notifyDatasetAdded(const Dataset<DatasetImpl>& dataset)
 {
     try {

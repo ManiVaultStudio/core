@@ -104,6 +104,8 @@ public:
      */
     virtual void unregisterEventListener(EventListener* eventListener) = 0;
 
+    virtual bool areDatasetsPartOfSelectionGroup(Dataset<DatasetImpl> d1, Dataset<DatasetImpl> d2) = 0;
+
 protected:
 
     /**
