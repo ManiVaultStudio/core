@@ -190,7 +190,7 @@ public:
 
     SharedWorkflowResult executeBlocking(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext);
     WorkflowResultFuture executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext);
-    SharedWorkflowResult executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task = nullptr, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext);
+    SharedWorkflowResult executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext);
 
 	Stages getStages() const;
 
