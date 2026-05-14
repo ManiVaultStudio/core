@@ -22,18 +22,22 @@ public:
 
     AbstractWorkflowPlanExecutor(QObject* parent = nullptr);
 
-    [[nodiscard]] virtual SharedWorkflowResult executeBlocking(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions = {}) = 0;
-    [[nodiscard]] virtual WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions = {}) = 0;
+    [[nodiscard]] virtual SharedWorkflowResult executeBlocking(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions) = 0;
+    [[nodiscard]] virtual SharedWorkflowResult executeBlocking(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext) = 0;
+    [[nodiscard]] virtual WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions) = 0;
+    [[nodiscard]] virtual WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext) = 0;
 
     static void installNotificationLinkHandler();
 
 protected:
-    virtual WorkflowResultFuture executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext) = 0;
-    virtual SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {}) = 0;
+    [[nodiscard]] virtual WorkflowResultFuture executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> executionContext) = 0;
+    [[nodiscard]] virtual SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task, WorkflowExecutionOptions executionOptions = {}) = 0;
+    [[nodiscard]] virtual SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext) = 0;
 
 private:
-    virtual SharedWorkflowResult executeRoot(const WorkflowPlan& workflowPlan, Task* task, WorkflowExecutionOptions executionOptions = {}) = 0;
-    virtual SharedWorkflowResult executeChild(const WorkflowPlan& workflowPlan, WorkflowExecutionContext& parentContext) = 0;
+    [[nodiscard]] virtual SharedWorkflowResult executeRoot(const WorkflowPlan& workflowPlan, Task* task, WorkflowExecutionOptions executionOptions = {}) = 0;
+    [[nodiscard]] virtual SharedWorkflowResult executeChild(const WorkflowPlan& workflowPlan, WorkflowExecutionContext& parentContext) = 0;
+
     virtual void executeImpl(const WorkflowPlan& workflowPlan) = 0;
     virtual void executeStage(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) = 0;
     virtual void executeStageGroup(const WorkflowPlan::Stages& stages) = 0;

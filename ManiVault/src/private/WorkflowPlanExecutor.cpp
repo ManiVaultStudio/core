@@ -29,7 +29,7 @@ WorkflowPlanExecutor::WorkflowPlanExecutor(QObject* parent) :
 {
 }
 
-SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions /*= {}*/)
+SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions)
 {
 #ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
     qDebug() << "Executing workflow plan:" << workflowPlan.getName() << "with" << workflowPlan.getStages().size() << "stage(s)";
@@ -38,42 +38,37 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
     SharedWorkflowResult result;
 
     try {
-	    if (auto* currentContext = WorkflowExecutionContext::current()) {
-	        result = executeChild(workflowPlan, *currentContext);
-	    }
-	    else {
-		    auto future = executeAsyncImpl(workflowPlan, executionOptions._reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, executionOptions, std::nullopt);
+	    auto future = executeAsyncImpl(workflowPlan, executionOptions._reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, executionOptions, std::nullopt);
 
-	        if (QThread::currentThread() == qApp->thread()) {
-        		QEventLoop loop;
+        if (QThread::currentThread() == qApp->thread()) {
+        	QEventLoop loop;
 
-        		auto* watcher = future.getWatcher();
+        	auto* watcher = future.getWatcher();
 
-                connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, future.getTask(), [watcher, future]() {
-                    if (future.getState()->hasException()) {
-                        future.getTask()->setFinished();
-                        return;
-                    }
-
-                    const auto result = watcher->result();
-
-                    future.getTask()->setProgress(1.0f);
+            connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, future.getTask(), [watcher, future]() {
+                if (future.getState()->hasException()) {
                     future.getTask()->setFinished();
-                },
-                Qt::QueuedConnection);
+                    return;
+                }
 
-                connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, &loop, &QEventLoop::quit);
+                const auto result = watcher->result();
 
-        		loop.exec();
-	        }
-	        else {
-        		future.waitForFinished();
-	        }
+                future.getTask()->setProgress(1.0f);
+                future.getTask()->setFinished();
+            },
+            Qt::QueuedConnection);
 
-	        result = future.result();
+            connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, &loop, &QEventLoop::quit);
 
-            future.getState()->rethrowExceptionIfAny();
-	    }
+        	loop.exec();
+        }
+        else {
+        	future.waitForFinished();
+        }
+
+        result = future.result();
+
+        future.getState()->rethrowExceptionIfAny();
     }
     catch (const ManiVaultException& exception) {
         WorkflowReporter::message(exception._severity, exception._message, workflowPlan.getName(), exception._code, exception._scope, exception._details);
@@ -98,33 +93,37 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
     return result;
 }
 
-WorkflowResultFuture WorkflowPlanExecutor::executeAsync(
-    WorkflowPlan& workflowPlan,
-    WorkflowExecutionOptions executionOptions)
+SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext)
 {
-    const auto pendingWorkLabel = QString("Async workflow: %1").arg(workflowPlan.getName());
+    if (!parentContext)
+        return executeBlocking(workflowPlan, executionOptions);
 
-    auto* currentContext = WorkflowExecutionContext::current();
+    return executeChild(workflowPlan, *parentContext);
+}
 
-    std::optional<WorkflowExecutionContext> executionContext;
-
-    if (currentContext) {
-        // IMPORTANT: create child progress/report node now, while parent job is still active
-        executionContext = currentContext->createChild(
-            workflowPlan.getName(),
-            workflowPlan.getWeight(),
-            WorkflowPlan::JobProgressMode::Automatic);
-    }
-
-    auto future = executeAsyncImpl(
+WorkflowResultFuture WorkflowPlanExecutor::executeAsync(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions)
+{
+    return executeAsyncImpl(
         WorkflowPlan(workflowPlan),
         executionOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None,
         executionOptions,
-        executionContext);
+        std::nullopt
+    );
+}
 
-    if (currentContext) {
-        currentContext->addPendingAsyncWork(future, pendingWorkLabel);
+WorkflowResultFuture WorkflowPlanExecutor::executeAsync(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext)
+{
+    if (!parentContext) {
+        return executeAsync(workflowPlan, executionOptions);
     }
+
+    const auto pendingWorkLabel = QString("Async workflow: %1").arg(workflowPlan.getName());
+
+    auto childContext = parentContext->createChild(workflowPlan.getName(), workflowPlan.getWeight(), WorkflowPlan::JobProgressMode::Automatic);
+
+    auto future = executeAsyncImpl(WorkflowPlan(workflowPlan), executionOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, executionOptions, childContext);
+
+    parentContext->addPendingAsyncWork(future, pendingWorkLabel);
 
     return future;
 }
@@ -139,7 +138,7 @@ const QThreadPool& WorkflowPlanExecutor::getThreadPool() const
     return WorkflowExecutionContext::current()->getThreadPool();
 }
 
-WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, mv::util::WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext)
+WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, mv::util::WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> executionContext)
 {
     auto state = std::make_shared<WorkflowResultFuture::State>();
 
@@ -154,12 +153,12 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflo
 
     state->task = task;
 
-    state->future = QtConcurrent::run([state, workflowPlan = std::move(workflowPlan), task, executionOptions, parentContext]() mutable -> SharedWorkflowResult {
+    state->future = QtConcurrent::run([state, workflowPlan = std::move(workflowPlan), task, executionOptions, executionContext]() mutable -> SharedWorkflowResult {
         try {
             WorkflowPlanExecutor executor;
 
-            if (parentContext) {
-                WorkflowExecutionScope scope(*parentContext);
+            if (executionContext) {
+                WorkflowExecutionScope scope(*executionContext);
 
                 WorkflowReporter::info("Nested workflow started", workflowPlan.getName());
 
@@ -201,14 +200,17 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflo
 
 SharedWorkflowResult WorkflowPlanExecutor::executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
-    SharedWorkflowResult result;
+    return executeRoot(workflowPlan, task, executionOptions);
+}
 
-    if (auto* currentContext = WorkflowExecutionContext::current())
-        result = executeChild(workflowPlan, *currentContext);
-    else
-        result = executeRoot(workflowPlan, task, executionOptions);
+SharedWorkflowResult WorkflowPlanExecutor::executeOnCurrentThread(WorkflowPlan& workflowPlan, mv::Task* task, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext)
+{
+    Q_UNUSED(task)
 
-    return result;
+    if (parentContext)
+        return executeChild(workflowPlan, *parentContext);
+
+    return executeRoot(workflowPlan, task, executionOptions);
 }
 
 SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workflowPlan, Task* task, WorkflowExecutionOptions executionOptions /*= {}*/)

@@ -13,6 +13,8 @@
 #include <QString>
 #include <QVariant>
 
+#include <optional>
+
 namespace mv
 {
     class Task;
@@ -22,6 +24,7 @@ namespace mv::util
 {
 
 class AbstractWorkflowPlanExecutor;
+class WorkflowExecutionContext;
 
 using SharedWorkflowPlanExecutor = std::shared_ptr<AbstractWorkflowPlanExecutor>;
 
@@ -184,6 +187,10 @@ public:
     SharedWorkflowResult executeBlocking(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions = {});
     WorkflowResultFuture executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions = {});
     SharedWorkflowResult executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {});
+
+    SharedWorkflowResult executeBlocking(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext);
+    WorkflowResultFuture executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext);
+    SharedWorkflowResult executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task = nullptr, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext);
 
 	Stages getStages() const;
 

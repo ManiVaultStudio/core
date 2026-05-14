@@ -19,45 +19,49 @@ namespace mv
 }
 
 /*
- * TaskTreeWorkflowPlanExecutor is a concrete implementation of the AbstractWorkflowPlanExecutor interface that executes a workflow plan using a task tree workflow. It creates a SerializePlanWorkflow with the provided workflow plan and starts it, waiting for the workflow to complete. If the workflow finishes with an error, it throws a runtime error with the error message. The workflow is stored as a unique pointer, which ensures that it is properly cleaned up when it is no longer needed. The workflow will be created in the execute method when the workflow plan is executed, and it will be reset to nullptr when the workflow is done.
  *
  * @author T. Kroes
  */
-class WorkflowPlanExecutor final : public mv::util::AbstractWorkflowPlanExecutor
+class WorkflowPlanExecutor final : public AbstractWorkflowPlanExecutor
 {
 public:
 
     WorkflowPlanExecutor(QObject* parent = nullptr);
 
-	mv::util::SharedWorkflowResult executeBlocking(mv::util::WorkflowPlan& workflowPlan, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
-	mv::util::WorkflowResultFuture executeAsync(mv::util::WorkflowPlan& workflowPlan, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
+	SharedWorkflowResult executeBlocking(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions) override;
+    SharedWorkflowResult executeBlocking(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext) override;
+	WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions) override;
+    WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext) override;
+
+public: // Thread pool access
 
     QThreadPool& getThreadPool();
     const QThreadPool& getThreadPool() const;
 
 protected:
-    mv::util::SharedWorkflowResult executeOnCurrentThread(mv::util::WorkflowPlan& workflowPlan, mv::Task* task = nullptr, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
-    mv::util::WorkflowResultFuture executeAsyncImpl(mv::util::WorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, mv::util::WorkflowExecutionOptions executionOptions, std::optional<mv::util::WorkflowExecutionContext> parentContext) override;
+    WorkflowResultFuture executeAsyncImpl(WorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> executionContext) override;
+	SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, mv::Task* task, WorkflowExecutionOptions executionOptions = {}) override;
+    SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, mv::Task* task, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext) override;
 
 private:
-    mv::util::SharedWorkflowResult executeRoot(const mv::util::WorkflowPlan& workflowPlan, mv::Task* task, mv::util::WorkflowExecutionOptions executionOptions = {}) override;
-    mv::util::SharedWorkflowResult executeChild(const mv::util::WorkflowPlan& workflowPlan, mv::util::WorkflowExecutionContext& parentContext) override;
-    void                           executeImpl(const mv::util::WorkflowPlan& workflowPlan) override;
-    void                           executeStage(const mv::util::WorkflowPlan::Stage& stage, mv::util::WorkflowExecutionContext& stageContext) override;
-    void                           executeStageGroup(const mv::util::WorkflowPlan::Stages& stages) override;
+    SharedWorkflowResult executeRoot(const WorkflowPlan& workflowPlan, mv::Task* task, WorkflowExecutionOptions executionOptions = {}) override;
+    SharedWorkflowResult executeChild(const WorkflowPlan& workflowPlan, WorkflowExecutionContext& parentContext) override;
+    void executeImpl(const WorkflowPlan& workflowPlan) override;
+    void executeStage(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) override;
+    void executeStageGroup(const WorkflowPlan::Stages& stages) override;
 
 private: // Execute jobs in a stage
-    void executeSequentialJobs(const mv::util::WorkflowPlan::Stage& stage, mv::util::WorkflowExecutionContext& stageContext) override;
-    void executeParallelJobs(const mv::util::WorkflowPlan::Stage& stage, mv::util::WorkflowExecutionContext& stageContext) override;
+    void executeSequentialJobs(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) override;
+    void executeParallelJobs(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) override;
 
 private: // Execute individual jobs
-	void executeJobOnGuiThread(mv::util::WorkflowPlan::Job job, mv::util::WorkflowExecutionContext& jobContext) override;
-	void executeJobOnWorkerThread(mv::util::WorkflowPlan::Job job, mv::util::WorkflowExecutionContext& jobContext);
-	void executeJob(mv::util::WorkflowPlan::Job job, mv::util::WorkflowExecutionContext& jobContext) override;
+	void executeJobOnGuiThread(WorkflowPlan::Job job, WorkflowExecutionContext& jobContext) override;
+	void executeJobOnWorkerThread(WorkflowPlan::Job job, WorkflowExecutionContext& jobContext);
+	void executeJob(WorkflowPlan::Job job, WorkflowExecutionContext& jobContext) override;
 
 private: // Helpers
 
-    static void handleStageException(const mv::util::WorkflowPlan::Stage& stage, const mv::ManiVaultException& exception);
+    static void handleStageException(const WorkflowPlan::Stage& stage, const mv::ManiVaultException& exception);
 
 };
 

@@ -303,4 +303,21 @@ SharedWorkflowResult WorkflowPlan::executeOnCurrentThread(const SharedWorkflowPl
     return workflowPlanExecutor->executeOnCurrentThread(*this, task, executionOptions);
 }
 
+SharedWorkflowResult WorkflowPlan::executeBlocking(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext)
+{
+    if (!workflowPlanExecutor) {
+        qWarning() << "Unable to execute workflow plan: no executor provided!";
+        return {};
+    }
+
+    return workflowPlanExecutor->executeBlocking(*this, executionOptions);
+}
+
+WorkflowResultFuture WorkflowPlan::executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext)
+{
+}
+
+SharedWorkflowResult WorkflowPlan::executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext)
+{
+}
 }
