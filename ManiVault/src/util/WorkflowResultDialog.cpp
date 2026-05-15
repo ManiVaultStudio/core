@@ -58,18 +58,19 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     header->setStretchLastSection(false);
 
     header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level), QHeaderView::Fixed);
-    header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), QHeaderView::Interactive);
+    header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Emitter), QHeaderView::Interactive);
+    header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Location), QHeaderView::Interactive);
     header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Text), QHeaderView::Stretch);
-    header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), QHeaderView::Fixed);
     header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), QHeaderView::Interactive);
 
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level), 35);
-    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), 150);
+    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Emitter), 150);
+    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Location), 150);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Text), 300);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), 60);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), 100);
     
-    header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::Source), true);
+    //header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::Emitter), true);
     header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), true);
 
     auto layout = new QVBoxLayout(this);

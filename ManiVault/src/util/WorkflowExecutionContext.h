@@ -76,6 +76,13 @@ public:
 
     void waitForPendingAsyncWork();
 
+    /**
+     * @brief Gets the execution path of this workflow execution context as a string, with each level of the hierarchy separated by the specified separator. The execution path is constructed by concatenating the names of this context and all of its ancestor contexts, starting from the root context down to this context. This can be useful for logging and tracing purposes to provide a clear and human-readable representation of where in the workflow hierarchy a particular event or message is occurring.
+     * @param separator The string to use as a separator between levels of the execution path. The default value is " / ", but it can be customized to use any other separator as needed (e.g., " > ", " -> ", etc.).
+     * @return The execution path of this workflow execution context as a string, with each level of the hierarchy separated by the specified separator.
+     */
+    QString getExecutionPath(const QString& separator = " / ") const;
+
 public: // ID
 
     /**
@@ -107,6 +114,7 @@ private:
     QString                         _name;                                                      /** Name of the workflow execution context, typically derived from the name of the workflow plan or job it represents */
     QUuid                           _id;                                                        /** Unique identifier for this workflow execution context */
     QUuid                           _parentId;                                                  /** Unique identifier of the parent workflow execution context, if any */
+    QStringList                     _executionPath;                                             /** Execution path of this workflow execution context */
     ReportNodePtr                   _reportNode;                                                /** Report node associated with this workflow execution context */
     ProgressNodePtr                 _progressNode;                                              /** Progress node associated with this workflow execution context */
     StatePtr                        _state;                                                     /** Execution state associated with this workflow execution context */

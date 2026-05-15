@@ -27,13 +27,15 @@ void WorkflowReportNode::addMessage(SeverityLevel level, const QString& emitter,
 {
 	QMutexLocker lock(&_mutex);
 
+    auto context = WorkflowExecutionContext::current();
+
 	_messages.push_back(WorkflowMessage{
 		level,
-		emitter,
+        context->getExecutionPath(),
         location,
 		text,
 		details,
-		QDateTime::currentDateTime()
+		QDateTime::currentDateTimeUtc()
 	});
 }
 

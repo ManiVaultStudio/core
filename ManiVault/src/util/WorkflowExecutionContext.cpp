@@ -20,6 +20,7 @@ WorkflowExecutionContext::WorkflowExecutionContext() :
 WorkflowExecutionContext::WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, SharedThreadPool threadPool, Task* task /*= nullptr*/, WorkflowPlan::JobProgressMode progressMode /*= WorkflowPlan::JobProgressMode::Automatic*/) :
 	_name(std::move(name)),
     _id(QUuid::createUuid()),
+    _executionPath({ _name }),
 	_reportNode(std::move(reportNode)),
 	_progressNode(std::move(progressNode)),
 	_state(std::move(state)),
@@ -85,6 +86,7 @@ WorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& na
     };
 
     child._parentId = _id;
+    child._executionPath.append(name);
 
     return child;
 }
@@ -246,6 +248,11 @@ void WorkflowExecutionContext::waitForPendingAsyncWork()
     }
 
     _pendingAsyncWork.clear();
+}
+
+QString WorkflowExecutionContext::getExecutionPath(const QString& separator) const
+{
+    return _executionPath.join(separator);
 }
 
 QUuid WorkflowExecutionContext::getId() const
