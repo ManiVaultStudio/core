@@ -676,6 +676,20 @@ void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
         setStudioMode(projects().getCurrentProject()->getStudioModeAction().isChecked(), false);
 }
 
+WorkflowPlan WidgetAction::fromVariantMapWorkflow(const QVariantMap& variantMap)
+{
+    WorkflowPlan workflowPlan(QString("%1::fromVariantMap").arg(metaObject()->className()));
+
+    workflowPlan.addSequentialStage("Load", {
+        WorkflowPlan::Job("Load", [this, variantMap](const WorkflowPlan::Job&) {
+        	fromVariantMap(variantMap);
+			}, WorkflowPlan::JobThreadAffinity::GuiThread
+        )
+    });
+
+    return workflowPlan;
+}
+
 QVariantMap WidgetAction::toVariantMap() const
 {
     QVariantMap variantMap = Serializable::toVariantMap();
