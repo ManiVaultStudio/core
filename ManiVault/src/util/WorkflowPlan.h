@@ -111,14 +111,41 @@ public:
 
         JobProgressMode getProgressMode() const;
 
+    public: // Workflow context access for jobs
+
+        /**
+         * @brief Gets the shared workflow context associated with this job.
+         * @return A SharedWorkflowContext object that provides access to the shared workflow context for this job.
+         */
+        SharedWorkflowContext getWorkflowContext() const;
+
+        /**
+         * @brief Gets the shared workflow context associated with this job, cast to the specified type.
+         * @tparam WorkflowContextType The specific derived type of WorkflowContextBase that you want to access the workflow context as.
+         * @return A std::shared_ptr<WorkflowContextType> that points to the workflow context cast to the specified type if the cast is successful, or nullptr if the cast fails.
+         */
+        template<typename WorkflowContextType>
+        std::shared_ptr<WorkflowContextType> getWorkflowContextAs() const;
+
+    protected: // Workflow context access for jobs
+
+        /**
+         * @brief Sets the shared workflow context for this job.
+         * @param workflowContext The shared workflow context to be associated with this job.
+         */
+        void setWorkflowContext(SharedWorkflowContext workflowContext);
+
     private:
-        QString     _name;
-        JobFunction _function;
-        QVariant    _result;
-        std::optional<QString> _error;
-        JobThreadAffinity _threadAffinity = JobThreadAffinity::CurrentWorkerThread;
-        double          _weight = 1.0;
-        JobProgressMode _progressMode = JobProgressMode::Automatic;
+        QString                     _name;
+        JobFunction                 _function;
+        QVariant                    _result;
+        std::optional<QString>      _error;
+        JobThreadAffinity           _threadAffinity = JobThreadAffinity::CurrentWorkerThread;
+        double                      _weight = 1.0;
+        JobProgressMode             _progressMode = JobProgressMode::Automatic;
+        SharedWorkflowContext       _workflowContext;
+
+        friend class WorkflowPlan;
     };
 
     using Jobs = std::vector<Job>;
@@ -198,10 +225,17 @@ public:
     Stages getOnFailureStages() const;
     Stages getFinallyStages() const;
 
-    SharedState getSharedState() const;
-
+    /**
+     * @brief Gets the shared workflow context associated with this workflow plan. The workflow context is a shared data structure that can be used to store and share data across stages and jobs within this workflow plan.
+     * @return A SharedWorkflowContext object that provides access to the shared workflow context for this workflow plan.
+     */
     SharedWorkflowContext getWorkflowContext() const;
 
+    /**
+     * @brief Gets the shared workflow context associated with this workflow plan, cast to the specified type. This is a convenience method that allows you to access the workflow context as a specific derived type without having to manually perform the dynamic pointer cast each time. The template parameter WorkflowContextType must be a type that derives from WorkflowContextBase, and the method will return a shared pointer to the workflow context cast to that type if the cast is successful, or nullptr if the cast fails (e.g., if the actual type of the workflow context is not compatible with WorkflowContextType).
+     * @tparam WorkflowContextType The specific derived type of WorkflowContextBase that you want to access the workflow context as.
+     * @return A std::shared_ptr<WorkflowContextType> that points to the workflow context cast to the specified type, or nullptr if the cast fails.
+     */
     template<typename WorkflowContextType>
     std::shared_ptr<WorkflowContextType> getWorkflowContextAs() const {
         static_assert(std::derived_from<WorkflowContextType, WorkflowContextBase>, "WorkflowContextType must derive from WorkflowContextBase");
@@ -236,14 +270,13 @@ private:
     }
 
 private:
-    QString _name;
-    Stages  _stages;
-    Stages _onSuccessStages;
-    Stages _onFailureStages;
-    Stages _finalizationStages;
-    SharedState _sharedState = std::make_shared<QVariantMap>();
-    SharedWorkflowContext   _workflowContext;
-    double _weight = 1.0;
+    QString                 _name;                  /** Name of the workflow plan */
+    Stages                  _stages;                /** Stages to execute in the main execution phase */
+    Stages                  _onSuccessStages;       /** Stages to execute if the main execution phase completes successfully */
+    Stages                  _onFailureStages;       /** Stages to execute if the main execution phase throws an exception */
+    Stages                  _finalizationStages;    /** Stages to execute after the main execution phase and any success/failure stages, regardless of whether an exception was thrown or not */
+    SharedWorkflowContext   _workflowContext;       /** Shared context that can be used to store and share data across stages and jobs within this workflow plan (see WorkflowContextBase for more information) */
+    double                  _weight = 1.0;          /** Relative weight of this workflow plan when executed as part of a larger workflow (e.g., as a nested workflow within a job of another workflow plan). This can be used to influence progress reporting and scheduling decisions when multiple workflows are executed together. The default weight is 1.0, and it can be set to any positive value to indicate the relative importance or contribution of this workflow plan compared to others. */
     
 };
 

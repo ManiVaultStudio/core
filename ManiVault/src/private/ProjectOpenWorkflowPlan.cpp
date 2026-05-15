@@ -42,37 +42,34 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
             );
         }
 
-    	auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
+        if (auto context = plan.getWorkflowContextAs<ProjectOpenContext>()) {
+	        if (QFileInfo(context->getFilePath()).isDir())
+	        	throw std::runtime_error("Project file path may not be a directory");
 
-        if (QFileInfo(context->_filePath).isDir())
-            throw std::runtime_error("Project file path may not be a directory");
+			auto temporaryDirPath = context->getTemporaryDirectory()->path();
 
-        context->_temporaryDirectory.reset(new QTemporaryDir(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "SaveProject")));
+			if (!QFileInfo(temporaryDirPath).exists())
+				throw std::runtime_error("Temporary directory does not exist");
 
-        auto temporaryDirPath = context->_temporaryDirectory->path();
-
-        if (!QFileInfo(temporaryDirPath).exists())
-            throw std::runtime_error("Temporary directory does not exist");
-
-        context->_temporaryDirectoryPath    = temporaryDirPath;
-        context->_workspaceJsonPath         = QFileInfo(context->_temporaryDirectoryPath, "workspace.json").absoluteFilePath();
-        context->_projectJsonPath           = QFileInfo(context->_temporaryDirectoryPath, "project.json").absoluteFilePath();
-        context->_metaJsonPath              = QFileInfo(context->_temporaryDirectoryPath, "meta.json").absoluteFilePath();
+			context->setWorkspaceJsonPath(QFileInfo(context->getTemporaryDirectoryPath(), "workspace.json").absoluteFilePath());
+			context->setProjectJsonPath(QFileInfo(context->getTemporaryDirectoryPath(), "project.json").absoluteFilePath());
+			context->setMetaJsonPath(QFileInfo(context->getTemporaryDirectoryPath(), "meta.json").absoluteFilePath());
 
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
-        qDebug() << "Temp. Dir" << context->_temporaryDirectoryPath;
-        qDebug() << "Workspace JSON" << context->_workspaceJsonPath;
-        qDebug() << "Project JSON" << context->_projectJsonPath;
-        qDebug() << "Project meta JSON" << context->_metaJsonPath;
+			qDebug() << "Temp. Dir" << context->getTemporaryDirectoryPath();
+			qDebug() << "Workspace JSON" << context->getWorkspaceJsonPath();
+			qDebug() << "Project JSON" << context->getProjectJsonPath();
+			qDebug() << "Project meta JSON" << context->getMetaJsonPath();
 #endif
 
-        workspaces().reset();
+			workspaces().reset();
 
-        mv::projects().newProject();
+			mv::projects().newProject();
 
-        Application::requestOverrideCursor(Qt::WaitCursor);
+			Application::requestOverrideCursor(Qt::WaitCursor);
 
-        mv::projects().getCurrentProject()->setFilePath(context->_filePath);
+			mv::projects().getCurrentProject()->setFilePath(context->getFilePath());
+        }
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     plan.addSequentialStage("Extract project archive", [&plan]() -> void {
@@ -80,13 +77,13 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         qDebug() << "Extract project archive";
 #endif
 
-	    auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
+        if (auto context = plan.getWorkflowContextAs<ProjectOpenContext>()) {
+	        Archiver archiver;
 
-	    Archiver archiver;
-
-	    archiver.extractSingleFile(context->_filePath, "project.json", context->_projectJsonPath);
-	    archiver.extractSingleFile(context->_filePath, "meta.json", context->_metaJsonPath);
-		archiver.extractSingleFile(context->_filePath, "workspace.json", context->_workspaceJsonPath);
+			archiver.extractSingleFile(context->getFilePath(), "project.json", context->getProjectJsonPath());
+			archiver.extractSingleFile(context->getFilePath(), "meta.json", context->getMetaJsonPath());
+			archiver.extractSingleFile(context->getFilePath(), "workspace.json", context->getWorkspaceJsonPath());
+        }
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     plan.addSequentialStage("Open meta JSON", [&plan]() -> void {
@@ -94,33 +91,34 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
         qDebug() << "Open meta JSON";
 #endif
 
-        auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
+        if (auto context = plan.getWorkflowContextAs<ProjectOpenContext>()) {
+	        if (!QFileInfo(context->getMetaJsonPath()).exists())
+	        	throw std::runtime_error("Meta JSON file does not exist");
 
-        if (!QFileInfo(context->_metaJsonPath).exists())
-            throw std::runtime_error("Meta JSON file does not exist");
-
-        if (auto currentProject = mv::projects().getCurrentProject()) {
-            currentProject->getProjectMetaAction().fromJsonFile(context->_metaJsonPath);
-        }
-        else {
-            throw std::runtime_error("No current project found");
+			if (auto currentProject = mv::projects().getCurrentProject()) {
+				currentProject->getProjectMetaAction().fromJsonFile(context->getMetaJsonPath());
+			}
+			else {
+				throw std::runtime_error("No current project found");
+			}
         }
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1);
 
     plan.addSequentialStage("Open project JSON", [&plan]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
-        qDebug() << "Open project JSON";
+		qDebug() << "Open project JSON";
 #endif
 
-        auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
+        if (auto context = plan.getWorkflowContextAs<ProjectOpenContext>()) {
+	        if (!QFileInfo(context->getProjectJsonPath()).exists())
+	        	throw std::runtime_error("Project JSON file does not exist");
 
-        if (!QFileInfo(context->_projectJsonPath).exists())
-            throw std::runtime_error("Project JSON file does not exist");
-    
-        if (auto currentProject = mv::projects().getCurrentProject()) {
-            currentProject->fromJsonFile(context->_projectJsonPath);
-        } else {
-            throw std::runtime_error("No current project found");
+			if (auto currentProject = mv::projects().getCurrentProject()) {
+				currentProject->fromJsonFile(context->getProjectJsonPath());
+			}
+			else {
+				throw std::runtime_error("No current project found");
+			}
         }
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 20.0);
 
@@ -128,12 +126,13 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Open workspace JSON";
 #endif
-        auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
+        if (auto context = plan.getWorkflowContextAs<ProjectOpenContext>()) {
 
-        if (!QFileInfo(context->_workspaceJsonPath).exists())
-            throw std::runtime_error("Workspace JSON file does not exist");
-    
-        workspaces().loadWorkspace(context->_workspaceJsonPath);
+            if (!QFileInfo(context->getWorkspaceJsonPath()).exists())
+                throw std::runtime_error("Workspace JSON file does not exist");
+        
+            workspaces().loadWorkspace(context->getWorkspaceJsonPath());
+        }
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     plan.addOnSuccessStage("Success", []() -> void {
@@ -161,18 +160,17 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
         Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
 
-        auto context = plan.getWorkflowContextAs<ProjectOpenContext>();
+        if (auto context = plan.getWorkflowContextAs<ProjectOpenContext>()) {
+	        if (!context->getErrorMessage().isEmpty())
+	        	throw std::runtime_error(context->getErrorMessage().toStdString());
 
-        if (!context->_errorMessage.isEmpty())
-            throw std::runtime_error(context->_errorMessage.toStdString());
+			mv::projects().getRecentProjectsAction().addRecentFilePath(context->getFilePath());
+			mv::projects().setState(AbstractProjectManager::State::Idle);
 
-        mv::projects().getRecentProjectsAction().addRecentFilePath(context->_filePath);
-        mv::projects().setState(AbstractProjectManager::State::Idle);
+			auto project = mv::projects().getCurrentProject();
 
-        auto project = mv::projects().getCurrentProject();
-
-        project->updateContributors();
-
+			project->updateContributors();
+        }
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     return plan;

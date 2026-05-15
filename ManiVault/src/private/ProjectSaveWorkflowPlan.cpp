@@ -30,22 +30,22 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 
         auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
 
-        if (QFileInfo(context->_filePath).isDir())
+        if (QFileInfo(context->getFilePath()).isDir())
             throw std::runtime_error("Project file path may not be a directory");
 
-        auto temporaryDirPath = context->_temporaryDirectory->path();
+        auto temporaryDirPath = context->getTemporaryDirectory()->path();
 
         if (!QFileInfo(temporaryDirPath).exists())
             throw std::runtime_error("Temporary directory does not exist");
 
-        context->_workspaceJsonPath = QFileInfo(temporaryDirPath, "workspace.json").absoluteFilePath();
-        context->_projectJsonPath   = QFileInfo(temporaryDirPath, "project.json").absoluteFilePath();
-        context->_metaJsonPath      = QFileInfo(temporaryDirPath, "meta.json").absoluteFilePath();
+        context->setWorkspaceJsonPath(QFileInfo(temporaryDirPath, "workspace.json").absoluteFilePath());
+        context->setProjectJsonPath(QFileInfo(temporaryDirPath, "project.json").absoluteFilePath());
+        context->setMetaJsonPath(QFileInfo(temporaryDirPath, "meta.json").absoluteFilePath());
 
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
-        qDebug() << "Workspace JSON" << context->_workspaceJsonPath;
-        qDebug() << "Project JSON" << context->_projectJsonPath;
-        qDebug() << "Meta JSON" << context->_metaJsonPath;
+        qDebug() << "Workspace JSON" << context->getWorkspaceJsonPath();
+        qDebug() << "Project JSON" << context->getProjectJsonPath();
+        qDebug() << "Meta JSON" << context->getMetaJsonPath();
 #endif
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
@@ -56,7 +56,7 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 
         auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
 
-        projects().toJsonFile(context->_projectJsonPath);
+        projects().toJsonFile(context->getProjectJsonPath());
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 10.0);
 
     plan.addSequentialStage("Save meta JSON", [&plan]() -> void {
@@ -67,7 +67,7 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
         auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
 
         if (auto project = projects().getCurrentProject()) {
-            project->getProjectMetaAction().toJsonFile(context->_metaJsonPath);
+            project->getProjectMetaAction().toJsonFile(context->getMetaJsonPath());
         }
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);
 
@@ -78,7 +78,7 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 
         auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
 
-        workspaces().saveWorkspace(context->_workspaceJsonPath, false);
+        workspaces().saveWorkspace(context->getWorkspaceJsonPath(), false);
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 2.0);
 
     plan.addSequentialStage("Archive", [&plan]() -> void {
@@ -88,7 +88,7 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 
         auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
 
-        context->_archiver.compressDirectory(context->_temporaryDirectory->path(), context->_filePath, true, 0);
+        context->getArchiver().compressDirectory(context->getTemporaryDirectory()->path(), context->getFilePath(), true, 0);
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     plan.addSequentialStage("Finalize", [&plan]() -> void {
@@ -98,13 +98,13 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 
         auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
 
-        if (!context->_errorMessage.isEmpty())
-            throw std::runtime_error(context->_errorMessage.toStdString());
+        if (!context->getErrorMessage().isEmpty())
+            throw std::runtime_error(context->getErrorMessage().toStdString());
 
-        mv::projects().getRecentProjectsAction().addRecentFilePath(context->_filePath);
+        mv::projects().getRecentProjectsAction().addRecentFilePath(context->getFilePath());
 
         if (auto project = projects().getCurrentProject()) {
-            project->setFilePath(context->_filePath);
+            project->setFilePath(context->getFilePath());
             project->updateContributors();
         }
         else {

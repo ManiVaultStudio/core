@@ -743,7 +743,7 @@ void ProjectManager::saveProject(QString filePath)
 
 	        auto workflowPlan = createProjectSaveWorkflowPlan(filePath);
 
-            setTemporaryDirPath(TemporaryDirType::Save, workflowPlan.getWorkflowContextAs<ProjectSaveContext>()->_temporaryDirectory->path());
+            setTemporaryDirPath(TemporaryDirType::Save, workflowPlan.getWorkflowContextAs<ProjectSaveContext>()->getTemporaryDirectoryPath());
 
 	        auto workflowResult = workflowPlan.executeBlocking(_workflowPlanExecutor, {
                 parameters._parallel,

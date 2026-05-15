@@ -120,6 +120,24 @@ WorkflowPlan::JobProgressMode WorkflowPlan::Job::getProgressMode() const
     return _progressMode;
 }
 
+SharedWorkflowContext WorkflowPlan::Job::getWorkflowContext() const
+{
+	return _workflowContext;
+}
+
+template <typename WorkflowContextType>
+std::shared_ptr<WorkflowContextType> WorkflowPlan::Job::getWorkflowContextAs() const
+{
+	static_assert(std::derived_from<WorkflowContextType, WorkflowContextBase>, "WorkflowContextType must derive from WorkflowContextBase");
+
+	return std::dynamic_pointer_cast<WorkflowContextType>(_workflowContext);
+}
+
+void WorkflowPlan::Job::setWorkflowContext(SharedWorkflowContext workflowContext)
+{
+	_workflowContext = std::move(workflowContext);
+}
+
 void WorkflowPlan::Stage::setWeight(double weight)
 {
 	_weight = weight;
@@ -186,11 +204,6 @@ WorkflowPlan::Stages WorkflowPlan::getFinallyStages() const
     return _finalizationStages;
 }
 
-WorkflowPlan::SharedState WorkflowPlan::getSharedState() const
-{
-	return _sharedState;
-}
-
 SharedWorkflowContext WorkflowPlan::getWorkflowContext() const
 {
 	return _workflowContext;
@@ -237,6 +250,10 @@ WorkflowPlan::WorkflowPlan(const QString& title, SharedWorkflowContext context) 
 
 void WorkflowPlan::addStage(Stage stage)
 {
+    for (auto& job : stage.getJobs()) {
+        job.setWorkflowContext(_workflowContext);
+    }
+
     _stages.emplace_back(std::move(stage));
 }
 
@@ -247,7 +264,7 @@ void WorkflowPlan::addSequentialStage(QString name, Jobs jobs, double weight /*=
 	    return;
     }
         
-    _stages.emplace_back(std::move(name), ConcurrencyMode::Sequential, std::move(jobs), weight);
+    addStage(std::move(name), ConcurrencyMode::Sequential, std::move(jobs), weight);
 }
 
 void WorkflowPlan::addParallelStage(QString name, Jobs jobs, double weight /*= 1.0*/)
@@ -257,7 +274,7 @@ void WorkflowPlan::addParallelStage(QString name, Jobs jobs, double weight /*= 1
         return;
     }
 
-    _stages.emplace_back(std::move(name), ConcurrencyMode::Parallel, std::move(jobs), weight);
+    addStage(std::move(name), ConcurrencyMode::Parallel, std::move(jobs), weight);
 }
 
 void WorkflowPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight /*= 1.0*/)

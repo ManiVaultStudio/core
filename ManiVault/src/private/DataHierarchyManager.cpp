@@ -384,6 +384,76 @@ WorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& var
     //qDebug() << "Total raw size:" << getNoBytesHumanReadable(totalRawSize);
 }
 
+/** Thread-safe data hierarchy save context */
+class DataHierarchyManagerSaveContext : public WorkflowContextBase
+{
+public:
+
+	/**
+     * @brief Set dataset map for dataset ID in the context
+     * @param datasetId Dataset ID
+     * @param datasetMap Dataset map to set for the dataset ID
+	 */
+	void setDatasetMap(const QString& datasetId, const QVariantMap& datasetMap)
+    {
+        QMutexLocker lock(&_mutex);
+
+        _datasetsMap[datasetId] = datasetMap;
+    }
+
+    /**
+     * @brief Get dataset map for dataset ID from the context
+     * @param datasetId Dataset ID
+     * @return Dataset map for the dataset ID, or empty map if not found
+     */
+    QVariantMap getDatasetMap(const QString& datasetId) const
+    {
+        QMutexLocker lock(&_mutex);
+
+		const auto it = _datasetsMap.find(datasetId);
+
+		if (it != _datasetsMap.end())
+            return it.value().toMap();
+
+        return {};
+    }
+
+	/**
+     * @brief Get dataset IDs from the context
+	 * @return List of dataset IDs
+	 */
+	QStringList getDatasetIds() const
+    {
+        QMutexLocker lock(&_mutex);
+        return _datasetsMap.keys();
+    }
+
+    /**
+     * @brief Get data hierarchy map from the context
+     * @return Data hierarchy map
+     */
+    QVariantMap getDataHierachyMap() const
+    {
+        QMutexLocker lock(&_mutex);
+        return _dataHierarchyMap;
+    }
+
+    /**
+     * @brief Set data hierarchy map in the context
+     * @param dataHierarchyMap Data hierarchy map to set
+     */
+    void setDataHierarchyMap(const QVariantMap& dataHierarchyMap)
+    {
+        QMutexLocker lock(&_mutex);
+        _dataHierarchyMap = dataHierarchyMap;
+    }
+
+private:
+    mutable QMutex  _mutex;             /** Mutex for thread safety */
+    QVariantMap     _datasetsMap;       /** Path to the project file */
+    QVariantMap     _dataHierarchyMap;  /** Map representing the data hierarchy structure */
+};
+
 QVariantMap DataHierarchyManager::toVariantMap() const
 {
     if (!_items.empty()) {
@@ -393,94 +463,70 @@ QVariantMap DataHierarchyManager::toVariantMap() const
 
         std::int32_t sortIndex = 0;
 
-        auto sharedStateMutex = std::make_shared<QMutex>();
-        auto sharedState = toPlan.getSharedState();
-
         for (auto& dataHierarchyItem : _items) {
-            const auto dataset = dataHierarchyItem->getDataset();
-            const auto datasetId = dataset->getId();
-            const auto datasetGuiName = dataset->getGuiName();
-            const auto itemSortIndex = sortIndex++;
+            const auto dataset          = dataHierarchyItem->getDataset();
+            const auto datasetId        = dataset->getId();
+            const auto datasetGuiName   = dataset->getGuiName();
+            const auto itemSortIndex    = sortIndex++;
 
-            createItemMapJobs.emplace_back(
-                datasetGuiName,
-                [
-                    &dataHierarchyItem,
-                    datasetId,
-                    datasetGuiName,
-                    itemSortIndex,
-                    sharedState,
-                    sharedStateMutex
-                ](WorkflowPlan::Job& job) {
+            createItemMapJobs.emplace_back(datasetGuiName, [&dataHierarchyItem, datasetId, itemSortIndex](WorkflowPlan::Job& job) {
+                if (auto context = job.getWorkflowContextAs<DataHierarchyManagerSaveContext>()) {
                     auto itemMap = dataHierarchyItem->toVariantMap();
 
                     itemMap["SortIndex"] = itemSortIndex;
 
-                    {
-                        QMutexLocker lock(sharedStateMutex.get());
-                        (*sharedState)[datasetId] = itemMap;
-                    }
+                    context->setDatasetMap(datasetId, itemMap);
+                }
 
-                    qDebug() << "Finished create item map job" << datasetGuiName;
-                },
-                WorkflowPlan::JobThreadAffinity::CurrentWorkerThread,
-                WorkflowPlan::JobProgressMode::Automatic
-            );
+                //qDebug() << "Finished create item map job" << datasetGuiName;
+            }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Automatic);
         }
 
         toPlan.addParallelStage("Create item maps", createItemMapJobs);
 
         toPlan.addSequentialStage("Assemble item maps", [this, &toPlan](WorkflowPlan::Job& job) -> void {
             try {
-                QVariantMap variantMap;
+                if (auto context = job.getWorkflowContextAs<DataHierarchyManagerSaveContext>()) {
+                    const auto findItemMap = [&toPlan, &job, context](const QString& datasetId) -> QVariantMap {
+						return context->getDatasetMap(datasetId);
+                    };
 
-                const auto findItemMap = [&toPlan](const QString& datasetId) -> QVariantMap {
-                    const auto datasetIds = toPlan.getSharedState()->keys();
+                    std::function<QVariantMap(DataHierarchyItem*, QVariantMap&, std::int32_t)> traverseItem;
 
-                    const auto it = std::find_if(datasetIds.begin(), datasetIds.end(), [&datasetId](const auto& candidateDatasetId) -> bool {
-                        return candidateDatasetId == datasetId;
-                    });
+                    traverseItem = [findItemMap, &traverseItem](DataHierarchyItem* item, QVariantMap& parentMap, std::int32_t sortIndex) -> QVariantMap {
+                        const auto datasetId = item->getDataset()->getId();
 
-                    if (it == datasetIds.end()) {
-                        throw std::runtime_error(QString("Failed to find serialization job for dataset ID %1").arg(datasetId).toStdString());
+                        std::uint32_t childSortIndex = 0;
+
+                        QVariantMap children;
+
+                        for (auto childItem : item->getChildren()) {
+                            auto itemMap = findItemMap(childItem->getDataset()->getId());
+
+                            itemMap["SortIndex"] = childSortIndex;
+
+                            children[datasetId] = traverseItem(childItem, children, childSortIndex);
+                            childSortIndex++;
+                        }
+
+                        auto datasetMap = findItemMap(datasetId);
+
+                        datasetMap["Children"] = children;
+                        datasetMap["SortIndex"] = sortIndex;
+
+                        parentMap[datasetId] = datasetMap;
+
+                        return datasetMap;
+                        };
+
+                    QVariantMap dataHierarchyMap;
+
+                    for (const auto topLevelItem : const_cast<DataHierarchyManager*>(this)->getTopLevelItems()) {
+	                    dataHierarchyMap[topLevelItem->getDataset()->getId()] = traverseItem(topLevelItem, dataHierarchyMap, 0);
                     }
 
-                	return (*toPlan.getSharedState())[datasetId].toMap();
-                };
-
-                std::function<QVariantMap(DataHierarchyItem*, QVariantMap&, std::int32_t)> traverseItem;
-
-                traverseItem = [findItemMap, &traverseItem](DataHierarchyItem* item, QVariantMap& parentMap, std::int32_t sortIndex) -> QVariantMap {
-                    const auto datasetId = item->getDataset()->getId();
-
-                	std::uint32_t childSortIndex = 0;
-
-                    QVariantMap children;
-
-                    for (auto childItem : item->getChildren()) {
-			            auto itemMap = findItemMap(childItem->getDataset()->getId());
-
-			            itemMap["SortIndex"] = childSortIndex;
-
-			            children[datasetId] = traverseItem(childItem, children, childSortIndex);
-			            childSortIndex++;
-			        }
-
-                    auto datasetMap = findItemMap(datasetId);
-
-                    datasetMap["Children"]  = children;
-                    datasetMap["SortIndex"] = sortIndex;
-
-                    parentMap[datasetId] = datasetMap;
-
-                    return datasetMap;
-                };
-
-                for (const auto topLevelItem : const_cast<DataHierarchyManager*>(this)->getTopLevelItems()) {
-                    variantMap[topLevelItem->getDataset()->getId()] = traverseItem(topLevelItem, variantMap, 0);
+                    context->setDataHierarchyMap(dataHierarchyMap);
                 }
-
-                (*toPlan.getSharedState())["Hierarchy"] = variantMap;
             } catch (std::exception& e) {
                 Serializable::reportSerializationError("Data hierarchy manager", "Failed to assemble item maps: " + QString::fromStdString(e.what()));
             }
@@ -491,7 +537,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
 
         toPlan.executeBlocking(mv::projects().getWorkflowPlanExecutor());
 
-        return (*toPlan.getSharedState())["Hierarchy"].toMap();
+        return toPlan.getWorkflowContextAs<DataHierarchyManagerSaveContext>()->getDataHierachyMap();
     }
     
     return {};

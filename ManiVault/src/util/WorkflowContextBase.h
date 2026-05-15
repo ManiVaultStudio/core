@@ -6,13 +6,25 @@
 
 #include "ManiVaultGlobals.h"
 
-#include <QString>
+#include <memory>
 
-struct CORE_EXPORT WorkflowContextBase
+/**
+ * @brief Optional workflow-specific context shared by all stages and jobs.
+ *
+ * The context is the intended mechanism for sharing input, output, and
+ * intermediate data across a workflow. Implementations should use a typed
+ * context class when workflow stages need to communicate.
+ *
+ * Thread safety is the responsibility of the context implementation. For
+ * parallel stages, prefer per-job output storage followed by a sequential
+ * merge stage, or protect shared mutable state with appropriate locking.
+ *
+ * @author Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
+ */
+class CORE_EXPORT WorkflowContextBase
 {
+public:
     virtual ~WorkflowContextBase() = default;
-
-    QString     _errorMessage;
 };
 
 using UniqueWorkflowContext = std::unique_ptr<WorkflowContextBase>;

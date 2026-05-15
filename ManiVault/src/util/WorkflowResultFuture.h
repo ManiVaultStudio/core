@@ -12,6 +12,11 @@
 
 #include <exception>
 
+namespace mv
+{
+    class Task;
+}
+
 namespace mv::util
 {
 
