@@ -89,7 +89,8 @@ QVariant AbstractWorkflowMessagesModel::TextItem::data(int role /*= Qt::UserRole
             return getWorkflowMessage()._text;
 
         case Qt::DisplayRole:
-            return QString("%1: %2").arg(getSeverityLevelName(getWorkflowMessage()._level), data(Qt::EditRole).toString());
+            return data(Qt::EditRole).toString();
+            //return QString("%1: %2").arg(getSeverityLevelName(getWorkflowMessage()._level), data(Qt::EditRole).toString());
 
         case Qt::ToolTipRole:
             return data(Qt::DisplayRole).toString();
