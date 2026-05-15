@@ -24,8 +24,9 @@ public:
     /** Model columns */
     enum class Column {
         Level,
-        Source,
         Text,
+        Emitter,
+        Location,
         Details,
         TimeStamp,
 
@@ -91,39 +92,6 @@ public:
         }
     };
 
-    /** Item class for displaying the workflow message source */
-    class CORE_EXPORT SourceItem final : public Item {
-    public:
-
-        /** No need for specialized constructor */
-        using Item::Item;
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get header data for \p orientation and \p role
-         * @param orientation Horizontal/vertical
-         * @param role Data role
-         * @return Header data
-         */
-        static QVariant headerData(Qt::Orientation orientation, int role) {
-            switch (role) {
-                case Qt::DisplayRole:
-                case Qt::EditRole:
-                    return "Source";
-
-                case Qt::ToolTipRole:
-                    return "Workflow message source";
-            }
-
-            return {};
-        }
-    };
-
     /** Item class for displaying the workflow message text */
     class CORE_EXPORT TextItem final : public Item {
     public:
@@ -145,12 +113,78 @@ public:
          */
         static QVariant headerData(Qt::Orientation orientation, int role) {
             switch (role) {
+            case Qt::DisplayRole:
+            case Qt::EditRole:
+                return "Text";
+
+            case Qt::ToolTipRole:
+                return "Workflow message text";
+            }
+
+            return {};
+        }
+    };
+
+    /** Item class for displaying the workflow message emitter */
+    class CORE_EXPORT EmitterItem final : public Item {
+    public:
+
+        /** No need for specialized constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
                 case Qt::DisplayRole:
                 case Qt::EditRole:
-                    return "Text";
+                    return "Emitter";
 
                 case Qt::ToolTipRole:
-                    return "Workflow message text";
+                    return "Workflow message emitter";
+            }
+
+            return {};
+        }
+    };
+
+    /** Item class for displaying the workflow message location */
+    class CORE_EXPORT LocationItem final : public Item {
+    public:
+
+        /** No need for specialized constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Location";
+
+	            case Qt::ToolTipRole:
+	                return "Workflow message location";
             }
 
             return {};
@@ -237,7 +271,8 @@ protected:
         Row(const util::WorkflowMessage& message) : QList<QStandardItem*>()
         {
             append(new LevelItem(message));
-            append(new SourceItem(message));
+            append(new EmitterItem(message));
+            append(new LocationItem(message));
             append(new TextItem(message));
             append(new DetailsItem(message));
             append(new TimeStampItem(message));

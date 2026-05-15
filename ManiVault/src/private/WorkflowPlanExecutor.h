@@ -56,7 +56,7 @@ private: // Execute jobs in a stage
 
 private: // Execute individual jobs
 	void executeJobOnGuiThread(WorkflowPlan::Job job, WorkflowExecutionContext& jobContext) override;
-	void executeJobOnWorkerThread(WorkflowPlan::Job job, WorkflowExecutionContext& jobContext);
+	void executeJobOnWorkerThread(WorkflowPlan::Job job, WorkflowExecutionContext& jobContext) override;
 	void executeJob(WorkflowPlan::Job job, WorkflowExecutionContext& jobContext) override;
 
 private: // Helpers

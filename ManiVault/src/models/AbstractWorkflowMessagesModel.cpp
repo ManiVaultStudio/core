@@ -101,12 +101,26 @@ QVariant AbstractWorkflowMessagesModel::TextItem::data(int role /*= Qt::UserRole
     return Item::data(role);
 }
 
-QVariant AbstractWorkflowMessagesModel::SourceItem::data(int role /*= Qt::UserRole + 1*/) const
+QVariant AbstractWorkflowMessagesModel::EmitterItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
 	    case Qt::EditRole:
 	    case Qt::DisplayRole:
-	        return getWorkflowMessage()._source;
+	        return getWorkflowMessage()._emitter;
+
+	    case Qt::ToolTipRole:
+	        return QString("%1").arg(data(Qt::DisplayRole).toString());
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractWorkflowMessagesModel::LocationItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	    case Qt::DisplayRole:
+	        return getWorkflowMessage()._location;
 
 	    case Qt::ToolTipRole:
 	        return QString("%1").arg(data(Qt::DisplayRole).toString());
@@ -174,8 +188,11 @@ QVariant AbstractWorkflowMessagesModel::headerData(int section, Qt::Orientation 
         case Column::Level:
             return LevelItem::headerData(orientation, role);
 
-        case Column::Source:
-            return SourceItem::headerData(orientation, role);
+        case Column::Emitter:
+            return EmitterItem::headerData(orientation, role);
+
+        case Column::Location:
+            return LocationItem::headerData(orientation, role);
 
         case Column::Text:
             return TextItem::headerData(orientation, role);

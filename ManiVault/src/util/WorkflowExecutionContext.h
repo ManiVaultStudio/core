@@ -29,7 +29,7 @@ protected:
     };
 
 public:
-    using ReportNodePtr = WorkflowReportNode::Ptr;
+    using ReportNodePtr = WorkflowReportNode::SharedWorkflowReportNode;
     using ProgressNodePtr = WorkflowProgressNode::Ptr;
     using StatePtr = WorkflowExecutionState::Ptr;
     using SharedThreadPool = std::shared_ptr<QThreadPool>;

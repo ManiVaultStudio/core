@@ -7,30 +7,32 @@
 namespace mv::util
 {
 
-WorkflowReportNode::WorkflowReportNode(const QString& name):
-	_name(name)
+WorkflowReportNode::WorkflowReportNode(QString name):
+	_name(std::move(name))
 {
 }
 
-WorkflowReportNode::Ptr WorkflowReportNode::createChild(const QString& name)
+WorkflowReportNode::SharedWorkflowReportNode WorkflowReportNode::createChild(const QString& name)
 {
 	QMutexLocker lock(&_mutex);
 
 	auto child = std::make_shared<WorkflowReportNode>(name);
+
 	_children.push_back(child);
+
 	return child;
 }
 
-void WorkflowReportNode::addMessage(SeverityLevel level, const QString& source, const QString& text, const QString& scope, const QVariantMap& details)
+void WorkflowReportNode::addMessage(SeverityLevel level, const QString& emitter, const QString& location, const QString& text, const QVariantMap& details)
 {
 	QMutexLocker lock(&_mutex);
 
 	_messages.push_back(WorkflowMessage{
 		level,
-		source,
+		emitter,
+        location,
 		text,
 		details,
-		_name,
 		QDateTime::currentDateTime()
 	});
 }
@@ -41,13 +43,13 @@ QString WorkflowReportNode::getName() const
 	return _name;
 }
 
-QVector<WorkflowMessage> WorkflowReportNode::getMessages() const
+WorkflowMessages WorkflowReportNode::getMessages() const
 {
 	QMutexLocker lock(&_mutex);
 	return _messages;
 }
 
-QVector<WorkflowReportNode::Ptr> WorkflowReportNode::getChildren() const
+WorkflowReportNode::SharedWorkflowReportNodes WorkflowReportNode::getChildren() const
 {
 	QMutexLocker lock(&_mutex);
 	return _children;
@@ -55,7 +57,7 @@ QVector<WorkflowReportNode::Ptr> WorkflowReportNode::getChildren() const
 
 bool WorkflowReportNode::hasErrorsRecursive() const
 {
-	QVector<Ptr> childrenCopy;
+	SharedWorkflowReportNodes childrenCopy;
 
 	{
 		QMutexLocker lock(&_mutex);
@@ -76,10 +78,11 @@ bool WorkflowReportNode::hasErrorsRecursive() const
 	return false;
 }
 
-int WorkflowReportNode::getWarningCountRecursive() const
+std::int32_t WorkflowReportNode::getWarningCountRecursive() const
 {
-	int          result = 0;
-	QVector<Ptr> childrenCopy;
+    std::int32_t result = 0;
+
+	SharedWorkflowReportNodes childrenCopy;
 
 	{
 		QMutexLocker lock(&_mutex);
@@ -98,10 +101,11 @@ int WorkflowReportNode::getWarningCountRecursive() const
 	return result;
 }
 
-int WorkflowReportNode::getErrorCountRecursive() const
+std::int32_t WorkflowReportNode::getErrorCountRecursive() const
 {
-	int          result = 0;
-	QVector<Ptr> childrenCopy;
+    std::int32_t result = 0;
+
+	SharedWorkflowReportNodes childrenCopy;
 
 	{
 		QMutexLocker lock(&_mutex);

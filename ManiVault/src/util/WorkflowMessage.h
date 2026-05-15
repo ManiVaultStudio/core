@@ -13,14 +13,19 @@
 namespace mv::util
 {
 
+/**
+ * Represents a message generated during workflow execution, containing information about the severity, emitter, location, text, details, and timestamp of the message.
+ *
+ * @authors BioVault Thomas Kroes (Biomedical Visual Analytics Unit LUMC - TU Delft)
+ */
 struct CORE_EXPORT WorkflowMessage
 {
-    SeverityLevel   _level = SeverityLevel::Info;
-    QString         _source;
-    QString         _text;
-    QVariantMap     _details;
-    QString         _nodeName;
-    QDateTime       _timestamp = QDateTime::currentDateTime();
+    SeverityLevel   _level = SeverityLevel::Info;                   /** The severity level of the message (e.g., Info, Warning, Error, Fatal) */
+    QString         _emitter;                                       /** The name of the component or module that generated the message */
+    QString         _location;                                      /** The specific location in the code or workflow where the message was generated (e.g., function name, line number) */
+    QString         _text;                                          /** The main text or content of the message */
+    QVariantMap     _details;                                       /** Additional details or metadata associated with the message */
+    QDateTime       _timestamp = QDateTime::currentDateTime();      /** The timestamp when the message was generated */
 };
 
 using WorkflowMessages = QVector<WorkflowMessage>;

@@ -23,9 +23,9 @@ class CORE_EXPORT WorkflowExecutionState
 public:
     using Ptr = std::shared_ptr<WorkflowExecutionState>;
 
-    WorkflowExecutionState(const WorkflowReportNode::Ptr& reportRoot, const WorkflowProgressNode::Ptr& progressRoot, WorkflowExecutionOptions executionOptions = {});
+    WorkflowExecutionState(const WorkflowReportNode::SharedWorkflowReportNode& reportRoot, const WorkflowProgressNode::Ptr& progressRoot, WorkflowExecutionOptions executionOptions = {});
 
-    WorkflowReportNode::Ptr getReportRoot() const;
+    WorkflowReportNode::SharedWorkflowReportNode getReportRoot() const;
 
     WorkflowProgressNode::Ptr getProgressRoot() const;
 
@@ -50,10 +50,10 @@ public: // Tracing
     void trace(WorkflowTraceEvent event) const;
 
 private:
-    static void collectMessagesRecursive(const WorkflowReportNode::Ptr& node, QVector<WorkflowMessage>& out);
+    static void collectMessagesRecursive(const WorkflowReportNode::SharedWorkflowReportNode& node, QVector<WorkflowMessage>& out);
 
 private:
-    WorkflowReportNode::Ptr     _reportRoot;                                /** Report nodes are stored in the execution state since they need to be accessible from the context and may be updated from multiple threads during execution. The execution context provides thread-safe access to these nodes, and they are designed to handle concurrent updates internally (e.g., by using mutexes). */
+    WorkflowReportNode::SharedWorkflowReportNode     _reportRoot;                                /** Report nodes are stored in the execution state since they need to be accessible from the context and may be updated from multiple threads during execution. The execution context provides thread-safe access to these nodes, and they are designed to handle concurrent updates internally (e.g., by using mutexes). */
     WorkflowProgressNode::Ptr   _progressRoot;                              /** Progress and report nodes are stored in the execution state since they need to be accessible from the context and may be updated from multiple threads during execution. The execution context provides thread-safe access to these nodes, and they are designed to handle concurrent updates internally (e.g., by using mutexes). */
     WorkflowExecutionOptions    _executionOptions;                          /** Execution options are stored in the execution state since they may need to be accessed from multiple threads during execution and should be immutable after initialization. */
     mutable QMutex              _mutex;                                     /** Mutex to protect access to mutable members that may be updated from multiple threads during execution. */

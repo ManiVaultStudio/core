@@ -6,14 +6,14 @@
 
 namespace mv::util
 {
-WorkflowExecutionState::WorkflowExecutionState(const WorkflowReportNode::Ptr& reportRoot, const WorkflowProgressNode::Ptr& progressRoot, WorkflowExecutionOptions executionOptions /*= {}*/) :
+WorkflowExecutionState::WorkflowExecutionState(const WorkflowReportNode::SharedWorkflowReportNode& reportRoot, const WorkflowProgressNode::Ptr& progressRoot, WorkflowExecutionOptions executionOptions /*= {}*/) :
 	_reportRoot(reportRoot),
 	_progressRoot(progressRoot),
     _executionOptions(executionOptions)
 {
 }
 
-WorkflowReportNode::Ptr WorkflowExecutionState::getReportRoot() const
+WorkflowReportNode::SharedWorkflowReportNode WorkflowExecutionState::getReportRoot() const
 {
 	return _reportRoot;
 }
@@ -80,7 +80,7 @@ void WorkflowExecutionState::trace(WorkflowTraceEvent event) const
     getTraceSink()->trace(event);
 }
 
-void WorkflowExecutionState::collectMessagesRecursive(const WorkflowReportNode::Ptr& node, QVector<WorkflowMessage>& out)
+void WorkflowExecutionState::collectMessagesRecursive(const WorkflowReportNode::SharedWorkflowReportNode& node, QVector<WorkflowMessage>& out)
 {
 	if (!node)
 		return;
