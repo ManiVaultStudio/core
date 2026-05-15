@@ -66,22 +66,14 @@ bool WorkflowMessagesFilterModel::lessThan(const QModelIndex& lhs, const QModelI
 			break;
         }
 
-        case static_cast<int>(AbstractWorkflowMessagesModel::Column::Source): {
-            const auto lhsSource = lhs.data(Qt::EditRole).toString();
-            const auto rhsSource = rhs.data(Qt::EditRole).toString();
-
-            if (lhsSource != rhsSource)
-                return lhsSource < rhsSource;
-
-            break;
-        }
-
+        case static_cast<int>(AbstractWorkflowMessagesModel::Column::Emitter):
+        case static_cast<int>(AbstractWorkflowMessagesModel::Column::Location):
         case static_cast<int>(AbstractWorkflowMessagesModel::Column::Text): {
-            const auto lhsText = lhs.data(Qt::EditRole).toString();
-            const auto rhsText = rhs.data(Qt::EditRole).toString();
+            const auto lhsString = lhs.data(Qt::EditRole).toString();
+            const auto rhsString = rhs.data(Qt::EditRole).toString();
 
-				if (lhsText != rhsText)
-                return lhsText < rhsText;
+				if (lhsString != rhsString)
+                return lhsString < rhsString;
 			
             break;
         }
