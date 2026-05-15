@@ -26,8 +26,8 @@ namespace mv::util
 class AbstractWorkflowPlanExecutor;
 
 class WorkflowExecutionContext;
-using OptionalWorkflowExecutionContext = std::optional<std::reference_wrapper<WorkflowExecutionContext>>;
 
+using SharedWorkflowExecutionContext = std::shared_ptr<WorkflowExecutionContext>;
 using SharedWorkflowPlanExecutor = std::shared_ptr<AbstractWorkflowPlanExecutor>;
 
 class CORE_EXPORT WorkflowPlan
@@ -217,9 +217,9 @@ public:
         addStageTo(_finalizationStages, std::move(name), std::forward<Function>(function), threadAffinity, weight);
     }
 
-    SharedWorkflowResult executeBlocking(const SharedWorkflowPlanExecutor& workflowPlanExecutor, OptionalWorkflowExecutionContext parentContext = std::nullopt, OptionalWorkflowExecutionOptions executionOptions = {});
-    WorkflowResultFuture executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, OptionalWorkflowExecutionContext parentContext = std::nullopt, OptionalWorkflowExecutionOptions executionOptions = {});
-    SharedWorkflowResult executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task, OptionalWorkflowExecutionContext parentContext = std::nullopt, OptionalWorkflowExecutionOptions executionOptions = {});
+    SharedWorkflowResult executeBlocking(const SharedWorkflowPlanExecutor& workflowPlanExecutor, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = {});
+    WorkflowResultFuture executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = {});
+    SharedWorkflowResult executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = {});
 
 	Stages getStages() const;
 

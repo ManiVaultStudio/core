@@ -38,9 +38,9 @@ public:
 
     WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, SharedThreadPool threadPool, Task* task = nullptr, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
 
-    static WorkflowExecutionContext makeRoot(const QString& name, Task* task, WorkflowExecutionOptions executionOptions = {});
+    static SharedWorkflowExecutionContext makeRoot(const QString& name, Task* task, WorkflowExecutionOptions executionOptions = {});
 
-    WorkflowExecutionContext createChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic) const;
+    SharedWorkflowExecutionContext createChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic) const;
 
     bool hasProgressChildren() const;
 
@@ -84,9 +84,9 @@ public:
 
     QThreadPool& getThreadPool();
 
-    static WorkflowExecutionContext* current();
+    static SharedWorkflowExecutionContext current();
 
-    static const WorkflowExecutionContext* currentConst();
+    static const SharedWorkflowExecutionContext currentConst();
 
     WorkflowPlan::JobProgressMode getProgressMode() const;
 
@@ -124,9 +124,7 @@ public: // ID
 private:
     friend class WorkflowExecutionScope;
 
-    static void setCurrent(WorkflowExecutionContext* context);
-
-    
+    static void setCurrent(SharedWorkflowExecutionContext context);
 
 private:
     QString                         _name;                                                      /** Name of the workflow execution context, typically derived from the name of the workflow plan or job it represents */
@@ -143,6 +141,6 @@ private:
 };
 
 /** Optional reference to a WorkflowExecutionContext */
-using OptionalWorkflowExecutionContext = std::optional<std::reference_wrapper<WorkflowExecutionContext>>;
+using SharedWorkflowExecutionContext = std::shared_ptr<WorkflowExecutionContext>;
 
 } // namespace mv::util

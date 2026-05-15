@@ -424,11 +424,11 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
 
     if (concurrencyMode == WorkflowPlan::ConcurrencyMode::Parallel) {
         result._async = true;
-        result._future = decodeWorkflowPlan.executeAsync(sharedExecutor, *WorkflowExecutionContext::current());
+        result._future = decodeWorkflowPlan.executeAsync(sharedExecutor, WorkflowExecutionContext::current());
     }
     else {
         result._async = false;
-        result._workflowResult = decodeWorkflowPlan.executeBlocking(sharedExecutor, *WorkflowExecutionContext::current());
+        result._workflowResult = decodeWorkflowPlan.executeBlocking(sharedExecutor, WorkflowExecutionContext::current());
     }
 
     return result;
@@ -631,7 +631,7 @@ WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantM
     decodeWorkflowPlan.addSequentialStage(
         "Finalize",
         [totalSize](WorkflowPlan::Job&) {
-            if (auto* workflowExecutionContext = WorkflowExecutionContext::current()) {
+            if (auto workflowExecutionContext = WorkflowExecutionContext::current()) {
                 auto state = workflowExecutionContext->getState();
 
                 if (!state)
@@ -651,14 +651,13 @@ WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantM
 
     options._parallel = concurrencyMode == WorkflowPlan::ConcurrencyMode::Parallel;
 
-    const auto sharedExecutor =
-        SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor());
+    const auto sharedExecutor = SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor());
 
     if (concurrencyMode == WorkflowPlan::ConcurrencyMode::Parallel)
-        return decodeWorkflowPlan.executeAsync(sharedExecutor, options);
+        return decodeWorkflowPlan.executeAsync(sharedExecutor, WorkflowExecutionContext::current() ? WorkflowExecutionContext::current() : nullptr, options);
 
     const auto blockingResult =
-        decodeWorkflowPlan.executeBlocking(sharedExecutor, options);
+        decodeWorkflowPlan.executeBlocking(sharedExecutor, WorkflowExecutionContext::current() ? WorkflowExecutionContext::current() : nullptr, options);
 
     return WorkflowResultFuture::makeReady(blockingResult);
 }

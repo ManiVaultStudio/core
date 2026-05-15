@@ -120,7 +120,7 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
 
     auto dataHierarchyPlan = dataHierarchy().fromVariantMapWorkflow(variantMap);
 
-    dataHierarchyPlan.executeBlocking(mv::projects().getWorkflowPlanExecutor(), *WorkflowExecutionContext::current());
+    dataHierarchyPlan.executeBlocking(mv::projects().getWorkflowPlanExecutor(), WorkflowExecutionContext::current());
 
     //executor->executeBlocking(
     //    dataHierarchyPlan,

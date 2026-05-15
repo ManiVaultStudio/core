@@ -9,7 +9,7 @@ namespace mv::util
 
 namespace
 {
-    thread_local WorkflowExecutionContext* currentWorkflowExecutionContext = nullptr;
+    thread_local SharedWorkflowExecutionContext currentWorkflowExecutionContext = nullptr;
 }
 
 WorkflowExecutionContext::WorkflowExecutionContext() :
@@ -30,29 +30,28 @@ WorkflowExecutionContext::WorkflowExecutionContext(QString name, ReportNodePtr r
 {
 }
 
-WorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString& name, Task* task /*= nullptr*/, WorkflowExecutionOptions executionOptions /*= {}*/)
+SharedWorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString& name, Task* task /*= nullptr*/, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
-	auto reportRoot   = std::make_shared<WorkflowReportNode>(name);
-	auto progressRoot = std::make_shared<WorkflowProgressNode>(1.0);
-	auto state        = std::make_shared<WorkflowExecutionState>(reportRoot, progressRoot, executionOptions);
-
-    auto threadPool = std::make_shared<QThreadPool>();
+	auto reportRoot     = std::make_shared<WorkflowReportNode>(name);
+	auto progressRoot   = std::make_shared<WorkflowProgressNode>(1.0);
+	auto state          = std::make_shared<WorkflowExecutionState>(reportRoot, progressRoot, std::move(executionOptions));
+    auto threadPool     = std::make_shared<QThreadPool>();
 
 	threadPool->setObjectName("WorkflowExecutorPool");
     threadPool->setMaxThreadCount(state->getExecutionOptions()._parallel ? state->getExecutionOptions()._maxWorkerThreadCount : 1);
     threadPool->setExpiryTimeout(30'000);
 
-	return {
+	return std::make_shared<WorkflowExecutionContext>(
         name,
         reportRoot,
         progressRoot,
         state,
         threadPool,
         task
-    };
+    );
 }
 
-WorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
+SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
 {
     if (!_reportNode || !_progressNode || !_state)
         return {};
@@ -75,7 +74,7 @@ WorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& na
         progressChild = _progressNode->createChild(effectiveWeight);
     }
 
-    WorkflowExecutionContext child{
+    auto child = std::make_shared<WorkflowExecutionContext>(
         name,
         _reportNode->createChild(name),
         progressChild,
@@ -83,10 +82,11 @@ WorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& na
         _threadPool,
         _task,
         progressMode
-    };
+    );
 
-    child._parentId = _id;
-    child._executionPath.append(name);
+    child->_parentId = _id;
+    child->_executionPath = _executionPath;
+    child->_executionPath.append(name);
 
     return child;
 }
@@ -174,12 +174,12 @@ QThreadPool& WorkflowExecutionContext::getThreadPool()
     return *_threadPool;
 }
 
-WorkflowExecutionContext* WorkflowExecutionContext::current()
+SharedWorkflowExecutionContext WorkflowExecutionContext::current()
 {
 	return currentWorkflowExecutionContext;
 }
 
-const WorkflowExecutionContext* WorkflowExecutionContext::currentConst()
+const SharedWorkflowExecutionContext WorkflowExecutionContext::currentConst()
 {
 	return currentWorkflowExecutionContext;
 }
@@ -189,7 +189,7 @@ WorkflowPlan::JobProgressMode WorkflowExecutionContext::getProgressMode() const
 	return _progressMode;
 }
 
-void WorkflowExecutionContext::setCurrent(WorkflowExecutionContext* context)
+void WorkflowExecutionContext::setCurrent(SharedWorkflowExecutionContext context)
 {
     currentWorkflowExecutionContext = context;
 }
@@ -198,7 +198,7 @@ void WorkflowExecutionContext::addPendingAsyncWork(WorkflowResultFuture future, 
 {
     _pendingAsyncWork.push_back({
         ._future = std::move(future),
-        ._label = std::move(label)
+        ._label = label
     });
 }
 

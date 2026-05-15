@@ -282,34 +282,34 @@ void WorkflowPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs, doubl
 	}
 }
 
-SharedWorkflowResult WorkflowPlan::executeBlocking(const SharedWorkflowPlanExecutor& workflowPlanExecutor, OptionalWorkflowExecutionContext parentContext /*= std::nullopt*/, OptionalWorkflowExecutionOptions executionOptions /*= {}*/)
+SharedWorkflowResult WorkflowPlan::executeBlocking(const SharedWorkflowPlanExecutor& workflowPlanExecutor, SharedWorkflowExecutionContext parentContext /*= nullptr*/, OptionalWorkflowExecutionOptions executionOptions /*= {}*/)
 {
     if (!workflowPlanExecutor) {
         qWarning() << "Unable to execute workflow plan: no executor provided!";
         return {};
     }
 
-    return workflowPlanExecutor->executeBlocking(*this, parentContext, std::move(executionOptions));
+    return workflowPlanExecutor->executeBlocking(*this, std::move(parentContext), std::move(executionOptions));
 }
 
-WorkflowResultFuture WorkflowPlan::executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, OptionalWorkflowExecutionContext parentContext /*= std::nullopt*/, OptionalWorkflowExecutionOptions executionOptions /*= {}*/)
+WorkflowResultFuture WorkflowPlan::executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, SharedWorkflowExecutionContext parentContext /*= nullptr*/, OptionalWorkflowExecutionOptions executionOptions /*= {}*/)
 {
     if (!workflowPlanExecutor) {
         qWarning() << "Unable to execute workflow plan: no executor provided!";
         return WorkflowResultFuture::makeReady(SharedWorkflowResult());
     }
 
-    return workflowPlanExecutor->executeAsync(*this, parentContext, std::move(executionOptions));
+    return workflowPlanExecutor->executeAsync(*this, std::move(parentContext), std::move(executionOptions));
 }
 
-SharedWorkflowResult WorkflowPlan::executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task, OptionalWorkflowExecutionContext parentContext /*= std::nullopt*/, OptionalWorkflowExecutionOptions executionOptions /*= {}*/)
+SharedWorkflowResult WorkflowPlan::executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task, SharedWorkflowExecutionContext parentContext /*= nullptr*/, OptionalWorkflowExecutionOptions executionOptions /*= {}*/)
 {
     if (!workflowPlanExecutor) {
         qWarning() << "Unable to execute workflow plan: no executor provided!";
         return{};
     }
 
-    return workflowPlanExecutor->executeOnCurrentThread(*this, task, parentContext, std::move(executionOptions));
+    return workflowPlanExecutor->executeOnCurrentThread(*this, task, std::move(parentContext), std::move(executionOptions));
 }
 
 }

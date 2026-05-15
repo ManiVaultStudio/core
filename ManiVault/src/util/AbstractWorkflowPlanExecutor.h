@@ -22,32 +22,32 @@ public:
 
     AbstractWorkflowPlanExecutor(QObject* parent = nullptr);
 
-    [[nodiscard]] virtual SharedWorkflowResult executeBlocking(WorkflowPlan& workflowPlan, OptionalWorkflowExecutionContext parentContext = std::nullopt, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) = 0;
-    [[nodiscard]] virtual WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, OptionalWorkflowExecutionContext parentContext = std::nullopt, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) = 0;
+    [[nodiscard]] virtual SharedWorkflowResult executeBlocking(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) = 0;
+    [[nodiscard]] virtual WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) = 0;
 
 	static void installNotificationLinkHandler();
 
 protected:
-    [[nodiscard]] virtual WorkflowResultFuture executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, WorkflowExecutionOptions executionOptions, OptionalWorkflowExecutionContext executionContext) = 0;
+    [[nodiscard]] virtual WorkflowResultFuture executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, WorkflowExecutionOptions executionOptions, SharedWorkflowExecutionContext executionContext) = 0;
     [[nodiscard]] virtual SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task, WorkflowExecutionOptions executionOptions = {}) = 0;
-    [[nodiscard]] virtual SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task, OptionalWorkflowExecutionContext parentContext = std::nullopt, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) = 0;
+    [[nodiscard]] virtual SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) = 0;
 
 private:
     [[nodiscard]] virtual SharedWorkflowResult executeRoot(const WorkflowPlan& workflowPlan, Task* task, WorkflowExecutionOptions executionOptions = {}) = 0;
-    [[nodiscard]] virtual SharedWorkflowResult executeChild(const WorkflowPlan& workflowPlan, WorkflowExecutionContext& parentContext) = 0;
+    [[nodiscard]] virtual SharedWorkflowResult executeChild(const WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext parentContext) = 0;
 
     virtual void executeImpl(const WorkflowPlan& workflowPlan) = 0;
-    virtual void executeStage(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) = 0;
+    virtual void executeStage(const WorkflowPlan::Stage& stage, SharedWorkflowExecutionContext stageContext) = 0;
     virtual void executeStageGroup(const WorkflowPlan::Stages& stages) = 0;
 
 private: // Execute jobs in a stage
-    virtual void executeSequentialJobs(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) = 0;
-    virtual void executeParallelJobs(const WorkflowPlan::Stage& stage, WorkflowExecutionContext& stageContext) = 0;
+    virtual void executeSequentialJobs(const WorkflowPlan::Stage& stage, SharedWorkflowExecutionContext stageContext) = 0;
+    virtual void executeParallelJobs(const WorkflowPlan::Stage& stage, SharedWorkflowExecutionContext stageContext) = 0;
 
 private: // Execute individual jobs
-    virtual void executeJobOnGuiThread(WorkflowPlan::Job job, WorkflowExecutionContext& jobContext) = 0;
-    virtual void executeJobOnWorkerThread(WorkflowPlan::Job job, WorkflowExecutionContext& jobContext) = 0;
-    virtual void executeJob(WorkflowPlan::Job, WorkflowExecutionContext& jobContext) = 0;
+    virtual void executeJobOnGuiThread(WorkflowPlan::Job job, SharedWorkflowExecutionContext jobContext) = 0;
+    virtual void executeJobOnWorkerThread(WorkflowPlan::Job job, SharedWorkflowExecutionContext jobContext) = 0;
+    virtual void executeJob(WorkflowPlan::Job, SharedWorkflowExecutionContext jobContext) = 0;
 
 protected: // Tracing
 
