@@ -48,11 +48,11 @@ public:
      * Adds a message to this report node.
      * @param level The severity level of the message (e.g., Info, Warning, Error, Fatal).
      * @param emitter The name of the component or module that generated the message.
-     * @param location The specific location in the code or workflow where the message was generated (e.g., function name, line number).
      * @param text The main text or content of the message.
+     * @param location The specific location in the code or workflow where the message was generated (e.g., function name, line number).
      * @param details Additional details or metadata associated with the message (optional).
      */
-    void addMessage(SeverityLevel level, const QString& emitter, const QString& location, const QString& text, const QVariantMap& details = {});
+    void addMessage(SeverityLevel level, QString emitter, QString text, QString location, QVariantMap details = {});
 
     /**
      * @brief Retrieves the name of this report node.

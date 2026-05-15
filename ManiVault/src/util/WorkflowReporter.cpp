@@ -12,39 +12,39 @@ bool WorkflowReporter::hasContext()
 	return WorkflowExecutionContext::current() != nullptr;
 }
 
-void WorkflowReporter::info(const QString& text, const QString& source, const QString& scope, QVariantMap details)
+void WorkflowReporter::info(QString text, QString location, QVariantMap details)
 {
-	if (auto* context = WorkflowExecutionContext::current())
-		context->info(text, source, scope, std::move(details));
+	if (auto context = WorkflowExecutionContext::current())
+		context->info(std::move(text), std::move(location), std::move(details));
 }
 
-void WorkflowReporter::warning(const QString& text, const QString& source, const QString& scope, QVariantMap details)
+void WorkflowReporter::warning(QString text, QString location, QVariantMap details)
 {
-	if (auto* context = WorkflowExecutionContext::current())
-		context->warning(text, source, scope, std::move(details));
+	if (auto context = WorkflowExecutionContext::current())
+		context->warning(std::move(text), std::move(location), std::move(details));
 }
 
-void WorkflowReporter::error(const QString& text, const QString& source, const QString& scope, QVariantMap details)
+void WorkflowReporter::error(QString text, QString location, QVariantMap details)
 {
-	if (auto* context = WorkflowExecutionContext::current())
-		context->error(text, source, scope, std::move(details));
+	if (auto context = WorkflowExecutionContext::current())
+		context->error(std::move(text), std::move(location), std::move(details));
 }
 
-void WorkflowReporter::message(SeverityLevel severity, const QString& text, const QString& source, const QString& code, const QString& scope, QVariantMap details)
+void WorkflowReporter::message(SeverityLevel severity, QString text, QString location, QVariantMap details)
 {
 	if (auto context = WorkflowExecutionContext::current()) {
 		switch (severity) {
 			case SeverityLevel::Info:
-				context->info(text, source, scope, std::move(details));
+				context->info(std::move(text), std::move(location), std::move(details));
 				break;
 
 			case SeverityLevel::Warning:
-				context->warning(text, source, scope, std::move(details));
+				context->warning(std::move(text), std::move(location), std::move(details));
 				break;
 
 			case SeverityLevel::Error:
 			case SeverityLevel::Fatal:
-				context->error(text, source, scope, std::move(details));
+				context->error(std::move(text), std::move(location), std::move(details));
 				break;
 		}
 	}
@@ -52,7 +52,7 @@ void WorkflowReporter::message(SeverityLevel severity, const QString& text, cons
 
 void WorkflowReporter::setProgress(double value)
 {
-	if (auto* context = WorkflowExecutionContext::current())
+	if (auto context = WorkflowExecutionContext::current())
 		context->setProgress(value);
 }
 

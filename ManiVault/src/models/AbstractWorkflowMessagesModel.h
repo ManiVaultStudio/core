@@ -271,9 +271,9 @@ protected:
         Row(const util::WorkflowMessage& message) : QList<QStandardItem*>()
         {
             append(new LevelItem(message));
-            append(new EmitterItem(message));
-            append(new LocationItem(message));
             append(new TextItem(message));
+        	append(new EmitterItem(message));
+            append(new LocationItem(message));
             append(new DetailsItem(message));
             append(new TimeStampItem(message));
         }

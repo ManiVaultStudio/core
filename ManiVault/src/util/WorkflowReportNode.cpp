@@ -23,7 +23,7 @@ WorkflowReportNode::SharedWorkflowReportNode WorkflowReportNode::createChild(con
 	return child;
 }
 
-void WorkflowReportNode::addMessage(SeverityLevel level, const QString& emitter, const QString& location, const QString& text, const QVariantMap& details)
+void WorkflowReportNode::addMessage(SeverityLevel level, QString emitter, QString text, QString location, QVariantMap details)
 {
 	QMutexLocker lock(&_mutex);
 
@@ -32,9 +32,9 @@ void WorkflowReportNode::addMessage(SeverityLevel level, const QString& emitter,
 	_messages.push_back(WorkflowMessage{
 		level,
         context->getExecutionPath(),
-        location,
-		text,
-		details,
+        std::move(location),
+		std::move(text),
+		std::move(details),
 		QDateTime::currentDateTimeUtc()
 	});
 }

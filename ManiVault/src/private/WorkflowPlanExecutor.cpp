@@ -71,7 +71,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
         future.getState()->rethrowExceptionIfAny();
     }
     catch (const ManiVaultException& exception) {
-        WorkflowReporter::message(exception._severity, exception._message, workflowPlan.getName(), exception._code, exception._scope, exception._details);
+        WorkflowReporter::message(exception._severity, exception._message, exception._scope, exception._details);
 
         // displayFailure(exception._message);
         //throw;
@@ -263,7 +263,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
 #endif
     }
     catch (const ManiVaultException& exception) {
-        WorkflowReporter::message(exception._severity, exception._message, workflowPlan.getName(), exception._code, exception._scope, exception._details);
+        WorkflowReporter::message(exception._severity, exception._message, exception._scope, exception._details);
 
         displayFailure(exception._message);
 
@@ -930,7 +930,7 @@ void WorkflowPlanExecutor::executeJob(mv::util::WorkflowPlan::Job job, WorkflowE
 
 void WorkflowPlanExecutor::handleStageException(const WorkflowPlan::Stage& stage, const ManiVaultException& exception)
 {
-    WorkflowReporter::message(exception._severity, exception._message, stage.getName(), exception._code, exception._scope, exception._details);
+    WorkflowReporter::message(exception._severity, exception._message, stage.getName(), exception._details);
 
     if (exception._severity == SeverityLevel::Error || exception._severity == SeverityLevel::Fatal)
         throw;

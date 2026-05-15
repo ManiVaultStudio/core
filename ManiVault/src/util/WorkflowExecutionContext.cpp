@@ -106,28 +106,28 @@ QString WorkflowExecutionContext::getName() const
 	return _name;
 }
 
-void WorkflowExecutionContext::info(const QString& text, const QString& source, const QString& scope, QVariantMap details) const
+void WorkflowExecutionContext::info(QString text, QString location, QVariantMap details) const
 {
 	if (_reportNode)
-		_reportNode->addMessage(SeverityLevel::Info, source, text, scope, details);
+		_reportNode->addMessage(SeverityLevel::Info, getExecutionPath(), std::move(text), std::move(location), std::move(details));
 
 	//if (_task)
 	//    _task->setStatusText(text);
 }
 
-void WorkflowExecutionContext::warning(const QString& text, const QString& source, const QString& scope, QVariantMap details) const
+void WorkflowExecutionContext::warning(QString text, QString location, QVariantMap details) const
 {
 	if (_reportNode)
-		_reportNode->addMessage(SeverityLevel::Warning, source, text, scope, details);
+		_reportNode->addMessage(SeverityLevel::Warning, getExecutionPath(), std::move(text), std::move(location), std::move(details));
 
 	//if (_task)
 	//    _task->addWarning(text);
 }
 
-void WorkflowExecutionContext::error(const QString& text, const QString& source, const QString& scope, QVariantMap details) const
+void WorkflowExecutionContext::error(QString text, QString location, QVariantMap details) const
 {
 	if (_reportNode)
-		_reportNode->addMessage(SeverityLevel::Error, source, text, scope, details);
+		_reportNode->addMessage(SeverityLevel::Error, getExecutionPath(), std::move(text), std::move(location), std::move(details));
 
 	//if (_task)
 	//    _task->addError(text);
