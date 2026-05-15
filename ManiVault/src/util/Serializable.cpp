@@ -66,19 +66,18 @@ void Serializable::fromVariantMap(const QVariantMap& variantMap)
     _serializationCounter[static_cast<int>(Direction::From)]++;
 }
 
-AsyncFromVariantMapResult Serializable::fromVariantMapAsync(const QVariantMap& map)
+WorkflowPlan Serializable::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
-	WorkflowPlan plan(QString("Deserialize %1").arg(getSerializationName()));
+    WorkflowPlan plan(QString("%1::fromVariantMap").arg(getSerializationName()));
 
-    WorkflowPlan::Jobs jobs;
+    plan.addSequentialStage("Load", {
+        WorkflowPlan::Job("Load", [this, variantMap](const WorkflowPlan::Job&) {
+            fromVariantMap(variantMap);
+            }, WorkflowPlan::JobThreadAffinity::GuiThread
+        )
+    });
 
-    jobs.emplace_back("fromVariantMap", [this, map](WorkflowPlan::Job&) {
-        fromVariantMap(map);
-	}, WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Automatic);
-
-    plan.addSequentialStage("fromVariantMap", std::move(jobs));
-
-    return { std::move(plan) };
+    return plan;
 }
 
 QVariantMap Serializable::toVariantMap() const
@@ -90,21 +89,20 @@ QVariantMap Serializable::toVariantMap() const
     };
 }
 
-AsyncToVariantMapResult Serializable::toVariantMapAsync() const
+WorkflowPlan Serializable::toVariantMapWorkflow() const
 {
-    WorkflowPlan plan(QString("Serialize %1").arg(getSerializationName()));
+    WorkflowPlan workflowPlan(QString("%1::toVariantMap").arg(getSerializationName()));
 
-    WorkflowPlan::Jobs jobs;
+    workflowPlan.addSequentialStage("Serialize", {
+        WorkflowPlan::Job(
+            "Serialize",
+            [this](WorkflowPlan::Job& job) {
+                const QVariantMap variantMap = toVariantMap();
+                //job.setResult("variantMap", variantMap);
+            }, WorkflowPlan::JobThreadAffinity::GuiThread)
+        });
 
-    auto result = std::make_shared<QVariantMap>();
-
-    jobs.emplace_back("toVariantMap", [this, result](WorkflowPlan::Job&) {
-        *result = toVariantMap();
-    }, WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Automatic);
-
-    plan.addSequentialStage("toVariantMap", std::move(jobs));
-
-    return { std::move(plan), result };
+    return workflowPlan;
 }
 
 void Serializable::fromJsonDocument(const QJsonDocument& jsonDocument)

@@ -842,42 +842,10 @@ protected: // Widgets
 public: // Serialization
 
     /**
-     * Load the object state from a variant map.
-     *
-     * This function is strictly synchronous. When this function returns, all state
-     * represented by the variant map must have been fully applied to the object.
-     *
-     * Implementations must not start background work, schedule workflow jobs, or
-     * return before the object is in a fully restored and usable state.
-     *
-     * If loading requires long-running, parallel, or asynchronous work, implement
-     * fromVariantMapWorkflow() instead and keep this function as the blocking
-     * fallback.
-     *
-     * @param variantMap Variant map representation of the object state.
+     * Load widget action from variant map
+     * @param variantMap Variant map representation of the widget action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
-
-    /**
-     * Create a workflow plan that loads the object state from a variant map.
-     *
-     * This function only constructs and returns a workflow plan. It must not execute
-     * the plan, schedule background work, or modify object state except for trivial
-     * preparation required to build the plan.
-     *
-     * The caller owns the scheduling decision and may execute the returned workflow
-     * blocking, asynchronously, or as a child of another workflow execution context.
-     *
-     * Implement this function when restoring the object involves long-running,
-     * parallelizable, staged, or progress-reporting work.
-     *
-     * The default implementation may return a simple workflow that calls
-     * fromVariantMap() synchronously.
-     *
-     * @param variantMap Variant map representation of the object state.
-     * @return Workflow plan that restores the object state when executed.
-     */
-    virtual util::WorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap);
 
     /**
      * Save widget action to variant map

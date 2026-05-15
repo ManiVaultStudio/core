@@ -117,8 +117,17 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
     _overrideApplicationStatusBarAction.fromParentVariantMap(variantMap);
     _statusBarVisibleAction.fromParentVariantMap(variantMap);
     _statusBarOptionsAction.fromParentVariantMap(variantMap);
-    
-    dataHierarchy().fromParentVariantMap(variantMap);
+
+    auto dataHierarchyPlan = dataHierarchy().fromVariantMapWorkflow(variantMap);
+
+    dataHierarchyPlan.executeBlocking(mv::projects().getWorkflowPlanExecutor(), {}, *WorkflowExecutionContext::current());
+
+    //executor->executeBlocking(
+    //    dataHierarchyPlan,
+    //    executionOptions,
+    //    *WorkflowExecutionContext::current()
+    //);
+    //;
     
     actions().fromParentVariantMap(variantMap);
     
