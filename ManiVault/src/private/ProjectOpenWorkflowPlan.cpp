@@ -46,17 +46,17 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 	        if (QFileInfo(context->getFilePath()).isDir())
 	        	throw std::runtime_error("Project file path may not be a directory");
 
-			auto temporaryDirPath = context->getTemporaryDirectory()->path();
+			auto temporaryDirPath = context->getTemporaryDirectoryPath();
 
 			if (!QFileInfo(temporaryDirPath).exists())
 				throw std::runtime_error("Temporary directory does not exist");
 
-			context->setWorkspaceJsonPath(QFileInfo(context->getTemporaryDirectoryPath(), "workspace.json").absoluteFilePath());
-			context->setProjectJsonPath(QFileInfo(context->getTemporaryDirectoryPath(), "project.json").absoluteFilePath());
-			context->setMetaJsonPath(QFileInfo(context->getTemporaryDirectoryPath(), "meta.json").absoluteFilePath());
+			context->setWorkspaceJsonPath(QFileInfo(temporaryDirPath, "workspace.json").absoluteFilePath());
+			context->setProjectJsonPath(QFileInfo(temporaryDirPath, "project.json").absoluteFilePath());
+			context->setMetaJsonPath(QFileInfo(temporaryDirPath, "meta.json").absoluteFilePath());
 
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
-			qDebug() << "Temp. Dir" << context->getTemporaryDirectoryPath();
+			qDebug() << "Temp. Dir" << temporaryDirPath;
 			qDebug() << "Workspace JSON" << context->getWorkspaceJsonPath();
 			qDebug() << "Project JSON" << context->getProjectJsonPath();
 			qDebug() << "Project meta JSON" << context->getMetaJsonPath();
@@ -167,9 +167,9 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 			mv::projects().getRecentProjectsAction().addRecentFilePath(context->getFilePath());
 			mv::projects().setState(AbstractProjectManager::State::Idle);
 
-			auto project = mv::projects().getCurrentProject();
-
-			project->updateContributors();
+			if (auto project = mv::projects().getCurrentProject()) {
+				project->updateContributors();
+			}
         }
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 

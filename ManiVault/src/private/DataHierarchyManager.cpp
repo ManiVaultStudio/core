@@ -298,7 +298,7 @@ WorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& var
             loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);
 
             return loadedDataset;
-            };
+        };
 
         const std::function<void(const QVariantMap&, Dataset<DatasetImpl>)> populateDataHierarchy = [&populateDataHierarchy, loadDataHierarchyItem](const QVariantMap& variantMap, Dataset<DatasetImpl> parent) -> void {
             QVector<QPair<QString, std::int32_t>> sortedDatasets;
@@ -312,13 +312,13 @@ WorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& var
 
             std::sort(sortedDatasets.begin(), sortedDatasets.end(), [](const auto& a, const auto& b) {
                 return a.second < b.second;  // ascending
-                });
+            });
 
             for (const auto& [datasetId, sortIndex] : sortedDatasets)
                 populateDataHierarchy(variantMap[datasetId].toMap()["Children"].toMap(), loadDataHierarchyItem(variantMap[datasetId].toMap(), variantMap[datasetId].toMap()["Name"].toString(), parent));
-            };
+        };
 
-        populateDataHierarchy(variantMap, Dataset<>());
+        populateDataHierarchy(variantMap["DataHierarchy"].toMap(), Dataset<>());
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     std::vector<QVariantMap> datasetMaps;
@@ -333,7 +333,7 @@ WorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& var
         }
         };
 
-    enumerateDatasetNames(variantMap);
+    enumerateDatasetNames(variantMap["DataHierarchy"].toMap());
 
     std::sort(datasetMaps.begin(), datasetMaps.end(), [](const auto& a, const auto& b) {
         const auto rawA = findRawBlockObject(a);

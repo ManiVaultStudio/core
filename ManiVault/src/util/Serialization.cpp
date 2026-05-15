@@ -415,17 +415,7 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
             state->metrics().addInteger("project.data.bytes_loaded", totalSize);
         }
     });
-
-    auto options = WorkflowExecutionOptions{};
-
-    if (auto* context = WorkflowExecutionContext::current()) {
-        if (auto state = context->getState()) {
-            options = state->getExecutionOptions();
-        }
-    }
-
-    options._parallel = true;
-    options._maxWorkerThreadCount = 64;
+   
     auto sharedExecutor = SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor());
 
     PopulateDataBufferResult result;
@@ -434,11 +424,11 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
 
     if (concurrencyMode == WorkflowPlan::ConcurrencyMode::Parallel) {
         result._async = true;
-        result._future = decodeWorkflowPlan.executeAsync(sharedExecutor, options);
+        result._future = decodeWorkflowPlan.executeAsync(sharedExecutor, *WorkflowExecutionContext::current());
     }
     else {
         result._async = false;
-        result._workflowResult = decodeWorkflowPlan.executeBlocking(sharedExecutor, options);
+        result._workflowResult = decodeWorkflowPlan.executeBlocking(sharedExecutor, *WorkflowExecutionContext::current());
     }
 
     return result;
@@ -654,7 +644,7 @@ WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantM
 
     auto options = WorkflowExecutionOptions{};
 
-    if (auto* context = WorkflowExecutionContext::current()) {
+    if (auto context = WorkflowExecutionContext::current()) {
         if (auto state = context->getState())
             options = state->getExecutionOptions();
     }

@@ -21,4 +21,7 @@ struct CORE_EXPORT WorkflowExecutionOptions
     SharedWorkflowTraceSink     _traceSink;                     /** Initialized based on _executionOptions._traceSinkType */
 };
 
+/** Optional WorkflowExecutionOptions for configuring workflow execution behavior */
+using OptionalWorkflowExecutionOptions = std::optional<WorkflowExecutionOptions>;
+
 } // namespace mv::util

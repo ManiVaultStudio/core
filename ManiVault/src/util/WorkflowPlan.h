@@ -24,7 +24,9 @@ namespace mv::util
 {
 
 class AbstractWorkflowPlanExecutor;
+
 class WorkflowExecutionContext;
+using OptionalWorkflowExecutionContext = std::optional<std::reference_wrapper<WorkflowExecutionContext>>;
 
 using SharedWorkflowPlanExecutor = std::shared_ptr<AbstractWorkflowPlanExecutor>;
 
@@ -125,7 +127,11 @@ public:
          * @return A std::shared_ptr<WorkflowContextType> that points to the workflow context cast to the specified type if the cast is successful, or nullptr if the cast fails.
          */
         template<typename WorkflowContextType>
-        std::shared_ptr<WorkflowContextType> getWorkflowContextAs() const;
+        std::shared_ptr<WorkflowContextType> getWorkflowContextAs() const {
+            static_assert(std::derived_from<WorkflowContextType, WorkflowContextBase>, "WorkflowContextType must derive from WorkflowContextBase");
+
+            return std::dynamic_pointer_cast<WorkflowContextType>(_workflowContext);
+        }
 
     protected: // Workflow context access for jobs
 
@@ -211,13 +217,9 @@ public:
         addStageTo(_finalizationStages, std::move(name), std::forward<Function>(function), threadAffinity, weight);
     }
 
-    SharedWorkflowResult executeBlocking(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions = {});
-    WorkflowResultFuture executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions = {});
-    SharedWorkflowResult executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {});
-
-    SharedWorkflowResult executeBlocking(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext);
-    WorkflowResultFuture executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext);
-    SharedWorkflowResult executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext);
+    SharedWorkflowResult executeBlocking(const SharedWorkflowPlanExecutor& workflowPlanExecutor, OptionalWorkflowExecutionContext parentContext = std::nullopt, OptionalWorkflowExecutionOptions executionOptions = {});
+    WorkflowResultFuture executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, OptionalWorkflowExecutionContext parentContext = std::nullopt, OptionalWorkflowExecutionOptions executionOptions = {});
+    SharedWorkflowResult executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task, OptionalWorkflowExecutionContext parentContext = std::nullopt, OptionalWorkflowExecutionOptions executionOptions = {});
 
 	Stages getStages() const;
 

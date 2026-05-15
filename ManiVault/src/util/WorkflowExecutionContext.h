@@ -142,4 +142,7 @@ private:
     std::vector<PendingAsyncWork>   _pendingAsyncWork;                                          /** List of pending asynchronous work (futures) that need to be completed before this workflow execution context can be considered finished */
 };
 
+/** Optional reference to a WorkflowExecutionContext */
+using OptionalWorkflowExecutionContext = std::optional<std::reference_wrapper<WorkflowExecutionContext>>;
+
 } // namespace mv::util

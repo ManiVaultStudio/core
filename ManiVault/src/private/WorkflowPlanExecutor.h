@@ -28,10 +28,8 @@ public:
 
     WorkflowPlanExecutor(QObject* parent = nullptr);
 
-	SharedWorkflowResult executeBlocking(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions) override;
-    SharedWorkflowResult executeBlocking(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext) override;
-	WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions) override;
-    WorkflowResultFuture executeAsync(WorkflowPlan& workflowPlan, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext) override;
+    SharedWorkflowResult executeBlocking(WorkflowPlan &workflowPlan, OptionalWorkflowExecutionContext parentContext = std::nullopt, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) override;
+    WorkflowResultFuture executeAsync(WorkflowPlan &workflowPlan, OptionalWorkflowExecutionContext parentContext = std::nullopt, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) override;
 
 public: // Thread pool access
 
@@ -39,9 +37,9 @@ public: // Thread pool access
     const QThreadPool& getThreadPool() const;
 
 protected:
-    WorkflowResultFuture executeAsyncImpl(WorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> executionContext) override;
+    WorkflowResultFuture executeAsyncImpl(WorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, WorkflowExecutionOptions executionOptions, OptionalWorkflowExecutionContext executionContext) override;
 	SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, mv::Task* task, WorkflowExecutionOptions executionOptions = {}) override;
-    SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, mv::Task* task, WorkflowExecutionOptions executionOptions, std::optional<WorkflowExecutionContext> parentContext) override;
+    SharedWorkflowResult executeOnCurrentThread(WorkflowPlan &workflowPlan, mv::Task *task, OptionalWorkflowExecutionContext parentContext = std::nullopt, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) override;
 
 private:
     SharedWorkflowResult executeRoot(const WorkflowPlan& workflowPlan, mv::Task* task, WorkflowExecutionOptions executionOptions = {}) override;
