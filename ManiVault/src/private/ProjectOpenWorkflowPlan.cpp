@@ -120,7 +120,7 @@ WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 				throw std::runtime_error("No current project found");
 			}
         }
-    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 20.0);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 20.0);
 
     plan.addSequentialStage("Open workspace JSON", [&plan]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE

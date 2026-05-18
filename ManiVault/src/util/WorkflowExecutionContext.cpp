@@ -108,6 +108,8 @@ QString WorkflowExecutionContext::getName() const
 
 void WorkflowExecutionContext::info(QString text, QString location, QVariantMap details) const
 {
+    qDebug() << "Info:" << text << ", location:" << location << ", details:" << details;
+
 	if (_reportNode)
 		_reportNode->addMessage(SeverityLevel::Info, getExecutionPath(), std::move(text), std::move(location), std::move(details));
 
@@ -117,6 +119,8 @@ void WorkflowExecutionContext::info(QString text, QString location, QVariantMap 
 
 void WorkflowExecutionContext::warning(QString text, QString location, QVariantMap details) const
 {
+    qDebug() << "Warning:" << text << ", location:" << location << ", details:" << details;
+
 	if (_reportNode)
 		_reportNode->addMessage(SeverityLevel::Warning, getExecutionPath(), std::move(text), std::move(location), std::move(details));
 
@@ -126,6 +130,8 @@ void WorkflowExecutionContext::warning(QString text, QString location, QVariantM
 
 void WorkflowExecutionContext::error(QString text, QString location, QVariantMap details) const
 {
+    qDebug() << "Error:" << text << ", location:" << location << ", details:" << details;
+
 	if (_reportNode)
 		_reportNode->addMessage(SeverityLevel::Error, getExecutionPath(), std::move(text), std::move(location), std::move(details));
 

@@ -358,12 +358,15 @@ WorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& var
         const auto rawBlockSize = getRawBlockObjectSize(dataVariantMap);
 
         loadDatasetJobs.emplace_back(datasetName, [datasetId, datasetName, dataVariantMap](WorkflowPlan::Job& job) {
+            qDebug() << "---Loading dataset" << datasetName << "with ID" << datasetId;
             mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
-            }, WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Nested).weighted(rawBlockSize);
+            qDebug() << "---Finished loading dataset" << datasetName << "with ID" << datasetId;
+        }, WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Nested).weighted(rawBlockSize);
     }
 
     fromPlan.addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Sequential, loadDatasetJobs);
     fromPlan.addSequentialStage("Notify datasets", [this](WorkflowPlan::Job& job) {
+        qDebug() << "Notifying datasets in the data hierarchy manager";
         for (const auto& item : _items) {
             events().notifyDatasetDataChanged(item->getDataset());
         }
