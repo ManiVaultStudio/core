@@ -15,6 +15,8 @@ using namespace mv::util;
 	#define PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
 #endif
 
+#define PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
+
 WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 {
     auto context = std::make_shared<ProjectSaveContext>(filePath);
@@ -28,75 +30,66 @@ WorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 
         Application::requestOverrideCursor(Qt::WaitCursor);
 
-        auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
+        if (auto context = plan.getWorkflowContextAs<ProjectSaveContext>()) {
+	        if (QFileInfo(context->getFilePath()).isDir())
+	        	throw std::runtime_error("Project file path may not be a directory");
 
-        if (QFileInfo(context->getFilePath()).isDir())
-            throw std::runtime_error("Project file path may not be a directory");
+			auto temporaryDirPath = context->getTemporaryDirectoryPath();
 
-        auto temporaryDirPath = context->getTemporaryDirectory()->path();
+			if (!QFileInfo(temporaryDirPath).exists())
+				throw std::runtime_error("Temporary directory does not exist");
 
-        if (!QFileInfo(temporaryDirPath).exists())
-            throw std::runtime_error("Temporary directory does not exist");
-
-        context->setWorkspaceJsonPath(QFileInfo(temporaryDirPath, "workspace.json").absoluteFilePath());
-        context->setProjectJsonPath(QFileInfo(temporaryDirPath, "project.json").absoluteFilePath());
-        context->setMetaJsonPath(QFileInfo(temporaryDirPath, "meta.json").absoluteFilePath());
+			context->setWorkspaceJsonPath(QFileInfo(temporaryDirPath, "workspace.json").absoluteFilePath());
+			context->setProjectJsonPath(QFileInfo(temporaryDirPath, "project.json").absoluteFilePath());
+			context->setMetaJsonPath(QFileInfo(temporaryDirPath, "meta.json").absoluteFilePath());
 
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
-        qDebug() << "Workspace JSON" << context->getWorkspaceJsonPath();
-        qDebug() << "Project JSON" << context->getProjectJsonPath();
-        qDebug() << "Meta JSON" << context->getMetaJsonPath();
+			qDebug() << "Workspace JSON" << context->getWorkspaceJsonPath();
+			qDebug() << "Project JSON" << context->getProjectJsonPath();
+			qDebug() << "Meta JSON" << context->getMetaJsonPath();
 #endif
+		}
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
-    plan.addSequentialStage("Save project JSON", [&plan]() -> void {
+    plan.addSequentialStage("Save project JSON", [context]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Save project JSON";
 #endif
 
-        auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
-
         projects().toJsonFile(context->getProjectJsonPath());
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 10.0);
 
-    plan.addSequentialStage("Save meta JSON", [&plan]() -> void {
+    plan.addSequentialStage("Save meta JSON", [context]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Save meta JSON";
 #endif
 
-        auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
-
         if (auto project = projects().getCurrentProject()) {
             project->getProjectMetaAction().toJsonFile(context->getMetaJsonPath());
         }
+
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);
 
-    plan.addSequentialStage("Save workspace JSON", [&plan]() -> void {
+    plan.addSequentialStage("Save workspace JSON", [&plan, context]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Save workspace JSON";
 #endif
 
-        auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
-
         workspaces().saveWorkspace(context->getWorkspaceJsonPath(), false);
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 2.0);
 
-    plan.addSequentialStage("Archive", [&plan]() -> void {
+    plan.addSequentialStage("Archive", [&plan, context]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Archive";
 #endif
 
-        auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
-
-        context->getArchiver().compressDirectory(context->getTemporaryDirectory()->path(), context->getFilePath(), true, 0);
+        context->getArchiver().compressDirectory(context->getTemporaryDirectoryPath(), context->getFilePath(), true, 0);
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
-    plan.addSequentialStage("Finalize", [&plan]() -> void {
+    plan.addSequentialStage("Finalize", [context]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Finalize";
 #endif
-
-        auto context = plan.getWorkflowContextAs<ProjectSaveContext>();
 
         if (!context->getErrorMessage().isEmpty())
             throw std::runtime_error(context->getErrorMessage().toStdString());

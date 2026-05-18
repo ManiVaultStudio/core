@@ -42,7 +42,13 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
             return executeChild(workflowPlan, parentContext);
         }
 
-        auto future = executeAsyncImpl(workflowPlan, executionOptions.value()._reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, executionOptions.value(), nullptr);
+        auto guiScope = Task::GuiScope::None;
+
+        if (executionOptions.has_value() && executionOptions->_reportProgress) {
+            guiScope = Task::GuiScope::Modal;
+        }
+
+        auto future = executeAsyncImpl(workflowPlan, guiScope, executionOptions.value_or({}), nullptr);
 
         if (QThread::currentThread() == qApp->thread()) {
         	QEventLoop loop;
@@ -829,12 +835,13 @@ void WorkflowPlanExecutor::executeJobOnGuiThread(mv::util::WorkflowPlan::Job job
             });
 #endif
 
+            qDebug() << "Executing GUI-thread job:" << job.getName() << "in thread" << QThread::currentThread();
             job.run();
         }
         catch (...) {
             exceptionPtr = std::current_exception();
         }
-        };
+    };
 
     if (QThread::currentThread() == dispatcher.thread()) {
         runOnGuiThread();

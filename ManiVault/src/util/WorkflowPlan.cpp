@@ -243,6 +243,7 @@ WorkflowPlan::WorkflowPlan(const QString& title, SharedWorkflowContext context) 
 void WorkflowPlan::addStage(Stage stage)
 {
     for (auto& job : stage.getJobs()) {
+        qDebug() << _workflowContext.get();
         job.setWorkflowContext(_workflowContext);
     }
 

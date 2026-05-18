@@ -153,8 +153,6 @@ QVariantMap Project::toVariantMap() const
     _statusBarVisibleAction.insertIntoVariantMap(variantMap);
     _statusBarOptionsAction.insertIntoVariantMap(variantMap);
 
-    Task dataHierarchyTask(const_cast<Project*>(this), "Load data hierarchy");
-
     plugins().insertIntoVariantMap(variantMap);
 
     dataHierarchy().insertIntoVariantMap(variantMap);

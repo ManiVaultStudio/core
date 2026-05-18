@@ -235,9 +235,12 @@ void PointData::fromVariantMapPre150(const QVariantMap& variantMap)
     if (_isDense)
     {
         setElementTypeSpecifier(elementTypeIndex);
-        resizeVector(numberOfElements);
 
-        populateDataBufferFromVariantMapToRawBufferSync(rawData, (char*)getDataVoidPtr(), getRawDataSize());
+        if (numberOfElements > 0) {
+            resizeVector(numberOfElements);
+
+            populateDataBufferFromVariantMapToRawBufferSync(rawData, (char*)getDataVoidPtr(), getRawDataSize());
+        }
     }
     else
     {

@@ -727,13 +727,6 @@ void ProjectManager::saveProject(QString filePath)
             setState(State::SavingProject);
 
             const auto stateGuard = qScopeGuard([this]() { setState(State::Idle); });
-
-	        QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "SaveProject"));
-
-	        const auto temporaryDirectoryPath = temporaryDirectory.path();
-
-	        setTemporaryDirPath(TemporaryDirType::Save, temporaryDirectory.path());
-
             const auto parameters = getProjectSaveParameters(filePath);
 
             if (parameters.isValid())

@@ -276,9 +276,8 @@ void DatasetImpl::fromVariantMapPre150(const QVariantMap& variantMap)
 
     if (variantMap.contains("Properties"))
     {
-        //_properties = mv::util::loadQVariant(variantMap["Properties"]).toMap();
+        _properties = mv::util::loadQVariant(variantMap["Properties"]).toMap();
     }
-
 
     if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {
         Datasets proxyMembers;

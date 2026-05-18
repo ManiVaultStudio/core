@@ -143,6 +143,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
 	    const auto saveDir = QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Save));
 
+        qDebug() << saveDir;
         WorkflowPlan encodeWorkflowPlan("Encode Blocks");
         WorkflowPlan::Jobs encodeJobs;
 
@@ -168,7 +169,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
         if (!encodeJobs.empty()) {
             encodeWorkflowPlan.addParallelStage("Encode Blocks", encodeJobs);
-            encodeWorkflowPlan.executeBlocking(mv::projects().getWorkflowPlanExecutor());
+            encodeWorkflowPlan.executeBlocking(mv::projects().getWorkflowPlanExecutor(), WorkflowExecutionContext::current());
         }
 
         QVariantList blocks;
