@@ -155,6 +155,11 @@ QVariantMap Project::toVariantMap() const
 
     plugins().insertIntoVariantMap(variantMap);
 
+    auto dataHierarchyPlan = dataHierarchy().fromVariantMapWorkflow(variantMap);
+
+    auto result = dataHierarchyPlan.executeBlocking(mv::projects().getWorkflowPlanExecutor(), WorkflowExecutionContext::current());
+
+    variantMap[dataHierarchy().getSerializationName()] = dataHierarchyPlan.getWorkflowContextAs<DataHierarchyManagerSaveContext>()->getDataHierachyMap();
     dataHierarchy().insertIntoVariantMap(variantMap);
     actions().insertIntoVariantMap(variantMap);
     events().insertIntoVariantMap(variantMap);

@@ -271,11 +271,6 @@ QVariant findNested(const QVariantMap& root, const QStringList& path)
     return current;
 }
 
-void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
-{
-
-}
-
 WorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
     WorkflowPlan fromPlan(__FUNCTION__);
@@ -457,13 +452,13 @@ private:
     QVariantMap     _dataHierarchyMap;  /** Map representing the data hierarchy structure */
 };
 
-QVariantMap DataHierarchyManager::toVariantMap() const
+WorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 {
+    auto context = std::make_shared<DataHierarchyManagerSaveContext>();
+
+    WorkflowPlan toPlan(__FUNCTION__, context);
+
     if (!_items.empty()) {
-        auto context = std::make_shared<DataHierarchyManagerSaveContext>();
-
-        WorkflowPlan toPlan(__FUNCTION__, context);
-
         WorkflowPlan::Jobs createItemMapJobs;
 
         std::int32_t sortIndex = 0;
@@ -495,8 +490,8 @@ QVariantMap DataHierarchyManager::toVariantMap() const
         toPlan.addSequentialStage("Assemble item maps", [this, &toPlan, context](WorkflowPlan::Job& job) -> void {
             try {
                 const auto findItemMap = [&toPlan, &job, context](const QString& datasetId) -> QVariantMap {
-					return context->getDatasetMap(datasetId);
-                };
+                    return context->getDatasetMap(datasetId);
+                    };
 
                 std::function<QVariantMap(DataHierarchyItem*, QVariantMap&, std::int32_t)> traverseItem;
 
@@ -533,20 +528,19 @@ QVariantMap DataHierarchyManager::toVariantMap() const
                 }
 
                 context->setDataHierarchyMap(dataHierarchyMap);
-            } catch (std::exception& e) {
+            }
+            catch (std::exception& e) {
                 Serializable::reportSerializationError("Data hierarchy manager", "Failed to assemble item maps: " + QString::fromStdString(e.what()));
             }
             catch (...) {
                 Serializable::reportSerializationError("Data hierarchy manager", "Failed to assemble item maps");
             }
         });
-
-        toPlan.executeBlocking(mv::projects().getWorkflowPlanExecutor(), WorkflowExecutionContext::current());
-
-        return toPlan.getWorkflowContextAs<DataHierarchyManagerSaveContext>()->getDataHierachyMap();
     }
-    
-    return {};
+
+    //return toPlan;//.getWorkflowContextAs<DataHierarchyManagerSaveContext>()->getDataHierachyMap();
+
+    return toPlan;
 }
 
 }
