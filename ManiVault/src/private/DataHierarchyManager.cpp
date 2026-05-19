@@ -338,7 +338,12 @@ WorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& var
             try {
                 //qDebug() << "---Loading dataset" << datasetName << "with ID" << datasetId;
                 //{
+                if (datasetName == "M1_cross_species_merged_final")
                     mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
+                else
+                    mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
+
+            	
                 //}
                 //qDebug() << "---Finished loading dataset" << datasetName << "with ID" << datasetId;
             }

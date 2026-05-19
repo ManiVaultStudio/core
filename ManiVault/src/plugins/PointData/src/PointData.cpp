@@ -239,7 +239,14 @@ void PointData::fromVariantMapPre150(const QVariantMap& variantMap)
         if (numberOfElements > 0) {
             resizeVector(numberOfElements);
 
-            populateDataBufferFromVariantMapToRawBufferSync(rawData, (char*)getDataVoidPtr(), getRawDataSize());
+            populateDataBufferFromVariantMapToRawBufferAsync(rawData, (char*)getDataVoidPtr(), getRawDataSize());
+
+            /*
+            if (getGuiName() == "M1_cross_species_merged_final")
+				
+            else
+                populateDataBufferFromVariantMapToRawBufferSync(rawData, (char*)getDataVoidPtr(), getRawDataSize());
+            */
         }
     }
     else
@@ -1177,7 +1184,7 @@ void Points::fromVariantMapPre150(const QVariantMap& variantMap)
         // Copy the dimension names raw data into the byte array
         dimensionsByteArray.resize(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
 
-        populateDataBufferFromVariantMapToRawBufferSync(variantMap["DimensionNames"].toMap(), (char*)dimensionsByteArray.data(), dimensionsByteArray.size());
+        populateDataBufferFromVariantMapToRawBufferAsync(variantMap["DimensionNames"].toMap(), (char*)dimensionsByteArray.data(), dimensionsByteArray.size());
 
         // Open input data stream
         QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::ReadOnly);
@@ -1223,7 +1230,7 @@ void Points::fromVariantMapPre150(const QVariantMap& variantMap)
 
             selectionSet->indices.resize(count);
 
-            populateDataBufferFromVariantMapToRawBufferSync(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t));
+            populateDataBufferFromVariantMapToRawBufferAsync(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t));
 
             events().notifyDatasetDataSelectionChanged(this);
         }

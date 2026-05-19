@@ -108,13 +108,8 @@ QString WorkflowExecutionContext::getName() const
 
 void WorkflowExecutionContext::info(QString text, QString location, QVariantMap details) const
 {
-    qDebug() << "Info:" << text << ", location:" << location << ", details:" << details;
-
 	if (_reportNode)
 		_reportNode->addMessage(SeverityLevel::Info, getName(), std::move(text), std::move(location), std::move(details));
-
-	//if (_task)
-	//    _task->setStatusText(text);
 }
 
 void WorkflowExecutionContext::warning(QString text, QString location, QVariantMap details) const
@@ -123,9 +118,6 @@ void WorkflowExecutionContext::warning(QString text, QString location, QVariantM
 
 	if (_reportNode)
 		_reportNode->addMessage(SeverityLevel::Warning, getName(), std::move(text), std::move(location), std::move(details));
-
-	//if (_task)
-	//    _task->addWarning(text);
 }
 
 void WorkflowExecutionContext::error(QString text, QString location, QVariantMap details) const
@@ -134,9 +126,6 @@ void WorkflowExecutionContext::error(QString text, QString location, QVariantMap
 
 	if (_reportNode)
 		_reportNode->addMessage(SeverityLevel::Error, getName(), std::move(text), std::move(location), std::move(details));
-
-	//if (_task)
-	//    _task->addError(text);
 }
 
 void WorkflowExecutionContext::setProgress(double value) const
@@ -145,9 +134,6 @@ void WorkflowExecutionContext::setProgress(double value) const
 		_progressNode->setProgress(value);
 
 	const double overall = _state ? _state->getOverallProgress() : 0.0;
-
-	//qDebug() << "Setting local progress of context" << _name << "to" << value
-	//	<< ", overall progress =" << overall;
 
 	if (_task && _state)
 		_task->setProgress(static_cast<float>(overall));
