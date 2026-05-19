@@ -99,7 +99,7 @@ public:
      * @param separator The string to use as a separator between levels of the execution path. The default value is " / ", but it can be customized to use any other separator as needed (e.g., " > ", " -> ", etc.).
      * @return The execution path of this workflow execution context as a string, with each level of the hierarchy separated by the specified separator.
      */
-    QString getExecutionPath(const QString& separator = " / ") const;
+    QString getExecutionPath(const QString& separator = "/") const;
 
 public: // ID
 

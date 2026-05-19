@@ -8,12 +8,12 @@
 
 namespace mv {
 
-ManiVaultException::ManiVaultException(SeverityLevel severity, QString message, QString code, QString scope, QVariantMap details) :
+ManiVaultException::ManiVaultException(SeverityLevel severity, QString message, QString what, QString where, QVariantMap details) :
 	std::runtime_error(message.toStdString()),
 	_severity(severity),
 	_message(std::move(message)),
-	_code(std::move(code)),
-	_scope(std::move(scope)),
+	_what(std::move(what)),
+	_where(std::move(where)),
 	_details(std::move(details))
 {
 }

@@ -198,101 +198,127 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
 DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec, char* destination, std::uint64_t destinationSize)
 {
+    const auto location = "serialization.decode.block.file";
+
     DecodeBlockResult result;
 
-    result._offset  = decodeBlockJob._offset;
-    result._size    = decodeBlockJob._size;
+    try {
+	    result._offset  = decodeBlockJob._offset;
+	    result._size    = decodeBlockJob._size;
 
-    if (!destination)
-        throw std::runtime_error("Destination buffer is null");
+	    if (!destination)
+	        throw std::runtime_error("Destination buffer is null");
 
-    if (decodeBlockJob._offset > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max()) || decodeBlockJob._size > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max())) {
-        throw std::runtime_error("Decode block offset or size exceeds std::uint64_t range");
+	    if (decodeBlockJob._offset > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max()) || decodeBlockJob._size > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max())) {
+	        throw std::runtime_error("Decode block offset or size exceeds std::uint64_t range");
+	    }
+
+	    const auto offset   = static_cast<std::uint64_t>(decodeBlockJob._offset);
+	    const auto size     = static_cast<std::uint64_t>(decodeBlockJob._size);
+
+	    if (offset < 0 || size < 0 || offset > destinationSize || size > destinationSize - offset) {
+	        throw std::runtime_error(QString("Decode block destination range out of bounds. offset=%1, size=%2, destinationSize=%3, uri=%4")
+	            .arg(offset)
+	            .arg(size)
+	            .arg(destinationSize)
+	            .arg(decodeBlockJob._uri)
+	            .toStdString()
+	        );
+	    }
+
+	    auto codec = createCodec();
+
+	    if (!codec)
+	        throw std::runtime_error("Failed to create blob codec");
+
+	    if (decodeBlockJob._uri.isEmpty())
+	        throw std::runtime_error("Block URI is empty");
+
+	    const auto decodeResult = codec->decodeFromFileTo(
+	        decodeBlockJob._uri,
+	        destination + offset,
+	        size
+	    );
+
+	    if (!decodeResult.isSuccess()) {
+	        throw ManiVaultException(SeverityLevel::Error, QString("Failed to decode block from file '%1': %2").arg(decodeBlockJob._uri, decodeResult._error), location);
+	    }
     }
+    catch (const ManiVaultException&) {
 
-    const auto offset   = static_cast<std::uint64_t>(decodeBlockJob._offset);
-    const auto size     = static_cast<std::uint64_t>(decodeBlockJob._size);
+        // Rethrow ManiVaultExceptions as they are already properly constructed with severity and message
+    	throw;
+    } 
+    catch (const std::exception& exception) {
 
-    if (offset < 0 || size < 0 || offset > destinationSize || size > destinationSize - offset) {
-        throw std::runtime_error(QString("Decode block destination range out of bounds. offset=%1, size=%2, destinationSize=%3, uri=%4")
-            .arg(offset)
-            .arg(size)
-            .arg(destinationSize)
-            .arg(decodeBlockJob._uri)
-            .toStdString()
-        );
+        // Upgrade to ManiVaultException with context
+        throw ManiVaultException(SeverityLevel::Error, QString("Failed to decode block from file '%1': %2").arg(decodeBlockJob._uri, QString::fromStdString(exception.what())), location);
     }
+	catch(...) {
 
-    auto codec = createCodec();
-
-    if (!codec)
-        throw std::runtime_error("Failed to create blob codec");
-
-    if (decodeBlockJob._uri.isEmpty())
-        throw std::runtime_error("Block URI is empty");
-
-    const auto decodeResult = codec->decodeFromFileTo(
-        decodeBlockJob._uri,
-        destination + offset,
-        size
-    );
-
-    if (!decodeResult.isSuccess()) {
-        throw SerializationException(SeverityLevel::Error, QString("Failed to decode block from file '%1': %2").arg(decodeBlockJob._uri, decodeResult._error), "serialization.decode.blocks");
+        // Upgrade to ManiVaultException with context
+        throw ManiVaultException(SeverityLevel::Error, QString("Failed to decode block from file '%1' due to an unknown error").arg(decodeBlockJob._uri), location);
     }
-
-    //if (decodeResult._bytesWritten != size) {
-    //    throw std::runtime_error(
-    //        QString(
-    //            "Decode size mismatch for block '%1': expected %2 bytes, got %3 bytes"
-    //        )
-    //        .arg(decodeBlockJob._uri)
-    //        .arg(size)
-    //        .arg(decodeResult._bytesWritten)
-    //        .toStdString()
-    //    );
-    //}
 
     return result;
 }
 
 DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec, char* destination, std::uint64_t destinationSize)
 {
+    const auto location = "serialization.decode.block.base64";
+
     DecodeBlockResult result;
 
-    result._offset  = decodeBlockJob._offset;
-    result._size    = decodeBlockJob._size;
+    try {
+	    result._offset  = decodeBlockJob._offset;
+	    result._size    = decodeBlockJob._size;
 
-    if (!destination)
-        throw std::runtime_error("Destination buffer is null");
+	    if (!destination)
+	        throw std::runtime_error("Destination buffer is null");
 
-    const auto offset   = static_cast<std::uint64_t>(decodeBlockJob._offset);
-    const auto size     = static_cast<std::uint64_t>(decodeBlockJob._size);
+	    const auto offset   = static_cast<std::uint64_t>(decodeBlockJob._offset);
+	    const auto size     = static_cast<std::uint64_t>(decodeBlockJob._size);
 
-    if (offset < 0 || size < 0 || offset > destinationSize || size > destinationSize - offset) {
-        throw std::runtime_error(QString("Inline decode block out of bounds. offset=%1, size=%2, destinationSize=%3")
-            .arg(offset)
-            .arg(size)
-            .arg(destinationSize)
-            .toStdString()
-        );
+	    if (offset < 0 || size < 0 || offset > destinationSize || size > destinationSize - offset) {
+	        throw std::runtime_error(QString("Inline decode block out of bounds. offset=%1, size=%2, destinationSize=%3")
+	            .arg(offset)
+	            .arg(size)
+	            .arg(destinationSize)
+	            .toStdString()
+	        );
+	    }
+
+	    auto codec = createCodec();
+
+	    if (!codec)
+	        throw std::runtime_error("Failed to create blob codec");
+
+	    const QByteArray encodedBytes = QByteArray::fromBase64(decodeBlockJob._encodedData.toUtf8());
+
+	    const auto decodeResult = codec->decodeTo(encodedBytes, destination + offset, size);
+
+	    if (!decodeResult.isSuccess()) {
+	        throw std::runtime_error(QString("Failed to decode inline block at offset %1: %2")
+	            .arg(decodeBlockJob._offset)
+	            .arg(decodeResult._error)
+	            .toStdString()
+	        );
+	    }
     }
+    catch (const ManiVaultException&) {
 
-    auto codec = createCodec();
+        // Rethrow ManiVaultExceptions as they are already properly constructed with severity and message
+        throw;
+    }
+    catch (const std::exception& exception) {
 
-    if (!codec)
-        throw std::runtime_error("Failed to create blob codec");
+        // Upgrade to ManiVaultException with context
+        throw ManiVaultException(SeverityLevel::Error, QString("Failed to decode block from file '%1': %2").arg(decodeBlockJob._uri, QString::fromStdString(exception.what())), location);
+    }
+    catch (...) {
 
-    const QByteArray encodedBytes = QByteArray::fromBase64(decodeBlockJob._encodedData.toUtf8());
-
-    const auto decodeResult = codec->decodeTo(encodedBytes, destination + offset, size);
-
-    if (!decodeResult.isSuccess()) {
-        throw std::runtime_error(QString("Failed to decode inline block at offset %1: %2")
-            .arg(decodeBlockJob._offset)
-            .arg(decodeResult._error)
-            .toStdString()
-        );
+        // Upgrade to ManiVaultException with context
+        throw ManiVaultException(SeverityLevel::Error, QString("Failed to decode block from file '%1' due to an unknown error").arg(decodeBlockJob._uri), location);
     }
 
     return result;

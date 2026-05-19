@@ -254,7 +254,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
 WorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
-    WorkflowPlan fromPlan(__FUNCTION__);
+    WorkflowPlan fromPlan("Load data hierarchy");
 
     fromPlan.addSequentialStage("Populate data hierarchy", [this, variantMap](WorkflowPlan::Job& job) -> void {
         const auto loadDataHierarchyItem = [variantMap](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
@@ -334,9 +334,30 @@ WorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& var
         const auto rawBlockSize = getRawBlockObjectSize(dataVariantMap);
 
         loadDatasetJobs.emplace_back(datasetName, [datasetId, datasetName, dataVariantMap](WorkflowPlan::Job& job) {
-            qDebug() << "---Loading dataset" << datasetName << "with ID" << datasetId;
-            mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
-            qDebug() << "---Finished loading dataset" << datasetName << "with ID" << datasetId;
+            
+            try {
+                //qDebug() << "---Loading dataset" << datasetName << "with ID" << datasetId;
+                //{
+                    mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
+                //}
+                //qDebug() << "---Finished loading dataset" << datasetName << "with ID" << datasetId;
+            }
+            catch (const ManiVaultException&) {
+
+	            // Rethrow ManiVaultExceptions as they are already properly constructed with severity and message
+	            throw;
+	        }
+	        catch (const std::exception& exception) {
+
+                const auto what = QString::fromStdString(exception.what());
+
+	            // Upgrade to ManiVaultException with context
+	            throw ManiVaultException(SeverityLevel::Error, QString("Failed to load dataset '%1': %2").arg(datasetName, what), "DataHierarchyManager::loadDataset", what, dataVariantMap);
+	        }
+	        catch (...) {
+		        // Upgrade to ManiVaultException with context
+				throw ManiVaultException(SeverityLevel::Error, QString("Failed to load dataset '%1' due to an unknown error").arg(datasetName), "DataHierarchyManager::loadDataset");
+	        }
         }, WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Nested).weighted(rawBlockSize);
     }
 
@@ -437,7 +458,7 @@ WorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 {
     auto context = std::make_shared<DataHierarchyManagerSaveContext>();
 
-    WorkflowPlan toPlan(__FUNCTION__, context);
+    WorkflowPlan toPlan("Save data hierarchy", context);
 
     if (!_items.empty()) {
         WorkflowPlan::Jobs createItemMapJobs;

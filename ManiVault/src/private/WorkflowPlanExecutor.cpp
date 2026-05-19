@@ -86,7 +86,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
         future.getState()->rethrowExceptionIfAny();
     }
     catch (const ManiVaultException& exception) {
-        WorkflowReporter::message(exception._severity, exception._message, exception._scope, exception._details);
+        WorkflowReporter::message(exception._severity, exception._message, exception._where, exception._details);
 
         return getFailedResult();
         // displayFailure(exception._message);
@@ -271,7 +271,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
 #endif
     }
     catch (const ManiVaultException& exception) {
-        WorkflowReporter::message(exception._severity, exception._message, exception._scope, exception._details);
+        WorkflowReporter::message(exception._severity, exception._message, exception._where, exception._details);
 
         displayFailure(exception._message);
 
