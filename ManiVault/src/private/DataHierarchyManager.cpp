@@ -239,36 +239,17 @@ void DataHierarchyManager::removeAllItems()
     _items.clear();
 }
 
-QFuture<void> fromVariantMapAsync(WidgetAction* action, const QVariantMap& variantMap)
+void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    Q_ASSERT(action);
+    WorkflowPlan plan(__FUNCTION__);
 
-    if (!action)
-        return {};
-
-    return QtConcurrent::run([action, &variantMap]() -> void {
-        action->fromVariantMap(variantMap);
+    plan.addSequentialStage("fromVariantMap", {
+        WorkflowPlan::Job("fromVariantMap", [this, variantMap](const WorkflowPlan::Job&) {
+            fromVariantMap(variantMap);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread)
     });
-}
-
-QVariant findNested(const QVariantMap& root, const QStringList& path)
-{
-    QVariant current = root;
-
-    for (const QString& key : path) {
-        if (!current.canConvert<QVariantMap>())
-            return {};
-
-        const QVariantMap map = current.toMap();
-
-        auto it = map.find(key);
-        if (it == map.end())
-            return {};
-
-        current = it.value();
-    }
-
-    return current;
+    
+	const auto result = plan.executeBlocking(projects().getWorkflowPlanExecutor(), WorkflowExecutionContext::current());
 }
 
 WorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap)
@@ -541,6 +522,24 @@ WorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
     //return toPlan;//.getWorkflowContextAs<DataHierarchyManagerSaveContext>()->getDataHierachyMap();
 
     return toPlan;
+}
+
+QVariantMap DataHierarchyManager::toVariantMap() const
+{
+    WorkflowPlan plan(__FUNCTION__);
+
+    plan.addSequentialStage("toVariantMap", {
+        WorkflowPlan::Job("toVariantMap", [this](const WorkflowPlan::Job&) {
+            if (auto context = WorkflowExecutionContext::current()) {
+                auto result = toVariantMap();
+                context->publishResult(result);
+            }
+        }, WorkflowPlan::JobThreadAffinity::GuiThread)
+    });
+
+    const auto result = plan.executeBlocking(projects().getWorkflowPlanExecutor(), WorkflowExecutionContext::current());
+
+    return result->value<QVariantMap>();
 }
 
 }

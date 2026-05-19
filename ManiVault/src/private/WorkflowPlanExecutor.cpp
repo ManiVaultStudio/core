@@ -37,6 +37,12 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
 
     SharedWorkflowResult result;
 
+    const auto getFailedResult = [&workflowPlan]() {
+        auto failedResult = std::make_shared<WorkflowResult>(workflowPlan.getName());
+        failedResult->setStatus(WorkflowResult::Status::Failed);
+        return failedResult;
+    };
+
     try {
         if (parentContext != nullptr) {
             return executeChild(workflowPlan, parentContext);
@@ -65,8 +71,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
 
 				future.getTask()->setProgress(1.0f);
 				future.getTask()->setFinished();
-				},
-				Qt::QueuedConnection);
+        	}, Qt::QueuedConnection);
 
         	connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, &loop, &QEventLoop::quit);
 
@@ -83,19 +88,23 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
     catch (const ManiVaultException& exception) {
         WorkflowReporter::message(exception._severity, exception._message, exception._scope, exception._details);
 
+        return getFailedResult();
         // displayFailure(exception._message);
         //throw;
         //TODO
     }
     catch (const std::exception& exception) {
         WorkflowReporter::error(QString("Workflow '%1' failed: %2").arg(workflowPlan.getName(), exception.what()),workflowPlan.getName());
-        // displayFailure(exception.what());
+
+        return getFailedResult();
 
         //throw;
         //TODO
     }
     catch (...) {
         WorkflowReporter::error(QString("Workflow '%1' failed with an unknown error.").arg(workflowPlan.getName()), workflowPlan.getName());
+
+        return getFailedResult();
 
         // displayFailure("Unknown exception");
 
@@ -324,6 +333,8 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
 
     	}, Qt::QueuedConnection);
     }
+
+    result->setValue(rootContext->takeResult());
 
     return result;
 }

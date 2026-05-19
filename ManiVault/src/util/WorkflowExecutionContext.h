@@ -121,6 +121,26 @@ public: // ID
      */
     std::size_t getPendingAsyncWorkCount() const;
 
+public: // Result handling
+
+    /**
+     * @brief Sets the result of this workflow execution context. The result can be any value that can be stored in a QVariant, such as a data structure, a file path, or any other relevant information that needs to be returned after the workflow execution is completed. The result is stored in the execution state and can be accessed from the workflow execution context.
+     * @tparam T The type of the result value. This can be any type that is supported by QVariant (e.g., int, QString, custom data structures registered with Q_DECLARE_METATYPE, etc.).
+     * @param value The result value to be set for this workflow execution context. This value will be stored in the execution state and can be accessed later using the takeResult() function.
+     */
+    template<typename T>
+    void publishResult(T&& value) {
+        _state->setResult(QVariant::fromValue(std::forward<T>(value)));
+    }
+
+    /**
+     * @brief Retrieves and clears the result of this workflow execution context. This function returns the current result stored in the execution state as a QVariant, and then clears it to ensure that subsequent calls will not return the same result again. This is useful for scenarios where the result should only be consumed once, such as when passing the result to another component or when finalizing the workflow execution.
+     * @return The current result of this workflow execution context before it is cleared, returned as a QVariant. The caller can then convert this QVariant to the appropriate type as needed.
+     */
+    QVariant takeResult() const {
+        return _state->takeResult();
+    }
+
 private:
     friend class WorkflowExecutionScope;
 

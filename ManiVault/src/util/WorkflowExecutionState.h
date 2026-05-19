@@ -38,10 +38,30 @@ public:
     double getOverallProgress() const;
 
     WorkflowMessages collectMessages() const;
-    
+
+public: // Metrics
+
     WorkflowExecutionMetrics& metrics();
 
     const WorkflowExecutionMetrics& metrics() const;
+
+public: // Result
+
+    /**
+     * @brief Sets the result of the workflow execution. The result can be any QVariant that represents the outcome of the workflow, such as a data structure, a file path, or any other relevant information that needs to be returned after the workflow execution is completed. The result is stored in the execution state and can be accessed from the workflow execution context.
+     * @param result The result of the workflow execution.
+     */
+    void setResult(QVariant result) {
+        _result = std::move(result);
+    }
+
+    /**
+     * @brief Retrieves and clears the result of the workflow execution. This function returns the current result stored in the execution state and then clears it to ensure that subsequent calls will not return the same result again. This is useful for scenarios where the result should only be consumed once, such as when passing the result to another component or when finalizing the workflow execution.
+     * @return The current result of the workflow execution before it is cleared.
+     */
+    QVariant takeResult() {
+        return std::exchange(_result, {});
+    }
 
 public: // Tracing
 
@@ -59,6 +79,7 @@ private:
     mutable QMutex              _mutex;                                     /** Mutex to protect access to mutable members that may be updated from multiple threads during execution. */
     WorkflowExecutionStatus     _status = WorkflowExecutionStatus::Idle;    /** The execution status is protected by a mutex since it may be updated from multiple threads during execution and needs to be read and updated atomically. */
     WorkflowExecutionMetrics    _metrics;                                   /** Metrics are stored in the execution state since they may be updated from multiple threads during execution and need to be accessible from the context. */
+    QVariant                    _result;
 };
 
 } // namespace mv::util
