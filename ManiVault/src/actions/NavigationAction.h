@@ -78,6 +78,10 @@ public: // Serialization
 
     QVariantMap toVariantMap() const override;
 
+public: // State getters
+    [[nodiscard]] bool isNavigationFrozen() const { return _freezeNavigation.isChecked(); }
+    [[nodiscard]] bool isNavigationActive() const { return !isNavigationFrozen(); }
+
 public: // Action getters
 
     TriggerAction& getZoomOutAction() { return _zoomOutAction; }
