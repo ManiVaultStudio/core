@@ -22,9 +22,6 @@ public:
      */
     explicit ZstdBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction);
 
-    /* Virtual destructor for proper cleanup */
-    ~ZstdBlobCodec() override;
-
     /** Returns the codec type */
     [[nodiscard]] Type getType() const override;
 

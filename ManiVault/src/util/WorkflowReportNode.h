@@ -25,6 +25,8 @@ class CORE_EXPORT WorkflowReportNode
 {
 public:
 
+    Q_DISABLE_COPY_MOVE(WorkflowReportNode)
+
     /** A shared pointer type for WorkflowReportNode, allowing for easy management of node lifetimes and shared ownership across different parts of the workflow reporting system. */
     using SharedWorkflowReportNode = std::shared_ptr<WorkflowReportNode>;
 

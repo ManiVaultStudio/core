@@ -22,9 +22,6 @@ public:
      */
     explicit PassthroughBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction);
 
-    /* Virtual destructor for proper cleanup */
-    ~PassthroughBlobCodec() override;
-
     /** Returns the codec type */
     [[nodiscard]] Type getType() const override;
 

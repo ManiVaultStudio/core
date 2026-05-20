@@ -14,12 +14,12 @@
 #include <QElapsedTimer>
 
 #ifdef _DEBUG
-	#define WORKFLOW_PLAN_EXECUTOR_VERBOSE
+	//#define WORKFLOW_PLAN_EXECUTOR_VERBOSE
 #endif
 
 //#define WORKFLOW_PLAN_EXECUTOR_VERBOSE
 
-#define USE_WORKFLOW_CONSOLE_TRACE_SINK
+//#define USE_WORKFLOW_CONSOLE_TRACE_SINK
 
 using namespace mv;
 using namespace mv::util;
@@ -141,12 +141,22 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsync(WorkflowPlan& workflowPl
 
 QThreadPool& WorkflowPlanExecutor::getThreadPool()
 {
-    return WorkflowExecutionContext::current()->getThreadPool();
+    auto context = WorkflowExecutionContext::current();
+
+    if (!context)
+        throw std::runtime_error("No active workflow execution context");
+
+    return context->getThreadPool();
 }
 
 const QThreadPool& WorkflowPlanExecutor::getThreadPool() const
 {
-    return WorkflowExecutionContext::current()->getThreadPool();
+    auto context = WorkflowExecutionContext::current();
+
+    if (!context)
+        throw std::runtime_error("No active workflow execution context");
+
+    return context->getThreadPool();
 }
 
 WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, WorkflowExecutionOptions executionOptions, SharedWorkflowExecutionContext executionContext)
@@ -200,7 +210,7 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflo
     //    Qt::QueuedConnection);
     //}
 
-    connect(watcher, &QFutureWatcher<WorkflowResult>::finished, watcher,&QObject::deleteLater, Qt::QueuedConnection);
+    connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, watcher,&QObject::deleteLater, Qt::QueuedConnection);
 
     watcher->setFuture(state->future);
 
@@ -827,31 +837,21 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
 #endif
 }
 
-void WorkflowPlanExecutor::executeJobOnGuiThread(mv::util::WorkflowPlan::Job job, SharedWorkflowExecutionContext jobContext)
+void WorkflowPlanExecutor::executeJobOnGuiThread(WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
 {
     auto& dispatcher = Application::workflowGuiThreadDispatcher();
 
-    std::exception_ptr exceptionPtr;
+    auto exceptionPtr = std::make_shared<std::exception_ptr>();
 
-    auto runOnGuiThread = [this, &job, &jobContext, &exceptionPtr]() {
+    auto runOnGuiThread = [job = std::move(job),
+        jobContext,
+        exceptionPtr]() mutable {
         try {
             WorkflowExecutionScope scope(jobContext);
-
-#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
-            trace({
-			    ._type = WorkflowTraceEventType::GuiDispatchEntered,
-			    ._name = job.getName(),
-			    ._contextId = jobContext->getId(),
-			    ._parentContextId = jobContext->getParentId()
-            });
-#endif
-
-        	WorkflowReporter::info(QString("Executing GUI-thread job: %1 in thread %2").arg(job.getName()).arg(reinterpret_cast<quintptr>(QThread::currentThread())));
-
-        	job.run();
+            job.run();
         }
         catch (...) {
-            exceptionPtr = std::current_exception();
+            *exceptionPtr = std::current_exception();
         }
     };
 
@@ -859,27 +859,18 @@ void WorkflowPlanExecutor::executeJobOnGuiThread(mv::util::WorkflowPlan::Job job
         runOnGuiThread();
     }
     else {
-#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
-        trace({
-		    ._type = WorkflowTraceEventType::GuiDispatchRequested,
-		    ._name = job.getName(),
-		    ._contextId = jobContext->getId(),
-		    ._parentContextId = jobContext->getParentId()
-        });
-#endif
-
         QMetaObject::invokeMethod(
             &dispatcher,
-            runOnGuiThread,
+            std::move(runOnGuiThread),
             Qt::BlockingQueuedConnection
         );
     }
 
-    if (exceptionPtr)
-        std::rethrow_exception(exceptionPtr);
+    if (*exceptionPtr)
+        std::rethrow_exception(*exceptionPtr);
 }
 
-void WorkflowPlanExecutor::executeJobOnWorkerThread(mv::util::WorkflowPlan::Job job, SharedWorkflowExecutionContext jobContext)
+void WorkflowPlanExecutor::executeJobOnWorkerThread(mv::util::WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
 {
 #ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
     qDebug() << "Executing job on worker thread:" << job.getName() << "in thread" << QThread::currentThread();
@@ -890,7 +881,7 @@ void WorkflowPlanExecutor::executeJobOnWorkerThread(mv::util::WorkflowPlan::Job 
     job.run();
 }
 
-void WorkflowPlanExecutor::executeJob(WorkflowPlan::Job job, SharedWorkflowExecutionContext jobContext)
+void WorkflowPlanExecutor::executeJob(WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
 {
     WorkflowReporter::info("Job started");
 

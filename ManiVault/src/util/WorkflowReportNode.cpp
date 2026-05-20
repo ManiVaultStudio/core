@@ -25,18 +25,33 @@ WorkflowReportNode::SharedWorkflowReportNode WorkflowReportNode::createChild(con
 
 void WorkflowReportNode::addMessage(SeverityLevel level, QString emitter, QString text, QString location, QVariantMap details)
 {
+    qDebug()
+        << "addMessage thread =" << QThread::currentThread()
+        << "this =" << this
+        << "messages size =" << _messages.size();
+
 	QMutexLocker lock(&_mutex);
 
     auto context = WorkflowExecutionContext::current();
 
-	_messages.push_back(WorkflowMessage{
-		level,
+    thread_local bool inAddMessage = false;
+
+    if (inAddMessage) {
+        qFatal("Recursive addMessage detected");
+    }
+
+    inAddMessage = true;
+
+    _messages.push_back(WorkflowMessage{
+        level,
         context->getExecutionPath(),
         std::move(location),
-		std::move(text),
-		std::move(details),
-		QDateTime::currentDateTimeUtc()
-	});
+        std::move(text),
+        std::move(details),
+        QDateTime::currentDateTimeUtc()
+    });
+
+    inAddMessage = false;
 }
 
 QString WorkflowReportNode::getName() const

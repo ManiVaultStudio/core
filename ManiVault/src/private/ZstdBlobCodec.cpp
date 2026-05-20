@@ -39,13 +39,6 @@ ZstdBlobCodec::ZstdBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* code
 #endif
 }
 
-ZstdBlobCodec::~ZstdBlobCodec()
-{
-#ifdef ZSTD_CODEC_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-}
-
 mv::util::BlobCodec::Type ZstdBlobCodec::getType() const
 {
     return Type::Zstd;

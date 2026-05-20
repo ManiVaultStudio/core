@@ -21,13 +21,6 @@ PassthroughBlobCodec::PassthroughBlobCodec(QObject* parent, mv::gui::CodecSettin
 #endif
 }
 
-PassthroughBlobCodec::~PassthroughBlobCodec()
-{
-#ifdef PASSTHROUGH_CODEC_VERBOSE
-    qDebug() << __FUNCTION__;
-#endif
-}
-
 mv::util::BlobCodec::Type PassthroughBlobCodec::getType() const
 {
     return Type::None;

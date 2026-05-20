@@ -79,6 +79,21 @@ public:
         Job(QString name, JobFunction function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, JobProgressMode progressMode = JobProgressMode::Automatic);
         Job(QString name, JobFunction function, double weight);
 
+        ~Job()
+        {
+            qDebug() << "~WorkflowPlanJob" << this;
+        }
+
+        //Job(const Job& other)
+        //{
+        //    qDebug() << "COPY" << this << &other;
+        //}
+
+        //Job(Job&& other)
+        //{
+        //    qDebug() << "MOVE" << this << &other;
+        //}
+
         QString getName() const;
 
         const JobFunction& getFunction() const;

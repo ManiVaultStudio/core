@@ -53,9 +53,9 @@ private: // Execute jobs in a stage
     void executeParallelJobs(const WorkflowPlan::Stage& stage, SharedWorkflowExecutionContext stageContext) override;
 
 private: // Execute individual jobs
-	void executeJobOnGuiThread(WorkflowPlan::Job job, SharedWorkflowExecutionContext jobContext) override;
-	void executeJobOnWorkerThread(WorkflowPlan::Job job, SharedWorkflowExecutionContext jobContext) override;
-	void executeJob(WorkflowPlan::Job job, SharedWorkflowExecutionContext jobContext) override;
+	void executeJobOnGuiThread(WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext) override;
+	void executeJobOnWorkerThread(WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext) override;
+	void executeJob(WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext) override;
 
 private: // Helpers
 
