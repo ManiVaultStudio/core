@@ -220,7 +220,7 @@ QString ColorMapAction::getColorMap() const
 QImage ColorMapAction::getColorMapImage() const
 {
     if (getCurrentColorMapAction().getModel() == nullptr)
-        return QImage();
+        return {};
 
     const auto filteredModelIndex = getCurrentColorMapAction().getModel()->index(getCurrentColorMapAction().getCurrentIndex(), 0);
 

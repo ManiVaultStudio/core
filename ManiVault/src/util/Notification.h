@@ -198,6 +198,12 @@ signals:
     /** Signal emitted when the toaster finishes displaying */
     void finished();
 
+    /**
+     * Emitted when a hyperlink in the notification was clicked
+     * @param url URL of the hyperlink that was clicked
+     */
+    void linkActivated(const QUrl& url);
+
 private:
     QIcon                   _icon;                          /** Notification icon (maybe empty) */
     QString                 _title;                         /** Notification title (maybe HTML) */

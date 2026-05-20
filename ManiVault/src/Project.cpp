@@ -109,10 +109,6 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
 {
     Serializable::fromVariantMap(variantMap);
 
-    projects().getProjectSerializationTask().setName("Load project");
-
-    _projectMetaAction.fromParentVariantMap(variantMap);
-
     if (variantMap.contains(_selectionGroupingAction.getSerializationName()))
         _selectionGroupingAction.fromParentVariantMap(variantMap);
     else
@@ -122,23 +118,31 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
     _statusBarVisibleAction.fromParentVariantMap(variantMap);
     _statusBarOptionsAction.fromParentVariantMap(variantMap);
 
-    dataHierarchy().fromParentVariantMap(variantMap);
+    auto dataHierarchyPlan = dataHierarchy().fromVariantMapWorkflow(variantMap);
+
+    dataHierarchyPlan.executeBlocking(mv::projects().getWorkflowPlanExecutor(), WorkflowExecutionContext::current());
+
+    //executor->executeBlocking(
+    //    dataHierarchyPlan,
+    //    executionOptions,
+    //    *WorkflowExecutionContext::current()
+    //);
+    //;
+    
     actions().fromParentVariantMap(variantMap);
+    
     plugins().fromParentVariantMap(variantMap);
+    
     events().fromParentVariantMap(variantMap, true);
 
     if (getReadOnlyAction().isChecked() && getAllowedPluginsOnlyAction().isChecked()) {
         for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
             pluginFactory->setAllowPluginCreationFromStandardGui(_projectMetaAction.getAllowedPluginsAction().getStrings().contains(pluginFactory->getKind()));
-
-        qDebug() << _projectMetaAction.getAllowedPluginsAction().getStrings();
     }
 }
 
 QVariantMap Project::toVariantMap() const
 {
-    projects().getProjectSerializationTask().setName("Save project");
-
     auto variantMap = Serializable::toVariantMap();
     
     _projectMetaAction.insertIntoVariantMap(variantMap);
@@ -150,6 +154,12 @@ QVariantMap Project::toVariantMap() const
     _statusBarOptionsAction.insertIntoVariantMap(variantMap);
 
     plugins().insertIntoVariantMap(variantMap);
+
+    auto dataHierarchyPlan = dataHierarchy().fromVariantMapWorkflow(variantMap);
+
+    auto result = dataHierarchyPlan.executeBlocking(mv::projects().getWorkflowPlanExecutor(), WorkflowExecutionContext::current());
+
+    //variantMap[dataHierarchy().getSerializationName()] = dataHierarchyPlan.getWorkflowContextAs<DataHierarchyManagerSaveContext>()->getDataHierachyMap();
     dataHierarchy().insertIntoVariantMap(variantMap);
     actions().insertIntoVariantMap(variantMap);
     events().insertIntoVariantMap(variantMap);

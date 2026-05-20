@@ -14,6 +14,8 @@
 #include <QWidgetAction>
 #include <QPointer>
 
+#include "util/WorkflowPlan.h"
+
 class QLabel;
 class QMenu;
 
@@ -841,7 +843,7 @@ public: // Serialization
 
     /**
      * Load widget action from variant map
-     * @param Variant map representation of the widget action
+     * @param variantMap Variant map representation of the widget action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 

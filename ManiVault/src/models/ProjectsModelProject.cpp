@@ -359,7 +359,7 @@ void ProjectsModelProject::determineDownloadSize()
                 emit downloadSizeDetermined(_serverDownloadSize);
             });
         }
-        catch (const BaseException& exception) {
+        catch (const ManiVaultException& exception) {
             emit downloadSizeDetermined(0);
 
             qCritical() << "Unable to determine download size for" << getUrl().toDisplayString() << ":" << exception.what();
@@ -404,7 +404,7 @@ void ProjectsModelProject::determineLastModified()
                 emit lastModifiedDetermined(_serverLastModified);
             });
         }
-        catch (const BaseException& exception) {
+        catch (const ManiVaultException& exception) {
             emit lastModifiedDetermined({});
 
             qCritical() << "Unable to determine download last modified for" << getUrl().toDisplayString() << ":" << exception.what();

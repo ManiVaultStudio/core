@@ -5,6 +5,7 @@
 #include "TextData.h"
 
 #include <Application.h>
+#include <util/Serialization.h>
 
 #include "InfoAction.h"
 

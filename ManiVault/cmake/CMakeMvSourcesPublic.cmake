@@ -264,6 +264,7 @@ set(PUBLIC_TOOLBAR_ACTIONS_FILES
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/Actions.h
+    src/actions/ActionOperation.h
     src/actions/DatasetPickerAction.h
     src/actions/PluginPickerAction.h
     src/actions/ImageAction.h
@@ -277,6 +278,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/StatusBarAction.h
     src/actions/PluginStatusBarAction.h
     src/actions/EventAction.h
+    src/actions/CodecSettingsAction.h
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
@@ -293,6 +295,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     src/actions/StatusBarAction.cpp
     src/actions/PluginStatusBarAction.cpp
     src/actions/EventAction.cpp
+    src/actions/CodecSettingsAction.cpp
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES
@@ -359,6 +362,10 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/StartPageConfigurationAction.h
     src/actions/BrandingConfigurationAction.h
     src/actions/ProjectsConfigurationAction.h
+    src/actions/ActionHooks.h
+    src/actions/ActionRecipeProvider.h
+    src/actions/ActionRecipeComposer.h
+    src/actions/ActionRecipeContext.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -405,6 +412,10 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/StartPageConfigurationAction.cpp
     src/actions/BrandingConfigurationAction.cpp
     src/actions/ProjectsConfigurationAction.cpp
+    src/actions/ActionHooks.cpp
+    src/actions/ActionRecipeProvider.cpp
+    src/actions/ActionRecipeComposer.cpp
+    src/actions/ActionRecipeContext.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
@@ -581,6 +592,39 @@ set(PUBLIC_UTIL_HEADERS
     src/util/SplashScreenBridge.h
     src/util/StandardPaths.h
     src/util/CustomAssetsUrlSchemeHandler.h
+    src/util/BlobCodec.h
+    src/util/BlobCodecFactory.h
+    src/util/CodecRegistry.h
+    src/util/CodecActionBinding.h
+    src/util/DecodeExecutor.h
+    src/util/SeverityLevel.h
+    src/util/WorkflowExecutionContext.h
+    src/util/WorkflowExecutionScope.h
+    src/util/WorkflowContextBase.h
+    src/util/WorkflowResult.h
+    src/util/WorkflowMessage.h
+    src/util/WorkflowReportNode.h
+    src/util/WorkflowProgressNode.h
+    src/util/WorkflowReporter.h
+    src/util/WorkflowExecutionNotifier.h
+    src/util/WorkflowExecutionState.h
+    src/util/WorkflowResultFuture.h
+    src/util/WorkflowGuiThreadDispatcher.h
+    src/util/DecodeRequestState.h
+    src/util/WorkflowPlan.h
+    src/util/AbstractWorkflowPlanExecutor.h
+    src/util/OperationContext.h
+    src/util/OperationContextScope.h
+    src/util/WorkflowExecutionOptions.h
+    src/util/WorkflowMetric.h
+    src/util/WorkflowExecutionMetrics.h
+    src/util/WorkflowResultRegistry.h
+    src/util/WorkflowResultDialog.h
+    src/util/WorkflowTraceEvent.h
+    src/util/AbstractWorkflowTraceSink.h
+    src/util/WorkflowConsoleTraceSink.h
+    src/util/WorkflowChromeTraceSink.h
+    src/util/AsyncVariantMapResult.h
 )
 
 if(APPLE)
@@ -644,6 +688,38 @@ set(PUBLIC_UTIL_SOURCES
 	src/util/SplashScreenBridge.cpp
 	src/util/StandardPaths.cpp
 	src/util/CustomAssetsUrlSchemeHandler.cpp
+	src/util/BlobCodec.cpp
+    src/util/BlobCodecFactory.cpp
+    src/util/CodecRegistry.cpp
+    src/util/CodecActionBinding.cpp
+    src/util/DecodeExecutor.cpp
+    src/util/SeverityLevel.cpp
+    src/util/WorkflowContextBase.cpp
+    src/util/WorkflowResult.cpp
+    src/util/WorkflowExecutionContext.cpp
+    src/util/WorkflowExecutionScope.cpp
+    src/util/WorkflowMessage.cpp
+    src/util/WorkflowReportNode.cpp
+    src/util/WorkflowProgressNode.cpp
+    src/util/WorkflowReporter.cpp
+    src/util/WorkflowExecutionNotifier.cpp
+    src/util/WorkflowExecutionState.cpp
+    src/util/WorkflowResultFuture.cpp
+    src/util/DecodeRequestState.cpp
+    src/util/WorkflowPlan.cpp
+    src/util/WorkflowGuiThreadDispatcher.cpp
+    src/util/AbstractWorkflowPlanExecutor.cpp
+    src/util/OperationContext.cpp
+    src/util/OperationContextScope.cpp
+    src/util/WorkflowExecutionOptions.cpp
+    src/util/WorkflowMetric.cpp
+    src/util/WorkflowExecutionMetrics.cpp
+    src/util/WorkflowResultRegistry.cpp
+    src/util/WorkflowResultDialog.cpp
+    src/util/WorkflowTraceEvent.cpp
+    src/util/AbstractWorkflowTraceSink.cpp
+    src/util/WorkflowConsoleTraceSink.cpp
+    src/util/WorkflowChromeTraceSink.cpp
 )
 
 if(APPLE)
@@ -700,14 +776,12 @@ set(PUBLIC_PROJECT_HEADERS
     src/Project.h
     src/ProjectMetaAction.h
     src/ProjectCompressionAction.h
-    src/ProjectSerializationTask.h
 )
 
 set(PUBLIC_PROJECT_SOURCES
     src/Project.cpp
     src/ProjectMetaAction.cpp
     src/ProjectCompressionAction.cpp
-    src/ProjectSerializationTask.cpp
 )
 
 set(PUBLIC_PROJECT_FILES
@@ -737,6 +811,7 @@ set(PUBLIC_DATASET_HEADERS
     src/Dataset.h
     src/DatasetPrivate.h
     src/DatasetsMimeData.h
+    src/PropertiesSerializer.h
 )
 
 set(PUBLIC_DATASET_SOURCES
@@ -746,6 +821,7 @@ set(PUBLIC_DATASET_SOURCES
     src/Dataset.cpp
     src/DatasetPrivate.cpp
     src/DatasetsMimeData.cpp
+    src/PropertiesSerializer.cpp
 )
 
 set(PUBLIC_DATASET_FILES
@@ -1126,6 +1202,23 @@ set(PUBLIC_HUD_MODEL_FILES
     ${PUBLIC_HUD_MODEL_SOURCES}
 )
 
+set(PUBLIC_WORKFLOW_MESSAGES_MODEL_HEADERS
+    src/models/AbstractWorkflowMessagesModel.h
+    src/models/WorkflowMessagesListModel.h
+    src/models/WorkflowMessagesFilterModel.h
+)
+
+set(PUBLIC_WORKFLOW_MESSAGES_MODEL_SOURCES
+    src/models/AbstractWorkflowMessagesModel.cpp
+    src/models/WorkflowMessagesListModel.cpp
+    src/models/WorkflowMessagesFilterModel.cpp
+)
+
+set(PUBLIC_WORKFLOW_MESSAGES_MODEL_FILES
+    ${PUBLIC_WORKFLOW_MESSAGES_MODEL_HEADERS}
+    ${PUBLIC_WORKFLOW_MESSAGES_MODEL_SOURCES}
+)
+
 set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/GlobalSettingsGroupAction.h
     src/ParametersSettingsAction.h
@@ -1194,6 +1287,21 @@ set(PUBLIC_TASK_FILES
     ${PUBLIC_TASK_SOURCES}
 )
 
+set(PUBLIC_EXCEPTION_HEADERS
+    src/Exception/ManiVaultException.h
+    src/Exception/SerializationException.h
+)
+
+set(PUBLIC_EXCEPTION_SOURCES
+    src/Exception/ManiVaultException.cpp
+    src/Exception/SerializationException.cpp
+)
+    
+set(PUBLIC_EXCEPTION_FILES
+    ${PUBLIC_EXCEPTION_HEADERS}
+    ${PUBLIC_EXCEPTION_SOURCES}
+)
+
 # Automatically generated during cmake config
 set(PUBLIC_VERSION_HEADERS
     src/ManiVaultVersion.h
@@ -1250,8 +1358,10 @@ set(PUBLIC_HEADERS
     ${PUBLIC_SCRIPTS_MODEL_HEADERS}
     ${PUBLIC_RECENT_FILES_MODEL_HEADERS}
     ${PUBLIC_HUD_MODEL_HEADERS}
+    ${PUBLIC_WORKFLOW_MESSAGES_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
+    ${PUBLIC_EXCEPTION_HEADERS}
     ${PUBLIC_NOTIFICATIONS_HEADERS}
     ${PUBLIC_VERSION_HEADERS}
     ${PUBLIC_GLOBALS_HEADERS}
@@ -1303,8 +1413,10 @@ set(PUBLIC_SOURCES
     ${PUBLIC_SCRIPTS_MODEL_SOURCES}
     ${PUBLIC_RECENT_FILES_MODEL_SOURCES}
     ${PUBLIC_HUD_MODEL_SOURCES}
+    ${PUBLIC_WORKFLOW_MESSAGES_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
     ${PUBLIC_TASK_SOURCES}
+    ${PUBLIC_EXCEPTION_SOURCES}
     ${PUBLIC_NOTIFICATIONS_SOURCES}
     ${PUBLIC_HEADERS}
 )
@@ -1366,9 +1478,11 @@ source_group(Models\\LearningCenter\\Tutorials FILES ${PUBLIC_LEARNING_CENTER_TU
 source_group(Models\\Projects FILES ${PUBLIC_PROJECTS_MODEL_FILES})
 source_group(Models\\ColorSchemes FILES ${PUBLIC_COLOR_SCHEMES_MODEL_FILES})
 source_group(Models\\Scripts FILES ${PUBLIC_SCRIPTS_MODEL_FILES})
+source_group(Models\\WorkflowMessages FILES ${PUBLIC_WORKFLOW_MESSAGES_MODEL_FILES})
 source_group(Models\\HardwareSpec FILES ${PUBLIC_HARDWARE_SPEC_MODEL_FILES})
 source_group(Models\\RecentFiles FILES ${PUBLIC_RECENT_FILES_MODEL_FILES})
 source_group(Models\\HUD FILES ${PUBLIC_HUD_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
 source_group(Task FILES ${PUBLIC_TASK_FILES})
+source_group(Exception FILES ${PUBLIC_EXCEPTION_FILES})
 source_group(Notifications FILES ${PUBLIC_NOTIFICATIONS_FILES})

@@ -4,19 +4,64 @@
 
 #include "Cluster.h"
 
+#include <CoreInterface.h>
+
 #include <QUuid>
 #include <QImage>
 
 #include <stdexcept>
 
+/*
+QDataStream& operator<<(QDataStream& out, const Cluster& cluster)
+{
+    out << kClusterStreamVersion;
+
+    out << cluster._name;
+    out << cluster._id;
+    out << cluster._color;
+
+    writeRawVector(out, cluster._indices);
+    writeRawVector(out, cluster._median);
+    writeRawVector(out, cluster._mean);
+    writeRawVector(out, cluster._stddev);
+
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, Cluster& cluster)
+{
+    quint32 version = 0;
+    in >> version;
+
+    if (in.status() != QDataStream::Ok)
+        return in;
+
+    switch (version) {
+	    case 1:
+	        in >> cluster._name;
+	        in >> cluster._id;
+	        in >> cluster._color;
+
+	        readRawVector(in, cluster._indices);
+	        readRawVector(in, cluster._median);
+	        readRawVector(in, cluster._mean);
+	        readRawVector(in, cluster._stddev);
+	        break;
+
+	    default:
+	        in.setStatus(QDataStream::ReadCorruptData);
+	        break;
+    }
+
+    return in;
+}
+*/
+
 Cluster::Cluster(const QString& name /*= ""*/, const QColor& color /*= Qt::gray*/, const std::vector<std::uint32_t>& indices /*= std::vector<std::uint32_t>()*/) :
     _name(name),
     _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _color(color),
-    _indices(indices),
-    _median(),
-    _mean(),
-    _stddev()
+    _indices(indices)
 {
 }
 
@@ -102,5 +147,9 @@ void Cluster::colorizeClusters(QVector<Cluster>& clusters, const QImage& colorMa
 
 Cluster Cluster::copy() const
 {
-    return Cluster(_name, _color, _indices);
+    return {
+        _name,
+        _color,
+        _indices
+    };
 }

@@ -23,11 +23,39 @@
 #include <QVariant>
 #include <QRegularExpression>
 #include <QFileInfo>
+#include <QToolTip>
 
 #include <exception>
+#include <algorithm>
 
 namespace mv::util
 {
+
+    struct MemoryStats
+    {
+        double rssMB = 0.0;        // Resident Set Size
+        double privateMB = 0.0;    // Private / committed (if available)
+    };
+
+#ifdef Q_OS_WIN
+	#include <windows.h>
+	#include <psapi.h>
+
+    MemoryStats getMemoryStats()
+    {
+        PROCESS_MEMORY_COUNTERS_EX pmc;
+        GetProcessMemoryInfo(
+            GetCurrentProcess(),
+            reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&pmc),
+            sizeof(pmc)
+        );
+
+        MemoryStats s;
+        s.rssMB = pmc.WorkingSetSize / 1024.0 / 1024.0;
+        s.privateMB = pmc.PrivateUsage / 1024.0 / 1024.0;
+        return s;
+    }
+#endif
 
 QString getIntegerCountHumanReadable(const double& count)
 {
@@ -101,6 +129,45 @@ QString getNoBytesHumanReadable(std::uint64_t byteCount, bool useIEC /*= true*/)
     return QString::number(size, 'f', 2) + " " + units[i];
 }
 
+QString getElapsedTimeHumanReadable(std::uint64_t ms, bool compact)
+{
+    if (ms < 1000)
+    {
+        double seconds = ms / 1000.0;
+
+        QString s = QString::number(seconds, 'f', 2);
+
+        s.remove(QRegularExpression("0+$"));
+        s.remove(QRegularExpression("\\.$"));
+
+        return s + "s";
+    }
+
+    const std::uint64_t totalSeconds = ms / 1000;
+    const std::uint64_t seconds = totalSeconds % 60;
+    const std::uint64_t minutes = (totalSeconds / 60) % 60;
+    const std::uint64_t hours = (totalSeconds / 3600) % 24;
+    const std::uint64_t days = totalSeconds / 86400;
+
+    QStringList parts;
+
+    if (days > 0)
+        parts << QString("%1d").arg(days);
+
+    if (hours > 0)
+        parts << QString("%1h").arg(hours);
+
+    if (minutes > 0)
+        parts << QString("%1m").arg(minutes);
+
+    if (seconds > 0 || (!compact && parts.isEmpty()))
+        parts << QString("%1s").arg(seconds);
+
+    if (parts.isEmpty())
+        return "0s";
+
+    return parts.join(" ");
+}
 
 QString getTabIndentedMessage(QString message, const std::uint32_t& tabIndex)
 {
@@ -711,4 +778,177 @@ QString getFilenameFromWaterButlerMetadata(const QByteArray& raw)
 
 	return {};
 }
+
+void printLine(const QString& key, const QVariant& value /*= {}*/, int indent /*= 0*/, int colonColumn /*= 24*/)
+{
+    const QString indentStr(indent, ' ');
+    const QString left = indentStr + key;
+
+    if (!value.isValid()) {
+        qDebug().noquote() << left;
+        return;
+    }
+
+    int spaces = colonColumn - left.size();
+
+    if (spaces < 1) {
+        qDebug().noquote() << left + " : " + value.toString();
+        return;
+    }
+
+    qDebug().noquote() << left + QString(spaces, ' ') + ": " + value.toString();
+}
+
+void prettyPrintVariantMap(const QVariantMap& variantMap)
+{
+    qDebug().noquote() << QJsonDocument(QJsonObject::fromVariantMap(variantMap)).toJson(QJsonDocument::Indented);
+}
+
+QString variantMapToPrettyString(const QVariantMap& variantMap, int indent)
+{
+    return QJsonDocument(QJsonObject::fromVariantMap(variantMap)).toJson(QJsonDocument::Indented);
+}
+
+static QString cssColor(QPalette::ColorRole role)
+{
+    const auto pal = QToolTip::palette();
+    return pal.color(QPalette::Active, role).name();
+}
+
+QString variantMapToHtml(const QVariantMap& map, int depth /*= 0*/, int maxDepth /*= 2*/)
+{
+    const auto pal = QToolTip::palette();
+
+    const QString bg = pal.color(QPalette::ToolTipBase).name();
+    const QString text = pal.color(QPalette::ToolTipText).name();
+
+    const QString altBg = QColor(bg).darker(108).name();
+    const QString key = QColor(text).lighter(115).name();
+
+    if (depth >= maxDepth) {
+        return QString("<span style='color:%1; font-style:italic;'>{%2 keys}</span>")
+            .arg(text, QString::number(map.size()));
+    }
+
+    auto html = QString("<table style='border-collapse:collapse; font-family:monospace; font-size:10px; color:%1; background:%2; border:none;'>")
+    	.arg(text, bg);
+
+    int row = 0;
+
+    for (auto it = map.begin(); it != map.end(); ++it, ++row) {
+        const QString rowBg = (row % 2 == 0) ? bg : altBg;
+
+        html += QString(
+            "<tr style='background:%1;'>"
+	            "<td style='padding:2px 8px; font-weight:bold; color:%2; vertical-align:top; white-space:nowrap;'>%4</td>"
+	            "<td style='padding:2px 8px;color:%5; vertical-align:top;'>%6</td>"
+            "</tr>"
+        ).arg(
+            rowBg,
+            key,
+            it.key().toHtmlEscaped(),
+            text,
+            variantToHtml(it.value(), depth + 1, maxDepth)
+        );
+    }
+
+    html += "</table>";
+    return html;
+}
+
+QString variantListToHtml(const QVariantList& list, int depth, int maxDepth)
+{
+    if (depth >= maxDepth) {
+        return QString("<i>[%1 items]</i>").arg(list.size());
+    }
+
+    QString html = "<ul style='margin:0; padding-left:16px;'>";
+
+    for (const auto& v : list) {
+        html += QString("<li>%1</li>")
+            .arg(variantToHtml(v, depth + 1, maxDepth));
+    }
+
+    html += "</ul>";
+    return html;
+}
+
+QString variantToHtml(const QVariant& value, int depth, int maxDepth)
+{
+    switch (value.metaType().id()) {
+	    case QMetaType::QVariantMap:
+	        return variantMapToHtml(value.toMap(), depth, maxDepth);
+
+	    case QMetaType::QVariantList:
+	        return variantListToHtml(value.toList(), depth, maxDepth);
+
+	    default:
+	        return value.toString().toHtmlEscaped();
+    }
+}
+
+void logMemory(const QString& label)
+{
+    const auto stats = getMemoryStats();
+
+    qDebug().noquote()
+        << label
+        << "RSS MB:" << stats.rssMB
+        << "Private MB:" << stats.privateMB;
+}
+
+QVariant findNested(const QVariantMap& root, const QStringList& path)
+{
+	QVariant current = root;
+
+	for (const QString& key : path) {
+		if (!current.canConvert<QVariantMap>())
+			return {};
+
+		const QVariantMap map = current.toMap();
+
+		auto it = map.find(key);
+
+		if (it == map.end())
+			return {};
+
+		current = it.value();
+	}
+
+	return current;
+}
+
+QString describeVariantMapKeys(const QVariantMap& map, qsizetype maxKeys)
+{
+	QStringList keys = map.keys();
+
+	std::sort(keys.begin(), keys.end());
+
+	QStringList shownKeys = keys.mid(0, maxKeys);
+
+	QString suffix;
+
+	if (keys.size() > maxKeys) {
+		suffix = QString(" ... and %1 more").arg(keys.size() - maxKeys);
+	}
+
+	return QString("[%1%2]").arg(shownKeys.join(", "), suffix);
+}
+
+QString dumpHex(const QByteArray& bytes, qsizetype count)
+{
+	QStringList hex;
+
+	const qsizetype n = qMin(count, bytes.size());
+
+	for (qsizetype i = 0; i < n; ++i)
+	{
+		hex << QString("%1")
+		       .arg(static_cast<unsigned char>(bytes[i]), 2, 16, QLatin1Char('0'))
+		       .toUpper();
+	}
+
+	return hex.join(' ');
+}
+
 }

@@ -102,6 +102,8 @@ public:
      */
     void unregisterEventListener(EventListener* eventListener) override;
 
+    bool areDatasetsPartOfSelectionGroup(Dataset<DatasetImpl> d1, Dataset<DatasetImpl> d2);
+
 public: // Serialization
 
     /**

@@ -225,18 +225,6 @@ QVariantMap DataHierarchyItem::toVariantMap() const
     {
     }
 
-    std::uint32_t childSortIndex = 0;
-
-    for (auto child : getChildren()) {
-        auto dataHierarchyItemMap = child->toVariantMap();
-
-        dataHierarchyItemMap["SortIndex"] = childSortIndex;
-
-        children[child->getDataset()->getId()] = dataHierarchyItemMap;
-
-        childSortIndex++;
-    }
-
     variantMap["Name"]      = _dataset->text();
     variantMap["Expanded"]  = QVariant::fromValue(_expanded);
     variantMap["Visible"]   = QVariant::fromValue(isVisible());

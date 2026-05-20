@@ -113,19 +113,40 @@ protected:
 public: // Serialization
 
     /**
-     * Load widget action from variant
-     * @param Variant representation of the widget action
+     * Load the data hierarchy manager state from a variant map.
+     *
+     * @note See the documentation of Serializable::fromVariantMap() for important information about the expected behavior of this function.
+     * @param variantMap Variant map representation of the object state.
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
     /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
+     * Create a workflow plan that loads the data hierarchy manager state from a variant map.
+     *
+     * @note See the documentation of Serializable::fromVariantMapWorkflow() for important information about the expected behavior of this function.
+     * @param variantMap Variant map representation of the object state.
+     * @return Workflow plan that restores the object state when executed.
+     */
+    WorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap) override;
+
+    /**
+     * Create a workflow plan that serializes the data hierarchy manager state to a variant map.
+     *
+     * @note See the documentation of Serializable::toVariantMapWorkflow() for important information about the expected behavior of this function.
+     * @return Workflow plan that serializes the data hierarchy manager state when executed.
+     */
+    WorkflowPlan toVariantMapWorkflow() const override;
+
+    /**
+     * Serialize the data hierarchy manager state to a variant map.
+     *
+     * @note See the documentation of Serializable::toVariantMap() for important information about the expected behavior of this function.
+     * @return Variant map representation of the object state.
      */
     QVariantMap toVariantMap() const override;
 
 private:
-    std::vector<std::unique_ptr<DataHierarchyItem>>     _items;      /** Unique pointers to data hierarchy items */
+    std::vector<std::unique_ptr<DataHierarchyItem>>     _items;                 /** Unique pointers to data hierarchy items */
 };
 
 }

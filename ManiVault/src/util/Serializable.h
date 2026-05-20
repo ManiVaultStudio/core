@@ -5,13 +5,26 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
-
-#include "Serialization.h"
+//#include "WorkflowPlan.h"
 
 #include <QString>
 #include <QJsonDocument>
+#include <QPointer>
+
+#include "WorkflowPlan.h"
+
+namespace mv
+{
+    class Task;
+}
 
 namespace mv::util {
+
+/** Result of an asynchronous toVariantMap() operation */
+struct AsyncToVariantMapResult;
+
+/** Result of an asynchronous fromVariantMap() operation */
+struct AsyncFromVariantMapResult;
 
 /**
  * Serializable class
@@ -36,6 +49,7 @@ public:
         From,   /** From variant map to serializable object */
         To      /** From serializable object to variant map */
     };
+
 public:
 
     /**
@@ -73,23 +87,109 @@ public:
     void setSerializationName(const QString& serializationName);
 
     /**
-     * Load from variant map
-     * @param variantMap Variant map
+     * Load the object state from a variant map.
+     *
+     * This function is strictly synchronous. When this function returns, all state
+     * represented by the variant map must have been fully applied to the object.
+     *
+     * Implementations must not start background work, schedule workflow jobs, or
+     * return before the object is in a fully restored and usable state.
+     *
+     * If loading requires long-running, parallel, or asynchronous work, implement
+     * fromVariantMapWorkflow() instead and keep this function as the blocking
+     * fallback.
+     *
+     * @param variantMap Variant map representation of the object state.
      */
     virtual void fromVariantMap(const QVariantMap& variantMap);
 
     /**
-     * Load from variant map located in \p parentVariantMap at the serialization name
-     * @param parentVariantMap Parent variant map
-     * @param ignoreLoadingErrors Whether to ignore loading errors (default: false)
+     * Create a workflow plan that loads the object state from a variant map.
+     *
+     * This function only constructs and returns a workflow plan. It must not execute
+     * the plan, schedule background work, or modify object state except for trivial
+     * preparation required to build the plan.
+     *
+     * The caller owns the scheduling decision and may execute the returned workflow
+     * blocking, asynchronously, or as a child of another workflow execution context.
+     *
+     * Implement this function when restoring the object involves long-running,
+     * parallelizable, staged, or progress-reporting work.
+     *
+     * The default implementation may return a simple workflow that calls
+     * fromVariantMap() synchronously.
+     *
+     * @param variantMap Variant map representation of the object state.
+     * @return Workflow plan that restores the object state when executed.
+     */
+    virtual WorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap);
+
+    /**
+     * Load the object state from a parent variant map.
+     *
+     * This utility function looks up the variant map entry associated with the
+     * object's serialization name, extracts the corresponding child variant map,
+     * and forwards it to fromVariantMap().
+     *
+     * If no entry with the serialization name exists:
+     *
+     * - an exception is thrown when ignoreLoadingErrors is false
+     * - the function returns silently when ignoreLoadingErrors is true
+     *
+     * This function is synchronous and blocking, matching the contract of
+     * fromVariantMap().
+     *
+     * @param parentVariantMap Parent variant map containing serialized child objects.
+     * @param ignoreLoadingErrors Whether missing or invalid serialized data should
+     * be ignored instead of causing a loading failure (default: false).
      */
     virtual void fromParentVariantMap(const QVariantMap& parentVariantMap, bool ignoreLoadingErrors = false);
 
     /**
-     * Save to variant map
-     * @return Variant map
-     */
+	 * Serialize the object state to a variant map.
+	 *
+	 * This function returns a complete and self-contained variant map
+	 * representation of the object state suitable for persistence,
+	 * reconstruction, or transfer.
+	 *
+	 * The returned variant map should contain all data required by
+	 * fromVariantMap() to fully restore the object.
+	 *
+	 * This function is synchronous and blocking. Implementations must not
+	 * schedule asynchronous work or defer serialization to background tasks.
+	 *
+	 * For large, staged, or parallelizable serialization operations,
+	 * implement toVariantMapWorkflow() instead and keep this function as
+	 * the blocking fallback.
+	 *
+	 * @return Variant map representation of the object state.
+	 */
     virtual QVariantMap toVariantMap() const;
+
+    /**
+	 * Create a workflow plan that serializes the object state to a variant map.
+	 *
+	 * This function only constructs and returns a workflow plan. It must not
+	 * execute the plan, schedule background work, or perform deferred execution
+	 * outside the returned workflow structure.
+	 *
+	 * The caller owns the execution and scheduling strategy of the returned
+	 * workflow plan and may execute it blocking, asynchronously, or as part
+	 * of another workflow hierarchy.
+	 *
+	 * Implement this function when serialization involves long-running,
+	 * staged, parallelizable, or progress-reporting work.
+	 *
+	 * The default implementation may return a simple workflow that calls
+	 * toVariantMap() synchronously.
+	 *
+	 * The resulting workflow is expected to produce a complete and
+	 * self-contained variant map representation of the object state
+	 * equivalent to the result of toVariantMap().
+	 *
+	 * @return Workflow plan that serializes the object state when executed.
+	 */
+    virtual WorkflowPlan toVariantMapWorkflow() const;
 
     /**
      * Save into \p variantMap
@@ -149,6 +249,57 @@ public:
      */
     std::int32_t getSerializationCountTo() const;
 
+    /**
+     * Handle the case where an item with a specific key is not found in a variant map (e.g. by throwing an exception with an informative error message)
+     * @param serializable Serializable object for which the key was not found in the map
+     * @param map QVariantMap that should contain the key
+     * @param key Item name that was not found in the map
+     */
+    static void handleKeyNotFoundInVariantMap(const Serializable& serializable, const QVariantMap& map, const QString& key);
+
+public: // Task related
+
+    /**
+     * Get task that the serializable object belongs to (if any)
+     * @return Task that the serializable object belongs to (if any)
+     */
+    QPointer<Task> getTask() const;
+
+    /**
+     * Whether the serializable object belongs to a task
+     * @return Whether the serializable object belongs to a task
+     */
+    bool hasTask() const;
+
+    /**
+     * Set task that the serializable object belongs to (if any)
+     * @param task Task that the serializable object belongs to (if any)
+     */
+    void setTask(Task* task);
+
+public:
+
+    /**
+     * Convenience wrapper that reports to the currently active operation context, if any.
+     * @param scope Scope of the warning (e.g. the name of the serializable object or the name of the property that is being serialized)
+     * @param message Warning message
+     */
+    static void reportSerializationWarning(const QString& scope, const QString& message);
+
+    /**
+     * Convenience wrapper that reports to the currently active operation context, if any.
+     * @param scope Scope of the error (e.g. the name of the serializable object or the name of the property that is being serialized)
+     * @param message Error message
+     */
+    static void reportSerializationError(QString scope, QString message);
+
+    /**
+     * Convenience wrapper that reports to the currently active operation context, if any.
+     * @param scope Scope of the fatal error (e.g. the name of the serializable object or the name of the property that is being serialized)
+     * @param message Fatal error message
+     */
+    static void reportFatalSerializationError(QString scope, QString message);
+
 protected: // Serialization
 
     /**
@@ -207,9 +358,10 @@ public: // Operators
     }
 
 private:
-    QString         _id;                        /** Globally unique identifier of the serializable object */
-    QString         _serializationName;         /** Serialization name */
-    std::int32_t    _serializationCounter[2];   /** Serialization counter (used to query how many times the action is serialized to- and from) */
+    QString             _id;                        /** Globally unique identifier of the serializable object */
+    QString             _serializationName;         /** Serialization name */
+    std::int32_t        _serializationCounter[2];   /** Serialization counter (used to query how many times the action is serialized to- and from) */
+    QPointer<Task>      _task;                      /** Task that the serializable object belongs to (if any) */
 };
 
 }

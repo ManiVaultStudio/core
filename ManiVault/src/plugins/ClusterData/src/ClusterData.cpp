@@ -19,9 +19,9 @@
 
 #include <set>
 
-Q_PLUGIN_METADATA(IID "studio.manivault.ClusterData")
+#include "ClustersSerializer.h"
 
-using namespace mv::util;
+Q_PLUGIN_METADATA(IID "studio.manivault.ClusterData")using namespace mv::util;
 
 ClusterData::ClusterData(const mv::plugin::PluginFactory* factory) :
     mv::plugin::RawData(factory, ClusterType)
@@ -121,6 +121,20 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
+    const auto dataMap                      = variantMap["Data"].toMap();
+    const auto projectApplicationVersion    = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
+
+    if (projectApplicationVersion < Version(1, 5, 0)) {
+        fromVariantMapPre150(variantMap);
+    } else {
+        ClusterSerializer::fromVariantMap(dataMap["Clusters"].toMap(), _clusters);
+    }
+}
+
+void ClusterData::fromVariantMapPre150(const QVariantMap& variantMap)
+{
+    WidgetAction::fromVariantMap(variantMap);
+
     const auto dataMap = variantMap["Data"].toMap();
 
     variantMapMustContain(dataMap, "IndicesRawData");
@@ -131,8 +145,10 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 
     packedIndices.resize(dataMap["NumberOfIndices"].toInt());
 
+    qDebug() << "========" << dataMap["NumberOfIndices"].toInt();
     // Convert raw data to indices
-    populateDataBufferFromVariantMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data());
+    if (!packedIndices.empty())
+		populateDataBufferFromVariantMapToRawBufferSync(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), packedIndices.size() * sizeof(std::uint32_t));
 
     if (dataMap.contains("ClustersRawData")) {
         QByteArray clustersByteArray;
@@ -142,8 +158,9 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
         const auto clustersRawDataSize = dataMap["ClustersRawDataSize"].toInt();
 
         clustersByteArray.resize(clustersRawDataSize);
-
-        populateDataBufferFromVariantMap(dataMap["ClustersRawData"].toMap(), (char*)clustersByteArray.data());
+        
+        qDebug() << "---ClusterData::fromVariantMapPre150---ClustersRawData";
+        populateDataBufferFromVariantMapToRawBufferSync(dataMap["ClustersRawData"].toMap(), (char*)clustersByteArray.data(), clustersByteArray.size());
 
         QVariantList clusters;
 
@@ -162,15 +179,15 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
             cluster.setId(clusterMap["ID"].toString());
             cluster.setColor(clusterMap["Color"].toString());
 
-            const auto globalIndicesOffset  = clusterMap["GlobalIndicesOffset"].toInt();
-            const auto numberOfIndices      = clusterMap["NumberOfIndices"].toInt();
+            const auto globalIndicesOffset = clusterMap["GlobalIndicesOffset"].toInt();
+            const auto numberOfIndices = clusterMap["NumberOfIndices"].toInt();
 
             cluster.getIndices() = std::vector<std::uint32_t>(packedIndices.begin() + globalIndicesOffset, packedIndices.begin() + globalIndicesOffset + numberOfIndices);
 
             ++clusterIndex;
         }
     }
-    
+
     // For backwards compatibility
     if (dataMap.contains("Clusters")) {
         const auto clustersList = dataMap["Clusters"].toList();
@@ -178,7 +195,7 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
         _clusters.resize(clustersList.count());
 
         for (const auto& clusterVariant : clustersList) {
-            const auto clusterMap   = clusterVariant.toMap();
+            const auto clusterMap = clusterVariant.toMap();
             const auto clusterIndex = clustersList.indexOf(clusterMap);
 
             auto& cluster = _clusters[clusterIndex];
@@ -187,59 +204,24 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
             cluster.setId(clusterMap["ID"].toString());
             cluster.setColor(clusterMap["Color"].toString());
 
-            const auto globalIndicesOffset  = clusterMap["GlobalIndicesOffset"].toInt();
-            const auto numberOfIndices      = clusterMap["NumberOfIndices"].toInt();
+            const auto globalIndicesOffset = clusterMap["GlobalIndicesOffset"].toInt();
+            const auto numberOfIndices = clusterMap["NumberOfIndices"].toInt();
 
             cluster.getIndices() = std::vector<std::uint32_t>(packedIndices.begin() + globalIndicesOffset, packedIndices.begin() + globalIndicesOffset + numberOfIndices);
         }
     }
 }
 
+
+
 QVariantMap ClusterData::toVariantMap() const
 {
-    auto variantMap = WidgetAction::toVariantMap();
+    auto variantMap = RawData::toVariantMap();
 
-    std::vector<std::uint32_t> indices;
-
-    for (const auto& cluster : _clusters)
-        indices.insert(indices.end(), cluster.getIndices().begin(), cluster.getIndices().end());
-
-    QVariantMap indicesRawData = rawDataToVariantMap((char*)indices.data(), indices.size() * sizeof(std::uint32_t), true);
-
-    std::size_t globalIndicesOffset = 0;
-
-    QVariantList clusters;
-
-    clusters.reserve(_clusters.count());
-
-    for (const auto& cluster : _clusters) {
-        const auto numberOfIndicesInCluster = cluster.getIndices().size();
-
-        clusters.push_back(QVariantMap({
-            { "Name", cluster.getName() },
-            { "ID", cluster.getId() },
-            { "Color", cluster.getColor() },
-            { "GlobalIndicesOffset", QVariant::fromValue(globalIndicesOffset) },
-            { "NumberOfIndices", QVariant::fromValue(numberOfIndicesInCluster) }
-        }));
-
-        globalIndicesOffset += numberOfIndicesInCluster;
-    }
-
-    // https://stackoverflow.com/questions/19537186/serializing-qvariant-through-qdatastream
-
-    QByteArray clustersByteArray;
-    QDataStream clustersDataStream(&clustersByteArray, QIODevice::WriteOnly);
-
-    clustersDataStream << clusters;
-
-    QVariantMap clustersRawData = rawDataToVariantMap((char*)clustersByteArray.data(), clustersByteArray.size(), true);
+    ClusterSerializer::toVariantMap(_clusters);
 
     variantMap.insert({
-        { "ClustersRawData", clustersRawData },
-        { "ClustersRawDataSize", clustersByteArray.size() },
-        { "IndicesRawData", indicesRawData },
-        { "NumberOfIndices", QVariant::fromValue(indices.size()) }
+    	{ "Clusters", ClusterSerializer::toVariantMap(_clusters) }
     });
 
     return variantMap;
@@ -321,9 +303,23 @@ std::vector<std::uint32_t> Clusters::getSelectedIndices() const
 
 void Clusters::fromVariantMap(const QVariantMap& variantMap)
 {
-    DatasetImpl::fromVariantMap(variantMap);
+    const auto projectApplicationVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
-    getRawData<ClusterData>()->fromVariantMap(variantMap);
+    if (projectApplicationVersion < Version(1, 5, 0)) {
+        fromVariantMapPre150(variantMap);
+    }
+    else {
+        DatasetImpl::fromVariantMap(variantMap);
+
+        getRawData<ClusterData>()->fromVariantMap(variantMap);
+    }
+}
+
+void Clusters::fromVariantMapPre150(const QVariantMap& variantMap)
+{
+    DatasetImpl::fromVariantMapPre150(variantMap);
+
+    getRawData<ClusterData>()->fromVariantMapPre150(variantMap);
 
     events().notifyDatasetDataChanged(this);
 }

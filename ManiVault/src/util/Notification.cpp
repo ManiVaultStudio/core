@@ -93,7 +93,10 @@ Notification::Notification(const QString& title, const QString& description, con
 
     _messageLabel.setWordWrap(true);
     _messageLabel.setMinimumHeight(10);
-    _messageLabel.setOpenExternalLinks(true);
+    _messageLabel.setOpenExternalLinks(false);
+    _messageLabel.setTextInteractionFlags(Qt::TextBrowserInteraction);
+    
+    connect(&_messageLabel, &QLabel::linkActivated, this, &Notification::linkActivated);
 
     closePushButton->setFixedSize(18, 18);
     closePushButton->setIcon(StyledIcon("xmark"));

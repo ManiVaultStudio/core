@@ -377,7 +377,7 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
             if (const auto project = projectsTreeModel.getProject(sourceIndex)) {
                 auto projectPageAction = addProjectPageAction(project);
 
-                //qDebug() << "Adding project page action for" << project->getTitle() << "at filter row index" << filterRowIndex;
+                //qDebug() << "Adding project page action for" << project->getName() << "at filter row index" << filterRowIndex;
 
                 if (const auto numberOfChildren = _projectsFilterModel.rowCount(filterIndex); numberOfChildren >= 1) {
                     QStringList childProjectNames;

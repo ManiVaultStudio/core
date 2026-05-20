@@ -7,6 +7,7 @@
 #include "AnalysisPlugin.h"
 #include "CoreInterface.h"
 #include "DataHierarchyItem.h"
+#include "PropertiesSerializer.h"
 
 #include "util/Exception.h"
 #include "util/Serialization.h"
@@ -144,6 +145,90 @@ mv::plugin::AnalysisPlugin* DatasetImpl::getAnalysis()
 
 void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 {
+    const auto projectApplicationVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
+
+    if (projectApplicationVersion < Version(1, 5, 0)) {
+        fromVariantMapPre150(variantMap);
+    }
+    else {
+        try {
+            WidgetAction::fromVariantMap(variantMap);
+
+            variantMapMustContain(variantMap, "Name");
+            variantMapMustContain(variantMap, "Locked");
+            variantMapMustContain(variantMap, "StorageType");
+            variantMapMustContain(variantMap, "DataType");
+            variantMapMustContain(variantMap, "Derived");
+            //    variantMapMustContain(variantMap, "Full");
+            variantMapMustContain(variantMap, "LinkedData");
+
+            setText(variantMap["Name"].toString());
+            setLocked(variantMap["Locked"].toBool());
+            setStorageType(static_cast<StorageType>(variantMap["StorageType"].toInt()));
+
+            assert(variantMap["DataType"].toString() == getDataType().getTypeString());
+
+            if (variantMap["Derived"].toBool())
+            {
+                if (variantMap.contains("SourceDatasetID"))
+                    setSourceDataset(mv::data().getDataset(variantMap["SourceDatasetID"].toString()));
+                else
+                    setSourceDataset(getParent());
+
+                assert(_sourceDataset.isValid());
+            }
+
+            // For backwards compatibility, check PluginVersion
+            if (!(variantMap["PluginVersion"] == "No Version") && !variantMap["Full"].toBool())
+            {
+                if (variantMap.contains("FullDatasetID"))
+                    makeSubsetOf(mv::data().getDataset(variantMap["FullDatasetID"].toString()));
+                else
+                    makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
+
+                assert(variantMap["PluginKind"].toString() == _rawData->getKind());
+
+                assert(_fullDataset.isValid());
+            }
+
+            if (variantMap.contains("GroupIndex") && variantMap["GroupIndex"].toInt() >= 0)
+                setGroupIndex(variantMap["GroupIndex"].toInt());
+
+            if (variantMap.contains("MayUnderive"))
+                _mayUnderive = variantMap["MayUnderive"].toBool();
+
+            if (variantMap.contains("Properties")) {
+                PropertiesSerializer::fromVariantMap(variantMap["Properties"].toMap(), _properties);
+            }
+
+            if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {
+                Datasets proxyMembers;
+
+                for (const auto& proxyMemberGuid : variantMap["ProxyMembers"].toStringList())
+                    proxyMembers << mv::data().getDataset(proxyMemberGuid);
+
+                setProxyMembers(proxyMembers);
+            }
+
+            for (const auto& linkedDataVariant : variantMap["LinkedData"].toList()) {
+                LinkedData linkedData;
+
+                linkedData.fromVariantMap(linkedDataVariant.toMap());
+
+                _linkedData.push_back(linkedData);
+            }
+        }
+        catch (const std::exception& e) {
+            qCritical() << "Failed to load dataset from variant map: " << e.what();
+            throw;
+        }
+    }
+}
+
+void DatasetImpl::fromVariantMapPre150(const QVariantMap& variantMap)
+{
+    qDebug() << "Loading " << getGuiName() << " from variant map with pre-1.5.0 format, this may cause issues and should be avoided by updating the project to a newer version of the application";
+
     WidgetAction::fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "Name");
@@ -151,7 +236,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "StorageType");
     variantMapMustContain(variantMap, "DataType");
     variantMapMustContain(variantMap, "Derived");
-//    variantMapMustContain(variantMap, "Full");
+    //    variantMapMustContain(variantMap, "Full");
     variantMapMustContain(variantMap, "LinkedData");
 
     setText(variantMap["Name"].toString());
@@ -172,7 +257,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
     // For backwards compatibility, check PluginVersion
     if (!(variantMap["PluginVersion"] == "No Version") && !variantMap["Full"].toBool())
-    {        
+    {
         if (variantMap.contains("FullDatasetID"))
             makeSubsetOf(mv::data().getDataset(variantMap["FullDatasetID"].toString()));
         else
@@ -193,7 +278,6 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     {
         _properties = mv::util::loadQVariant(variantMap["Properties"]).toMap();
     }
-    
 
     if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {
         Datasets proxyMembers;
@@ -242,7 +326,7 @@ QVariantMap DatasetImpl::toVariantMap() const
         { "FullDatasetID", isFull() ? "" : QVariant::fromValue(_fullDataset->getId()) },
         { "GroupIndex", QVariant::fromValue(getGroupIndex()) },
         { "LinkedData", linkedDataList },
-        { "Properties", mv::util::storeQVariant(_properties)}
+        { "Properties", PropertiesSerializer::toVariantMap(_properties)}
     });
 
     return variantMap;

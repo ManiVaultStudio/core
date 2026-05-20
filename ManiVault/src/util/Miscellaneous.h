@@ -48,6 +48,14 @@ CORE_EXPORT std::uint64_t parseByteSize(const QString& input);
 CORE_EXPORT QString getNoBytesHumanReadable(std::uint64_t noBytes, bool useIEC = true);
 
 /**
+* Returns a human-readable string of an elapsed time duration
+* @param ms Duration in milliseconds
+* @param compact Whether to use compact formatting (e.g. "1h 2m") or verbose ("1h 2m 3s")
+* @return Human-readable elapsed time string
+*/
+CORE_EXPORT QString getElapsedTimeHumanReadable(std::uint64_t ms, bool compact = true);
+
+/**
  * Sort action based on their text
  * @param actions Actions to sort
  */
@@ -284,5 +292,92 @@ CORE_EXPORT QString getFilenameFromUrlPath(const QUrl& effectiveUrl);
  * @return Filename if found, otherwise an empty string
  */
 CORE_EXPORT QString getFilenameFromWaterButlerMetadata(const QByteArray& raw);
+
+/**
+ * Print a key-value pair with optional indentation and aligned colons
+ * @param key Key to print
+ * @param value Value to print (default is an invalid QVariant, which will be printed as "null")
+ * @param indent Number of spaces to indent (default is 0)
+ * @param colonColumn Column at which to align the colon (default is 24)
+ */
+CORE_EXPORT void printLine(const QString& key, const QVariant& value = {}, int indent = 0, int colonColumn = 24);
+
+/**
+ *  Pretty print a QVariantMap
+ *  @param variantMap Map to print
+ */
+CORE_EXPORT void prettyPrintVariantMap(const QVariantMap& variantMap);
+
+/**
+ * Convert a QVariantMap to a pretty-printed string with indentation
+ * @param variantMap Map to convert
+ * @param indent Number of spaces to indent (default is 0)
+ * @return Pretty-printed string representation of the map
+ */
+CORE_EXPORT QString variantMapToPrettyString(const QVariantMap& variantMap, int indent = 0);
+
+/**
+ * Convert a QVariant to an HTML string representation, handling maps and lists recursively
+ * @param value QVariant to convert
+ * @return HTML string representation of the QVariant
+ */
+CORE_EXPORT QString variantToHtml(const QVariant& value);
+
+/**
+ * Convert a QVariantMap to an HTML string representation, showing key-value pairs in a table
+ * @param map Map to convert
+ * @param depth Current recursion depth (default is 0)
+ * @param maxDepth Maximum depth to recurse into nested maps/lists (default is 2)
+ * @return HTML string representation of the map
+ */
+CORE_EXPORT QString variantMapToHtml(const QVariantMap& map, int depth = 0, int maxDepth = 2);
+
+/**
+ * Convert a QVariantList to an HTML string representation, showing items in an ordered list
+ * @param list List to convert
+ * @param depth Current recursion depth (default is 0)
+ * @param maxDepth Maximum depth to recurse into nested maps/lists (default is 2)
+ * @return HTML string representation of the list
+ */
+CORE_EXPORT QString variantListToHtml(const QVariantList& list, int depth, int maxDepth);
+
+/**
+ * Convert a QVariant to an HTML string representation, handling maps and lists recursively
+ * @param value QVariant to convert
+ * @param depth Current recursion depth (default is 0)
+ * @param maxDepth Maximum depth to recurse into nested maps/lists (default is 2)
+ * @return HTML string representation of the QVariant
+ */
+CORE_EXPORT QString variantToHtml(const QVariant& value, int depth, int maxDepth);
+
+/**
+ * Log memory usage of the current process with an optional label
+ * @param label Label to prefix the log message with (default is an empty string)
+ */
+CORE_EXPORT void logMemory(const QString& label);
+
+/**
+ * Find a nested value in a QVariantMap by a dot-separated path (e.g. "a.b.c" to find root["a"]["b"]["c"])
+ * @param root Root map to search within
+ * @param path Dot-separated path to the value to find
+ * @return Value at the specified path, or an invalid QVariant if not found
+ */
+CORE_EXPORT QVariant findNested(const QVariantMap& root, const QStringList& path);
+
+/**
+ * Describe the keys of a QVariantMap in a human-readable string, showing up to \p maxKeys keys and indicating if there are more
+ * @param map Map whose keys to describe
+ * @param maxKeys Maximum number of keys to show (default is 20)
+ * @return String describing the keys of the map
+ */
+CORE_EXPORT QString describeVariantMapKeys(const QVariantMap& map, qsizetype maxKeys = 20);
+
+/**
+ * Dump a byte array as a hex string, showing up to \p count bytes
+ * @param bytes Byte array to dump
+ * @param count Maximum number of bytes to show (default is 100)
+ * @return Hex string representation of the byte array
+ */
+CORE_EXPORT QString dumpHex(const QByteArray& bytes, qsizetype count = 100);;
 
 }

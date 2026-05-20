@@ -124,11 +124,11 @@ WorkspaceManager::WorkspaceManager(QObject* parent) :
 
     QFile styleSheetFile(":/styles/ads_light.css");
 
-    styleSheetFile.open(QIODevice::ReadOnly);
+    if (styleSheetFile.open(QIODevice::ReadOnly)) {
+        QTextStream styleSheetStream(&styleSheetFile);
 
-    QTextStream styleSheetStream(&styleSheetFile);
-
-    _styleSheet = styleSheetStream.readAll();
+        _styleSheet = styleSheetStream.readAll();
+    }
 
     styleSheetFile.close();
 }
@@ -349,8 +349,6 @@ void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*
 
     const auto temporaryDirectoryPath = temporaryDirectory.path();
 
-    Application::setSerializationAborted(false);
-
     if (projectFilePath.isEmpty()) {
         FileOpenDialog fileOpenDialog;
 
@@ -558,11 +556,6 @@ Workspace* WorkspaceManager::getCurrentWorkspace()
 
 void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    auto& projectSerializationTask = projects().getProjectSerializationTask();
-
-    _mainDockManager->setSerializationTask(&projectSerializationTask.getSystemViewPluginsTask());
-    _viewPluginsDockManager->setSerializationTask(&projectSerializationTask.getViewPluginsTask());
-
     getCurrentWorkspace()->fromVariantMap(variantMap);
 
     variantMapMustContain(variantMap, "DockManagers");
@@ -584,11 +577,6 @@ void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap WorkspaceManager::toVariantMap() const
 {
-    auto& projectSerializationTask = projects().getProjectSerializationTask();
-
-    _mainDockManager->setSerializationTask(&projectSerializationTask.getSystemViewPluginsTask());
-    _viewPluginsDockManager->setSerializationTask(&projectSerializationTask.getViewPluginsTask());
-
     auto currentWorkspaceMap = getCurrentWorkspace()->toVariantMap();
 
     QVariantMap dockManagers{

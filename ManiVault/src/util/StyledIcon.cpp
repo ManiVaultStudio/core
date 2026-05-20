@@ -135,7 +135,9 @@ void StyledIcon::initializeIconFont(const QString& iconFontName, const Version& 
         QFile iconFontMetaDataFile;
 
         iconFontMetaDataFile.setFileName(iconFontMetadataResourcePath);
-        iconFontMetaDataFile.open(QIODevice::ReadOnly | QIODevice::Text);
+
+        if (!iconFontMetaDataFile.open(QIODevice::ReadOnly | QIODevice::Text))
+            throw std::runtime_error(QString("Unable to open icon font metadata file: %1").arg(iconFontMetadataResourcePath).toStdString());
 
         QString iconFontMetaData = iconFontMetaDataFile.readAll();
 
@@ -340,10 +342,6 @@ QString StyledIcon::getIconCharacter(const QString& iconName, const QString& ico
             const auto candidateIconFontVersion = iconFontCandidate.second;
             const auto iconFontResourceName     = getIconFontResourceName(candidateIconFontName, candidateIconFontVersion);
 
-#ifdef STYLED_ICON_VERBOSE
-            qDebug() << "Trying" << candidateIconFontName << candidateIconFontVersion;
-#endif
-
             iconFontResourceNames << iconFontResourceName;
 
             if (!fontMetadata.keys().contains(iconFontResourceName)) {
@@ -431,10 +429,6 @@ QString StyledIcon::generateSha(const QString& iconName, const QString& iconFont
 
 void StyledIcon::updateIconFontVersions(const QString& iconFontName)
 {
-#ifdef STYLED_ICON_VERBOSE
-    qDebug() << "Updating" << iconFontName << "versions";
-#endif
-
     if (iconFontVersions.contains(iconFontName))
         return;
 

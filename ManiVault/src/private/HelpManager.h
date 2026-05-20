@@ -99,6 +99,19 @@ public:
     void addNotification(const QString& title, const QString& description, const QIcon& icon = QIcon(), const util::Notification::DurationType& durationType = util::Notification::DurationType::Calculated, std::int32_t delayMs = 0) override;
 
     /**
+     * Add notification link handler for \p route
+     * @param route Route to handle (e.g. "app://open/errors")
+     * @param handler Handler function to invoke when a link with the specified route is clicked
+     */
+    void addNotificationLinkHandler(const QString& route, const NotificationLinkHandler& handler) override;
+
+    /**
+     * Handle notification link for \p url
+     * @param url URL of the clicked link
+     */
+    void handleNotificationLink(const QUrl& url) override;
+
+    /**
      * Initialize notifications manager with \p parentWidget widget
      * @param parentWidget Pointer to parent widget
      */
@@ -122,17 +135,18 @@ public: // Action getters
     gui::TriggerAction& getToLearningCenterAction() override { return _toLearningCenterAction; }
 
 private:
-    gui::ToggleAction               _showLearningCenterPageAction;  /** Toggle action for toggling the learning center */
-    gui::TriggerAction              _toDiscordAction;               /** External link to discord */
-    gui::TriggerAction              _toWebsiteAction;               /** External link to website */
-    gui::TriggerAction              _toWikiAction;                  /** External link to wiki */
-    gui::TriggerAction              _toRepositoryAction;            /** External link to repository */
-    gui::TriggerAction              _toLearningCenterAction;        /** Trigger action to go the learning center */
-    LearningCenterVideosModel          _videosModel;                   /** Videos model */
-    LearningCenterTutorialsModel    _tutorialsModel;                /** Tutorials model */
-    util::Notifications             _notifications;                 /** Notifications manager */
-    mv::TasksListModel              _tasksModel;                    /** Tasks list model */
-    mv::TasksFilterModel            _tasksFilterModel;              /** Filter model for the tasks model */
+    gui::ToggleAction                       _showLearningCenterPageAction;  /** Toggle action for toggling the learning center */
+    gui::TriggerAction                      _toDiscordAction;               /** External link to discord */
+    gui::TriggerAction                      _toWebsiteAction;               /** External link to website */
+    gui::TriggerAction                      _toWikiAction;                  /** External link to wiki */
+    gui::TriggerAction                      _toRepositoryAction;            /** External link to repository */
+    gui::TriggerAction                      _toLearningCenterAction;        /** Trigger action to go the learning center */
+    LearningCenterVideosModel               _videosModel;                   /** Videos model */
+    LearningCenterTutorialsModel            _tutorialsModel;                /** Tutorials model */
+    util::Notifications                     _notifications;                 /** Notifications manager */
+    mv::TasksListModel                      _tasksModel;                    /** Tasks list model */
+    mv::TasksFilterModel                    _tasksFilterModel;              /** Filter model for the tasks model */
+    QHash<QString, NotificationLinkHandler> _linkHandlers;                  /** Notification link handlers */
 };
 
 }

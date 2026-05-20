@@ -470,9 +470,16 @@ public: // Sparse data, test implementation
 public: // Serialization
     /**
      * Load point data from variant map
-     * @param Variant map representation of the point data
+     * @param variantMap Variant map representation of the point data
      */
     void fromVariantMap(const QVariantMap& variantMap) final;
+
+    /**
+     * Load widget action from variant for app versions prior to 5.0.0
+     * @param variantMap Variant representation of the widget action
+     * @return Variant representation of the widget action
+     */
+    void fromVariantMapPre150(const QVariantMap& variantMap);
 
     /**
      * Save point data to variant map
@@ -983,9 +990,17 @@ public: // Serialization
 
     /**
      * Load widget action from variant
-     * @param Variant representation of the widget action
+     * @param variantMap Variant map representation of the widget action
+     * @return Variant representation of the widget action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Load widget action from variant for app versions prior to 5.0.0
+     * @param variantMap Variant representation of the widget action
+     * @return Variant representation of the widget action
+     */
+    void fromVariantMapPre150(const QVariantMap& variantMap);
 
     /**
         * Save widget action to variant

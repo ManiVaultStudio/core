@@ -5,11 +5,15 @@
 #include "Serializable.h"
 #include "Application.h"
 #include "CoreInterface.h"
+#include "WorkflowExecutionContext.h"
 
 #include "actions/WidgetAction.h"
 
 #include "util/Serialization.h"
 #include "util/Exception.h"
+#include "util/AsyncVariantMapResult.h"
+
+#include "exception/SerializationException.h"
 
 #include <QDebug>
 #include <QUuid>
@@ -62,6 +66,20 @@ void Serializable::fromVariantMap(const QVariantMap& variantMap)
     _serializationCounter[static_cast<int>(Direction::From)]++;
 }
 
+WorkflowPlan Serializable::fromVariantMapWorkflow(const QVariantMap& variantMap)
+{
+    WorkflowPlan plan(QString("%1::fromVariantMap").arg(getSerializationName()));
+
+    plan.addSequentialStage("Load", {
+        WorkflowPlan::Job("Load", [this, variantMap](const WorkflowPlan::Job&) {
+            fromVariantMap(variantMap);
+            }, WorkflowPlan::JobThreadAffinity::GuiThread
+        )
+    });
+
+    return plan;
+}
+
 QVariantMap Serializable::toVariantMap() const
 {
     const_cast<Serializable*>(this)->_serializationCounter[static_cast<int>(Direction::To)]++;
@@ -69,6 +87,22 @@ QVariantMap Serializable::toVariantMap() const
     return {
         { "ID", _id }
     };
+}
+
+WorkflowPlan Serializable::toVariantMapWorkflow() const
+{
+    WorkflowPlan workflowPlan(QString("%1::toVariantMap").arg(getSerializationName()));
+
+    workflowPlan.addSequentialStage("Serialize", {
+        WorkflowPlan::Job(
+            "Serialize",
+            [this](WorkflowPlan::Job& job) {
+                const QVariantMap variantMap = toVariantMap();
+                //job.setResult("variantMap", variantMap);
+            }, WorkflowPlan::JobThreadAffinity::GuiThread)
+        });
+
+    return workflowPlan;
 }
 
 void Serializable::fromJsonDocument(const QJsonDocument& jsonDocument)
@@ -89,70 +123,45 @@ QJsonDocument Serializable::toJsonDocument() const
 
 void Serializable::fromJsonFile(const QString& filePath /*= ""*/)
 {
-    if (Application::isSerializationAborted())
-        return;
+    if (!QFileInfo(filePath).exists())
+        throw std::runtime_error("File does not exist");
 
-    try
-    {
-        if (!QFileInfo(filePath).exists())
-            throw std::runtime_error("File does not exist");
+    QFile jsonFile(filePath);
 
-        QFile jsonFile(filePath);
+    if (!jsonFile.open(QIODevice::ReadOnly))
+        throw std::runtime_error("Unable to open file for reading");
 
-        if (!jsonFile.open(QIODevice::ReadOnly))
-            throw std::runtime_error("Unable to open file for reading");
+    QByteArray data = jsonFile.readAll();
 
-        QByteArray data = jsonFile.readAll();
+    if (data.isEmpty())
+        throw std::runtime_error("No data read");
 
-        if (data.isEmpty())
-            throw std::runtime_error("No data read");
+    auto jsonDocument = QJsonDocument::fromJson(data);
 
-        auto jsonDocument = QJsonDocument::fromJson(data);
+    if (jsonDocument.isNull() || jsonDocument.isEmpty())
+        throw std::runtime_error("JSON document is invalid");
 
-        if (jsonDocument.isNull() || jsonDocument.isEmpty())
-            throw std::runtime_error("JSON document is invalid");
-
-        fromJsonDocument(jsonDocument);
-    }
-    catch (std::exception& e)
-    {
-        qCritical() << "Unable to load data from JSON file: " << e.what();
-    }
-    catch (...) {
-        qCritical() << "Unable to load data from JSON file due to an unhandled exception";
-    }
+    fromJsonDocument(jsonDocument);
 }
 
 void Serializable::toJsonFile(const QString& filePath /*= ""*/) const
 {
-    if (Application::isSerializationAborted())
-        return;
+    QFile jsonFile(filePath);
 
-    try
-    {
-        QFile jsonFile(filePath);
+    if (!jsonFile.open(QFile::WriteOnly))
+        throw std::runtime_error("Unable to open file for writing");
 
-        if (!jsonFile.open(QFile::WriteOnly))
-            throw std::runtime_error("Unable to open file for writing");
+    auto jsonDocument = toJsonDocument();
 
-        auto jsonDocument = toJsonDocument();
-
-        if (jsonDocument.isNull() || jsonDocument.isEmpty())
-            throw std::runtime_error("JSON document is invalid");
+    if (jsonDocument.isNull() || jsonDocument.isEmpty())
+        throw std::runtime_error("JSON document is invalid");
 
 #ifdef SERIALIZABLE_VERBOSE
-        qDebug().noquote() << jsonDocument.toJson(QJsonDocument::Indented);
+    qDebug().noquote() << jsonDocument.toJson(QJsonDocument::Indented);
 #endif
 
-        jsonFile.write(jsonDocument.toJson());
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to save data to JSON file", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to save data to JSON file");
-    }
+    jsonFile.write(jsonDocument.toJson());
+
 }
 
 void Serializable::makeUnique()
@@ -180,40 +189,62 @@ std::int32_t Serializable::getSerializationCountTo() const
     return getSerializationCount(Direction::To);
 }
 
+QPointer<Task> Serializable::getTask() const
+{
+    return _task;
+}
+
+bool Serializable::hasTask() const
+{
+    return !_task.isNull();
+}
+
+void Serializable::setTask(Task* task)
+{
+    _task = task;
+}
+
+void Serializable::reportSerializationWarning(const QString& scope, const QString& message)
+{
+    if (auto context = WorkflowExecutionContext::current()) {
+	    context->getReportNode()->addMessage(SeverityLevel::Warning, "Serializable", message, scope);
+    }
+
+	qWarning() << "Warning: " << message << "(" << scope << ")";
+}
+
+void Serializable::reportSerializationError(QString scope, QString message)
+{
+    if (auto context = WorkflowExecutionContext::current()) {
+        context->getReportNode()->addMessage(SeverityLevel::Error, "Serializable", message, scope);
+    }
+
+	qWarning() << "Error: " << message << "(" << scope << ")";
+}
+
+void Serializable::reportFatalSerializationError(QString scope, QString message)
+{
+    if (auto context = WorkflowExecutionContext::current()) {
+	    context->getReportNode()->addMessage(SeverityLevel::Fatal, "Serializable", message, scope);
+    }
+    
+    qWarning() << "Critical: " << message << "(" << scope << ")";
+}
+
 void Serializable::fromVariantMap(Serializable* serializable, const QVariantMap& variantMap)
 {
-#ifdef SERIALIZABLE_VERBOSE
-    qDebug().noquote() << QString("From variant map: %1").arg(serializable->getSerializationName());
-#endif
+	Q_ASSERT(serializable);
+
+    if (!serializable)
+        throw std::runtime_error("Serializable pointer is null");
 
     serializable->fromVariantMap(variantMap);
-
-    /*
-    auto object = dynamic_cast<const QObject*>(serializable);
-
-    if (object == nullptr)
-        return;
-
-    for (auto child : object->children()) {
-        auto childSerializable = dynamic_cast<Serializable*>(child);
-
-        if (!childSerializable)
-            continue;
-
-        fromVariantMap(childSerializable, variantMap[childSerializable->getSerializationName()].toMap());
-    }
-    */
 }
 
 void Serializable::fromVariantMap(Serializable& serializable, const QVariantMap& variantMap, const QString& key)
 {
     if (!variantMap.contains(key)) {
-        const auto errorMessage = QString("%1 not found in map: %2").arg(key);
-
-        if (settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
-            qCritical() << errorMessage; 
-        else
-            throw std::runtime_error(errorMessage.toLatin1());
+        serializable.handleKeyNotFoundInVariantMap(serializable, variantMap, key);
     }
     else {
         serializable.fromVariantMap(variantMap[key].toMap());
@@ -222,39 +253,14 @@ void Serializable::fromVariantMap(Serializable& serializable, const QVariantMap&
 
 void Serializable::fromParentVariantMap(const QVariantMap& parentVariantMap, bool ignoreLoadingErrors /*= false*/)
 {
-    try
-    {
-        if (getSerializationName().isEmpty())
-            throw std::runtime_error("Serialization name may not be empty");
+    if (getSerializationName().isEmpty())
+        throw std::runtime_error("Serialization name may not be empty");
 
-        if (!parentVariantMap.contains(getSerializationName())) {
-            const auto errorMessage = QString("%1 not found in map: %2").arg(getSerializationName());
-
-            if (!ignoreLoadingErrors) {
-                if (core() != nullptr && settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
-                    qCritical() << errorMessage;
-                else
-                    throw std::runtime_error(errorMessage.toStdString());
-            }
-        }
-        else {
-            fromVariantMap(parentVariantMap[getSerializationName()].toMap());
-        }
+    if (!parentVariantMap.contains(getSerializationName())) {
+        handleKeyNotFoundInVariantMap(*this, parentVariantMap, getSerializationName());
     }
-    catch (std::exception& e)
-    {
-#ifdef _DEBUG
-        qDebug() << QString("%1 failed: %2").arg(__FUNCTION__, e.what());
-#else
-        throw e;
-#endif
-    }
-    catch (...) {
-#ifdef _DEBUG
-        qDebug() << "";
-#else
-        throw std::runtime_error(QString("%1 failed due to unhandled exception").arg(__FUNCTION__, getSerializationName()).toLatin1());
-#endif
+    else {
+        fromVariantMap(parentVariantMap[getSerializationName()].toMap());
     }
 }
 
@@ -286,6 +292,27 @@ void Serializable::insertIntoVariantMap(QVariantMap& variantMap) const
         throw std::runtime_error(QString("%1 already exists in variant map (%2)").arg(getSerializationName()).toLatin1());
 
     variantMap.insert(getSerializationName(), toVariantMap());
+}
+
+void Serializable::handleKeyNotFoundInVariantMap(const Serializable& serializable, const QVariantMap& map, const QString& key)
+{
+    const auto errorMessage = QString(
+        "Required key '%1' was not found in QVariantMap. "
+        "Available keys (%2 total): %3"
+    ).arg(
+        key,
+        QString::number(map.size()),
+        describeVariantMapKeys(map)
+    );
+
+    if (!settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
+		throw SerializationException::missingKey(key, serializable.getSerializationName(), map);
+
+
+    //if (settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
+    //    Serializable::reportSerializationWarning(serializable.getSerializationName(), errorMessage);
+    //else
+    //    Serializable::reportFatalSerializationError(serializable.getSerializationName(), errorMessage);
 }
 
 }
