@@ -90,6 +90,7 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomGroupAction.setShowLabels(false);
     _zoomGroupAction.setIconByName("magnifying-glass");
 
+    _zoomGroupAction.addAction(&_freezeNavigation, ToggleAction::PushButtonIcon);
     _zoomGroupAction.addAction(&_zoomOutAction, TriggerAction::Icon);
     _zoomGroupAction.addAction(&_zoomPercentageAction);
     _zoomGroupAction.addAction(&_zoomInAction, TriggerAction::Icon);
@@ -99,7 +100,6 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomGroupAction.addAction(&_zoomRegionAction, TriggerAction::Icon);
     
     addAction(&_zoomGroupAction, 1);
-    addAction(&_freezeNavigation, 50);
     addAction(&_zoomMarginAction);
 
     const auto updateReadOnly = [this]() -> void {
