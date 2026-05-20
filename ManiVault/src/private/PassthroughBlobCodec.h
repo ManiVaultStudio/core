@@ -6,6 +6,11 @@
 
 #include <util/BlobCodec.h>
 
+/**
+ * BLOB Codec implementation for uncompressed data.
+ *
+ * @author Thomas Kroes (Biomedical Visual Analytics Unit LUMC - TU Delft)
+ */
 class PassthroughBlobCodec final : public mv::util::BlobCodec
 {
 public:
@@ -17,13 +22,31 @@ public:
      */
     explicit PassthroughBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction);
 
-    ~PassthroughBlobCodec();
+    /* Virtual destructor for proper cleanup */
+    ~PassthroughBlobCodec() override;
 
+    /** Returns the codec type */
     [[nodiscard]] Type getType() const override;
+
+    /** Returns the codec name used for serialization/debugging */
     [[nodiscard]] QString getName() const override;
 
-    [[nodiscard]] Result encode(const QByteArray& input) const override;
-    [[nodiscard]] Result decode(const QByteArray& input, qsizetype expectedSize = -1) const override;
+    /**
+     * @brief Encode a block of raw bytes and return the encoded data.
+     * @note This method will throw an exception if encoding fails. The returned QByteArray is only valid if the encoding was successful.
+     * @param input Raw input bytes
+     * @return Encoded bytes
+     */
+    [[nodiscard]] QByteArray encode(const QByteArray& input) const override;
+
+    /**
+     * @brief Decode a previously encoded block of bytes and return the decoded data.
+     * @note This method will throw an exception if decoding fails. The returned QByteArray is only valid if the decoding was successful.
+     * @param input Encoded input bytes
+     * @param expectedSize Expected decoded size in bytes, or -1 if unknown
+     * @return Decoded bytes
+     */
+    [[nodiscard]] QByteArray decode(const QByteArray& input, qsizetype expectedSize = -1) const override;
 
     /*
      * Load encoded data from a file on disk and decode it.
@@ -32,7 +55,7 @@ public:
      * @param expectedSize Expected decoded size in bytes, or -1 if unknown
      * @return Decoded bytes or an error
      */
-    [[nodiscard]] Result decodeFromFile(const QString& filePath, qsizetype expectedSize = -1) const override;
+    [[nodiscard]] QByteArray decodeFromFile(const QString& filePath, qsizetype expectedSize = -1) const override;
 
     /*
      * Load encoded data from a file on disk and decode it directly to a provided output buffer.
@@ -42,7 +65,11 @@ public:
      * @param destinationSize Size of the output buffer in bytes
      * @return Decoded bytes or an error
      */
-    [[nodiscard]] Result decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const override;
+    void decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const override;
 
+    /**
+     * Get file extension for this codec (without leading dot, e.g. "zstd" for Zstandard codec)
+     * @return File extension for this codec
+     */
     [[nodiscard]] QString getFileExtension() const override;
 };

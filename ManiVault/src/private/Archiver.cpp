@@ -183,31 +183,38 @@ void Archiver::extractSingleFile(const QString& compressedFilePath, const QStrin
 
 QByteArray Archiver::readZipEntryToMemory(const QString& zipPath, const QString& entryName)
 {
-	QuaZip zip(zipPath);
+    static QMutex zipReadMutex;
 
-	if (!zip.open(QuaZip::mdUnzip)) {
-		throw std::runtime_error(
-			QString("Unable to open ZIP archive: %1").arg(zipPath).toStdString());
-	}
+    QByteArray data;
 
-	if (!zip.setCurrentFile(entryName)) {
-		throw std::runtime_error(
-			QString("Unable to locate ZIP entry: %1").arg(entryName).toStdString());
-	}
+    QMutexLocker lock(&zipReadMutex);
+    {
+        QuaZip zip(zipPath);
 
-	QuaZipFile file(&zip);
+        if (!zip.open(QuaZip::mdUnzip)) {
+            throw std::runtime_error(
+                QString("Unable to open ZIP archive: %1").arg(zipPath).toStdString());
+        }
 
-	if (!file.open(QIODevice::ReadOnly)) {
-		throw std::runtime_error(
-			QString("Unable to open ZIP entry for reading: %1").arg(entryName).toStdString());
-	}
+        if (!zip.setCurrentFile(entryName)) {
+            throw std::runtime_error(
+                QString("Unable to locate ZIP entry: %1").arg(entryName).toStdString());
+        }
 
-	const QByteArray data = file.readAll();
+        QuaZipFile file(&zip);
 
-	if (file.getZipError() != UNZ_OK) {
-		throw std::runtime_error(
-			QString("Failed while reading ZIP entry: %1").arg(entryName).toStdString());
-	}
+        if (!file.open(QIODevice::ReadOnly)) {
+            throw std::runtime_error(
+                QString("Unable to open ZIP entry for reading: %1").arg(entryName).toStdString());
+        }
+
+        data = file.readAll();
+
+        if (file.getZipError() != UNZ_OK) {
+            throw std::runtime_error(
+                QString("Failed while reading ZIP entry: %1").arg(entryName).toStdString());
+        }
+    }
 
 	return data;
 }

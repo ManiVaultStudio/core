@@ -83,16 +83,19 @@ static EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& s
 
         const auto fileName     = QUuid::createUuid().toString(QUuid::WithoutBraces) + codec->getFileExtension();
         const auto filePath     = QDir::cleanPath(saveDir + QDir::separator() + fileName);
-        const auto encodeResult = codec->encodeToFile(job._rawData, filePath);
 
-        if (!encodeResult.isSuccess()) {
-            throw std::runtime_error(QString("Failed to encode block to file: %1").arg(filePath).toStdString());
-        }
+        std::uint64_t numberOfEncodedBytes = 0;
 
-        blockVariantMap["CompressedSize"]   = QVariant::fromValue<std::uint64_t>(static_cast<std::uint64_t>(encodeResult._data.size()));
+    	codec->encodeToFile(job._rawData, filePath, &numberOfEncodedBytes);
+
+        blockVariantMap["CompressedSize"]   = QVariant::fromValue<std::uint64_t>(numberOfEncodedBytes);
         blockVariantMap["URI"]              = fileName;
 
         result._block = std::move(blockVariantMap);
+    }
+    catch (const ManiVaultException&)
+    {
+        throw; // rethrow ManiVaultExceptions without modification
     }
     catch (const std::exception& e) {
         result._error = QString::fromUtf8(e.what());
@@ -234,18 +237,10 @@ DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, co
 	    if (decodeBlockJob._uri.isEmpty())
 	        throw std::runtime_error("Block URI is empty");
 
-	    const auto decodeResult = codec->decodeFromFileTo(
-	        decodeBlockJob._uri,
-	        destination + offset,
-	        size
-	    );
-
-	    if (!decodeResult.isSuccess()) {
-	        throw ManiVaultException(SeverityLevel::Error, QString("Failed to decode block from file '%1': %2").arg(decodeBlockJob._uri, decodeResult._error), location);
-	    }
+	    codec->decodeFromFileTo(decodeBlockJob._uri, destination + offset, size);
     }
-    catch (const ManiVaultException&) {
-
+    catch (const ManiVaultException& e) {
+        qDebug() << "ManiVaultException caught during block decoding:" << e._message << "- rethrowing";
         // Rethrow ManiVaultExceptions as they are already properly constructed with severity and message
     	throw;
     } 
@@ -293,17 +288,9 @@ DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, 
 	    if (!codec)
 	        throw std::runtime_error("Failed to create blob codec");
 
-	    const QByteArray encodedBytes = QByteArray::fromBase64(decodeBlockJob._encodedData.toUtf8());
+	    const auto encodedBytes = QByteArray::fromBase64(decodeBlockJob._encodedData.toUtf8());
 
-	    const auto decodeResult = codec->decodeTo(encodedBytes, destination + offset, size);
-
-	    if (!decodeResult.isSuccess()) {
-	        throw std::runtime_error(QString("Failed to decode inline block at offset %1: %2")
-	            .arg(decodeBlockJob._offset)
-	            .arg(decodeResult._error)
-	            .toStdString()
-	        );
-	    }
+	    codec->decodeTo(encodedBytes, destination + offset, size);
     }
     catch (const ManiVaultException&) {
 

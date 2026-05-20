@@ -56,39 +56,61 @@ QString ZstdBlobCodec::getName() const
     return QStringLiteral("zstd");
 }
 
-mv::util::BlobCodec::Result ZstdBlobCodec::encode(const QByteArray& input) const
+QByteArray ZstdBlobCodec::encode(const QByteArray& input) const
 {
 #ifdef ZSTD_CODEC_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
     if (input.isEmpty())
-        return { true, {}, {} };
-
-    if (!getSettingsAction())
-        return { false, {}, "Codec settings action is not set" };
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to encode input data",
+            "Input data is empty",
+            __FUNCTION__,
+            {
+                { "InputSize", QString::number(input.size()) }
+            }
+        );
 
     auto settings = dynamic_cast<ZstdCodecSettingsAction*>(getSettingsAction());
 
     if (!settings)
-        return { false, {}, "Invalid codec settings action" };
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to encode input data",
+            "Invalid codec settings action",
+            __FUNCTION__,
+            {
+                { "InputSize", QString::number(input.size()) }
+            }
+        );
 
     const auto bound = ZSTD_compressBound(static_cast<size_t>(input.size()));
 
     QByteArray output;
+
     output.resize(static_cast<qsizetype>(bound));
 
     const auto compressedSize = ZSTD_compress(output.data(), bound, input.constData(), static_cast<size_t>(input.size()),settings->getLevelAction().getValue());
 
     if (ZSTD_isError(compressedSize))
-        return { false, {}, getZstdErrorString("ZSTD_compress failed", compressedSize) };
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to encode input data",
+            getZstdErrorString("ZSTD_compress failed", compressedSize),
+            __FUNCTION__,
+            {
+                { "InputSize", QString::number(input.size()) }
+            }
+        );
 
     output.resize(static_cast<qsizetype>(compressedSize));
 
-    return { true, output, {} };
+    return output;
 }
 
-mv::util::BlobCodec::Result ZstdBlobCodec::decode(const QByteArray& input, qsizetype expectedSize) const
+QByteArray ZstdBlobCodec::decode(const QByteArray& input, qsizetype expectedSize) const
 {
 #ifdef ZSTD_CODEC_VERBOSE
     qDebug() << __FUNCTION__;
@@ -96,130 +118,178 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decode(const QByteArray& input, qsize
 
     if (input.isEmpty()) {
         if (expectedSize > 0)
-            return { false, {}, QStringLiteral("Input is empty but expected decoded data") };
-
-        return { true, {}, {} };
+            throw mv::ManiVaultException(
+                SeverityLevel::Error,
+                "Failed to decode input data",
+                "Input is empty but expected decoded data",
+                __FUNCTION__,
+                {
+                    { "ExpectedSize", QString::number(expectedSize) }
+                }
+            );
     }
 
-    if (expectedSize < -1) {
-        return { false, {}, QStringLiteral("Invalid expected decoded size") };
-    }
+    if (expectedSize < -1)
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to decode input data",
+            "Expected decoded size cannot be negative",
+            __FUNCTION__,
+            {
+                { "ExpectedSize", QString::number(expectedSize) }
+            }
+        );
 
-    unsigned long long frameContentSize = ZSTD_getFrameContentSize(
-        input.constData(),
-        static_cast<size_t>(input.size())
-    );
+    unsigned long long frameContentSize = ZSTD_getFrameContentSize(input.constData(), static_cast<size_t>(input.size()));
 
-    if (frameContentSize == ZSTD_CONTENTSIZE_ERROR) {
-        return { false, {}, QStringLiteral("Input is not a valid zstd frame") };
-    }
+    if (frameContentSize == ZSTD_CONTENTSIZE_ERROR)
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to decode input data",
+            "Input is not a valid zstd frame",
+            __FUNCTION__,
+            {
+                { "InputSize", QString::number(input.size()) },
+                { "ExpectedSize", QString::number(expectedSize) }
+            }
+        );
 
     if (frameContentSize == ZSTD_CONTENTSIZE_UNKNOWN) {
-        if (expectedSize < 0) {
-            return { false, {}, QStringLiteral("Expected decoded size is required for this zstd frame") };
-        }
+        if (expectedSize < 0)
+            throw mv::ManiVaultException(
+                SeverityLevel::Error,
+                "Failed to decode input data",
+                "Expected decoded size is required for this zstd frame",
+                __FUNCTION__,
+                {
+                    { "ExpectedSize", QString::number(expectedSize) }
+                }
+            );
 
         frameContentSize = static_cast<unsigned long long>(expectedSize);
     }
 
-    if (frameContentSize > static_cast<unsigned long long>(std::numeric_limits<qsizetype>::max())) {
-        return { false, {}, QStringLiteral("Decoded size exceeds maximum QByteArray size") };
-    }
+    if (frameContentSize > static_cast<unsigned long long>(std::numeric_limits<qsizetype>::max()))
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to decode input data",
+            "Decoded size exceeds maximum QByteArray size",
+            __FUNCTION__,
+            {
+                { "FrameContentSize", QString::number(frameContentSize) }
+            }
+        );
 
-    if (expectedSize >= 0 &&
-        frameContentSize != static_cast<unsigned long long>(expectedSize)) {
-        return {
-            false,
-            {},
+    if (expectedSize >= 0 && frameContentSize != static_cast<unsigned long long>(expectedSize)) {
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to decode input data",
             QStringLiteral("Zstd frame decoded size mismatch. Frame reports %1 bytes, expected %2 bytes")
                 .arg(frameContentSize)
-                .arg(expectedSize)
-        };
+                .arg(expectedSize),
+            __FUNCTION__,
+            {
+                { "FrameContentSize", QString::number(frameContentSize) },
+                { "ExpectedSize", QString::number(expectedSize) }
+            }
+        );
     }
 
     QByteArray output;
+
     output.resize(static_cast<qsizetype>(frameContentSize));
 
-    if (output.size() != static_cast<qsizetype>(frameContentSize)) {
-        return { false, {}, QStringLiteral("Failed to allocate decoded output buffer") };
-    }
+    if (output.size() != static_cast<qsizetype>(frameContentSize))
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to decode input data",
+            "Failed to allocate decoded output buffer of the required size",
+            __FUNCTION__,
+            {
+                { "FrameContentSize", QString::number(frameContentSize) }
+            }
+        );
 
-    const auto decompressedSize = ZSTD_decompress(
-        output.data(),
-        static_cast<size_t>(output.size()),
-        input.constData(),
-        static_cast<size_t>(input.size())
-    );
+    const auto decompressedSize = ZSTD_decompress(output.data(), static_cast<size_t>(output.size()), input.constData(), static_cast<size_t>(input.size()));
 
-    if (ZSTD_isError(decompressedSize)) {
-        return { false, {}, getZstdErrorString("ZSTD_decompress failed", decompressedSize) };
-    }
+    if (ZSTD_isError(decompressedSize))
+        throw std::runtime_error(getZstdErrorString("ZSTD_decompress failed", decompressedSize).toStdString());
 
-    if (decompressedSize > static_cast<size_t>(output.size())) {
-        return { false, {}, QStringLiteral("ZSTD_decompress returned more bytes than output buffer size") };
-    }
+    if (decompressedSize > static_cast<size_t>(output.size()))
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to decode input data",
+            "ZSTD_decompress returned more bytes than output buffer size",
+            __FUNCTION__,
+            {
+                { "DecompressedSize", QString::number(decompressedSize) },
+                { "OutputSize", QString::number(output.size()) }
+            }
+        );
 
     output.resize(static_cast<qsizetype>(decompressedSize));
 
-    if (expectedSize >= 0 && output.size() != expectedSize) {
-        return {
-            false,
-            {},
+    if (expectedSize >= 0 && output.size() != expectedSize)
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to decode input data",
             QStringLiteral("Decoded size mismatch. Decoded %1 bytes, expected %2 bytes")
                 .arg(output.size())
-                .arg(expectedSize)
-        };
-    }
+                .arg(expectedSize),
+            __FUNCTION__,
+            {
+                { "DecodedSize", QString::number(output.size()) },
+                { "ExpectedSize", QString::number(expectedSize) }
+            }
+        );
 
-    return { true, output, {} };
+    return output;
 }
 
-mv::util::BlobCodec::Result ZstdBlobCodec::decodeTo(const QByteArray& encodedData, char* destination, std::uint64_t destinationSize) const
+void ZstdBlobCodec::decodeTo(const QByteArray& encodedData, char* destination, std::uint64_t destinationSize) const
 {
 #ifdef ZSTD_CODEC_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
-    Result result;
+    if (encodedData.isEmpty())
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to decode input data",
+            "Encoded data is empty",
+            __FUNCTION__
+        );
 
-    if (encodedData.isEmpty()) {
-        result._error = "Encoded data is empty";
-        return result;
-    }
-
-    if (destinationSize == 0) {
-        result._error = "Destination buffer size is zero";
-        return result;
-    }
+    if (destinationSize == 0)
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to decode input data",
+            "Destination buffer size is zero",
+            __FUNCTION__
+        );
 
     auto dctx = getThreadLocalDCtx();
 
-    const size_t decodedSize = ZSTD_decompressDCtx(
-        dctx,
-        destination,
-        static_cast<size_t>(destinationSize),
-        encodedData.constData(),
-        static_cast<size_t>(encodedData.size())
-    );
+    const auto decodedSize = ZSTD_decompressDCtx(dctx, destination, destinationSize, encodedData.constData(), static_cast<size_t>(encodedData.size()));
 
-    if (ZSTD_isError(decodedSize)) {
-        result._error = QString("ZSTD decompression failed: %1")
-            .arg(ZSTD_getErrorName(decodedSize));
-        return result;
-    }
+    if (ZSTD_isError(decodedSize))
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to decode input data",
+            QString("ZSTD decompression failed: %1").arg(ZSTD_getErrorName(decodedSize)),
+            __FUNCTION__
+        );
 
-    if (decodedSize != destinationSize) {
-        result._error = QString("Decoded size mismatch: expected %1 bytes, got %2 bytes")
-            .arg(destinationSize)
-            .arg(static_cast<std::uint64_t>(decodedSize));
-        return result;
-    }
-
-    result._success = true;
-    return result;
+    if (decodedSize != destinationSize)
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to decode input data",
+            QString("Decoded size mismatch: expected %1 bytes, got %2 bytes").arg(destinationSize).arg(static_cast<std::uint64_t>(decodedSize)),
+            __FUNCTION__
+        );
 }
 
-mv::util::BlobCodec::Result ZstdBlobCodec::decodeFromFile(const QString& filePath, qsizetype expectedSize) const
+QByteArray ZstdBlobCodec::decodeFromFile(const QString& filePath, qsizetype expectedSize) const
 {
 #ifdef ZSTD_CODEC_VERBOSE
     qDebug() << __FUNCTION__ << filePath;
@@ -228,27 +298,42 @@ mv::util::BlobCodec::Result ZstdBlobCodec::decodeFromFile(const QString& filePat
     QFile file(filePath);
 
     if (!file.open(QIODevice::ReadOnly))
-        return { false, {}, QString("Unable to open file for reading: %1").arg(filePath) };
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to open file for reading",
+            QString("Unable to open file for reading: %1").arg(filePath),
+            __FUNCTION__
+        );
 
     const auto zstdBytes = mv::util::Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
+
+    if (zstdBytes.isEmpty()) {
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to decode input data",
+            QString("ZIP entry '%1' is empty").arg(filePath),
+            __FUNCTION__
+        );
+    }
 
     return decode(zstdBytes, expectedSize);
 }
 
-mv::util::BlobCodec::Result ZstdBlobCodec::decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const
+void ZstdBlobCodec::decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const
 {
 #ifdef ZSTD_CODEC_VERBOSE
     qDebug() << __FUNCTION__ << filePath;
 #endif
 
-    if (destination == nullptr) {
-        Result result;
+    if (destination == nullptr)
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to decode input data",
+            "Destination buffer is null",
+            __FUNCTION__
+        );
 
-    	result._error = "Destination buffer is null";
-        return result;
-    }
-
-    const QByteArray encodedData = mv::util::Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
+    const auto encodedData = Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
 
     return decodeTo(encodedData, destination, destinationSize);
 }

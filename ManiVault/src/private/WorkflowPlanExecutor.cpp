@@ -846,8 +846,9 @@ void WorkflowPlanExecutor::executeJobOnGuiThread(mv::util::WorkflowPlan::Job job
             });
 #endif
 
-            qDebug() << "Executing GUI-thread job:" << job.getName() << "in thread" << QThread::currentThread();
-            job.run();
+        	WorkflowReporter::info(QString("Executing GUI-thread job: %1 in thread %2").arg(job.getName()).arg(reinterpret_cast<quintptr>(QThread::currentThread())));
+
+        	job.run();
         }
         catch (...) {
             exceptionPtr = std::current_exception();

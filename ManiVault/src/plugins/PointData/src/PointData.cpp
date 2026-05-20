@@ -240,13 +240,6 @@ void PointData::fromVariantMapPre150(const QVariantMap& variantMap)
             resizeVector(numberOfElements);
 
             populateDataBufferFromVariantMapToRawBufferAsync(rawData, (char*)getDataVoidPtr(), getRawDataSize());
-
-            /*
-            if (getGuiName() == "M1_cross_species_merged_final")
-				
-            else
-                populateDataBufferFromVariantMapToRawBufferSync(rawData, (char*)getDataVoidPtr(), getRawDataSize());
-            */
         }
     }
     else

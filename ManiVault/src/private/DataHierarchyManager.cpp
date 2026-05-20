@@ -336,16 +336,10 @@ WorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& var
         loadDatasetJobs.emplace_back(datasetName, [datasetId, datasetName, dataVariantMap](WorkflowPlan::Job& job) {
             
             try {
-                //qDebug() << "---Loading dataset" << datasetName << "with ID" << datasetId;
-                //{
                 if (datasetName == "M1_cross_species_merged_final")
                     mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
                 else
                     mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
-
-            	
-                //}
-                //qDebug() << "---Finished loading dataset" << datasetName << "with ID" << datasetId;
             }
             catch (const ManiVaultException&) {
 
@@ -360,6 +354,7 @@ WorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& var
 	            throw ManiVaultException(SeverityLevel::Error, QString("Failed to load dataset '%1': %2").arg(datasetName, what), "DataHierarchyManager::loadDataset", what, dataVariantMap);
 	        }
 	        catch (...) {
+
 		        // Upgrade to ManiVaultException with context
 				throw ManiVaultException(SeverityLevel::Error, QString("Failed to load dataset '%1' due to an unknown error").arg(datasetName), "DataHierarchyManager::loadDataset");
 	        }
@@ -368,7 +363,6 @@ WorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& var
 
     fromPlan.addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Sequential, loadDatasetJobs);
     fromPlan.addSequentialStage("Notify datasets", [this](WorkflowPlan::Job& job) {
-        qDebug() << "Notifying datasets in the data hierarchy manager";
         for (const auto& item : _items) {
             events().notifyDatasetDataChanged(item->getDataset());
         }

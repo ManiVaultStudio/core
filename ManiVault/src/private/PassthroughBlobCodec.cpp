@@ -38,69 +38,112 @@ QString PassthroughBlobCodec::getName() const
     return QStringLiteral("none");
 }
 
-mv::util::BlobCodec::Result PassthroughBlobCodec::encode(const QByteArray& input) const
+QByteArray PassthroughBlobCodec::encode(const QByteArray& input) const
 {
 #ifdef PASSTHROUGH_CODEC_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
-    return { true, input, {} };
+    return input;
 }
 
-mv::util::BlobCodec::Result PassthroughBlobCodec::decode(const QByteArray& input, qsizetype expectedSize) const
+QByteArray PassthroughBlobCodec::decode(const QByteArray& input, qsizetype expectedSize) const
 {
 #ifdef PASSTHROUGH_CODEC_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
     if (expectedSize >= 0 && input.size() != expectedSize)
-        return { false, {}, QStringLiteral("Decoded size mismatch") };
+        throw std::runtime_error("Decoded size mismatch");
 
-    return { true, input, {} };
+    return input;
 }
 
-mv::util::BlobCodec::Result PassthroughBlobCodec::decodeFromFile(const QString& filePath, qsizetype expectedSize) const
+QByteArray PassthroughBlobCodec::decodeFromFile(const QString& filePath, qsizetype expectedSize) const
 {
 #ifdef PASSTHROUGH_CODEC_VERBOSE
     qDebug() << __FUNCTION__ << filePath;
 #endif
 
-    const QByteArray encodedData = mv::util::Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
+    const auto encodedData = Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
 
-    return { true, encodedData, {} };
+    return encodedData;
 }
 
-mv::util::BlobCodec::Result PassthroughBlobCodec::decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const
+void PassthroughBlobCodec::decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const
 {
 #ifdef PASSTHROUGH_CODEC_VERBOSE
     qDebug() << __FUNCTION__ << filePath;
 #endif
+
+    if (destination == nullptr)
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to decode from file to buffer",
+            "Destination buffer is null",
+            __FUNCTION__,
+            {
+                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination), 16) },
+                { "DestinationSize", QString::number(destinationSize) }
+            }
+        );
+
+    const auto encodedData = mv::util::Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
+
+    if (encodedData.isEmpty())
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to decode from file to buffer",
+            "Encoded data is empty",
+            __FUNCTION__,
+            {
+                { "FilePath", filePath }
+            }
+        );
+
+    if (encodedData.size() > static_cast<qsizetype>(destinationSize))
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            QString("Encoded data size exceeds destination buffer size. Encoded data size: %1 bytes, destination buffer size: %2 bytes").arg(encodedData.size()).arg(destinationSize),
+            "Encoded data size > destinationSize",
+            __FUNCTION__,
+            {
+                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination), 16) },
+                { "DestinationSize", QString::number(destinationSize) },
+                { "EncodedDataSize", QString::number(encodedData.size()) }
+            }
+        );
 
     try {
-        if (!destination)
-            throw std::runtime_error("Destination buffer is null");
-
-        const QByteArray encodedData = mv::util::Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
-
-        if (encodedData.isEmpty())
-            throw std::runtime_error("Encoded data is empty");
-
-        if (encodedData.size() > static_cast<qsizetype>(destinationSize))
-            throw std::runtime_error(QString("Encoded data size exceeds destination buffer size. Encoded data size: %1 bytes, destination buffer size: %2 bytes")
-                .arg(encodedData.size())
-                .arg(destinationSize)
-                .toStdString()
-            );
-
         memcpy(destination, encodedData.constData(), encodedData.size());
-
-        return { true, {}, {} };
     }
-    catch (const std::exception& e) {
-        return { false, {}, QString::fromUtf8(e.what()) };
+    catch (const std::exception& exception) {
+	    throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to copy decoded data to destination buffer",
+            exception.what(),
+            __FUNCTION__,
+            {
+                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination), 16) },
+                { "DestinationSize", QString::number(destinationSize) },
+                { "EncodedDataSize", QString::number(encodedData.size()) }
+            }
+        );
     }
-
-    return { false, {}, {} };
+    catch (...)
+    {
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to copy decoded data to destination buffer: unknown error",
+            "Unknown error",
+            __FUNCTION__,
+            {
+                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination), 16) },
+                { "DestinationSize", QString::number(destinationSize) },
+                { "EncodedDataSize", QString::number(encodedData.size()) }
+            }
+        );
+    }
 }
 
 QString PassthroughBlobCodec::getFileExtension() const

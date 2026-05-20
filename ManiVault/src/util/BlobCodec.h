@@ -41,17 +41,6 @@ public:
         Count
     };
 
-    /** Codec operation result */
-    struct Result
-    {
-        bool        _success = false;
-        QByteArray  _data;
-        QString     _error;
-
-        [[nodiscard]] bool isSuccess() const { return _success; }
-        [[nodiscard]] bool hasError() const { return !_success; }
-    };
-
 public:
 
     /**
@@ -62,7 +51,7 @@ public:
     BlobCodec(QObject* parent, const gui::CodecSettingsActionPtr& codecSettingsAction);
 
     /* Virtual destructor for proper cleanup in derived classes */
-	virtual ~BlobCodec() = default;
+	virtual ~BlobCodec() override = default;
 
     /** Returns the codec type */
     [[nodiscard]] virtual Type getType() const = 0;
@@ -71,24 +60,24 @@ public:
     [[nodiscard]] virtual QString getName() const = 0;
 
     /**
-     * Encode a block of raw bytes.
-     *
+     * @brief Encode a block of raw bytes and return the encoded data.
+     * @note This method will throw an exception if encoding fails. The returned QByteArray is only valid if the encoding was successful.
      * @param input Raw input bytes
-     * @return Encoded bytes or an error
+     * @return Encoded bytes
      */
-    [[nodiscard]] virtual Result encode(const QByteArray& input) const = 0;
+    [[nodiscard]] virtual QByteArray encode(const QByteArray& input) const = 0;
 
     /**
-     * Decode a previously encoded block of bytes.
-     *
+     * @brief Decode a previously encoded block of bytes and return the decoded data.
+     * @note This method will throw an exception if decoding fails. The returned QByteArray is only valid if the decoding was successful.
      * @param input Encoded input bytes
      * @param expectedSize Expected decoded size in bytes, or -1 if unknown
-     * @return Decoded bytes or an error
+     * @return Decoded bytes
      */
-    [[nodiscard]] virtual Result decode(const QByteArray& input, qsizetype expectedSize = -1) const = 0;
+    [[nodiscard]] virtual QByteArray decode(const QByteArray& input, qsizetype expectedSize = -1) const = 0;
 
     /**
-	 * Decode a previously encoded block of bytes directly into a provided output buffer.
+     * @brief Decode a previously encoded block of bytes directly to a provided output buffer.
 	 *
 	 * The default implementation may allocate a temporary decoded buffer and copy it
 	 * into the destination. Codecs should override this method when they can decode
@@ -97,37 +86,36 @@ public:
 	 * @param encodedData Encoded input bytes.
 	 * @param destination Output buffer that receives the decoded bytes.
 	 * @param destinationSize Size of the output buffer in bytes.
-	 * @return Success or an error.
 	 */
-    [[nodiscard]] virtual Result decodeTo(const QByteArray& encodedData, char* destination, std::uint64_t destinationSize) const;
+    virtual void decodeTo(const QByteArray& encodedData, char* destination, std::uint64_t destinationSize) const;
 
     /*
-     * Encode a block of raw bytes and save the encoded data to a file on disk.
-     *
+     * @brief Encode a block of raw bytes and save the encoded data to a file on disk.
+     * @note This method will throw an exception if encoding or file writing fails.
      * @param input Raw input bytes
      * @param filePath Path of the file on disk to which the encoded data is saved
-     * @return Encoded bytes or an error
+     * @param numberOfEncodedBytes Optional output parameter to receive the number of bytes that were encoded and written to the file
+     * @return Encoded bytes
      */
-    [[nodiscard]] Result encodeToFile(const QByteArray& input, const QString& filePath) const;
+    void encodeToFile(const QByteArray& input, const QString& filePath, std::uint64_t* numberOfEncodedBytes = nullptr) const;
 
     /*
-     * Load encoded data from a file on disk and decode it.
-     *
+     * @brief Load encoded data from a file on disk and decode it.
+     * @note This method will throw an exception if file reading or decoding fails. The returned QByteArray is only valid if the decoding was successful.
      * @param filePath Path of the file on disk from which the encoded data is loaded
      * @param expectedSize Expected decoded size in bytes, or -1 if unknown
-     * @return Decoded bytes or an error
+     * @return Decoded bytes
      */
-    [[nodiscard]] virtual Result decodeFromFile(const QString& filePath, qsizetype expectedSize = -1) const = 0;
+    [[nodiscard]] virtual QByteArray decodeFromFile(const QString& filePath, qsizetype expectedSize = -1) const = 0;
 
     /*
-     * Load encoded data from a file on disk and decode it directly to a provided output buffer.
-     *
+     * @brief Load encoded data from a file on disk and decode it directly to a provided output buffer.
+     * @note This method will throw an exception if file reading or decoding fails. The returned QByteArray is only valid if the decoding was successful.
      * @param filePath Path of the file on disk from which the encoded data is loaded
      * @param destination Output buffer to which the decoded data is copied
      * @param destinationSize Size of the output buffer in bytes
-     * @return Decoded bytes or an error
      */
-    [[nodiscard]] virtual Result decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const = 0;
+    virtual void decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const = 0;
 
     /** Convert codec type to persistent string */
     [[nodiscard]] static QString typeToString(Type type);
@@ -135,7 +123,16 @@ public:
     /** Convert persistent string to codec type */
     [[nodiscard]] static Type typeFromString(const QString& typeString);
 
+    /**
+     * Get file extension for this codec (without leading dot, e.g. "zstd" for Zstandard codec)
+     * @return File extension for this codec
+     */
     [[nodiscard]] virtual QString getFileExtension() const = 0;
+
+    /**
+     * Check if this codec supports inline data (i.e. storing encoded data directly in the database instead of as separate files on disk)
+     * @return True if this codec supports inline data, false otherwise
+     */
     [[nodiscard]] virtual bool supportsInlineData() const { return true; }
 
     /**

@@ -20,69 +20,114 @@ BlobCodec::BlobCodec(QObject* parent, const CodecSettingsActionPtr& codecSetting
     QObject(parent),
     _codecSettingsAction(codecSettingsAction)
 {
-    //Q_ASSERT(_codecSettingsAction);
-
-    //if (!_codecSettingsAction)
-    //    throw std::invalid_argument("Codec settings action must be a valid pointer");
 }
 
-BlobCodec::Result BlobCodec::decodeTo(const QByteArray& encodedData, char* destination, std::uint64_t destinationSize) const
+void BlobCodec::decodeTo(const QByteArray& encodedData, char* destination, std::uint64_t destinationSize) const
 {
 #ifdef CODEC_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
-    Result result;
+    if (destination == nullptr)
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to decode to buffer",
+            "Destination buffer is null",
+            __FUNCTION__,
+            {
+                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination), 16) },
+                { "DestinationSize", QString::number(destinationSize) }
+            }
+        );
 
-    if (destination == nullptr) {
-        result._error = "Destination buffer is null";
-        return result;
-    }
-
-    const auto decodeResult = decode(encodedData);
-
-    if (!decodeResult._success) {
-        result._error = decodeResult._error;
-        return result;
-    }
-
-    const auto decodedSize = static_cast<std::uint64_t>(decodeResult._data.size());
+    const auto decodedBytes = decode(encodedData);
+    const auto decodedSize  = static_cast<std::uint64_t>(decodedBytes.size());
 
     if (decodedSize > destinationSize) {
-        result._error = QString("Decoded data size (%1) exceeds destination buffer size (%2)").arg(decodedSize).arg(destinationSize);
-        return result;
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            QString("Decoded data size (%1) exceeds destination buffer size (%2)").arg(decodedSize).arg(destinationSize),
+            "DecodedSize > destinationSize",
+            __FUNCTION__,
+            {
+				{ "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination), 16) },
+                { "DestinationSize", QString::number(destinationSize) },
+                { "EncodedDataSize", QString::number(encodedData.size()) }
+            }
+        );
     }
 
-    memcpy(destination, decodeResult._data.constData(), static_cast<size_t>(decodedSize));
-
-    result._success = true;
-
-	return result;
+    try {
+        memcpy(destination, decodedBytes.constData(), decodedSize);
+    }
+    catch (const std::exception& e) {
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            QString("Failed to copy decoded data to destination buffer: %1").arg(e.what()),
+            "DecodedSize > destinationSize",
+            __FUNCTION__,
+            {
+                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination), 16) },
+                { "DestinationSize", QString::number(destinationSize) },
+                { "EncodedDataSize", QString::number(encodedData.size()) }
+            }
+        );
+    }
+    catch (...) {
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to copy decoded data to destination buffer: unknown error",
+            "DecodedSize > destinationSize",
+            __FUNCTION__,
+            {
+                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination), 16) },
+                { "DestinationSize", QString::number(destinationSize) },
+                { "EncodedDataSize", QString::number(encodedData.size()) }
+            }
+        );
+    }
 }
-
-BlobCodec::Result BlobCodec::encodeToFile(const QByteArray& input, const QString& filePath) const
+void BlobCodec::encodeToFile(const QByteArray& input, const QString& filePath, std::uint64_t* numberOfEncodedBytes /*= nullptr*/) const
 {
 #ifdef CODEC_VERBOSE
     qDebug() << __FUNCTION__ << filePath;
 #endif
 
-    auto encoded = encode(input);
-
-    if (!encoded.isSuccess())
-        return encoded;
+    auto encodedBytes = encode(input);
 
     QFile file(filePath);
 
     if (!file.open(QIODevice::WriteOnly))
-        return { false, {}, QString("Unable to open file for writing: %1").arg(filePath) };
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to open file for writing",
+            QString("Unable to open file for writing: %1").arg(filePath),
+            __FUNCTION__,
+            {
+                { "FilePath", filePath },
+                { "InputSize", QString::number(input.size()) },
+                { "EncodedDataSize", QString::number(encodedBytes.size()) }
+            }
+        );
 
-    if (file.write(encoded._data) != encoded._data.size())
-        return { false, {}, QString("Unable to write file: %1").arg(filePath) };
+    if (file.write(encodedBytes) != encodedBytes.size())
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to write file",
+            QString("Unable to write file: %1").arg(filePath),
+            __FUNCTION__,
+            {
+                { "FilePath", filePath },
+                { "InputSize", QString::number(input.size()) },
+                { "EncodedDataSize", QString::number(encodedBytes.size()) }
+            }
+        );
 
-    return encoded;
+    if (numberOfEncodedBytes != nullptr)
+        *numberOfEncodedBytes = static_cast<std::uint64_t>(encodedBytes.size());
 }
 
-BlobCodec::Result BlobCodec::decodeFromFile(const QString& filePath, qsizetype expectedSize) const
+QByteArray BlobCodec::decodeFromFile(const QString& filePath, qsizetype expectedSize) const
 {
 #ifdef CODEC_VERBOSE
     qDebug() << __FUNCTION__ << filePath;
@@ -91,37 +136,68 @@ BlobCodec::Result BlobCodec::decodeFromFile(const QString& filePath, qsizetype e
     QFile file(filePath);
 
     if (!file.open(QIODevice::ReadOnly))
-        return { false, {}, QString("Unable to open file for reading: %1").arg(filePath) };
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to open file for reading",
+            QString("Unable to open file for reading: %1").arg(filePath),
+            __FUNCTION__,
+            {
+                { "FilePath", filePath },
+                { "ExpectedSize", QString::number(expectedSize) }
+            }
+        );
 
     return decode(file.readAll(), expectedSize);
 }
 
-BlobCodec::Result BlobCodec::decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const
+void BlobCodec::decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const
 {
 #ifdef CODEC_VERBOSE
     qDebug() << __FUNCTION__ << filePath;
 #endif
 
-    Result result;
-
-    if (destination == nullptr) {
-        result._error = "Destination buffer is null";
-        return result;
-    }
+    if (destination == nullptr)
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to decode to destination buffer",
+            "Destination buffer is null",
+            __FUNCTION__,
+			{
+                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination), 16) },
+                { "DestinationSize", QString::number(destinationSize) },
+                { "FilePath", filePath }
+            }
+        );
 
     QFile file(filePath);
 
-    if (!file.open(QIODevice::ReadOnly)) {
-        result._error = QString("Unable to open file for reading: %1").arg(filePath);
-        return result;
-    }
+    if (!file.open(QIODevice::ReadOnly))
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to open file for reading",
+            QString("Unable to open file for reading: %1").arg(filePath),
+            __FUNCTION__,
+            {
+                { "FilePath", filePath },
+                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination), 16) },
+                { "DestinationSize", QString::number(destinationSize) }
+            }
+        );
 
-    if (file.error() != QFileDevice::NoError) {
-        result._error = QString("Failed to read file: %1").arg(filePath);
-        return result;
-    }
+    if (file.error() != QFileDevice::NoError)
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to read file",
+            QString("Failed to read file: %1").arg(filePath),
+            __FUNCTION__,
+            {
+                { "FilePath", filePath },
+                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination), 16) },
+                { "DestinationSize", QString::number(destinationSize) }
+            }
+        );
 
-    return decodeTo(file.readAll(), destination, destinationSize);
+    decodeTo(file.readAll(), destination, destinationSize);
 }
 
 QString BlobCodec::typeToString(Type type)
@@ -149,7 +225,15 @@ BlobCodec::Type BlobCodec::typeFromString(const QString& typeString)
     if (typeString.compare(QStringLiteral("zstd"), Qt::CaseInsensitive) == 0)
         return Type::Zstd;
 
-    throw std::runtime_error(QString("Unknown blob codec type: %1").arg(typeString).toStdString());
+    throw mv::ManiVaultException(
+        SeverityLevel::Error,
+        "Unknown blob codec type",
+        QString("Unknown blob codec type: %1").arg(typeString),
+        __FUNCTION__,
+        {
+            { "TypeString", typeString }
+        }
+    );
 }
 
 gui::CodecSettingsAction* BlobCodec::getSettingsAction() const
