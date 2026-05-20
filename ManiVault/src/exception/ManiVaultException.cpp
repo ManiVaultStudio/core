@@ -18,4 +18,14 @@ ManiVaultException::ManiVaultException(SeverityLevel severity, QString message, 
 {
 }
 
+ManiVaultException ManiVaultException::withAddedDetails(const QVariantMap& additionalDetails) const
+{
+	QVariantMap newDetails = _details;
+
+	for (auto it = additionalDetails.begin(); it != additionalDetails.end(); ++it)
+		newDetails[it.key()] = it.value();
+
+    return ManiVaultException(_severity, _message, _what, _where, newDetails);
+}
+
 }

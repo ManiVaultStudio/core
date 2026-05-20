@@ -16,6 +16,8 @@ class CORE_EXPORT ManiVaultException : public std::runtime_error {
 public:
     ManiVaultException(SeverityLevel severity, QString message, QString what, QString where = {}, QVariantMap details = {});
 
+    ManiVaultException withAddedDetails(const QVariantMap& additionalDetails) const;
+
     SeverityLevel   _severity;  /** The severity level of the exception */
     QString         _message;   /** The message describing the exception */
     QString         _what;      /** The specific cause or nature of the exception */

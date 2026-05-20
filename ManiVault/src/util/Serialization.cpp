@@ -25,14 +25,31 @@ void saveRawDataToBinaryFile(const char* bytes, const std::uint64_t& numberOfByt
 
     // Exit prematurely if the target directory does not exist
     if (!QFileInfo(filePath).dir().exists())
-        throw std::runtime_error(QString("Unable to save data in %1, the directory does not exist").arg(outputDirectory.dirName()).toLatin1());
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to save raw data to binary file",
+            QString("Unable to save data in %1, the directory does not exist").arg(outputDirectory.dirName()),
+            __FUNCTION__,
+            {
+                { "FilePath", filePath },
+                { "OutputDirectory", outputDirectory.dirName() }
+            }
+        );
 
     // Create binary file
     QFile binaryFile(filePath);
 
     // And save it do disk
     if (!binaryFile.open(QIODevice::WriteOnly))
-        throw std::runtime_error(QString("Unable to save binary file, cannot open file").toLatin1());
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to save raw data to binary file",
+            "Unable to open file for writing",
+            __FUNCTION__,
+            {
+                { "FilePath", filePath }
+            }
+        );
 
     binaryFile.write(QByteArray::fromRawData(bytes, numberOfBytes)); // usng QByteArray::fromRawData(const char *data, qsizetype size) so that the bytes are not copied.
     binaryFile.close();
@@ -42,21 +59,47 @@ void loadRawDataFromBinaryFile(char* bytes, const std::uint64_t& numberOfBytes, 
 {
     // Exit prematurely if the target file does not exist
     if (!QFileInfo(filePath).exists())
-        throw std::runtime_error(QString("Unable to load binary file, %1 does not exist").arg(filePath).toLatin1());
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to load raw data from binary file",
+            QString("Unable to load binary file, %1 does not exist").arg(filePath),
+            __FUNCTION__,
+            {
+                { "FilePath", filePath }
+            }
+        );
 
     // Create binary file
     QFile binaryFile(filePath);
 
     // Open the file read-only
     if (!binaryFile.open(QIODevice::ReadOnly))
-        throw std::runtime_error("Unable to load binary file, cannot open file");
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to load raw data from binary file",
+            "Unable to open file for reading",
+            __FUNCTION__,
+            {
+                { "FilePath", filePath }
+            }
+        );
 
     // Read the raw data from the file directly into bytes
     const auto numberOfBytesRead = binaryFile.read(bytes, numberOfBytes);
 
     // Except if the number of bytes in the file deviates from the number of requested bytes
     if (numberOfBytesRead != numberOfBytes)
-        throw std::runtime_error("Unable to load binary file, number of requested bytes is not the same as in the file");
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to load raw data from binary file",
+            "Number of requested bytes is not the same as in the file",
+            __FUNCTION__,
+            {
+                { "FilePath", filePath },
+                { "RequestedBytes", QString::number(numberOfBytes) },
+                { "ReadBytes", QString::number(numberOfBytesRead) }
+            }
+        );
 }
 
 QByteArray readBinaryFileToByteArray(const QString& filePath)
@@ -64,7 +107,15 @@ QByteArray readBinaryFileToByteArray(const QString& filePath)
     QFile file(filePath);
 
     if (!file.open(QIODevice::ReadOnly))
-        throw std::runtime_error(QString("Unable to open file %1").arg(filePath).toStdString());
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to read binary file",
+            QString("Unable to open file %1").arg(filePath),
+            __FUNCTION__,
+            {
+                { "FilePath", filePath }
+            }
+        );
 
     return file.readAll();
 }
@@ -93,12 +144,23 @@ static EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& s
 
         result._block = std::move(blockVariantMap);
     }
-    catch (const ManiVaultException&)
+    catch (const ManiVaultException& maniVaultException)
     {
-        throw; // rethrow ManiVaultExceptions without modification
+        throw maniVaultException.withAddedDetails({
+            { "Offset", QString::number(job._offset) },
+            { "Size", QString::number(job._size) }
+		});
     }
-    catch (const std::exception& e) {
-        result._error = QString::fromUtf8(e.what());
+    catch (const std::exception& exception) {
+        throw ManiVaultException(SeverityLevel::Error,
+            "Enable to encode block",
+            exception.what(),
+            __FUNCTION__,
+            {
+                { "Offset", QString::number(job._offset) },
+				{ "Size", QString::number(job._size) },
+                { "SaveDir", saveDir }
+            });
     }
 
     return result;
@@ -108,7 +170,13 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 {
     try {
         if (!mv::projects().hasProject())
-            throw std::runtime_error("Unable to save raw data, no project is currently open");
+            throw mv::ManiVaultException(
+                SeverityLevel::Error,
+                "Unable to save raw data",
+                "No project is currently open",
+                __FUNCTION__,
+                {}
+            );
 
         auto createCodec = [&]() -> std::shared_ptr<BlobCodec> {
             return mv::projects().getCurrentProject()->getCompressionAction().createCodec(nullptr);
@@ -146,7 +214,6 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
 	    const auto saveDir = QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Save));
 
-        qDebug() << saveDir;
         WorkflowPlan encodeWorkflowPlan("Encode Blocks");
         WorkflowPlan::Jobs encodeJobs;
 
@@ -181,7 +248,14 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
         for (const auto& encodeBlockJob : encodeBlockJobs) {
             if (!encodeBlockJob._result._error.isEmpty())
-                throw std::runtime_error(encodeBlockJob._result._error.toStdString());
+                throw ManiVaultException(
+                    SeverityLevel::Error,
+                    "Failed to encode block",
+                    encodeBlockJob._result._error,
+                    __FUNCTION__,
+                    {
+                        { "BlockIndex", QString::number(&encodeBlockJob - &encodeBlockJobs[0]) }
+                    });
 
             blocks.push_back(encodeBlockJob._result._block);
         }
@@ -191,18 +265,34 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
         rawData["Blocks"]           = QVariant::fromValue(blocks);
 
         return rawData;
-     }
-     catch (const std::exception& e) {
-         qWarning() << "Unable to convert raw data to variant map:" << e.what();
-     }
-
-     return {};
+    }
+	catch (const ManiVaultException& maniVaultException) {
+        throw maniVaultException.withAddedDetails({
+            { "NumberOfBytes", QString::number(numberOfBytes) }
+        });
+    }
+    catch (const std::exception& exception) {
+        throw ManiVaultException(SeverityLevel::Error,
+            "Failed to convert raw data to variant map",
+            exception.what(),
+            __FUNCTION__,
+            {
+                { "NumberOfBytes", QString::number(numberOfBytes) }
+            });
+    }
+    catch (...) {
+	    throw ManiVaultException(SeverityLevel::Error,
+			"Failed to convert raw data to variant map",
+			"An unknown error occurred",
+			__FUNCTION__,
+			{
+				{ "NumberOfBytes", QString::number(numberOfBytes) }
+			});
+    }
 }
 
 DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec, char* destination, std::uint64_t destinationSize)
 {
-    const auto location = "serialization.decode.block.file";
-
     DecodeBlockResult result;
 
     try {
@@ -210,49 +300,101 @@ DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, co
 	    result._size    = decodeBlockJob._size;
 
 	    if (!destination)
-	        throw std::runtime_error("Destination buffer is null");
+	        throw ManiVaultException(SeverityLevel::Error,
+                "Unable to decode block from file to buffer",
+	            "Destination buffer is null",
+	            __FUNCTION__,
+	            {
+	                { "URI", decodeBlockJob._uri }
+	            });
 
 	    if (decodeBlockJob._offset > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max()) || decodeBlockJob._size > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max())) {
-	        throw std::runtime_error("Decode block offset or size exceeds std::uint64_t range");
+	        throw ManiVaultException(SeverityLevel::Error,
+                "Unable to decode block from file to buffer",
+	            "Decode block offset or size exceeds std::uint64_t range",
+	            __FUNCTION__,
+	            {
+	                { "URI", decodeBlockJob._uri }
+	            });
 	    }
 
 	    const auto offset   = static_cast<std::uint64_t>(decodeBlockJob._offset);
 	    const auto size     = static_cast<std::uint64_t>(decodeBlockJob._size);
 
 	    if (offset < 0 || size < 0 || offset > destinationSize || size > destinationSize - offset) {
-	        throw std::runtime_error(QString("Decode block destination range out of bounds. offset=%1, size=%2, destinationSize=%3, uri=%4")
-	            .arg(offset)
-	            .arg(size)
-	            .arg(destinationSize)
-	            .arg(decodeBlockJob._uri)
-	            .toStdString()
-	        );
+            throw ManiVaultException(SeverityLevel::Error,
+                "Unable to decode block from file to buffer",
+                QString("Decode block destination range is out of bounds. offset=%1, size=%2, destinationSize=%3, uri=%4")
+                    .arg(offset)
+                    .arg(size)
+                    .arg(destinationSize)
+                    .arg(decodeBlockJob._uri),
+                __FUNCTION__,
+                {
+                    { "Offset", QString::number(offset) },
+                    { "Size", QString::number(size) },
+                    { "DestinationSize", QString::number(destinationSize) },
+                    { "URI", decodeBlockJob._uri }
+                }
+            );
 	    }
 
 	    auto codec = createCodec();
 
 	    if (!codec)
-	        throw std::runtime_error("Failed to create blob codec");
+	        throw ManiVaultException(SeverityLevel::Error,
+                "Unable to decode block from file to buffer",
+	            "Failed to create blob codec",
+	            __FUNCTION__,
+	            {
+	                { "URI", decodeBlockJob._uri }
+	            });
 
 	    if (decodeBlockJob._uri.isEmpty())
-	        throw std::runtime_error("Block URI is empty");
+	        throw ManiVaultException(SeverityLevel::Error,
+                "Unable to decode block from file to buffer",
+	            "Block URI is empty",
+	            __FUNCTION__,
+	            {
+	                { "URI", decodeBlockJob._uri }
+	            });
 
 	    codec->decodeFromFileTo(decodeBlockJob._uri, destination + offset, size);
     }
-    catch (const ManiVaultException& e) {
-        qDebug() << "ManiVaultException caught during block decoding:" << e._message << "- rethrowing";
-        // Rethrow ManiVaultExceptions as they are already properly constructed with severity and message
+    catch (const ManiVaultException&) {
+
+    	// Rethrow ManiVaultExceptions as they are already properly constructed
     	throw;
     } 
     catch (const std::exception& exception) {
 
         // Upgrade to ManiVaultException with context
-        throw ManiVaultException(SeverityLevel::Error, QString("Failed to decode block from file '%1': %2").arg(decodeBlockJob._uri, QString::fromStdString(exception.what())), location);
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Unable to decode block from file to buffer",
+            exception.what(),
+            __FUNCTION__,
+            {
+                { "Offset", QString::number(decodeBlockJob._offset) },
+                { "Size", QString::number(decodeBlockJob._size) },
+                { "DestinationSize", QString::number(destinationSize) },
+                { "URI", decodeBlockJob._uri }
+            });
     }
 	catch(...) {
 
-        // Upgrade to ManiVaultException with context
-        throw ManiVaultException(SeverityLevel::Error, QString("Failed to decode block from file '%1' due to an unknown error").arg(decodeBlockJob._uri), location);
+        // Handle any other types of exceptions
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Unable to decode block from file to buffer",
+            "Unknown error",
+            __FUNCTION__,
+            {
+                { "Offset", QString::number(decodeBlockJob._offset) },
+                { "Size", QString::number(decodeBlockJob._size) },
+                { "DestinationSize", QString::number(destinationSize) },
+                { "URI", decodeBlockJob._uri }
+            });
     }
 
     return result;
@@ -260,8 +402,6 @@ DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, co
 
 DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec, char* destination, std::uint64_t destinationSize)
 {
-    const auto location = "serialization.decode.block.base64";
-
     DecodeBlockResult result;
 
     try {
@@ -269,24 +409,40 @@ DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, 
 	    result._size    = decodeBlockJob._size;
 
 	    if (!destination)
-	        throw std::runtime_error("Destination buffer is null");
+            throw ManiVaultException(SeverityLevel::Error,
+                "Unable to decode block from base64 to buffer",
+                "Destination buffer is null",
+                __FUNCTION__,
+                {
+                    { "URI", decodeBlockJob._uri }
+                });
 
 	    const auto offset   = static_cast<std::uint64_t>(decodeBlockJob._offset);
 	    const auto size     = static_cast<std::uint64_t>(decodeBlockJob._size);
 
 	    if (offset < 0 || size < 0 || offset > destinationSize || size > destinationSize - offset) {
-	        throw std::runtime_error(QString("Inline decode block out of bounds. offset=%1, size=%2, destinationSize=%3")
-	            .arg(offset)
-	            .arg(size)
-	            .arg(destinationSize)
-	            .toStdString()
-	        );
+	        throw ManiVaultException(SeverityLevel::Error,
+                "Unable to decode block from base64 to buffer",
+	            "Inline decode block out of bounds",
+	            __FUNCTION__,
+	            {
+	                { "Offset", QString::number(decodeBlockJob._offset) },
+	                { "Size", QString::number(decodeBlockJob._size) },
+	                { "DestinationSize", QString::number(destinationSize) },
+	                { "URI", decodeBlockJob._uri }
+	            });
 	    }
 
 	    auto codec = createCodec();
 
 	    if (!codec)
-	        throw std::runtime_error("Failed to create blob codec");
+	        throw ManiVaultException(SeverityLevel::Error,
+                "Unable to decode block from base64 to buffer",
+	            "Failed to create blob codec",
+	            __FUNCTION__,
+	            {
+	                { "URI", decodeBlockJob._uri }
+	            });
 
 	    const auto encodedBytes = QByteArray::fromBase64(decodeBlockJob._encodedData.toUtf8());
 
@@ -300,12 +456,31 @@ DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, 
     catch (const std::exception& exception) {
 
         // Upgrade to ManiVaultException with context
-        throw ManiVaultException(SeverityLevel::Error, QString("Failed to decode block from file '%1': %2").arg(decodeBlockJob._uri, QString::fromStdString(exception.what())), location);
+        throw ManiVaultException(SeverityLevel::Error,
+            "Unable to decode block from base64 to buffer",
+            exception.what(),
+            __FUNCTION__,
+			{
+                { "Offset", QString::number(decodeBlockJob._offset) },
+                { "Size", QString::number(decodeBlockJob._size) },
+                { "DestinationSize", QString::number(destinationSize) },
+                { "URI", decodeBlockJob._uri }
+			});
     }
     catch (...) {
 
-        // Upgrade to ManiVaultException with context
-        throw ManiVaultException(SeverityLevel::Error, QString("Failed to decode block from file '%1' due to an unknown error").arg(decodeBlockJob._uri), location);
+        // Handle any other types of exceptions
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Unable to decode block from base64 to buffer",
+            "Unknown error",
+            __FUNCTION__,
+            {
+                { "Offset", QString::number(decodeBlockJob._offset) },
+                { "Size", QString::number(decodeBlockJob._size) },
+                { "DestinationSize", QString::number(destinationSize) },
+                { "URI", decodeBlockJob._uri }
+            });
     }
 
     return result;
@@ -314,7 +489,15 @@ DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, 
 PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& variantMap, WorkflowPlan::ConcurrencyMode concurrencyMode)
 {
     if (variantMap.isEmpty())
-        throw std::runtime_error("Variant map is empty");
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to populate data buffer from variant map",
+            "Variant map is empty",
+            __FUNCTION__,
+            {
+                { "VariantMap", variantMap }
+            }
+        );
 
     variantMapMustContain(variantMap, "BlockSize");
     variantMapMustContain(variantMap, "Blocks");
@@ -326,14 +509,31 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
     const auto totalSize    = static_cast<std::uint64_t>(variantMap.value("Size").toULongLong());
 
     if (totalSize == 0)
-        throw std::runtime_error("Decoded buffer size is zero");
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to populate data buffer from variant map",
+            "Decoded buffer size is zero",
+            __FUNCTION__,
+            {
+                { "VariantMap", variantMap }
+            }
+        );
 
     auto sharedData = SharedDataBuffer::create();
 
     sharedData->resize(totalSize);
 
     if (hasCodec && !codecRegistry().isRegistered(codecName)) {
-        throw std::runtime_error(QStringLiteral("Unable to load raw data, codec %1 is not registered").arg(codecName).toStdString());
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to populate data buffer from variant map",
+            QString("Unable to load raw data, codec %1 is not registered").arg(codecName),
+            __FUNCTION__,
+            {
+                { "CodecName", codecName },
+                { "VariantMap", variantMap }
+            }
+        );
     }
 
     auto createCodec = [hasCodec, codecName]() -> std::shared_ptr<BlobCodec> {
@@ -380,23 +580,45 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
         const quint64 end = job._offset + job._size;
 
         if (job._offset < expectedOffset) {
-            throw std::runtime_error(QString("Raw-data block overlap detected at offset %1").arg(job._offset).toStdString());
+            throw ManiVaultException(
+                SeverityLevel::Error,
+                "Failed to populate data buffer from variant map",
+                QString("Raw-data block overlap detected at offset %1").arg(job._offset),
+                __FUNCTION__,
+                {
+                    { "CodecName", codecName },
+                    { "VariantMap", variantMap }
+                }
+            );
         }
 
         // Optional: require contiguous packing
         if (job._offset != expectedOffset) {
-            throw std::runtime_error(QString("Raw-data block gap detected: expected offset %1, got %2").arg(expectedOffset).arg(job._offset).toStdString());
+            throw ManiVaultException(
+                SeverityLevel::Error,
+                "Failed to populate data buffer from variant map",
+                QString("Raw-data block gap detected: expected offset %1, got %2").arg(expectedOffset).arg(job._offset),
+                __FUNCTION__,
+                {
+                    { "CodecName", codecName },
+                    { "VariantMap", variantMap }
+                }
+            );
         }
 
         expectedOffset = end;
     }
 
     if (expectedOffset != totalSize) {
-        throw std::runtime_error(
-            QString("Raw-data blocks do not cover total size. Expected %1 bytes, got %2 bytes")
-            .arg(totalSize)
-            .arg(expectedOffset)
-            .toStdString()
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to populate data buffer from variant map",
+            QString("Raw-data blocks do not cover total size. Expected %1 bytes, got %2 bytes").arg(totalSize).arg(expectedOffset),
+            __FUNCTION__,
+            {
+                { "CodecName", codecName },
+                { "VariantMap", variantMap },
+            }
         );
     }
 
@@ -491,10 +713,30 @@ QByteArray populateDataBufferFromVariantMapSync(const QVariantMap& variantMap)
 WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, WorkflowPlan::ConcurrencyMode concurrencyMode)
 {
     if (variantMap.isEmpty())
-        throw std::runtime_error("Variant map is empty");
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to populate data buffer from variant map",
+            "Variant map is empty",
+            __FUNCTION__,
+            {
+                { "VariantMap", variantMap },
+                { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
+                { "DestinationSize", QString::number(destinationSize) }
+            }
+        );
 
-    if (!destination)
-        throw std::runtime_error("Destination buffer is null");
+    if (!destination)   
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to populate data buffer from variant map",
+            "Destination buffer is null",
+            __FUNCTION__,
+            {
+                { "VariantMap", variantMap },
+                { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
+                { "DestinationSize", QString::number(destinationSize) }
+            }
+        );
 
     variantMapMustContain(variantMap, "BlockSize");
     variantMapMustContain(variantMap, "Blocks");
@@ -506,26 +748,48 @@ WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantM
         ? variantMap.value("Codec").toString()
         : QStringLiteral("none");
 
-    const auto totalSize =
-        static_cast<std::uint64_t>(variantMap.value("Size").toULongLong());
+    const auto totalSize = variantMap.value("Size").toULongLong();
 
     if (totalSize == 0)
-        throw std::runtime_error("Decoded buffer size is zero");
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to populate data buffer from variant map",
+            "Decoded buffer size is zero",
+            __FUNCTION__,
+            {
+                { "VariantMap", variantMap },
+                { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
+                { "DestinationSize", QString::number(destinationSize) }
+            }
+        );
 
     if (totalSize != destinationSize) {
-        throw std::runtime_error(
-            QString("Destination buffer size mismatch. Expected %1 bytes, got %2 bytes")
-            .arg(totalSize)
-            .arg(destinationSize)
-            .toStdString()
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to populate data buffer from variant map",
+            "Destination buffer size mismatch",
+            __FUNCTION__,
+            {
+                { "VariantMap", variantMap },
+                { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
+                { "DestinationSize", QString::number(destinationSize) },
+                { "ExpectedSize", QString::number(totalSize) }
+            }
         );
     }
 
     if (hasCodec && !codecRegistry().isRegistered(codecName)) {
-        throw std::runtime_error(
-            QStringLiteral("Unable to load raw data, codec %1 is not registered")
-            .arg(codecName)
-            .toStdString()
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to populate data buffer from variant map",
+            QString("Unable to load raw data, codec %1 is not registered").arg(codecName),
+            __FUNCTION__,
+            {
+                { "VariantMap", variantMap },
+                { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
+                { "DestinationSize", QString::number(destinationSize) },
+                { "Codec", codecName }
+            }
         );
     }
 
@@ -534,7 +798,7 @@ WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantM
             return codecRegistry().createCodec(nullptr, codecName);
 
         return codecRegistry().createCodec(nullptr, BlobCodec::Type::None);
-        };
+    };
 
     DecodeBlockJobs decodeBlockJobs;
     decodeBlockJobs.reserve(blocks.size());
@@ -572,39 +836,85 @@ WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantM
 
     for (const auto& job : decodeBlockJobs) {
         if (job._size > std::numeric_limits<quint64>::max() - job._offset)
-            throw std::runtime_error("Raw-data block offset overflow detected");
+            throw ManiVaultException(
+                SeverityLevel::Error,
+                "Failed to populate data buffer from variant map",
+                "Raw-data block offset overflow detected",
+                __FUNCTION__,
+                {
+                    { "VariantMap", variantMap },
+                    { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
+                    { "DestinationSize", QString::number(destinationSize) },
+                    { "BlockOffset", QString::number(job._offset) },
+                    { "BlockSize", QString::number(job._size) }
+                }
+            );
 
         const quint64 end = job._offset + job._size;
 
         if (job._offset < expectedOffset) {
-            throw std::runtime_error(
-                QString("Raw-data block overlap detected at offset %1")
-                .arg(job._offset)
-                .toStdString()
+            throw ManiVaultException(
+                SeverityLevel::Error,
+                "Failed to populate data buffer from variant map",
+                "Raw-data block overlap detected",
+                __FUNCTION__,
+                {
+                    { "VariantMap", variantMap },
+                    { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
+                    { "DestinationSize", QString::number(destinationSize) },
+                    { "BlockOffset", QString::number(job._offset) },
+                    { "ExpectedOffset", QString::number(expectedOffset) }
+                }
             );
         }
 
         if (job._offset != expectedOffset) {
-            throw std::runtime_error(
-                QString("Raw-data block gap detected: expected offset %1, got %2")
-                .arg(expectedOffset)
-                .arg(job._offset)
-                .toStdString()
+            throw ManiVaultException(
+                SeverityLevel::Error,
+                "Failed to populate data buffer from variant map",
+                "Raw-data block gap detected",
+                __FUNCTION__,
+                {
+                    { "VariantMap", variantMap },
+                    { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
+                    { "DestinationSize", QString::number(destinationSize) },
+                    { "BlockOffset", QString::number(job._offset) },
+                    { "ExpectedOffset", QString::number(expectedOffset) }
+                }
             );
         }
 
         if (end > destinationSize)
-            throw std::runtime_error("Raw-data block exceeds destination buffer size");
+            throw ManiVaultException(
+                SeverityLevel::Error,
+                "Failed to populate data buffer from variant map",
+                "Raw-data block exceeds destination buffer size",
+                __FUNCTION__,
+                {
+                    { "VariantMap", variantMap },
+                    { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
+                    { "DestinationSize", QString::number(destinationSize) },
+                    { "BlockOffset", QString::number(job._offset) },
+                    { "BlockSize", QString::number(job._size) }
+                }
+            );
 
         expectedOffset = end;
     }
 
     if (expectedOffset != totalSize) {
-        throw std::runtime_error(
-            QString("Raw-data blocks do not cover total size. Expected %1 bytes, got %2 bytes")
-            .arg(totalSize)
-            .arg(expectedOffset)
-            .toStdString()
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to populate data buffer from variant map",
+            "Raw-data blocks do not cover total size",
+            __FUNCTION__,
+            {
+                { "VariantMap", variantMap },
+                { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
+                { "DestinationSize", QString::number(destinationSize) },
+                { "ExpectedOffset", QString::number(expectedOffset) },
+                { "TotalSize", QString::number(totalSize) }
+            }
         );
     }
 
@@ -715,29 +1025,80 @@ WorkflowResultFuture populateDataBufferFromVariantMapToRawBufferAsync(const QVar
 void populateDataBufferFromVariantMapToRawBufferSync(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize)
 {
     if (!destination)
-        throw std::runtime_error("Destination buffer is null");
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to populate data buffer from variant map to raw buffer",
+            "Destination buffer is null",
+            __FUNCTION__,
+            {
+                { "VariantMap", variantMap },
+                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
+                { "DestinationSize", QString::number(destinationSize) }
+            }
+        );
 
-    auto result = populateDataBufferFromVariantMap(
-        variantMap,
-        WorkflowPlan::ConcurrencyMode::Sequential
-    );
+    auto result = populateDataBufferFromVariantMap(variantMap, WorkflowPlan::ConcurrencyMode::Sequential);
 
     const auto decodedSize = static_cast<std::uint64_t>(result._data->size());
 
     if (decodedSize != destinationSize)
-        throw std::runtime_error("Decoded point-data size does not match destination size");
-
-    std::memcpy(
-        destination,
-        result._data->constData(),
-        static_cast<size_t>(decodedSize)
-    );
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to populate data buffer from variant map to raw buffer",
+            "Decoded data size does not match destination size",
+            __FUNCTION__,
+            {
+                { "VariantMap", variantMap },
+                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
+                { "DestinationSize", QString::number(destinationSize) },
+                { "DecodedSize", QString::number(decodedSize) }
+            }
+        );
+        
+    try {
+        std::memcpy(destination, result._data->constData(), static_cast<size_t>(decodedSize));
+    }
+    catch (const std::exception& exception) {
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to populate data buffer from variant map to raw buffer (memcpy)",
+            exception.what(),
+            __FUNCTION__,
+            {
+                { "VariantMap", variantMap },
+                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
+                { "DestinationSize", QString::number(destinationSize) },
+            }
+        );
+    }
+    catch (...) {
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to populate data buffer from variant map to raw buffer (memcpy)",
+            "Unknown error",
+            __FUNCTION__,
+            {
+                { "VariantMap", variantMap },
+                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
+                { "DestinationSize", QString::number(destinationSize) },
+            }
+        );
+    }
 }
 
 void variantMapMustContain(const QVariantMap& variantMap, const QString& key)
 {
     if (!variantMap.contains(key)) {
-        throw SerializationException::missingKey(key, "serialization", variantMap);
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Variant map is missing required key",
+            QString("Variant map is missing required key '%1'").arg(key),
+            __FUNCTION__,
+            {
+                { "VariantMap", variantMap },
+                { "MissingKey", key }
+            }
+        );
     }
 }
 
@@ -846,20 +1207,45 @@ QVariantMap loadJsonToVariantMap(const QString& filePath)
 	QFile file(filePath);
 
 	if (!file.open(QIODevice::ReadOnly)) {
-		throw std::runtime_error(("Failed to open file: " + filePath).toStdString());
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to open JSON file",
+            QString("Unable to open file at path '%1'").arg(filePath),
+            __FUNCTION__,
+            {
+                { "FilePath", filePath }
+            }
+        );
 	}
 
-	const QByteArray data = file.readAll();
+	const auto data = file.readAll();
 
 	QJsonParseError parseError;
-	QJsonDocument   doc = QJsonDocument::fromJson(data, &parseError);
+
+	const auto doc = QJsonDocument::fromJson(data, &parseError);
 
 	if (parseError.error != QJsonParseError::NoError) {
-		throw std::runtime_error(("JSON parse error: " + parseError.errorString()).toStdString());
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "JSON parse error",
+            QString("JSON parse error: %1").arg(parseError.errorString()),
+            __FUNCTION__,
+            {
+                { "FilePath", filePath }
+            }
+        );
 	}
 
 	if (!doc.isObject()) {
-		throw std::runtime_error("JSON root is not an object");
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "JSON root is not an object",
+            QString("JSON root is not an object in file '%1'").arg(filePath),
+            __FUNCTION__,
+            {
+                { "FilePath", filePath }
+            }
+        );
 	}
 
 	return doc.object().toVariantMap();
@@ -1211,7 +1597,16 @@ QVariantList loadTypedList(const QByteArray& bytes, qsizetype count)
     const qsizetype expectedBytes = count * qsizetype(sizeof(T));
 
     if (bytes.size() != expectedBytes)
-        throw std::runtime_error("Invalid optimized QVariantList byte size");
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Invalid optimized QVariantList byte size",
+            QString("Invalid optimized QVariantList byte size: expected %1, got %2").arg(expectedBytes).arg(bytes.size()),
+            __FUNCTION__,
+            {
+                { "ExpectedBytes", QString::number(expectedBytes) },
+                { "ActualBytes", QString::number(bytes.size()) }
+            }
+        );
 
     const auto* src = reinterpret_cast<const T*>(bytes.constData());
 
@@ -1227,7 +1622,16 @@ QVariantList loadTypedList(const QByteArray& bytes, qsizetype count)
 QVariantList loadBoolList(const QByteArray& bytes, qsizetype count)
 {
     if (bytes.size() != count)
-        throw std::runtime_error("Invalid optimized bool QVariantList byte size");
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Invalid optimized bool QVariantList byte size",
+            QString("Invalid optimized bool QVariantList byte size: expected %1, got %2").arg(count).arg(bytes.size()),
+            __FUNCTION__,
+            {
+                { "ExpectedCount", QString::number(count) },
+                { "ActualCount", QString::number(bytes.size()) }
+            }
+        );
 
     QVariantList list;
     list.reserve(count);
@@ -1259,10 +1663,26 @@ QVariant loadStringList(const QVariantMap& block)
     stream >> strings;
 
     if (stream.status() != QDataStream::Ok)
-        throw std::runtime_error("Failed to load optimized QStringList block");
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to load optimized QStringList block",
+            "Failed to load optimized QStringList block",
+            __FUNCTION__,
+            {
+                { "Block", block }
+            }
+        );
 
     if (strings.size() != expectedCount)
-        throw std::runtime_error("Optimized QStringList count mismatch");
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Optimized QStringList count mismatch",
+            QString("Optimized QStringList count mismatch: expected %1, got %2").arg(expectedCount).arg(strings.size()),
+            __FUNCTION__,
+            {
+                { "Block", block }
+            }
+        );
 
     QVariantList list;
     list.reserve(strings.size());
