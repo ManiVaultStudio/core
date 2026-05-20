@@ -11,7 +11,6 @@
 #include "actions/HorizontalGroupAction.h"
 #include "actions/DecimalRectangleAction.h"
 #include "actions/DecimalPointAction.h"
-#include "actions/VerticalGroupAction.h"
 #include "actions/ZoomMarginAction.h"
 
 #include <QObject>
