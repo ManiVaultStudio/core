@@ -98,9 +98,9 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomGroupAction.addAction(&_zoomExtentsAction, TriggerAction::Icon);
     _zoomGroupAction.addAction(&_zoomSelectionAction, TriggerAction::Icon);
     _zoomGroupAction.addAction(&_zoomRegionAction, TriggerAction::Icon);
+    _zoomGroupAction.addAction(&_zoomMarginAction);
     
     addAction(&_zoomGroupAction, 1);
-    addAction(&_zoomMarginAction);
 
     const auto updateReadOnly = [this]() -> void {
         const bool navigationIsActive = isNavigationActive();
