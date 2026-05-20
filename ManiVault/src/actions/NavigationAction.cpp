@@ -54,10 +54,9 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomExtentsAction.setToolTip("Zoom to the boundaries of the scene (o)");
     _zoomSelectionAction.setToolTip("Zoom to the boundaries of the current selection (b)");
     _zoomRegionAction.setToolTip("Zoom to a picked region");
-    _freezeNavigation.setToolTip("Freeze the navigation");
+    _freezeNavigation.setToolTip("Toggle the navigation on/off");
 
-    _freezeNavigation.setIconByName("icicles");
-    _freezeNavigation.setDefaultWidgetFlags(ToggleAction::WidgetFlag::CheckBox);
+    _freezeNavigation.setIconByName("hand-pointer");
 
     _zoomPercentageAction.setOverrideSizeHint(QSize(300, 0));
 
@@ -104,6 +103,8 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
 
     const auto updateReadOnly = [this]() -> void {
         const bool navigationIsActive = isNavigationActive();
+
+        _freezeNavigation.setIconByName(navigationIsActive ? "hand-pointer":  "hand-back-fist");
 
         _zoomOutAction.setEnabled(navigationIsActive);
         _zoomPercentageAction.setEnabled(navigationIsActive);
