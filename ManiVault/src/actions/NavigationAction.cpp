@@ -9,12 +9,6 @@
 #include "util/StyledIcon.h"
 #include "util/Icon.h"
 
-#ifdef _DEBUG
-    //#define NAVIGATION_ACTION_VERBOSE
-#endif
-
-//#define NAVIGATION_ACTION_VERBOSE
-
 using namespace mv::util;
 
 namespace mv::gui
