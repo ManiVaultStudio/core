@@ -1108,10 +1108,10 @@ QVariantMap Points::toVariantMap() const
     if (dimensionNames.size() > 1000)
         dimensionsDataStream << dimensionNames;
 
-    QVariantMap indices;
+    QVariantMap indicesMap;
 
-    indices["Count"]    = QVariant::fromValue(this->indices.size());
-    indices["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t), true);
+    indicesMap["Count"]    = QVariant::fromValue(this->indices.size());
+    indicesMap["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(typename decltype(this->indices)::value_type), true);
 
     QVariantMap selection;
 
@@ -1119,12 +1119,12 @@ QVariantMap Points::toVariantMap() const
         auto selectionSet = getSelection<Points>();
 
         selection["Count"]  = QVariant::fromValue(selectionSet->indices.size());
-        selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), true);
+        selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(typename decltype(this->indices)::value_type), true);
     }
 
     variantMap["Data"]                  = isFull() ? getRawData<PointData>()->toVariantMap() : QVariantMap();
     variantMap["NumberOfPoints"]        = QVariant::fromValue<std::uint64_t>(getNumPoints());
-    variantMap["Indices"]               = indices;
+    variantMap["Indices"]               = indicesMap;
     variantMap["Selection"]             = selection;
     variantMap["DimensionNames"]        = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true) : QVariant::fromValue(dimensionNames);
     variantMap["NumberOfDimensions"]    = QVariant::fromValue<std::uint64_t>(getNumDimensions());
