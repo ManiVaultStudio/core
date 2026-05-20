@@ -45,11 +45,6 @@ namespace
 
 }
 
-PointData::~PointData(void)
-{
-    
-}
-
 void PointData::init()
 {
 }
@@ -326,10 +321,6 @@ Points::Points(QString dataName, bool mayUnderive /*= true*/, const QString& gui
     _infoAction(nullptr),
     _dimensionsPickerGroupAction(nullptr),
     _dimensionsPickerAction(nullptr)
-{
-}
-
-Points::~Points()
 {
 }
 

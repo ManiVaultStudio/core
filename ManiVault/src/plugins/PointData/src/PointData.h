@@ -206,7 +206,7 @@ public:
     using ElementTypeAt = typename std::variant_alternative_t<N, VariantOfVectors>::value_type;
 
     PointData(PluginFactory* factory) : RawData(factory, PointType) { }
-    ~PointData(void) override;
+    ~PointData() override = default;
 
     void init() override;
 
@@ -600,7 +600,7 @@ private:
 
 public:
     Points(QString dataName, bool mayUnderive = true, const QString& guid = "");
-    ~Points() override;
+    ~Points() override = default;
 
     void init() override;
 
