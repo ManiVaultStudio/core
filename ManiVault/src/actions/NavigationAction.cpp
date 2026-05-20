@@ -103,15 +103,15 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     addAction(&_zoomMarginAction);
 
     const auto updateReadOnly = [this]() -> void {
-        const auto notFrozen = _freezeNavigation.isChecked();
+        const bool navigationIsActive = isNavigationActive();
 
-        _zoomOutAction.setEnabled(!notFrozen);
-        _zoomPercentageAction.setEnabled(!notFrozen);
-        _zoomInAction.setEnabled(!notFrozen);
-        _zoomExtentsAction.setEnabled(!notFrozen);
-        _zoomSelectionAction.setEnabled(!notFrozen);
-        _zoomRegionAction.setEnabled(!notFrozen);
-        _zoomCenterAction.setEnabled(!notFrozen);
+        _zoomOutAction.setEnabled(navigationIsActive);
+        _zoomPercentageAction.setEnabled(navigationIsActive);
+        _zoomInAction.setEnabled(navigationIsActive);
+        _zoomExtentsAction.setEnabled(navigationIsActive);
+        _zoomSelectionAction.setEnabled(navigationIsActive);
+        _zoomRegionAction.setEnabled(navigationIsActive);
+        _zoomCenterAction.setEnabled(navigationIsActive);
     };
 
     updateReadOnly();
