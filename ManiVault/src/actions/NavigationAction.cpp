@@ -112,6 +112,7 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
         _zoomSelectionAction.setEnabled(navigationIsActive);
         _zoomRegionAction.setEnabled(navigationIsActive);
         _zoomCenterAction.setEnabled(navigationIsActive);
+        _zoomMarginAction.setEnabled(navigationIsActive);
     };
 
     updateReadOnly();
