@@ -206,7 +206,7 @@ public:
     using ElementTypeAt = typename std::variant_alternative_t<N, VariantOfVectors>::value_type;
 
     PointData(PluginFactory* factory) : RawData(factory, PointType) { }
-    ~PointData(void) override;
+    ~PointData() override = default;
 
     void init() override;
 
@@ -301,7 +301,7 @@ public:
 
         std::visit([&resultContainer, this, &dimensionIndices, &indices](const auto& vec)
             {
-                const std::uint64_t numPoints{ static_cast<std::uint32_t>(indices.size()) };
+                const std::uint64_t numPoints{ static_cast<std::uint64_t>(indices.size()) };
                 std::uint64_t resultIndex{};
 
                 for (std::uint64_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
@@ -352,7 +352,7 @@ public:
     void convertData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
         convertData(data, numPoints * numDimensions);
-        _numDimensions = static_cast<std::uint32_t>(numDimensions);
+        _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
 
     /// Converts the specified data to the internal data, using static_cast for each data element.
@@ -362,7 +362,7 @@ public:
     void convertData(const T& inputDataContainer, const std::size_t numDimensions)
     {
         convertData(inputDataContainer.data(), inputDataContainer.size());
-        _numDimensions = static_cast<std::uint32_t>(numDimensions);
+        _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
 
     /// Copies the specified data into the internal data, sets the number of
@@ -372,7 +372,7 @@ public:
     void setData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
          _variantOfVectors = VariantOfVectors( std::vector<T>(data, data + numPoints * numDimensions) );
-         _numDimensions = static_cast<std::uint32_t>(numDimensions);
+         _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
 
 
@@ -422,7 +422,7 @@ public: // Sparse data, test implementation
         static void setSparseData(PointData* points, size_t numRows, size_t numCols, const std::vector<size_t>& rowPointers, const std::vector<size_t>& colIndices, const std::vector<float>& values)
         {
             points->_sparseData.setData(numRows, numCols, rowPointers, colIndices, values);
-            points->_numRows = static_cast<uint32_t>(numRows);
+            points->_numRows = static_cast<uint64_t>(numRows);
             points->setData(std::vector<float> {}, numCols);
             points->_isDense = false;
         }
@@ -430,7 +430,7 @@ public: // Sparse data, test implementation
         static void setSparseData(PointData* points, size_t numRows, size_t numCols, std::vector<size_t>&& rowPointers, std::vector<size_t>&& colIndices, std::vector<float>&& values)
         {
             points->_sparseData.setData(numRows, numCols, std::move(rowPointers), std::move(colIndices), std::move(values));
-            points->_numRows = static_cast<uint32_t>(numRows);
+            points->_numRows = static_cast<uint64_t>(numRows);
             points->setData(std::vector<float> {}, numCols);
             points->_isDense = false;
         }
@@ -600,7 +600,7 @@ private:
 
 public:
     Points(QString dataName, bool mayUnderive = true, const QString& guid = "");
-    ~Points() override;
+    ~Points() override = default;
 
     void init() override;
 
@@ -795,7 +795,7 @@ public:
     std::uint64_t getNumPoints() const
     {
         if (isProxy()) {
-            auto numberOfPoints = 0;
+            std::uint64_t numberOfPoints = 0;
 
             for (auto& proxyMember : getProxyMembers())
                 numberOfPoints += mv::Dataset<Points>(proxyMember)->getNumPoints();
@@ -803,8 +803,12 @@ public:
             return numberOfPoints;
         }
         else {
-            if (isFull()) return getRawData<PointData>()->getNumPoints();
-                else return static_cast<std::uint32_t>(indices.size());
+            if (isFull()) {
+                return getRawData<PointData>()->getNumPoints();
+            }
+            else {
+                return static_cast<std::uint64_t>(indices.size());
+            }
         }
     }
 

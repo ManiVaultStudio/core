@@ -45,11 +45,6 @@ namespace
 
 }
 
-PointData::~PointData(void)
-{
-    
-}
-
 void PointData::init()
 {
 }
@@ -300,7 +295,7 @@ void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, 
 }
 
 
-void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices) const
+void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<std::uint32_t>& indices) const
 {
     CheckDimensionIndex(dimensionIndex1);
     CheckDimensionIndex(dimensionIndex2);
@@ -326,10 +321,6 @@ Points::Points(QString dataName, bool mayUnderive /*= true*/, const QString& gui
     _infoAction(nullptr),
     _dimensionsPickerGroupAction(nullptr),
     _dimensionsPickerAction(nullptr)
-{
-}
-
-Points::~Points()
 {
 }
 
@@ -702,7 +693,7 @@ void Points::selectedLocalIndices(const std::vector<std::uint32_t>& selectionInd
     }
 }
 
-void Points::getLocalSelectionIndices(std::vector<unsigned int>& localSelectionIndices) const
+void Points::getLocalSelectionIndices(std::vector<std::uint32_t>& localSelectionIndices) const
 {
     if (isProxy())
     {
@@ -939,7 +930,7 @@ bool Points::canSelectInvert() const
 
 void Points::selectAll()
 {
-    std::vector<unsigned int> selectionIndices;
+    std::vector<std::uint32_t> selectionIndices;
 
     selectionIndices.resize(getNumPoints());
 
@@ -963,7 +954,7 @@ void Points::selectNone()
 void Points::selectInvert()
 {
     // Get the locally selected indices (the points in the subset that are selected)
-    std::vector<unsigned int> localSelectionIndices;
+    std::vector<std::uint32_t> localSelectionIndices;
     getLocalSelectionIndices(localSelectionIndices);
 
     // Compute the inverse of this
@@ -1108,10 +1099,10 @@ QVariantMap Points::toVariantMap() const
     if (dimensionNames.size() > 1000)
         dimensionsDataStream << dimensionNames;
 
-    QVariantMap indices;
+    QVariantMap indicesMap;
 
-    indices["Count"]    = QVariant::fromValue(this->indices.size());
-    indices["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t), true);
+    indicesMap["Count"]    = QVariant::fromValue(this->indices.size());
+    indicesMap["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(typename decltype(this->indices)::value_type), true);
 
     QVariantMap selection;
 
@@ -1119,12 +1110,12 @@ QVariantMap Points::toVariantMap() const
         auto selectionSet = getSelection<Points>();
 
         selection["Count"]  = QVariant::fromValue(selectionSet->indices.size());
-        selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), true);
+        selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(typename decltype(this->indices)::value_type), true);
     }
 
     variantMap["Data"]                  = isFull() ? getRawData<PointData>()->toVariantMap() : QVariantMap();
     variantMap["NumberOfPoints"]        = QVariant::fromValue<std::uint64_t>(getNumPoints());
-    variantMap["Indices"]               = indices;
+    variantMap["Indices"]               = indicesMap;
     variantMap["Selection"]             = selection;
     variantMap["DimensionNames"]        = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true) : QVariant::fromValue(dimensionNames);
     variantMap["NumberOfDimensions"]    = QVariant::fromValue<std::uint64_t>(getNumDimensions());
