@@ -239,7 +239,7 @@ void PointData::fromVariantMapPre150(const QVariantMap& variantMap)
         if (numberOfElements > 0) {
             resizeVector(numberOfElements);
 
-            populateDataBufferFromVariantMapToRawBufferSync(rawData, (char*)getDataVoidPtr(), getRawDataSize());
+            populateDataBufferFromVariantMapToRawBufferAsync(rawData, (char*)getDataVoidPtr(), getRawDataSize());
         }
     }
     else

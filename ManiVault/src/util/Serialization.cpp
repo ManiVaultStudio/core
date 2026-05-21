@@ -822,6 +822,7 @@ WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantM
         job._offset = blockMap.value("Offset").value<quint64>();
         job._size = blockMap.value("Size").value<quint64>();
         job._compressedSize = blockMap.value("CompressedSize", 0).value<quint64>();
+        job._codec = createCodec();
 
         if (blockMap.contains("URI"))
             job._uri = blockMap.value("URI").toString();
