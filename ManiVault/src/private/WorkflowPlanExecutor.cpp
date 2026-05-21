@@ -62,31 +62,39 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(UniqueWorkflowPlan wo
             guiScope = Task::GuiScope::Modal;
         }
 
-        auto future = executeAsyncImpl(*workflowPlan, guiScope, executionOptions.value_or({}), nullptr);
+        auto future = executeAsyncImpl(std::move(workflowPlan), guiScope, executionOptions.value_or({}), nullptr);
 
         if (QThread::currentThread() == qApp->thread()) {
-        	QEventLoop loop;
+            QEventLoop loop;
+            QFutureWatcher<SharedWorkflowResult> watcher;
 
-        	auto* watcher = future.getWatcher();
+            QObject::connect(
+                &watcher,
+                &QFutureWatcher<SharedWorkflowResult>::finished,
+                &loop,
+                &QEventLoop::quit
+            );
 
-        	connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, future.getTask(), [watcher, future]() {
-				if (future.getState()->hasException()) {
-					future.getTask()->setFinished();
-					return;
-				}
+            if (auto* task = future.getTask()) {
+                QObject::connect(
+                    &watcher,
+                    &QFutureWatcher<SharedWorkflowResult>::finished,
+                    task,
+                    [task, future]() {
+                        if (!future.getState()->hasException())
+                            task->setProgress(1.0f);
 
-				const auto result = watcher->result();
+                        task->setFinished();
+                    },
+                    Qt::QueuedConnection
+                );
+            }
 
-				future.getTask()->setProgress(1.0f);
-				future.getTask()->setFinished();
-        	}, Qt::QueuedConnection);
-
-        	connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, &loop, &QEventLoop::quit);
-
-        	loop.exec();
+            watcher.setFuture(future.getFuture());
+            loop.exec();
         }
         else {
-        	future.waitForFinished();
+            future.waitForFinished();
         }
 
         result = future.result();
@@ -119,7 +127,7 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsync(UniqueWorkflowPlan workf
         const auto resolvedOptions  = executionOptions.value_or(parentContext->getState()->getExecutionOptions());
 
         auto childContext   = parentContext->createChild(workflowPlan->getName(), workflowPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
-        auto future         = executeAsyncImpl(*workflowPlan, resolvedOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, resolvedOptions, childContext);
+        auto future         = executeAsyncImpl(std::move(workflowPlan), resolvedOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, resolvedOptions, childContext);
 
         parentContext->addPendingAsyncWork(future, pendingWorkLabel);
         
@@ -129,7 +137,7 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsync(UniqueWorkflowPlan workf
     const auto resolvedOptions = executionOptions.value_or({});
 
     return executeAsyncImpl(
-        *workflowPlan,
+        std::move(workflowPlan),
         resolvedOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None,
         resolvedOptions,
         nullptr
@@ -152,7 +160,7 @@ const QThreadPool& WorkflowPlanExecutor::getThreadPool(const SharedWorkflowExecu
     return context->getThreadPool();
 }
 
-WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan& workflowPlan, Task::GuiScope guiScope, const WorkflowExecutionOptions& executionOptions, SharedWorkflowExecutionContext executionContext)
+WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(UniqueWorkflowPlan workflowPlan, Task::GuiScope guiScope, const WorkflowExecutionOptions& executionOptions, SharedWorkflowExecutionContext executionContext)
 {
     auto state = std::make_shared<WorkflowResultFuture::State>();
 
@@ -165,7 +173,7 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan& workfl
     Task* task = nullptr;
 
     if (guiScope != Task::GuiScope::None) {
-        task = new Task(nullptr, workflowPlan.getName());
+        task = new Task(nullptr, workflowPlan->getName());
         task->setGuiScopes({guiScope});
         task->setStatus(Task::Status::Running);
         task->setProgress(0.0f);
@@ -180,14 +188,14 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan& workfl
             if (executionContext != nullptr) {
                 //WorkflowReporter::info("Nested workflow started");
 
-                executor.executeImpl(workflowPlan, executionContext);
+                executor.executeImpl(*workflowPlan, executionContext);
 
                 //WorkflowReporter::info("Nested workflow finished");
 
                 return {};
             }
 
-            return executor.executeRoot(workflowPlan, task, executionOptions);
+            return executor.executeRoot(*workflowPlan, task, executionOptions);
         }
         catch (...) {
             state->setException(std::current_exception());
@@ -658,8 +666,8 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
         ._parentContextId = stageContext->getParentId(),
         ._metadata = {
             { "jobCount", jobCount },
-            { "maxThreadCount", getThreadPool().maxThreadCount() },
-            { "activeThreadCount", getThreadPool().activeThreadCount() }
+            { "maxThreadCount", getThreadPool(stageContext).maxThreadCount() },
+            { "activeThreadCount", getThreadPool(stageContext).activeThreadCount() }
         }
     });
 #endif
@@ -698,8 +706,8 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
                 { "stage", stage.getName() },
                 { "jobIndex", jobIndex },
                 { "jobCount", jobCount },
-                { "maxThreadCount", getThreadPool().maxThreadCount() },
-                { "activeThreadCount", getThreadPool().activeThreadCount() }
+                { "maxThreadCount", getThreadPool(stageContext).maxThreadCount() },
+                { "activeThreadCount", getThreadPool(stageContext).activeThreadCount() }
             }
         });
 #endif
@@ -724,8 +732,8 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
                         { "stage", stageName },
                         { "jobIndex", jobIndex },
                         { "jobCount", jobCount },
-                        { "maxThreadCount", getThreadPool().maxThreadCount() },
-                        { "activeThreadCount", getThreadPool().activeThreadCount() }
+                        { "maxThreadCount", getThreadPool(stageContext).maxThreadCount() },
+                        { "activeThreadCount", getThreadPool(stageContext).activeThreadCount() }
                     }
                 });
 #endif
@@ -801,8 +809,8 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
         ._parentContextId = stageContext->getParentId(),
         ._metadata = {
             { "jobCount", jobCount },
-            { "maxThreadCount", getThreadPool().maxThreadCount() },
-            { "activeThreadCount", getThreadPool().activeThreadCount() }
+            { "maxThreadCount", getThreadPool(stageContext).maxThreadCount() },
+            { "activeThreadCount", getThreadPool(stageContext).activeThreadCount() }
         }
     });
 #endif
