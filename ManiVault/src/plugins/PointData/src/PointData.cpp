@@ -239,7 +239,7 @@ void PointData::fromVariantMapPre150(const QVariantMap& variantMap)
         if (numberOfElements > 0) {
             resizeVector(numberOfElements);
 
-            populateDataBufferFromVariantMapToRawBufferAsync(rawData, (char*)getDataVoidPtr(), getRawDataSize());
+            populateDataBufferFromVariantMapToRawBufferSync(rawData, (char*)getDataVoidPtr(), getRawDataSize());
         }
     }
     else
@@ -1139,6 +1139,11 @@ void Points::fromVariantMapPre150(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "DimensionNames");
     variantMapMustContain(variantMap, "Selection");
 
+    if (variantMap["Name"].toString() == "M1_cross_species_merged_final")
+    {
+        Q_ASSERT(false);
+    }
+
     // For backwards compatibility, check PluginVersion
     if (variantMap["PluginVersion"] == "No Version" && !variantMap["Full"].toBool())
     {
@@ -1177,7 +1182,7 @@ void Points::fromVariantMapPre150(const QVariantMap& variantMap)
         // Copy the dimension names raw data into the byte array
         dimensionsByteArray.resize(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
 
-        populateDataBufferFromVariantMapToRawBufferAsync(variantMap["DimensionNames"].toMap(), (char*)dimensionsByteArray.data(), dimensionsByteArray.size());
+        populateDataBufferFromVariantMapToRawBufferSync(variantMap["DimensionNames"].toMap(), (char*)dimensionsByteArray.data(), dimensionsByteArray.size());
 
         // Open input data stream
         QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::ReadOnly);

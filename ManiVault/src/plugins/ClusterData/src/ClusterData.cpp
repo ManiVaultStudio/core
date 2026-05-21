@@ -145,7 +145,6 @@ void ClusterData::fromVariantMapPre150(const QVariantMap& variantMap)
 
     packedIndices.resize(dataMap["NumberOfIndices"].toInt());
 
-    qDebug() << "========" << dataMap["NumberOfIndices"].toInt();
     // Convert raw data to indices
     if (!packedIndices.empty())
 		populateDataBufferFromVariantMapToRawBufferSync(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), packedIndices.size() * sizeof(std::uint32_t));
@@ -159,7 +158,6 @@ void ClusterData::fromVariantMapPre150(const QVariantMap& variantMap)
 
         clustersByteArray.resize(clustersRawDataSize);
         
-        qDebug() << "---ClusterData::fromVariantMapPre150---ClustersRawData";
         populateDataBufferFromVariantMapToRawBufferSync(dataMap["ClustersRawData"].toMap(), (char*)clustersByteArray.data(), clustersByteArray.size());
 
         QVariantList clusters;

@@ -79,21 +79,6 @@ public:
         Job(QString name, JobFunction function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, JobProgressMode progressMode = JobProgressMode::Automatic);
         Job(QString name, JobFunction function, double weight);
 
-        ~Job()
-        {
-            qDebug() << "~WorkflowPlanJob" << this;
-        }
-
-        //Job(const Job& other)
-        //{
-        //    qDebug() << "COPY" << this << &other;
-        //}
-
-        //Job(Job&& other)
-        //{
-        //    qDebug() << "MOVE" << this << &other;
-        //}
-
         QString getName() const;
 
         const JobFunction& getFunction() const;
@@ -232,10 +217,6 @@ public:
         addStageTo(_finalizationStages, std::move(name), std::forward<Function>(function), threadAffinity, weight);
     }
 
-    SharedWorkflowResult executeBlocking(const SharedWorkflowPlanExecutor& workflowPlanExecutor, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = {});
-    WorkflowResultFuture executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = {});
-    SharedWorkflowResult executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = {});
-
 	Stages getStages() const;
 
     Stages getOnSuccessStages() const;
@@ -296,5 +277,7 @@ private:
     double                  _weight = 1.0;          /** Relative weight of this workflow plan when executed as part of a larger workflow (e.g., as a nested workflow within a job of another workflow plan). This can be used to influence progress reporting and scheduling decisions when multiple workflows are executed together. The default weight is 1.0, and it can be set to any positive value to indicate the relative importance or contribution of this workflow plan compared to others. */
     
 };
+
+using UniqueWorkflowPlan = std::unique_ptr<WorkflowPlan>;
 
 }

@@ -120,7 +120,7 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
 
     auto dataHierarchyPlan = dataHierarchy().fromVariantMapWorkflow(variantMap);
 
-    dataHierarchyPlan.executeBlocking(mv::projects().getWorkflowPlanExecutor(), WorkflowExecutionContext::current());
+    auto result = mv::projects().getWorkflowPlanExecutor()->executeBlocking(std::move(dataHierarchyPlan), WorkflowExecutionContext::current());
 
     //executor->executeBlocking(
     //    dataHierarchyPlan,
@@ -155,9 +155,9 @@ QVariantMap Project::toVariantMap() const
 
     plugins().insertIntoVariantMap(variantMap);
 
-    auto dataHierarchyPlan = dataHierarchy().fromVariantMapWorkflow(variantMap);
+    UniqueWorkflowPlan dataHierarchyPlan = dataHierarchy().fromVariantMapWorkflow(variantMap);
 
-    auto result = dataHierarchyPlan.executeBlocking(mv::projects().getWorkflowPlanExecutor(), WorkflowExecutionContext::current());
+    auto result = mv::projects().getWorkflowPlanExecutor()->executeBlocking(std::move(dataHierarchyPlan), WorkflowExecutionContext::current());
 
     //variantMap[dataHierarchy().getSerializationName()] = dataHierarchyPlan.getWorkflowContextAs<DataHierarchyManagerSaveContext>()->getDataHierachyMap();
     dataHierarchy().insertIntoVariantMap(variantMap);

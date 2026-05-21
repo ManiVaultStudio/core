@@ -11,7 +11,7 @@
 	#define PASSTHROUGH_CODEC_VERBOSE
 #endif
 
-#define PASSTHROUGH_CODEC_VERBOSE
+//#define PASSTHROUGH_CODEC_VERBOSE
 
 PassthroughBlobCodec::PassthroughBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction) :
     BlobCodec(parent, codecSettingsAction)
@@ -94,11 +94,11 @@ void PassthroughBlobCodec::decodeFromFileTo(const QString& filePath, char* desti
             }
         );
 
-    if (encodedData.size() > static_cast<qsizetype>(destinationSize))
+    if (encodedData.size() != static_cast<qsizetype>(destinationSize))
         throw mv::ManiVaultException(
             SeverityLevel::Error,
-            QString("Encoded data size exceeds destination buffer size. Encoded data size: %1 bytes, destination buffer size: %2 bytes").arg(encodedData.size()).arg(destinationSize),
-            "Encoded data size > destinationSize",
+            QString("Encoded data size does not match destination buffer size. Encoded data size: %1 bytes, destination buffer size: %2 bytes").arg(encodedData.size()).arg(destinationSize),
+            "Encoded data size != destinationSize",
             __FUNCTION__,
             {
                 { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination), 16) },
@@ -108,7 +108,13 @@ void PassthroughBlobCodec::decodeFromFileTo(const QString& filePath, char* desti
         );
 
     try {
-        memcpy(destination, encodedData.constData(), encodedData.size());
+        //QMutex mutex;
+
+        //QMutexLocker<QMutex> locker(&mutex);
+
+        //{
+            memcpy(destination, encodedData.constData(), encodedData.size());
+        //}
     }
     catch (const std::exception& exception) {
 	    throw mv::ManiVaultException(

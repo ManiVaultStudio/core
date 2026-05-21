@@ -4,6 +4,7 @@
 
 #include "ClustersSerializer.h"
 
+#include <CoreInterface.h>
 #include <util/Serialization.h>
 
 #include <QDataStream>
@@ -109,51 +110,45 @@ void ClusterSerializer::fromVariantMap(const QVariantMap& map, QVector<Cluster>&
     
     auto context = std::make_shared<ClustersLoadContext>(map);
 
-    auto fromPlan = std::make_shared<WorkflowPlan>(__FUNCTION__, context);
+    auto fromPlan = std::make_unique<WorkflowPlan>(__FUNCTION__, context);
 
     WorkflowPlan::Jobs preprocessingJobs;
 
-	preprocessingJobs.emplace_back("Process headers", [map, fromPlan](WorkflowPlan::Job& job) {
-        if (auto clustersLoadContext = fromPlan->getWorkflowContextAs<ClustersLoadContext>()) {
-			auto result = populateDataBufferFromVariantMap(map.value("ClustersMetaData").toMap(), WorkflowPlan::ConcurrencyMode::Parallel);
+	preprocessingJobs.emplace_back("Process headers", [map, context](WorkflowPlan::Job& job) {
+		auto result = populateDataBufferFromVariantMap(map.value("ClustersMetaData").toMap(), WorkflowPlan::ConcurrencyMode::Parallel);
 
-            result._future.waitForFinished();
+        result._future.waitForFinished();
 
-            if (result._data->isEmpty())
-                throw std::runtime_error("Cluster headers data is empty");
+        if (result._data->isEmpty())
+            throw std::runtime_error("Cluster headers data is empty");
 
-			clustersLoadContext->_headers = deserializeHeaders(*result._data);
-        }
+        context->_headers = deserializeHeaders(*result._data);
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 
-    preprocessingJobs.emplace_back("Process indices", [map, fromPlan, context](WorkflowPlan::Job& job) {
-        if (auto clustersLoadContext = fromPlan->getWorkflowContextAs<ClustersLoadContext>()) {
-	        auto result = populateDataBufferFromVariantMap(map.value("ClustersIndicesRawData").toMap(), WorkflowPlan::ConcurrencyMode::Parallel);
+    preprocessingJobs.emplace_back("Process indices", [map, context](WorkflowPlan::Job& job) {
+        auto result = populateDataBufferFromVariantMap(map.value("ClustersIndicesRawData").toMap(), WorkflowPlan::ConcurrencyMode::Parallel);
 
-			result._future.waitForFinished();
+		result._future.waitForFinished();
 
-			if (result._data->isEmpty())
-				throw std::runtime_error("Cluster indices data is empty");
+		if (result._data->isEmpty())
+			throw std::runtime_error("Cluster indices data is empty");
 
-			if (result._data->size() % static_cast<qsizetype>(sizeof(unsigned int)) != 0)
-				throw std::runtime_error("Cluster indices blob size is not aligned");
+		if (result._data->size() % static_cast<qsizetype>(sizeof(unsigned int)) != 0)
+			throw std::runtime_error("Cluster indices blob size is not aligned");
 
-			context->_allIndices.resize(static_cast<std::size_t>(result._data->size()) / sizeof(unsigned int));
+		context->_allIndices.resize(static_cast<std::size_t>(result._data->size()) / sizeof(unsigned int));
 
-			if (!context->_allIndices.empty()) {
-				std::memcpy(context->_allIndices.data(), result._data->constData(), static_cast<std::size_t>(result._data->size()));
-			}
-        }
+		if (!context->_allIndices.empty()) {
+			std::memcpy(context->_allIndices.data(), result._data->constData(), static_cast<std::size_t>(result._data->size()));
+		}
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 
     fromPlan->addParallelStage("Preprocessing", preprocessingJobs);
-    fromPlan->addSequentialStage("Rebuild clusters", [&clusters, fromPlan]() -> void {
-        if (auto clustersLoadContext = fromPlan->getWorkflowContextAs<ClustersLoadContext>()) {
-            clusters = rebuildClusters(clustersLoadContext->_headers, clustersLoadContext->_allIndices);
-        }
+    fromPlan->addSequentialStage("Rebuild clusters", [&clusters, context]() -> void {
+        clusters = rebuildClusters(context->_headers, context->_allIndices);
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread);
 
-    fromPlan->executeAsync(mv::projects().getWorkflowPlanExecutor());
+    auto result = mv::projects().getWorkflowPlanExecutor()->executeAsync(std::move(fromPlan));
 }
 
 QByteArray ClusterSerializer::serializeHeaders(

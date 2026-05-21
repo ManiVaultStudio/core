@@ -241,22 +241,22 @@ void DataHierarchyManager::removeAllItems()
 
 void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    WorkflowPlan plan(__FUNCTION__);
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    plan.addSequentialStage("fromVariantMap", {
+    plan->addSequentialStage("fromVariantMap", {
         WorkflowPlan::Job("fromVariantMap", [this, variantMap](const WorkflowPlan::Job&) {
             fromVariantMap(variantMap);
         }, WorkflowPlan::JobThreadAffinity::GuiThread)
     });
     
-	const auto result = plan.executeBlocking(projects().getWorkflowPlanExecutor(), WorkflowExecutionContext::current());
+	const auto result = projects().getWorkflowPlanExecutor()->executeBlocking(std::move(plan), WorkflowExecutionContext::current());
 }
 
-WorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap)
+UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
-    WorkflowPlan fromPlan("Load data hierarchy");
+    UniqueWorkflowPlan fromPlan = std::make_unique<WorkflowPlan>("Load data hierarchy");
 
-    fromPlan.addSequentialStage("Populate data hierarchy", [this, variantMap](WorkflowPlan::Job& job) -> void {
+    fromPlan->addSequentialStage("Populate data hierarchy", [this, variantMap](WorkflowPlan::Job& job) -> void {
         const auto loadDataHierarchyItem = [variantMap](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
             const auto dataset = dataHierarchyItemMap["Dataset"].toMap();
             const auto datasetId = dataset["ID"].toString();
@@ -361,8 +361,8 @@ WorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& var
         }, WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Nested).weighted(rawBlockSize);
     }
 
-    fromPlan.addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Sequential, loadDatasetJobs);
-    fromPlan.addSequentialStage("Notify datasets", [this](WorkflowPlan::Job& job) {
+    fromPlan->addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Sequential, loadDatasetJobs);
+    fromPlan->addSequentialStage("Notify datasets", [this](WorkflowPlan::Job& job) {
         for (const auto& item : _items) {
             events().notifyDatasetDataChanged(item->getDataset());
         }
@@ -453,11 +453,11 @@ private:
     QVariantMap     _dataHierarchyMap;  /** Map representing the data hierarchy structure */
 };
 
-WorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
+UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 {
     auto context = std::make_shared<DataHierarchyManagerSaveContext>();
 
-    WorkflowPlan toPlan("Save data hierarchy", context);
+    UniqueWorkflowPlan toPlan = std::make_unique<WorkflowPlan>("Save data hierarchy", context);
 
     if (!_items.empty()) {
         WorkflowPlan::Jobs createItemMapJobs;
@@ -486,9 +486,9 @@ WorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
             //createItemMapJobs.back()->setWorkflowContext(context);
         }
 
-        toPlan.addSequentialStage("Create item maps", createItemMapJobs);
+        toPlan->addSequentialStage("Create item maps", createItemMapJobs);
 
-        toPlan.addSequentialStage("Assemble item maps", [this, &toPlan, context](WorkflowPlan::Job& job) -> void {
+        toPlan->addSequentialStage("Assemble item maps", [this, &toPlan, context](WorkflowPlan::Job& job) -> void {
             try {
                 const auto findItemMap = [&toPlan, &job, context](const QString& datasetId) -> QVariantMap {
                     return context->getDatasetMap(datasetId);
@@ -546,9 +546,9 @@ WorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 
 QVariantMap DataHierarchyManager::toVariantMap() const
 {
-    WorkflowPlan plan(__FUNCTION__);
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    plan.addSequentialStage("toVariantMap", {
+    plan->addSequentialStage("toVariantMap", {
         WorkflowPlan::Job("toVariantMap", [this](const WorkflowPlan::Job&) {
             if (auto context = WorkflowExecutionContext::current()) {
                 auto result = toVariantMap();
@@ -557,7 +557,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
         }, WorkflowPlan::JobThreadAffinity::GuiThread)
     });
 
-    const auto result = plan.executeBlocking(projects().getWorkflowPlanExecutor(), WorkflowExecutionContext::current());
+    const auto result = projects().getWorkflowPlanExecutor()->executeBlocking(std::move(plan), WorkflowExecutionContext::current());
 
     return result->value<QVariantMap>();
 }

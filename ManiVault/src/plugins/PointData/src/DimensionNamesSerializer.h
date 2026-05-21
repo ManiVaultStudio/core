@@ -22,6 +22,7 @@ class DimensionNamesSerializer : public QObject
 {
 public:
 
+
     static constexpr quint32 FormatVersion = 2;
 
     /**
@@ -38,11 +39,12 @@ public:
      */
     static QVariantMap toVariantMap(const std::vector<QString>& dimensionNames);
 
-private:
+protected:
 
     /** Workflow context for loading dimension names. */
     struct DimensionNamesLoadContext : public WorkflowContextBase
     {
         QStringList _dimensionNames;
     };
+    
 };

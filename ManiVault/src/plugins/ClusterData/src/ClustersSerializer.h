@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <util/WorkflowContextBase.h>
+
 #include "clusterdata_export.h"
 
 #include "ClusterData.h"
@@ -17,7 +19,8 @@ public:
 
     static void fromVariantMap(const QVariantMap& map, QVector<Cluster>& clusters);
 
-private:
+protected:
+
     struct Header
     {
         QString name;
@@ -31,16 +34,19 @@ private:
     };
 
     struct ClustersLoadContext : public WorkflowContextBase
-	{
-	    explicit ClustersLoadContext(QVariantMap map) :
+    {
+        explicit ClustersLoadContext(QVariantMap map) :
             _map(std::move(map))
-	    {
-	    }
+        {
+        }
 
-	    QVariantMap _map;
+        QVariantMap _map;
         std::vector<Header> _headers;
         std::vector<unsigned int> _allIndices;
-	};
+    };
+
+private:
+    
 
     static QByteArray serializeHeaders(const std::vector<Header>& headers);
     static std::vector<Header> deserializeHeaders(const QByteArray& bytes);

@@ -6,5 +6,5 @@
 
 #include <util/WorkflowPlan.h>
 
-mv::util::WorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath);
+mv::util::UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath);
     

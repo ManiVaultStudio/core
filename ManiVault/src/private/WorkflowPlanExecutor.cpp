@@ -29,7 +29,7 @@ WorkflowPlanExecutor::WorkflowPlanExecutor(QObject* parent) :
 {
 }
 
-SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext parentContext /*= nullptr*/, OptionalWorkflowExecutionOptions executionOptions /*= std::nullopt*/)
+SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext /*= nullptr*/, OptionalWorkflowExecutionOptions executionOptions /*= std::nullopt*/)
 {
 #ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
     qDebug() << "Executing workflow plan:" << workflowPlan.getName() << "with" << workflowPlan.getStages().size() << "stage(s)";
@@ -38,14 +38,14 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
     SharedWorkflowResult result;
 
     const auto getFailedResult = [&workflowPlan]() {
-        auto failedResult = std::make_shared<WorkflowResult>(workflowPlan.getName());
+        auto failedResult = std::make_shared<WorkflowResult>(workflowPlan->getName());
         failedResult->setStatus(WorkflowResult::Status::Failed);
         return failedResult;
     };
 
     try {
         if (parentContext != nullptr) {
-            return executeChild(workflowPlan, parentContext);
+            return executeChild(*workflowPlan, parentContext);
         }
 
         auto guiScope = Task::GuiScope::None;
@@ -54,7 +54,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
             guiScope = Task::GuiScope::Modal;
         }
 
-        auto future = executeAsyncImpl(workflowPlan, guiScope, executionOptions.value_or({}), nullptr);
+        auto future = executeAsyncImpl(*workflowPlan, guiScope, executionOptions.value_or({}), nullptr);
 
         if (QThread::currentThread() == qApp->thread()) {
         	QEventLoop loop;
@@ -94,7 +94,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
         //TODO
     }
     catch (const std::exception& exception) {
-        WorkflowReporter::error(QString("Workflow '%1' failed: %2").arg(workflowPlan.getName(), exception.what()),workflowPlan.getName());
+        WorkflowReporter::error(QString("Workflow '%1' failed: %2").arg(workflowPlan->getName(), exception.what()),workflowPlan->getName());
 
         return getFailedResult();
 
@@ -102,7 +102,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
         //TODO
     }
     catch (...) {
-        WorkflowReporter::error(QString("Workflow '%1' failed with an unknown error.").arg(workflowPlan.getName()), workflowPlan.getName());
+        WorkflowReporter::error(QString("Workflow '%1' failed with an unknown error.").arg(workflowPlan->getName()), workflowPlan->getName());
 
         return getFailedResult();
 
@@ -115,14 +115,14 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(WorkflowPlan& workflo
     return result;
 }
 
-WorkflowResultFuture WorkflowPlanExecutor::executeAsync(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext parentContext /*= nullptr*/, OptionalWorkflowExecutionOptions executionOptions /*= std::nullopt*/)
+WorkflowResultFuture WorkflowPlanExecutor::executeAsync(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext /*= nullptr*/, OptionalWorkflowExecutionOptions executionOptions /*= std::nullopt*/)
 {
     if (parentContext != nullptr) {
-        const auto pendingWorkLabel = QString("Async workflow: %1").arg(workflowPlan.getName());
+        const auto pendingWorkLabel = QString("Async workflow: %1").arg(workflowPlan->getName());
         const auto resolvedOptions  = executionOptions.value_or(parentContext->getState()->getExecutionOptions());
 
-        auto childContext   = parentContext->createChild(workflowPlan.getName(), workflowPlan.getWeight(), WorkflowPlan::JobProgressMode::Automatic);
-        auto future         = executeAsyncImpl(WorkflowPlan(workflowPlan), resolvedOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, resolvedOptions, childContext);
+        auto childContext   = parentContext->createChild(workflowPlan->getName(), workflowPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
+        auto future         = executeAsyncImpl(*workflowPlan, resolvedOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, resolvedOptions, childContext);
 
         parentContext->addPendingAsyncWork(future, pendingWorkLabel);
         
@@ -132,7 +132,7 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsync(WorkflowPlan& workflowPl
     const auto resolvedOptions = executionOptions.value_or({});
 
     return executeAsyncImpl(
-        WorkflowPlan(workflowPlan),
+        *workflowPlan,
         resolvedOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None,
         resolvedOptions,
         nullptr
@@ -159,7 +159,7 @@ const QThreadPool& WorkflowPlanExecutor::getThreadPool() const
     return context->getThreadPool();
 }
 
-WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflowPlan, Task::GuiScope guiScope, WorkflowExecutionOptions executionOptions, SharedWorkflowExecutionContext executionContext)
+WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan& workflowPlan, Task::GuiScope guiScope, const WorkflowExecutionOptions& executionOptions, SharedWorkflowExecutionContext executionContext)
 {
     auto state = std::make_shared<WorkflowResultFuture::State>();
 
@@ -219,7 +219,7 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan workflo
     return WorkflowResultFuture(state);
 }
 
-SharedWorkflowResult WorkflowPlanExecutor::executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task, WorkflowExecutionOptions executionOptions /*= {}*/)
+SharedWorkflowResult WorkflowPlanExecutor::executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task, const WorkflowExecutionOptions& executionOptions /*= {}*/)
 {
     return executeRoot(workflowPlan, task, executionOptions);
 }
@@ -231,7 +231,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeOnCurrentThread(WorkflowPlan& 
     return executeRoot(workflowPlan, task, executionOptions.value_or(WorkflowExecutionOptions{}));
 }
 
-SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workflowPlan, Task* task, WorkflowExecutionOptions executionOptions /*= {}*/)
+SharedWorkflowResult WorkflowPlanExecutor::executeRoot(WorkflowPlan& workflowPlan, Task* task, const WorkflowExecutionOptions& executionOptions /*= {}*/)
 {
     QElapsedTimer elapsedTimer;
 
@@ -349,7 +349,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(const WorkflowPlan& workf
     return result;
 }
 
-SharedWorkflowResult WorkflowPlanExecutor::executeChild(const WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext parentContext)
+SharedWorkflowResult WorkflowPlanExecutor::executeChild(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext parentContext)
 {
     auto childContext = parentContext->createChild(
         workflowPlan.getName(),
@@ -391,7 +391,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeChild(const WorkflowPlan& work
     return {};
 }
 
-void WorkflowPlanExecutor::executeImpl(const WorkflowPlan& workflowPlan)
+void WorkflowPlanExecutor::executeImpl(WorkflowPlan& workflowPlan)
 {
     std::exception_ptr primaryException;
     bool mainSucceeded = false;

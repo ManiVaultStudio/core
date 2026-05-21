@@ -127,7 +127,7 @@ public: // Serialization
      * @param variantMap Variant map representation of the object state.
      * @return Workflow plan that restores the object state when executed.
      */
-    WorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap) override;
+    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap) override;
 
     /**
      * Create a workflow plan that serializes the data hierarchy manager state to a variant map.
@@ -135,7 +135,7 @@ public: // Serialization
      * @note See the documentation of Serializable::toVariantMapWorkflow() for important information about the expected behavior of this function.
      * @return Workflow plan that serializes the data hierarchy manager state when executed.
      */
-    WorkflowPlan toVariantMapWorkflow() const override;
+    UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
     /**
      * Serialize the data hierarchy manager state to a variant map.

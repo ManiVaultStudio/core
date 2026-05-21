@@ -66,11 +66,11 @@ void Serializable::fromVariantMap(const QVariantMap& variantMap)
     _serializationCounter[static_cast<int>(Direction::From)]++;
 }
 
-WorkflowPlan Serializable::fromVariantMapWorkflow(const QVariantMap& variantMap)
+UniqueWorkflowPlan Serializable::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
-    WorkflowPlan plan(QString("%1::fromVariantMap").arg(getSerializationName()));
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1::fromVariantMap").arg(getSerializationName()));
 
-    plan.addSequentialStage("Load", {
+    plan->addSequentialStage("Load", {
         WorkflowPlan::Job("Load", [this, variantMap](const WorkflowPlan::Job&) {
             fromVariantMap(variantMap);
             }, WorkflowPlan::JobThreadAffinity::GuiThread
@@ -89,11 +89,11 @@ QVariantMap Serializable::toVariantMap() const
     };
 }
 
-WorkflowPlan Serializable::toVariantMapWorkflow() const
+UniqueWorkflowPlan Serializable::toVariantMapWorkflow() const
 {
-    WorkflowPlan workflowPlan(QString("%1::toVariantMap").arg(getSerializationName()));
+    UniqueWorkflowPlan workflowPlan = std::make_unique<WorkflowPlan>(QString("%1::toVariantMap").arg(getSerializationName()));
 
-    workflowPlan.addSequentialStage("Serialize", {
+    workflowPlan->addSequentialStage("Serialize", {
         WorkflowPlan::Job(
             "Serialize",
             [this](WorkflowPlan::Job& job) {

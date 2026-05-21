@@ -377,7 +377,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             const auto stateGuard = qScopeGuard([this]() { setState(State::Idle); });
 
         	auto projectOpenWorkflowPlan    = createProjectOpenWorkflowPlan(filePath);
-        	auto workflowResult             = projectOpenWorkflowPlan.executeBlocking(_workflowPlanExecutor, nullptr, WorkflowExecutionOptions({
+        	auto workflowResult             = _workflowPlanExecutor->executeBlocking(std::move(projectOpenWorkflowPlan), WorkflowExecutionContext::current(), WorkflowExecutionOptions({
                 ._parallel = parameters._parallel,
         		._maxWorkerThreadCount = parameters._maxParallelThreads,
                 ._reportProgress = true,
@@ -736,9 +736,9 @@ void ProjectManager::saveProject(QString filePath)
 
 	        auto workflowPlan = createProjectSaveWorkflowPlan(filePath);
 
-            setTemporaryDirPath(TemporaryDirType::Save, workflowPlan.getWorkflowContextAs<ProjectSaveContext>()->getTemporaryDirectoryPath());
+            setTemporaryDirPath(TemporaryDirType::Save, workflowPlan->getWorkflowContextAs<ProjectSaveContext>()->getTemporaryDirectoryPath());
 
-	        auto workflowResult = workflowPlan.executeBlocking(_workflowPlanExecutor, nullptr, WorkflowExecutionOptions({
+	        auto workflowResult = mv::projects().getWorkflowPlanExecutor()->executeBlocking(std::move(workflowPlan), nullptr, WorkflowExecutionOptions({
                 parameters._parallel,
 	        	parameters._maxParallelThreads,
                 true,   // Show progress

@@ -37,7 +37,7 @@ void PropertiesSerializer::fromVariantMap(const QVariantMap& propertiesMap, QVar
     if (version != FormatVersion)
         throw std::runtime_error("Unsupported properties serialization format version");
 
-    auto fromPlan = std::make_shared<WorkflowPlan>(__FUNCTION__);
+    UniqueWorkflowPlan fromPlan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
     WorkflowPlan::Jobs preprocessingJobs;
 
@@ -46,7 +46,8 @@ void PropertiesSerializer::fromVariantMap(const QVariantMap& propertiesMap, QVar
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 
     fromPlan->addParallelStage("Preprocessing", preprocessingJobs);
-    fromPlan->executeAsync(mv::projects().getWorkflowPlanExecutor());
+
+    auto result = mv::projects().getWorkflowPlanExecutor()->executeAsync(std::move(fromPlan), WorkflowExecutionContext::current());
 }
 
 }

@@ -15,37 +15,37 @@ using namespace mv::util;
 	#define PROJECT_PUBLISH_WORKFLOW_PLAN_VERBOSE
 #endif
 
-WorkflowPlan createProjectPublishWorkflowPlan(const QString& filePath)
+UniqueWorkflowPlan createProjectPublishWorkflowPlan(const QString& filePath)
 {
     auto context = std::make_shared<ProjectPublishContext>(filePath);
 
-    WorkflowPlan plan("Publish project workflow", context);
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>("Publish project workflow", context);
 
-    plan.addSequentialStage("Setup", [&plan]() -> void {
+    plan->addSequentialStage("Setup", []() -> void {
 #ifdef PROJECT_PUBLISH_WORKFLOW_PLAN_VERBOSE
         printLine("Recipe stage", "Setup", 2);
 #endif
     });
 
-    plan.addSequentialStage("Extract project archive", [&plan]() -> void {
+    plan->addSequentialStage("Extract project archive", []() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
     printLine("Recipe stage", "Extract project archive", 2);
 #endif
     });
 
-    plan.addSequentialStage("Open project JSON", [&plan]() -> void {
+    plan->addSequentialStage("Open project JSON", []() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
         printLine("Recipe stage", "Open project JSON", 2);
 #endif
     });
 
-    plan.addSequentialStage("Open workspace JSON", [&plan]() -> void {
+    plan->addSequentialStage("Open workspace JSON", []() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
         printLine("Recipe stage", "Open workspace JSON", 2);
 #endif
     });
 
-    plan.addSequentialStage("Finalize", [&plan]() -> void {
+    plan->addSequentialStage("Finalize", []() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
         printLine("Recipe stage", "Finalize", 2);
 #endif

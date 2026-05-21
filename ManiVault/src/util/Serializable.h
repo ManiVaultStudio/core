@@ -120,9 +120,9 @@ public:
      * fromVariantMap() synchronously.
      *
      * @param variantMap Variant map representation of the object state.
-     * @return Workflow plan that restores the object state when executed.
+     * @return Workflow plan that loads the object state when executed.
      */
-    virtual WorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap);
+    virtual UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap);
 
     /**
      * Load the object state from a parent variant map.
@@ -189,7 +189,7 @@ public:
 	 *
 	 * @return Workflow plan that serializes the object state when executed.
 	 */
-    virtual WorkflowPlan toVariantMapWorkflow() const;
+    virtual UniqueWorkflowPlan toVariantMapWorkflow() const;
 
     /**
      * Save into \p variantMap

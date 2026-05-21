@@ -214,7 +214,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
 	    const auto saveDir = QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Save));
 
-        WorkflowPlan encodeWorkflowPlan("Encode Blocks");
+        UniqueWorkflowPlan encodeWorkflowPlan = std::make_unique<WorkflowPlan>("Encode Blocks");
         WorkflowPlan::Jobs encodeJobs;
 
         std::int32_t encodeBlockJobIndex = 0;
@@ -238,8 +238,8 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
         }
 
         if (!encodeJobs.empty()) {
-            encodeWorkflowPlan.addParallelStage("Encode Blocks", encodeJobs);
-            encodeWorkflowPlan.executeBlocking(mv::projects().getWorkflowPlanExecutor(), WorkflowExecutionContext::current());
+            encodeWorkflowPlan->addParallelStage("Encode Blocks", encodeJobs);
+            auto result = mv::projects().getWorkflowPlanExecutor()->executeBlocking(std::move(encodeWorkflowPlan), WorkflowExecutionContext::current());
         }
 
         QVariantList blocks;
@@ -291,7 +291,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
     }
 }
 
-DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec, char* destination, std::uint64_t destinationSize)
+DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, char* destination, std::uint64_t destinationSize)
 {
     DecodeBlockResult result;
 
@@ -339,7 +339,7 @@ DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, co
             );
 	    }
 
-	    auto codec = createCodec();
+	    auto codec = decodeBlockJob._codec;
 
 	    if (!codec)
 	        throw ManiVaultException(SeverityLevel::Error,
@@ -400,7 +400,7 @@ DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, co
     return result;
 }
 
-DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec, char* destination, std::uint64_t destinationSize)
+DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, char* destination, std::uint64_t destinationSize)
 {
     DecodeBlockResult result;
 
@@ -433,7 +433,7 @@ DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, 
 	            });
 	    }
 
-	    auto codec = createCodec();
+	    auto codec = decodeBlockJob._codec;
 
 	    if (!codec)
 	        throw ManiVaultException(SeverityLevel::Error,
@@ -506,7 +506,7 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
     const auto blocks       = variantMap.value("Blocks").toList();
     const bool hasCodec     = variantMap.contains("Codec");
     const auto codecName    = hasCodec ? variantMap.value("Codec").toString() : QStringLiteral("none");
-    const auto totalSize    = static_cast<std::uint64_t>(variantMap.value("Size").toULongLong());
+    const auto totalSize    = variantMap.value("Size").toULongLong();
 
     if (totalSize == 0)
         throw ManiVaultException(
@@ -546,6 +546,8 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
     DecodeBlockJobs decodeBlockJobs;
     decodeBlockJobs.reserve(blocks.size());
 
+    QStringList uris;
+
     for (const auto& block : blocks) {
         const auto blockMap = block.toMap();
 
@@ -557,15 +559,20 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
         job._offset         = blockMap.value("Offset").value<quint64>();
         job._size           = blockMap.value("Size").value<quint64>();
         job._compressedSize = blockMap.value("CompressedSize", 0).value<quint64>();
-        
+        job._codec          = createCodec();
+
         if (blockMap.contains("URI"))
             job._uri = blockMap.value("URI").toString();
 
         if (blockMap.contains("Data"))
             job._encodedData = blockMap.value("Data").toString();
 
+        uris << job._uri;
+
         decodeBlockJobs.push_back(std::move(job));
     }
+
+    qDebug() << "Decoding data buffer with codec" << codecName << "and" << decodeBlockJobs.size() << "blocks. URIs:" << uris;
 
     // Overlap check
     std::sort(decodeBlockJobs.begin(), decodeBlockJobs.end(),
@@ -622,7 +629,7 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
         );
     }
 
-    WorkflowPlan decodeWorkflowPlan("Decode Blocks");
+    UniqueWorkflowPlan decodeWorkflowPlan = std::make_unique<WorkflowPlan>("Decode Blocks");
 
     WorkflowPlan::Jobs decodeJobs;
 
@@ -631,17 +638,18 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
     for (auto& decodeBlockJob : decodeBlockJobs) {
         decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [decodeBlockJob, sharedData, totalSize, createCodec](const WorkflowPlan::Job& job) {
             if (decodeBlockJob._uri.isEmpty()) {
-                decodeBlockFromBase64To(decodeBlockJob, createCodec, sharedData->data(), totalSize);
+                decodeBlockFromBase64To(decodeBlockJob, sharedData->data(), totalSize);
             } else {
-                decodeBlockFromFileTo(decodeBlockJob, createCodec, sharedData->data(), totalSize);
+                qDebug() << "Decoding block from file:" << decodeBlockJob._uri;
+				decodeBlockFromFileTo(decodeBlockJob, sharedData->data(), totalSize);
             }
         }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread);
 
         ++decodeBlockJobIndex;
     }
 
-    decodeWorkflowPlan.addParallelStage("Decode blocks", decodeJobs);
-    decodeWorkflowPlan.addSequentialStage("Finalize", [totalSize](WorkflowPlan::Job& job) {
+    decodeWorkflowPlan->addParallelStage("Decode blocks", decodeJobs);
+    decodeWorkflowPlan->addSequentialStage("Finalize", [totalSize](WorkflowPlan::Job& job) {
         if (auto workflowExecutionContext = WorkflowExecutionContext::current()) {
             auto state = workflowExecutionContext->getState();
 
@@ -660,11 +668,11 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
 
     if (concurrencyMode == WorkflowPlan::ConcurrencyMode::Parallel) {
         result._async = true;
-        result._future = decodeWorkflowPlan.executeAsync(sharedExecutor, WorkflowExecutionContext::current());
+        result._future = sharedExecutor->executeAsync(std::move(decodeWorkflowPlan), WorkflowExecutionContext::current());
     }
     else {
         result._async = false;
-        result._workflowResult = decodeWorkflowPlan.executeBlocking(sharedExecutor, WorkflowExecutionContext::current());
+        result._workflowResult = mv::projects().getWorkflowPlanExecutor()->executeBlocking(std::move(decodeWorkflowPlan), WorkflowExecutionContext::current());
     }
 
     return result;
@@ -918,7 +926,7 @@ WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantM
         );
     }
 
-    WorkflowPlan decodeWorkflowPlan("Decode Raw Buffer Blocks");
+    UniqueWorkflowPlan decodeWorkflowPlan = std::make_unique<WorkflowPlan>("Decode Raw Buffer Blocks");
     WorkflowPlan::Jobs decodeJobs;
 
     std::int32_t decodeBlockJobIndex = 0;
@@ -926,22 +934,12 @@ WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantM
     for (const auto& decodeBlockJob : decodeBlockJobs) {
         decodeJobs.emplace_back(
             QString("Decode Block %1").arg(decodeBlockJobIndex),
-            [decodeBlockJob, destination, destinationSize, createCodec](const WorkflowPlan::Job&) {
+            [decodeBlockJob, destination, destinationSize, createCodec, totalSize](const WorkflowPlan::Job&) {
                 if (decodeBlockJob._uri.isEmpty()) {
-                    decodeBlockFromBase64To(
-                        decodeBlockJob,
-                        createCodec,
-                        destination,
-                        destinationSize
-                    );
+                    decodeBlockFromBase64To(decodeBlockJob, destination, destinationSize);
                 }
                 else {
-                    decodeBlockFromFileTo(
-                        decodeBlockJob,
-                        createCodec,
-                        destination,
-                        destinationSize
-                    );
+                    decodeBlockFromFileTo(decodeBlockJob, destination, destinationSize);
                 }
             },
             WorkflowPlan::JobThreadAffinity::CurrentWorkerThread
@@ -950,9 +948,9 @@ WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantM
         ++decodeBlockJobIndex;
     }
 
-    decodeWorkflowPlan.addParallelStage("Decode blocks", decodeJobs);
+    decodeWorkflowPlan->addParallelStage("Decode blocks", decodeJobs);
 
-    decodeWorkflowPlan.addSequentialStage(
+    decodeWorkflowPlan->addSequentialStage(
         "Finalize",
         [totalSize](WorkflowPlan::Job&) {
             if (auto workflowExecutionContext = WorkflowExecutionContext::current()) {
@@ -978,10 +976,9 @@ WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantM
     const auto sharedExecutor = SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor());
 
     if (concurrencyMode == WorkflowPlan::ConcurrencyMode::Parallel)
-        return decodeWorkflowPlan.executeAsync(sharedExecutor, WorkflowExecutionContext::current() ? WorkflowExecutionContext::current() : nullptr, options);
+        return sharedExecutor->executeAsync(std::move(decodeWorkflowPlan), WorkflowExecutionContext::current() ? WorkflowExecutionContext::current() : nullptr, options);
 
-    const auto blockingResult =
-        decodeWorkflowPlan.executeBlocking(sharedExecutor, WorkflowExecutionContext::current() ? WorkflowExecutionContext::current() : nullptr, options);
+    const auto blockingResult = sharedExecutor->executeBlocking(std::move(decodeWorkflowPlan), WorkflowExecutionContext::current() ? WorkflowExecutionContext::current() : nullptr, options);
 
     return WorkflowResultFuture::makeReady(blockingResult);
 }

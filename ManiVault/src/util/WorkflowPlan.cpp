@@ -243,7 +243,6 @@ WorkflowPlan::WorkflowPlan(const QString& title, SharedWorkflowContext context) 
 void WorkflowPlan::addStage(Stage stage)
 {
     for (auto& job : stage.getJobs()) {
-        qDebug() << _workflowContext.get();
         job.setWorkflowContext(_workflowContext);
     }
 
@@ -281,36 +280,6 @@ void WorkflowPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs, doubl
             addParallelStage(std::move(name), std::move(jobs), weight);
             break;
 	}
-}
-
-SharedWorkflowResult WorkflowPlan::executeBlocking(const SharedWorkflowPlanExecutor& workflowPlanExecutor, SharedWorkflowExecutionContext parentContext /*= nullptr*/, OptionalWorkflowExecutionOptions executionOptions /*= {}*/)
-{
-    if (!workflowPlanExecutor) {
-        qWarning() << "Unable to execute workflow plan: no executor provided!";
-        return {};
-    }
-
-    return workflowPlanExecutor->executeBlocking(*this, std::move(parentContext), std::move(executionOptions));
-}
-
-WorkflowResultFuture WorkflowPlan::executeAsync(const SharedWorkflowPlanExecutor& workflowPlanExecutor, SharedWorkflowExecutionContext parentContext /*= nullptr*/, OptionalWorkflowExecutionOptions executionOptions /*= {}*/)
-{
-    if (!workflowPlanExecutor) {
-        qWarning() << "Unable to execute workflow plan: no executor provided!";
-        return WorkflowResultFuture::makeReady(SharedWorkflowResult());
-    }
-
-    return workflowPlanExecutor->executeAsync(*this, std::move(parentContext), std::move(executionOptions));
-}
-
-SharedWorkflowResult WorkflowPlan::executeOnCurrentThread(const SharedWorkflowPlanExecutor& workflowPlanExecutor, Task* task, SharedWorkflowExecutionContext parentContext /*= nullptr*/, OptionalWorkflowExecutionOptions executionOptions /*= {}*/)
-{
-    if (!workflowPlanExecutor) {
-        qWarning() << "Unable to execute workflow plan: no executor provided!";
-        return{};
-    }
-
-    return workflowPlanExecutor->executeOnCurrentThread(*this, task, std::move(parentContext), std::move(executionOptions));
 }
 
 }

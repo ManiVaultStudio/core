@@ -33,36 +33,32 @@ void DimensionNamesSerializer::fromVariantMap(const QVariantMap& pointsMap, Poin
         throw std::runtime_error("Unsupported dimensions serialization format version");
 
     auto context    = std::make_shared<DimensionNamesLoadContext>();
-    auto fromPlan   = std::make_shared<WorkflowPlan>(__FUNCTION__, context);
+    auto fromPlan   = std::make_unique<WorkflowPlan>(__FUNCTION__, context);
 
-    fromPlan->addSequentialStage("Read dimension names", [fromPlan, pointsMap, points](WorkflowPlan::Job& job) -> void {
-        if (auto context = fromPlan->getWorkflowContextAs<DimensionNamesLoadContext>()) {
-            context->_dimensionNames.reserve(pointsMap.value("DimensionNames").toMap().value("Size").toUInt());
+    fromPlan->addSequentialStage("Read dimension names", [context, pointsMap, points](WorkflowPlan::Job& job) -> void {
+        context->_dimensionNames.reserve(pointsMap.value("DimensionNames").toMap().value("Size").toUInt());
 
-            auto result = populateDataBufferFromVariantMap(pointsMap["DimensionNames"].toMap(), WorkflowPlan::ConcurrencyMode::Parallel);
+        auto result = populateDataBufferFromVariantMap(pointsMap["DimensionNames"].toMap(), WorkflowPlan::ConcurrencyMode::Parallel);
 
-            result._future.waitForFinished();
+        result._future.waitForFinished();
 
-            QDataStream dimensionsDataStream(result._data.get(), QIODevice::ReadOnly);
+        QDataStream dimensionsDataStream(result._data.get(), QIODevice::ReadOnly);
 
-            dimensionsDataStream >> context->_dimensionNames;
-        }
+        dimensionsDataStream >> context->_dimensionNames;
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
-	fromPlan->addSequentialStage("Set dimension names", [fromPlan, points](WorkflowPlan::Job& job) -> void {
-        if (auto context = fromPlan->getWorkflowContextAs<DimensionNamesLoadContext>()) {
-	        std::vector<QString> dimensionNames;
+	fromPlan->addSequentialStage("Set dimension names", [context, points](WorkflowPlan::Job& job) -> void {
+        std::vector<QString> dimensionNames;
 
-			dimensionNames.reserve(points->getNumDimensions());
+		dimensionNames.reserve(points->getNumDimensions());
 
-        	for (const auto& dimensionName : context->_dimensionNames)
-				dimensionNames.emplace_back(dimensionName);
+        for (const auto& dimensionName : context->_dimensionNames)
+			dimensionNames.emplace_back(dimensionName);
 
-			points->setDimensionNames(dimensionNames);
-        }
+		points->setDimensionNames(dimensionNames);
 	}, WorkflowPlan::JobThreadAffinity::GuiThread);
 
-    fromPlan->executeAsync(mv::projects().getWorkflowPlanExecutor());
+    auto result = mv::projects().getWorkflowPlanExecutor()->executeAsync(std::move(fromPlan));
 }
 
 QVariantMap DimensionNamesSerializer::toVariantMap(const std::vector<QString>& dimensionNames)
