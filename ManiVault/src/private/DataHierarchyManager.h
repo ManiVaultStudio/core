@@ -130,20 +130,20 @@ public: // Serialization
     UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap) override;
 
     /**
-     * Create a workflow plan that serializes the data hierarchy manager state to a variant map.
-     *
-     * @note See the documentation of Serializable::toVariantMapWorkflow() for important information about the expected behavior of this function.
-     * @return Workflow plan that serializes the data hierarchy manager state when executed.
-     */
-    UniqueWorkflowPlan toVariantMapWorkflow() const override;
-
-    /**
      * Serialize the data hierarchy manager state to a variant map.
      *
      * @note See the documentation of Serializable::toVariantMap() for important information about the expected behavior of this function.
      * @return Variant map representation of the object state.
      */
     QVariantMap toVariantMap() const override;
+
+    /**
+     * Create a workflow plan that serializes the data hierarchy manager state to a variant map.
+     *
+     * @note See the documentation of Serializable::toVariantMapWorkflow() for important information about the expected behavior of this function.
+     * @return Workflow plan that serializes the data hierarchy manager state when executed.
+     */
+    UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 private:
     std::vector<std::unique_ptr<DataHierarchyItem>>     _items;                 /** Unique pointers to data hierarchy items */

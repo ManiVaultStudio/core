@@ -377,7 +377,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             const auto stateGuard = qScopeGuard([this]() { setState(State::Idle); });
 
         	auto projectOpenWorkflowPlan    = createProjectOpenWorkflowPlan(filePath);
-        	auto workflowResult             = _workflowPlanExecutor->executeBlocking(std::move(projectOpenWorkflowPlan), WorkflowExecutionContext::current(), WorkflowExecutionOptions({
+        	auto workflowResult             = _workflowPlanExecutor->executeBlocking(std::move(projectOpenWorkflowPlan), nullptr, WorkflowExecutionOptions({
                 ._parallel = parameters._parallel,
         		._maxWorkerThreadCount = parameters._maxParallelThreads,
                 ._reportProgress = true,

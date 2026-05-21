@@ -68,7 +68,7 @@ public:
 public:
     class Job;
 
-    using JobFunction   = std::function<void(Job&)>;
+    using JobFunction   = std::function<void(Job&, const SharedWorkflowExecutionContext& )>;
     using JobFunctions  = std::vector<JobFunction>;
 
     class CORE_EXPORT Job
@@ -83,7 +83,7 @@ public:
 
         const JobFunction& getFunction() const;
 
-        void run() const;
+        void run(SharedWorkflowExecutionContext context) const;
 
         void setResult(QVariant result);
 
@@ -246,23 +246,64 @@ public:
 
 private:
     template<typename Function>
-    void addStageTo(Stages& stages, QString name, Function&& function, JobThreadAffinity threadAffinity, double weight) {
-        if constexpr (std::is_invocable_v<Function, Job&>) {
-            stages.emplace_back(Stage(name, ConcurrencyMode::Sequential, {
-                Job(name, JobFunction(std::forward<Function>(function)), threadAffinity)
-                }, weight));
+    void addStageTo(Stages& stages, QString name, Function&& function, JobThreadAffinity threadAffinity, double weight)
+    {
+        if constexpr (std::is_invocable_v<Function, Job&, const SharedWorkflowExecutionContext&>) {
+            stages.emplace_back(
+                std::move(name),
+                ConcurrencyMode::Sequential,
+                Jobs{
+                    Job(
+                        name,
+                        JobFunction(std::forward<Function>(function)),
+                        threadAffinity
+                    )
+                },
+                weight
+            );
+        }
+        else if constexpr (std::is_invocable_v<Function, Job&>) {
+            stages.emplace_back(
+                std::move(name),
+                ConcurrencyMode::Sequential,
+                Jobs{
+                    Job(
+                        name,
+                        [fn = std::forward<Function>(function)](
+                            Job& job,
+                            const SharedWorkflowExecutionContext&) mutable {
+                            fn(job);
+                        },
+                        threadAffinity
+                    )
+                },
+                weight
+            );
         }
         else if constexpr (std::is_invocable_v<Function>) {
-            stages.emplace_back(Stage(name, ConcurrencyMode::Sequential, {
-                Job(name, JobFunction([fn = std::forward<Function>(function)](Job&) mutable {
-                    fn();
-                }), threadAffinity)
-                }, weight));
+            stages.emplace_back(
+                std::move(name),
+                ConcurrencyMode::Sequential,
+                Jobs{
+                    Job(
+                        name,
+                        [fn = std::forward<Function>(function)](
+                            Job&,
+                            const SharedWorkflowExecutionContext&) mutable {
+                            fn();
+                        },
+                        threadAffinity
+                    )
+                },
+                weight
+            );
         }
         else {
             static_assert(
-                std::is_invocable_v<Function, Job&> || std::is_invocable_v<Function>,
-                "Stage function must be callable as void(Job&) or void()"
+                std::is_invocable_v<Function, Job&, const SharedWorkflowExecutionContext&> ||
+                std::is_invocable_v<Function, Job&> ||
+                std::is_invocable_v<Function>,
+                "Stage function must be callable as void(Job&, context), void(Job&) or void()"
                 );
         }
     }

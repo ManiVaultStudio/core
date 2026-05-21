@@ -107,64 +107,94 @@ bool Project::isStartupProject() const
 
 void Project::fromVariantMap(const QVariantMap& variantMap)
 {
-    Serializable::fromVariantMap(variantMap);
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    if (variantMap.contains(_selectionGroupingAction.getSerializationName()))
-        _selectionGroupingAction.fromParentVariantMap(variantMap);
-    else
-        _selectionGroupingAction.setChecked(true);
+    plan->addSequentialStage("fromVariantMap", {
+        WorkflowPlan::Job("fromVariantMap", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) {
+            fromVariantMap(variantMap);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread)
+        });
 
-    _overrideApplicationStatusBarAction.fromParentVariantMap(variantMap);
-    _statusBarVisibleAction.fromParentVariantMap(variantMap);
-    _statusBarOptionsAction.fromParentVariantMap(variantMap);
+    const auto result = projects().getWorkflowPlanExecutor()->executeBlocking(std::move(plan));
+}
 
-    auto dataHierarchyPlan = dataHierarchy().fromVariantMapWorkflow(variantMap);
+UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap)
+{
+    UniqueWorkflowPlan fromPlan = std::make_unique<WorkflowPlan>("Load project");
 
-    auto result = mv::projects().getWorkflowPlanExecutor()->executeBlocking(std::move(dataHierarchyPlan), WorkflowExecutionContext::current());
+    fromPlan->addSequentialStage("Populate data hierarchy", [this, variantMap](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) -> void {
+        Serializable::fromVariantMap(variantMap);
 
-    //executor->executeBlocking(
-    //    dataHierarchyPlan,
-    //    executionOptions,
-    //    *WorkflowExecutionContext::current()
-    //);
-    //;
-    
-    actions().fromParentVariantMap(variantMap);
-    
-    plugins().fromParentVariantMap(variantMap);
-    
-    events().fromParentVariantMap(variantMap, true);
+        if (variantMap.contains(_selectionGroupingAction.getSerializationName()))
+            _selectionGroupingAction.fromParentVariantMap(variantMap);
+        else
+            _selectionGroupingAction.setChecked(true);
 
-    if (getReadOnlyAction().isChecked() && getAllowedPluginsOnlyAction().isChecked()) {
-        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
-            pluginFactory->setAllowPluginCreationFromStandardGui(_projectMetaAction.getAllowedPluginsAction().getStrings().contains(pluginFactory->getKind()));
-    }
+        _overrideApplicationStatusBarAction.fromParentVariantMap(variantMap);
+        _statusBarVisibleAction.fromParentVariantMap(variantMap);
+        _statusBarOptionsAction.fromParentVariantMap(variantMap);
+
+        auto dataHierarchyPlan = dataHierarchy().fromVariantMapWorkflow(variantMap);
+
+        auto result = mv::projects().getWorkflowPlanExecutor()->executeBlocking(std::move(dataHierarchyPlan), context);
+
+        actions().fromParentVariantMap(variantMap);
+        plugins().fromParentVariantMap(variantMap);
+        events().fromParentVariantMap(variantMap, true);
+
+        if (getReadOnlyAction().isChecked() && getAllowedPluginsOnlyAction().isChecked()) {
+            for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
+                pluginFactory->setAllowPluginCreationFromStandardGui(_projectMetaAction.getAllowedPluginsAction().getStrings().contains(pluginFactory->getKind()));
+        }
+    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+
+    return fromPlan;
 }
 
 QVariantMap Project::toVariantMap() const
 {
-    auto variantMap = Serializable::toVariantMap();
-    
-    _projectMetaAction.insertIntoVariantMap(variantMap);
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    _selectionGroupingAction.insertIntoVariantMap(variantMap);
+    plan->addSequentialStage("toVariantMap", {
+        WorkflowPlan::Job("toVariantMap", [this](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
+            auto result = toVariantMap();
+            context->publishResult(result);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread)
+    });
 
-    _overrideApplicationStatusBarAction.insertIntoVariantMap(variantMap);
-    _statusBarVisibleAction.insertIntoVariantMap(variantMap);
-    _statusBarOptionsAction.insertIntoVariantMap(variantMap);
+    const auto result = projects().getWorkflowPlanExecutor()->executeBlocking(std::move(plan));
 
-    plugins().insertIntoVariantMap(variantMap);
+    return result->value<QVariantMap>();
+}
 
-    UniqueWorkflowPlan dataHierarchyPlan = dataHierarchy().fromVariantMapWorkflow(variantMap);
+UniqueWorkflowPlan Project::toVariantMapWorkflow() const
+{
+    UniqueWorkflowPlan toPlan = std::make_unique<WorkflowPlan>("Save project");
 
-    auto result = mv::projects().getWorkflowPlanExecutor()->executeBlocking(std::move(dataHierarchyPlan), WorkflowExecutionContext::current());
+    toPlan->addSequentialStage("Assemble item maps", [this](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
+        auto variantMap = Serializable::toVariantMap();
 
-    //variantMap[dataHierarchy().getSerializationName()] = dataHierarchyPlan.getWorkflowContextAs<DataHierarchyManagerSaveContext>()->getDataHierachyMap();
-    dataHierarchy().insertIntoVariantMap(variantMap);
-    actions().insertIntoVariantMap(variantMap);
-    events().insertIntoVariantMap(variantMap);
+        _projectMetaAction.insertIntoVariantMap(variantMap);
 
-    return variantMap;
+        _selectionGroupingAction.insertIntoVariantMap(variantMap);
+
+        _overrideApplicationStatusBarAction.insertIntoVariantMap(variantMap);
+        _statusBarVisibleAction.insertIntoVariantMap(variantMap);
+        _statusBarOptionsAction.insertIntoVariantMap(variantMap);
+
+        plugins().insertIntoVariantMap(variantMap);
+
+        UniqueWorkflowPlan dataHierarchyPlan = dataHierarchy().fromVariantMapWorkflow(variantMap);
+
+        auto result = mv::projects().getWorkflowPlanExecutor()->executeBlocking(std::move(dataHierarchyPlan), executionContext);
+
+        //variantMap[dataHierarchy().getSerializationName()] = dataHierarchyPlan.getWorkflowContextAs<DataHierarchyManagerSaveContext>()->getDataHierachyMap();
+        dataHierarchy().insertIntoVariantMap(variantMap);
+        actions().insertIntoVariantMap(variantMap);
+        events().insertIntoVariantMap(variantMap);
+    });
+
+    return toPlan;
 }
 
 util::Version Project::getVersion() const

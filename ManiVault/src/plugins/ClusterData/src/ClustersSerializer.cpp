@@ -114,7 +114,7 @@ void ClusterSerializer::fromVariantMap(const QVariantMap& map, QVector<Cluster>&
 
     WorkflowPlan::Jobs preprocessingJobs;
 
-	preprocessingJobs.emplace_back("Process headers", [map, context](WorkflowPlan::Job& job) {
+	preprocessingJobs.emplace_back("Process headers", [map, context](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
 		auto result = populateDataBufferFromVariantMap(map.value("ClustersMetaData").toMap(), WorkflowPlan::ConcurrencyMode::Parallel);
 
         result._future.waitForFinished();
@@ -125,7 +125,7 @@ void ClusterSerializer::fromVariantMap(const QVariantMap& map, QVector<Cluster>&
         context->_headers = deserializeHeaders(*result._data);
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 
-    preprocessingJobs.emplace_back("Process indices", [map, context](WorkflowPlan::Job& job) {
+    preprocessingJobs.emplace_back("Process indices", [map, context](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext ) {
         auto result = populateDataBufferFromVariantMap(map.value("ClustersIndicesRawData").toMap(), WorkflowPlan::ConcurrencyMode::Parallel);
 
 		result._future.waitForFinished();

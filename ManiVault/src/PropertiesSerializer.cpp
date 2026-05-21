@@ -26,7 +26,7 @@ QVariantMap PropertiesSerializer::toVariantMap(const QVariantMap& map)
     return result;
 }
 
-void PropertiesSerializer::fromVariantMap(const QVariantMap& propertiesMap, QVariantMap& destinationPropertiesMap)
+void PropertiesSerializer::fromVariantMap(const QVariantMap& propertiesMap, QVariantMap& destinationPropertiesMap, SharedWorkflowExecutionContext parentContext)
 {
 #ifdef PROPERTIES_SERIALIZER_VERBOSE
     qDebug() << "Deserializing properties: " << propertiesMap.keys();
@@ -41,13 +41,13 @@ void PropertiesSerializer::fromVariantMap(const QVariantMap& propertiesMap, QVar
 
     WorkflowPlan::Jobs preprocessingJobs;
 
-    preprocessingJobs.emplace_back("Process headers", [propertiesMap, &destinationPropertiesMap](WorkflowPlan::Job& job) {
+    preprocessingJobs.emplace_back("Process headers", [propertiesMap, &destinationPropertiesMap](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
         destinationPropertiesMap = loadOptimizedVariant(propertiesMap).toMap();
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 
     fromPlan->addParallelStage("Preprocessing", preprocessingJobs);
 
-    auto result = mv::projects().getWorkflowPlanExecutor()->executeAsync(std::move(fromPlan), WorkflowExecutionContext::current());
+    auto result = mv::projects().getWorkflowPlanExecutor()->executeAsync(std::move(fromPlan), parentContext);
 }
 
 }

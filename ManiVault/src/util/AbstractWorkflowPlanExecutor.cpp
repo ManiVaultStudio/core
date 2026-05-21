@@ -52,18 +52,27 @@ void AbstractWorkflowPlanExecutor::installNotificationLinkHandler()
     });
 }
 
-void AbstractWorkflowPlanExecutor::trace(WorkflowTraceEvent event)
+SharedWorkflowExecutionContext AbstractWorkflowPlanExecutor::requireContext(const SharedWorkflowExecutionContext& context, const char* where)
 {
-	if (auto context = WorkflowExecutionContext::current()) {
-        if (auto state = context->getState()) {
-            if (auto traceSink = state->getTraceSink()) {
-	            event._threadId     = QThread::currentThreadId();
-            	event._timestampNs  = AbstractWorkflowTraceSink::currentTimestampNs();
-
-            	traceSink->trace(event);
-            }
-        }
+	if (!context || !context->isValid()) {
+		throw std::runtime_error(
+			QString("Invalid workflow execution context in %1").arg(where).toStdString()
+		);
 	}
+
+	return context;
+}
+
+void AbstractWorkflowPlanExecutor::trace(const SharedWorkflowExecutionContext& context, WorkflowTraceEvent event)
+{
+    if (auto state = context->getState()) {
+        if (auto traceSink = state->getTraceSink()) {
+            event._threadId     = QThread::currentThreadId();
+            event._timestampNs  = AbstractWorkflowTraceSink::currentTimestampNs();
+
+            traceSink->trace(event);
+        }
+    }
 }
 
 }

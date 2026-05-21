@@ -43,6 +43,14 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(UniqueWorkflowPlan wo
         return failedResult;
     };
 
+    const auto reportFailure = [&](const ManiVaultException& exception) {
+        if (parentContext && parentContext->isValid()) {
+            parentContext->error(exception._message, exception._where, exception._details);
+        }
+
+        qWarning() << exception._message;
+    };
+
     try {
         if (parentContext != nullptr) {
             return executeChild(*workflowPlan, parentContext);
@@ -86,30 +94,19 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(UniqueWorkflowPlan wo
         future.getState()->rethrowExceptionIfAny();
     }
     catch (const ManiVaultException& exception) {
-        WorkflowReporter::message(exception._severity, exception._message, exception._where, exception._details);
+        qWarning() << exception._message;
 
         return getFailedResult();
-        // displayFailure(exception._message);
-        //throw;
-        //TODO
     }
     catch (const std::exception& exception) {
-        WorkflowReporter::error(QString("Workflow '%1' failed: %2").arg(workflowPlan->getName(), exception.what()),workflowPlan->getName());
+        qWarning() << QString("Workflow '%1' failed: %2").arg(workflowPlan->getName(), exception.what());
 
         return getFailedResult();
-
-        //throw;
-        //TODO
     }
     catch (...) {
-        WorkflowReporter::error(QString("Workflow '%1' failed with an unknown error.").arg(workflowPlan->getName()), workflowPlan->getName());
+        qWarning() << QString("Workflow '%1' failed with an unknown error.").arg(workflowPlan->getName());
 
         return getFailedResult();
-
-        // displayFailure("Unknown exception");
-
-        //throw;
-        //TODO
     }
 
     return result;
@@ -139,22 +136,18 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsync(UniqueWorkflowPlan workf
     );
 }
 
-QThreadPool& WorkflowPlanExecutor::getThreadPool()
+QThreadPool& WorkflowPlanExecutor::getThreadPool(const SharedWorkflowExecutionContext& context)
 {
-    auto context = WorkflowExecutionContext::current();
-
-    if (!context)
-        throw std::runtime_error("No active workflow execution context");
+    if (!context || !context->isValid())
+        throw std::runtime_error("Invalid workflow execution context");
 
     return context->getThreadPool();
 }
 
-const QThreadPool& WorkflowPlanExecutor::getThreadPool() const
+const QThreadPool& WorkflowPlanExecutor::getThreadPool(const SharedWorkflowExecutionContext& context) const
 {
-    auto context = WorkflowExecutionContext::current();
-
-    if (!context)
-        throw std::runtime_error("No active workflow execution context");
+    if (!context || !context->isValid())
+        throw std::runtime_error("Invalid workflow execution context");
 
     return context->getThreadPool();
 }
@@ -162,6 +155,12 @@ const QThreadPool& WorkflowPlanExecutor::getThreadPool() const
 WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan& workflowPlan, Task::GuiScope guiScope, const WorkflowExecutionOptions& executionOptions, SharedWorkflowExecutionContext executionContext)
 {
     auto state = std::make_shared<WorkflowResultFuture::State>();
+
+    auto* watcher = new QFutureWatcher<SharedWorkflowResult>();
+
+    state->watcher = watcher;
+
+    connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, watcher, &QObject::deleteLater, Qt::QueuedConnection);
 
     Task* task = nullptr;
 
@@ -179,11 +178,9 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan& workfl
             WorkflowPlanExecutor executor;
 
             if (executionContext != nullptr) {
-                WorkflowExecutionScope scope(executionContext);
-
                 //WorkflowReporter::info("Nested workflow started");
 
-                executor.executeImpl(workflowPlan);
+                executor.executeImpl(workflowPlan, executionContext);
 
                 //WorkflowReporter::info("Nested workflow finished");
 
@@ -198,23 +195,7 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(WorkflowPlan& workfl
         }
     });
 
-    auto* watcher = new QFutureWatcher<SharedWorkflowResult>();
-
-    //if (task != nullptr) {
-    //    connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, task, [watcher, task]() {
-    //        const auto result = watcher->result();
-
-    //        //task->setProgress(1.0f);
-    //        //task->setFinished();
-    //    },
-    //    Qt::QueuedConnection);
-    //}
-
-    connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, watcher,&QObject::deleteLater, Qt::QueuedConnection);
-
     watcher->setFuture(state->future);
-
-	state->watcher = watcher;
 
     return WorkflowResultFuture(state);
 }
@@ -238,8 +219,6 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(WorkflowPlan& workflowPla
     elapsedTimer.start();
 
     auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task, executionOptions);
-
-	WorkflowExecutionScope rootScope(rootContext);
 
     //WorkflowReporter::info("Workflow started", workflowPlan.getName());
 
@@ -266,7 +245,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(WorkflowPlan& workflowPla
     };
 
     try {
-        executeImpl(workflowPlan);
+        executeImpl(workflowPlan, rootContext);
         
         //WorkflowReporter::info("Workflow finished", workflowPlan.getName());
 
@@ -281,7 +260,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(WorkflowPlan& workflowPla
 #endif
     }
     catch (const ManiVaultException& exception) {
-        WorkflowReporter::message(exception._severity, exception._message, exception._where, exception._details);
+        rootContext->error(exception._message, exception._where, exception._details);
 
         displayFailure(exception._message);
 
@@ -289,13 +268,15 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(WorkflowPlan& workflowPla
             throw;
     }
     catch (const std::exception& exception) {
-        WorkflowReporter::error(QString("Workflow failed: %1").arg(QString::fromUtf8(exception.what())), workflowPlan.getName());
+        rootContext->error(exception.what(), workflowPlan.getName());
 
         displayFailure(QString::fromUtf8(exception.what()));
+
         throw;
     }
     catch (...) {
-        WorkflowReporter::error("Workflow failed with unknown error", workflowPlan.getName());
+        rootContext->error("Workflow failed with unknown error", workflowPlan.getName());
+        
         displayFailure("Unknown error");
 
         throw;
@@ -305,7 +286,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeRoot(WorkflowPlan& workflowPla
 
     if (auto state = rootContext->getState()) {
 	    result->setMetrics(state->metrics().snapshot());
-    	result->setMessages(WorkflowExecutionContext::current()->getState()->collectMessages());
+    	result->setMessages(rootContext->getState()->collectMessages());
         result->setDuration(static_cast<std::uint64_t>(elapsedTimer.elapsed()));
     }
 
@@ -356,8 +337,6 @@ SharedWorkflowResult WorkflowPlanExecutor::executeChild(WorkflowPlan& workflowPl
         workflowPlan.getWeight(),
         WorkflowPlan::JobProgressMode::Automatic);
 
-    WorkflowExecutionScope childScope(childContext);
-
     //WorkflowReporter::info("Nested workflow started", workflowPlan.getName());
 
 #ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
@@ -372,7 +351,7 @@ SharedWorkflowResult WorkflowPlanExecutor::executeChild(WorkflowPlan& workflowPl
     });
 #endif
 
-    executeImpl(workflowPlan);
+    executeImpl(workflowPlan, childContext);
 
     //WorkflowReporter::info("Nested workflow finished", workflowPlan.getName());
     
@@ -391,13 +370,15 @@ SharedWorkflowResult WorkflowPlanExecutor::executeChild(WorkflowPlan& workflowPl
     return {};
 }
 
-void WorkflowPlanExecutor::executeImpl(WorkflowPlan& workflowPlan)
+void WorkflowPlanExecutor::executeImpl(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext executionContext)
 {
+    executionContext = requireContext(executionContext, __FUNCTION__);
+
     std::exception_ptr primaryException;
     bool mainSucceeded = false;
 
     try {
-        executeStageGroup(workflowPlan.getStages());
+        executeStageGroup(workflowPlan.getStages(), executionContext);
         mainSucceeded = true;
     }
     catch (...) {
@@ -406,10 +387,10 @@ void WorkflowPlanExecutor::executeImpl(WorkflowPlan& workflowPlan)
 
     try {
         if (mainSucceeded) {
-            executeStageGroup(workflowPlan.getOnSuccessStages());
+            executeStageGroup(workflowPlan.getOnSuccessStages(), executionContext);
         }
         else {
-            executeStageGroup(workflowPlan.getOnFailureStages());
+            executeStageGroup(workflowPlan.getOnFailureStages(), executionContext);
         }
     }
     catch (...) {
@@ -418,7 +399,7 @@ void WorkflowPlanExecutor::executeImpl(WorkflowPlan& workflowPlan)
     }
 
     try {
-        executeStageGroup(workflowPlan.getFinallyStages());
+        executeStageGroup(workflowPlan.getFinallyStages(), executionContext);
     }
     catch (...) {
         if (!primaryException)
@@ -429,16 +410,16 @@ void WorkflowPlanExecutor::executeImpl(WorkflowPlan& workflowPlan)
         std::rethrow_exception(primaryException);
 }
 
-void WorkflowPlanExecutor::executeStageGroup(const WorkflowPlan::Stages& stages)
+void WorkflowPlanExecutor::executeStageGroup(const WorkflowPlan::Stages& stages, SharedWorkflowExecutionContext executionContext)
 {
+    executionContext = requireContext(executionContext, __FUNCTION__);
+
     const auto stageCount = stages.size();
 
     if (stageCount == 0)
         return;
 
-    auto currentContext = WorkflowExecutionContext::current();
-
-    if (!currentContext)
+    if (!executionContext)
         throw std::runtime_error("No active workflow execution context");
 
     QVector<SharedWorkflowExecutionContext> stageContexts;
@@ -447,7 +428,7 @@ void WorkflowPlanExecutor::executeStageGroup(const WorkflowPlan::Stages& stages)
 
     for (int i = 0; i < stageCount; ++i) {
         const auto& stage = stages[i];
-        stageContexts.push_back(currentContext->createChild(stage.getName(), stage.getWeight()));
+        stageContexts.push_back(executionContext->createChild(stage.getName(), stage.getWeight()));
     }
 
     for (int i = 0; i < stageCount; ++i) {
@@ -482,13 +463,13 @@ void WorkflowPlanExecutor::executeStageGroup(const WorkflowPlan::Stages& stages)
 
 void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, SharedWorkflowExecutionContext stageContext)
 {
+    stageContext = requireContext(stageContext, __FUNCTION__);
+
     if (stage.getConcurrencyMode() == WorkflowPlan::ConcurrencyMode::Parallel && stage.containsGuiThreadJobs()) {
         throw ManiVaultException(SeverityLevel::Error, QString("Parallel stage '%1' contains GUI-thread jobs, which is not allowed.").arg(stage.getName()), "workflow.stage.parallel_gui_jobs", stage.getName());
     }
 
-    WorkflowExecutionScope stageScope(stageContext);
-
-    WorkflowReporter::info("Stage started");
+    stageContext->info("Stage started");
 
     auto state = stageContext->getState();
 
@@ -511,7 +492,7 @@ void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, Shared
         WorkflowPlan::ConcurrencyMode effectiveMode = stage.getConcurrencyMode();
 
         if (state && !state->getExecutionOptions()._parallel) {
-            WorkflowReporter::warning("Parallel execution is disabled, switching to sequential mode", stage.getName());
+            stageContext->warning("Parallel execution is disabled, switching to sequential mode");
 
             effectiveMode = WorkflowPlan::ConcurrencyMode::Sequential;
         }
@@ -526,7 +507,7 @@ void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, Shared
 	            break;
         }
 
-        WorkflowReporter::info("Stage finished");
+        stageContext->info("Stage finished");
 
 #ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({
@@ -539,7 +520,7 @@ void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, Shared
 
     }
     catch (const ManiVaultException& exception) {
-        handleStageException(stage, exception);
+        handleStageException(stage, exception, stageContext);
 
 #ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({
@@ -551,7 +532,7 @@ void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, Shared
 #endif
     }
     catch (const std::exception& exception) {
-        WorkflowReporter::error(QString("Stage failed: %1").arg(exception.what()));
+        stageContext->error(QString("Stage failed: %1").arg(exception.what()));
         
 #ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({
@@ -565,7 +546,7 @@ void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, Shared
         throw;
     }
     catch (...) {
-        WorkflowReporter::error("Stage failed with unknown error", stage.getName());
+        stageContext->error("Stage failed with unknown error");
 
 #ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({
@@ -586,11 +567,7 @@ void WorkflowPlanExecutor::executeSequentialJobs(const WorkflowPlan::Stage& stag
     qDebug() << "Executing sequential jobs for stage:" << stage.getName() << "in thread" << QThread::currentThread();
 #endif
 
-    Q_ASSERT(stageContext);
-
-    if (!stageContext) {
-        throw std::runtime_error("Invalid workflow execution context");
-    }
+    stageContext = requireContext(stageContext, __FUNCTION__);
 
     const auto& jobs = stage.getJobs();
     const auto jobCount = jobs.size();
@@ -654,11 +631,7 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
         << QThread::currentThread();
 #endif
 
-    Q_ASSERT(stageContext);
-
-    if (!stageContext) {
-        throw std::runtime_error("Invalid workflow execution context");
-    }
+    stageContext = requireContext(stageContext, __FUNCTION__);
 
     const auto& jobs = stage.getJobs();
     const auto jobCount = jobs.size();
@@ -732,7 +705,7 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
 #endif
 
         synchronizer.addFuture(QtConcurrent::run(
-            &getThreadPool(),
+            &getThreadPool(jobContext),
             [this,
             job,
             jobContext,
@@ -741,8 +714,6 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
             jobCount,
             &exceptionMutex,
             &firstException]() mutable {
-                WorkflowExecutionScope jobScope(jobContext);
-
 #ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
                 trace({
                     ._type = WorkflowTraceEventType::ParallelJobStarted,
@@ -839,6 +810,8 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
 
 void WorkflowPlanExecutor::executeJobOnGuiThread(WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
 {
+    jobContext = requireContext(jobContext, __FUNCTION__);
+
     auto& dispatcher = Application::workflowGuiThreadDispatcher();
 
     auto exceptionPtr = std::make_shared<std::exception_ptr>();
@@ -847,8 +820,7 @@ void WorkflowPlanExecutor::executeJobOnGuiThread(WorkflowPlan::Job& job, SharedW
         jobContext,
         exceptionPtr]() mutable {
         try {
-            WorkflowExecutionScope scope(jobContext);
-            job.run();
+            job.run(jobContext);
         }
         catch (...) {
             *exceptionPtr = std::current_exception();
@@ -876,14 +848,14 @@ void WorkflowPlanExecutor::executeJobOnWorkerThread(mv::util::WorkflowPlan::Job&
     qDebug() << "Executing job on worker thread:" << job.getName() << "in thread" << QThread::currentThread();
 #endif
 
-    WorkflowExecutionScope scope(jobContext);
+    jobContext = requireContext(jobContext, __FUNCTION__);
 
-    job.run();
+    job.run(jobContext);
 }
 
 void WorkflowPlanExecutor::executeJob(WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
 {
-    WorkflowReporter::info("Job started");
+    jobContext->info("Job started");
 
 #ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
     trace({
@@ -893,6 +865,8 @@ void WorkflowPlanExecutor::executeJob(WorkflowPlan::Job& job, SharedWorkflowExec
 	    ._parentContextId = jobContext->getParentId()
     });
 #endif
+
+    jobContext = requireContext(jobContext, __FUNCTION__);
 
     try {
         switch (job.getThreadAffinity()) {
@@ -912,7 +886,7 @@ void WorkflowPlanExecutor::executeJob(WorkflowPlan::Job& job, SharedWorkflowExec
             jobContext->setProgress(1.0);
         }
 
-        WorkflowReporter::info("Job finished");
+        jobContext->info("Job finished");
 
 #ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({
@@ -940,9 +914,9 @@ void WorkflowPlanExecutor::executeJob(WorkflowPlan::Job& job, SharedWorkflowExec
     }
 }
 
-void WorkflowPlanExecutor::handleStageException(const WorkflowPlan::Stage& stage, const ManiVaultException& exception)
+void WorkflowPlanExecutor::handleStageException(const WorkflowPlan::Stage& stage, const ManiVaultException& exception, SharedWorkflowExecutionContext stageContext)
 {
-    WorkflowReporter::message(exception._severity, exception._message, stage.getName(), exception._details);
+    stageContext->message(exception._severity, exception._message, stage.getName(), exception._details);
 
     if (exception._severity == SeverityLevel::Error || exception._severity == SeverityLevel::Fatal)
         throw;

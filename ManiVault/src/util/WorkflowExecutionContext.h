@@ -48,6 +48,8 @@ public:
 
     QString getName() const;
 
+    void message(SeverityLevel severity, QString text, QString location, QVariantMap details) const;
+
     /**
      * @brief Adds an informational message to the report node associated with this workflow execution context.
      * @param text The main text or content of the informational message to be added to the report node.
@@ -143,8 +145,6 @@ public: // Result handling
 
 private:
     friend class WorkflowExecutionScope;
-
-    static void setCurrent(SharedWorkflowExecutionContext context);
 
 private:
     QString                         _name;                                                      /** Name of the workflow execution context, typically derived from the name of the workflow plan or job it represents */

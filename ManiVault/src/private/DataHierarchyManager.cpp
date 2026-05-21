@@ -244,27 +244,27 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
     plan->addSequentialStage("fromVariantMap", {
-        WorkflowPlan::Job("fromVariantMap", [this, variantMap](const WorkflowPlan::Job&) {
+        WorkflowPlan::Job("fromVariantMap", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) {
             fromVariantMap(variantMap);
         }, WorkflowPlan::JobThreadAffinity::GuiThread)
     });
     
-	const auto result = projects().getWorkflowPlanExecutor()->executeBlocking(std::move(plan), WorkflowExecutionContext::current());
+	const auto result = projects().getWorkflowPlanExecutor()->executeBlocking(std::move(plan));
 }
 
 UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
     UniqueWorkflowPlan fromPlan = std::make_unique<WorkflowPlan>("Load data hierarchy");
 
-    fromPlan->addSequentialStage("Populate data hierarchy", [this, variantMap](WorkflowPlan::Job& job) -> void {
+    fromPlan->addSequentialStage("Populate data hierarchy", [this, variantMap](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) -> void {
         const auto loadDataHierarchyItem = [variantMap](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
-            const auto dataset = dataHierarchyItemMap["Dataset"].toMap();
-            const auto datasetId = dataset["ID"].toString();
-            const auto datasetName = dataset["Name"].toString();
-            const auto pluginKind = dataset["PluginKind"].toString();
-            const auto isDerived = dataset["Derived"].toBool();
-            const auto isFull = dataset["Full"].toBool();
-            const auto sourceDatasetID = dataset["SourceDatasetID"].toString();
+            const auto dataset          = dataHierarchyItemMap["Dataset"].toMap();
+            const auto datasetId        = dataset["ID"].toString();
+            const auto datasetName      = dataset["Name"].toString();
+            const auto pluginKind       = dataset["PluginKind"].toString();
+            const auto isDerived        = dataset["Derived"].toBool();
+            const auto isFull           = dataset["Full"].toBool();
+            const auto sourceDatasetID  = dataset["SourceDatasetID"].toString();
 
             auto loadedDataset = (isDerived || !isFull) ? mv::data().createDatasetWithoutSelection(pluginKind, guiName, parent, datasetId) : mv::data().createDataset(pluginKind, guiName, parent, datasetId);
 
@@ -333,7 +333,7 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
         const auto datasetName = dataVariantMap["Name"].toString();
         const auto rawBlockSize = getRawBlockObjectSize(dataVariantMap);
 
-        loadDatasetJobs.emplace_back(datasetName, [datasetId, datasetName, dataVariantMap](WorkflowPlan::Job& job) {
+        loadDatasetJobs.emplace_back(datasetName, [datasetId, datasetName, dataVariantMap](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
             
             try {
                 if (datasetName == "M1_cross_species_merged_final")
@@ -453,6 +453,22 @@ private:
     QVariantMap     _dataHierarchyMap;  /** Map representing the data hierarchy structure */
 };
 
+QVariantMap DataHierarchyManager::toVariantMap() const
+{
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+
+    plan->addSequentialStage("toVariantMap", {
+        WorkflowPlan::Job("toVariantMap", [this](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
+            auto result = toVariantMap();
+            context->publishResult(result);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread)
+        });
+
+    const auto result = projects().getWorkflowPlanExecutor()->executeBlocking(std::move(plan));
+
+    return result->value<QVariantMap>();
+}
+
 UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 {
     auto context = std::make_shared<DataHierarchyManagerSaveContext>();
@@ -470,7 +486,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
             const auto datasetGuiName   = dataset->getGuiName();
             const auto itemSortIndex    = sortIndex++;
 
-            createItemMapJobs.emplace_back(datasetGuiName, [context, &dataHierarchyItem, datasetId, itemSortIndex, datasetGuiName](WorkflowPlan::Job& job) {
+            createItemMapJobs.emplace_back(datasetGuiName, [context, &dataHierarchyItem, datasetId, itemSortIndex, datasetGuiName](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
                 qDebug() << "Creating item map for dataset" << datasetGuiName;
                 auto itemMap = dataHierarchyItem->toVariantMap();
 
@@ -488,7 +504,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 
         toPlan->addSequentialStage("Create item maps", createItemMapJobs);
 
-        toPlan->addSequentialStage("Assemble item maps", [this, &toPlan, context](WorkflowPlan::Job& job) -> void {
+        toPlan->addSequentialStage("Assemble item maps", [this, &toPlan, context](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
             try {
                 const auto findItemMap = [&toPlan, &job, context](const QString& datasetId) -> QVariantMap {
                     return context->getDatasetMap(datasetId);
@@ -530,36 +546,30 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 
                 context->setDataHierarchyMap(dataHierarchyMap);
             }
-            catch (std::exception& e) {
-                Serializable::reportSerializationError("Data hierarchy manager", "Failed to assemble item maps: " + QString::fromStdString(e.what()));
+            catch (const std::exception& exception) {
+                throw ManiVaultException(
+                    SeverityLevel::Error,
+                    "Failed to populate data buffer from variant map to raw buffer (memcpy)",
+                    exception.what(),
+                    __FUNCTION__,
+                    {
+                    }
+				);
             }
             catch (...) {
-                Serializable::reportSerializationError("Data hierarchy manager", "Failed to assemble item maps");
+                throw ManiVaultException(
+                    SeverityLevel::Error,
+                    "Failed to populate data buffer from variant map to raw buffer (memcpy)",
+                    "Unknown error",
+                    __FUNCTION__,
+                    {
+                    }
+				);
             }
         });
     }
 
-    //return toPlan;//.getWorkflowContextAs<DataHierarchyManagerSaveContext>()->getDataHierachyMap();
-
     return toPlan;
-}
-
-QVariantMap DataHierarchyManager::toVariantMap() const
-{
-    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
-
-    plan->addSequentialStage("toVariantMap", {
-        WorkflowPlan::Job("toVariantMap", [this](const WorkflowPlan::Job&) {
-            if (auto context = WorkflowExecutionContext::current()) {
-                auto result = toVariantMap();
-                context->publishResult(result);
-            }
-        }, WorkflowPlan::JobThreadAffinity::GuiThread)
-    });
-
-    const auto result = projects().getWorkflowPlanExecutor()->executeBlocking(std::move(plan), WorkflowExecutionContext::current());
-
-    return result->value<QVariantMap>();
 }
 
 }

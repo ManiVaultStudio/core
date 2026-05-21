@@ -82,8 +82,8 @@ UniqueWorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 #endif
 
         QDir tempDir(context->getTemporaryDirectoryPath());
-        QStringList files = tempDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
-        qDebug() << "Files in temporary directory:" << files;
+
+    	QStringList files = tempDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
 
         context->getArchiver().compressDirectory(context->getTemporaryDirectoryPath(), context->getFilePath(), true, 0);
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);

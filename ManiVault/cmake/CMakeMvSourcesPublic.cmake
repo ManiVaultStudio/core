@@ -599,13 +599,11 @@ set(PUBLIC_UTIL_HEADERS
     src/util/DecodeExecutor.h
     src/util/SeverityLevel.h
     src/util/WorkflowExecutionContext.h
-    src/util/WorkflowExecutionScope.h
     src/util/WorkflowContextBase.h
     src/util/WorkflowResult.h
     src/util/WorkflowMessage.h
     src/util/WorkflowReportNode.h
     src/util/WorkflowProgressNode.h
-    src/util/WorkflowReporter.h
     src/util/WorkflowExecutionNotifier.h
     src/util/WorkflowExecutionState.h
     src/util/WorkflowResultFuture.h
@@ -697,11 +695,9 @@ set(PUBLIC_UTIL_SOURCES
     src/util/WorkflowContextBase.cpp
     src/util/WorkflowResult.cpp
     src/util/WorkflowExecutionContext.cpp
-    src/util/WorkflowExecutionScope.cpp
     src/util/WorkflowMessage.cpp
     src/util/WorkflowReportNode.cpp
     src/util/WorkflowProgressNode.cpp
-    src/util/WorkflowReporter.cpp
     src/util/WorkflowExecutionNotifier.cpp
     src/util/WorkflowExecutionState.cpp
     src/util/WorkflowResultFuture.cpp

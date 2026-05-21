@@ -35,8 +35,9 @@ public:
      * Deserializes the properties from the given source QVariantMap into the destination QVariantMap. It checks the format version and throws a runtime error if it is not supported.
      * @param propertiesMap The source QVariantMap containing the serialized properties, which should include the "PropertiesFormatVersion" key with the format version.
      * @param destinationPropertiesMap The reference to the QVariantMap that will be populated with the deserialized properties. This map will be cleared before populating it with the deserialized properties.
+     * @param parentContext An optional shared pointer to a WorkflowExecutionContext that can be used for reporting progress or messages during the deserialization process. If not provided, it defaults to nullptr.
      */
-    static void fromVariantMap(const QVariantMap& propertiesMap, QVariantMap& destinationPropertiesMap);
+    static void fromVariantMap(const QVariantMap& propertiesMap, QVariantMap& destinationPropertiesMap, SharedWorkflowExecutionContext parentContext = nullptr);
 };
 
 }

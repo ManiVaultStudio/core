@@ -7,11 +7,6 @@
 namespace mv::util
 {
 
-namespace
-{
-    thread_local SharedWorkflowExecutionContext currentWorkflowExecutionContext = nullptr;
-}
-
 WorkflowExecutionContext::WorkflowExecutionContext() :
     _id(QUuid::createUuid())
 {
@@ -106,6 +101,24 @@ QString WorkflowExecutionContext::getName() const
 	return _name;
 }
 
+void WorkflowExecutionContext::message(SeverityLevel severity, QString text, QString location, QVariantMap details) const
+{
+	switch (severity) {
+		case SeverityLevel::Info:
+			info(std::move(text), std::move(location), std::move(details));
+			break;
+
+		case SeverityLevel::Warning:
+			warning(std::move(text), std::move(location), std::move(details));
+			break;
+
+		case SeverityLevel::Error:
+		case SeverityLevel::Fatal:
+			error(std::move(text), std::move(location), std::move(details));
+			break;
+	}
+}
+
 void WorkflowExecutionContext::info(QString text, QString location, QVariantMap details) const
 {
 	if (_reportNode)
@@ -166,24 +179,9 @@ QThreadPool& WorkflowExecutionContext::getThreadPool()
     return *_threadPool;
 }
 
-SharedWorkflowExecutionContext WorkflowExecutionContext::current()
-{
-	return currentWorkflowExecutionContext;
-}
-
-const SharedWorkflowExecutionContext WorkflowExecutionContext::currentConst()
-{
-	return currentWorkflowExecutionContext;
-}
-
 WorkflowPlan::JobProgressMode WorkflowExecutionContext::getProgressMode() const
 {
 	return _progressMode;
-}
-
-void WorkflowExecutionContext::setCurrent(SharedWorkflowExecutionContext context)
-{
-    currentWorkflowExecutionContext = context;
 }
 
 void WorkflowExecutionContext::addPendingAsyncWork(WorkflowResultFuture future, const QString& label /*= {}*/)

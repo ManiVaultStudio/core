@@ -98,9 +98,9 @@ CORE_EXPORT void loadRawDataFromBinaryFile(char* bytes, const std::uint64_t& num
  * Convert raw data buffer to variant map (divide up in blocks when the total number of bytes exceeds maxBlockSize)
  * @param bytes Pointer to input buffer
  * @param numberOfBytes Number of input bytes 
- * @param blobCodecOverride Optional blob codec to use for encoding the data blocks (defaults to nullptr, which means no compression)
+ * @param parentContext Optional workflow execution context for asynchronous operations
  */
-CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, const BlobCodec* blobCodecOverride = nullptr);
+CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, SharedWorkflowExecutionContext parentContext = nullptr);
 
 /**
  * Decode a block of data from a file on disk and populate the provided output buffer with the decoded data
@@ -125,10 +125,10 @@ CORE_EXPORT DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decode
  */
 CORE_EXPORT DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec);
 
-CORE_EXPORT PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& variantMap, WorkflowPlan::ConcurrencyMode concurrencyMode);
+CORE_EXPORT PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& variantMap, WorkflowPlan::ConcurrencyMode concurrencyMode, SharedWorkflowExecutionContext parentContext = nullptr);
 CORE_EXPORT PopulateDataBufferResult populateDataBufferFromVariantMapAsync(const QVariantMap& variantMap, QObject* context, PopulateDataReadyCallback populated = {});
 CORE_EXPORT QByteArray populateDataBufferFromVariantMapSync(const QVariantMap& variantMap);
-CORE_EXPORT WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, WorkflowPlan::ConcurrencyMode concurrencyMode);
+CORE_EXPORT WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, WorkflowPlan::ConcurrencyMode concurrencyMode, SharedWorkflowExecutionContext parentContext = nullptr);
 CORE_EXPORT WorkflowResultFuture populateDataBufferFromVariantMapToRawBufferAsync(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, QObject* context = nullptr, PopulateDoneCallback onPopulated = {});
 CORE_EXPORT void populateDataBufferFromVariantMapToRawBufferSync(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize);
 

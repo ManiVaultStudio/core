@@ -22,25 +22,23 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QStringLiteral("Open project"), context);
 
-    plan->addSequentialStage("Setup", [context]() -> void {
+    plan->addSequentialStage("Setup", [context](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobContext) -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Setup";
 #endif
 
-        if (auto workflowExecutionContext = WorkflowExecutionContext::current()) {
-            auto state = workflowExecutionContext->getState();
+        auto state = jobContext->getState();
 
-            if (!state)
-                return;
+        if (!state)
+            return;
 
-            state->metrics().registerInteger(
-                "project.data.bytes_loaded",
-                "bytes",
-                {
-                    { "displayName", "Total number of bytes loaded" }
-                }
-            );
-        }
+        state->metrics().registerInteger(
+            "project.data.bytes_loaded",
+            "bytes",
+            {
+                { "displayName", "Total number of bytes loaded" }
+            }
+        );
 
         if (QFileInfo(context->getFilePath()).isDir())
 	        throw std::runtime_error("Project file path may not be a directory");

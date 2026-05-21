@@ -120,7 +120,7 @@ QByteArray readBinaryFileToByteArray(const QString& filePath)
     return file.readAll();
 }
 
-static EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& saveDir, const std::function<std::shared_ptr<BlobCodec>()>& createCodec)
+static EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& saveDir)
 {
     EncodeBlockResult result;
 
@@ -130,14 +130,12 @@ static EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& s
         blockVariantMap["Offset"] = QVariant::fromValue(job._offset);
         blockVariantMap["Size"]   = QVariant::fromValue(job._size);
 
-        auto codec = createCodec();
-
-        const auto fileName     = QUuid::createUuid().toString(QUuid::WithoutBraces) + codec->getFileExtension();
+        const auto fileName     = QUuid::createUuid().toString(QUuid::WithoutBraces) + job._codec->getFileExtension();
         const auto filePath     = QDir::cleanPath(saveDir + QDir::separator() + fileName);
 
         std::uint64_t numberOfEncodedBytes = 0;
 
-    	codec->encodeToFile(job._rawData, filePath, &numberOfEncodedBytes);
+        job._codec->encodeToFile(job._rawData, filePath, &numberOfEncodedBytes);
 
         blockVariantMap["CompressedSize"]   = QVariant::fromValue<std::uint64_t>(numberOfEncodedBytes);
         blockVariantMap["URI"]              = fileName;
@@ -166,7 +164,7 @@ static EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& s
     return result;
 }
 
-QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, const BlobCodec* blobCodecOverride /*= nullptr*/)
+QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
 {
     try {
         if (!mv::projects().hasProject())
@@ -222,16 +220,8 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
         for (auto& encodeBlockJob : encodeBlockJobs) {
             auto* encodeBlockJobPtr = &encodeBlockJob;
 
-            encodeJobs.emplace_back(QString("Encode Block %1").arg(QString::number(encodeBlockJobIndex)), [encodeBlockJobPtr, saveDir, createCodec](const WorkflowPlan::Job& job) {
-                try {
-                    encodeBlockJobPtr->_result = encodeBlock(*encodeBlockJobPtr, saveDir, createCodec);
-                }
-                catch (std::exception& e) {
-                    Serializable::reportSerializationError("Encoder", "Failed to encode block: " + QString::fromStdString(e.what()));
-                }
-                catch (...) {
-                    Serializable::reportSerializationError("Encoder", "Failed to encode block");
-                }
+            encodeJobs.emplace_back(QString("Encode Block %1").arg(QString::number(encodeBlockJobIndex)), [encodeBlockJobPtr, saveDir](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
+            	encodeBlockJobPtr->_result = encodeBlock(*encodeBlockJobPtr, saveDir);
             });
 
             ++encodeBlockJobIndex;
@@ -239,7 +229,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
         if (!encodeJobs.empty()) {
             encodeWorkflowPlan->addParallelStage("Encode Blocks", encodeJobs);
-            auto result = mv::projects().getWorkflowPlanExecutor()->executeBlocking(std::move(encodeWorkflowPlan), WorkflowExecutionContext::current());
+            auto result = mv::projects().getWorkflowPlanExecutor()->executeBlocking(std::move(encodeWorkflowPlan), parentContext);
         }
 
         QVariantList blocks;
@@ -486,7 +476,7 @@ DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, 
     return result;
 }
 
-PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& variantMap, WorkflowPlan::ConcurrencyMode concurrencyMode)
+PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& variantMap, WorkflowPlan::ConcurrencyMode concurrencyMode, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
 {
     if (variantMap.isEmpty())
         throw ManiVaultException(
@@ -546,8 +536,6 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
     DecodeBlockJobs decodeBlockJobs;
     decodeBlockJobs.reserve(blocks.size());
 
-    QStringList uris;
-
     for (const auto& block : blocks) {
         const auto blockMap = block.toMap();
 
@@ -567,12 +555,8 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
         if (blockMap.contains("Data"))
             job._encodedData = blockMap.value("Data").toString();
 
-        uris << job._uri;
-
         decodeBlockJobs.push_back(std::move(job));
     }
-
-    qDebug() << "Decoding data buffer with codec" << codecName << "and" << decodeBlockJobs.size() << "blocks. URIs:" << uris;
 
     // Overlap check
     std::sort(decodeBlockJobs.begin(), decodeBlockJobs.end(),
@@ -636,7 +620,7 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
     std::int32_t decodeBlockJobIndex = 0;
 
     for (auto& decodeBlockJob : decodeBlockJobs) {
-        decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [decodeBlockJob, sharedData, totalSize, createCodec](const WorkflowPlan::Job& job) {
+        decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [decodeBlockJob, sharedData, totalSize, createCodec](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
             if (decodeBlockJob._uri.isEmpty()) {
                 decodeBlockFromBase64To(decodeBlockJob, sharedData->data(), totalSize);
             } else {
@@ -649,14 +633,9 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
     }
 
     decodeWorkflowPlan->addParallelStage("Decode blocks", decodeJobs);
-    decodeWorkflowPlan->addSequentialStage("Finalize", [totalSize](WorkflowPlan::Job& job) {
-        if (auto workflowExecutionContext = WorkflowExecutionContext::current()) {
-            auto state = workflowExecutionContext->getState();
-
-            if (!state)
-                return;
-
-            state->metrics().addInteger("project.data.bytes_loaded", totalSize);
+    decodeWorkflowPlan->addSequentialStage("Finalize", [totalSize](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
+        if (auto state = context->getState()) {
+	        state->metrics().addInteger("project.data.bytes_loaded", totalSize);
         }
     });
    
@@ -668,11 +647,11 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
 
     if (concurrencyMode == WorkflowPlan::ConcurrencyMode::Parallel) {
         result._async = true;
-        result._future = sharedExecutor->executeAsync(std::move(decodeWorkflowPlan), WorkflowExecutionContext::current());
+        result._future = sharedExecutor->executeAsync(std::move(decodeWorkflowPlan), parentContext);
     }
     else {
         result._async = false;
-        result._workflowResult = mv::projects().getWorkflowPlanExecutor()->executeBlocking(std::move(decodeWorkflowPlan), WorkflowExecutionContext::current());
+        result._workflowResult = mv::projects().getWorkflowPlanExecutor()->executeBlocking(std::move(decodeWorkflowPlan), parentContext);
     }
 
     return result;
@@ -718,7 +697,7 @@ QByteArray populateDataBufferFromVariantMapSync(const QVariantMap& variantMap)
     return *result._data;
 }
 
-WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, WorkflowPlan::ConcurrencyMode concurrencyMode)
+WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, WorkflowPlan::ConcurrencyMode concurrencyMode, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
 {
     if (variantMap.isEmpty())
         throw ManiVaultException(
@@ -933,9 +912,7 @@ WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantM
     std::int32_t decodeBlockJobIndex = 0;
 
     for (const auto& decodeBlockJob : decodeBlockJobs) {
-        decodeJobs.emplace_back(
-            QString("Decode Block %1").arg(decodeBlockJobIndex),
-            [decodeBlockJob, destination, destinationSize, createCodec, totalSize](const WorkflowPlan::Job&) {
+        decodeJobs.emplace_back(QString("Decode Block %1").arg(decodeBlockJobIndex), [decodeBlockJob, destination, destinationSize, createCodec, totalSize](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
                 if (decodeBlockJob._uri.isEmpty()) {
                     decodeBlockFromBase64To(decodeBlockJob, destination, destinationSize);
                 }
@@ -950,25 +927,16 @@ WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantM
     }
 
     decodeWorkflowPlan->addParallelStage("Decode blocks", decodeJobs);
-
-    decodeWorkflowPlan->addSequentialStage(
-        "Finalize",
-        [totalSize](WorkflowPlan::Job&) {
-            if (auto workflowExecutionContext = WorkflowExecutionContext::current()) {
-                auto state = workflowExecutionContext->getState();
-
-                if (!state)
-                    return;
-
-                state->metrics().addInteger("project.data.bytes_loaded", totalSize);
-            }
+    decodeWorkflowPlan->addSequentialStage("Finalize", [totalSize](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        if (auto state = executionContext->getState()) {
+            state->metrics().addInteger("project.data.bytes_loaded", totalSize);
         }
-    );
+    });
 
     auto options = WorkflowExecutionOptions{};
 
-    if (auto context = WorkflowExecutionContext::current()) {
-        if (auto state = context->getState())
+    if (parentContext) {
+        if (auto state = parentContext->getState())
             options = state->getExecutionOptions();
     }
 
@@ -977,9 +945,9 @@ WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantM
     const auto sharedExecutor = SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor());
 
     if (concurrencyMode == WorkflowPlan::ConcurrencyMode::Parallel)
-        return sharedExecutor->executeAsync(std::move(decodeWorkflowPlan), WorkflowExecutionContext::current() ? WorkflowExecutionContext::current() : nullptr, options);
+        return sharedExecutor->executeAsync(std::move(decodeWorkflowPlan), parentContext ? parentContext : nullptr, options);
 
-    const auto blockingResult = sharedExecutor->executeBlocking(std::move(decodeWorkflowPlan), WorkflowExecutionContext::current() ? WorkflowExecutionContext::current() : nullptr, options);
+    const auto blockingResult = sharedExecutor->executeBlocking(std::move(decodeWorkflowPlan), parentContext ? parentContext : nullptr, options);
 
     return WorkflowResultFuture::makeReady(blockingResult);
 }

@@ -84,16 +84,37 @@ public: // Miscellaneous
 public: // Serialization
 
     /**
-     * Load project from variant
-     * @param Variant representation of the project
+     * Load the project state from a variant map.
+     *
+     * @note See the documentation of Serializable::fromVariantMap() for important information about the expected behavior of this function.
+     * @param variantMap Variant map representation of the object state.
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
     /**
-     * Save project to variant
-     * @return Variant representation of the project
+     * Create a workflow plan that loads the project state from a variant map.
+     *
+     * @note See the documentation of Serializable::fromVariantMapWorkflow() for important information about the expected behavior of this function.
+     * @param variantMap Variant map representation of the object state.
+     * @return Workflow plan that restores the object state when executed.
+     */
+    util::UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap) override;
+
+    /**
+     * Serialize the project state to a variant map.
+     *
+     * @note See the documentation of Serializable::toVariantMap() for important information about the expected behavior of this function.
+     * @return Variant map representation of the object state.
      */
     QVariantMap toVariantMap() const override;
+
+    /**
+     * Create a workflow plan that serializes the project state to a variant map.
+     *
+     * @note See the documentation of Serializable::toVariantMapWorkflow() for important information about the expected behavior of this function.
+     * @return Workflow plan that serializes the project state when executed.
+     */
+    util::UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 public:
 

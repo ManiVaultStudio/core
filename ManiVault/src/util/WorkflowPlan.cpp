@@ -38,14 +38,14 @@ const WorkflowPlan::JobFunction& WorkflowPlan::Job::getFunction() const
 	return _function;
 }
 
-void WorkflowPlan::Job::run() const
+void WorkflowPlan::Job::run(SharedWorkflowExecutionContext context) const
 {
 //#ifdef WORKFLOW_PLAN_VERBOSE
 //    qDebug() << "Running job:" << _name;
 //#endif
 
     if (_function)
-		_function(*const_cast<WorkflowPlan::Job*>(this));
+		_function(*const_cast<WorkflowPlan::Job*>(this), std::move(context));
 }
 
 void WorkflowPlan::Job::setResult(QVariant result)

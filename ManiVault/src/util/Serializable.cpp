@@ -71,7 +71,7 @@ UniqueWorkflowPlan Serializable::fromVariantMapWorkflow(const QVariantMap& varia
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1::fromVariantMap").arg(getSerializationName()));
 
     plan->addSequentialStage("Load", {
-        WorkflowPlan::Job("Load", [this, variantMap](const WorkflowPlan::Job&) {
+        WorkflowPlan::Job("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) {
             fromVariantMap(variantMap);
             }, WorkflowPlan::JobThreadAffinity::GuiThread
         )
@@ -94,11 +94,9 @@ UniqueWorkflowPlan Serializable::toVariantMapWorkflow() const
     UniqueWorkflowPlan workflowPlan = std::make_unique<WorkflowPlan>(QString("%1::toVariantMap").arg(getSerializationName()));
 
     workflowPlan->addSequentialStage("Serialize", {
-        WorkflowPlan::Job(
-            "Serialize",
-            [this](WorkflowPlan::Job& job) {
+        WorkflowPlan::Job("Serialize", [this](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
                 const QVariantMap variantMap = toVariantMap();
-                //job.setResult("variantMap", variantMap);
+                //context->publishResult()//job.setResult("variantMap", variantMap);
             }, WorkflowPlan::JobThreadAffinity::GuiThread)
         });
 
@@ -202,33 +200,6 @@ bool Serializable::hasTask() const
 void Serializable::setTask(Task* task)
 {
     _task = task;
-}
-
-void Serializable::reportSerializationWarning(const QString& scope, const QString& message)
-{
-    if (auto context = WorkflowExecutionContext::current()) {
-	    context->getReportNode()->addMessage(SeverityLevel::Warning, "Serializable", message, scope);
-    }
-
-	qWarning() << "Warning: " << message << "(" << scope << ")";
-}
-
-void Serializable::reportSerializationError(QString scope, QString message)
-{
-    if (auto context = WorkflowExecutionContext::current()) {
-        context->getReportNode()->addMessage(SeverityLevel::Error, "Serializable", message, scope);
-    }
-
-	qWarning() << "Error: " << message << "(" << scope << ")";
-}
-
-void Serializable::reportFatalSerializationError(QString scope, QString message)
-{
-    if (auto context = WorkflowExecutionContext::current()) {
-	    context->getReportNode()->addMessage(SeverityLevel::Fatal, "Serializable", message, scope);
-    }
-    
-    qWarning() << "Critical: " << message << "(" << scope << ")";
 }
 
 void Serializable::fromVariantMap(Serializable* serializable, const QVariantMap& variantMap)
