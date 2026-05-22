@@ -6,6 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include <QFuture>
+
 namespace mv::util
 {
 
@@ -25,7 +27,8 @@ public:
     WorkflowJobResult(const QString& workflowName);
 };
 
-using UniqueWorkflowJobResult = std::unique_ptr<WorkflowJobResult>;
-using SharedWorkflowJobResult = std::shared_ptr<WorkflowJobResult>;
+using UniqueWorkflowJobResult   = std::unique_ptr<WorkflowJobResult>;
+using SharedWorkflowJobResult   = std::shared_ptr<WorkflowJobResult>;
+using WorkflowJobFuture         = QFuture<WorkflowJobResult>;
 
 } // namespace mv::util

@@ -6,6 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include <QFuture>
+
 namespace mv::util
 {
 
@@ -27,5 +29,6 @@ public:
 
 using UniqueWorkflowStageResult = std::unique_ptr<WorkflowStageResult>;
 using SharedWorkflowStageResult = std::shared_ptr<WorkflowStageResult>;
+using WorkflowStageFuture       = QFuture<WorkflowStageResult>;
 
 } // namespace mv::util
