@@ -33,7 +33,7 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString&
     auto threadPool     = std::make_shared<QThreadPool>();
 
 	threadPool->setObjectName("WorkflowExecutorPool");
-    threadPool->setMaxThreadCount(state->getExecutionOptions()._parallel ? state->getExecutionOptions()._maxWorkerThreadCount : 1);
+    threadPool->setMaxThreadCount(64);//state->getExecutionOptions()._parallel ? state->getExecutionOptions()._maxWorkerThreadCount : 1);
     threadPool->setExpiryTimeout(30'000);
 
 	return std::make_shared<WorkflowExecutionContext>(
@@ -121,6 +121,8 @@ void WorkflowExecutionContext::message(SeverityLevel severity, QString text, QSt
 
 void WorkflowExecutionContext::info(QString text, QString location, QVariantMap details) const
 {
+    qDebug() << "Info:" << text << ", location:" << location;
+
 	if (_reportNode)
 		_reportNode->addMessage(SeverityLevel::Info, getName(), std::move(text), std::move(location), std::move(details));
 }

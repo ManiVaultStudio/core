@@ -91,12 +91,12 @@ QVariantMap ClusterSerializer::toVariantMap(const QVector<Cluster>& clusters)
 
     map["ClustersFormatVersion"]    = FormatVersion;
     map["ClustersMetaDataSize"]     = headersBytes.size();
-    map["ClustersMetaData"]         = rawDataToVariantMap(headersBytes.constData(), headersBytes.size(), nullptr);
+    map["ClustersMetaData"]         = bytesToBlobVariantMap(headersBytes.constData(), headersBytes.size(), nullptr);
 
 	const auto indicesByteSize = allIndices.size() * sizeof(unsigned int);
 
     map["ClustersIndicesRawDataSize"]   = static_cast<qulonglong>(indicesByteSize);
-    map["ClustersIndicesRawData"]       = rawDataToVariantMap(reinterpret_cast<const char*>(allIndices.data()), indicesByteSize, nullptr);
+    map["ClustersIndicesRawData"]       = bytesToBlobVariantMap(reinterpret_cast<const char*>(allIndices.data()), indicesByteSize, nullptr);
 
     return map;
 }

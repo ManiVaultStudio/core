@@ -133,7 +133,7 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap
 
     plan->addSequentialStage("Step 2", [this, variantMap](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
         dataHierarchy().fromVariantMap(variantMap);
-    });
+    }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     plan->addSequentialStage("Step 3", [this, variantMap](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
         actions().fromParentVariantMap(variantMap);
@@ -161,8 +161,6 @@ QVariantMap Project::toVariantMap() const
     });
 
     const auto future = projects().getWorkflowPlanExecutor()->execute(std::move(plan));
-
-    AbstractWorkflowPlanExecutor::waitWithEventLoop(future);
 
     return future.result()->value<QVariantMap>();
 }

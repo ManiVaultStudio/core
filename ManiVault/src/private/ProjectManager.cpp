@@ -371,23 +371,36 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             return;
 
         emit projectAboutToBeOpened(filePath);
-	    {
-		    setState(State::OpeningProject);
 
-            const auto stateGuard = qScopeGuard([this]() { setState(State::Idle); });
+	    setState(State::OpeningProject);
 
-        	auto projectOpenWorkflowPlan    = createProjectOpenWorkflowPlan(filePath);
-        	auto workflowResult             = _workflowPlanExecutor->execute(std::move(projectOpenWorkflowPlan), nullptr, WorkflowExecutionOptions({
-                ._parallel = parameters._parallel,
-        		._maxWorkerThreadCount = parameters._maxParallelThreads,
-                ._reportProgress = true,
-                ._addNotification = true/*,
-                ._traceSink = std::make_shared<WorkflowChromeTraceSink>(QStringLiteral("D:/Temp/chrome_trace.json"))*/
-        	}));
+        auto watcher = new QFutureWatcher<SharedWorkflowResult>(this);
 
-            AbstractWorkflowPlanExecutor::waitWithEventLoop(workflowResult);
-	    }
-        //emit projectOpened(*_project);
+        connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, this, [this, watcher] {
+            watcher->deleteLater();
+
+            setState(State::Idle);
+
+            emit projectOpened(*_project);
+        });
+
+        auto projectOpenWorkflowPlan = createProjectOpenWorkflowPlan(filePath);
+
+        qDebug() << "before execute";
+
+        auto future = _workflowPlanExecutor->execute(std::move(projectOpenWorkflowPlan), nullptr, WorkflowExecutionOptions({
+            ._parallel = parameters._parallel,
+        	._maxWorkerThreadCount = parameters._maxParallelThreads,
+            ._reportProgress = true,
+            ._addNotification = true/*,
+            ._traceSink = std::make_shared<WorkflowChromeTraceSink>(QStringLiteral("D:/Temp/chrome_trace.json"))*/
+        }));
+
+        qDebug() << "after execute" << future.isValid() << future.isFinished();
+
+        watcher->setFuture(future.getFuture());
+
+        qDebug() << "after setFuture";
     }
     catch (const std::exception& e) {
         setState(State::Idle);
@@ -740,14 +753,15 @@ void ProjectManager::saveProject(QString filePath)
 
             setTemporaryDirPath(TemporaryDirType::Save, workflowPlan->getWorkflowContextAs<ProjectSaveContext>()->getTemporaryDirectoryPath());
 
-	        auto workflowResult = mv::projects().getWorkflowPlanExecutor()->execute(std::move(workflowPlan), nullptr, WorkflowExecutionOptions({
+	        auto future = mv::projects().getWorkflowPlanExecutor()->execute(std::move(workflowPlan), nullptr, WorkflowExecutionOptions({
                 parameters._parallel,
 	        	parameters._maxParallelThreads,
                 true,   // Show progress
                 true    // Add notification
 	        }));
 
-            AbstractWorkflowPlanExecutor::waitBlocking(workflowResult);
+            future.waitForFinished();
+            //AbstractWorkflowPlanExecutor::waitWithEventLoop(workflowResult);
         }
         emit projectSaved(*_project);
     }

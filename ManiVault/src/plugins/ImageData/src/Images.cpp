@@ -862,7 +862,7 @@ QVariantMap Images::toVariantMap() const
     variantMap["ImageSize"]                  = QVariantMap({ { "Width", getImageSize().width() }, { "Height", getImageSize().height() } });
     variantMap["NumberOfComponentsPerPixel"] = getNumberOfComponentsPerPixel();
     variantMap["ImageFilePaths"]             = getImageFilePaths();
-    variantMap["MaskData"]                   = rawDataToVariantMap((char*)_maskData.data(), _maskData.size() * sizeof(std::uint8_t));
+    variantMap["MaskData"]                   = bytesToBlobVariantMap((char*)_maskData.data(), _maskData.size() * sizeof(std::uint8_t));
     variantMap["MaskDataGiven"]              = _maskDataGiven;
     variantMap["VisibleRectangle"]           = QVariantMap({ { "X", _visibleRectangle.x() }, { "Y", _visibleRectangle.y() },{ "Width", _visibleRectangle.width() }, { "Height", _visibleRectangle.height() } });
 

@@ -65,29 +65,7 @@ struct DecodeBlockJob
 
 using DecodeBlockJobs = QVector<DecodeBlockJob>;
 
-/**
- * Save raw data to binary file on disk
- * @param bytes Pointer to input buffer
- * @param numberOfBytes Number of input bytes
- * @param filePath Path of the file on disk
- */
-CORE_EXPORT void saveRawDataToBinaryFile(const char* bytes, const std::uint64_t& numberOfBytes, const QString& filePath);
-
-/**
- * Load raw data from binary file on disk
- * @param bytes Pointer to input buffer
- * @param numberOfBytes Number of input bytes
- * @param filePath Path of the file on disk
- */
-CORE_EXPORT void loadRawDataFromBinaryFile(char* bytes, const std::uint64_t& numberOfBytes, const QString& filePath);
-
-/**
- * Convert raw data buffer to variant map (divide up in blocks when the total number of bytes exceeds maxBlockSize)
- * @param bytes Pointer to input buffer
- * @param numberOfBytes Number of input bytes 
- * @param parentContext Optional workflow execution context for asynchronous operations
- */
-CORE_EXPORT QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, SharedWorkflowExecutionContext parentContext = nullptr);
+CORE_EXPORT QVariantMap bytesToBlobVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, SharedWorkflowExecutionContext parentContext = nullptr);
 
 /**
  * Decode a block of data from a file on disk and populate the provided output buffer with the decoded data

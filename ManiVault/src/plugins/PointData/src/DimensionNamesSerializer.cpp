@@ -79,7 +79,7 @@ QVariantMap DimensionNamesSerializer::toVariantMap(const std::vector<QString>& d
 
     dimensionsDataStream << dimensionNameList;
 
-    auto result = rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size());
+    auto result = bytesToBlobVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size());
 
     result["FormatVersion"] = FormatVersion;
 

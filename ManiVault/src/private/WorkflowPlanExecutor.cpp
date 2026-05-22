@@ -53,6 +53,36 @@ WorkflowResultFuture WorkflowPlanExecutor::execute(UniqueWorkflowPlan workflowPl
     );
 }
 
+void WorkflowPlanExecutor::waitForWorkflowResultFuture(const WorkflowResultFuture& future, WorkflowPlan::Job& job)
+{
+    future.waitForFinished();
+
+    if (future.getState()->hasException())
+        future.getState()->rethrowExceptionIfAny();
+
+    auto result = future.result();
+
+    if (!result) {
+        job.fail("Async stage returned no workflow result");
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Async stage failed",
+            "Async stage returned no workflow result",
+            job.getName()
+        );
+    }
+
+    if (result->hasErrors()) {
+        job.fail("Async stage returned failed workflow result");
+        throw ManiVaultException(
+            SeverityLevel::Error,
+            "Async stage failed",
+            "Nested workflow reported errors",
+            job.getName()
+        );
+    }
+}
+
 QThreadPool& WorkflowPlanExecutor::getThreadPool(const SharedWorkflowExecutionContext& context)
 {
     if (!context || !context->isValid())
@@ -386,8 +416,8 @@ void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, Shared
         throw ManiVaultException(SeverityLevel::Error, QString("Parallel stage '%1' contains GUI-thread jobs, which is not allowed.").arg(stage.getName()), "workflow.stage.parallel_gui_jobs", stage.getName());
     }
 
-    stageContext->info("Stage started");
-
+    stageContext->info(QString("Stage started: %1").arg(stage.getName()));
+    
     auto state = stageContext->getState();
 
 #ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
@@ -424,7 +454,7 @@ void WorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, Shared
 	            break;
         }
 
-        stageContext->info("Stage finished");
+        stageContext->info(QString("Stage finished: %1").arg(stage.getName()));
 
 #ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({
@@ -547,6 +577,11 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
         << "in thread"
         << QThread::currentThread();
 #endif
+
+    qDebug() << "Executing parallel jobs for stage:"
+        << stage.getName()
+        << "in thread"
+        << QThread::currentThread();
 
     stageContext = requireContext(stageContext, __FUNCTION__);
 
@@ -690,12 +725,12 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
 
     synchronizer.waitForFinished();
 
-    for (auto& jobContext : jobContexts) {
-        if (jobContext->getPendingAsyncWorkCount() == 0)
-            continue;
+    //for (auto& jobContext : jobContexts) {
+    //    if (jobContext->getPendingAsyncWorkCount() == 0)
+    //        continue;
 
-        jobContext->waitForPendingAsyncWork();
-    }
+    //    jobContext->waitForPendingAsyncWork();
+    //}
 
     if (firstException) {
 #ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
@@ -732,33 +767,12 @@ void WorkflowPlanExecutor::executeJobOnGuiThread(WorkflowPlan::Job& job, SharedW
     auto& dispatcher = Application::workflowGuiThreadDispatcher();
 
     auto exceptionPtr = std::make_shared<std::exception_ptr>();
+    auto futurePtr = std::make_shared<std::optional<WorkflowResultFuture>>();
 
-    auto runOnGuiThread = [this, job = std::move(job), jobContext, exceptionPtr]() mutable {
+    auto runOnGuiThread = [&job, jobContext, exceptionPtr, futurePtr]() mutable {
         try {
             if (job.isAsync()) {
-                auto future = job.runAsync(jobContext);
-
-                auto watcher = new QFutureWatcher<SharedWorkflowResult>();
-
-                connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, this, [this, watcher, &job]() {
-                        auto result = watcher->future().result();
-
-                	watcher->deleteLater();
-
-                        if (result->getStatus() != WorkflowJobResult::Status::Success) {
-                            job.fail("Async stage failed");
-                            // route to failure handling
-                            return;
-                        }
-
-                        // mark job/stage complete here
-                        //continueWorkflowExecution();
-                    },
-                    Qt::QueuedConnection
-                );
-
-                watcher->setFuture(future.getFuture());
-
+                *futurePtr = job.runAsync(jobContext);
                 return;
             }
 
@@ -767,7 +781,7 @@ void WorkflowPlanExecutor::executeJobOnGuiThread(WorkflowPlan::Job& job, SharedW
         catch (...) {
             *exceptionPtr = std::current_exception();
         }
-    };
+        };
 
     if (QThread::currentThread() == dispatcher.thread()) {
         runOnGuiThread();
@@ -782,6 +796,10 @@ void WorkflowPlanExecutor::executeJobOnGuiThread(WorkflowPlan::Job& job, SharedW
 
     if (*exceptionPtr)
         std::rethrow_exception(*exceptionPtr);
+
+    if (futurePtr->has_value()) {
+        waitForWorkflowResultFuture(futurePtr->value(), job);
+    }
 }
 
 void WorkflowPlanExecutor::executeJobOnWorkerThread(mv::util::WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
@@ -794,29 +812,8 @@ void WorkflowPlanExecutor::executeJobOnWorkerThread(mv::util::WorkflowPlan::Job&
 
     if (job.isAsync()) {
         auto future = job.runAsync(jobContext);
-
-        auto watcher = new QFutureWatcher<SharedWorkflowResult>();
-        
-        connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, this, [this, watcher, &job]() {
-            auto result = watcher->future().result();
-
-            watcher->deleteLater();
-
-            if (result->getStatus() != WorkflowJobResult::Status::Success) {
-                job.fail("Async stage failed");
-                // route to failure handling
-                return;
-            }
-
-            // mark job/stage complete here
-            //continueWorkflowExecution();
-            },
-            Qt::QueuedConnection
-        );
-
-        watcher->setFuture(future.getFuture());
-
-        return; // critical
+        waitForWorkflowResultFuture(future, job);
+        return;
     }
 
     job.run(jobContext);
@@ -824,7 +821,7 @@ void WorkflowPlanExecutor::executeJobOnWorkerThread(mv::util::WorkflowPlan::Job&
 
 void WorkflowPlanExecutor::executeJob(WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
 {
-    jobContext->info("Job started");
+    jobContext->info(QString("Job started: %1").arg(job.getName()));
 
 #ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
     trace({
@@ -855,7 +852,7 @@ void WorkflowPlanExecutor::executeJob(WorkflowPlan::Job& job, SharedWorkflowExec
             jobContext->setProgress(1.0);
         }
 
-        jobContext->info("Job finished");
+        jobContext->info(QString("Job finished: %1").arg(job.getName()));
 
 #ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
         trace({

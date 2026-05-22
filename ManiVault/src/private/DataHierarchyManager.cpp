@@ -244,8 +244,6 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
     auto plan = fromVariantMapWorkflow(variantMap);
 
     const auto future = projects().getWorkflowPlanExecutor()->execute(std::move(plan));
-
-    AbstractWorkflowPlanExecutor::waitWithEventLoop(future);
 }
 
 UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap)
@@ -332,10 +330,10 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
         loadDatasetJobs.emplace_back(datasetName, [datasetId, datasetName, dataVariantMap](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
             
             try {
-                qDebug() << QString("Loading dataset '%1' with ID '%2'").arg(datasetName, datasetId);
+                context->info(QString("Loading dataset '%1' with ID '%2'").arg(datasetName, datasetId));
                 auto plan   = mv::data().getDataset(datasetId)->fromVariantMapWorkflow(dataVariantMap);
                 auto result = mv::projects().getWorkflowPlanExecutor()->execute(std::move(plan), context);
-                qDebug() << QString("Finished loading dataset '%1' with ID '%2'").arg(datasetName, datasetId);
+                context->info(QString("Finished loading dataset '%1' with ID '%2'").arg(datasetName, datasetId));
             }
             catch (const ManiVaultException&) {
 
@@ -354,10 +352,10 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
 		        // Upgrade to ManiVaultException with context
 				throw ManiVaultException(SeverityLevel::Error, QString("Failed to load dataset '%1' due to an unknown error").arg(datasetName), "DataHierarchyManager::loadDataset");
 	        }
-        }, WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Nested).weighted(rawBlockSize);
+        });
     }
 
-    fromPlan->addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Sequential, loadDatasetJobs);
+    fromPlan->addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Parallel, loadDatasetJobs);
     fromPlan->addSequentialStage("Notify datasets", [this](WorkflowPlan::Job& job) {
         for (const auto& item : _items) {
             events().notifyDatasetDataChanged(item->getDataset());
@@ -462,7 +460,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
 
     const auto future = projects().getWorkflowPlanExecutor()->execute(std::move(plan));
 
-    AbstractWorkflowPlanExecutor::waitWithEventLoop(future);
+    future.waitForFinished();
 
     return future.result()->value<QVariantMap>();
 }

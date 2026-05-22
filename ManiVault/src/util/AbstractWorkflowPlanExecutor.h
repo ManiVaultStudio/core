@@ -28,6 +28,9 @@ public:
 
     static SharedWorkflowResult waitWithEventLoop(const WorkflowResultFuture& future);
 
+
+    
+
 	static void installNotificationLinkHandler();
 
 protected:

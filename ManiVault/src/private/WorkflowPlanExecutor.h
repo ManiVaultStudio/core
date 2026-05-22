@@ -30,6 +30,8 @@ public:
 
     WorkflowResultFuture execute(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) override;
 
+    void waitForWorkflowResultFuture(const WorkflowResultFuture& future, WorkflowPlan::Job& job);
+
 public: // Thread pool access
 
     QThreadPool& getThreadPool(const SharedWorkflowExecutionContext& context);

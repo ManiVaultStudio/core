@@ -18,90 +18,6 @@
 
 namespace mv::util {
 
-void saveRawDataToBinaryFile(const char* bytes, const std::uint64_t& numberOfBytes, const QString& filePath)
-{
-    // Output directory
-    const auto outputDirectory = QFileInfo(filePath).dir();
-
-    // Exit prematurely if the target directory does not exist
-    if (!QFileInfo(filePath).dir().exists())
-        throw mv::ManiVaultException(
-            SeverityLevel::Error,
-            "Failed to save raw data to binary file",
-            QString("Unable to save data in %1, the directory does not exist").arg(outputDirectory.dirName()),
-            __FUNCTION__,
-            {
-                { "FilePath", filePath },
-                { "OutputDirectory", outputDirectory.dirName() }
-            }
-        );
-
-    // Create binary file
-    QFile binaryFile(filePath);
-
-    // And save it do disk
-    if (!binaryFile.open(QIODevice::WriteOnly))
-        throw mv::ManiVaultException(
-            SeverityLevel::Error,
-            "Failed to save raw data to binary file",
-            "Unable to open file for writing",
-            __FUNCTION__,
-            {
-                { "FilePath", filePath }
-            }
-        );
-
-    binaryFile.write(QByteArray::fromRawData(bytes, numberOfBytes)); // usng QByteArray::fromRawData(const char *data, qsizetype size) so that the bytes are not copied.
-    binaryFile.close();
-}
-
-void loadRawDataFromBinaryFile(char* bytes, const std::uint64_t& numberOfBytes, const QString& filePath)
-{
-    // Exit prematurely if the target file does not exist
-    if (!QFileInfo(filePath).exists())
-        throw mv::ManiVaultException(
-            SeverityLevel::Error,
-            "Failed to load raw data from binary file",
-            QString("Unable to load binary file, %1 does not exist").arg(filePath),
-            __FUNCTION__,
-            {
-                { "FilePath", filePath }
-            }
-        );
-
-    // Create binary file
-    QFile binaryFile(filePath);
-
-    // Open the file read-only
-    if (!binaryFile.open(QIODevice::ReadOnly))
-        throw mv::ManiVaultException(
-            SeverityLevel::Error,
-            "Failed to load raw data from binary file",
-            "Unable to open file for reading",
-            __FUNCTION__,
-            {
-                { "FilePath", filePath }
-            }
-        );
-
-    // Read the raw data from the file directly into bytes
-    const auto numberOfBytesRead = binaryFile.read(bytes, numberOfBytes);
-
-    // Except if the number of bytes in the file deviates from the number of requested bytes
-    if (numberOfBytesRead != numberOfBytes)
-        throw mv::ManiVaultException(
-            SeverityLevel::Error,
-            "Failed to load raw data from binary file",
-            "Number of requested bytes is not the same as in the file",
-            __FUNCTION__,
-            {
-                { "FilePath", filePath },
-                { "RequestedBytes", QString::number(numberOfBytes) },
-                { "ReadBytes", QString::number(numberOfBytesRead) }
-            }
-        );
-}
-
 QByteArray readBinaryFileToByteArray(const QString& filePath)
 {
     QFile file(filePath);
@@ -120,7 +36,10 @@ QByteArray readBinaryFileToByteArray(const QString& filePath)
     return file.readAll();
 }
 
-static EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& saveDir)
+namespace
+{
+	
+EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& saveDir)
 {
     EncodeBlockResult result;
 
@@ -164,7 +83,9 @@ static EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& s
     return result;
 }
 
-QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
+}
+
+QVariantMap bytesToBlobVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
 {
     try {
         if (!mv::projects().hasProject())
@@ -229,30 +150,31 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
         if (!encodeJobs.empty()) {
             encodeWorkflowPlan->addParallelStage("Encode Blocks", encodeJobs);
-            auto result = mv::projects().getWorkflowPlanExecutor()->execute(std::move(encodeWorkflowPlan), parentContext);
+
+            auto future = mv::projects().getWorkflowPlanExecutor()->execute(std::move(encodeWorkflowPlan), parentContext);
+
+            QVariantList blocks;
+
+            blocks.reserve(encodeBlockJobs.size());
+
+            for (const auto& encodeBlockJob : encodeBlockJobs) {
+                if (!encodeBlockJob._result._error.isEmpty())
+                    throw ManiVaultException(
+                        SeverityLevel::Error,
+                        "Failed to encode block",
+                        encodeBlockJob._result._error,
+                        __FUNCTION__,
+                        {
+                            { "BlockIndex", QString::number(&encodeBlockJob - &encodeBlockJobs[0]) }
+                        });
+
+                blocks.push_back(encodeBlockJob._result._block);
+            }
+
+            rawData["NumberOfBlocks"] = QVariant::fromValue(numberOfBlocks);
+            rawData["BlockSize"] = QVariant::fromValue(maxBlockSizeInBytes);
+            rawData["Blocks"] = QVariant::fromValue(blocks);
         }
-
-        QVariantList blocks;
-
-        blocks.reserve(encodeBlockJobs.size());
-
-        for (const auto& encodeBlockJob : encodeBlockJobs) {
-            if (!encodeBlockJob._result._error.isEmpty())
-                throw ManiVaultException(
-                    SeverityLevel::Error,
-                    "Failed to encode block",
-                    encodeBlockJob._result._error,
-                    __FUNCTION__,
-                    {
-                        { "BlockIndex", QString::number(&encodeBlockJob - &encodeBlockJobs[0]) }
-                    });
-
-            blocks.push_back(encodeBlockJob._result._block);
-        }
-
-        rawData["NumberOfBlocks"]   = QVariant::fromValue(numberOfBlocks);
-        rawData["BlockSize"]        = QVariant::fromValue(maxBlockSizeInBytes);
-        rawData["Blocks"]           = QVariant::fromValue(blocks);
 
         return rawData;
     }
@@ -629,7 +551,7 @@ WorkflowResultFuture populateBytesFromBlobFromVariantMapAsync(const QVariantMap&
             } else {
 				decodeBlockFromFileTo(decodeBlockJob, destination, destinationSize);
             }
-        }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread);
+        });
 
         ++decodeBlockJobIndex;
     }
@@ -660,7 +582,7 @@ void populateBytesFromBlobFromVariantMap(const QVariantMap& variantMap, char* de
 {
     auto future = populateBytesFromBlobFromVariantMapAsync(variantMap, destination, destinationSize, parentContext);
 
-    AbstractWorkflowPlanExecutor::waitWithEventLoop(future);
+    //AbstractWorkflowPlanExecutor::waitWithEventLoop(future);
 }
 
 QByteArray bytesFromBlobVariantMap(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
@@ -704,7 +626,7 @@ QByteArray bytesFromBlobVariantMap(const QVariantMap& variantMap, SharedWorkflow
 
     auto future = populateBytesFromBlobFromVariantMapAsync(variantMap, bytes.data(), bytes.size(), parentContext);
 
-    AbstractWorkflowPlanExecutor::waitWithEventLoop(future);
+    future.waitForFinished();
 
     return bytes;
 }
@@ -742,7 +664,7 @@ QVariant storeQVariant(const QVariant& variant)
     }
     // store large variant in one or more binary files similar to raw data
     const quint32 version = 1;
-    QVariantMap result = rawDataToVariantMap(byteArray.data(), byteArray.size());
+    QVariantMap result = bytesToBlobVariantMap(byteArray.data(), byteArray.size());
     Q_ASSERT(!result.contains("QVariantOnDiskVersion"));
     result["QVariantOnDiskVersion"] = version; // add an extra item to the result so we can check how the data was stored
     return result;
@@ -794,7 +716,7 @@ QVariantMap storeOnDisk(const QStringList& list)
     QByteArray byteArray;
     QDataStream dataStream(&byteArray, QIODevice::WriteOnly);
     dataStream << list;
-    QVariantMap variantMap = rawDataToVariantMap((const char*)byteArray.data(), byteArray.size());
+    QVariantMap variantMap = bytesToBlobVariantMap((const char*)byteArray.data(), byteArray.size());
     return variantMap;
 }
 
@@ -803,7 +725,7 @@ QVariantMap storeOnDisk(const QVector<uint32_t>& vec)
     QByteArray byteArray;
     QDataStream dataStream(&byteArray, QIODevice::WriteOnly);
     dataStream << vec;
-    QVariantMap variantMap = rawDataToVariantMap((const char*)byteArray.data(), byteArray.size());
+    QVariantMap variantMap = bytesToBlobVariantMap((const char*)byteArray.data(), byteArray.size());
     return variantMap;
 }
 
@@ -1045,7 +967,7 @@ QVariant saveTypedVector(const QVariantList& list, const QString& typeName)
     raw["Type"] = typeName;
     raw["Count"] = static_cast<qulonglong>(values.size());
 
-    raw["Data"] = rawDataToVariantMap(
+    raw["Data"] = bytesToBlobVariantMap(
         reinterpret_cast<const char*>(values.constData()),
         static_cast<std::uint64_t>(values.size() * sizeof(T))
     );
@@ -1067,7 +989,7 @@ QVariant saveBoolVector(const QVariantList& list)
     raw["Type"] = "BoolArray";
     raw["Count"] = static_cast<qulonglong>(list.size());
 
-    raw["Data"] = rawDataToVariantMap(
+    raw["Data"] = bytesToBlobVariantMap(
         bytes.constData(),
         static_cast<std::uint64_t>(bytes.size())
     );
@@ -1092,7 +1014,7 @@ QVariant saveStringList(const QVariantList& list)
     block["__OptimizedVariantList"] = true;
     block["Type"] = "QStringList";
     block["Count"] = static_cast<qulonglong>(strings.size());
-    block["Data"] = rawDataToVariantMap(
+    block["Data"] = bytesToBlobVariantMap(
         bytes.constData(),
         static_cast<std::uint64_t>(bytes.size())
     );

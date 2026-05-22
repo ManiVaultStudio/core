@@ -163,7 +163,7 @@ QVariantMap SelectionMap::toVariantMap() const
     };
 
     variantMap["Type"]              = QVariant::fromValue(static_cast<std::int32_t>(_type));
-    variantMap["SerializedMap"]     = rawDataToVariantMap((char*)serializedMap.data(), serializedMap.size() * sizeof(std::uint32_t));
+    variantMap["SerializedMap"]     = bytesToBlobVariantMap((char*)serializedMap.data(), serializedMap.size() * sizeof(std::uint32_t));
     variantMap["SerializedMapSize"] = QVariant::fromValue(serializedMap.size());
     variantMap["SourceImageSize"]   = QVariant::fromValue(sourceImageSize);
     variantMap["TargetImageSize"]   = QVariant::fromValue(targetImageSize);
