@@ -332,10 +332,7 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
         loadDatasetJobs.emplace_back(datasetName, [datasetId, datasetName, dataVariantMap](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
             
             try {
-                if (datasetName == "M1_cross_species_merged_final")
-                    mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
-                else
-                    mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
+                mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
             }
             catch (const ManiVaultException&) {
 

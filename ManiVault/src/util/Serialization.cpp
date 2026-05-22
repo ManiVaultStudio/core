@@ -644,15 +644,10 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
     PopulateDataBufferResult result;
 
     result._data = sharedData;
+	result._async = true;
+    result._future = sharedExecutor->execute(std::move(decodeWorkflowPlan), parentContext);
 
-    if (concurrencyMode == WorkflowPlan::ConcurrencyMode::Parallel) {
-        result._async = true;
-        result._future = sharedExecutor->execute(std::move(decodeWorkflowPlan), parentContext);
-    }
-    else {
-        //result._async = false;
-        //result._workflowResult = mv::projects().getWorkflowPlanExecutor()->execute(std::move(decodeWorkflowPlan), parentContext);
-    }
+    AbstractWorkflowPlanExecutor::waitWithEventLoop(result._future);
 
     return result;
 }
