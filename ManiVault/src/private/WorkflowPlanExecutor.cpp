@@ -35,89 +35,37 @@ SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(UniqueWorkflowPlan wo
     qDebug() << "Executing workflow plan:" << workflowPlan.getName() << "with" << workflowPlan.getStages().size() << "stage(s)";
 #endif
 
-    SharedWorkflowResult result;
+    /*if (QThread::currentThread() == qApp->thread()) {
+        throw ManiVaultException(
+            SeverityLevel::Fatal,
+            "executeBlocking() may not be called on the GUI thread",
+            "workflow.blocking_on_gui_thread",
+            "WorkflowPlanExecutor"
+        );
+    }*/
 
-    const auto getFailedResult = [&workflowPlan]() {
-        auto failedResult = std::make_shared<WorkflowResult>(workflowPlan->getName());
-        failedResult->setStatus(WorkflowResult::Status::Failed);
-        return failedResult;
-    };
+    static thread_local int blockingDepth = 0;
 
-    const auto reportFailure = [&](const ManiVaultException& exception) {
-        if (parentContext && parentContext->isValid()) {
-            parentContext->error(exception._message, exception._where, exception._details);
-        }
-
-        qWarning() << exception._message;
-    };
-
-    try {
-        if (parentContext != nullptr) {
-            return executeChild(*workflowPlan, parentContext);
-        }
-
-        auto guiScope = Task::GuiScope::None;
-
-        if (executionOptions.has_value() && executionOptions->_reportProgress) {
-            guiScope = Task::GuiScope::Modal;
-        }
-
-        auto future = executeAsyncImpl(std::move(workflowPlan), guiScope, executionOptions.value_or({}), nullptr);
-
-        if (QThread::currentThread() == qApp->thread()) {
-            QEventLoop loop;
-            QFutureWatcher<SharedWorkflowResult> watcher;
-
-            QObject::connect(
-                &watcher,
-                &QFutureWatcher<SharedWorkflowResult>::finished,
-                &loop,
-                &QEventLoop::quit
-            );
-
-            if (auto* task = future.getTask()) {
-                QObject::connect(
-                    &watcher,
-                    &QFutureWatcher<SharedWorkflowResult>::finished,
-                    task,
-                    [task, future]() {
-                        if (!future.getState()->hasException())
-                            task->setProgress(1.0f);
-
-                        task->setFinished();
-                    },
-                    Qt::QueuedConnection
-                );
-            }
-
-            watcher.setFuture(future.getFuture());
-            loop.exec();
-        }
-        else {
-            future.waitForFinished();
-        }
-
-        result = future.result();
-
-        future.getState()->rethrowExceptionIfAny();
-    }
-    catch (const ManiVaultException& exception) {
-        qWarning() << exception._message;
-
-        return getFailedResult();
-    }
-    catch (const std::exception& exception) {
-        qWarning() << QString("Workflow '%1' failed: %2").arg(workflowPlan->getName(), exception.what());
-
-        return getFailedResult();
-    }
-    catch (...) {
-        qWarning() << QString("Workflow '%1' failed with an unknown error.").arg(workflowPlan->getName());
-
-        return getFailedResult();
+    if (blockingDepth > 0) {
+        throw ManiVaultException(
+            SeverityLevel::Fatal,
+            "Nested executeBlocking() is not allowed",
+            "workflow.nested_blocking_execution",
+            "WorkflowPlanExecutor"
+        );
     }
 
-    return result;
+    blockingDepth++;
+
+    auto guard = qScopeGuard([&] {
+        blockingDepth--;
+        });
+
+    auto future = executeAsync(std::move(workflowPlan), parentContext, executionOptions);
+
+    future.waitForFinished();
+
+    return future.result();
 }
 
 WorkflowResultFuture WorkflowPlanExecutor::executeAsync(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext /*= nullptr*/, OptionalWorkflowExecutionOptions executionOptions /*= std::nullopt*/)

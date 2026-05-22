@@ -377,7 +377,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             const auto stateGuard = qScopeGuard([this]() { setState(State::Idle); });
 
         	auto projectOpenWorkflowPlan    = createProjectOpenWorkflowPlan(filePath);
-        	auto workflowResult             = _workflowPlanExecutor->executeBlocking(std::move(projectOpenWorkflowPlan), nullptr, WorkflowExecutionOptions({
+        	auto workflowResult             = _workflowPlanExecutor->executeAsync(std::move(projectOpenWorkflowPlan), nullptr, WorkflowExecutionOptions({
                 ._parallel = parameters._parallel,
         		._maxWorkerThreadCount = parameters._maxParallelThreads,
                 ._reportProgress = true,
@@ -385,7 +385,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 ._traceSink = std::make_shared<WorkflowChromeTraceSink>(QStringLiteral("D:/Temp/chrome_trace.json"))*/
         	}));
 	    }
-        emit projectOpened(*_project);
+        //emit projectOpened(*_project);
     }
     catch (const std::exception& e) {
         setState(State::Idle);

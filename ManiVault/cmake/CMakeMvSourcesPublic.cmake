@@ -600,6 +600,8 @@ set(PUBLIC_UTIL_HEADERS
     src/util/SeverityLevel.h
     src/util/WorkflowExecutionContext.h
     src/util/WorkflowContextBase.h
+    src/util/WorkflowJobResult.h
+    src/util/WorkflowStageResult.h
     src/util/WorkflowResult.h
     src/util/WorkflowMessage.h
     src/util/WorkflowReportNode.h
@@ -693,6 +695,8 @@ set(PUBLIC_UTIL_SOURCES
     src/util/DecodeExecutor.cpp
     src/util/SeverityLevel.cpp
     src/util/WorkflowContextBase.cpp
+    src/util/WorkflowJobResult.cpp
+    src/util/WorkflowStageResult.cpp
     src/util/WorkflowResult.cpp
     src/util/WorkflowExecutionContext.cpp
     src/util/WorkflowMessage.cpp
