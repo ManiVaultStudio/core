@@ -476,18 +476,19 @@ DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, 
     return result;
 }
 
-PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& variantMap, WorkflowPlan::ConcurrencyMode concurrencyMode, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
+WorkflowResultFuture populateBytesFromBlobFromVariantMapAsync(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
 {
-    if (variantMap.isEmpty())
-        throw ManiVaultException(
-            SeverityLevel::Error,
-            "Failed to populate data buffer from variant map",
-            "Variant map is empty",
-            __FUNCTION__,
-            {
-                { "VariantMap", variantMap }
-            }
-        );
+    if (variantMap.isEmpty()) {
+	    throw ManiVaultException(
+			SeverityLevel::Error,
+			"Failed to populate data buffer from variant map",
+			"Variant map is empty",
+			__FUNCTION__,
+			{
+				{ "VariantMap", variantMap }
+			}
+		);
+    }
 
     variantMapMustContain(variantMap, "BlockSize");
     variantMapMustContain(variantMap, "Blocks");
@@ -508,10 +509,6 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
                 { "VariantMap", variantMap }
             }
         );
-
-    auto sharedData = SharedDataBuffer::create();
-
-    sharedData->resize(totalSize);
 
     if (hasCodec && !codecRegistry().isRegistered(codecName)) {
         throw ManiVaultException(
@@ -620,12 +617,17 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
     std::int32_t decodeBlockJobIndex = 0;
 
     for (auto& decodeBlockJob : decodeBlockJobs) {
-        decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [decodeBlockJob, sharedData, totalSize, createCodec](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
+        decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [decodeBlockJob, destination, destinationSize, createCodec](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
+            qDebug() << QString("Decoding block %1: offset=%2, size=%3, compressedSize=%4, uri=%5")
+                        .arg(job.getName())
+                        .arg(decodeBlockJob._offset)
+                        .arg(decodeBlockJob._size)
+                        .arg(decodeBlockJob._compressedSize)
+                .arg(decodeBlockJob._uri);
             if (decodeBlockJob._uri.isEmpty()) {
-                decodeBlockFromBase64To(decodeBlockJob, sharedData->data(), totalSize);
+                decodeBlockFromBase64To(decodeBlockJob, destination, destinationSize);
             } else {
-                qDebug() << "Decoding block from file:" << decodeBlockJob._uri;
-				decodeBlockFromFileTo(decodeBlockJob, sharedData->data(), totalSize);
+				decodeBlockFromFileTo(decodeBlockJob, destination, destinationSize);
             }
         }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread);
 
@@ -638,63 +640,32 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
 	        state->metrics().addInteger("project.data.bytes_loaded", totalSize);
         }
     });
-   
-    auto sharedExecutor = SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor());
 
-    PopulateDataBufferResult result;
+    return mv::projects().getWorkflowPlanExecutor()->execute(std::move(decodeWorkflowPlan), parentContext);
 
-    result._data = sharedData;
-	result._async = true;
-    result._future = sharedExecutor->execute(std::move(decodeWorkflowPlan), parentContext);
+ //   auto sharedExecutor = SharedWorkflowPlanExecutor();
 
-    AbstractWorkflowPlanExecutor::waitWithEventLoop(result._future);
+ //   PopulateDataBufferResult result;
 
-    return result;
+ //   result._data = sharedData;
+	//result._async = true;
+ //   result._future = sharedExecutor->execute(std::move(decodeWorkflowPlan), parentContext);
+
+ //   AbstractWorkflowPlanExecutor::waitWithEventLoop(result._future);
+
+ //   return result;
 }
 
-PopulateDataBufferResult populateDataBufferFromVariantMapAsync(const QVariantMap& variantMap, QObject* context, PopulateDataReadyCallback populated /*= {}*/)
+void populateBytesFromBlobFromVariantMap(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext)
 {
-    auto result = populateDataBufferFromVariantMap(variantMap, WorkflowPlan::ConcurrencyMode::Parallel);
+    auto future = populateBytesFromBlobFromVariantMapAsync(variantMap, destination, destinationSize, parentContext);
 
-    if (populated) {
-        auto watcher = new QFutureWatcher<SharedWorkflowResult>(context);
-
-        QObject::connect(
-            watcher,
-            &QFutureWatcher<SharedWorkflowResult>::finished,
-            context ? context : watcher,
-            [watcher, data = result._data, populated = std::move(populated)]() mutable {
-                watcher->deleteLater();
-
-                //const auto workflowResult = watcher->result();
-
-                //if (!workflowResult || !workflowResult->isSuccess()) {
-                //    qCritical() << "Failed to populate data buffer";
-                //    return;
-                //}
-
-                populated(data);
-            }
-        );
-
-        watcher->setFuture(result._future.getFuture());
-    }
-
-    return result;
+    AbstractWorkflowPlanExecutor::waitWithEventLoop(future);
 }
 
-QByteArray populateDataBufferFromVariantMapSync(const QVariantMap& variantMap)
+QByteArray bytesFromBlobVariantMap(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
 {
-    auto result = populateDataBufferFromVariantMap(variantMap, WorkflowPlan::ConcurrencyMode::Sequential);
-
-    result._future.waitForFinished();
-
-    return *result._data;
-}
-
-WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, WorkflowPlan::ConcurrencyMode concurrencyMode, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
-{
-    if (variantMap.isEmpty())
+    if (variantMap.isEmpty()) {
         throw ManiVaultException(
             SeverityLevel::Error,
             "Failed to populate data buffer from variant map",
@@ -702,37 +673,20 @@ WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantM
             __FUNCTION__,
             {
                 { "VariantMap", variantMap },
-                { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
-                { "DestinationSize", QString::number(destinationSize) }
             }
         );
-
-    if (!destination)   
-        throw ManiVaultException(
-            SeverityLevel::Error,
-            "Failed to populate data buffer from variant map",
-            "Destination buffer is null",
-            __FUNCTION__,
-            {
-                { "VariantMap", variantMap },
-                { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
-                { "DestinationSize", QString::number(destinationSize) }
-            }
-        );
+    }
 
     variantMapMustContain(variantMap, "BlockSize");
     variantMapMustContain(variantMap, "Blocks");
     variantMapMustContain(variantMap, "Size");
 
-    const auto blocks = variantMap.value("Blocks").toList();
-    const bool hasCodec = variantMap.contains("Codec");
-    const auto codecName = hasCodec
-        ? variantMap.value("Codec").toString()
-        : QStringLiteral("none");
+    const auto blocks       = variantMap.value("Blocks").toList();
+    const bool hasCodec     = variantMap.contains("Codec");
+    const auto codecName    = hasCodec ? variantMap.value("Codec").toString() : QStringLiteral("none");
+    const auto totalSize    = variantMap.value("Size").toULongLong();
 
-    const auto totalSize = variantMap.value("Size").toULongLong();
-
-    if (totalSize == 0)
+    if (totalSize == 0) {
         throw ManiVaultException(
             SeverityLevel::Error,
             "Failed to populate data buffer from variant map",
@@ -740,302 +694,19 @@ WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantM
             __FUNCTION__,
             {
                 { "VariantMap", variantMap },
-                { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
-                { "DestinationSize", QString::number(destinationSize) }
-            }
-        );
-
-    if (totalSize != destinationSize) {
-        throw ManiVaultException(
-            SeverityLevel::Error,
-            "Failed to populate data buffer from variant map",
-            "Destination buffer size mismatch",
-            __FUNCTION__,
-            {
-                { "VariantMap", variantMap },
-                { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
-                { "DestinationSize", QString::number(destinationSize) },
-                { "ExpectedSize", QString::number(totalSize) }
             }
         );
     }
 
-    if (hasCodec && !codecRegistry().isRegistered(codecName)) {
-        throw ManiVaultException(
-            SeverityLevel::Error,
-            "Failed to populate data buffer from variant map",
-            QString("Unable to load raw data, codec %1 is not registered").arg(codecName),
-            __FUNCTION__,
-            {
-                { "VariantMap", variantMap },
-                { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
-                { "DestinationSize", QString::number(destinationSize) },
-                { "Codec", codecName }
-            }
-        );
-    }
+	QByteArray bytes;
 
-    auto createCodec = [hasCodec, codecName]() -> std::shared_ptr<BlobCodec> {
-        if (hasCodec)
-            return codecRegistry().createCodec(nullptr, codecName);
+    bytes.resize(static_cast<qsizetype>(totalSize));
 
-        return codecRegistry().createCodec(nullptr, BlobCodec::Type::None);
-    };
+    auto future = populateBytesFromBlobFromVariantMapAsync(variantMap, bytes.data(), bytes.size(), parentContext);
 
-    DecodeBlockJobs decodeBlockJobs;
-    decodeBlockJobs.reserve(blocks.size());
+    AbstractWorkflowPlanExecutor::waitWithEventLoop(future);
 
-    for (const auto& block : blocks) {
-        const auto blockMap = block.toMap();
-
-        variantMapMustContain(blockMap, "Offset");
-        variantMapMustContain(blockMap, "Size");
-
-        DecodeBlockJob job;
-
-        job._offset = blockMap.value("Offset").value<quint64>();
-        job._size = blockMap.value("Size").value<quint64>();
-        job._compressedSize = blockMap.value("CompressedSize", 0).value<quint64>();
-        job._codec = createCodec();
-
-        if (blockMap.contains("URI"))
-            job._uri = blockMap.value("URI").toString();
-
-        if (blockMap.contains("Data"))
-            job._encodedData = blockMap.value("Data").toString();
-
-        decodeBlockJobs.push_back(std::move(job));
-    }
-
-    std::sort(
-        decodeBlockJobs.begin(),
-        decodeBlockJobs.end(),
-        [](const DecodeBlockJob& a, const DecodeBlockJob& b) {
-            return a._offset < b._offset;
-        }
-    );
-
-    quint64 expectedOffset = 0;
-
-    for (const auto& job : decodeBlockJobs) {
-        if (job._size > std::numeric_limits<quint64>::max() - job._offset)
-            throw ManiVaultException(
-                SeverityLevel::Error,
-                "Failed to populate data buffer from variant map",
-                "Raw-data block offset overflow detected",
-                __FUNCTION__,
-                {
-                    { "VariantMap", variantMap },
-                    { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
-                    { "DestinationSize", QString::number(destinationSize) },
-                    { "BlockOffset", QString::number(job._offset) },
-                    { "BlockSize", QString::number(job._size) }
-                }
-            );
-
-        const quint64 end = job._offset + job._size;
-
-        if (job._offset < expectedOffset) {
-            throw ManiVaultException(
-                SeverityLevel::Error,
-                "Failed to populate data buffer from variant map",
-                "Raw-data block overlap detected",
-                __FUNCTION__,
-                {
-                    { "VariantMap", variantMap },
-                    { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
-                    { "DestinationSize", QString::number(destinationSize) },
-                    { "BlockOffset", QString::number(job._offset) },
-                    { "ExpectedOffset", QString::number(expectedOffset) }
-                }
-            );
-        }
-
-        if (job._offset != expectedOffset) {
-            throw ManiVaultException(
-                SeverityLevel::Error,
-                "Failed to populate data buffer from variant map",
-                "Raw-data block gap detected",
-                __FUNCTION__,
-                {
-                    { "VariantMap", variantMap },
-                    { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
-                    { "DestinationSize", QString::number(destinationSize) },
-                    { "BlockOffset", QString::number(job._offset) },
-                    { "ExpectedOffset", QString::number(expectedOffset) }
-                }
-            );
-        }
-
-        if (end > destinationSize)
-            throw ManiVaultException(
-                SeverityLevel::Error,
-                "Failed to populate data buffer from variant map",
-                "Raw-data block exceeds destination buffer size",
-                __FUNCTION__,
-                {
-                    { "VariantMap", variantMap },
-                    { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
-                    { "DestinationSize", QString::number(destinationSize) },
-                    { "BlockOffset", QString::number(job._offset) },
-                    { "BlockSize", QString::number(job._size) }
-                }
-            );
-
-        expectedOffset = end;
-    }
-
-    if (expectedOffset != totalSize) {
-        throw ManiVaultException(
-            SeverityLevel::Error,
-            "Failed to populate data buffer from variant map",
-            "Raw-data blocks do not cover total size",
-            __FUNCTION__,
-            {
-                { "VariantMap", variantMap },
-                { "Destination", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
-                { "DestinationSize", QString::number(destinationSize) },
-                { "ExpectedOffset", QString::number(expectedOffset) },
-                { "TotalSize", QString::number(totalSize) }
-            }
-        );
-    }
-
-    UniqueWorkflowPlan decodeWorkflowPlan = std::make_unique<WorkflowPlan>("Decode Raw Buffer Blocks");
-    WorkflowPlan::Jobs decodeJobs;
-
-    std::int32_t decodeBlockJobIndex = 0;
-
-    for (const auto& decodeBlockJob : decodeBlockJobs) {
-        decodeJobs.emplace_back(QString("Decode Block %1").arg(decodeBlockJobIndex), [decodeBlockJob, destination, destinationSize, createCodec, totalSize](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
-                if (decodeBlockJob._uri.isEmpty()) {
-                    decodeBlockFromBase64To(decodeBlockJob, destination, destinationSize);
-                }
-                else {
-                    decodeBlockFromFileTo(decodeBlockJob, destination, destinationSize);
-                }
-            },
-            WorkflowPlan::JobThreadAffinity::CurrentWorkerThread
-        );
-
-        ++decodeBlockJobIndex;
-    }
-
-    decodeWorkflowPlan->addParallelStage("Decode blocks", decodeJobs);
-    decodeWorkflowPlan->addSequentialStage("Finalize", [totalSize](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-        if (auto state = executionContext->getState()) {
-            state->metrics().addInteger("project.data.bytes_loaded", totalSize);
-        }
-    });
-
-    auto options = WorkflowExecutionOptions{};
-
-    if (parentContext) {
-        if (auto state = parentContext->getState())
-            options = state->getExecutionOptions();
-    }
-
-	return mv::projects().getWorkflowPlanExecutor()->execute(std::move(decodeWorkflowPlan), parentContext ? parentContext : nullptr, options);
-}
-
-WorkflowResultFuture populateDataBufferFromVariantMapToRawBufferAsync(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, QObject* context, PopulateDoneCallback onPopulated)
-{
-    auto future = populateDataBufferFromVariantMapToRawBuffer(
-        variantMap,
-        destination,
-        destinationSize,
-        WorkflowPlan::ConcurrencyMode::Parallel
-    );
-
-    if (onPopulated) {
-        auto watcher = new QFutureWatcher<SharedWorkflowResult>(context);
-
-        QObject::connect(
-            watcher,
-            &QFutureWatcher<SharedWorkflowResult>::finished,
-            context ? context : watcher,
-            [watcher, onPopulated = std::move(onPopulated)]() mutable {
-                watcher->deleteLater();
-
-                //const auto result = watcher->result();
-
-                //if (!result || !result->isSuccess()) {
-                //    qCritical() << "Failed to populate raw data buffer";
-                //    return;
-                //}
-
-                onPopulated();
-            }
-        );
-
-        watcher->setFuture(future.getFuture());
-    }
-
-    return future;
-}
-
-void populateDataBufferFromVariantMapToRawBufferSync(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize)
-{
-    if (!destination)
-        throw ManiVaultException(
-            SeverityLevel::Error,
-            "Failed to populate data buffer from variant map to raw buffer",
-            "Destination buffer is null",
-            __FUNCTION__,
-            {
-                { "VariantMap", variantMap },
-                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
-                { "DestinationSize", QString::number(destinationSize) }
-            }
-        );
-
-    auto result = populateDataBufferFromVariantMap(variantMap, WorkflowPlan::ConcurrencyMode::Sequential);
-
-    const auto decodedSize = static_cast<std::uint64_t>(result._data->size());
-
-    if (decodedSize != destinationSize)
-        throw ManiVaultException(
-            SeverityLevel::Error,
-            "Failed to populate data buffer from variant map to raw buffer",
-            "Decoded data size does not match destination size",
-            __FUNCTION__,
-            {
-                { "VariantMap", variantMap },
-                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
-                { "DestinationSize", QString::number(destinationSize) },
-                { "DecodedSize", QString::number(decodedSize) }
-            }
-        );
-        
-    try {
-        std::memcpy(destination, result._data->constData(), static_cast<size_t>(decodedSize));
-    }
-    catch (const std::exception& exception) {
-        throw ManiVaultException(
-            SeverityLevel::Error,
-            "Failed to populate data buffer from variant map to raw buffer (memcpy)",
-            exception.what(),
-            __FUNCTION__,
-            {
-                { "VariantMap", variantMap },
-                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
-                { "DestinationSize", QString::number(destinationSize) },
-            }
-        );
-    }
-    catch (...) {
-        throw ManiVaultException(
-            SeverityLevel::Error,
-            "Failed to populate data buffer from variant map to raw buffer (memcpy)",
-            "Unknown error",
-            __FUNCTION__,
-            {
-                { "VariantMap", variantMap },
-                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination)) },
-                { "DestinationSize", QString::number(destinationSize) },
-            }
-        );
-    }
+    return bytes;
 }
 
 void variantMapMustContain(const QVariantMap& variantMap, const QString& key)
@@ -1606,7 +1277,7 @@ QVariant loadStringList(const QVariantMap& block)
         static_cast<qsizetype>(block.value("Count").toULongLong());
 
     const QVariantMap dataMap = block.value("Data").toMap();
-    QByteArray bytes = populateDataBufferFromVariantMapSync(dataMap);
+    QByteArray bytes = bytesFromBlobVariantMap(dataMap);
 
 	QDataStream stream(bytes);
     stream.setVersion(QDataStream::Qt_6_8);
@@ -1657,7 +1328,7 @@ QVariant loadOptimizedVariantList(const QVariantMap& map)
 
     const QVariantMap dataMap = map.value("Data").toMap();
 
-    QByteArray bytes = populateDataBufferFromVariantMapSync(dataMap);
+    QByteArray bytes = bytesFromBlobVariantMap(dataMap);
 
     if (type == "BoolArray")
         return loadBoolList(bytes, count);

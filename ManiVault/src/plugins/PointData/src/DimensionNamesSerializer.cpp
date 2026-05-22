@@ -38,11 +38,9 @@ void DimensionNamesSerializer::fromVariantMap(const QVariantMap& pointsMap, Poin
     fromPlan->addSequentialStage("Read dimension names", [context, pointsMap, points](WorkflowPlan::Job& job) -> void {
         context->_dimensionNames.reserve(pointsMap.value("DimensionNames").toMap().value("Size").toUInt());
 
-        auto result = populateDataBufferFromVariantMap(pointsMap["DimensionNames"].toMap(), WorkflowPlan::ConcurrencyMode::Parallel);
+        auto bytes = bytesFromBlobVariantMap(pointsMap["DimensionNames"].toMap());
 
-        result._future.waitForFinished();
-
-        QDataStream dimensionsDataStream(result._data.get(), QIODevice::ReadOnly);
+        QDataStream dimensionsDataStream(&bytes, QIODevice::ReadOnly);
 
         dimensionsDataStream >> context->_dimensionNames;
     }, WorkflowPlan::JobThreadAffinity::GuiThread);

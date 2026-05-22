@@ -115,31 +115,27 @@ void ClusterSerializer::fromVariantMap(const QVariantMap& map, QVector<Cluster>&
     WorkflowPlan::Jobs preprocessingJobs;
 
 	preprocessingJobs.emplace_back("Process headers", [map, context](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-		auto result = populateDataBufferFromVariantMap(map.value("ClustersMetaData").toMap(), WorkflowPlan::ConcurrencyMode::Parallel);
+		const auto bytes = bytesFromBlobVariantMap(map.value("ClustersMetaData").toMap());
 
-        result._future.waitForFinished();
-
-        if (result._data->isEmpty())
+        if (bytes.isEmpty())
             throw std::runtime_error("Cluster headers data is empty");
 
-        context->_headers = deserializeHeaders(*result._data);
+        context->_headers = deserializeHeaders(bytes);
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 
     preprocessingJobs.emplace_back("Process indices", [map, context](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext ) {
-        auto result = populateDataBufferFromVariantMap(map.value("ClustersIndicesRawData").toMap(), WorkflowPlan::ConcurrencyMode::Parallel);
+        const auto bytes = bytesFromBlobVariantMap(map.value("ClustersIndicesRawData").toMap());
 
-		result._future.waitForFinished();
-
-		if (result._data->isEmpty())
+		if (bytes.isEmpty())
 			throw std::runtime_error("Cluster indices data is empty");
 
-		if (result._data->size() % static_cast<qsizetype>(sizeof(unsigned int)) != 0)
+		if (bytes.size() % static_cast<qsizetype>(sizeof(unsigned int)) != 0)
 			throw std::runtime_error("Cluster indices blob size is not aligned");
 
-		context->_allIndices.resize(static_cast<std::size_t>(result._data->size()) / sizeof(unsigned int));
+		context->_allIndices.resize(static_cast<std::size_t>(bytes.size()) / sizeof(unsigned int));
 
 		if (!context->_allIndices.empty()) {
-			std::memcpy(context->_allIndices.data(), result._data->constData(), static_cast<std::size_t>(result._data->size()));
+			std::memcpy(context->_allIndices.data(), bytes.constData(), static_cast<std::size_t>(bytes.size()));
 		}
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 

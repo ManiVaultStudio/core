@@ -332,7 +332,10 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
         loadDatasetJobs.emplace_back(datasetName, [datasetId, datasetName, dataVariantMap](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
             
             try {
-                mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
+                qDebug() << QString("Loading dataset '%1' with ID '%2'").arg(datasetName, datasetId);
+                auto plan   = mv::data().getDataset(datasetId)->fromVariantMapWorkflow(dataVariantMap);
+                auto result = mv::projects().getWorkflowPlanExecutor()->execute(std::move(plan), context);
+                qDebug() << QString("Finished loading dataset '%1' with ID '%2'").arg(datasetName, datasetId);
             }
             catch (const ManiVaultException&) {
 

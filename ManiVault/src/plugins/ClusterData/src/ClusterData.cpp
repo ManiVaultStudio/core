@@ -147,18 +147,16 @@ void ClusterData::fromVariantMapPre150(const QVariantMap& variantMap)
 
     // Convert raw data to indices
     if (!packedIndices.empty())
-		populateDataBufferFromVariantMapToRawBufferSync(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), packedIndices.size() * sizeof(std::uint32_t));
+		populateBytesFromBlobFromVariantMapAsync(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), packedIndices.size() * sizeof(std::uint32_t));
 
     if (dataMap.contains("ClustersRawData")) {
         QByteArray clustersByteArray;
 
         QDataStream clustersDataStream(&clustersByteArray, QIODevice::ReadOnly);
 
-        const auto clustersRawDataSize = dataMap["ClustersRawDataSize"].toInt();
-
-        clustersByteArray.resize(clustersRawDataSize);
+        //const auto clustersRawDataSize = dataMap["ClustersRawDataSize"].toInt();
         
-        populateDataBufferFromVariantMapToRawBufferSync(dataMap["ClustersRawData"].toMap(), (char*)clustersByteArray.data(), clustersByteArray.size());
+        clustersByteArray = bytesFromBlobVariantMap(dataMap["ClustersRawData"].toMap());
 
         QVariantList clusters;
 

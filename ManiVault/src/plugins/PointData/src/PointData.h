@@ -996,6 +996,15 @@ public: // Serialization
     void fromVariantMap(const QVariantMap& variantMap) override;
 
     /**
+     * Create a workflow plan that loads the point data state from a variant map.
+     *
+     * @note See the documentation of Serializable::fromVariantMapWorkflow() for important information about the expected behavior of this function.
+     * @param variantMap Variant map representation of the object state.
+     * @return Workflow plan that restores the object state when executed.
+     */
+    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap) override;
+
+    /**
      * Load widget action from variant for app versions prior to 5.0.0
      * @param variantMap Variant representation of the widget action
      * @return Variant representation of the widget action

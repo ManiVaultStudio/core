@@ -181,9 +181,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
                 setElementTypeSpecifier(elementTypeIndex);
                 resizeVector(numberOfElements);
 
-                const auto populateResult = populateDataBufferFromVariantMapToRawBufferAsync(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), this, [this]() {
-                    qDebug() << "Finished loading dense data with" << getNumPoints() << "points and" << _numDimensions << "dimensions.";
-                });
+                const auto populateResult = populateBytesFromBlobFromVariantMapAsync(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize());
             }/*
             else {
                 const auto numberOfNonZeroElements = variantMap["NumberOfNonZeroElements"].toULongLong();
@@ -239,7 +237,7 @@ void PointData::fromVariantMapPre150(const QVariantMap& variantMap)
         if (numberOfElements > 0) {
             resizeVector(numberOfElements);
 
-            populateDataBufferFromVariantMapToRawBufferAsync(rawData, (char*)getDataVoidPtr(), getRawDataSize());
+            populateBytesFromBlobFromVariantMapAsync(rawData, (char*)getDataVoidPtr(), getRawDataSize());
         }
     }
     else
@@ -250,7 +248,7 @@ void PointData::fromVariantMapPre150(const QVariantMap& variantMap)
 
         std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
 
-        populateDataBufferFromVariantMapToRawBufferSync(rawData, bytes.data(), bytes.size());
+        populateBytesFromBlobFromVariantMap(rawData, bytes.data(), bytes.size());
         _numRows = static_cast<std::uint64_t>(numberOfPoints); // FIXME should be redundant
 
         size_t offset = 0;
@@ -1061,75 +1059,88 @@ void Points::selectInvert()
 
 void Points::fromVariantMap(const QVariantMap& variantMap)
 {
-    DatasetImpl::fromVariantMap(variantMap);
-    
-    variantMapMustContain(variantMap, "DimensionNames");
-    variantMapMustContain(variantMap, "Selection");
+    auto plan = fromVariantMapWorkflow(variantMap);
 
-    const auto dataMap = variantMap["Data"].toMap();
-    const auto projectApplicationVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
+    const auto future = projects().getWorkflowPlanExecutor()->execute(std::move(plan));
 
-    if (projectApplicationVersion < Version(1, 5, 0)) {
-        fromVariantMapPre150(variantMap);
-    }
-    else {
-        // For backwards compatibility, check PluginVersion
-        if (variantMap["PluginVersion"] == "No Version" && !variantMap["Full"].toBool())
-        {
-            makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
+    AbstractWorkflowPlanExecutor::waitWithEventLoop(future);
+}
 
-            qWarning() << "[ManiVault deprecation warning]: This project was saved with an older ManiVault version (<1.0). "
-                "Please save the project again to ensure compatibility with newer ManiVault versions. "
-                "Future releases may not be able to load this projects otherwise. ";
+UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap)
+{
+    UniqueWorkflowPlan fromPlan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+
+    fromPlan->addSequentialStage("Load points", [this, variantMap](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) -> void {
+        DatasetImpl::fromVariantMap(variantMap);
+
+        variantMapMustContain(variantMap, "DimensionNames");
+        variantMapMustContain(variantMap, "Selection");
+
+        const auto dataMap                      = variantMap["Data"].toMap();
+        const auto projectApplicationVersion    = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
+
+        if (projectApplicationVersion < Version(1, 5, 0)) {
+            fromVariantMapPre150(variantMap);
         }
+        else {
+            // For backwards compatibility, check PluginVersion
+            if (variantMap["PluginVersion"] == "No Version" && !variantMap["Full"].toBool())
+            {
+                makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
 
-        // Load raw point data
-        if (isFull()) {
-            getRawData<PointData>()->fromVariantMap(variantMap);
-        }
-        else
-        {
-            variantMapMustContain(variantMap, "Indices");
+                qWarning() << "[ManiVault deprecation warning]: This project was saved with an older ManiVault version (<1.0). "
+                    "Please save the project again to ensure compatibility with newer ManiVault versions. "
+                    "Future releases may not be able to load this projects otherwise. ";
+            }
 
-            const auto& indicesMap = variantMap["Indices"].toMap();
+            // Load raw point data
+            if (isFull()) {
+                getRawData<PointData>()->fromVariantMap(variantMap);
+            }
+            else
+            {
+                variantMapMustContain(variantMap, "Indices");
 
-            indices.resize(indicesMap["Count"].toUInt());
+                const auto& indicesMap = variantMap["Indices"].toMap();
 
-            populateDataBufferFromVariantMapToRawBufferAsync(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(uint32_t), this, [this]() {
-                qDebug() << "Finished loading indices with" << indices.size() << "elements.";
-            });
-        }
+                indices.resize(indicesMap["Count"].toUInt());
 
-        DimensionNamesSerializer::fromVariantMap(variantMap, this);
+                populateBytesFromBlobFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(uint32_t));
+            }
 
-        if (variantMap.contains("Dimensions")) {
-            _dimensionsPickerAction->fromParentVariantMap(variantMap);
-        }
+            DimensionNamesSerializer::fromVariantMap(variantMap, this);
 
-        QTimer::singleShot(1000, this, [this]() {
-            events().notifyDatasetDataChanged(this);
-            events().notifyDatasetDataDimensionsChanged(this);
-        });
+            if (variantMap.contains("Dimensions")) {
+                _dimensionsPickerAction->fromParentVariantMap(variantMap);
+            }
 
-        // Handle saved selection
-        if (isFull()) {
-            const auto& selectionMap = variantMap["Selection"].toMap();
-
-            const auto count = selectionMap["Count"].toUInt();
-
-            if (count > 0) {
-                auto selectionSet = getSelection<Points>();
-
-                selectionSet->indices.resize(count);
-
-                populateDataBufferFromVariantMapAsync(selectionMap["Raw"].toMap(), this, [this, selectionSet](const SharedDataBuffer& data) {
-                    std::memcpy(const_cast<uint32_t*>(selectionSet->indices.data()), data->data(), data->size());
+            QTimer::singleShot(1000, this, [this]() {
+                events().notifyDatasetDataChanged(this);
+                events().notifyDatasetDataDimensionsChanged(this);
                 });
 
-                //events().notifyDatasetDataSelectionChanged(this);
+            // Handle saved selection
+            if (isFull()) {
+                const auto& selectionMap = variantMap["Selection"].toMap();
+
+                const auto count = selectionMap["Count"].toUInt();
+
+                if (count > 0) {
+                    auto selectionSet = getSelection<Points>();
+
+                    selectionSet->indices.resize(count);
+
+                    const auto bytes = bytesFromBlobVariantMap(selectionMap["Raw"].toMap());
+
+                    std::memcpy(const_cast<uint32_t*>(selectionSet->indices.data()), bytes.data(), bytes.size());
+
+                    //events().notifyDatasetDataSelectionChanged(this);
+                }
             }
         }
-    }
+    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+
+    return fromPlan;
 }
 
 void Points::fromVariantMapPre150(const QVariantMap& variantMap)
@@ -1160,9 +1171,9 @@ void Points::fromVariantMapPre150(const QVariantMap& variantMap)
 
         indices.resize(indicesMap["Count"].toUInt());
 
-        populateDataBufferFromVariantMapToRawBufferSync(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(std::uint32_t));
+        populateBytesFromBlobFromVariantMapAsync(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(std::uint32_t));
     }
-    /**/
+    /*
     // Load dimension names
     QStringList dimensionNameList;
     std::vector<QString> dimensionNames;
@@ -1174,10 +1185,7 @@ void Points::fromVariantMapPre150(const QVariantMap& variantMap)
         // Dimension names in byte array format
         QByteArray dimensionsByteArray;
 
-        // Copy the dimension names raw data into the byte array
-        dimensionsByteArray.resize(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
-
-        populateDataBufferFromVariantMapToRawBufferSync(variantMap["DimensionNames"].toMap(), (char*)dimensionsByteArray.data(), dimensionsByteArray.size());
+        dimensionsByteArray = bytesFromBlobVariantMap(variantMap["DimensionNames"].toMap());
 
         // Open input data stream
         QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::ReadOnly);
@@ -1209,7 +1217,7 @@ void Points::fromVariantMapPre150(const QVariantMap& variantMap)
     if (variantMap.contains("Dimensions")) {
         _dimensionsPickerAction->fromParentVariantMap(variantMap);
     }
-    
+    */
     events().notifyDatasetDataChanged(this);
 
     // Handle saved selection
@@ -1223,7 +1231,7 @@ void Points::fromVariantMapPre150(const QVariantMap& variantMap)
 
             selectionSet->indices.resize(count);
 
-            populateDataBufferFromVariantMapToRawBufferAsync(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t));
+            populateBytesFromBlobFromVariantMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t));
 
             events().notifyDatasetDataSelectionChanged(this);
         }

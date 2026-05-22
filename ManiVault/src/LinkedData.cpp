@@ -113,7 +113,7 @@ void SelectionMap::fromVariantMap(const QVariantMap& variantMap)
     std::vector<std::uint32_t> serializedMap;
     serializedMap.resize(static_cast<size_t>(variantMap["SerializedMapSize"].toInt()));
 
-    QByteArray bytes = populateDataBufferFromVariantMapSync(variantMap["SerializedMap"].toMap());
+    QByteArray bytes = bytesFromBlobVariantMap(variantMap["SerializedMap"].toMap());
 
     if (bytes.size() % qsizetype(sizeof(std::uint32_t)) != 0)
         throw std::runtime_error("SerializedMap byte size is not uint32-aligned");

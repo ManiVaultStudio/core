@@ -837,7 +837,7 @@ void Images::fromVariantMap(const QVariantMap& variantMap)
     {
         auto size = _imageData->getImageSize();
         _maskData.resize(static_cast<size_t>(size.width()) * size.height());
-        populateDataBufferFromVariantMapToRawBufferSync(variantMap["MaskData"].toMap(), (char*)_maskData.data(), _maskData.size() * sizeof(std::uint8_t));
+        populateBytesFromBlobFromVariantMapAsync(variantMap["MaskData"].toMap(), (char*)_maskData.data(), _maskData.size() * sizeof(std::uint8_t));
     }
 
     if (variantMap.contains("MaskDataGiven"))

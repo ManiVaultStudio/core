@@ -65,19 +65,6 @@ struct DecodeBlockJob
 
 using DecodeBlockJobs = QVector<DecodeBlockJob>;
 
-using SharedDataBuffer = QSharedPointer<QByteArray>;
-
-struct CORE_EXPORT PopulateDataBufferResult
-{
-    SharedDataBuffer        _data;
-    WorkflowResultFuture    _future;
-    SharedWorkflowResult    _workflowResult;
-    bool                    _async = false;
-};
-
-using PopulateDataReadyCallback = std::function<void(const SharedDataBuffer& data)>;
-using PopulateDoneCallback = std::function<void()>;
-
 /**
  * Save raw data to binary file on disk
  * @param bytes Pointer to input buffer
@@ -125,12 +112,9 @@ CORE_EXPORT DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decode
  */
 CORE_EXPORT DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec);
 
-CORE_EXPORT PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& variantMap, WorkflowPlan::ConcurrencyMode concurrencyMode, SharedWorkflowExecutionContext parentContext = nullptr);
-CORE_EXPORT PopulateDataBufferResult populateDataBufferFromVariantMapAsync(const QVariantMap& variantMap, QObject* context, PopulateDataReadyCallback populated = {});
-CORE_EXPORT QByteArray populateDataBufferFromVariantMapSync(const QVariantMap& variantMap);
-CORE_EXPORT WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, WorkflowPlan::ConcurrencyMode concurrencyMode, SharedWorkflowExecutionContext parentContext = nullptr);
-CORE_EXPORT WorkflowResultFuture populateDataBufferFromVariantMapToRawBufferAsync(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, QObject* context = nullptr, PopulateDoneCallback onPopulated = {});
-CORE_EXPORT void populateDataBufferFromVariantMapToRawBufferSync(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize);
+CORE_EXPORT WorkflowResultFuture populateBytesFromBlobFromVariantMapAsync(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext = nullptr);
+CORE_EXPORT void populateBytesFromBlobFromVariantMap(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext = nullptr);
+CORE_EXPORT QByteArray bytesFromBlobVariantMap(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext = nullptr);
 
 /**
  * Raises an exception if an item with key is not found in a variant map
