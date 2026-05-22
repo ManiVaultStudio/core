@@ -148,7 +148,7 @@ void ClusterSerializer::fromVariantMap(const QVariantMap& map, QVector<Cluster>&
         clusters = rebuildClusters(context->_headers, context->_allIndices);
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread);
 
-    auto result = mv::projects().getWorkflowPlanExecutor()->executeAsync(std::move(fromPlan));
+    auto result = mv::projects().getWorkflowPlanExecutor()->execute(std::move(fromPlan));
 }
 
 QByteArray ClusterSerializer::serializeHeaders(

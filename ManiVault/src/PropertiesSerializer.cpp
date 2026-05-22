@@ -47,7 +47,7 @@ void PropertiesSerializer::fromVariantMap(const QVariantMap& propertiesMap, QVar
 
     fromPlan->addParallelStage("Preprocessing", preprocessingJobs);
 
-    auto result = mv::projects().getWorkflowPlanExecutor()->executeAsync(std::move(fromPlan), parentContext);
+    auto result = mv::projects().getWorkflowPlanExecutor()->execute(std::move(fromPlan), parentContext);
 }
 
 }

@@ -28,14 +28,17 @@ WorkflowPlan::Job::Job(QString name, JobFunction function, double weight) :
 {
 }
 
+WorkflowPlan::Job::Job(QString name, AsyncJobFunction function, JobThreadAffinity threadAffinity, JobProgressMode progressMode) :
+    _name(std::move(name)),
+    _function(std::move(function)),
+    _threadAffinity(threadAffinity),
+    _progressMode(progressMode)
+{
+}
+
 QString WorkflowPlan::Job::getName() const
 {
 	return _name;
-}
-
-const WorkflowPlan::JobFunction& WorkflowPlan::Job::getFunction() const
-{
-	return _function;
 }
 
 void WorkflowPlan::Job::run(SharedWorkflowExecutionContext context) const
@@ -44,8 +47,26 @@ void WorkflowPlan::Job::run(SharedWorkflowExecutionContext context) const
 //    qDebug() << "Running job:" << _name;
 //#endif
 
-    if (_function)
-		_function(*const_cast<WorkflowPlan::Job*>(this), std::move(context));
+    if (const auto* fn = std::get_if<JobFunction>(&_function)) {
+        (*fn)(*const_cast<WorkflowPlan::Job*>(this), std::move(context));
+        return;
+    }
+
+    throw std::logic_error("Tried to run async workflow job synchronously");
+}
+
+bool WorkflowPlan::Job::isAsync() const
+{
+    return std::holds_alternative<AsyncJobFunction>(_function);
+}
+
+WorkflowResultFuture WorkflowPlan::Job::runAsync(SharedWorkflowExecutionContext context)
+{
+    if (auto* fn = std::get_if<AsyncJobFunction>(&_function)) {
+        return (*fn)(*this, std::move(context));
+    }
+
+    throw std::logic_error("Tried to run sync workflow job asynchronously");
 }
 
 void WorkflowPlan::Job::setResult(QVariant result)

@@ -249,7 +249,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         }, WorkflowPlan::JobThreadAffinity::GuiThread)
     });
     
-	const auto result = projects().getWorkflowPlanExecutor()->executeBlocking(std::move(plan));
+	const auto result = projects().getWorkflowPlanExecutor()->execute(std::move(plan));
 }
 
 UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap)
@@ -464,9 +464,11 @@ QVariantMap DataHierarchyManager::toVariantMap() const
         }, WorkflowPlan::JobThreadAffinity::GuiThread)
         });
 
-    const auto result = projects().getWorkflowPlanExecutor()->executeBlocking(std::move(plan));
+    const auto future = projects().getWorkflowPlanExecutor()->execute(std::move(plan));
 
-    return result->value<QVariantMap>();
+    AbstractWorkflowPlanExecutor::waitWithEventLoop(future);
+
+    return future.result()->value<QVariantMap>();
 }
 
 UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const

@@ -229,7 +229,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOf
 
         if (!encodeJobs.empty()) {
             encodeWorkflowPlan->addParallelStage("Encode Blocks", encodeJobs);
-            auto result = mv::projects().getWorkflowPlanExecutor()->executeBlocking(std::move(encodeWorkflowPlan), parentContext);
+            auto result = mv::projects().getWorkflowPlanExecutor()->execute(std::move(encodeWorkflowPlan), parentContext);
         }
 
         QVariantList blocks;
@@ -647,11 +647,11 @@ PopulateDataBufferResult populateDataBufferFromVariantMap(const QVariantMap& var
 
     if (concurrencyMode == WorkflowPlan::ConcurrencyMode::Parallel) {
         result._async = true;
-        result._future = sharedExecutor->executeAsync(std::move(decodeWorkflowPlan), parentContext);
+        result._future = sharedExecutor->execute(std::move(decodeWorkflowPlan), parentContext);
     }
     else {
-        result._async = false;
-        result._workflowResult = mv::projects().getWorkflowPlanExecutor()->executeBlocking(std::move(decodeWorkflowPlan), parentContext);
+        //result._async = false;
+        //result._workflowResult = mv::projects().getWorkflowPlanExecutor()->execute(std::move(decodeWorkflowPlan), parentContext);
     }
 
     return result;
@@ -940,16 +940,7 @@ WorkflowResultFuture populateDataBufferFromVariantMapToRawBuffer(const QVariantM
             options = state->getExecutionOptions();
     }
 
-    options._parallel = concurrencyMode == WorkflowPlan::ConcurrencyMode::Parallel;
-
-    const auto sharedExecutor = SharedWorkflowPlanExecutor(mv::projects().getWorkflowPlanExecutor());
-
-    if (concurrencyMode == WorkflowPlan::ConcurrencyMode::Parallel)
-        return sharedExecutor->executeAsync(std::move(decodeWorkflowPlan), parentContext ? parentContext : nullptr, options);
-
-    const auto blockingResult = sharedExecutor->executeBlocking(std::move(decodeWorkflowPlan), parentContext ? parentContext : nullptr, options);
-
-    return WorkflowResultFuture::makeReady(blockingResult);
+	return mv::projects().getWorkflowPlanExecutor()->execute(std::move(decodeWorkflowPlan), parentContext ? parentContext : nullptr, options);
 }
 
 WorkflowResultFuture populateDataBufferFromVariantMapToRawBufferAsync(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, QObject* context, PopulateDoneCallback onPopulated)

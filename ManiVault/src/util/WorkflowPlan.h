@@ -9,6 +9,7 @@
 #include "WorkflowResult.h"
 #include "WorkflowResultFuture.h"
 #include "WorkflowExecutionOptions.h"
+#include "WorkflowJobResult.h"
 
 #include <QString>
 #include <QVariant>
@@ -68,8 +69,10 @@ public:
 public:
     class Job;
 
-    using JobFunction   = std::function<void(Job&, const SharedWorkflowExecutionContext& )>;
-    using JobFunctions  = std::vector<JobFunction>;
+    using JobFunction       = std::function<void(Job&, const SharedWorkflowExecutionContext& )>;
+    using AsyncJobFunction  = std::function<WorkflowResultFuture(Job&, const SharedWorkflowExecutionContext&)>;
+    using JobFunctions      = std::vector<JobFunction>;
+
 
     class CORE_EXPORT Job
     {
@@ -78,12 +81,14 @@ public:
 
         Job(QString name, JobFunction function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, JobProgressMode progressMode = JobProgressMode::Automatic);
         Job(QString name, JobFunction function, double weight);
+        Job(QString name, AsyncJobFunction function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, JobProgressMode progressMode = JobProgressMode::Automatic);
 
         QString getName() const;
 
-        const JobFunction& getFunction() const;
-
         void run(SharedWorkflowExecutionContext context) const;
+
+        bool isAsync() const;
+        WorkflowResultFuture runAsync(SharedWorkflowExecutionContext context);
 
         void setResult(QVariant result);
 
@@ -143,7 +148,7 @@ public:
 
     private:
         QString                     _name;
-        JobFunction                 _function;
+        std::variant<JobFunction, AsyncJobFunction> _function;
         QVariant                    _result;
         std::optional<QString>      _error;
         JobThreadAffinity           _threadAffinity = JobThreadAffinity::CurrentWorkerThread;
@@ -248,7 +253,21 @@ private:
     template<typename Function>
     void addStageTo(Stages& stages, QString name, Function&& function, JobThreadAffinity threadAffinity, double weight)
     {
-        if constexpr (std::is_invocable_v<Function, Job&, const SharedWorkflowExecutionContext&>) {
+        if constexpr (std::is_invocable_r_v<WorkflowResultFuture, Function, Job&, const SharedWorkflowExecutionContext&>) {
+            stages.emplace_back(
+                name,
+                ConcurrencyMode::Sequential,
+                Jobs{
+                    Job(
+                        name,
+                        AsyncJobFunction(std::forward<Function>(function)),
+                        threadAffinity
+                    )
+                },
+                weight
+            );
+        }
+        else if constexpr (std::is_invocable_v<Function, Job&, const SharedWorkflowExecutionContext&>) {
             stages.emplace_back(
                 std::move(name),
                 ConcurrencyMode::Sequential,

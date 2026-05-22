@@ -58,7 +58,7 @@ void DimensionNamesSerializer::fromVariantMap(const QVariantMap& pointsMap, Poin
 		points->setDimensionNames(dimensionNames);
 	}, WorkflowPlan::JobThreadAffinity::GuiThread);
 
-    auto result = mv::projects().getWorkflowPlanExecutor()->executeAsync(std::move(fromPlan));
+    auto result = mv::projects().getWorkflowPlanExecutor()->execute(std::move(fromPlan));
 }
 
 QVariantMap DimensionNamesSerializer::toVariantMap(const std::vector<QString>& dimensionNames)

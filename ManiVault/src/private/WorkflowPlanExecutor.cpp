@@ -29,46 +29,7 @@ WorkflowPlanExecutor::WorkflowPlanExecutor(QObject* parent) :
 {
 }
 
-SharedWorkflowResult WorkflowPlanExecutor::executeBlocking(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext /*= nullptr*/, OptionalWorkflowExecutionOptions executionOptions /*= std::nullopt*/)
-{
-#ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
-    qDebug() << "Executing workflow plan:" << workflowPlan.getName() << "with" << workflowPlan.getStages().size() << "stage(s)";
-#endif
-
-    /*if (QThread::currentThread() == qApp->thread()) {
-        throw ManiVaultException(
-            SeverityLevel::Fatal,
-            "executeBlocking() may not be called on the GUI thread",
-            "workflow.blocking_on_gui_thread",
-            "WorkflowPlanExecutor"
-        );
-    }*/
-
-    static thread_local int blockingDepth = 0;
-
-    if (blockingDepth > 0) {
-        throw ManiVaultException(
-            SeverityLevel::Fatal,
-            "Nested executeBlocking() is not allowed",
-            "workflow.nested_blocking_execution",
-            "WorkflowPlanExecutor"
-        );
-    }
-
-    blockingDepth++;
-
-    auto guard = qScopeGuard([&] {
-        blockingDepth--;
-        });
-
-    auto future = executeAsync(std::move(workflowPlan), parentContext, executionOptions);
-
-    future.waitForFinished();
-
-    return future.result();
-}
-
-WorkflowResultFuture WorkflowPlanExecutor::executeAsync(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext /*= nullptr*/, OptionalWorkflowExecutionOptions executionOptions /*= std::nullopt*/)
+WorkflowResultFuture WorkflowPlanExecutor::execute(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext /*= nullptr*/, OptionalWorkflowExecutionOptions executionOptions /*= std::nullopt*/)
 {
     if (parentContext != nullptr) {
         const auto pendingWorkLabel = QString("Async workflow: %1").arg(workflowPlan->getName());
@@ -156,17 +117,17 @@ WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(UniqueWorkflowPlan w
     return WorkflowResultFuture(state);
 }
 
-SharedWorkflowResult WorkflowPlanExecutor::executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task, const WorkflowExecutionOptions& executionOptions /*= {}*/)
-{
-    return executeRoot(workflowPlan, task, executionOptions);
-}
-
-SharedWorkflowResult WorkflowPlanExecutor::executeOnCurrentThread(WorkflowPlan& workflowPlan, mv::Task* task, SharedWorkflowExecutionContext parentContext, OptionalWorkflowExecutionOptions executionOptions /*= std::nullopt*/)
-{
-    Q_UNUSED(task)
-
-    return executeRoot(workflowPlan, task, executionOptions.value_or(WorkflowExecutionOptions{}));
-}
+//SharedWorkflowResult WorkflowPlanExecutor::executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task, const WorkflowExecutionOptions& executionOptions /*= {}*/)
+//{
+//    return executeRoot(workflowPlan, task, executionOptions);
+//}
+//
+//SharedWorkflowResult WorkflowPlanExecutor::executeOnCurrentThread(WorkflowPlan& workflowPlan, mv::Task* task, SharedWorkflowExecutionContext parentContext, OptionalWorkflowExecutionOptions executionOptions /*= std::nullopt*/)
+//{
+//    Q_UNUSED(task)
+//
+//    return executeRoot(workflowPlan, task, executionOptions.value_or(WorkflowExecutionOptions{}));
+//}
 
 SharedWorkflowResult WorkflowPlanExecutor::executeRoot(WorkflowPlan& workflowPlan, Task* task, const WorkflowExecutionOptions& executionOptions /*= {}*/)
 {
@@ -772,10 +733,35 @@ void WorkflowPlanExecutor::executeJobOnGuiThread(WorkflowPlan::Job& job, SharedW
 
     auto exceptionPtr = std::make_shared<std::exception_ptr>();
 
-    auto runOnGuiThread = [job = std::move(job),
-        jobContext,
-        exceptionPtr]() mutable {
+    auto runOnGuiThread = [this, job = std::move(job), jobContext, exceptionPtr]() mutable {
         try {
+            if (job.isAsync()) {
+                auto future = job.runAsync(jobContext);
+
+                auto watcher = new QFutureWatcher<SharedWorkflowResult>();
+
+                connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, this, [this, watcher, &job]() {
+                        auto result = watcher->future().result();
+
+                	watcher->deleteLater();
+
+                        if (result->getStatus() != WorkflowJobResult::Status::Success) {
+                            job.fail("Async stage failed");
+                            // route to failure handling
+                            return;
+                        }
+
+                        // mark job/stage complete here
+                        //continueWorkflowExecution();
+                    },
+                    Qt::QueuedConnection
+                );
+
+                watcher->setFuture(future.getFuture());
+
+                return;
+            }
+
             job.run(jobContext);
         }
         catch (...) {
@@ -805,6 +791,33 @@ void WorkflowPlanExecutor::executeJobOnWorkerThread(mv::util::WorkflowPlan::Job&
 #endif
 
     jobContext = requireContext(jobContext, __FUNCTION__);
+
+    if (job.isAsync()) {
+        auto future = job.runAsync(jobContext);
+
+        auto watcher = new QFutureWatcher<SharedWorkflowResult>();
+        
+        connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, this, [this, watcher, &job]() {
+            auto result = watcher->future().result();
+
+            watcher->deleteLater();
+
+            if (result->getStatus() != WorkflowJobResult::Status::Success) {
+                job.fail("Async stage failed");
+                // route to failure handling
+                return;
+            }
+
+            // mark job/stage complete here
+            //continueWorkflowExecution();
+            },
+            Qt::QueuedConnection
+        );
+
+        watcher->setFuture(future.getFuture());
+
+        return; // critical
+    }
 
     job.run(jobContext);
 }
