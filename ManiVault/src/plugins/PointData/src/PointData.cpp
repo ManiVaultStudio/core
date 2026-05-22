@@ -1139,11 +1139,6 @@ void Points::fromVariantMapPre150(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "DimensionNames");
     variantMapMustContain(variantMap, "Selection");
 
-    if (variantMap["Name"].toString() == "M1_cross_species_merged_final")
-    {
-        Q_ASSERT(false);
-    }
-
     // For backwards compatibility, check PluginVersion
     if (variantMap["PluginVersion"] == "No Version" && !variantMap["Full"].toBool())
     {

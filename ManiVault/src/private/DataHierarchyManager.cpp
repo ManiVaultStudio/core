@@ -241,15 +241,11 @@ void DataHierarchyManager::removeAllItems()
 
 void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+    auto plan = fromVariantMapWorkflow(variantMap);
 
-    plan->addSequentialStage("fromVariantMap", {
-        WorkflowPlan::Job("fromVariantMap", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) {
-            fromVariantMap(variantMap);
-        }, WorkflowPlan::JobThreadAffinity::GuiThread)
-    });
-    
-	const auto result = projects().getWorkflowPlanExecutor()->execute(std::move(plan));
+    const auto future = projects().getWorkflowPlanExecutor()->execute(std::move(plan));
+
+    AbstractWorkflowPlanExecutor::waitWithEventLoop(future);
 }
 
 UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap)

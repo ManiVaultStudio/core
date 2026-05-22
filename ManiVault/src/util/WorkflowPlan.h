@@ -171,7 +171,8 @@ public:
 
         QString getName() const;
 
-        Jobs    getJobs() const;
+        const Jobs& getJobs() const;
+        Jobs& getJobs();
 
         void setWeight(double weight);
 
@@ -222,11 +223,12 @@ public:
         addStageTo(_finalizationStages, std::move(name), std::forward<Function>(function), threadAffinity, weight);
     }
 
-	Stages getStages() const;
+	const Stages& getStages() const;
+	Stages& getStages();
 
-    Stages getOnSuccessStages() const;
-    Stages getOnFailureStages() const;
-    Stages getFinallyStages() const;
+    const Stages& getOnSuccessStages() const;
+    const Stages& getOnFailureStages() const;
+    const Stages& getFinallyStages() const;
 
     /**
      * @brief Gets the shared workflow context associated with this workflow plan. The workflow context is a shared data structure that can be used to store and share data across stages and jobs within this workflow plan.

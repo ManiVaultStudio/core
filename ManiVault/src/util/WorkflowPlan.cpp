@@ -19,6 +19,7 @@ WorkflowPlan::Job::Job(QString name, JobFunction function, JobThreadAffinity thr
     _threadAffinity(threadAffinity),
     _progressMode(progressMode)
 {
+    Q_ASSERT(_result.isValid() || _result.isNull());
 }
 
 WorkflowPlan::Job::Job(QString name, JobFunction function, double weight) :
@@ -26,6 +27,7 @@ WorkflowPlan::Job::Job(QString name, JobFunction function, double weight) :
     _function(std::move(function)),
     _weight(weight)
 {
+    Q_ASSERT(_result.isValid() || _result.isNull());
 }
 
 WorkflowPlan::Job::Job(QString name, AsyncJobFunction function, JobThreadAffinity threadAffinity, JobProgressMode progressMode) :
@@ -34,6 +36,7 @@ WorkflowPlan::Job::Job(QString name, AsyncJobFunction function, JobThreadAffinit
     _threadAffinity(threadAffinity),
     _progressMode(progressMode)
 {
+    Q_ASSERT(_result.isValid() || _result.isNull());
 }
 
 QString WorkflowPlan::Job::getName() const
@@ -76,6 +79,8 @@ void WorkflowPlan::Job::setResult(QVariant result)
 
 const QVariant& WorkflowPlan::Job::getResult() const
 {
+    Q_ASSERT(_result.isValid() || _result.isNull());
+
 	return _result;
 }
 
@@ -197,22 +202,27 @@ QString WorkflowPlan::getName() const
 	return _name;
 }
 
-WorkflowPlan::Stages WorkflowPlan::getStages() const
+const WorkflowPlan::Stages& WorkflowPlan::getStages() const
 {
 	return _stages;
 }
 
-WorkflowPlan::Stages WorkflowPlan::getOnSuccessStages() const
+WorkflowPlan::Stages& WorkflowPlan::getStages()
+{
+    return _stages;
+}
+
+const WorkflowPlan::Stages& WorkflowPlan::getOnSuccessStages() const
 {
     return _onSuccessStages;
 }
 
-WorkflowPlan::Stages WorkflowPlan::getOnFailureStages() const
+const WorkflowPlan::Stages& WorkflowPlan::getOnFailureStages() const
 {
     return _onFailureStages;
 }
 
-WorkflowPlan::Stages WorkflowPlan::getFinallyStages() const
+const WorkflowPlan::Stages& WorkflowPlan::getFinallyStages() const
 {
     return _finalizationStages;
 }
@@ -250,9 +260,14 @@ QString WorkflowPlan::Stage::getName() const
 	return _name;
 }
 
-WorkflowPlan::Jobs WorkflowPlan::Stage::getJobs() const
+const WorkflowPlan::Jobs& WorkflowPlan::Stage::getJobs() const
 {
 	return _jobs;
+}
+
+WorkflowPlan::Jobs& WorkflowPlan::Stage::getJobs()
+{
+    return _jobs;
 }
 
 WorkflowPlan::WorkflowPlan(const QString& title, SharedWorkflowContext context) :
