@@ -11,23 +11,8 @@ namespace mv::util
 {
 
 WorkflowResult::WorkflowResult(const QString& workflowName) :
-    _workflowName(workflowName)
+    WorkflowResultBase(workflowName)
 {
-}
-
-QString WorkflowResult::getWorkflowName() const
-{
-    return _workflowName;
-}
-
-WorkflowResult::Status WorkflowResult::getStatus() const
-{
-    return _status;
-}
-
-void WorkflowResult::setStatus(Status status)
-{
-    _status = status;
 }
 
 std::uint64_t WorkflowResult::getDuration() const
@@ -68,26 +53,6 @@ int WorkflowResult::getErrorCount() const
 int WorkflowResult::getFatalErrorCount() const
 {
 	return getMessageCountByLevels({ SeverityLevel::Fatal });
-}
-
-bool WorkflowResult::hasValue() const
-{
-	return _value.isValid();
-}
-
-const QVariant& WorkflowResult::getValue() const
-{
-	return _value;
-}
-
-void WorkflowResult::setValue(const QVariant& value)
-{
-	_value = value;
-}
-
-void WorkflowResult::setValue(QVariant&& value)
-{
-	_value = std::move(value);
 }
 
 WorkflowMessages WorkflowResult::getMessages() const
