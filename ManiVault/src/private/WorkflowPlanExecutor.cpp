@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #include "WorkflowPlanExecutor.h"
+#include "Taskflow.h"
 
 #include <util/WorkflowResultRegistry.h>
 #include <util/WorkflowMetric.h>
@@ -24,9 +25,33 @@
 using namespace mv;
 using namespace mv::util;
 
+void testTaskflow()
+{
+    tf::Executor executor;
+    tf::Taskflow taskflow;
+
+    auto A = taskflow.emplace([] {
+        qDebug() << "A" << QThread::currentThread();
+        });
+
+    auto B = taskflow.emplace([] {
+        qDebug() << "B" << QThread::currentThread();
+        });
+
+    auto C = taskflow.emplace([] {
+        qDebug() << "C" << QThread::currentThread();
+        });
+
+    A.precede(C);
+    B.precede(C);
+
+    executor.run(taskflow).wait();
+}
+
 WorkflowPlanExecutor::WorkflowPlanExecutor(QObject* parent) :
 	AbstractWorkflowPlanExecutor(parent)
 {
+    testTaskflow();
 }
 
 WorkflowResultFuture WorkflowPlanExecutor::execute(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext /*= nullptr*/, OptionalWorkflowExecutionOptions executionOptions /*= std::nullopt*/)
@@ -760,7 +785,7 @@ void WorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage,
 #endif
 }
 
-void WorkflowPlanExecutor::executeJobOnGuiThread(WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
+void WorkflowPlanExecutor::executeJobOnGuiThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
 {
     jobContext = requireContext(jobContext, __FUNCTION__);
 
@@ -796,13 +821,9 @@ void WorkflowPlanExecutor::executeJobOnGuiThread(WorkflowPlan::Job& job, SharedW
 
     if (*exceptionPtr)
         std::rethrow_exception(*exceptionPtr);
-
-    if (futurePtr->has_value()) {
-        waitForWorkflowResultFuture(futurePtr->value(), job);
-    }
 }
 
-void WorkflowPlanExecutor::executeJobOnWorkerThread(mv::util::WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
+void WorkflowPlanExecutor::executeJobOnWorkerThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
 {
 #ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
     qDebug() << "Executing job on worker thread:" << job.getName() << "in thread" << QThread::currentThread();
@@ -812,14 +833,13 @@ void WorkflowPlanExecutor::executeJobOnWorkerThread(mv::util::WorkflowPlan::Job&
 
     if (job.isAsync()) {
         auto future = job.runAsync(jobContext);
-        waitForWorkflowResultFuture(future, job);
         return;
     }
 
     job.run(jobContext);
 }
 
-void WorkflowPlanExecutor::executeJob(WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
+void WorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
 {
     jobContext->info(QString("Job started: %1").arg(job.getName()));
 

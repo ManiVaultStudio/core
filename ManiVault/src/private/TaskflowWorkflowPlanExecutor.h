@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "Taskflow.h"
+
 #include <util/AbstractWorkflowPlanExecutor.h>
 #include <util/WorkflowPlan.h>
 #include <util/WorkflowResult.h>
@@ -22,25 +24,15 @@ namespace mv
  *
  * @author T. Kroes
  */
-class WorkflowPlanExecutor final : public AbstractWorkflowPlanExecutor
+class TaskflowWorkflowPlanExecutor final : public AbstractWorkflowPlanExecutor
 {
 public:
 
-    WorkflowPlanExecutor(QObject* parent = nullptr);
-
+    TaskflowWorkflowPlanExecutor(QObject* parent = nullptr);
     WorkflowResultFuture execute(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) override;
-
-    void waitForWorkflowResultFuture(const WorkflowResultFuture& future, WorkflowPlan::Job& job);
-
-public: // Thread pool access
-
-    QThreadPool& getThreadPool(const SharedWorkflowExecutionContext& context);
-    const QThreadPool& getThreadPool(const SharedWorkflowExecutionContext& context) const;
 
 protected:
     WorkflowResultFuture executeAsyncImpl(UniqueWorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, const WorkflowExecutionOptions& executionOptions, SharedWorkflowExecutionContext executionContext) override;
-	//SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, mv::Task* task, const WorkflowExecutionOptions& executionOptions = {}) override;
- //   SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, mv::Task* task, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) override;
 
 private:
     SharedWorkflowResult executeRoot(WorkflowPlan& workflowPlan, mv::Task* task, const WorkflowExecutionOptions& executionOptions = {}) override;
@@ -62,5 +54,7 @@ private: // Helpers
 
     static void handleStageException(const WorkflowPlan::Stage& stage, const mv::ManiVaultException& exception, SharedWorkflowExecutionContext stageContext);
 
+private:
+    tf::Executor    _executor;  
 };
 

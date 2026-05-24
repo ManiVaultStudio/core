@@ -69,8 +69,7 @@ public:
 public:
     class Job;
 
-    using JobFunction       = std::function<void(Job&, const SharedWorkflowExecutionContext& )>;
-    using AsyncJobFunction  = std::function<WorkflowResultFuture(Job&, const SharedWorkflowExecutionContext&)>;
+    using JobFunction       = std::function<void(const Job&, const SharedWorkflowExecutionContext& )>;
     using JobFunctions      = std::vector<JobFunction>;
 
 
@@ -80,15 +79,10 @@ public:
         using ErrorString = QString;
 
         Job(QString name, JobFunction function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, JobProgressMode progressMode = JobProgressMode::Automatic);
-        Job(QString name, JobFunction function, double weight);
-        Job(QString name, AsyncJobFunction function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, JobProgressMode progressMode = JobProgressMode::Automatic);
 
         QString getName() const;
 
         void run(SharedWorkflowExecutionContext context) const;
-
-        bool isAsync() const;
-        WorkflowResultFuture runAsync(SharedWorkflowExecutionContext context);
 
         void setResult(QVariant result);
 
@@ -148,7 +142,7 @@ public:
 
     private:
         QString                     _name;
-        std::variant<JobFunction, AsyncJobFunction> _function;
+        JobFunction                 _function;
         QVariant                    _result;
         std::optional<QString>      _error;
         JobThreadAffinity           _threadAffinity = JobThreadAffinity::CurrentWorkerThread;
@@ -253,9 +247,38 @@ public:
 
 private:
     template<typename Function>
+    static void invokeJobFunction(
+        Function& function,
+        const Job& job,
+        const SharedWorkflowExecutionContext& context)
+    {
+        if constexpr (std::is_invocable_v<Function, const Job&, const SharedWorkflowExecutionContext&>) {
+            function(job, context);
+        }
+        else if constexpr (std::is_invocable_v<Function, Job&, const SharedWorkflowExecutionContext&>) {
+            auto mutableJob = job;
+            function(mutableJob, context);
+        }
+        else if constexpr (std::is_invocable_v<Function, const SharedWorkflowExecutionContext&>) {
+            function(context);
+        }
+        else if constexpr (std::is_invocable_v<Function>) {
+            function();
+        }
+        else {
+            static_assert(std::is_invocable_v<Function>,
+                "Stage function must be callable as one of: "
+                "void(const Job&, const SharedWorkflowExecutionContext&), "
+                "void(Job&, const SharedWorkflowExecutionContext&), "
+                "void(const SharedWorkflowExecutionContext&), "
+                "or void()");
+        }
+    }
+
+    template<typename Function>
     void addStageTo(Stages& stages, QString name, Function&& function, JobThreadAffinity threadAffinity, double weight)
     {
-        if constexpr (std::is_invocable_r_v<WorkflowResultFuture, Function, Job&, const SharedWorkflowExecutionContext&>) {
+        if constexpr (std::is_invocable_r_v<WorkflowResultFuture, Function, const Job&, const SharedWorkflowExecutionContext&>) {
             stages.emplace_back(
                 name,
                 ConcurrencyMode::Sequential,
@@ -269,63 +292,31 @@ private:
                 weight
             );
         }
-        else if constexpr (std::is_invocable_v<Function, Job&, const SharedWorkflowExecutionContext&>) {
+        else if constexpr (
+            std::is_invocable_v<Function, const Job&, const SharedWorkflowExecutionContext&> ||
+            std::is_invocable_v<Function, Job&, const SharedWorkflowExecutionContext&> ||
+            std::is_invocable_v<Function, const SharedWorkflowExecutionContext&> ||
+            std::is_invocable_v<Function>
+            ) {
+            const auto jobName = name;
+
             stages.emplace_back(
                 std::move(name),
                 ConcurrencyMode::Sequential,
                 Jobs{
                     Job(
-                        name,
-                        JobFunction(std::forward<Function>(function)),
-                        threadAffinity
-                    )
-                },
-                weight
-            );
-        }
-        else if constexpr (std::is_invocable_v<Function, Job&>) {
-            stages.emplace_back(
-                std::move(name),
-                ConcurrencyMode::Sequential,
-                Jobs{
-                    Job(
-                        name,
+                        jobName,
                         [fn = std::forward<Function>(function)](
-                            Job& job,
-                            const SharedWorkflowExecutionContext&) mutable {
-                            fn(job);
+                            const Job& job,
+                            const SharedWorkflowExecutionContext& context) mutable
+                        {
+                            invokeJobFunction(fn, job, context);
                         },
                         threadAffinity
                     )
                 },
                 weight
             );
-        }
-        else if constexpr (std::is_invocable_v<Function>) {
-            stages.emplace_back(
-                std::move(name),
-                ConcurrencyMode::Sequential,
-                Jobs{
-                    Job(
-                        name,
-                        [fn = std::forward<Function>(function)](
-                            Job&,
-                            const SharedWorkflowExecutionContext&) mutable {
-                            fn();
-                        },
-                        threadAffinity
-                    )
-                },
-                weight
-            );
-        }
-        else {
-            static_assert(
-                std::is_invocable_v<Function, Job&, const SharedWorkflowExecutionContext&> ||
-                std::is_invocable_v<Function, Job&> ||
-                std::is_invocable_v<Function>,
-                "Stage function must be callable as void(Job&, context), void(Job&) or void()"
-                );
         }
     }
 
