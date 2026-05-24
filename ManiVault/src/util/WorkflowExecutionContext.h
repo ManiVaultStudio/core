@@ -32,15 +32,13 @@ public:
     using ReportNodePtr = WorkflowReportNode::SharedWorkflowReportNode;
     using ProgressNodePtr = WorkflowProgressNode::Ptr;
     using StatePtr = WorkflowExecutionState::Ptr;
-    using SharedThreadPool = std::shared_ptr<QThreadPool>;
 
     WorkflowExecutionContext();
 
-    WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, SharedThreadPool threadPool, Task* task = nullptr, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
-
+    WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, Task* task = nullptr, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
     static SharedWorkflowExecutionContext makeRoot(const QString& name, Task* task, WorkflowExecutionOptions executionOptions = {});
 
-    SharedWorkflowExecutionContext createChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic) const;
+    SharedWorkflowExecutionContext createChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
 
     bool hasProgressChildren() const;
 
@@ -84,17 +82,7 @@ public:
 
     StatePtr getState() const;
 
-    QThreadPool& getThreadPool();
-
-    static SharedWorkflowExecutionContext current();
-
-    static const SharedWorkflowExecutionContext currentConst();
-
     WorkflowPlan::JobProgressMode getProgressMode() const;
-
-    void addPendingAsyncWork(WorkflowResultFuture future, const QString& label = {});
-
-    void waitForPendingAsyncWork();
 
     /**
      * @brief Gets the execution path of this workflow execution context as a string, with each level of the hierarchy separated by the specified separator. The execution path is constructed by concatenating the names of this context and all of its ancestor contexts, starting from the root context down to this context. This can be useful for logging and tracing purposes to provide a clear and human-readable representation of where in the workflow hierarchy a particular event or message is occurring.
@@ -147,17 +135,15 @@ private:
     friend class WorkflowExecutionScope;
 
 private:
-    QString                         _name;                                                      /** Name of the workflow execution context, typically derived from the name of the workflow plan or job it represents */
-    QUuid                           _id;                                                        /** Unique identifier for this workflow execution context */
-    QUuid                           _parentId;                                                  /** Unique identifier of the parent workflow execution context, if any */
-    QStringList                     _executionPath;                                             /** Execution path of this workflow execution context */
-    ReportNodePtr                   _reportNode;                                                /** Report node associated with this workflow execution context */
-    ProgressNodePtr                 _progressNode;                                              /** Progress node associated with this workflow execution context */
-    StatePtr                        _state;                                                     /** Execution state associated with this workflow execution context */
-    SharedThreadPool                _threadPool;                                                /** Thread pool used for executing tasks within this workflow execution context */
-    QPointer<Task>                  _task;                                                      /** Task associated with this workflow execution context */
-    WorkflowPlan::JobProgressMode   _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /** Progress mode for this workflow execution context */  
-    std::vector<PendingAsyncWork>   _pendingAsyncWork;                                          /** List of pending asynchronous work (futures) that need to be completed before this workflow execution context can be considered finished */
+    QString                             _name;                                                      /** Name of the workflow execution context, typically derived from the name of the workflow plan or job it represents */
+    QUuid                               _id;                                                        /** Unique identifier for this workflow execution context */
+    QUuid                               _parentId;                                                  /** Unique identifier of the parent workflow execution context, if any */
+    QStringList                         _executionPath;                                             /** Execution path of this workflow execution context */
+    ReportNodePtr                       _reportNode;                                                /** Report node associated with this workflow execution context */
+    ProgressNodePtr                     _progressNode;                                              /** Progress node associated with this workflow execution context */
+    StatePtr                            _state;                                                     /** Execution state associated with this workflow execution context */
+    QPointer<Task>                      _task;                                                      /** Task associated with this workflow execution context */
+    WorkflowPlan::JobProgressMode       _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /** Progress mode for this workflow execution context */  
 };
 
 /** Optional reference to a WorkflowExecutionContext */

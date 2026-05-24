@@ -54,6 +54,16 @@ private: // Helpers
 
     static void handleStageException(const WorkflowPlan::Stage& stage, const mv::ManiVaultException& exception, SharedWorkflowExecutionContext stageContext);
 
+    void compileWorkflow(
+        const WorkflowPlan& workflowPlan,
+        tf::Taskflow& taskflow,
+        SharedWorkflowExecutionContext parentContext);
+
+    void compileWorkflow(
+        const WorkflowPlan& workflowPlan,
+        tf::Subflow& subflow,
+        SharedWorkflowExecutionContext parentContext);
+
 private:
     tf::Executor    _executor;  
 };

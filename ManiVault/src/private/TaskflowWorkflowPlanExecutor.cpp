@@ -116,10 +116,14 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
     try {
         executeImpl(workflowPlan, rootContext);
 
+        rootContext->waitForCompletion();
+        rootContext->markFinished();
+
         //WorkflowReporter::info("Workflow finished", workflowPlan.getName());
 
     }
     catch (const ManiVaultException& exception) {
+        rootContext->markFinished();
         rootContext->error(exception._message, exception._where, exception._details);
 
         displayFailure(exception._message);
@@ -128,6 +132,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
             throw;
     }
     catch (const std::exception& exception) {
+        rootContext->markFinished();
         rootContext->error(exception.what(), workflowPlan.getName());
 
         displayFailure(QString::fromUtf8(exception.what()));
@@ -135,6 +140,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
         throw;
     }
     catch (...) {
+        rootContext->markFinished();
         rootContext->error("Workflow failed with unknown error", workflowPlan.getName());
 
         displayFailure("Unknown error");
@@ -319,26 +325,33 @@ void TaskflowWorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage
         }
 
         switch (effectiveMode) {
-        case WorkflowPlan::ConcurrencyMode::Sequential:
-            executeSequentialJobs(stage, stageContext);
-            break;
+	        case WorkflowPlan::ConcurrencyMode::Sequential:
+	            executeSequentialJobs(stage, stageContext);
+	            break;
 
-        case WorkflowPlan::ConcurrencyMode::Parallel:
-            executeParallelJobs(stage, stageContext);
-            break;
+	        case WorkflowPlan::ConcurrencyMode::Parallel:
+	            executeParallelJobs(stage, stageContext);
+	            break;
         }
 
+        stageContext->waitForCompletion();
+
         stageContext->info(QString("Stage finished: %1").arg(stage.getName()));
+        stageContext->markFinished();
     }
     catch (const ManiVaultException& exception) {
-        handleStageException(stage, exception, stageContext);
+        stageContext->markFinished();
+
+    	handleStageException(stage, exception, stageContext);
     }
     catch (const std::exception& exception) {
+        stageContext->markFinished();
         stageContext->error(QString("Stage failed: %1").arg(exception.what()));
 
         throw;
     }
     catch (...) {
+        stageContext->markFinished();
         stageContext->error("Stage failed with unknown error");
 
         throw;
@@ -369,19 +382,12 @@ void TaskflowWorkflowPlanExecutor::executeSequentialJobs(const WorkflowPlan::Sta
     }
 
     for (int jobIndex = 0; jobIndex < jobCount; ++jobIndex) {
-        auto& job = const_cast<WorkflowPlan::Job&>(jobs[jobIndex]);
+        const auto& job = jobs[jobIndex];
         auto& jobContext = jobContexts[jobIndex];
 
         executeJob(job, jobContext);
-    }
 
-    for (auto& jobContext : jobContexts) {
-        const auto pendingCount = jobContext->getPendingAsyncWorkCount();
-
-        if (pendingCount == 0)
-            continue;
-
-        jobContext->waitForPendingAsyncWork();
+        jobContext->waitForCompletion();
     }
 }
 
@@ -409,6 +415,10 @@ void TaskflowWorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage
     }
 
     _executor.run(taskflow).wait();
+
+    for (auto& jobContext : jobContexts) {
+        jobContext->waitForCompletion();
+    }
 }
 
 void TaskflowWorkflowPlanExecutor::executeJobOnGuiThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
@@ -463,13 +473,13 @@ void TaskflowWorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, Shar
 
     try {
         switch (job.getThreadAffinity()) {
-        case WorkflowPlan::JobThreadAffinity::CurrentWorkerThread:
-            executeJobOnWorkerThread(job, jobContext);
-            break;
+	        case WorkflowPlan::JobThreadAffinity::CurrentWorkerThread:
+	            executeJobOnWorkerThread(job, jobContext);
+	            break;
 
-        case WorkflowPlan::JobThreadAffinity::GuiThread:
-            executeJobOnGuiThread(job, jobContext);
-            break;
+	        case WorkflowPlan::JobThreadAffinity::GuiThread:
+	            executeJobOnGuiThread(job, jobContext);
+	            break;
         }
 
         if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Atomic) {
@@ -479,9 +489,14 @@ void TaskflowWorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, Shar
             jobContext->setProgress(1.0);
         }
 
+        jobContext->waitForCompletion();
+
         jobContext->info(QString("Job finished: %1").arg(job.getName()));
+        jobContext->markFinished();
     }
     catch (...) {
+        jobContext->markFinished();
+
         if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Atomic || (job.getProgressMode() == WorkflowPlan::JobProgressMode::Automatic && !jobContext->hasProgressChildren())) {
             jobContext->setProgress(1.0);
         }

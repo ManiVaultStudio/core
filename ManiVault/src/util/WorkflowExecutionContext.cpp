@@ -12,14 +12,13 @@ WorkflowExecutionContext::WorkflowExecutionContext() :
 {
 }
 
-WorkflowExecutionContext::WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, SharedThreadPool threadPool, Task* task /*= nullptr*/, WorkflowPlan::JobProgressMode progressMode /*= WorkflowPlan::JobProgressMode::Automatic*/) :
+WorkflowExecutionContext::WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, Task* task /*= nullptr*/, WorkflowPlan::JobProgressMode progressMode /*= WorkflowPlan::JobProgressMode::Automatic*/) :
 	_name(std::move(name)),
     _id(QUuid::createUuid()),
     _executionPath({ _name }),
 	_reportNode(std::move(reportNode)),
 	_progressNode(std::move(progressNode)),
 	_state(std::move(state)),
-    _threadPool(std::move(threadPool)),
     _task(task),
     _progressMode(progressMode)
 {
@@ -41,12 +40,11 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString&
         reportRoot,
         progressRoot,
         state,
-        threadPool,
         task
     );
 }
 
-SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
+SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode)
 {
     if (!_reportNode || !_progressNode || !_state)
         return {};
@@ -74,7 +72,6 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(const QStri
         _reportNode->createChild(name),
         progressChild,
         _state,
-        _threadPool,
         _task,
         progressMode
     );
@@ -82,6 +79,11 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(const QStri
     child->_parentId = _id;
     child->_executionPath = _executionPath;
     child->_executionPath.append(name);
+    
+    {
+        std::lock_guard lock(_childrenMutex);
+        _children.push_back(child);
+    }
 
     return child;
 }
@@ -174,13 +176,6 @@ WorkflowExecutionContext::StatePtr WorkflowExecutionContext::getState() const
 	return _state;
 }
 
-QThreadPool& WorkflowExecutionContext::getThreadPool()
-{
-    Q_ASSERT(_threadPool);
-
-    return *_threadPool;
-}
-
 WorkflowPlan::JobProgressMode WorkflowExecutionContext::getProgressMode() const
 {
 	return _progressMode;
@@ -188,58 +183,52 @@ WorkflowPlan::JobProgressMode WorkflowExecutionContext::getProgressMode() const
 
 void WorkflowExecutionContext::addPendingAsyncWork(WorkflowResultFuture future, const QString& label /*= {}*/)
 {
+    std::lock_guard lock(_pendingAsyncWorkMutex);
+
     _pendingAsyncWork.push_back({
         ._future = std::move(future),
         ._label = label
-    });
+	});
 }
 
 void WorkflowExecutionContext::waitForPendingAsyncWork()
 {
-    for (auto& pendingWork : _pendingAsyncWork) {
-        if (auto state = getState()) {
-            state->trace({
-	            ._type = WorkflowTraceEventType::PendingAsyncWorkItemStarted,
-	            ._name = pendingWork._label,
-	            ._contextId = getId(),
-	            ._parentContextId = getParentId(),
-                ._threadId = QThread::currentThreadId(),
-				._timestampNs = AbstractWorkflowTraceSink::currentTimestampNs()
-            });
+    while (true) {
+        std::vector<PendingAsyncWork> pendingWork;
+
+        {
+            std::lock_guard lock(_pendingAsyncWorkMutex);
+
+            if (_pendingAsyncWork.empty())
+                break;
+
+            pendingWork = std::move(_pendingAsyncWork);
+            _pendingAsyncWork.clear();
         }
 
-        try {
-            pendingWork._future.waitForFinished();
-            pendingWork._future.getState()->rethrowExceptionIfAny();
-        }
-        catch (...) {
-            if (auto state = getState()) {
-                state->trace({
-                    ._type = WorkflowTraceEventType::PendingAsyncWorkItemFailed,
-                    ._name = pendingWork._label,
-                    ._contextId = getId(),
-                    ._parentContextId = getParentId(),
-	                ._threadId = QThread::currentThreadId(),
-	                ._timestampNs = AbstractWorkflowTraceSink::currentTimestampNs()
-                });
+        for (auto& work : pendingWork) {
+            try {
+                work._future.waitForFinished();
+
+                if (auto state = work._future.getState())
+                    state->rethrowExceptionIfAny();
+
+                const auto result = work._future.result();
+
+                if (result && result->hasErrors()) {
+                    throw ManiVaultException(
+                        SeverityLevel::Error,
+                        QString("Nested workflow failed: %1").arg(work._label),
+                        "workflow.nested_failed",
+                        getExecutionPath()
+                    );
+                }
             }
-
-            throw;
-        }
-
-        if (auto state = getState()) {
-            state->trace({
-	            ._type = WorkflowTraceEventType::PendingAsyncWorkItemFinished,
-	            ._name = pendingWork._label,
-	            ._contextId = getId(),
-	            ._parentContextId = getParentId(),
-                ._threadId = QThread::currentThreadId(),
-                ._timestampNs = AbstractWorkflowTraceSink::currentTimestampNs()
-            });
+            catch (...) {
+                throw;
+            }
         }
     }
-
-    _pendingAsyncWork.clear();
 }
 
 QString WorkflowExecutionContext::getExecutionPath(const QString& separator /*= "/"*/) const
@@ -255,11 +244,6 @@ QUuid WorkflowExecutionContext::getId() const
 QUuid WorkflowExecutionContext::getParentId() const
 {
     return _parentId;
-}
-
-std::size_t WorkflowExecutionContext::getPendingAsyncWorkCount() const
-{
-    return _pendingAsyncWork.size();
 }
 
 }

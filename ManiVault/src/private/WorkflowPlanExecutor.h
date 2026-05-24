@@ -32,11 +32,6 @@ public:
 
     void waitForWorkflowResultFuture(const WorkflowResultFuture& future, WorkflowPlan::Job& job);
 
-public: // Thread pool access
-
-    QThreadPool& getThreadPool(const SharedWorkflowExecutionContext& context);
-    const QThreadPool& getThreadPool(const SharedWorkflowExecutionContext& context) const;
-
 protected:
     WorkflowResultFuture executeAsyncImpl(UniqueWorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, const WorkflowExecutionOptions& executionOptions, SharedWorkflowExecutionContext executionContext) override;
 	//SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, mv::Task* task, const WorkflowExecutionOptions& executionOptions = {}) override;

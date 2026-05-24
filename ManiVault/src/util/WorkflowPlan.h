@@ -30,6 +30,7 @@ class WorkflowExecutionContext;
 
 using SharedWorkflowExecutionContext = std::shared_ptr<WorkflowExecutionContext>;
 using SharedWorkflowPlanExecutor = std::shared_ptr<AbstractWorkflowPlanExecutor>;
+using SharedWorkflowExecutionContexts = std::vector<SharedWorkflowExecutionContext>;
 
 class CORE_EXPORT WorkflowPlan
 {

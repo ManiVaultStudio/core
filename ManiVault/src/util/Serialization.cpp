@@ -540,12 +540,6 @@ WorkflowResultFuture populateBytesFromBlobFromVariantMapAsync(const QVariantMap&
 
     for (auto& decodeBlockJob : decodeBlockJobs) {
         decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [decodeBlockJob, destination, destinationSize, createCodec](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
-            qDebug() << QString("Decoding block %1: offset=%2, size=%3, compressedSize=%4, uri=%5")
-                        .arg(job.getName())
-                        .arg(decodeBlockJob._offset)
-                        .arg(decodeBlockJob._size)
-                        .arg(decodeBlockJob._compressedSize)
-                .arg(decodeBlockJob._uri);
             if (decodeBlockJob._uri.isEmpty()) {
                 decodeBlockFromBase64To(decodeBlockJob, destination, destinationSize);
             } else {
