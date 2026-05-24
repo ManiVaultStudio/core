@@ -5,14 +5,12 @@
 #pragma once
 
 #include <AbstractProjectManager.h>
-#include <QFileDialog>
-
-#include "WorkflowPlanExecutor.h"
 
 #include <models/ProjectsListModel.h>
 #include <models/ProjectsTreeModel.h>
 
 #include <QObject>
+#include <QFileDialog>
 
 namespace mv
 {
@@ -176,12 +174,6 @@ public:
      */
     QDir getDownloadedProjectsDir() const override;
 
-    /**
-     * Get workflow plan executor
-     * @return Pointer to the workflow plan executor (nullptr if not available)
-     */
-    util::SharedWorkflowPlanExecutor getWorkflowPlanExecutor() override;
-
 public: // Menus
 
     /**
@@ -315,7 +307,6 @@ private:
     gui::TriggerAction                  _backToProjectAction;           /** Action for going back to the project */
     ProjectsListModel                   _projectsListModel;             /** Projects list model */
     ProjectsTreeModel                   _projectsTreeModel;             /** Projects tree model */
-    util::SharedWorkflowPlanExecutor    _workflowPlanExecutor;          /** Executor for workflow plans, used for project opening/saving/publishing */
 };
 
 }

@@ -151,7 +151,7 @@ QVariantMap bytesToBlobVariantMap(const char* bytes, const std::uint64_t& number
         if (!encodeJobs.empty()) {
             encodeWorkflowPlan->addParallelStage("Encode Blocks", encodeJobs);
 
-            auto future = mv::projects().getWorkflowPlanExecutor()->execute(std::move(encodeWorkflowPlan), parentContext);
+            auto future = Application::getWorkflowPlanExecutor().execute(std::move(encodeWorkflowPlan), parentContext);
 
             QVariantList blocks;
 
@@ -557,13 +557,13 @@ WorkflowResultFuture populateBytesFromBlobFromVariantMapAsync(const QVariantMap&
     }
 
     decodeWorkflowPlan->addParallelStage("Decode blocks", decodeJobs);
-    decodeWorkflowPlan->addSequentialStage("Finalize", [totalSize](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
+    decodeWorkflowPlan->addSequentialStage("Finalize", [totalSize](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
         if (auto state = context->getState()) {
 	        state->metrics().addInteger("project.data.bytes_loaded", totalSize);
         }
     });
 
-    return mv::projects().getWorkflowPlanExecutor()->execute(std::move(decodeWorkflowPlan), parentContext);
+    return Application::getWorkflowPlanExecutor().execute(std::move(decodeWorkflowPlan), parentContext);
 
  //   auto sharedExecutor = SharedWorkflowPlanExecutor();
 

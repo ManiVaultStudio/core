@@ -11,6 +11,7 @@
 #include "util/Serializable.h"
 #include "util/CodecRegistry.h"
 #include "util/WorkflowGuiThreadDispatcher.h"
+#include "util/AbstractWorkflowPlanExecutor.h"
 
 #include "actions/TriggerAction.h"
 #include "actions/OptionsAction.h"
@@ -300,6 +301,20 @@ public: // Statics
     /** Initialize attributes (called once at application startup) */
     static void initializeAttributes();
 
+public: // Workflow plan executor
+
+    /**
+     * Get workflow plan executor
+     * @return Reference to workflow plan executor
+     */
+    static util::AbstractWorkflowPlanExecutor& getWorkflowPlanExecutor();
+
+    /**
+     * Set workflow plan executor to \p workflowPlanExecutor (the application takes ownership of the pointer)
+     * @param workflowPlanExecutor Pointer to workflow plan executor
+     */
+    static void setWorkflowPlanExecutor(util::UniqueWorkflowPlanExecutor workflowPlanExecutor);
+
 public: // Action getters
 
     gui::ApplicationConfigurationAction& getConfigurationAction() { return _configurationAction; }
@@ -340,6 +355,7 @@ protected:
     gui::ApplicationConfigurationAction _configurationAction;               /** Application configuration action */
     util::CodecRegistry                 _codecRegistry;                     /** Codec registry */
     util::WorkflowGuiThreadDispatcher   _workflowGuiThreadDispatcher;       /** Workflow GUI thread dispatcher */
+    util::UniqueWorkflowPlanExecutor    _workflowPlanExecutor;              /** Workflow plan executor */
 
     /** Count of cursor overrides for each cursor shape */
     static QList<CursorShapeCount> cursorOverridesCount;

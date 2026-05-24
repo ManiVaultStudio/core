@@ -71,5 +71,6 @@ private:
 };
 
 using SharedWorkflowPlanExecutor = std::shared_ptr<AbstractWorkflowPlanExecutor>;
+using UniqueWorkflowPlanExecutor = std::unique_ptr<AbstractWorkflowPlanExecutor>;
 
 }

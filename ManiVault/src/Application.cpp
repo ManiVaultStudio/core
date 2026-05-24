@@ -270,6 +270,20 @@ void Application::initializeAttributes()
     setApplicationName(applicationName);
 }
 
+AbstractWorkflowPlanExecutor& Application::getWorkflowPlanExecutor()
+{
+    Q_ASSERT(current()->_workflowPlanExecutor);
+
+    return *current()->_workflowPlanExecutor;
+}
+
+void Application::setWorkflowPlanExecutor(UniqueWorkflowPlanExecutor workflowPlanExecutor)
+{
+    Q_ASSERT(workflowPlanExecutor);
+
+    current()->_workflowPlanExecutor = std::move(workflowPlanExecutor);
+}
+
 ApplicationStartupTask& Application::getStartupTask()
 {
     return *_startupTask;

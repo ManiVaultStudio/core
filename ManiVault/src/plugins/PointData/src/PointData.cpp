@@ -1061,7 +1061,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 {
     auto plan = fromVariantMapWorkflow(variantMap);
 
-    const auto future = projects().getWorkflowPlanExecutor()->execute(std::move(plan));
+    const auto future = Application::getWorkflowPlanExecutor().execute(std::move(plan));
 
     AbstractWorkflowPlanExecutor::waitWithEventLoop(future);
 }
@@ -1070,7 +1070,7 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
     UniqueWorkflowPlan fromPlan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    fromPlan->addSequentialStage("Load points", [this, variantMap](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) -> void {
+    fromPlan->addSequentialStage("Load points", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) -> void {
         DatasetImpl::fromVariantMap(variantMap);
 
         variantMapMustContain(variantMap, "DimensionNames");

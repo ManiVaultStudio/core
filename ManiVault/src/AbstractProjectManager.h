@@ -19,7 +19,6 @@
 #include "util/Exception.h"
 #include "util/WorkflowPlan.h"
 #include "util/WorkflowExecutionOptions.h"
-#include "util/AbstractWorkflowPlanExecutor.h"
 
 #include <QObject>
 #include <QMenu>
@@ -266,12 +265,6 @@ public:
      * @return Reference to the projects tree model
      */
     virtual const ProjectsTreeModel& getProjectsTreeModel() const = 0;
-
-    /**
-     * Get workflow plan executor
-     * @return Pointer to the workflow plan executor (nullptr if not available)
-     */
-    virtual util::SharedWorkflowPlanExecutor getWorkflowPlanExecutor() = 0;
 
 public: // Project download
 

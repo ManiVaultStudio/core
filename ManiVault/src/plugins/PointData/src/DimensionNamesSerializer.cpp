@@ -14,6 +14,7 @@
 	#define DIMENSION_NAMES_SERIALIZER_VERBOSE
 #endif
 
+using namespace mv;
 using namespace mv::util;
 
 void DimensionNamesSerializer::fromVariantMap(const QVariantMap& pointsMap, Points* points)
@@ -35,7 +36,7 @@ void DimensionNamesSerializer::fromVariantMap(const QVariantMap& pointsMap, Poin
     auto context    = std::make_shared<DimensionNamesLoadContext>();
     auto fromPlan   = std::make_unique<WorkflowPlan>(__FUNCTION__, context);
 
-    fromPlan->addSequentialStage("Read dimension names", [context, pointsMap, points](WorkflowPlan::Job& job) -> void {
+    fromPlan->addSequentialStage("Read dimension names", [context, pointsMap, points](const WorkflowPlan::Job& job) -> void {
         context->_dimensionNames.reserve(pointsMap.value("DimensionNames").toMap().value("Size").toUInt());
 
         auto bytes = bytesFromBlobVariantMap(pointsMap["DimensionNames"].toMap());
@@ -45,7 +46,7 @@ void DimensionNamesSerializer::fromVariantMap(const QVariantMap& pointsMap, Poin
         dimensionsDataStream >> context->_dimensionNames;
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
-	fromPlan->addSequentialStage("Set dimension names", [context, points](WorkflowPlan::Job& job) -> void {
+	fromPlan->addSequentialStage("Set dimension names", [context, points](const WorkflowPlan::Job& job) -> void {
         std::vector<QString> dimensionNames;
 
 		dimensionNames.reserve(points->getNumDimensions());
@@ -56,7 +57,7 @@ void DimensionNamesSerializer::fromVariantMap(const QVariantMap& pointsMap, Poin
 		points->setDimensionNames(dimensionNames);
 	}, WorkflowPlan::JobThreadAffinity::GuiThread);
 
-    auto result = mv::projects().getWorkflowPlanExecutor()->execute(std::move(fromPlan));
+    auto result = Application::getWorkflowPlanExecutor().execute(std::move(fromPlan));
 }
 
 QVariantMap DimensionNamesSerializer::toVariantMap(const std::vector<QString>& dimensionNames)

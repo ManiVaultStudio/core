@@ -422,11 +422,6 @@ void TaskflowWorkflowPlanExecutor::executeJobOnGuiThread(const WorkflowPlan::Job
 
     auto runOnGuiThread = [&job, jobContext, exceptionPtr, futurePtr]() mutable {
         try {
-            if (job.isAsync()) {
-                *futurePtr = job.runAsync(jobContext);
-                return;
-            }
-
             job.run(jobContext);
         }
         catch (...) {
@@ -456,11 +451,6 @@ void TaskflowWorkflowPlanExecutor::executeJobOnWorkerThread(const WorkflowPlan::
 #endif
 
     jobContext = requireContext(jobContext, __FUNCTION__);
-
-    if (job.isAsync()) {
-        auto future = job.runAsync(jobContext);
-        return;
-    }
 
     job.run(jobContext);
 }

@@ -33,7 +33,7 @@ void WorkflowPlan::Job::run(SharedWorkflowExecutionContext context) const
 //    qDebug() << "Running job:" << _name;
 //#endif
 
-    _function(*const_cast<WorkflowPlan::Job*>(this), std::move(context));
+    _function(*this, context);
 }
 
 void WorkflowPlan::Job::setResult(QVariant result)

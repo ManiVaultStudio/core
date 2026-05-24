@@ -10,6 +10,7 @@
 #include "private/PassthroughBlobCodecFactory.h"
 #include "private/ZstdBlobCodec.h"
 #include "private/ZstdBlobCodecFactory.h"
+#include "private/TaskflowWorkflowPlanExecutor.h"
 
 #include <Application.h>
 #include <ManiVaultVersion.h>
@@ -72,6 +73,8 @@ int main(int argc, char *argv[])
     qDebug() << "Starting" << Application::applicationName();
 
     Application application(argc, argv);
+
+    Application::setWorkflowPlanExecutor(std::make_unique<TaskflowWorkflowPlanExecutor>());
 
     codecRegistry().registerFactory(std::make_unique<PassthroughBlobCodecFactory>(&application));
     codecRegistry().registerFactory(std::make_unique<ZstdBlobCodecFactory>(&application));

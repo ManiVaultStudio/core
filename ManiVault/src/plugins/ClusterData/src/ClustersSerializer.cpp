@@ -114,7 +114,7 @@ void ClusterSerializer::fromVariantMap(const QVariantMap& map, QVector<Cluster>&
 
     WorkflowPlan::Jobs preprocessingJobs;
 
-	preprocessingJobs.emplace_back("Process headers", [map, context](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+	preprocessingJobs.emplace_back("Process headers", [map, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
 		const auto bytes = bytesFromBlobVariantMap(map.value("ClustersMetaData").toMap());
 
         if (bytes.isEmpty())
@@ -123,7 +123,7 @@ void ClusterSerializer::fromVariantMap(const QVariantMap& map, QVector<Cluster>&
         context->_headers = deserializeHeaders(bytes);
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 
-    preprocessingJobs.emplace_back("Process indices", [map, context](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext ) {
+    preprocessingJobs.emplace_back("Process indices", [map, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext ) {
         const auto bytes = bytesFromBlobVariantMap(map.value("ClustersIndicesRawData").toMap());
 
 		if (bytes.isEmpty())
@@ -144,7 +144,7 @@ void ClusterSerializer::fromVariantMap(const QVariantMap& map, QVector<Cluster>&
         clusters = rebuildClusters(context->_headers, context->_allIndices);
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread);
 
-    auto result = mv::projects().getWorkflowPlanExecutor()->execute(std::move(fromPlan));
+    auto result = Application::getWorkflowPlanExecutor().execute(std::move(fromPlan));
 }
 
 QByteArray ClusterSerializer::serializeHeaders(

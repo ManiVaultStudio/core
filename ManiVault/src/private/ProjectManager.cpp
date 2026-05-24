@@ -61,8 +61,7 @@ ProjectManager::ProjectManager(QObject* parent) :
     _pluginManagerAction(nullptr, "Plugin Browser..."),
     _showStartPageAction(nullptr, "Start Page...", true),
     _backToProjectAction(nullptr, "Back to project"),
-    _projectsListModel(StandardItemModel::PopulationMode::AutomaticSynchronous, this),
-    _workflowPlanExecutor(std::make_shared<WorkflowPlanExecutor>())
+    _projectsListModel(StandardItemModel::PopulationMode::AutomaticSynchronous, this)
 {
     //_newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     //_newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -388,7 +387,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
         qDebug() << "before execute";
 
-        auto future = _workflowPlanExecutor->execute(std::move(projectOpenWorkflowPlan), nullptr, WorkflowExecutionOptions({
+        auto future = Application::getWorkflowPlanExecutor().execute(std::move(projectOpenWorkflowPlan), nullptr, WorkflowExecutionOptions({
             ._parallel = parameters._parallel,
         	._maxWorkerThreadCount = parameters._maxParallelThreads,
             ._reportProgress = true,
@@ -753,7 +752,7 @@ void ProjectManager::saveProject(QString filePath)
 
             setTemporaryDirPath(TemporaryDirType::Save, workflowPlan->getWorkflowContextAs<ProjectSaveContext>()->getTemporaryDirectoryPath());
 
-	        auto future = mv::projects().getWorkflowPlanExecutor()->execute(std::move(workflowPlan), nullptr, WorkflowExecutionOptions({
+	        auto future = Application::getWorkflowPlanExecutor().execute(std::move(workflowPlan), nullptr, WorkflowExecutionOptions({
                 parameters._parallel,
 	        	parameters._maxParallelThreads,
                 true,   // Show progress
@@ -1034,11 +1033,6 @@ QDir ProjectManager::getDownloadedProjectsDir() const
     }
 
     return resultDir;
-}
-
-SharedWorkflowPlanExecutor ProjectManager::getWorkflowPlanExecutor()
-{
-    return _workflowPlanExecutor;
 }
 
 AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenParameters(const QString& filePath) const
