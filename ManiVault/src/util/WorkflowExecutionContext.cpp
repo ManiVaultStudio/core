@@ -80,11 +80,6 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(const QStri
     child->_executionPath = _executionPath;
     child->_executionPath.append(name);
     
-    {
-        std::lock_guard lock(_childrenMutex);
-        _children.push_back(child);
-    }
-
     return child;
 }
 
@@ -181,55 +176,6 @@ WorkflowPlan::JobProgressMode WorkflowExecutionContext::getProgressMode() const
 	return _progressMode;
 }
 
-void WorkflowExecutionContext::addPendingAsyncWork(WorkflowResultFuture future, const QString& label /*= {}*/)
-{
-    std::lock_guard lock(_pendingAsyncWorkMutex);
-
-    _pendingAsyncWork.push_back({
-        ._future = std::move(future),
-        ._label = label
-	});
-}
-
-void WorkflowExecutionContext::waitForPendingAsyncWork()
-{
-    while (true) {
-        std::vector<PendingAsyncWork> pendingWork;
-
-        {
-            std::lock_guard lock(_pendingAsyncWorkMutex);
-
-            if (_pendingAsyncWork.empty())
-                break;
-
-            pendingWork = std::move(_pendingAsyncWork);
-            _pendingAsyncWork.clear();
-        }
-
-        for (auto& work : pendingWork) {
-            try {
-                work._future.waitForFinished();
-
-                if (auto state = work._future.getState())
-                    state->rethrowExceptionIfAny();
-
-                const auto result = work._future.result();
-
-                if (result && result->hasErrors()) {
-                    throw ManiVaultException(
-                        SeverityLevel::Error,
-                        QString("Nested workflow failed: %1").arg(work._label),
-                        "workflow.nested_failed",
-                        getExecutionPath()
-                    );
-                }
-            }
-            catch (...) {
-                throw;
-            }
-        }
-    }
-}
 
 QString WorkflowExecutionContext::getExecutionPath(const QString& separator /*= "/"*/) const
 {

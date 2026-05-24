@@ -26,6 +26,9 @@ namespace mv
  */
 class TaskflowWorkflowPlanExecutor final : public AbstractWorkflowPlanExecutor
 {
+protected:
+    using TaskList = std::vector<tf::Task>;
+
 public:
 
     TaskflowWorkflowPlanExecutor(QObject* parent = nullptr);
@@ -33,17 +36,8 @@ public:
 
 protected:
     WorkflowResultFuture executeAsyncImpl(UniqueWorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, const WorkflowExecutionOptions& executionOptions, SharedWorkflowExecutionContext executionContext) override;
-
-private:
     SharedWorkflowResult executeRoot(WorkflowPlan& workflowPlan, mv::Task* task, const WorkflowExecutionOptions& executionOptions = {}) override;
     SharedWorkflowResult executeChild(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext parentContext) override;
-    void executeImpl(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext executionContext) override;
-    void executeStage(const WorkflowPlan::Stage& stage, SharedWorkflowExecutionContext stageContext) override;
-    void executeStageGroup(const WorkflowPlan::Stages& stages, SharedWorkflowExecutionContext executionContext) override;
-
-private: // Execute jobs in a stage
-    void executeSequentialJobs(const WorkflowPlan::Stage& stage, SharedWorkflowExecutionContext stageContext) override;
-    void executeParallelJobs(const WorkflowPlan::Stage& stage, SharedWorkflowExecutionContext stageContext) override;
 
 private: // Execute individual jobs
 	void executeJobOnGuiThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext) override;
@@ -63,6 +57,96 @@ private: // Helpers
         const WorkflowPlan& workflowPlan,
         tf::Subflow& subflow,
         SharedWorkflowExecutionContext parentContext);
+
+    void addWorkflowFinishedNotification(const QString& workflowName, const SharedWorkflowResult& result, const QUuid& resultId);
+
+    void executeCompiledJob(
+        const WorkflowPlan::Job& job,
+        tf::Subflow& subflow,
+        SharedWorkflowExecutionContext jobContext);
+
+    template<typename Flow>
+    TaskList compileStages(const WorkflowPlan::Stages& stages, Flow& flow, SharedWorkflowExecutionContext parentContext)
+    {
+        TaskList previous;
+
+        for (const auto& stage : stages) {
+            auto current = compileStage(stage, flow, parentContext);
+
+            for (auto& prev : previous)
+                for (auto& cur : current)
+                    prev.precede(cur);
+
+            previous = std::move(current);
+        }
+
+        return previous;
+    }
+
+    template<typename Flow>
+    TaskList compileSequentialStage(
+        const WorkflowPlan::Stage& stage,
+        Flow& flow,
+        SharedWorkflowExecutionContext stageContext)
+    {
+        TaskList tasks;
+
+        for (const auto& job : stage.getJobs()) {
+            auto jobContext = stageContext->createChild(
+                job.getName(),
+                job.getWeight(),
+                job.getProgressMode());
+
+            auto task = flow.emplace([this, job, jobContext](tf::Subflow& subflow) mutable {
+                executeCompiledJob(job, subflow, jobContext);
+            });
+
+            if (!tasks.empty())
+                tasks.back().precede(task);
+
+            tasks.push_back(task);
+        }
+
+        return tasks;
+    }
+
+    template<typename Flow>
+    TaskList compileParallelStage(
+        const WorkflowPlan::Stage& stage,
+        Flow& flow,
+        SharedWorkflowExecutionContext stageContext)
+    {
+        TaskList tasks;
+
+        for (const auto& job : stage.getJobs()) {
+            auto jobContext = stageContext->createChild(
+                job.getName(),
+                job.getWeight(),
+                job.getProgressMode());
+
+            auto task = flow.emplace([this, job, jobContext](tf::Subflow& subflow) mutable {
+                executeCompiledJob(job, subflow, jobContext);
+            });
+
+            tasks.push_back(task);
+        }
+
+        return tasks;
+    }
+
+    template<typename Flow>
+    TaskList compileStage(const WorkflowPlan::Stage& stage, Flow& flow, SharedWorkflowExecutionContext parentContext)
+    {
+        auto stageContext = parentContext->createChild(
+            stage.getName(),
+            stage.getWeight(),
+            WorkflowPlan::JobProgressMode::Nested);
+
+        if (stage.getConcurrencyMode() == WorkflowPlan::ConcurrencyMode::Sequential)
+            return compileSequentialStage(stage, flow, stageContext);
+
+        return compileParallelStage(stage, flow, stageContext);
+    }
 
 private:
     tf::Executor    _executor;  

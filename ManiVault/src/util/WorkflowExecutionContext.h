@@ -105,12 +105,6 @@ public: // ID
      */
     QUuid getParentId() const;
 
-    /**
-     * Get the number of pending asynchronous work items (futures) that have been added to this workflow execution context and have not yet completed. This can be used to determine if there are any outstanding asynchronous operations that need to complete before the workflow execution can be considered finished.
-     * @return The number of pending asynchronous work items.
-     */
-    std::size_t getPendingAsyncWorkCount() const;
-
 public: // Result handling
 
     /**

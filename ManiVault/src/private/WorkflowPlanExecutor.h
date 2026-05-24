@@ -40,13 +40,6 @@ protected:
 private:
     SharedWorkflowResult executeRoot(WorkflowPlan& workflowPlan, mv::Task* task, const WorkflowExecutionOptions& executionOptions = {}) override;
     SharedWorkflowResult executeChild(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext parentContext) override;
-    void executeImpl(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext executionContext) override;
-    void executeStage(const WorkflowPlan::Stage& stage, SharedWorkflowExecutionContext stageContext) override;
-    void executeStageGroup(const WorkflowPlan::Stages& stages, SharedWorkflowExecutionContext executionContext) override;
-
-private: // Execute jobs in a stage
-    void executeSequentialJobs(const WorkflowPlan::Stage& stage, SharedWorkflowExecutionContext stageContext) override;
-    void executeParallelJobs(const WorkflowPlan::Stage& stage, SharedWorkflowExecutionContext stageContext) override;
 
 private: // Execute individual jobs
 	void executeJobOnGuiThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext) override;

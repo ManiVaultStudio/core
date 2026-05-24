@@ -30,8 +30,6 @@ WorkflowResultFuture TaskflowWorkflowPlanExecutor::execute(UniqueWorkflowPlan wo
         auto childContext = parentContext->createChild(workflowPlan->getName(), workflowPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
         auto future = executeAsyncImpl(std::move(workflowPlan), resolvedOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, resolvedOptions, childContext);
 
-        parentContext->addPendingAsyncWork(future, pendingWorkLabel);
-
         return future;
     }
 
@@ -71,7 +69,11 @@ WorkflowResultFuture TaskflowWorkflowPlanExecutor::executeAsyncImpl(UniqueWorkfl
             if (executionContext != nullptr) {
                 //WorkflowReporter::info("Nested workflow started");
 
-                executeImpl(*workflowPlan, executionContext);
+                tf::Taskflow taskFlow;
+
+                compileWorkflow(*workflowPlan, taskFlow, executionContext);
+
+                _executor.run(taskFlow).wait();
 
                 //WorkflowReporter::info("Nested workflow finished");
 
@@ -114,16 +116,16 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
         };
 
     try {
-        executeImpl(workflowPlan, rootContext);
+        tf::Taskflow taskflow;
 
-        rootContext->waitForCompletion();
-        rootContext->markFinished();
+        compileWorkflow(workflowPlan, taskflow, rootContext);
+
+        _executor.run(taskflow).wait();
 
         //WorkflowReporter::info("Workflow finished", workflowPlan.getName());
 
     }
     catch (const ManiVaultException& exception) {
-        rootContext->markFinished();
         rootContext->error(exception._message, exception._where, exception._details);
 
         displayFailure(exception._message);
@@ -132,7 +134,6 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
             throw;
     }
     catch (const std::exception& exception) {
-        rootContext->markFinished();
         rootContext->error(exception.what(), workflowPlan.getName());
 
         displayFailure(QString::fromUtf8(exception.what()));
@@ -140,7 +141,6 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
         throw;
     }
     catch (...) {
-        rootContext->markFinished();
         rootContext->error("Workflow failed with unknown error", workflowPlan.getName());
 
         displayFailure("Unknown error");
@@ -156,40 +156,8 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
         result->setDuration(static_cast<std::uint64_t>(elapsedTimer.elapsed()));
     }
 
-    const auto resultId = WorkflowResultRegistry::instance().add(result);
-
-    if (executionOptions._addNotification) {
-        const auto url = QString("app://workflow/results?workflowResultId=%1").arg(resultId.toString(QUuid::WithoutBraces));
-        const auto title = QString("%1 finished in %2").arg(workflowPlan.getName()).arg(getElapsedTimeHumanReadable(result->getDuration(), true));
-
-        QMetaObject::invokeMethod(&help(), [result, url, title]() {
-            QString message;
-
-            if (!result->hasWarnings() && !result->hasErrors()) {
-                message = QString("Completed successfully, see the <a href='%1'>report</a> for details").arg(QString("%1&levels=info").arg(url));
-            }
-
-            if (result->hasWarnings() && !result->hasErrors()) {
-                message = QString("Completed with <a href=\"%1\">warnings</a>. Review the report.").arg(QString("%1&levels=warning").arg(url));
-            }
-
-            if (!result->hasWarnings() && result->hasErrors()) {
-                message = QString("Completed with <a href=\"%1\">errors</a>. Review the report.").arg(QString("%1&levels=error").arg(url));
-            }
-
-            if (result->hasWarnings() && result->hasErrors()) {
-                message = QString("Completed with <a href=\"%1\">warnings </a> and <a href=\"%1\">errors </a>. Review the report.").arg(QString("%1&levels=warning,error,critical").arg(url));
-            }
-
-            //message += WorkflowMetric::getWorkflowMetricsHtmlNotificationSummary(result->getMetrics());
-
-            if (!message.isEmpty()) {
-                help().addNotification(title, message);
-                qDebug() << title;
-            }
-
-            }, Qt::QueuedConnection);
-    }
+    if (rootContext->getState()->getExecutionOptions()._addNotification)
+		addWorkflowFinishedNotification(workflowPlan.getName(), result, WorkflowResultRegistry::instance().add(result));
 
     result->setValue(rootContext->takeResult());
 
@@ -205,220 +173,11 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeChild(WorkflowPlan& wo
 
     //WorkflowReporter::info("Nested workflow started", workflowPlan.getName());
 
-    executeImpl(workflowPlan, childContext);
+    //executeImpl(workflowPlan, childContext);
 
     //WorkflowReporter::info("Nested workflow finished", workflowPlan.getName());
 
     return {};
-}
-
-void TaskflowWorkflowPlanExecutor::executeImpl(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext executionContext)
-{
-    executionContext = requireContext(executionContext, __FUNCTION__);
-
-    std::exception_ptr primaryException;
-    bool mainSucceeded = false;
-
-    try {
-        executeStageGroup(workflowPlan.getStages(), executionContext);
-        mainSucceeded = true;
-    }
-    catch (...) {
-        primaryException = std::current_exception();
-    }
-
-    try {
-        if (mainSucceeded) {
-            executeStageGroup(workflowPlan.getOnSuccessStages(), executionContext);
-        }
-        else {
-            executeStageGroup(workflowPlan.getOnFailureStages(), executionContext);
-        }
-    }
-    catch (...) {
-        if (!primaryException)
-            primaryException = std::current_exception();
-    }
-
-    try {
-        executeStageGroup(workflowPlan.getFinallyStages(), executionContext);
-    }
-    catch (...) {
-        if (!primaryException)
-            primaryException = std::current_exception();
-    }
-
-    if (primaryException)
-        std::rethrow_exception(primaryException);
-}
-
-void TaskflowWorkflowPlanExecutor::executeStageGroup(const WorkflowPlan::Stages& stages, SharedWorkflowExecutionContext executionContext)
-{
-    executionContext = requireContext(executionContext, __FUNCTION__);
-
-    const auto stageCount = stages.size();
-
-    if (stageCount == 0)
-        return;
-
-    if (!executionContext)
-        throw std::runtime_error("No active workflow execution context");
-
-    QVector<SharedWorkflowExecutionContext> stageContexts;
-
-    stageContexts.reserve(static_cast<int>(stageCount));
-
-    for (int i = 0; i < stageCount; ++i) {
-        const auto& stage = stages[i];
-        stageContexts.push_back(executionContext->createChild(stage.getName(), stage.getWeight()));
-    }
-
-    for (int i = 0; i < stageCount; ++i) {
-
-        const auto& stage = stages[i];
-
-        auto& stageContext = stageContexts[i];
-
-        try {
-            executeStage(stage, stageContext);
-        }
-        catch (const ManiVaultException& exception) {
-
-            //WorkflowReporter::error("Stage finished", stage.getName());
-            //ctx.setError(QString::fromStdString(e.what())); // or your reporting system
-
-            if (exception._severity == SeverityLevel::Error || exception._severity == SeverityLevel::Fatal) {
-                throw; // abort entire workflow
-            }
-
-            // NON-FATAL  continue to next stage
-        }
-        catch (const std::exception& exception) {
-            Q_UNUSED(exception)
-                //ctx.setError(QString::fromStdString(e.what()));
-
-                // Treat unknown exceptions as fatal (recommended)
-                throw;
-        }
-    }
-}
-
-void TaskflowWorkflowPlanExecutor::executeStage(const WorkflowPlan::Stage& stage, SharedWorkflowExecutionContext stageContext)
-{
-    stageContext = requireContext(stageContext, __FUNCTION__);
-
-    if (stage.getConcurrencyMode() == WorkflowPlan::ConcurrencyMode::Parallel && stage.containsGuiThreadJobs()) {
-        throw ManiVaultException(SeverityLevel::Error, QString("Parallel stage '%1' contains GUI-thread jobs, which is not allowed.").arg(stage.getName()), "workflow.stage.parallel_gui_jobs", stage.getName());
-    }
-
-    stageContext->info(QString("Stage started: %1").arg(stage.getName()));
-
-    auto state = stageContext->getState();
-
-    try {
-        WorkflowPlan::ConcurrencyMode effectiveMode = stage.getConcurrencyMode();
-
-        if (state && !state->getExecutionOptions()._parallel) {
-            stageContext->warning("Parallel execution is disabled, switching to sequential mode");
-
-            effectiveMode = WorkflowPlan::ConcurrencyMode::Sequential;
-        }
-
-        switch (effectiveMode) {
-	        case WorkflowPlan::ConcurrencyMode::Sequential:
-	            executeSequentialJobs(stage, stageContext);
-	            break;
-
-	        case WorkflowPlan::ConcurrencyMode::Parallel:
-	            executeParallelJobs(stage, stageContext);
-	            break;
-        }
-
-        stageContext->waitForCompletion();
-
-        stageContext->info(QString("Stage finished: %1").arg(stage.getName()));
-        stageContext->markFinished();
-    }
-    catch (const ManiVaultException& exception) {
-        stageContext->markFinished();
-
-    	handleStageException(stage, exception, stageContext);
-    }
-    catch (const std::exception& exception) {
-        stageContext->markFinished();
-        stageContext->error(QString("Stage failed: %1").arg(exception.what()));
-
-        throw;
-    }
-    catch (...) {
-        stageContext->markFinished();
-        stageContext->error("Stage failed with unknown error");
-
-        throw;
-    }
-}
-
-void TaskflowWorkflowPlanExecutor::executeSequentialJobs(const WorkflowPlan::Stage& stage, SharedWorkflowExecutionContext stageContext)
-{
-#ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
-    qDebug() << "Executing sequential jobs for stage:" << stage.getName() << "in thread" << QThread::currentThread();
-#endif
-
-    stageContext = requireContext(stageContext, __FUNCTION__);
-
-    const auto& jobs = stage.getJobs();
-    const auto jobCount = jobs.size();
-
-    if (jobCount == 0)
-        return;
-
-    QVector<SharedWorkflowExecutionContext> jobContexts;
-
-    jobContexts.reserve(jobCount);
-
-    for (int jobIndex = 0; jobIndex < jobCount; ++jobIndex) {
-        const auto& job = jobs[jobIndex];
-        jobContexts.push_back(stageContext->createChild(job.getName(), job.getWeight(), job.getProgressMode()));
-    }
-
-    for (int jobIndex = 0; jobIndex < jobCount; ++jobIndex) {
-        const auto& job = jobs[jobIndex];
-        auto& jobContext = jobContexts[jobIndex];
-
-        executeJob(job, jobContext);
-
-        jobContext->waitForCompletion();
-    }
-}
-
-void TaskflowWorkflowPlanExecutor::executeParallelJobs(const WorkflowPlan::Stage& stage, SharedWorkflowExecutionContext stageContext)
-{
-    tf::Taskflow taskflow;
-
-    QVector<SharedWorkflowExecutionContext> jobContexts;
-
-    for (const auto& job : stage.getJobs()) {
-        jobContexts.push_back(
-            stageContext->createChild(
-                job.getName(),
-                job.getWeight(),
-                job.getProgressMode()));
-    }
-
-    for (int i = 0; i < stage.getJobs().size(); ++i) {
-        auto job = stage.getJobs()[i];
-        auto context = jobContexts[i];
-
-        taskflow.emplace([this, job, context]() {
-            executeJob(job, context);
-        });
-    }
-
-    _executor.run(taskflow).wait();
-
-    for (auto& jobContext : jobContexts) {
-        jobContext->waitForCompletion();
-    }
 }
 
 void TaskflowWorkflowPlanExecutor::executeJobOnGuiThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
@@ -489,14 +248,9 @@ void TaskflowWorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, Shar
             jobContext->setProgress(1.0);
         }
 
-        jobContext->waitForCompletion();
-
         jobContext->info(QString("Job finished: %1").arg(job.getName()));
-        jobContext->markFinished();
     }
     catch (...) {
-        jobContext->markFinished();
-
         if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Atomic || (job.getProgressMode() == WorkflowPlan::JobProgressMode::Automatic && !jobContext->hasProgressChildren())) {
             jobContext->setProgress(1.0);
         }
@@ -511,5 +265,67 @@ void TaskflowWorkflowPlanExecutor::handleStageException(const WorkflowPlan::Stag
 
     if (exception._severity == SeverityLevel::Error || exception._severity == SeverityLevel::Fatal)
         throw;
+}
+
+void TaskflowWorkflowPlanExecutor::compileWorkflow(const WorkflowPlan& workflowPlan, tf::Taskflow& taskflow, SharedWorkflowExecutionContext parentContext)
+{
+    auto mainEndTasks       = compileStages(workflowPlan.getStages(), taskflow, parentContext);
+    auto successEndTasks    = compileStages(workflowPlan.getOnSuccessStages(), taskflow, parentContext);
+
+    for (auto& mainEnd : mainEndTasks) {
+        for (auto& successEnd : successEndTasks) {
+            mainEnd.precede(successEnd);
+        }
+    }
+
+    auto finallyEndTasks = compileStages(workflowPlan.getFinallyStages(), taskflow, parentContext);
+
+    for (auto& successEnd : successEndTasks) {
+        for (auto& finallyEnd : finallyEndTasks) {
+            successEnd.precede(finallyEnd);
+        }
+    }
+}
+
+void TaskflowWorkflowPlanExecutor::compileWorkflow(const WorkflowPlan& workflowPlan, tf::Subflow& subflow, SharedWorkflowExecutionContext parentContext)
+{
+    compileStages(workflowPlan.getStages(), subflow, parentContext);
+}
+
+void TaskflowWorkflowPlanExecutor::addWorkflowFinishedNotification(const QString& workflowName, const SharedWorkflowResult& result, const QUuid& resultId)
+{
+    const auto url = QString("app://workflow/results?workflowResultId=%1").arg(resultId.toString(QUuid::WithoutBraces));
+
+    const auto title = QString("%1 finished in %2")
+        .arg(workflowName)
+        .arg(getElapsedTimeHumanReadable(result->getDuration(), true));
+
+    QMetaObject::invokeMethod(&help(), [result, url, title]() {
+        QString message;
+
+        if (!result->hasWarnings() && !result->hasErrors())
+            message = QString("Completed successfully, see the <a href='%1'>report</a> for details").arg(QString("%1&levels=info").arg(url));
+
+        if (result->hasWarnings() && !result->hasErrors())
+            message = QString("Completed with <a href=\"%1\">warnings</a>. Review the report.").arg(QString("%1&levels=warning").arg(url));
+
+        if (!result->hasWarnings() && result->hasErrors())
+            message = QString("Completed with <a href=\"%1\">errors</a>. Review the report.").arg(QString("%1&levels=error").arg(url));
+
+        if (result->hasWarnings() && result->hasErrors())
+            message = QString("Completed with <a href=\"%1\">warnings </a> and <a href=\"%1\">errors </a>. Review the report.").arg(QString("%1&levels=warning,error,critical").arg(url));
+
+        if (!message.isEmpty()) {
+            help().addNotification(title, message);
+            qDebug() << title;
+        }
+    }, Qt::QueuedConnection);
+}
+
+void TaskflowWorkflowPlanExecutor::executeCompiledJob(const WorkflowPlan::Job& job, tf::Subflow& subflow, SharedWorkflowExecutionContext jobContext)
+{
+    Q_UNUSED(subflow)
+
+	executeJob(job, jobContext);
 }
 

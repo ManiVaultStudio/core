@@ -42,14 +42,6 @@ private:
     [[nodiscard]] virtual SharedWorkflowResult executeRoot(WorkflowPlan& workflowPlan, Task* task, const WorkflowExecutionOptions& executionOptions = {}) = 0;
     [[nodiscard]] virtual SharedWorkflowResult executeChild(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext parentContext) = 0;
 
-    virtual void executeImpl(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext executionContext) = 0;
-    virtual void executeStage(const WorkflowPlan::Stage& stage, SharedWorkflowExecutionContext stageContext) = 0;
-    virtual void executeStageGroup(const WorkflowPlan::Stages& stages, SharedWorkflowExecutionContext executionContext) = 0;
-
-private: // Execute jobs in a stage
-    virtual void executeSequentialJobs(const WorkflowPlan::Stage& stage, SharedWorkflowExecutionContext stageContext) = 0;
-    virtual void executeParallelJobs(const WorkflowPlan::Stage& stage, SharedWorkflowExecutionContext stageContext) = 0;
-
 private: // Execute individual jobs
     virtual void executeJobOnGuiThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext) = 0;
     virtual void executeJobOnWorkerThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext) = 0;
