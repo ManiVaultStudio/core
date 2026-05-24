@@ -156,24 +156,26 @@ class HdpsCoreConan(ConanFile):
         tc.variables["MV_INSTALL_DIR"] = self.install_dir
 
         # Set some default build options
-        MV_USE_ERROR_LOGGING = "ON"
-        MV_PRECOMPILE_HEADERS = "ON"
-        MV_UNITY_BUILD = "ON"
+        MV_USE_ERROR_LOGGING = True
+        MV_PRECOMPILE_HEADERS = True
+        MV_UNITY_BUILD = True
+        MV_RELWITHDEBUGINFO = True
 
         # Do not use some options on the release builds 
         current_branch_name = self.get_current_branch_name()
         
         # if current_branch_name.startswith("release/"):
-            # MV_PRECOMPILE_HEADERS = "OFF"
-            # MV_UNITY_BUILD = "OFF"
+            # MV_PRECOMPILE_HEADERS = False
+            # MV_UNITY_BUILD = False
 
         # TEMPORARILY disable sentry on macos, 16/04/25
         if self.settings.os == "Macos":
-            MV_USE_ERROR_LOGGING = "OFF"
+            MV_USE_ERROR_LOGGING = False
 
-        tc.variables["MV_PRECOMPILE_HEADERS"] = MV_PRECOMPILE_HEADERS
-        tc.variables["MV_UNITY_BUILD"] = MV_UNITY_BUILD
-        tc.variables["MV_USE_ERROR_LOGGING"] = MV_USE_ERROR_LOGGING
+        tc.cache_variables["MV_PRECOMPILE_HEADERS"] = MV_PRECOMPILE_HEADERS
+        tc.cache_variables["MV_UNITY_BUILD"] = MV_UNITY_BUILD
+        tc.cache_variables["MV_USE_ERROR_LOGGING"] = MV_USE_ERROR_LOGGING
+        tc.cache_variables["MV_RELWITHDEBUGINFO"] = MV_RELWITHDEBUGINFO
         
         try:
             tc.generate()

@@ -98,12 +98,11 @@ target_link_libraries(${CLUSTERDATA} PRIVATE PointData)
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${CLUSTERDATA} ${MV_USE_AVX})
 
-set_target_properties(${CLUSTERDATA} PROPERTIES PUBLIC_HEADER "${CLUSTER_HEADERS}")
-set_target_properties(${CLUSTERDATA} PROPERTIES AUTOMOC ON)
-
-if(MV_UNITY_BUILD)
-    set_target_properties(${CLUSTERDATA} PROPERTIES UNITY_BUILD ON)
-endif()
+set_target_properties(${CLUSTERDATA} PROPERTIES
+    AUTOMOC ON
+    UNITY_BUILD ${MV_UNITY_BUILD}
+    PUBLIC_HEADER "${CLUSTER_HEADERS}"
+)
 
 install(TARGETS ${CLUSTERDATA}
     EXPORT "ManiVaultPublicExport"
