@@ -313,18 +313,30 @@ std::vector<std::uint32_t> Clusters::getSelectedIndices() const
 
 void Clusters::fromVariantMap(const QVariantMap& variantMap)
 {
-    return;
+    auto plan   = fromVariantMapWorkflow(variantMap);
+    auto result = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));
+}
+
+UniqueWorkflowPlan Clusters::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext)
+{
+    UniqueWorkflowPlan fromPlan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+
+    DatasetImpl::fromVariantMap(variantMap);
 
     const auto projectApplicationVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
     if (projectApplicationVersion < Version(1, 5, 0)) {
-        fromVariantMapPre150(variantMap);
+        fromPlan->addSequentialStage("Load (version < 1.5.0)", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
+            fromVariantMapPre150(variantMap);
+            }, WorkflowPlan::JobThreadAffinity::GuiThread);
     }
     else {
-        DatasetImpl::fromVariantMap(variantMap);
-
-        getRawData<ClusterData>()->fromVariantMap(variantMap);
+        fromPlan->addNestedWorkflowStage("Load", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) mutable ->UniqueWorkflowPlan {
+            return getRawData<ClusterData>()->fromVariantMapWorkflow(variantMap, executionContext);
+        });
     }
+
+	return fromPlan;
 }
 
 void Clusters::fromVariantMapPre150(const QVariantMap& variantMap)
