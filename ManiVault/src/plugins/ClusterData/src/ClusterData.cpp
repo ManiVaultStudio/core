@@ -121,14 +121,28 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
+    
+}
+
+UniqueWorkflowPlan ClusterData::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext)
+{
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+
     const auto dataMap                      = variantMap["Data"].toMap();
     const auto projectApplicationVersion    = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
     if (projectApplicationVersion < Version(1, 5, 0)) {
-        fromVariantMapPre150(variantMap);
-    } else {
-        ClusterSerializer::fromVariantMap(dataMap["Clusters"].toMap(), _clusters);
+        plan->addSequentialStage("Load (version <1.5.0)", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+            fromVariantMapPre150(variantMap);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread);
     }
+    else {
+        plan->addNestedWorkflowStage("Load", [this, dataMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+            return ClusterSerializer::fromVariantMapWorkflow(dataMap["Clusters"].toMap(), _clusters, executionContext);
+        });
+    }
+
+	return plan;
 }
 
 void ClusterData::fromVariantMapPre150(const QVariantMap& variantMap)

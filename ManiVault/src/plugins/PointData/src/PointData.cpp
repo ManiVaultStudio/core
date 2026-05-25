@@ -158,6 +158,8 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
 UniqueWorkflowPlan PointData::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
 {
+    Serializable::fromVariantMap(variantMap);
+
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
     const auto projectApplicationVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
@@ -169,8 +171,6 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(const QVariantMap& variantM
     }
     else {
         plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
-            //Serializable::fromVariantMap(variantMap);
-
             variantMapMustContain(variantMap, "Data");
             variantMapMustContain(variantMap, "NumberOfPoints");
             variantMapMustContain(variantMap, "NumberOfDimensions");
@@ -195,7 +195,7 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(const QVariantMap& variantM
                 setElementTypeSpecifier(elementTypeIndex);
                 resizeVector(numberOfElements);
 
-                //populateBytesFromBlobMap(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), parentContext);
+                populateBytesFromBlobMap(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize());
             }/*
             else {
                 const auto numberOfNonZeroElements = variantMap["NumberOfNonZeroElements"].toULongLong();

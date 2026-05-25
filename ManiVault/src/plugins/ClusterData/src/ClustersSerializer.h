@@ -17,7 +17,7 @@ public:
 
     static QVariantMap toVariantMap(const QVector<Cluster>& clusters);
 
-    static void fromVariantMap(const QVariantMap& map, QVector<Cluster>& clusters);
+    static UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& map, QVector<Cluster>& clusters, SharedWorkflowExecutionContext parentExecutionContext);
 
 protected:
 

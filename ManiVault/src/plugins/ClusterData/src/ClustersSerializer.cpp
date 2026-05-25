@@ -101,7 +101,7 @@ QVariantMap ClusterSerializer::toVariantMap(const QVector<Cluster>& clusters)
     return map;
 }
 
-void ClusterSerializer::fromVariantMap(const QVariantMap& map, QVector<Cluster>& clusters)
+UniqueWorkflowPlan ClusterSerializer::fromVariantMapWorkflow(const QVariantMap& map, QVector<Cluster>& clusters, SharedWorkflowExecutionContext parentExecutionContext)
 {
     const auto version = map.value("ClustersFormatVersion").toUInt();
 
@@ -110,7 +110,7 @@ void ClusterSerializer::fromVariantMap(const QVariantMap& map, QVector<Cluster>&
     
     auto context = std::make_shared<ClustersLoadContext>(map);
 
-    auto fromPlan = std::make_unique<WorkflowPlan>(__FUNCTION__, context);
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__, context);
 
     WorkflowPlan::Jobs preprocessingJobs;
 
@@ -139,12 +139,12 @@ void ClusterSerializer::fromVariantMap(const QVariantMap& map, QVector<Cluster>&
 		}
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 
-    fromPlan->addParallelStage("Preprocessing", preprocessingJobs);
-    fromPlan->addSequentialStage("Rebuild clusters", [&clusters, context]() -> void {
+    plan->addParallelStage("Preprocessing", preprocessingJobs);
+    plan->addSequentialStage("Rebuild clusters", [&clusters, context]() -> void {
         clusters = rebuildClusters(context->_headers, context->_allIndices);
-    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread);
+    });
 
-    auto result = Application::getWorkflowPlanExecutor().execute(std::move(fromPlan));
+    return plan;
 }
 
 QByteArray ClusterSerializer::serializeHeaders(

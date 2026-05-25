@@ -98,18 +98,12 @@ public:
 
 public: // Serialization
 
-    /**
-     * Load widget action from variant
-     * @param variantMap Variant representation of the widget action
-     * @return Variant representation of the widget action
-     */
+    
     void fromVariantMap(const QVariantMap& variantMap) override;
 
-    /**
-     * Load widget action from variant for app versions prior to 1.5.0 (backwards compatibility)
-     * @param variantMap Variant representation of the widget action
-     * @return Variant representation of the widget action
-     */
+    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext = nullptr) override;
+
+    
     void fromVariantMapPre150(const QVariantMap& variantMap);
 
     /**
