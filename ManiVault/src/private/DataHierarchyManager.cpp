@@ -243,7 +243,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 {
     auto plan = fromVariantMapWorkflow(variantMap);
 
-    const auto future = Application::getWorkflowPlanExecutor().execute(std::move(plan));
+    const auto future = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));
 }
 
 UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
@@ -331,8 +331,7 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
             
             try {
                 context->info(QString("Loading dataset '%1' with ID '%2'").arg(datasetName, datasetId));
-                auto plan   = mv::data().getDataset(datasetId)->fromVariantMapWorkflow(dataVariantMap);
-                auto result = Application::getWorkflowPlanExecutor().execute(std::move(plan), context);
+                mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
                 context->info(QString("Finished loading dataset '%1' with ID '%2'").arg(datasetName, datasetId));
             }
             catch (const ManiVaultException&) {

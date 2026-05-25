@@ -111,6 +111,24 @@ public:
     }
 
     /**
+     * @brief Get project map for storing project data during the project opening process (e.g. to be used for passing data between workflow stages)
+     * @return QVariantMap for storing project data during the project opening process (e.g. to be used for passing data between workflow stages)
+     */
+    QVariantMap getProjectMap() const {
+        QMutexLocker locker(&_mutex);
+        return _projectMap;
+    }
+
+    /**
+     * @brief Set project map for storing project data during the project opening process (e.g. to be used for passing data between workflow stages)
+     * @param projectMap QVariantMap for storing project data during the project opening process (e.g. to be used for passing data between workflow stages)
+     */
+    void setProjectMap(const QVariantMap& projectMap) {
+        QMutexLocker locker(&_mutex);
+        _projectMap = projectMap;
+    }
+
+    /**
      * @brief Get error message
      * @return Error message string
      */
@@ -126,5 +144,6 @@ private:
     QString             _projectJsonPath;       /** Location on disk where the project JSON file resides */
     QString             _metaJsonPath;          /** Location on disk where the project meta JSON file resides */
     UniqueTemporaryDir  _temporaryDirectory;    /** Unique pointer to a QTemporaryDir instance representing the temporary directory for saving the project */
+    QVariantMap         _projectMap;            /** QVariantMap for storing project data during the project opening process (e.g. to be used for passing data between workflow stages) */
     QString             _errorMessage;          /** Error message string for storing any error that occurs during the project saving process */
 };

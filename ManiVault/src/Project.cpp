@@ -107,9 +107,8 @@ bool Project::isStartupProject() const
 
 void Project::fromVariantMap(const QVariantMap& variantMap)
 {
-    auto plan = fromVariantMapWorkflow(variantMap);
-
-    const auto future = Application::getWorkflowPlanExecutor().execute(std::move(plan));
+    auto plan   = fromVariantMapWorkflow(variantMap);
+    auto result = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));
 }
 
 UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap, util::SharedWorkflowExecutionContext parentContext /*= nullptr*/)
@@ -117,21 +116,25 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap
     auto plan = std::make_unique<WorkflowPlan>("Load project");
 
     plan->addSequentialStage("Step 1", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
-        Serializable::fromVariantMap(variantMap);
+        //Serializable::fromVariantMap(variantMap);
 
-        if (variantMap.contains(_selectionGroupingAction.getSerializationName()))
+        if (variantMap.contains(_selectionGroupingAction.getSerializationName())) {
             _selectionGroupingAction.fromParentVariantMap(variantMap);
-        else
+        }
+        else {
             _selectionGroupingAction.setChecked(true);
+        }
 
         _overrideApplicationStatusBarAction.fromParentVariantMap(variantMap);
+
         _statusBarVisibleAction.fromParentVariantMap(variantMap);
+
         _statusBarOptionsAction.fromParentVariantMap(variantMap);
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
-    plan->addSequentialStage("Step 2", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
-        dataHierarchy().fromVariantMap(variantMap);
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+    //plan->addNestedWorkflowStage("Step 2", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) mutable -> UniqueWorkflowPlan {
+    //    return dataHierarchy().fromVariantMapWorkflow(variantMap, context);
+    //});
 
     plan->addSequentialStage("Step 3", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
         actions().fromParentVariantMap(variantMap);

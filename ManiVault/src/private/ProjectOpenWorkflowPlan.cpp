@@ -78,7 +78,38 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 		archiver.extractSingleFile(context->getFilePath(), "project.json", context->getProjectJsonPath());
 		archiver.extractSingleFile(context->getFilePath(), "meta.json", context->getMetaJsonPath());
 		archiver.extractSingleFile(context->getFilePath(), "workspace.json", context->getWorkspaceJsonPath());
+
+
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
+
+    plan->addSequentialStage("Read project JSON", [context]() -> void {
+#ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
+        qDebug() << "Read project JSON";
+#endif
+
+        const auto filePath = context->getProjectJsonPath();
+
+        if (!QFileInfo(filePath).exists())
+            throw std::runtime_error("File does not exist");
+
+        QFile jsonFile(filePath);
+
+        if (!jsonFile.open(QIODevice::ReadOnly))
+            throw std::runtime_error("Unable to open file for reading");
+
+        QByteArray data = jsonFile.readAll();
+
+        if (data.isEmpty())
+            throw std::runtime_error("No data read");
+
+        auto jsonDocument = QJsonDocument::fromJson(data);
+
+        if (jsonDocument.isNull() || jsonDocument.isEmpty())
+            throw std::runtime_error("JSON document is invalid");
+
+        context->setProjectMap(jsonDocument.toVariant().toMap());
+
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1);
 
     plan->addSequentialStage("Open meta JSON", [context]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
@@ -96,21 +127,9 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 		}
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1);
 
-    plan->addSequentialStage("Open project JSON", [context]() -> void {
-#ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
-		qDebug() << "Open project JSON";
-#endif
-
-        if (!QFileInfo(context->getProjectJsonPath()).exists())
-	        throw std::runtime_error("Project JSON file does not exist");
-
-		if (auto currentProject = mv::projects().getCurrentProject()) {
-			currentProject->fromJsonFile(context->getProjectJsonPath());
-		}
-		else {
-			throw std::runtime_error("No current project found");
-		}
-    }, WorkflowPlan::JobThreadAffinity::GuiThread, 20.0);
+    plan->addNestedWorkflowStage("Open project JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
+        return mv::projects().getCurrentProject()->fromVariantMapWorkflow(context->getProjectMap(), executionContext);
+    });
 
     plan->addSequentialStage("Open workspace JSON", [context]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
