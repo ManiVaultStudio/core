@@ -246,7 +246,7 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
     const auto future = Application::getWorkflowPlanExecutor().execute(std::move(plan));
 }
 
-UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap)
+UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
 {
     UniqueWorkflowPlan fromPlan = std::make_unique<WorkflowPlan>("Load data hierarchy");
 

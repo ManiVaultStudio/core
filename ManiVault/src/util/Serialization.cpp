@@ -398,7 +398,7 @@ DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, 
     return result;
 }
 
-WorkflowResultFuture populateBytesFromBlobFromVariantMapAsync(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
+UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
 {
     if (variantMap.isEmpty()) {
 	    throw ManiVaultException(
@@ -557,7 +557,7 @@ WorkflowResultFuture populateBytesFromBlobFromVariantMapAsync(const QVariantMap&
         }
     });
 
-    return Application::getWorkflowPlanExecutor().execute(std::move(decodeWorkflowPlan), parentContext);
+    return decodeWorkflowPlan;
 
  //   auto sharedExecutor = SharedWorkflowPlanExecutor();
 
@@ -572,11 +572,10 @@ WorkflowResultFuture populateBytesFromBlobFromVariantMapAsync(const QVariantMap&
  //   return result;
 }
 
-void populateBytesFromBlobFromVariantMap(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext)
+void populateBytesFromBlobMap(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext)
 {
-    auto future = populateBytesFromBlobFromVariantMapAsync(variantMap, destination, destinationSize, parentContext);
-
-    //AbstractWorkflowPlanExecutor::waitWithEventLoop(future);
+    auto plan   = populateBytesFromBlobMapWorkflow(variantMap, destination, destinationSize, parentContext);
+    auto future = Application::getWorkflowPlanExecutor().execute(std::move(plan), parentContext);
 }
 
 QByteArray bytesFromBlobVariantMap(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
@@ -618,9 +617,7 @@ QByteArray bytesFromBlobVariantMap(const QVariantMap& variantMap, SharedWorkflow
 
     bytes.resize(static_cast<qsizetype>(totalSize));
 
-    auto future = populateBytesFromBlobFromVariantMapAsync(variantMap, bytes.data(), bytes.size(), parentContext);
-
-    future.waitForFinished();
+    populateBytesFromBlobMap(variantMap, bytes.data(), static_cast<std::uint64_t>(bytes.size()), parentContext);
 
     return bytes;
 }

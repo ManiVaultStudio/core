@@ -14,32 +14,13 @@ AbstractWorkflowPlanExecutor::AbstractWorkflowPlanExecutor(QObject* parent):
 {
 }
 
-SharedWorkflowResult AbstractWorkflowPlanExecutor::waitBlocking(const WorkflowResultFuture& future)
+SharedWorkflowResult AbstractWorkflowPlanExecutor::waitForAsync(WorkflowResultFuture::State& state)
 {
-    if (QThread::currentThread() == qApp->thread())
-        throw ManiVaultException(SeverityLevel::Error, "Blocking wait is not allowed on the GUI thread", {});
+    auto result = state.future.get();
 
-    future.waitForFinished();
+    state.rethrowExceptionIfAny();
 
-    return future.result();
-}
-
-SharedWorkflowResult AbstractWorkflowPlanExecutor::waitWithEventLoop(const WorkflowResultFuture& future)
-{
-    QFutureWatcher<SharedWorkflowResult> watcher;
-    QEventLoop loop;
-
-    QObject::connect(
-        &watcher,
-        &QFutureWatcher<SharedWorkflowResult>::finished,
-        &loop,
-        &QEventLoop::quit
-    );
-
-    watcher.setFuture(future.getFuture());
-    loop.exec();
-
-    return future.result();
+    return result;
 }
 
 void AbstractWorkflowPlanExecutor::installNotificationLinkHandler()

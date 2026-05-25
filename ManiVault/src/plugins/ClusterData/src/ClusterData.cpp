@@ -147,7 +147,7 @@ void ClusterData::fromVariantMapPre150(const QVariantMap& variantMap)
 
     // Convert raw data to indices
     if (!packedIndices.empty())
-		populateBytesFromBlobFromVariantMapAsync(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), packedIndices.size() * sizeof(std::uint32_t));
+        populateBytesFromBlobMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), packedIndices.size() * sizeof(std::uint32_t));
 
     if (dataMap.contains("ClustersRawData")) {
         QByteArray clustersByteArray;

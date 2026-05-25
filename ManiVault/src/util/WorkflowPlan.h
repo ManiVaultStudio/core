@@ -27,10 +27,12 @@ namespace mv::util
 class AbstractWorkflowPlanExecutor;
 
 class WorkflowExecutionContext;
+class WorkflowPlan;
 
-using SharedWorkflowExecutionContext = std::shared_ptr<WorkflowExecutionContext>;
-using SharedWorkflowPlanExecutor = std::shared_ptr<AbstractWorkflowPlanExecutor>;
-using SharedWorkflowExecutionContexts = std::vector<SharedWorkflowExecutionContext>;
+using SharedWorkflowExecutionContext    = std::shared_ptr<WorkflowExecutionContext>;
+using SharedWorkflowPlanExecutor        = std::shared_ptr<AbstractWorkflowPlanExecutor>;
+using SharedWorkflowExecutionContexts   = std::vector<SharedWorkflowExecutionContext>;
+using UniqueWorkflowPlan                = std::unique_ptr<WorkflowPlan>;
 
 class CORE_EXPORT WorkflowPlan
 {
@@ -65,21 +67,36 @@ public:
         Nested      /** Nested workflows contribute fine-grained progress */
     };
 
+    
+
     using SharedState = std::shared_ptr<QVariantMap>;
 
 public:
     class Job;
 
-    using JobFunction       = std::function<void(const Job&, const SharedWorkflowExecutionContext& )>;
-    using JobFunctions      = std::vector<JobFunction>;
+    using JobFunction               = std::function<void(const Job&, const SharedWorkflowExecutionContext& )>;
+    using JobFunctions              = std::vector<JobFunction>;
+    using NestedWorkflowFunction    = std::function<UniqueWorkflowPlan(const Job&,const SharedWorkflowExecutionContext&)>;
 
+    struct NestedWorkflowJob
+    {
+        NestedWorkflowFunction function;
+    };
 
     class CORE_EXPORT Job
     {
     public:
+        enum class JobKind {
+            Function,
+            NestedWorkflow
+        };
+
+    public:
         using ErrorString = QString;
 
         Job(QString name, JobFunction function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, JobProgressMode progressMode = JobProgressMode::Automatic);
+        Job(QString name, NestedWorkflowFunction nestedWorkflowFunction, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, JobProgressMode progressMode = JobProgressMode::Automatic, double weight = 1.0);
+        Job(QString name, NestedWorkflowJob job);
 
         QString getName() const;
 
@@ -113,6 +130,18 @@ public:
 
         JobProgressMode getProgressMode() const;
 
+        bool isNestedWorkflow() const
+        {
+            return _kind == JobKind::NestedWorkflow;
+        }
+
+        UniqueWorkflowPlan createNestedWorkflow(
+            const SharedWorkflowExecutionContext& context) const
+        {
+            Q_ASSERT(_nestedWorkflowFunction);
+            return _nestedWorkflowFunction(*this, context);
+        }
+
     public: // Workflow context access for jobs
 
         /**
@@ -143,7 +172,9 @@ public:
 
     private:
         QString                     _name;
+        JobKind                     _kind = JobKind::Function;
         JobFunction                 _function;
+        NestedWorkflowFunction _nestedWorkflowFunction;
         QVariant                    _result;
         std::optional<QString>      _error;
         JobThreadAffinity           _threadAffinity = JobThreadAffinity::CurrentWorkerThread;
@@ -246,6 +277,36 @@ public:
 
     double getWeight() const;
 
+public:
+
+    //template<typename Function>
+    //void addNestedWorkflowStage(
+    //    QString name,
+    //    Function&& function,
+    //    JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread,
+    //    double weight = 1.0)
+    //{
+    //    _stages.emplace_back(
+    //        name,
+    //        ConcurrencyMode::Sequential,
+    //        Jobs{
+    //            Job(
+    //                name,
+    //                NestedWorkflowFunction(std::forward<Function>(function)),
+    //                threadAffinity,
+    //                JobProgressMode::Automatic,
+    //                weight
+    //            )
+    //        },
+    //        weight
+    //    );
+    //}
+
+    void addNestedWorkflowStage(
+        const QString& name,
+        NestedWorkflowFunction function
+    );
+
 private:
     template<typename Function>
     static void invokeJobFunction(
@@ -331,7 +392,5 @@ private:
     double                  _weight = 1.0;          /** Relative weight of this workflow plan when executed as part of a larger workflow (e.g., as a nested workflow within a job of another workflow plan). This can be used to influence progress reporting and scheduling decisions when multiple workflows are executed together. The default weight is 1.0, and it can be set to any positive value to indicate the relative importance or contribution of this workflow plan compared to others. */
     
 };
-
-using UniqueWorkflowPlan = std::unique_ptr<WorkflowPlan>;
 
 }

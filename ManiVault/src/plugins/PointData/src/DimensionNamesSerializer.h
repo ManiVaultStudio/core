@@ -5,6 +5,8 @@
 #pragma once
 
 #include <util/WorkflowContextBase.h>
+#include <util/WorkflowPlan.h>
+#include <util/WorkflowExecutionContext.h>
 
 #include <QVariant>
 
@@ -27,10 +29,12 @@ public:
 
     /**
      * Deserializes dimension names from the provided QVariantMap and sets them to the provided Points.
-     * @param pointsMap The QVariantMap containing the serialized dimension names.
      * @param points The Points object to set the deserialized dimension names to.
+     * @param variantMap The QVariantMap containing the serialized dimension names.
+     * @param parentContext The parent workflow execution context.
+     * @return A UniqueWorkflowPlan representing the deserialization workflow.
      */
-    static void fromVariantMap(const QVariantMap& pointsMap, Points* points);
+    static mv::util::UniqueWorkflowPlan fromVariantMapWorkflow(Points* points, const QVariantMap& variantMap, mv::util::SharedWorkflowExecutionContext parentContext = nullptr);
 
     /**
      * Serializes the provided dimension names into a QVariantMap.

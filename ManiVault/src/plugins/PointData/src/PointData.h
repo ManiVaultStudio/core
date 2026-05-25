@@ -474,6 +474,8 @@ public: // Serialization
      */
     void fromVariantMap(const QVariantMap& variantMap) final;
 
+    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext = nullptr) override;
+
     /**
      * Load widget action from variant for app versions prior to 5.0.0
      * @param variantMap Variant representation of the widget action
@@ -1000,9 +1002,10 @@ public: // Serialization
      *
      * @note See the documentation of Serializable::fromVariantMapWorkflow() for important information about the expected behavior of this function.
      * @param variantMap Variant map representation of the object state.
+     * @param parentContext Optional parent workflow execution context to which the loading workflow will be attached as a child. This can be used to integrate the loading workflow into a larger workflow hierarchy, allowing it to report progress and messages in the context of the parent workflow execution.
      * @return Workflow plan that restores the object state when executed.
      */
-    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap) override;
+    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext = nullptr) override;
 
     /**
      * Load widget action from variant for app versions prior to 5.0.0

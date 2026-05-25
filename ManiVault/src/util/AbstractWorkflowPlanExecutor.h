@@ -9,6 +9,7 @@
 #include "WorkflowExecutionContext.h"
 #include "WorkflowResult.h"
 #include "AbstractWorkflowTraceSink.h"
+#include "WorkflowResultFuture.h"
 #include "Task.h"
 
 #include <QObject>
@@ -24,12 +25,7 @@ public:
 
     [[nodiscard]] virtual WorkflowResultFuture execute(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) = 0;
 
-    static SharedWorkflowResult waitBlocking(const WorkflowResultFuture& future);
-
-    static SharedWorkflowResult waitWithEventLoop(const WorkflowResultFuture& future);
-
-
-    
+    static SharedWorkflowResult waitForAsync(WorkflowResultFuture::State& state);
 
 	static void installNotificationLinkHandler();
 

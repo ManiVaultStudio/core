@@ -24,9 +24,7 @@ class CORE_EXPORT WorkflowResultFuture
 {
 public:
     struct CORE_EXPORT State {
-        QFuture<SharedWorkflowResult> future;
-        QPointer<QFutureWatcher<SharedWorkflowResult>> watcher;
-
+        std::future<SharedWorkflowResult> future;
         QPointer<Task> task;
 
         mutable QMutex mutex;
@@ -46,24 +44,12 @@ public:
 
     explicit WorkflowResultFuture(std::shared_ptr<State> state);
 
-    bool isValid() const;
-
-    bool isFinished() const;
-
-    void waitForFinished() const;
-
-    SharedWorkflowResult result() const;
-
-    const QFuture<SharedWorkflowResult>& getFuture() const;
+    const std::future<SharedWorkflowResult>& getFuture() const;
 
     Task* getTask() const;
 
-    QFutureWatcher<SharedWorkflowResult>* getWatcher() const;
-    static WorkflowResultFuture makeReady(const SharedWorkflowResult& result = {});
-
-    static WorkflowResultFuture fromFuture(QFuture<SharedWorkflowResult> future);
-
     std::shared_ptr<State> getState() const { return _state; }
+
 private:
     std::shared_ptr<State> _state;
 };

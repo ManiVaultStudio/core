@@ -110,11 +110,9 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
     auto plan = fromVariantMapWorkflow(variantMap);
 
     const auto future = Application::getWorkflowPlanExecutor().execute(std::move(plan));
-
-    AbstractWorkflowPlanExecutor::waitWithEventLoop(future);
 }
 
-UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap)
+UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap, util::SharedWorkflowExecutionContext parentContext /*= nullptr*/)
 {
     auto plan = std::make_unique<WorkflowPlan>("Load project");
 
@@ -186,9 +184,6 @@ UniqueWorkflowPlan Project::toVariantMapWorkflow() const
 
         auto future = Application::getWorkflowPlanExecutor().execute(std::move(dataHierarchyPlan), executionContext);
 
-        AbstractWorkflowPlanExecutor::waitBlocking(future);
-
-        //variantMap[dataHierarchy().getSerializationName()] = dataHierarchyPlan.getWorkflowContextAs<DataHierarchyManagerSaveContext>()->getDataHierachyMap();
         dataHierarchy().insertIntoVariantMap(variantMap);
         actions().insertIntoVariantMap(variantMap);
         events().insertIntoVariantMap(variantMap);

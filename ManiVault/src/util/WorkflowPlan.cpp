@@ -22,6 +22,23 @@ WorkflowPlan::Job::Job(QString name, JobFunction function, JobThreadAffinity thr
     Q_ASSERT(_result.isValid() || _result.isNull());
 }
 
+WorkflowPlan::Job::Job(QString name, NestedWorkflowFunction nestedWorkflowFunction, JobThreadAffinity threadAffinity, JobProgressMode progressMode, double weight):
+	_name(std::move(name)),
+	_kind(JobKind::NestedWorkflow),
+	_nestedWorkflowFunction(std::move(nestedWorkflowFunction)),
+	_threadAffinity(threadAffinity),
+	_progressMode(progressMode),
+	_weight(weight)
+{
+}
+
+WorkflowPlan::Job::Job(QString name, NestedWorkflowJob job):
+	_name(std::move(name)),
+	_kind(JobKind::NestedWorkflow),
+	_nestedWorkflowFunction(std::move(job.function))
+{
+}
+
 QString WorkflowPlan::Job::getName() const
 {
 	return _name;
@@ -204,6 +221,13 @@ void WorkflowPlan::setWeight(double weight)
 double WorkflowPlan::getWeight() const
 {
 	return _weight;
+}
+
+void WorkflowPlan::addNestedWorkflowStage(const QString& name, NestedWorkflowFunction function)
+{
+	Stage stage(name, ConcurrencyMode::Sequential, Jobs{ Job(name, NestedWorkflowJob{ std::move(function) }) });
+
+	_stages.push_back(std::move(stage));
 }
 
 WorkflowPlan::Stage::Stage(QString name, ConcurrencyMode concurrencyMode, Jobs jobs, double weight /*= 1.0*/) :

@@ -90,8 +90,8 @@ CORE_EXPORT DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decode
  */
 CORE_EXPORT DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec);
 
-CORE_EXPORT WorkflowResultFuture populateBytesFromBlobFromVariantMapAsync(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext = nullptr);
-CORE_EXPORT void populateBytesFromBlobFromVariantMap(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext = nullptr);
+CORE_EXPORT UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext = nullptr);
+CORE_EXPORT void populateBytesFromBlobMap(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext = nullptr);
 CORE_EXPORT QByteArray bytesFromBlobVariantMap(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext = nullptr);
 
 /**

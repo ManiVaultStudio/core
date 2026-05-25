@@ -47,12 +47,6 @@ WorkflowResultFuture TaskflowWorkflowPlanExecutor::executeAsyncImpl(UniqueWorkfl
 {
     auto state = std::make_shared<WorkflowResultFuture::State>();
 
-    auto* watcher = new QFutureWatcher<SharedWorkflowResult>();
-
-    state->watcher = watcher;
-
-    connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, watcher, &QObject::deleteLater, Qt::QueuedConnection);
-
     Task* task = nullptr;
 
     if (guiScope != Task::GuiScope::None) {
@@ -64,20 +58,10 @@ WorkflowResultFuture TaskflowWorkflowPlanExecutor::executeAsyncImpl(UniqueWorkfl
 
     state->task = task;
 
-    state->future = QtConcurrent::run([this, state, workflowPlan = std::move(workflowPlan), task, executionOptions, executionContext]() mutable -> SharedWorkflowResult {
+    state->future = _executor.async([this, state, workflowPlan = std::move(workflowPlan), task, executionOptions, executionContext]() mutable -> SharedWorkflowResult {
         try {
             if (executionContext != nullptr) {
-                //WorkflowReporter::info("Nested workflow started");
-
-                tf::Taskflow taskFlow;
-
-                compileWorkflow(*workflowPlan, taskFlow, executionContext);
-
-                _executor.run(taskFlow).wait();
-
-                //WorkflowReporter::info("Nested workflow finished");
-
-                return {};
+                throw std::runtime_error("Nested workflow execution through executeAsyncImpl is no longer supported. Use addNestedWorkflowStage.");
             }
 
             return executeRoot(*workflowPlan, task, executionOptions);
@@ -86,9 +70,7 @@ WorkflowResultFuture TaskflowWorkflowPlanExecutor::executeAsyncImpl(UniqueWorkfl
             state->setException(std::current_exception());
             return {};
         }
-        });
-
-    watcher->setFuture(state->future);
+	});
 
     return WorkflowResultFuture(state);
 }
@@ -269,27 +251,53 @@ void TaskflowWorkflowPlanExecutor::handleStageException(const WorkflowPlan::Stag
 
 void TaskflowWorkflowPlanExecutor::compileWorkflow(const WorkflowPlan& workflowPlan, tf::Taskflow& taskflow, SharedWorkflowExecutionContext parentContext)
 {
-    auto mainEndTasks       = compileStages(workflowPlan.getStages(), taskflow, parentContext);
-    auto successEndTasks    = compileStages(workflowPlan.getOnSuccessStages(), taskflow, parentContext);
+    auto mainTasks = compileStages(workflowPlan.getStages(), taskflow, parentContext);
 
-    for (auto& mainEnd : mainEndTasks) {
-        for (auto& successEnd : successEndTasks) {
-            mainEnd.precede(successEnd);
+    auto successTasks = compileStages(workflowPlan.getOnSuccessStages(), taskflow, parentContext);
+
+    for (auto& mainEnd : mainTasks.ends) {
+        for (auto& successStart : successTasks.starts) {
+            mainEnd.precede(successStart);
         }
     }
 
-    auto finallyEndTasks = compileStages(workflowPlan.getFinallyStages(), taskflow, parentContext);
+    auto finallyTasks = compileStages(workflowPlan.getFinallyStages(), taskflow, parentContext);
 
-    for (auto& successEnd : successEndTasks) {
-        for (auto& finallyEnd : finallyEndTasks) {
-            successEnd.precede(finallyEnd);
+    for (auto& successEnd : successTasks.ends) {
+        for (auto& finallyStart : finallyTasks.starts) {
+            successEnd.precede(finallyStart);
         }
     }
 }
 
 void TaskflowWorkflowPlanExecutor::compileWorkflow(const WorkflowPlan& workflowPlan, tf::Subflow& subflow, SharedWorkflowExecutionContext parentContext)
 {
-    compileStages(workflowPlan.getStages(), subflow, parentContext);
+    auto mainTasks = compileStages(
+        workflowPlan.getStages(),
+        subflow,
+        parentContext);
+
+    auto successTasks = compileStages(
+        workflowPlan.getOnSuccessStages(),
+        subflow,
+        parentContext);
+
+    for (auto& mainEnd : mainTasks.ends) {
+        for (auto& successStart : successTasks.starts) {
+            mainEnd.precede(successStart);
+        }
+    }
+
+    auto finallyTasks = compileStages(
+        workflowPlan.getFinallyStages(),
+        subflow,
+        parentContext);
+
+    for (auto& successEnd : successTasks.ends) {
+        for (auto& finallyStart : finallyTasks.starts) {
+            successEnd.precede(finallyStart);
+        }
+    }
 }
 
 void TaskflowWorkflowPlanExecutor::addWorkflowFinishedNotification(const QString& workflowName, const SharedWorkflowResult& result, const QUuid& resultId)
@@ -326,6 +334,20 @@ void TaskflowWorkflowPlanExecutor::executeCompiledJob(const WorkflowPlan::Job& j
 {
     Q_UNUSED(subflow)
 
-	executeJob(job, jobContext);
+        if (job.isNestedWorkflow()) {
+            jobContext->info(QString("Nested workflow job started: %1").arg(job.getName()));
+
+            auto childPlan = job.createNestedWorkflow(jobContext);
+
+            auto childContext = jobContext->createChild(
+                childPlan->getName(),
+                childPlan->getWeight(),
+                WorkflowPlan::JobProgressMode::Automatic);
+
+            compileWorkflow(*childPlan, subflow, childContext);
+            return;
+        }
+
+    executeJob(job, jobContext);
 }
 

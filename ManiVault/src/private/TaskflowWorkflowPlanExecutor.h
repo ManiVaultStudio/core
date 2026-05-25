@@ -13,7 +13,6 @@
 #include <exception/ManiVaultException.h>
 
 #include <QString>
-#include <QThreadPool>
 
 namespace mv
 {
@@ -28,6 +27,12 @@ class TaskflowWorkflowPlanExecutor final : public AbstractWorkflowPlanExecutor
 {
 protected:
     using TaskList = std::vector<tf::Task>;
+
+    struct CompiledTasks
+    {
+        TaskList starts;
+        TaskList ends;
+    };
 
 public:
 
@@ -66,16 +71,16 @@ private: // Helpers
         SharedWorkflowExecutionContext jobContext);
 
     template<typename Flow>
-    TaskList compileStages(const WorkflowPlan::Stages& stages, Flow& flow, SharedWorkflowExecutionContext parentContext)
+    CompiledTasks compileStages(const WorkflowPlan::Stages& stages, Flow& flow, SharedWorkflowExecutionContext parentContext)
     {
-        TaskList previous;
+        CompiledTasks previous;
 
         for (const auto& stage : stages) {
             auto current = compileStage(stage, flow, parentContext);
 
-            for (auto& prev : previous)
-                for (auto& cur : current)
-                    prev.precede(cur);
+            for (auto& prevEnd : previous.ends)
+                for (auto& currentStart : current.starts)
+                    prevEnd.precede(currentStart);
 
             previous = std::move(current);
         }
@@ -84,12 +89,13 @@ private: // Helpers
     }
 
     template<typename Flow>
-    TaskList compileSequentialStage(
+    CompiledTasks compileSequentialStage(
         const WorkflowPlan::Stage& stage,
         Flow& flow,
         SharedWorkflowExecutionContext stageContext)
     {
-        TaskList tasks;
+        CompiledTasks result;
+        tf::Task previous;
 
         for (const auto& job : stage.getJobs()) {
             auto jobContext = stageContext->createChild(
@@ -99,24 +105,27 @@ private: // Helpers
 
             auto task = flow.emplace([this, job, jobContext](tf::Subflow& subflow) mutable {
                 executeCompiledJob(job, subflow, jobContext);
-            });
+                });
 
-            if (!tasks.empty())
-                tasks.back().precede(task);
+            if (result.starts.empty())
+                result.starts.push_back(task);
 
-            tasks.push_back(task);
+            if (!result.ends.empty())
+                result.ends.back().precede(task);
+
+            result.ends = { task };
         }
 
-        return tasks;
+        return result;
     }
 
     template<typename Flow>
-    TaskList compileParallelStage(
+    CompiledTasks compileParallelStage(
         const WorkflowPlan::Stage& stage,
         Flow& flow,
         SharedWorkflowExecutionContext stageContext)
     {
-        TaskList tasks;
+        CompiledTasks result;
 
         for (const auto& job : stage.getJobs()) {
             auto jobContext = stageContext->createChild(
@@ -126,16 +135,17 @@ private: // Helpers
 
             auto task = flow.emplace([this, job, jobContext](tf::Subflow& subflow) mutable {
                 executeCompiledJob(job, subflow, jobContext);
-            });
+                });
 
-            tasks.push_back(task);
+            result.starts.push_back(task);
+            result.ends.push_back(task);
         }
 
-        return tasks;
+        return result;
     }
 
     template<typename Flow>
-    TaskList compileStage(const WorkflowPlan::Stage& stage, Flow& flow, SharedWorkflowExecutionContext parentContext)
+    CompiledTasks compileStage(const WorkflowPlan::Stage& stage, Flow& flow, SharedWorkflowExecutionContext parentContext)
     {
         auto stageContext = parentContext->createChild(
             stage.getName(),

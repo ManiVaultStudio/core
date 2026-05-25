@@ -20,11 +20,7 @@ namespace mv
 
 namespace mv::util {
 
-/** Result of an asynchronous toVariantMap() operation */
-struct AsyncToVariantMapResult;
-
-/** Result of an asynchronous fromVariantMap() operation */
-struct AsyncFromVariantMapResult;
+class WorkflowExecutionContext;
 
 /**
  * Serializable class
@@ -120,9 +116,10 @@ public:
      * fromVariantMap() synchronously.
      *
      * @param variantMap Variant map representation of the object state.
+     * @param parentContext Optional parent workflow execution context to which the loading workflow will be attached as a child. This can be used to integrate the loading workflow into a larger workflow hierarchy, allowing it to report progress and messages in the context of the parent workflow execution.
      * @return Workflow plan that loads the object state when executed.
      */
-    virtual UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap);
+    virtual UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext = nullptr);
 
     /**
      * Load the object state from a parent variant map.
