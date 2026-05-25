@@ -301,8 +301,6 @@ void Clusters::fromVariantMap(const QVariantMap& variantMap)
 {
     const auto projectApplicationVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
-    qDebug() << "-----CLUSTERS_BEGIN-----";
-
     if (projectApplicationVersion < Version(1, 5, 0)) {
         fromVariantMapPre150(variantMap);
     }
@@ -311,8 +309,6 @@ void Clusters::fromVariantMap(const QVariantMap& variantMap)
 
         getRawData<ClusterData>()->fromVariantMap(variantMap);
     }
-
-    qDebug() << "-----CLUSTERS_END-----";
 }
 
 void Clusters::fromVariantMapPre150(const QVariantMap& variantMap)

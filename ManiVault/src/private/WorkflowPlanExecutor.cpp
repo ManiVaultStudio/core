@@ -76,36 +76,6 @@ WorkflowResultFuture WorkflowPlanExecutor::execute(UniqueWorkflowPlan workflowPl
     );
 }
 
-void WorkflowPlanExecutor::waitForWorkflowResultFuture(const WorkflowResultFuture& future, WorkflowPlan::Job& job)
-{
-    future.waitForFinished();
-
-    if (future.getState()->hasException())
-        future.getState()->rethrowExceptionIfAny();
-
-    auto result = future.result();
-
-    if (!result) {
-        job.fail("Async stage returned no workflow result");
-        throw ManiVaultException(
-            SeverityLevel::Error,
-            "Async stage failed",
-            "Async stage returned no workflow result",
-            job.getName()
-        );
-    }
-
-    if (result->hasErrors()) {
-        job.fail("Async stage returned failed workflow result");
-        throw ManiVaultException(
-            SeverityLevel::Error,
-            "Async stage failed",
-            "Nested workflow reported errors",
-            job.getName()
-        );
-    }
-}
-
 WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(UniqueWorkflowPlan workflowPlan, Task::GuiScope guiScope, const WorkflowExecutionOptions& executionOptions, SharedWorkflowExecutionContext executionContext)
 {
     return {};

@@ -8,9 +8,9 @@
 
 #include <QFuture>
 #include <QPointer>
-#include <QFutureWatcher>
 
 #include <exception>
+#include <future>
 
 namespace mv
 {
@@ -44,11 +44,13 @@ public:
 
     explicit WorkflowResultFuture(std::shared_ptr<State> state);
 
-    const std::future<SharedWorkflowResult>& getFuture() const;
+    [[nodiscard]] SharedWorkflowResult get() const;
 
     Task* getTask() const;
 
     std::shared_ptr<State> getState() const { return _state; }
+
+    void onFinished(QObject* receiver, std::function<void(SharedWorkflowResult)> callback);
 
 private:
     std::shared_ptr<State> _state;

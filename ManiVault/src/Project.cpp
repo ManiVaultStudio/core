@@ -160,7 +160,7 @@ QVariantMap Project::toVariantMap() const
 
     const auto future = Application::getWorkflowPlanExecutor().execute(std::move(plan));
 
-    return future.result()->value<QVariantMap>();
+    return future.get()->value<QVariantMap>();
 }
 
 UniqueWorkflowPlan Project::toVariantMapWorkflow() const

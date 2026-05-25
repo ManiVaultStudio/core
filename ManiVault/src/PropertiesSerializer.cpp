@@ -31,6 +31,7 @@ void PropertiesSerializer::fromVariantMap(const QVariantMap& propertiesMap, QVar
 #ifdef PROPERTIES_SERIALIZER_VERBOSE
     qDebug() << "Deserializing properties: " << propertiesMap.keys();
 #endif
+    return;
 
     const auto version = propertiesMap.value("PropertiesFormatVersion").toUInt();
 

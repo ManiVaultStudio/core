@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <util/Serialization.h>
-
 #include <QObject>
 
 class DecodeRequestState final : public QObject
@@ -32,8 +30,6 @@ private:
     QString         _error;
     int             _totalJobs = 0;
     int             _completedJobs = 0;
-
-    QFutureWatcher<QVector<mv::util::DecodeBlockResult>> _watcher;
 
     friend class SerializationScheduler;
 };

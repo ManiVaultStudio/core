@@ -1071,7 +1071,8 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
     auto plan = fromVariantMapWorkflow(variantMap);
 
     const auto future = Application::getWorkflowPlanExecutor().execute(std::move(plan));
-    AbstractWorkflowPlanExecutor::waitWithEventLoop(future);
+
+    auto result = future.get();
 }
 
 UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext)

@@ -24,6 +24,7 @@ public:
     AbstractWorkflowPlanExecutor(QObject* parent = nullptr);
 
     [[nodiscard]] virtual WorkflowResultFuture execute(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) = 0;
+    [[nodiscard]] virtual SharedWorkflowResult executeBlocking(UniqueWorkflowPlan workflowPlan, Task* task, WorkflowExecutionOptions executionOptions) = 0;
 
     static SharedWorkflowResult waitForAsync(WorkflowResultFuture::State& state);
 

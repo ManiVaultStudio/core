@@ -460,9 +460,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
 
     const auto future = Application::getWorkflowPlanExecutor().execute(std::move(plan));
 
-    future.waitForFinished();
-
-    return future.result()->value<QVariantMap>();
+    return future.get()->value<QVariantMap>();
 }
 
 UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const

@@ -38,10 +38,15 @@ WorkflowResultFuture::WorkflowResultFuture(std::shared_ptr<State> state): _state
 {
 }
 
-const std::future<SharedWorkflowResult>& WorkflowResultFuture::getFuture() const
+SharedWorkflowResult WorkflowResultFuture::get() const
 {
 	Q_ASSERT(_state);
-	return _state->future;
+
+	auto result = _state->future.get();
+
+	_state->rethrowExceptionIfAny();
+
+	return result;
 }
 
 Task* WorkflowResultFuture::getTask() const
@@ -49,4 +54,27 @@ Task* WorkflowResultFuture::getTask() const
 	return _state ? _state->task.data() : nullptr;
 }
 
+void WorkflowResultFuture::onFinished(QObject* receiver, std::function<void(SharedWorkflowResult)> callback)
+{
+	auto state = _state;
+
+	std::thread([state, receiver, callback = std::move(callback)]() mutable {
+		SharedWorkflowResult result;
+
+		try {
+			result = state->future.get();
+		}
+		catch (...) {
+			state->setException(std::current_exception());
+		}
+
+		QMetaObject::invokeMethod(
+			receiver,
+			[state, callback = std::move(callback), result]() mutable {
+				state->rethrowExceptionIfAny();
+				callback(result);
+			},
+			Qt::QueuedConnection);
+	}).detach();
+}
 }

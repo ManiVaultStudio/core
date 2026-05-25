@@ -373,19 +373,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
 	    setState(State::OpeningProject);
 
-        auto watcher = new QFutureWatcher<SharedWorkflowResult>(this);
-
-        connect(watcher, &QFutureWatcher<SharedWorkflowResult>::finished, this, [this, watcher] {
-            watcher->deleteLater();
-
-            setState(State::Idle);
-
-            emit projectOpened(*_project);
-        });
-
         auto projectOpenWorkflowPlan = createProjectOpenWorkflowPlan(filePath);
-
-        qDebug() << "before execute";
 
         auto future = Application::getWorkflowPlanExecutor().execute(std::move(projectOpenWorkflowPlan), nullptr, WorkflowExecutionOptions({
             ._parallel = parameters._parallel,
@@ -395,15 +383,15 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             ._traceSink = std::make_shared<WorkflowChromeTraceSink>(QStringLiteral("D:/Temp/chrome_trace.json"))*/
         }));
 
-        qDebug() << "after execute" << future.isValid() << future.isFinished();
-
-        watcher->setFuture(future.getFuture());
-
-        qDebug() << "after setFuture";
+        
+        future.onFinished(this, [this](SharedWorkflowResult result) {
+            setState(State::Idle);
+            emit projectOpened(*_project);
+        });
     }
-    catch (const std::exception& e) {
+    catch (const std::exception& exception) {
         setState(State::Idle);
-        exceptionMessageBox("Unable to load ManiVault project", e);
+        exceptionMessageBox("Unable to load ManiVault project", exception);
     }
     catch (...) {
         setState(State::Idle);
@@ -759,8 +747,7 @@ void ProjectManager::saveProject(QString filePath)
                 true    // Add notification
 	        }));
 
-            future.waitForFinished();
-            //AbstractWorkflowPlanExecutor::waitWithEventLoop(workflowResult);
+            auto result = future.get();
         }
         emit projectSaved(*_project);
     }
