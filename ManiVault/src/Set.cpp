@@ -198,7 +198,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
                 _mayUnderive = variantMap["MayUnderive"].toBool();
 
             if (variantMap.contains("Properties")) {
-                PropertiesSerializer::fromVariantMap(variantMap["Properties"].toMap(), _properties);
+                //PropertiesSerializer::fromVariantMap(variantMap["Properties"].toMap(), _properties);
             }
 
             if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {

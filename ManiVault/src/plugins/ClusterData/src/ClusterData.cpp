@@ -299,6 +299,8 @@ std::vector<std::uint32_t> Clusters::getSelectedIndices() const
 
 void Clusters::fromVariantMap(const QVariantMap& variantMap)
 {
+    return;
+
     const auto projectApplicationVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
     if (projectApplicationVersion < Version(1, 5, 0)) {

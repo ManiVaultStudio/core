@@ -132,9 +132,9 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap
         _statusBarOptionsAction.fromParentVariantMap(variantMap);
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
-    //plan->addNestedWorkflowStage("Step 2", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) mutable -> UniqueWorkflowPlan {
-    //    return dataHierarchy().fromVariantMapWorkflow(variantMap, context);
-    //});
+    plan->addNestedWorkflowStage("Step 2", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) mutable -> UniqueWorkflowPlan {
+        return dataHierarchy().fromVariantMapWorkflow(variantMap, context);
+    });
 
     plan->addSequentialStage("Step 3", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
         actions().fromParentVariantMap(variantMap);

@@ -153,70 +153,78 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 {
     auto plan = fromVariantMapWorkflow(variantMap);
 
-    const auto future = Application::getWorkflowPlanExecutor().execute(std::move(plan));
+    const auto future = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));
 }
 
 UniqueWorkflowPlan PointData::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
 {
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+
     const auto projectApplicationVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
     if (projectApplicationVersion < Version(1, 5, 0)) {
-        fromVariantMapPre150(variantMap);
+        plan->addSequentialStage("Load (version <1.5.0)", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
+            fromVariantMapPre150(variantMap);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread);
     }
     else {
-        variantMapMustContain(variantMap, "Data");
-        variantMapMustContain(variantMap, "NumberOfPoints");
-        variantMapMustContain(variantMap, "NumberOfDimensions");
+        plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
+            //Serializable::fromVariantMap(variantMap);
 
-        const auto data = variantMap["Data"].toMap();
-        const auto numberOfPoints = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
-        const auto numberOfDimensions = variantMap["NumberOfDimensions"].toUInt();
-        const auto numberOfElements = numberOfPoints * numberOfDimensions;
-        const auto elementTypeIndex = static_cast<ElementTypeSpecifier>(data["TypeIndex"].toInt());
-        const auto rawDataMap = data["Raw"].toMap();
+            variantMapMustContain(variantMap, "Data");
+            variantMapMustContain(variantMap, "NumberOfPoints");
+            variantMapMustContain(variantMap, "NumberOfDimensions");
 
-        bool isDense = true;
+            const auto data = variantMap["Data"].toMap();
+            const auto numberOfPoints = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
+            const auto numberOfDimensions = variantMap["NumberOfDimensions"].toUInt();
+            const auto numberOfElements = numberOfPoints * numberOfDimensions;
+            const auto elementTypeIndex = static_cast<ElementTypeSpecifier>(data["TypeIndex"].toInt());
+            const auto rawDataMap = data["Raw"].toMap();
 
-        if (variantMap.contains("Dense"))
-            isDense = variantMap["Dense"].toBool();
+            bool isDense = true;
 
-        _isDense = isDense;
-        _numDimensions = numberOfDimensions;
+            if (variantMap.contains("Dense"))
+                isDense = variantMap["Dense"].toBool();
 
-        if (_isDense)
-        {
-            setElementTypeSpecifier(elementTypeIndex);
-            resizeVector(numberOfElements);
+            _isDense = isDense;
+            _numDimensions = numberOfDimensions;
 
-            populateBytesFromBlobMap(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), parentContext);
-        }/*
-        else {
-            const auto numberOfNonZeroElements = variantMap["NumberOfNonZeroElements"].toULongLong();
+            if (_isDense)
+            {
+                setElementTypeSpecifier(elementTypeIndex);
+                resizeVector(numberOfElements);
 
-            std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
+                //populateBytesFromBlobMap(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), parentContext);
+            }/*
+            else {
+                const auto numberOfNonZeroElements = variantMap["NumberOfNonZeroElements"].toULongLong();
 
-            populateDataBufferFromVariantMap(rawData, bytes.data());
-            _numRows = static_cast<std::uint64_t>(numberOfPoints); // FIXME should be redundant
+                std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
 
-            size_t offset = 0;
-            std::vector<size_t> rowPointers(numberOfPoints + 1);
-            std::memcpy(rowPointers.data(), bytes.data() + offset, rowPointers.size() * sizeof(size_t));
+                populateDataBufferFromVariantMap(rawData, bytes.data());
+                _numRows = static_cast<std::uint64_t>(numberOfPoints); // FIXME should be redundant
 
-            offset += rowPointers.size() * sizeof(size_t);
-            std::vector<size_t> colIndices(numberOfNonZeroElements);
-            std::memcpy(colIndices.data(), bytes.data() + offset, colIndices.size() * sizeof(size_t));
+                size_t offset = 0;
+                std::vector<size_t> rowPointers(numberOfPoints + 1);
+                std::memcpy(rowPointers.data(), bytes.data() + offset, rowPointers.size() * sizeof(size_t));
 
-            offset += colIndices.size() * sizeof(float);
-            std::vector<float> values(numberOfNonZeroElements);
-            std::memcpy(values.data(), bytes.data() + offset, values.size() * sizeof(float));
+                offset += rowPointers.size() * sizeof(size_t);
+                std::vector<size_t> colIndices(numberOfNonZeroElements);
+                std::memcpy(colIndices.data(), bytes.data() + offset, colIndices.size() * sizeof(size_t));
 
-            _sparseData.setData(numberOfPoints, numberOfDimensions, std::move(rowPointers), std::move(colIndices), std::move(values));
+                offset += colIndices.size() * sizeof(float);
+                std::vector<float> values(numberOfNonZeroElements);
+                std::memcpy(values.data(), bytes.data() + offset, values.size() * sizeof(float));
 
-            qDebug() << "Loaded sparse data with" << _numRows << "points and" << _numDimensions << "dimensions.";
-        }*/
+                _sparseData.setData(numberOfPoints, numberOfDimensions, std::move(rowPointers), std::move(colIndices), std::move(values));
+
+                qDebug() << "Loaded sparse data with" << _numRows << "points and" << _numDimensions << "dimensions.";
+            }*/
+        }, WorkflowPlan::JobThreadAffinity::GuiThread);
     }
 
-	return RawData::fromVariantMapWorkflow(variantMap, parentContext);
+	return plan;
 }
 
 void PointData::fromVariantMapPre150(const QVariantMap& variantMap)
@@ -1105,11 +1113,12 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap,
 
             populateBytesFromBlobMap(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(uint32_t));
         }
-
+        /*
         fromPlan->addNestedWorkflowStage("Load dimension names", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) mutable -> UniqueWorkflowPlan {
             return DimensionNamesSerializer::fromVariantMapWorkflow(this, variantMap, context);
         });
 
+        
         fromPlan->addSequentialStage("Process dimension names", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) -> void {
             if (variantMap.contains("Dimensions"))
                 _dimensionsPickerAction->fromParentVariantMap(variantMap);
@@ -1152,6 +1161,7 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap,
             //    });
 
         }, WorkflowPlan::JobThreadAffinity::GuiThread);
+        */
     }
     
 
