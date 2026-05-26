@@ -9,6 +9,7 @@
 #include "WorkflowProgressNode.h"
 #include "WorkflowExecutionState.h"
 #include "WorkflowPlan.h"
+#include "WorkflowStageSummary.h"
 #include "Task.h"
 
 #include <QString>
@@ -19,12 +20,48 @@ namespace mv::util
 
 class CORE_EXPORT WorkflowExecutionContext
 {
-protected:
+public:
 
-    struct PendingAsyncWork
+    /**
+	 * @brief Describes the semantic role of a workflow execution context within the workflow execution hierarchy.
+	 *
+	 * Workflow execution contexts are used to represent different levels and types of execution entities
+	 * within a workflow plan, such as entire workflows, stages, and individual jobs. The context type
+	 * determines how the execution context should be interpreted, visualized, and reported in logging,
+	 * progress reporting, tracing, and workflow diagnostics.
+	 *
+	 * This classification is primarily useful for:
+	 * - Rendering hierarchical console and debug output
+	 * - Distinguishing workflows from stages and jobs in reports
+	 * - Visualizing workflow execution trees
+	 * - Applying different progress aggregation strategies
+	 * - Improving workflow tracing and diagnostics
+	 * - Generating structured execution telemetry
+	 *
+	 * The different context types are:
+	 *
+	 * - Workflow:
+	 *   Represents a top-level workflow execution context.
+	 *
+	 * - NestedWorkflow:
+	 *   Represents a workflow executed as part of another workflow.
+	 *
+	 * - SequentialStage:
+	 *   Represents a stage whose jobs or child stages execute sequentially.
+	 *
+	 * - ParallelStage:
+	 *   Represents a stage whose jobs or child stages may execute concurrently.
+	 *
+	 * - Job:
+	 *   Represents an individual executable unit of work within a workflow stage.
+	 */
+    enum class Type
     {
-        WorkflowResultFuture _future;
-        QString _label;
+        Workflow,          /** Top-level workflow execution context */
+        NestedWorkflow,    /** Workflow executed as part of another workflow */
+        SequentialStage,   /** Sequential execution stage */
+        ParallelStage,     /** Parallel execution stage */
+        Job                /** Individual executable job */
     };
 
 public:
@@ -35,14 +72,69 @@ public:
     WorkflowExecutionContext();
 
     WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, Task* task = nullptr, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
+
+    
+    Type getType() const
+    {
+        return _type;
+    }
+
+    void setType(Type type)
+    {
+        _type = type;
+    }
+
+    static QString getWorkflowExecutionContextTypeName(Type type);
+
     static SharedWorkflowExecutionContext makeRoot(const QString& name, Task* task, WorkflowExecutionOptions executionOptions = {});
 
     SharedWorkflowExecutionContext createChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic) const;
 
-    SharedWorkflowExecutionContext createNestedWorkflowChild(
-        const QString& name,
-        double weight,
-        WorkflowPlan::JobProgressMode progressMode) const;
+    /**
+	 * @brief Creates a child workflow execution context representing a top-level workflow scope.
+	 *
+	 * This function creates a new workflow execution context that inherits execution state,
+	 * reporting infrastructure, progress tracking infrastructure, and task association from
+	 * the current context while establishing a new execution hierarchy level for a child workflow.
+	 *
+	 * The created child context:
+	 * - Shares the same workflow execution state
+	 * - Shares the same task association
+	 * - Extends the execution path hierarchy
+	 * - Creates child report and progress nodes
+	 * - Establishes a unique result scope
+	 * - Receives its own unique execution identifier
+	 * - Is classified as a Workflow execution context
+	 *
+	 * This function is typically used when:
+	 * - Executing a root workflow from another workflow executor
+	 * - Creating logical workflow boundaries
+	 * - Constructing nested execution hierarchies
+	 * - Establishing workflow-level progress aggregation
+	 *
+	 * @param name Human-readable name of the child workflow context.
+	 * @param weight Relative progress contribution weight of the child workflow.
+	 * @param progressMode Progress reporting mode used by the child workflow.
+	 * @return Shared pointer to the newly created workflow execution context.
+	 */
+    SharedWorkflowExecutionContext createWorkflowChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic) const;
+    SharedWorkflowExecutionContext createNestedWorkflowChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic) const;
+    SharedWorkflowExecutionContext createSequentialStageChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic) const;
+    SharedWorkflowExecutionContext createParallelStageChild(const QString& name, double weight = 1.0,WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic) const; 
+    SharedWorkflowExecutionContext createJobChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic) const;
+    SharedWorkflowExecutionContext createTypedChild(const QString& name, Type type, double weight,WorkflowPlan::JobProgressMode progressMode) const;
+
+public:
+
+    void reportStarted() const;
+    void reportFinished(std::uint64_t durationMs = 0) const;
+    void reportFailed(const QString& errorMessage) const;
+    void reportSkipped(const QString& reason) const;
+    void reportStageSummary(const WorkflowStageSummary& summary) const;
+
+    QVariantMap makeLifecycleDetails(const QString& event, std::uint64_t durationMs = 0) const;
+
+public:
 
     bool hasProgressChildren() const;
 
@@ -94,6 +186,27 @@ public:
      * @return The execution path of this workflow execution context as a string, with each level of the hierarchy separated by the specified separator.
      */
     QString getExecutionPath(const QString& separator = "/") const;
+
+    /**
+	 * @brief Gets the hierarchical depth of this workflow execution context within the workflow execution tree.
+	 *
+	 * The depth represents how deeply nested this context is relative to the root workflow execution context.
+	 * A root workflow execution context has a depth of 0, its direct children have a depth of 1, and so on.
+	 *
+	 * The depth is derived from the execution path associated with this context. Since the execution path
+	 * always contains at least the name of the current context itself, the depth is computed as:
+	 *
+	 *     executionPath.size() - 1
+	 *
+	 * This value is primarily useful for:
+	 * - Rendering hierarchical console or log output with indentation
+	 * - Visualizing nested workflows, stages, and jobs
+	 * - Debugging workflow execution structure
+	 * - Computing relative execution scope information
+	 *
+	 * @return The hierarchical depth of this workflow execution context, where 0 represents the root context.
+	 */
+    std::int32_t getDepth() const;
 
 public: // ID
 
@@ -151,16 +264,18 @@ private:
     friend class WorkflowExecutionScope;
 
 private:
-    QString                             _name;                                                      /** Name of the workflow execution context, typically derived from the name of the workflow plan or job it represents */
-    QUuid                               _id;                                                        /** Unique identifier for this workflow execution context */
-    QUuid                               _parentId;                                                  /** Unique identifier of the parent workflow execution context, if any */
-    QStringList                         _executionPath;                                             /** Execution path of this workflow execution context */
-    ReportNodePtr                       _reportNode;                                                /** Report node associated with this workflow execution context */
-    ProgressNodePtr                     _progressNode;                                              /** Progress node associated with this workflow execution context */
-    StatePtr                            _state;                                                     /** Execution state associated with this workflow execution context */
-    QPointer<Task>                      _task;                                                      /** Task associated with this workflow execution context */
-    WorkflowPlan::JobProgressMode       _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /** Progress mode for this workflow execution context */
-    QString                             _resultScope;                                               /** Scope for result values published by this workflow execution context, used to ensure uniqueness of result keys across the workflow execution hierarchy */
+    QString                                 _name;                                                      /** Name of the workflow execution context, typically derived from the name of the workflow plan or job it represents */
+    QUuid                                   _id;                                                        /** Unique identifier for this workflow execution context */
+    QUuid                                   _parentId;                                                  /** Unique identifier of the parent workflow execution context, if any */
+    QStringList                             _executionPath;                                             /** Execution path of this workflow execution context */
+    ReportNodePtr                           _reportNode;                                                /** Report node associated with this workflow execution context */
+    ProgressNodePtr                         _progressNode;                                              /** Progress node associated with this workflow execution context */
+    StatePtr                                _state;                                                     /** Execution state associated with this workflow execution context */
+    QPointer<Task>                          _task;                                                      /** Task associated with this workflow execution context */
+    WorkflowPlan::JobProgressMode           _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /** Progress mode for this workflow execution context */
+    QString                                 _resultScope;                                               /** Scope for result values published by this workflow execution context, used to ensure uniqueness of result keys across the workflow execution hierarchy */
+    Type                                    _type = Type::Workflow;                                     /** Semantic type of this workflow execution context, used for rendering, reporting, and diagnostics */
+    std::weak_ptr<WorkflowExecutionContext> _parent;                                                    /** Weak pointer to the parent workflow execution context, if any */  
 };
 
 /** Optional reference to a WorkflowExecutionContext */

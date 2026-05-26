@@ -24,18 +24,34 @@ WorkflowExecutionContext::WorkflowExecutionContext(QString name, ReportNodePtr r
 {
 }
 
+QString WorkflowExecutionContext::getWorkflowExecutionContextTypeName(Type type)
+{
+    switch (type) {
+	    case Type::Workflow:
+	        return "workflow";
+
+	    case Type::NestedWorkflow:
+	        return "nested-workflow";
+
+	    case Type::SequentialStage:
+	        return "sequential-stage";
+
+	    case Type::ParallelStage:
+	        return "parallel-stage";
+
+	    case Type::Job:
+	        return "job";
+    }
+
+    return "unknown";
+}
+
 SharedWorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString& name, Task* task /*= nullptr*/, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
 	auto reportRoot     = std::make_shared<WorkflowReportNode>(name);
 	auto progressRoot   = std::make_shared<WorkflowProgressNode>(1.0);
 	auto state          = std::make_shared<WorkflowExecutionState>(reportRoot, progressRoot, std::move(executionOptions));
-    auto threadPool     = std::make_shared<QThreadPool>();
-
-	threadPool->setObjectName("WorkflowExecutorPool");
-    threadPool->setMaxThreadCount(64);//state->getExecutionOptions()._parallel ? state->getExecutionOptions()._maxWorkerThreadCount : 1);
-    threadPool->setExpiryTimeout(30'000);
-
-	auto context = std::make_shared<WorkflowExecutionContext>(
+	auto context        = std::make_shared<WorkflowExecutionContext>(
         name,
         reportRoot,
         progressRoot,
@@ -43,7 +59,10 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString&
         task
     );
 
-    context->_resultScope = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    context->_type          = Type::Workflow;
+    context->_id            = QUuid::createUuid();
+    context->_executionPath = { name };
+    context->_resultScope   = name;
 
     return context;
 }
@@ -88,13 +107,117 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(const QStri
     return child;
 }
 
+SharedWorkflowExecutionContext WorkflowExecutionContext::createWorkflowChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
+{
+    auto childReportNode    = _reportNode ? _reportNode->createChild(name) : nullptr;
+    auto childProgressNode  = _progressNode ? _progressNode->createChild(weight) : nullptr;
+    auto child              = std::make_shared<WorkflowExecutionContext>(
+        name,
+        childReportNode,
+        childProgressNode,
+        _state,
+        _task,
+        progressMode
+    );
+
+    child->_type = Type::Workflow;
+    child->_parentId = _id;
+    child->_executionPath = _executionPath;
+    child->_executionPath << name;
+    child->_resultScope = _resultScope.isEmpty() ? name : _resultScope + "/" + name;
+
+    return child;
+}
+
 SharedWorkflowExecutionContext WorkflowExecutionContext::createNestedWorkflowChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
 {
-	auto child = createChild(name, weight, progressMode);
+    return createTypedChild(name, Type::NestedWorkflow, weight, progressMode);
+}
 
-	child->_resultScope = QUuid::createUuid().toString(QUuid::WithoutBraces);
+SharedWorkflowExecutionContext WorkflowExecutionContext::createSequentialStageChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
+{
+    return createTypedChild(name, Type::SequentialStage, weight, progressMode);
+}
 
-	return child;
+SharedWorkflowExecutionContext WorkflowExecutionContext::createParallelStageChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
+{
+    return createTypedChild(name, Type::ParallelStage, weight, progressMode);
+}
+
+SharedWorkflowExecutionContext WorkflowExecutionContext::createJobChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
+{
+    return createTypedChild(name, Type::Job, weight, progressMode);
+}
+
+SharedWorkflowExecutionContext WorkflowExecutionContext::createTypedChild(const QString& name, Type type, double weight, WorkflowPlan::JobProgressMode progressMode) const
+{
+    auto child = createChild(name, weight, progressMode);
+    child->_type = type;
+
+    return child;
+}
+
+void WorkflowExecutionContext::reportStarted() const
+{
+    info(_name, {}, makeLifecycleDetails("started"));
+}
+
+void WorkflowExecutionContext::reportFinished(std::uint64_t durationMs) const
+{
+    info(_name, {}, makeLifecycleDetails("finished", durationMs));
+}
+
+void WorkflowExecutionContext::reportFailed(const QString& errorMessage) const
+{
+    auto details = makeLifecycleDetails("failed");
+    details["error"] = errorMessage;
+
+    error(_name, {}, details);
+}
+
+void WorkflowExecutionContext::reportSkipped(const QString& reason) const
+{
+    auto details = makeLifecycleDetails("skipped");
+    details["reason"] = reason;
+
+    warning(_name, {}, details);
+}
+
+void WorkflowExecutionContext::reportStageSummary(const WorkflowStageSummary& summary) const
+{
+    auto details = makeLifecycleDetails("summary", summary.durationMs);
+
+    const auto summaryMap = summary.toVariantMap();
+
+    for (auto it = summaryMap.begin(); it != summaryMap.end(); ++it)
+        details[it.key()] = it.value();
+
+    info(_name, {}, details);
+}
+
+QVariantMap WorkflowExecutionContext::makeLifecycleDetails(const QString& event, std::uint64_t durationMs /*= 0*/) const
+{
+    QVariantMap details;
+
+    details["event"]    = event;
+    details["entity"]   = getWorkflowExecutionContextTypeName(_type);
+    details["name"]     = _name;
+    details["depth"]    = getDepth();
+    details["path"]     = getExecutionPath(" / ");
+    details["id"]       = _id.toString(QUuid::WithoutBraces);
+    details["parentId"] = _parentId.toString(QUuid::WithoutBraces);
+    details["threadId"] = QString::number(reinterpret_cast<quintptr>(QThread::currentThreadId()));
+
+    if (durationMs > 0)
+        details["durationMs"] = QVariant::fromValue<qulonglong>(durationMs);
+
+    qDebug()
+        << "TYPE DEBUG"
+        << _name
+        << static_cast<int>(_type)
+        << getWorkflowExecutionContextTypeName(_type);
+
+    return details;
 }
 
 bool WorkflowExecutionContext::hasProgressChildren() const
@@ -132,15 +255,16 @@ void WorkflowExecutionContext::message(SeverityLevel severity, QString text, QSt
 
 void WorkflowExecutionContext::info(QString text, QString location, QVariantMap details) const
 {
-    qDebug() << "Info:" << text << ", location:" << location;
+    qDebug().noquote() << WorkflowConsoleFormatter::format(SeverityLevel::Info, text, location, details);
 
-	if (_reportNode)
-		_reportNode->addMessage(SeverityLevel::Info, getName(), std::move(text), std::move(location), std::move(details));
+    if (_reportNode) {
+        _reportNode->addMessage(SeverityLevel::Info, getName(), text, location, details);
+    }
 }
 
 void WorkflowExecutionContext::warning(QString text, QString location, QVariantMap details) const
 {
-    qDebug() << "Warning:" << text << ", location:" << location;
+    qDebug().noquote() << WorkflowConsoleFormatter::format(SeverityLevel::Warning, text, location, details);
 
 	if (_reportNode)
 		_reportNode->addMessage(SeverityLevel::Warning, getName(), std::move(text), std::move(location), std::move(details));
@@ -148,7 +272,7 @@ void WorkflowExecutionContext::warning(QString text, QString location, QVariantM
 
 void WorkflowExecutionContext::error(QString text, QString location, QVariantMap details) const
 {
-    qDebug() << "Error:" << text << ", location:" << location;
+    qDebug().noquote() << WorkflowConsoleFormatter::format(SeverityLevel::Error, text, location, details);
 
 	if (_reportNode)
 		_reportNode->addMessage(SeverityLevel::Error, getName(), std::move(text), std::move(location), std::move(details));
@@ -194,6 +318,11 @@ WorkflowPlan::JobProgressMode WorkflowExecutionContext::getProgressMode() const
 QString WorkflowExecutionContext::getExecutionPath(const QString& separator /*= "/"*/) const
 {
     return _executionPath.join(separator);
+}
+
+std::int32_t WorkflowExecutionContext::getDepth() const
+{
+	return _executionPath.isEmpty() ? 0 : static_cast<std::int32_t>(_executionPath.size()) - 1;
 }
 
 QUuid WorkflowExecutionContext::getId() const

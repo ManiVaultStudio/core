@@ -7,6 +7,8 @@
 
 #include <Task.h>
 
+#include <util/WorkflowExecutionLifecycleScope.h>
+
 #include <future>
 
 #ifdef _DEBUG
@@ -27,7 +29,7 @@ WorkflowResultFuture TaskflowWorkflowPlanExecutor::execute(UniqueWorkflowPlan wo
         const auto pendingWorkLabel = QString("Async workflow: %1").arg(workflowPlan->getName());
         const auto resolvedOptions = executionOptions.value_or(parentContext->getState()->getExecutionOptions());
 
-        auto childContext = parentContext->createChild(workflowPlan->getName(), workflowPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
+        auto childContext = parentContext->createWorkflowChild(workflowPlan->getName(), workflowPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
         auto future = executeAsyncImpl(std::move(workflowPlan), resolvedOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, resolvedOptions, childContext);
 
         return future;
@@ -82,15 +84,9 @@ WorkflowResultFuture TaskflowWorkflowPlanExecutor::executeAsyncImpl(UniqueWorkfl
 
 SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& workflowPlan, Task* task, const WorkflowExecutionOptions& executionOptions /*= {}*/)
 {
-    qDebug() << "Taskflow workers:" << _executor.num_workers();
+    auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task, executionOptions);
 
-    QElapsedTimer elapsedTimer;
-    elapsedTimer.start();
-
-    auto rootContext = WorkflowExecutionContext::makeRoot(
-        workflowPlan.getName(),
-        task,
-        executionOptions);
+    WorkflowExecutionLifecycleScope lifecycle(rootContext);
 
     const auto displayFailure = [&workflowPlan, executionOptions](const QString& message) {
         QMetaObject::invokeMethod(&help(), [&workflowPlan, executionOptions, message]() {
@@ -111,8 +107,6 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
 
         compileStages(stages, taskflow, rootContext);
 
-        qDebug() << "Taskflow auxiliary graph tasks:" << taskflow.num_tasks();
-
         if (taskflow.num_tasks() > 0)
             _executor.run(taskflow).get();
         };
@@ -123,8 +117,6 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
         tf::Taskflow taskflow;
 
         compileWorkflow(workflowPlan, taskflow, rootContext);
-
-        qDebug() << "Taskflow graph tasks:" << taskflow.num_tasks();
 
         if (taskflow.num_tasks() > 0)
             _executor.run(taskflow).get();
@@ -138,10 +130,9 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
             std::rethrow_exception(primaryException);
         }
         catch (const ManiVaultException& exception) {
-            rootContext->error(
-                exception._message,
-                exception._where,
-                exception._details);
+            rootContext->error(exception._message, exception._where,exception._details);
+
+            lifecycle.fail(exception._message);
 
             displayFailure(exception._message);
 
@@ -149,24 +140,21 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
                 runStages(workflowPlan.getOnFailureStages());
             }
             catch (const std::exception& failureException) {
-                rootContext->error(
-                    QString("Failure stages failed: %1")
-                    .arg(QString::fromUtf8(failureException.what())),
-                    workflowPlan.getName());
+                rootContext->error(QString("Failure stages failed: %1").arg(QString::fromUtf8(failureException.what())), workflowPlan.getName());
             }
             catch (...) {
-                rootContext->error(
-                    "Failure stages failed with unknown error",
-                    workflowPlan.getName());
+                rootContext->error("Failure stages failed with unknown error", workflowPlan.getName());
             }
 
             if (exception._severity == SeverityLevel::Fatal)
                 std::rethrow_exception(primaryException);
         }
         catch (const std::exception& exception) {
-            rootContext->error(
-                QString::fromUtf8(exception.what()),
-                workflowPlan.getName());
+            const auto message = QString::fromUtf8(exception.what());
+
+            rootContext->error(message, workflowPlan.getName());
+
+            lifecycle.fail(message);
 
             displayFailure(QString::fromUtf8(exception.what()));
 
@@ -174,23 +162,18 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
                 runStages(workflowPlan.getOnFailureStages());
             }
             catch (const std::exception& failureException) {
-                rootContext->error(
-                    QString("Failure stages failed: %1")
-                    .arg(QString::fromUtf8(failureException.what())),
-                    workflowPlan.getName());
+                rootContext->error(QString("Failure stages failed: %1").arg(QString::fromUtf8(failureException.what())), workflowPlan.getName());
             }
             catch (...) {
-                rootContext->error(
-                    "Failure stages failed with unknown error",
-                    workflowPlan.getName());
+                rootContext->error("Failure stages failed with unknown error", workflowPlan.getName());
             }
 
             std::rethrow_exception(primaryException);
         }
         catch (...) {
-            rootContext->error(
-                "Workflow failed with unknown error",
-                workflowPlan.getName());
+            rootContext->error("Workflow failed with unknown error", workflowPlan.getName());
+
+        	lifecycle.fail("Workflow failed with unknown error");
 
             displayFailure("Unknown error");
 
@@ -198,15 +181,10 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
                 runStages(workflowPlan.getOnFailureStages());
             }
             catch (const std::exception& failureException) {
-                rootContext->error(
-                    QString("Failure stages failed: %1")
-                    .arg(QString::fromUtf8(failureException.what())),
-                    workflowPlan.getName());
+                rootContext->error(QString("Failure stages failed: %1").arg(QString::fromUtf8(failureException.what())), workflowPlan.getName());
             }
             catch (...) {
-                rootContext->error(
-                    "Failure stages failed with unknown error",
-                    workflowPlan.getName());
+                rootContext->error("Failure stages failed with unknown error", workflowPlan.getName());
             }
 
             std::rethrow_exception(primaryException);
@@ -217,10 +195,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
         runStages(workflowPlan.getFinallyStages());
     }
     catch (const std::exception& exception) {
-        rootContext->error(
-            QString("Finally stages failed: %1")
-            .arg(QString::fromUtf8(exception.what())),
-            workflowPlan.getName());
+        rootContext->error(QString("Finally stages failed: %1").arg(QString::fromUtf8(exception.what())), workflowPlan.getName());
 
         if (!primaryException)
             throw;
@@ -239,7 +214,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
     if (auto state = rootContext->getState()) {
         result->setMetrics(state->metrics().snapshot());
         result->setMessages(state->collectMessages());
-        result->setDuration(static_cast<std::uint64_t>(elapsedTimer.elapsed()));
+        result->setDuration(lifecycle.elapsedMs());
     }
 
     if (rootContext->getState()->getExecutionOptions()._addNotification) {
@@ -249,12 +224,14 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
             WorkflowResultRegistry::instance().add(result));
     }
 
+    lifecycle.finish();
+
     return result;
 }
 
 SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeChild(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext parentContext)
 {
-    auto childContext = parentContext->createChild(
+    auto childContext = parentContext->createWorkflowChild(
         workflowPlan.getName(),
         workflowPlan.getWeight(),
         WorkflowPlan::JobProgressMode::Automatic);
@@ -324,9 +301,9 @@ void TaskflowWorkflowPlanExecutor::executeJobOnWorkerThread(const WorkflowPlan::
 
 void TaskflowWorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
 {
-    jobContext->info(QString("Job started: %1").arg(job.getName()));
-
     jobContext = requireContext(jobContext, __FUNCTION__);
+
+    jobContext->reportStarted();
 
     try {
         switch (job.getThreadAffinity()) {
@@ -346,9 +323,14 @@ void TaskflowWorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, Shar
             jobContext->setProgress(1.0);
         }
 
-        jobContext->info(QString("Job finished: %1").arg(job.getName()));
+        jobContext->reportFinished();
+    }
+    catch (const std::exception& e) {
+        jobContext->reportFailed(QString::fromUtf8(e.what()));
+        throw;
     }
     catch (...) {
+        jobContext->reportFailed("Unknown exception");
         throw;
     }
 }
@@ -403,23 +385,30 @@ void TaskflowWorkflowPlanExecutor::addWorkflowFinishedNotification(const QString
 
 void TaskflowWorkflowPlanExecutor::executeCompiledJob(const WorkflowPlan::Job& job, tf::Subflow& subflow, SharedWorkflowExecutionContext jobContext)
 {
-    if (job.isNestedWorkflow()) {
-        jobContext->info(QString("Nested workflow job started: %1").arg(job.getName()));
+    jobContext = requireContext(jobContext, __FUNCTION__);
 
-        auto childPlan = job.createNestedWorkflow(jobContext);
-
-        if (!childPlan)
-            throw std::runtime_error("Nested workflow job returned null workflow plan");
-
-        auto childContext   = jobContext->createNestedWorkflowChild(childPlan->getName(), childPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
-        auto compiled       = compileWorkflow(*childPlan, subflow, childContext);
-
-        subflow.join();
-
+    if (!job.isNestedWorkflow()) {
+        executeJob(job, jobContext);
         return;
     }
 
-    executeJob(job, jobContext);
+    auto childPlan = job.createNestedWorkflow(jobContext);
+
+    if (!childPlan)
+        throw std::runtime_error("Nested workflow job returned null workflow plan");
+
+    auto childContext = jobContext->createNestedWorkflowChild(
+        childPlan->getName(),
+        childPlan->getWeight(),
+        WorkflowPlan::JobProgressMode::Automatic);
+
+    WorkflowExecutionLifecycleScope lifecycle(childContext);
+
+    compileWorkflow(*childPlan, subflow, childContext);
+
+    subflow.join();
+
+    lifecycle.finish();
 }
 
 void TaskflowWorkflowPlanExecutor::runStagesRoot(const WorkflowPlan::Stages& stages, SharedWorkflowExecutionContext rootContext)

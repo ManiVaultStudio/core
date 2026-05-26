@@ -56,7 +56,7 @@ protected:
     using HeadersRaw    = QByteArray;
 
     /** Context used during the toVariantMapWorkflow execution to store intermediate data between workflow stages */
-    struct ToVariantMapWorkflowContext : public WorkflowContextBase
+    class ToVariantMapWorkflowContext : public WorkflowContextBase
     {
     public:
 

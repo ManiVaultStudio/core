@@ -461,19 +461,12 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
             const auto itemSortIndex    = sortIndex++;
 
             createItemMapJobs.emplace_back(datasetGuiName, [context, &dataHierarchyItem, datasetId, itemSortIndex, datasetGuiName](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-                qDebug() << "Creating item map for dataset" << datasetGuiName;
                 auto itemMap = dataHierarchyItem->toVariantMap();
 
                 itemMap["SortIndex"] = itemSortIndex;
 
                 context->setDatasetMap(datasetId, itemMap);
-
-                qDebug() << "Finished creating item map for dataset" << datasetGuiName;
-
-                //qDebug() << "Finished create item map job" << datasetGuiName;
-            }, WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Automatic);
-
-            //createItemMapJobs.back()->setWorkflowContext(context);
+            });
         }
 
         toPlan->addSequentialStage("Create item maps", createItemMapJobs);
@@ -482,7 +475,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
             try {
                 const auto findItemMap = [&toPlan, &job, context](const QString& datasetId) -> QVariantMap {
                     return context->getDatasetMap(datasetId);
-                    };
+                };
 
                 std::function<QVariantMap(DataHierarchyItem*, QVariantMap&, std::int32_t)> traverseItem;
 

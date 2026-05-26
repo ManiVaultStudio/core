@@ -13,7 +13,7 @@ using namespace mv::gui;
 using namespace mv::util;
 
 #ifdef _DEBUG
-	#define PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
+	//#define PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
 #endif
 
 UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)

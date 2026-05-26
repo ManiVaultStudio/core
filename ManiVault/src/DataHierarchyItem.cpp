@@ -23,6 +23,48 @@ using namespace mv::util;
 namespace mv
 {
 
+namespace 
+{
+    /** Utility class for managing workflow context in a thread-safe manner */
+    class ToVariantMapWorkflowContext final : public WorkflowContextBase
+    {
+    public:
+
+        /**
+         * @brief Gets the indices from the context.
+         * @return The indices stored in the context
+         */
+        QVariantMap getResult() const {
+            QMutexLocker locker(&_mutex);
+            return _result;
+        }
+
+        /**
+         * @brief Gets a specific value from the result map of the context using the provided key.
+         * @param key The key to look up in the result map
+         * @return The value associated with the provided key in the result map, or an invalid QVariant if the key does not exist
+         */
+        QVariant getResultValue(const QString& key) const {
+            QMutexLocker locker(&_mutex);
+            return _result.value(key);
+        }
+
+        /**
+         * @brief Sets a key-value pair in the result map of the context.
+         * @param key The key to be set in the result map
+         * @param value The value to be associated with the key in the result map
+         */
+        void setResultValue(const QString& key, const QVariant& value) {
+            QMutexLocker locker(&_mutex);
+            _result.insert(key, value);
+        }
+
+    private:
+        mutable QMutex      _mutex;     /** Mutex for synchronizing access to the context */
+        QVariantMap         _result;    /** The QVariantMap that will hold the final result of the workflow execution, containing the serialized headers and indices data. This map will be returned at the end of the workflow execution and can be used for further processing or storage. */
+    };
+}
+
 DataHierarchyItem::DataHierarchyItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible /*= true*/, bool selected /*= false*/) :
     WidgetAction(nullptr, "Data Hierarchy Item"),
     _dataset(dataset),
@@ -215,24 +257,51 @@ void DataHierarchyItem::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap DataHierarchyItem::toVariantMap() const
 {
-    QVariantMap variantMap, children;
+    auto plan   = toVariantMapWorkflow();
+    auto result = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));
 
-    try
-    {
-        variantMap = WidgetAction::toVariantMap();
-    }
-    catch (...)
-    {
-    }
+    return result->value<QVariantMap>();
+}
 
-    variantMap["Name"]      = _dataset->text();
-    variantMap["Expanded"]  = QVariant::fromValue(_expanded);
-    variantMap["Visible"]   = QVariant::fromValue(isVisible());
-    variantMap["Selected"]  = QVariant::fromValue(isSelected());
-    variantMap["Dataset"]   = _dataset->toVariantMap();
-    variantMap["Children"]  = children;
+UniqueWorkflowPlan DataHierarchyItem::toVariantMapWorkflow() const
+{
+    auto sharedContext  = std::make_shared<ToVariantMapWorkflowContext>();
+    auto plan           = std::make_unique<WorkflowPlan>(__FUNCTION__, sharedContext);
 
-    return variantMap;
+    WorkflowPlan::Jobs jobs;
+
+    jobs.emplace_back("Metadata", [this, sharedContext](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        QVariantMap variantMap, children;
+
+        try
+        {
+            variantMap = WidgetAction::toVariantMap();
+        }
+        catch (...)
+        {
+        }
+        
+        variantMap["Name"]      = _dataset->text();
+        variantMap["Expanded"]  = QVariant::fromValue(_expanded);
+        variantMap["Visible"]   = QVariant::fromValue(isVisible());
+        variantMap["Selected"]  = QVariant::fromValue(isSelected());
+        variantMap["Children"]  = QVariant::fromValue(children);
+
+        for (auto [key, value] : variantMap.asKeyValueRange())
+            sharedContext->setResultValue(key, value);
+    });
+
+    jobs.emplace_back("Dataset", [this, sharedContext](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        sharedContext->setResultValue("Dataset", _dataset->toVariantMap());
+    });
+
+    jobs.emplace_back("Apply result", [this, sharedContext](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        executionContext->publishResultValue("VariantMap", sharedContext->getResultValue("VariantMap").toMap());
+    });
+
+    plan->addSequentialStage("Save", jobs);
+
+    return plan;
 }
 
 }

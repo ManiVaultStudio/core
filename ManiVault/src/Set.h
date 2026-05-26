@@ -415,6 +415,8 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+    UniqueWorkflowPlan toVariantMapWorkflow() const override;
+
 public: // Grouping
 
     /** Get group index */

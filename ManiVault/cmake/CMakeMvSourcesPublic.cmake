@@ -622,6 +622,9 @@ set(PUBLIC_UTIL_HEADERS
     src/util/WorkflowResultRegistry.h
     src/util/WorkflowResultDialog.h
     src/util/WorkflowTraceEvent.h
+    src/util/WorkflowConsoleFormatter.h
+    src/util/WorkflowExecutionLifecycleScope.h
+    src/util/WorkflowStageSummary.h
     src/util/AbstractWorkflowTraceSink.h
     src/util/WorkflowConsoleTraceSink.h
     src/util/WorkflowChromeTraceSink.h
@@ -719,6 +722,9 @@ set(PUBLIC_UTIL_SOURCES
     src/util/WorkflowResultRegistry.cpp
     src/util/WorkflowResultDialog.cpp
     src/util/WorkflowTraceEvent.cpp
+    src/util/WorkflowConsoleFormatter.cpp
+    src/util/WorkflowExecutionLifecycleScope.cpp
+    src/util/WorkflowStageSummary.cpp
     src/util/AbstractWorkflowTraceSink.cpp
     src/util/WorkflowConsoleTraceSink.cpp
     src/util/WorkflowChromeTraceSink.cpp

@@ -66,10 +66,20 @@ private: // Helpers
 
     void addWorkflowFinishedNotification(const QString& workflowName, const SharedWorkflowResult& result, const QUuid& resultId);
 
-    void executeCompiledJob(
-        const WorkflowPlan::Job& job,
-        tf::Subflow& subflow,
-        SharedWorkflowExecutionContext jobContext);
+    /**
+	 * @brief Executes a compiled workflow job within a Taskflow subflow.
+	 *
+	 * If the job represents a nested workflow, this function creates the nested workflow plan,
+	 * creates a nested workflow execution context, reports the nested workflow lifecycle, compiles
+	 * the nested workflow into the supplied subflow, and waits for the subflow to complete.
+	 *
+	 * If the job is a normal executable job, it is executed directly through executeJob().
+	 *
+	 * @param job The workflow job to execute.
+	 * @param subflow The Taskflow subflow used for nested workflow execution.
+	 * @param jobContext Execution context associated with the compiled job.
+	 */
+    void executeCompiledJob(const WorkflowPlan::Job& job, tf::Subflow& subflow, SharedWorkflowExecutionContext jobContext);
 
     template<typename Flow>
     CompiledTasks compileStages(const WorkflowPlan::Stages& stages, Flow& flow, SharedWorkflowExecutionContext parentContext)
@@ -99,7 +109,7 @@ private: // Helpers
         tf::Task previous;
 
         for (const auto& job : stage.getJobs()) {
-            auto jobContext = stageContext->createChild(
+            auto jobContext = stageContext->createJobChild(
                 job.getName(),
                 job.getWeight(),
                 job.getProgressMode());
@@ -129,7 +139,7 @@ private: // Helpers
         CompiledTasks result;
 
         for (const auto& job : stage.getJobs()) {
-            auto jobContext = stageContext->createChild(
+            auto jobContext = stageContext->createJobChild(
                 job.getName(),
                 job.getWeight(),
                 job.getProgressMode());
@@ -145,18 +155,72 @@ private: // Helpers
         return result;
     }
 
+    /**
+	 * @brief Compiles a workflow stage into the supplied Taskflow graph and adds lifecycle reporting.
+	 *
+	 * This function creates a typed stage execution context, compiles the stage jobs, and wraps the
+	 * compiled jobs between a stage-start task and a stage-finish task. This ensures that stage lifecycle
+	 * messages are emitted at execution time rather than at workflow compilation time.
+	 *
+	 * For sequential stages, jobs are compiled in order.
+	 * For parallel stages, jobs are compiled as independent tasks.
+	 *
+	 * Empty stages are reported as skipped and do not contribute executable tasks.
+	 *
+	 * @tparam Flow Taskflow graph type, either tf::Taskflow or tf::Subflow.
+	 * @param stage The workflow stage to compile.
+	 * @param flow The Taskflow graph or subflow to which the stage tasks are added.
+	 * @param parentContext Parent workflow execution context.
+	 * @return The compiled start and end tasks for dependency chaining.
+	 */
     template<typename Flow>
     CompiledTasks compileStage(const WorkflowPlan::Stage& stage, Flow& flow, SharedWorkflowExecutionContext parentContext)
     {
-        auto stageContext = parentContext->createChild(
-            stage.getName(),
-            stage.getWeight(),
-            WorkflowPlan::JobProgressMode::Nested);
+        SharedWorkflowExecutionContext stageContext;
 
-        if (stage.getConcurrencyMode() == WorkflowPlan::ConcurrencyMode::Sequential)
-            return compileSequentialStage(stage, flow, stageContext);
+        const bool isSequential = stage.getConcurrencyMode() == WorkflowPlan::ConcurrencyMode::Sequential;
 
-        return compileParallelStage(stage, flow, stageContext);
+        if (isSequential) {
+            stageContext = parentContext->createSequentialStageChild(stage.getName(), stage.getWeight(), WorkflowPlan::JobProgressMode::Nested);
+        }
+        else {
+            stageContext = parentContext->createParallelStageChild(stage.getName(), stage.getWeight(), WorkflowPlan::JobProgressMode::Nested);
+        }
+
+        if (stage.getJobs().empty()) {
+            auto skippedTask = flow.emplace([stageContext]() {
+                stageContext->reportSkipped("stage has no jobs");
+                });
+
+            return {
+                { skippedTask },
+                { skippedTask }
+            };
+        }
+
+        auto startTask = flow.emplace([stageContext]() {
+            stageContext->reportStarted();
+            });
+
+        auto compiled =
+            isSequential
+            ? compileSequentialStage(stage, flow, stageContext)
+            : compileParallelStage(stage, flow, stageContext);
+
+        auto finishTask = flow.emplace([stageContext]() {
+            stageContext->reportFinished();
+            });
+
+        for (auto& start : compiled.starts)
+            startTask.precede(start);
+
+        for (auto& end : compiled.ends)
+            end.precede(finishTask);
+
+        return {
+            { startTask },
+            { finishTask }
+        };
     }
 
     template<typename Graph>
