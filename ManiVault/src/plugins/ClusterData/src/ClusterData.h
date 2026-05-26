@@ -16,7 +16,6 @@
 
 #include <QString>
 #include <QColor>
-#include <QUuid>
 
 #include <vector>
 

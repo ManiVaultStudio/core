@@ -14,8 +14,6 @@
 #include <QSize>
 #include <QString>
 
-#include <vector>
-
 class Points;
 
 const mv::DataType ImageType = mv::DataType(QString("Images"));

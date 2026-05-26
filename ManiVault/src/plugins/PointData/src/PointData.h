@@ -20,7 +20,7 @@
 #include <QDebug>
 #include <QMap>
 #include <QString>
-#include <QVariant>
+#include <QVariantMap>
 
 #include <array>
 #include <cassert>
