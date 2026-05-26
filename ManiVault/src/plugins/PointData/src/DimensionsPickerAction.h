@@ -290,7 +290,7 @@ protected:
     QMetaObject::Connection                                 _summaryUpdateAwakeConnection;      /** Update summary view when idle */
 
     friend class Widget;
-    friend class AbstractActionsManager;
+    friend class mv::AbstractActionsManager;
 };
 
 Q_DECLARE_METATYPE(DimensionsPickerAction)
