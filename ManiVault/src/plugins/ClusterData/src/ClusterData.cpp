@@ -21,6 +21,7 @@
 
 Q_PLUGIN_METADATA(IID "studio.manivault.ClusterData")
 
+using namespace mv;
 using namespace mv::util;
 
 ClusterData::ClusterData(const mv::plugin::PluginFactory* factory) :

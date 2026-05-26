@@ -44,10 +44,10 @@ OverwriteClustersConfirmationDialog::OverwriteClustersConfirmationDialog(QWidget
     layout->addStretch(1);
     layout->addLayout(bottomLayout);
 
-    connect(&_alwaysAskPermissionAction, &ToggleAction::toggled, this, [this](bool toggled) {
+    connect(&_alwaysAskPermissionAction, &gui::ToggleAction::toggled, this, [this](bool toggled) {
         Application::current()->setSetting("OverwriteClustersAskConfirmation", toggled);
     });
 
-    connect(&_discardAction, &TriggerAction::triggered, this, &OverwriteClustersConfirmationDialog::accept);
-    connect(&_cancelAction, &TriggerAction::triggered, this, &OverwriteClustersConfirmationDialog::reject);
+    connect(&_discardAction, &gui::TriggerAction::triggered, this, &OverwriteClustersConfirmationDialog::accept);
+    connect(&_cancelAction, &gui::TriggerAction::triggered, this, &OverwriteClustersConfirmationDialog::reject);
 }

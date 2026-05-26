@@ -10,9 +10,6 @@
 #include <actions/IntegralAction.h>
 #include <actions/TriggerAction.h>
 
-using namespace mv;
-using namespace mv::gui;
-
 class ClustersAction;
 
 /**
@@ -22,12 +19,12 @@ class ClustersAction;
  *
  * @author Thomas Kroes
  */
-class ColorizeClustersAction : public TriggerAction
+class ColorizeClustersAction : public mv::gui::TriggerAction
 {
 protected:
 
     /** Widget class for colorize clusters action */
-    class Widget : public WidgetActionWidget {
+    class Widget : public mv::gui::WidgetActionWidget {
     public:
 
         /**
@@ -58,19 +55,19 @@ public:
 
 public: // Action getters
 
-    OptionAction& getColorByAction() { return _colorByAction; }
-    ColorMapAction& getColorMapAction() { return _colorMapAction; }
-    IntegralAction& getRandomSeedAction() { return _randomSeedAction; }
-    TriggerAction& getColorizeAction() { return _colorizeAction; }
+    mv::gui::OptionAction& getColorByAction() { return _colorByAction; }
+    mv::gui::ColorMapAction& getColorMapAction() { return _colorMapAction; }
+    mv::gui::IntegralAction& getRandomSeedAction() { return _randomSeedAction; }
+    mv::gui::TriggerAction& getColorizeAction() { return _colorizeAction; }
 
 public slots:
     /** When the color model or cluster number changes, update the cluster colors */
     void updateColorsInModel();
 
 protected:
-    ClustersAction&     _clustersAction;        /** Reference to clusters action */
-    OptionAction        _colorByAction;         /** Color by action */
-    ColorMap1DAction    _colorMapAction;        /** Color map action */
-    IntegralAction      _randomSeedAction;      /** Random seed action for random color generation */
-    TriggerAction       _colorizeAction;        /** Colorize action */
+    ClustersAction&             _clustersAction;        /** Reference to clusters action */
+    mv::gui::OptionAction       _colorByAction;         /** Color by action */
+    mv::gui::ColorMap1DAction   _colorMapAction;        /** Color map action */
+    mv::gui::IntegralAction     _randomSeedAction;      /** Random seed action for random color generation */
+    mv::gui::TriggerAction      _colorizeAction;        /** Colorize action */
 };
