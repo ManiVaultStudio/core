@@ -64,7 +64,7 @@ void DataHierarchyPluginFactory::initialize()
 QUrl DataHierarchyPluginFactory::getReadmeMarkdownUrl() const
 {
     if constexpr (MV_IS_DEV())
-        return { "https://raw.githubusercontent.com/ManiVaultStudio/core/tree/master/ManiVault/src/plugins/DataHierarchyPlugin" };
+        return { "https://raw.githubusercontent.com/ManiVaultStudio/core/tree/master/ManiVault/src/plugins/DataHierarchyPlugin/README.md" };
     else
         return QUrl{
             QString("https://raw.githubusercontent.com/ManiVaultStudio/core/tree/v") +

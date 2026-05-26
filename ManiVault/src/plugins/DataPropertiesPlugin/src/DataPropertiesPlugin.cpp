@@ -94,7 +94,7 @@ DataPropertiesPluginFactory::DataPropertiesPluginFactory() :
 QUrl DataPropertiesPluginFactory::getReadmeMarkdownUrl() const
 {
     if constexpr (MV_IS_DEV())
-        return { "https://raw.githubusercontent.com/ManiVaultStudio/core/tree/master/ManiVault/src/plugins/DataPropertiesPlugin" };
+        return { "https://raw.githubusercontent.com/ManiVaultStudio/core/tree/master/ManiVault/src/plugins/DataPropertiesPlugin/README.md" };
     else
         return QUrl{
             QString("https://raw.githubusercontent.com/ManiVaultStudio/core/tree/v") +
