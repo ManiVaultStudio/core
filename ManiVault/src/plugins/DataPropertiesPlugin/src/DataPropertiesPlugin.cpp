@@ -4,6 +4,8 @@
 
 #include "DataPropertiesPlugin.h"
 
+#include <ManiVaultVersion.h>
+
 #include <Application.h>
 #include <CoreInterface.h>
 #include <Set.h>
@@ -91,16 +93,26 @@ DataPropertiesPluginFactory::DataPropertiesPluginFactory() :
 
 QUrl DataPropertiesPluginFactory::getReadmeMarkdownUrl() const
 {
-#ifdef ON_LEARNING_CENTER_FEATURE_BRANCH
-    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/feature/learning_center/ManiVault/src/plugins/DataPropertiesPlugin/README.md");
-#else
-    return QUrl("https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/DataPropertiesPlugin/README.md");
-#endif
+    if constexpr (MV_IS_DEV())
+        return { "https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/DataPropertiesPlugin/README.md" };
+    else
+        return QUrl{
+            QString("https://raw.githubusercontent.com/ManiVaultStudio/core/release/") +
+            QString::fromStdString(MV_VERSION_STRING()) +
+            "/ManiVault/src/plugins/DataPropertiesPlugin/README.md"
+    };
 }
 
 QUrl DataPropertiesPluginFactory::getRepositoryUrl() const
 {
-    return { "https://github.com/ManiVaultStudio/core" };
+    if constexpr (MV_IS_DEV())
+        return { "https://www.github.com/ManiVaultStudio/core/tree/master/ManiVault/src/plugins/DataPropertiesPlugin" };
+    else
+        return QUrl{
+            QString("https://www.github.com/ManiVaultStudio/core/tree/release/") +
+            QString::fromStdString(MV_VERSION_STRING()) +
+            "/ManiVault/src/plugins/DataPropertiesPlugin"
+    };
 }
 
 ViewPlugin* DataPropertiesPluginFactory::produce()
