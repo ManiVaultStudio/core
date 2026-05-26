@@ -1,14 +1,13 @@
 cmake_minimum_required(VERSION 3.22)
 
 set(POINTDATA "PointData")
-PROJECT(${POINTDATA})
+PROJECT(${POINTDATA} LANGUAGES CXX))
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(POINTS_SOURCES
     src/PointData.h
     src/PointData.cpp
-    src/PointData.json
     src/PointDataIterator.h
     src/PointDataRange.h
     src/PointView.h
@@ -78,10 +77,14 @@ set(ACTIONS_SOURCES
     src/ModelResetter.cpp
 )
 
-source_group(Plugin FILES ${POINTS_SOURCES})
+set(POINT_DATA_AUX
+    PluginInfo.json
+)
+
+source_group(Plugin FILES ${POINTS_SOURCES} ${POINT_DATA_AUX})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 
-add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES})
+add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINT_DATA_AUX})
 
 add_library(ManiVault::${POINTDATA} ALIAS ${POINTDATA})
 
@@ -111,12 +114,11 @@ if(UNIX AND NOT APPLE)
    target_link_libraries(${POINTDATA} PRIVATE TBB::tbb)
 endif()
 
-if(MV_UNITY_BUILD)
-    set_target_properties(${POINTDATA} PROPERTIES UNITY_BUILD ON)
-endif()
-
-set_target_properties(${POINTDATA} PROPERTIES PUBLIC_HEADER "${POINTS_HEADERS}")
-set_target_properties(${POINTDATA} PROPERTIES AUTOMOC ON)
+set_target_properties(${POINTDATA} PROPERTIES 
+    AUTOMOC ON
+    PUBLIC_HEADER "${POINTS_HEADERS}"
+    UNITY_BUILD ${MV_UNITY_BUILD}
+)
 
 install(TARGETS ${POINTDATA}
     EXPORT "ManiVaultPublicExport"
@@ -136,6 +138,8 @@ add_custom_command(TARGET ${POINTDATA} POST_BUILD
         --config $<CONFIGURATION>
         --prefix ${MV_INSTALL_DIR}
 )
+
+mv_handle_plugin_config(${POINTDATA})
 
 # Currentlt, no tests are available
 #if (MV_USE_GTEST)
