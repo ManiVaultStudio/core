@@ -356,11 +356,13 @@ void ProjectManager::newBlankProject()
 void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly /*= false*/, bool loadWorkspace /*= true*/)
 {
     try {
-        if (hasProject() && getCurrentProject()->getFilePath() == filePath)
-            throw std::runtime_error("Project is already open");
+        if (hasProject() && getCurrentProject()->getFilePath() == filePath) {
+	        throw std::runtime_error("Project is already open");
+        }
 
-        if (isOpeningProject())
-            throw std::runtime_error("Cannot open project while another project is being opened");
+        if (isOpeningProject()) {
+	        throw std::runtime_error("Cannot open project while another project is being opened");
+        }
 
         const auto parameters = getProjectOpenParameters(filePath);
 
@@ -382,7 +384,6 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             ._addNotification = true/*,
             ._traceSink = std::make_shared<WorkflowChromeTraceSink>(QStringLiteral("D:/Temp/chrome_trace.json"))*/
         }));
-
         
         future.onFinished(this, [this](SharedWorkflowResult result) {
             setState(State::Idle);
@@ -722,34 +723,36 @@ void ProjectManager::saveProject(QString filePath)
 #endif
 
         emit projectAboutToBeSaved(*_project);
-        {
-	        if (QFileInfo(filePath).isDir())
-	            throw std::runtime_error("Project file path may not be a directory");
 
-            setState(State::SavingProject);
-
-            const auto stateGuard = qScopeGuard([this]() { setState(State::Idle); });
-            const auto parameters = getProjectSaveParameters(filePath);
-
-            if (parameters.isValid())
-                filePath = parameters._filePath;
-            else
-	            return;
-
-	        auto workflowPlan = createProjectSaveWorkflowPlan(filePath);
-
-            setTemporaryDirPath(TemporaryDirType::Save, workflowPlan->getWorkflowContextAs<ProjectSaveContext>()->getTemporaryDirectoryPath());
-
-	        auto future = Application::getWorkflowPlanExecutor().execute(std::move(workflowPlan), nullptr, WorkflowExecutionOptions({
-                parameters._parallel,
-	        	parameters._maxParallelThreads,
-                true,   // Show progress
-                true    // Add notification
-	        }));
-
-            auto result = future.get();
+        if (QFileInfo(filePath).isDir()) {
+            throw std::runtime_error("Project file path may not be a directory");
         }
-        emit projectSaved(*_project);
+
+        setState(State::SavingProject);
+
+        const auto stateGuard = qScopeGuard([this]() { setState(State::Idle); });
+        const auto parameters = getProjectSaveParameters(filePath);
+
+        if (parameters.isValid())
+            filePath = parameters._filePath;
+        else
+            return;
+
+        auto workflowPlan = createProjectSaveWorkflowPlan(filePath);
+
+        setTemporaryDirPath(TemporaryDirType::Save, workflowPlan->getWorkflowContextAs<ProjectSaveContext>()->getTemporaryDirectoryPath());
+
+        auto future = Application::getWorkflowPlanExecutor().execute(std::move(workflowPlan), nullptr, WorkflowExecutionOptions({
+            parameters._parallel,
+	        parameters._maxParallelThreads,
+            true,   // Show progress
+            true    // Add notification
+        }));
+
+        future.onFinished(this, [this](SharedWorkflowResult result) {
+            setState(State::Idle);
+            emit projectSaved(*_project);
+        });
     }
     catch (std::exception& e)
     {

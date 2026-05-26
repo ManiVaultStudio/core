@@ -152,18 +152,10 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap
 
 QVariantMap Project::toVariantMap() const
 {
-    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+    auto plan   = toVariantMapWorkflow();
+    auto result = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));
 
-    plan->addSequentialStage("toVariantMap", {
-        WorkflowPlan::Job("toVariantMap", [this](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
-            auto result = toVariantMap();
-            context->publishResult(result);
-        }, WorkflowPlan::JobThreadAffinity::GuiThread)
-    });
-
-    const auto future = Application::getWorkflowPlanExecutor().execute(std::move(plan));
-
-    return future.get()->value<QVariantMap>();
+    return result->value<QVariantMap>();
 }
 
 UniqueWorkflowPlan Project::toVariantMapWorkflow() const

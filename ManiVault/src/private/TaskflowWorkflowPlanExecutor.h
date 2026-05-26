@@ -54,12 +54,12 @@ private: // Helpers
 
     static void handleStageException(const WorkflowPlan::Stage& stage, const mv::ManiVaultException& exception, SharedWorkflowExecutionContext stageContext);
 
-    void compileWorkflow(
+    CompiledTasks compileWorkflow(
         const WorkflowPlan& workflowPlan,
         tf::Taskflow& taskflow,
         SharedWorkflowExecutionContext parentContext);
 
-    void compileWorkflow(
+    CompiledTasks compileWorkflow(
         const WorkflowPlan& workflowPlan,
         tf::Subflow& subflow,
         SharedWorkflowExecutionContext parentContext);
@@ -158,6 +158,33 @@ private: // Helpers
 
         return compileParallelStage(stage, flow, stageContext);
     }
+
+    template<typename Graph>
+    CompiledTasks compileWorkflowImpl(
+        const WorkflowPlan& workflowPlan,
+        Graph& graph,
+        SharedWorkflowExecutionContext parentContext)
+    {
+        auto mainTasks = compileStages(workflowPlan.getStages(), graph, parentContext);
+        auto successTasks = compileStages(workflowPlan.getOnSuccessStages(), graph, parentContext);
+
+        if (!successTasks.starts.empty()) {
+            for (auto& mainEnd : mainTasks.ends)
+                for (auto& successStart : successTasks.starts)
+                    mainEnd.precede(successStart);
+
+            return {
+                mainTasks.starts,
+                successTasks.ends
+            };
+        }
+
+        return mainTasks;
+    }
+
+    void runStagesRoot(
+        const WorkflowPlan::Stages& stages,
+        SharedWorkflowExecutionContext rootContext);
 
 private:
     tf::Executor    _executor;  

@@ -276,14 +276,19 @@ void Serializable::handleKeyNotFoundInVariantMap(const Serializable& serializabl
         describeVariantMapKeys(map)
     );
 
-    if (!settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
-		throw SerializationException::missingKey(key, serializable.getSerializationName(), map);
+    if (settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked()) {
+        throw ManiVaultException(SeverityLevel::Warning, "Missing key in QVariantMap", errorMessage, __FUNCTION__, {
+            { "Key", key },
+            { "SerializationName", serializable.getSerializationName() },
+            { "VariantMap", describeVariantMapKeys(map) }
+        });
+    }
 
-
-    //if (settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked())
-    //    Serializable::reportSerializationWarning(serializable.getSerializationName(), errorMessage);
-    //else
-    //    Serializable::reportFatalSerializationError(serializable.getSerializationName(), errorMessage);
+	throw ManiVaultException(SeverityLevel::Error, "Missing key in QVariantMap", errorMessage, __FUNCTION__, {
+		{ "Key", key },
+        { "SerializationName", serializable.getSerializationName() },
+        { "VariantMap", describeVariantMapKeys(map) }
+	});
 }
 
 }

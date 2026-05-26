@@ -35,16 +35,20 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString&
     threadPool->setMaxThreadCount(64);//state->getExecutionOptions()._parallel ? state->getExecutionOptions()._maxWorkerThreadCount : 1);
     threadPool->setExpiryTimeout(30'000);
 
-	return std::make_shared<WorkflowExecutionContext>(
+	auto context = std::make_shared<WorkflowExecutionContext>(
         name,
         reportRoot,
         progressRoot,
         state,
         task
     );
+
+    context->_resultScope = QUuid::createUuid().toString(QUuid::WithoutBraces);
+
+    return context;
 }
 
-SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode)
+SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
 {
     if (!_reportNode || !_progressNode || !_state)
         return {};
@@ -79,8 +83,18 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(const QStri
     child->_parentId = _id;
     child->_executionPath = _executionPath;
     child->_executionPath.append(name);
-    
+    child->_resultScope = _resultScope;
+
     return child;
+}
+
+SharedWorkflowExecutionContext WorkflowExecutionContext::createNestedWorkflowChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
+{
+	auto child = createChild(name, weight, progressMode);
+
+	child->_resultScope = QUuid::createUuid().toString(QUuid::WithoutBraces);
+
+	return child;
 }
 
 bool WorkflowExecutionContext::hasProgressChildren() const
@@ -192,4 +206,26 @@ QUuid WorkflowExecutionContext::getParentId() const
     return _parentId;
 }
 
+QVariant WorkflowExecutionContext::getResultValue(const QString& localKey) const
+{
+	return _state->getResultValue(localKey);
+}
+
+QVariant WorkflowExecutionContext::takeResultValue(const QString& localKey) const
+{
+	return _state->takeResultValue(localKey);
+}
+
+bool WorkflowExecutionContext::hasResultValue(const QString& localKey) const
+{
+	return _state->hasResultValue(localKey);
+}
+
+QString WorkflowExecutionContext::scopedResultKey(const QString& localKey) const
+{
+	if (localKey.trimmed().isEmpty())
+		throw std::invalid_argument("Workflow result key may not be empty");
+
+	return QString("%1/%2").arg(_resultScope, localKey);
+}
 }

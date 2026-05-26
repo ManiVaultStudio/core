@@ -33,12 +33,8 @@ namespace
         if (values.empty())
             return out;
 
-        const auto byteSize = qsizetype(values.size()) * qsizetype(sizeof(T));
-
-        const auto written = out.writeRawData(
-            reinterpret_cast<const char*>(values.data()),
-            byteSize
-        );
+        const auto byteSize = static_cast<qsizetype>(values.size()) * static_cast<qsizetype>(sizeof(T));
+        const auto written  = out.writeRawData(reinterpret_cast<const char*>(values.data()), byteSize);
 
         if (written != byteSize)
             out.setStatus(QDataStream::WriteFailed);
@@ -60,13 +56,8 @@ namespace
         if (size == 0)
             return in;
 
-        const auto byteSize =
-            qsizetype(size) * qsizetype(sizeof(T));
-
-        const auto read = in.readRawData(
-            reinterpret_cast<char*>(values.data()),
-            byteSize
-        );
+        const auto byteSize = static_cast<qsizetype>(size) * static_cast<qsizetype>(sizeof(T));
+        const auto read     = in.readRawData(reinterpret_cast<char*>(values.data()), byteSize);
 
         if (read != byteSize) {
             values.clear();
@@ -77,78 +68,104 @@ namespace
     }
 }
 
-QVariantMap ClusterSerializer::toVariantMap(const QVector<Cluster>& clusters)
+UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap& map, QVector<Cluster>& clusters, SharedWorkflowExecutionContext parentExecutionContext)
 {
-    QVariantMap map;
+    Q_UNUSED(parentExecutionContext)
 
-    std::vector<Header> headers;
-
-    headers.reserve(static_cast<std::size_t>(clusters.size()));
-
-    std::vector<unsigned int> allIndices = buildIndexBuffer(clusters, headers);
-
-    const QByteArray headersBytes = serializeHeaders(headers);
-
-    map["ClustersFormatVersion"]    = FormatVersion;
-    map["ClustersMetaDataSize"]     = headersBytes.size();
-    map["ClustersMetaData"]         = bytesToBlobVariantMap(headersBytes.constData(), headersBytes.size(), nullptr);
-
-	const auto indicesByteSize = allIndices.size() * sizeof(unsigned int);
-
-    map["ClustersIndicesRawDataSize"]   = static_cast<qulonglong>(indicesByteSize);
-    map["ClustersIndicesRawData"]       = bytesToBlobVariantMap(reinterpret_cast<const char*>(allIndices.data()), indicesByteSize, nullptr);
-
-    return map;
-}
-
-UniqueWorkflowPlan ClusterSerializer::fromVariantMapWorkflow(const QVariantMap& map, QVector<Cluster>& clusters, SharedWorkflowExecutionContext parentExecutionContext)
-{
-    const auto version = map.value("ClustersFormatVersion").toUInt();
+        const auto version = map.value("ClustersFormatVersion").toUInt();
 
     if (version != FormatVersion)
         throw std::runtime_error("Unsupported cluster serialization format version");
-    
-    auto context = std::make_shared<ClustersLoadContext>(map);
 
+    auto context = std::make_shared<FromVariantMapWorkflowContext>(map);
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__, context);
 
     WorkflowPlan::Jobs preprocessingJobs;
 
-	preprocessingJobs.emplace_back("Process headers", [map, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-		const auto bytes = bytesFromBlobVariantMap(map.value("ClustersMetaData").toMap());
+    preprocessingJobs.emplace_back("Headers", [map, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        const auto bytes = bytesFromBlobVariantMap(map.value("ClustersMetaData").toMap());
 
         if (bytes.isEmpty())
             throw std::runtime_error("Cluster headers data is empty");
 
-        context->_headers = deserializeHeaders(bytes);
-    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
+        context->setHeaders(deserializeHeaders(bytes));
+    });
 
-    preprocessingJobs.emplace_back("Process indices", [map, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext ) {
+    preprocessingJobs.emplace_back("Indices", [map, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
         const auto bytes = bytesFromBlobVariantMap(map.value("ClustersIndicesRawData").toMap());
 
-		if (bytes.isEmpty())
-			throw std::runtime_error("Cluster indices data is empty");
+        if (bytes.isEmpty())
+            throw std::runtime_error("Cluster indices data is empty");
 
-		if (bytes.size() % static_cast<qsizetype>(sizeof(unsigned int)) != 0)
-			throw std::runtime_error("Cluster indices blob size is not aligned");
+        if (bytes.size() % static_cast<qsizetype>(sizeof(unsigned int)) != 0)
+            throw std::runtime_error("Cluster indices blob size is not aligned");
 
-		context->_allIndices.resize(static_cast<std::size_t>(bytes.size()) / sizeof(unsigned int));
+        Indices allIndices;
 
-		if (!context->_allIndices.empty()) {
-			std::memcpy(context->_allIndices.data(), bytes.constData(), static_cast<std::size_t>(bytes.size()));
-		}
-    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
+        allIndices.resize(static_cast<std::size_t>(bytes.size()) / sizeof(unsigned int));
+
+        if (!allIndices.empty()) {
+            std::memcpy(allIndices.data(), bytes.constData(), static_cast<std::size_t>(bytes.size()));
+            context->setAllIndices(std::move(allIndices));
+        }
+    });
 
     plan->addParallelStage("Preprocessing", preprocessingJobs);
     plan->addSequentialStage("Rebuild clusters", [&clusters, context]() -> void {
-        clusters = rebuildClusters(context->_headers, context->_allIndices);
+        clusters = rebuildClusters(context->getHeaders(), context->getAllIndices());
     });
 
     return plan;
 }
 
-QByteArray ClusterSerializer::serializeHeaders(
-    const std::vector<Header>& headers)
+UniqueWorkflowPlan ClustersSerializer::toVariantMapWorkflow(const QVector<Cluster>& clusters, SharedWorkflowExecutionContext parentExecutionContext)
+{
+    Q_UNUSED(parentExecutionContext)
+
+    auto sharedContext  = std::make_shared<ToVariantMapWorkflowContext>();
+    auto plan           = std::make_unique<WorkflowPlan>(__FUNCTION__, sharedContext);
+
+    WorkflowPlan::Jobs preprocessingJobs;
+
+    preprocessingJobs.emplace_back("Create headers", [sharedContext, &clusters](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        Headers headers;
+
+        headers.reserve(static_cast<std::size_t>(clusters.size()));
+
+        sharedContext->setHeaders(std::move(headers));
+        sharedContext->setAllIndices(buildIndexBuffer(clusters, headers));
+	});
+
+    preprocessingJobs.emplace_back("Create headers", [sharedContext, &clusters](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        sharedContext->setHeadersRaw(serializeHeaders(sharedContext->getHeaders()));
+    });
+
+    plan->addSequentialStage("Preprocessing", preprocessingJobs);
+
+    WorkflowPlan::Jobs buildResultJobs;
+
+    buildResultJobs.emplace_back("General data", [sharedContext](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        sharedContext->setResultValue("ClustersFormatVersion", FormatVersion);
+        sharedContext->setResultValue("ClustersMetaDataSize", sharedContext->getHeadersRawSize());
+        sharedContext->setResultValue("ClustersIndicesRawDataSize", sharedContext->getAllIndicesRawSize());
+    });
+
+    buildResultJobs.emplace_back("Clusters raw meta data", [sharedContext](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        sharedContext->setResultValue("ClustersMetaData", bytesToBlobVariantMap(sharedContext->getHeadersRaw().constData(), sharedContext->getHeadersRawSize(), nullptr));
+    });
+
+    buildResultJobs.emplace_back("Clusters raw indices", [sharedContext](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        sharedContext->setResultValue("ClustersIndicesRawData", bytesToBlobVariantMap(reinterpret_cast<const char*>(sharedContext->getAllIndices().data()), sharedContext->getAllIndicesRawSize(), nullptr));
+
+        executionContext->publishResultValue("Clusters", sharedContext->getResult());
+    });
+
+    plan->addParallelStage("Build result", buildResultJobs);
+
+    return plan;
+}
+
+QByteArray ClustersSerializer::serializeHeaders(const std::vector<Header>& headers)
 {
     QByteArray bytes;
 
@@ -184,8 +201,8 @@ QByteArray ClusterSerializer::serializeHeaders(
     return bytes;
 }
 
-std::vector<ClusterSerializer::Header>
-ClusterSerializer::deserializeHeaders(const QByteArray& bytes)
+std::vector<ClustersSerializer::Header>
+ClustersSerializer::deserializeHeaders(const QByteArray& bytes)
 {
     QDataStream stream(bytes);
     stream.setVersion(QDataStream::Qt_6_5);
@@ -222,9 +239,7 @@ ClusterSerializer::deserializeHeaders(const QByteArray& bytes)
     return headers;
 }
 
-std::vector<unsigned int> ClusterSerializer::buildIndexBuffer(
-    const QVector<Cluster>& clusters,
-    std::vector<Header>& headers)
+std::vector<unsigned int> ClustersSerializer::buildIndexBuffer(const QVector<Cluster>& clusters, std::vector<Header>& headers)
 {
     std::size_t totalIndexCount = 0;
 
@@ -261,16 +276,14 @@ std::vector<unsigned int> ClusterSerializer::buildIndexBuffer(
     return allIndices;
 }
 
-QVector<Cluster> ClusterSerializer::rebuildClusters(
-    const std::vector<Header>& headers,
-    const std::vector<unsigned int>& allIndices)
+QVector<Cluster> ClustersSerializer::rebuildClusters(const std::vector<Header>& headers, const std::vector<unsigned int>& allIndices)
 {
     QVector<Cluster> clusters;
     clusters.reserve(static_cast<qsizetype>(headers.size()));
 
     for (const Header& header : headers) {
-        const auto offset = static_cast<std::size_t>(header.indexOffset);
-        const auto count = static_cast<std::size_t>(header.indexCount);
+        const auto offset   = static_cast<std::size_t>(header.indexOffset);
+        const auto count    = static_cast<std::size_t>(header.indexCount);
 
         if (offset > allIndices.size() || count > allIndices.size() - offset)
             throw std::runtime_error("Cluster index range exceeds index buffer");
@@ -289,7 +302,7 @@ QVector<Cluster> ClusterSerializer::rebuildClusters(
             allIndices.begin() + offset + count
         );
 
-        cluster.setIndices(std::move(indices));
+        cluster.setIndices(indices);
 
         clusters.emplace_back(std::move(cluster));
     }

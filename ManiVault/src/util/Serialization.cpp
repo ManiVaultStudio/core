@@ -624,18 +624,23 @@ QByteArray bytesFromBlobVariantMap(const QVariantMap& variantMap, SharedWorkflow
 
 void variantMapMustContain(const QVariantMap& variantMap, const QString& key)
 {
-    if (!variantMap.contains(key)) {
-        throw ManiVaultException(
-            SeverityLevel::Error,
-            "Variant map is missing required key",
-            QString("Variant map is missing required key '%1'").arg(key),
-            __FUNCTION__,
-            {
-                { "VariantMap", variantMap },
-                { "MissingKey", key }
-            }
-        );
+    if (variantMap.contains(key))
+        return;
+
+    if (settings().getMiscellaneousSettings().getIgnoreLoadingErrorsAction().isChecked()) {
+        throw ManiVaultException(SeverityLevel::Warning, "Missing key in QVariantMap", QString("Variant map is missing key '%1', but loading errors are set to be ignored").arg(key), __FUNCTION__, {
+	        { "Key", key },
+	        { "VariantMap", describeVariantMapKeys(variantMap) }
+		});
     }
+
+    throw ManiVaultException(SeverityLevel::Error, "Missing key in QVariantMap", QString("Variant map is missing required key '%1'").arg(key),
+        __FUNCTION__,
+        {
+            { "Key", key },
+            { "VariantMap", describeVariantMapKeys(variantMap) }
+        }
+    );
 }
 
 QVariant storeQVariant(const QVariant& variant)

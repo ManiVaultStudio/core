@@ -96,7 +96,7 @@ public:
 
         Job(QString name, JobFunction function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, JobProgressMode progressMode = JobProgressMode::Automatic);
         Job(QString name, NestedWorkflowFunction nestedWorkflowFunction, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, JobProgressMode progressMode = JobProgressMode::Automatic, double weight = 1.0);
-        Job(QString name, NestedWorkflowJob job);
+        Job(QString name, NestedWorkflowJob job, JobThreadAffinity threadAffinity, double weight);
 
         QString getName() const;
 
@@ -302,10 +302,7 @@ public:
     //    );
     //}
 
-    void addNestedWorkflowStage(
-        const QString& name,
-        NestedWorkflowFunction function
-    );
+    void addNestedWorkflowStage(const QString& name, NestedWorkflowFunction function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, double weight = 1.0);
 
 private:
     template<typename Function>

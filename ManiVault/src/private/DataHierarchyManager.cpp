@@ -320,41 +320,30 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
         return getRawBlockObjectSize(rawA) > getRawBlockObjectSize(rawB);
     });
 
-    WorkflowPlan::Jobs loadDatasetJobs;
+    WorkflowPlan::Jobs datasetJobs;
 
     for (const auto& dataVariantMap : datasetMaps) {
+
         const auto datasetId = dataVariantMap["ID"].toString();
         const auto datasetName = dataVariantMap["Name"].toString();
-        const auto rawBlockSize = getRawBlockObjectSize(dataVariantMap);
 
-        loadDatasetJobs.emplace_back(datasetName, [datasetId, datasetName, dataVariantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
-            
-            try {
-                context->info(QString("Loading dataset '%1' with ID '%2'").arg(datasetName, datasetId));
-                mv::data().getDataset(datasetId)->fromVariantMap(dataVariantMap);
-                context->info(QString("Finished loading dataset '%1' with ID '%2'").arg(datasetName, datasetId));
-            }
-            catch (const ManiVaultException&) {
-
-	            // Rethrow ManiVaultExceptions as they are already properly constructed with severity and message
-	            throw;
-	        }
-	        catch (const std::exception& exception) {
-
-                const auto what = QString::fromStdString(exception.what());
-
-	            // Upgrade to ManiVaultException with context
-	            throw ManiVaultException(SeverityLevel::Error, QString("Failed to load dataset '%1': %2").arg(datasetName, what), "DataHierarchyManager::loadDataset", what, dataVariantMap);
-	        }
-	        catch (...) {
-
-		        // Upgrade to ManiVaultException with context
-				throw ManiVaultException(SeverityLevel::Error, QString("Failed to load dataset '%1' due to an unknown error").arg(datasetName), "DataHierarchyManager::loadDataset");
-	        }
-        });
+        datasetJobs.emplace_back(
+            datasetName,
+            WorkflowPlan::NestedWorkflowFunction(
+                [datasetId, dataVariantMap](
+                    const WorkflowPlan::Job&,
+                    const SharedWorkflowExecutionContext& context) mutable -> UniqueWorkflowPlan
+                {
+                    return mv::data()
+                        .getDataset(datasetId)
+                        ->fromVariantMapWorkflow(dataVariantMap, context);
+                }));
     }
 
-    fromPlan->addStage("Load datasets", WorkflowPlan::ConcurrencyMode::Parallel, loadDatasetJobs);
+    fromPlan->addParallelStage(
+        "Load datasets",
+        std::move(datasetJobs));
+
     fromPlan->addSequentialStage("Notify datasets", [this](const WorkflowPlan::Job& job) {
         for (const auto& item : _items) {
             events().notifyDatasetDataChanged(item->getDataset());
@@ -448,18 +437,10 @@ private:
 
 QVariantMap DataHierarchyManager::toVariantMap() const
 {
-    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+    auto plan   = toVariantMapWorkflow();
+    auto result = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));
 
-    plan->addSequentialStage("toVariantMap", {
-        WorkflowPlan::Job("toVariantMap", [this](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
-            auto result = toVariantMap();
-            context->publishResult(result);
-        }, WorkflowPlan::JobThreadAffinity::GuiThread)
-        });
-
-    const auto future = Application::getWorkflowPlanExecutor().execute(std::move(plan));
-
-    return future.get()->value<QVariantMap>();
+    return result->value<QVariantMap>();
 }
 
 UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const

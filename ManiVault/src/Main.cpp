@@ -79,8 +79,6 @@ int main(int argc, char *argv[])
     codecRegistry().registerFactory(std::make_unique<PassthroughBlobCodecFactory>(&application));
     codecRegistry().registerFactory(std::make_unique<ZstdBlobCodecFactory>(&application));
 
-    QThreadPool::globalInstance()->setMaxThreadCount(QThread::idealThreadCount() * 2);
-
     Core core;
 
     application.setCore(&core);

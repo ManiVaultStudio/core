@@ -48,7 +48,8 @@ protected:
     /** Workflow context for loading dimension names. */
     struct DimensionNamesLoadContext : public WorkflowContextBase
     {
-        QStringList _dimensionNames;
+        QStringList     _dimensionNames;
+        QByteArray      _bytes;
     };
     
 };

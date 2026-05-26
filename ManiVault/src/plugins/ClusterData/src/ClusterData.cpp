@@ -117,13 +117,6 @@ std::int32_t ClusterData::getClusterIndex(const QString& clusterName) const
     return -1;
 }
 
-void ClusterData::fromVariantMap(const QVariantMap& variantMap)
-{
-    WidgetAction::fromVariantMap(variantMap);
-
-    
-}
-
 UniqueWorkflowPlan ClusterData::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext)
 {
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
@@ -138,8 +131,8 @@ UniqueWorkflowPlan ClusterData::fromVariantMapWorkflow(const QVariantMap& varian
     }
     else {
         plan->addNestedWorkflowStage("Load", [this, dataMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-            return ClusterSerializer::fromVariantMapWorkflow(dataMap["Clusters"].toMap(), _clusters, executionContext);
-        });
+            return ClustersSerializer::fromVariantMapWorkflow(dataMap["Clusters"].toMap(), _clusters, executionContext);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
     }
 
 	return plan;
@@ -226,15 +219,30 @@ void ClusterData::fromVariantMapPre150(const QVariantMap& variantMap)
 
 QVariantMap ClusterData::toVariantMap() const
 {
+    auto plan       = toVariantMapWorkflow();
+    auto result     = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));
     auto variantMap = RawData::toVariantMap();
 
-    ClusterSerializer::toVariantMap(_clusters);
-
     variantMap.insert({
-    	{ "Clusters", ClusterSerializer::toVariantMap(_clusters) }
+        { "Clusters", result->value<QVariantMap>() }
     });
 
     return variantMap;
+}
+
+UniqueWorkflowPlan ClusterData::toVariantMapWorkflow() const
+{
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+
+    plan->addNestedWorkflowStage("Serialize raw data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan{
+    	return RawData::toVariantMapWorkflow();
+    });
+
+    plan->addNestedWorkflowStage("Serialize clusters", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        return ClustersSerializer::toVariantMapWorkflow(_clusters, executionContext);
+    });
+
+    return plan;
 }
 
 void Clusters::init()
@@ -319,24 +327,24 @@ void Clusters::fromVariantMap(const QVariantMap& variantMap)
 
 UniqueWorkflowPlan Clusters::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext)
 {
-    UniqueWorkflowPlan fromPlan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
     DatasetImpl::fromVariantMap(variantMap);
 
     const auto projectApplicationVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
     if (projectApplicationVersion < Version(1, 5, 0)) {
-        fromPlan->addSequentialStage("Load (version < 1.5.0)", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
+        plan->addSequentialStage("Load (version < 1.5.0)", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
             fromVariantMapPre150(variantMap);
-            }, WorkflowPlan::JobThreadAffinity::GuiThread);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread);
     }
     else {
-        fromPlan->addNestedWorkflowStage("Load", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) mutable ->UniqueWorkflowPlan {
+        plan->addNestedWorkflowStage("Load", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) mutable ->UniqueWorkflowPlan {
             return getRawData<ClusterData>()->fromVariantMapWorkflow(variantMap, executionContext);
         });
     }
 
-	return fromPlan;
+	return plan;
 }
 
 void Clusters::fromVariantMapPre150(const QVariantMap& variantMap)

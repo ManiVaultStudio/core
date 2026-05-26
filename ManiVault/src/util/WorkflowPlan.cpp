@@ -32,10 +32,12 @@ WorkflowPlan::Job::Job(QString name, NestedWorkflowFunction nestedWorkflowFuncti
 {
 }
 
-WorkflowPlan::Job::Job(QString name, NestedWorkflowJob job):
+WorkflowPlan::Job::Job(QString name, NestedWorkflowJob job, JobThreadAffinity threadAffinity, double weight):
 	_name(std::move(name)),
 	_kind(JobKind::NestedWorkflow),
-	_nestedWorkflowFunction(std::move(job.function))
+	_nestedWorkflowFunction(std::move(job.function)),
+	_threadAffinity(threadAffinity),
+	_weight(weight)
 {
 }
 
@@ -223,9 +225,9 @@ double WorkflowPlan::getWeight() const
 	return _weight;
 }
 
-void WorkflowPlan::addNestedWorkflowStage(const QString& name, NestedWorkflowFunction function)
+void WorkflowPlan::addNestedWorkflowStage(const QString& name, NestedWorkflowFunction function, JobThreadAffinity threadAffinity /*= JobThreadAffinity::CurrentWorkerThread*/, double weight /*= 1.0*/)
 {
-	Stage stage(name, ConcurrencyMode::Sequential, Jobs{ Job(name, NestedWorkflowJob{ std::move(function) }) });
+	Stage stage(name, ConcurrencyMode::Sequential, Jobs{ Job(name, NestedWorkflowJob{ std::move(function) }, threadAffinity, weight) });
 
 	_stages.push_back(std::move(stage));
 }

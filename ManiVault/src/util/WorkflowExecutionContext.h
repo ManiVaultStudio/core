@@ -12,7 +12,6 @@
 #include "Task.h"
 
 #include <QString>
-#include <QThreadPool>
 #include <QUuid>
 
 namespace mv::util
@@ -38,7 +37,12 @@ public:
     WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, Task* task = nullptr, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
     static SharedWorkflowExecutionContext makeRoot(const QString& name, Task* task, WorkflowExecutionOptions executionOptions = {});
 
-    SharedWorkflowExecutionContext createChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
+    SharedWorkflowExecutionContext createChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic) const;
+
+    SharedWorkflowExecutionContext createNestedWorkflowChild(
+        const QString& name,
+        double weight,
+        WorkflowPlan::JobProgressMode progressMode) const;
 
     bool hasProgressChildren() const;
 
@@ -105,25 +109,43 @@ public: // ID
      */
     QUuid getParentId() const;
 
-public: // Result handling
+public: // Result values
 
     /**
-     * @brief Sets the result of this workflow execution context. The result can be any value that can be stored in a QVariant, such as a data structure, a file path, or any other relevant information that needs to be returned after the workflow execution is completed. The result is stored in the execution state and can be accessed from the workflow execution context.
-     * @tparam T The type of the result value. This can be any type that is supported by QVariant (e.g., int, QString, custom data structures registered with Q_DECLARE_METATYPE, etc.).
-     * @param value The result value to be set for this workflow execution context. This value will be stored in the execution state and can be accessed later using the takeResult() function.
+     * @brief Publishes a result value associated with this workflow execution context. The result value is stored in the execution state and can be retrieved later using the specified key. This allows different parts of the workflow to share data and results in a structured way, enabling better communication and coordination between different steps and components of the workflow.
+     * @tparam T The type of the value being published. This can be any type that can be stored in a QVariant, such as basic types (e.g., int, double, QString) or custom types that have been registered with the Qt meta-object system.
+     * @param localKey The key associated with the result value, used to identify and access the value later. This key should be unique within the context of this workflow execution to avoid conflicts with other result values. The actual key used for storage may be scoped or namespaced based on the hierarchy of workflow execution contexts to ensure uniqueness across the entire workflow execution.
+     * @param value The value to be published and stored in the execution state. This can be any value that can be converted to a QVariant, and will be stored in a way that allows it to be retrieved later using the specified key.
      */
     template<typename T>
-    void publishResult(T&& value) {
-        _state->setResult(QVariant::fromValue(std::forward<T>(value)));
+    void publishResultValue(const QString& localKey, T&& value) {
+        _state->setResultValue(localKey, QVariant::fromValue(std::forward<T>(value)));
     }
 
     /**
-     * @brief Retrieves and clears the result of this workflow execution context. This function returns the current result stored in the execution state as a QVariant, and then clears it to ensure that subsequent calls will not return the same result again. This is useful for scenarios where the result should only be consumed once, such as when passing the result to another component or when finalizing the workflow execution.
-     * @return The current result of this workflow execution context before it is cleared, returned as a QVariant. The caller can then convert this QVariant to the appropriate type as needed.
+     * @brief Retrieves the result value associated with the specified key from the execution state of this workflow execution context. This allows different parts of the workflow to access shared data and results that have been published by other steps or components of the workflow, enabling better communication and coordination between different parts of the workflow.
+     * @param localKey The key associated with the result value to be retrieved. This should match the key that was used when the result value was published using publishResultValue(). The actual key used for retrieval may be scoped or namespaced based on the hierarchy of workflow execution contexts, so it should be consistent with how the key was defined when publishing the result value.
+     * @return The result value associated with the specified key, wrapped in a QVariant. If no value is associated with the key, this may return an invalid QVariant or throw an exception, depending on the implementation of WorkflowExecutionState.
      */
-    QVariant takeResult() const {
-        return _state->takeResult();
-    }
+    [[nodiscard]] QVariant getResultValue(const QString& localKey) const;
+
+    /**
+     * @brief Retrieves and removes the result value associated with the specified key from the execution state of this workflow execution context. This is useful for cases where a result value should only be accessed once, and should be removed from the execution state after being retrieved to prevent it from being accessed again or to free up resources.
+     * @param localKey The key associated with the result value to be retrieved and removed. This should match the key that was used when the result value was published using publishResultValue().
+     * @return The result value associated with the specified key, wrapped in a QVariant. If no value is associated with the key, this may return an invalid QVariant or throw an exception, depending on the implementation of WorkflowExecutionState.
+     */
+    [[nodiscard]] QVariant takeResultValue(const QString& localKey) const;
+
+    /**
+     * @brief Checks if a result value with the specified key exists in the execution state of this workflow execution context. This can be used to determine whether a particular piece of information has been published and is available for retrieval before attempting to access it, allowing for safer and more robust code when working with dynamic result reporting.
+     * @param localKey The key to check for existence in the execution state. This should match the key that was used when the result value was published using publishResultValue().
+     * @return True if a result value with the specified key exists in the execution state, false otherwise.
+     */
+    [[nodiscard]] bool hasResultValue(const QString& localKey) const;
+
+private: // Result value
+
+    QString scopedResultKey(const QString& localKey) const;
 
 private:
     friend class WorkflowExecutionScope;
@@ -137,7 +159,8 @@ private:
     ProgressNodePtr                     _progressNode;                                              /** Progress node associated with this workflow execution context */
     StatePtr                            _state;                                                     /** Execution state associated with this workflow execution context */
     QPointer<Task>                      _task;                                                      /** Task associated with this workflow execution context */
-    WorkflowPlan::JobProgressMode       _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /** Progress mode for this workflow execution context */  
+    WorkflowPlan::JobProgressMode       _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /** Progress mode for this workflow execution context */
+    QString                             _resultScope;                                               /** Scope for result values published by this workflow execution context, used to ensure uniqueness of result keys across the workflow execution hierarchy */
 };
 
 /** Optional reference to a WorkflowExecutionContext */

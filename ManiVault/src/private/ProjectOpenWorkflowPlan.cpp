@@ -22,12 +22,12 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QStringLiteral("Open project"), context);
 
-    plan->addSequentialStage("Setup", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobContext) -> void {
+    plan->addSequentialStage("Setup", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Setup";
 #endif
 
-        auto state = jobContext->getState();
+        auto state = jobExecutionContext->getState();
 
         if (!state)
             return;
@@ -68,7 +68,7 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 		mv::projects().getCurrentProject()->setFilePath(context->getFilePath());
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
-    plan->addSequentialStage("Extract project archive", [context]() -> void {
+    plan->addSequentialStage("Extract project archive", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Extract project archive";
 #endif
@@ -82,7 +82,7 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
-    plan->addSequentialStage("Read project JSON", [context]() -> void {
+    plan->addSequentialStage("Read project JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Read project JSON";
 #endif
@@ -111,7 +111,7 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1);
 
-    plan->addSequentialStage("Open meta JSON", [context]() -> void {
+    plan->addSequentialStage("Open meta JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Open meta JSON";
 #endif
@@ -129,7 +129,7 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
     plan->addNestedWorkflowStage("Open project JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
         return mv::projects().getCurrentProject()->fromVariantMapWorkflow(context->getProjectMap()["Project"].toMap(), executionContext);
-    });
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     plan->addSequentialStage("Open workspace JSON", [context]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE

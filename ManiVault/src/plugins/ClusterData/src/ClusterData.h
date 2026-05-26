@@ -98,19 +98,13 @@ public:
 
 public: // Serialization
 
-    
-    void fromVariantMap(const QVariantMap& variantMap) override;
-
     UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext = nullptr) override;
 
     
     void fromVariantMapPre150(const QVariantMap& variantMap);
 
-    /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
-     */
     QVariantMap toVariantMap() const override;
+    UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 private:
     QVector<Cluster>    _clusters;      /** Clusters data */
