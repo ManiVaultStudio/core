@@ -17,10 +17,6 @@
 
 //#define TEST_SUITE
 
-using namespace mv;
-using namespace mv::plugin;
-using namespace mv::gui;
-
 /**
  * Tasks plugin
  *
@@ -28,7 +24,7 @@ using namespace mv::gui;
  *
  * @author Thomas Kroes
  */
-class TasksPlugin : public ViewPlugin
+class TasksPlugin : public mv::plugin::ViewPlugin
 {
     Q_OBJECT
     
@@ -38,7 +34,7 @@ public:
      * Construct with pointer to plugin \p factory
      * @param factory Pointer to plugin factory
      */
-    TasksPlugin(const PluginFactory* factory);
+    TasksPlugin(const mv::plugin::PluginFactory* factory);
 
     /** Perform plugin initialization */
     void init() override;
@@ -52,12 +48,12 @@ private:
 #endif
     
 private:
-    TasksTreeModel      _model;         /** Tasks tree model */
-    TasksFilterModel    _filterModel;   /** Filter model for the tasks model */
-    TasksTreeAction     _tasksAction;   /** Tasks action for displaying and interacting with the tasks in the system */
+    mv::TasksTreeModel           _model;         /** Tasks tree model */
+    mv::TasksFilterModel         _filterModel;   /** Filter model for the tasks model */
+    mv::gui::TasksTreeAction     _tasksAction;   /** Tasks action for displaying and interacting with the tasks in the system */
 };
 
-class TasksPluginFactory : public ViewPluginFactory
+class TasksPluginFactory : public mv::plugin::ViewPluginFactory
 {
     Q_INTERFACES(mv::plugin::ViewPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
@@ -85,5 +81,5 @@ public:
      * Produces the plugin
      * @return Pointer to the produced plugin
      */
-    ViewPlugin* produce() override;
+    mv::plugin::ViewPlugin* produce() override;
 };

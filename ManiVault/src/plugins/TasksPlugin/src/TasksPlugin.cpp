@@ -16,7 +16,7 @@ Q_PLUGIN_METADATA(IID "studio.manivault.TasksPlugin")
 using namespace mv;
 using namespace mv::util;
 
-TasksPlugin::TasksPlugin(const PluginFactory* factory) :
+TasksPlugin::TasksPlugin(const plugin::PluginFactory* factory) :
     ViewPlugin(factory),
     _tasksAction(this, "Tasks")
 {
@@ -127,7 +127,7 @@ QUrl TasksPluginFactory::getRepositoryUrl() const
     return { "https://github.com/ManiVaultStudio/core" };
 }
 
-ViewPlugin* TasksPluginFactory::produce()
+plugin::ViewPlugin* TasksPluginFactory::produce()
 {
     return new TasksPlugin(this);
 }
