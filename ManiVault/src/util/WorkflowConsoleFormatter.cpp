@@ -44,46 +44,48 @@ QString WorkflowConsoleFormatter::labelForEntity(const QString& entity)
     return "Item";
 }
 
-QString WorkflowConsoleFormatter::format(SeverityLevel, const QString& text, const QString&, const QVariantMap& details)
+QString WorkflowConsoleFormatter::format(SeverityLevel severity, const QString& text, const QString&, const QVariantMap& details)
 {
     const auto event = details.value("event").toString();
     const auto entity = details.value("entity").toString();
 
-    if (event.isEmpty() || entity.isEmpty())
+    if (event.isEmpty() || entity.isEmpty()) {
+        switch (severity) {
+        case SeverityLevel::Info:    return QString("[INFO] %1").arg(text);
+        case SeverityLevel::Warning: return QString("[WARNING] %1").arg(text);
+        case SeverityLevel::Error:
+        case SeverityLevel::Fatal:   return QString("[ERROR] %1").arg(text);
+        }
+
         return text;
+    }
 
     const int depth = details.value("depth").toInt();
+
     const QString indent(depth * 2, QLatin1Char(' '));
+    const QString icon = iconForEvent(event);
+    const QString label = labelForEntity(entity);
 
     QString line = QString("%1%2 %3: %4")
         .arg(indent)
-        .arg(iconForEvent(event))
-        .arg(labelForEntity(entity))
+        .arg(icon)
+        .arg(label)
         .arg(text);
 
     if (details.contains("durationMs")) {
-        line += QString("  %1 ms").arg(details.value("durationMs").toULongLong(), 8);
+        constexpr int durationColumn = 95;
+
+        const auto duration = QString("%1 ms")
+            .arg(details.value("durationMs").toULongLong(), 6);
+
+        line = line.leftJustified(durationColumn, QLatin1Char(' ')) + duration;
     }
 
-    if (event == "skipped" && details.contains("reason")) {
-        line += QString(" - %1").arg(details.value("reason").toString());
-    }
+    if (event == "failed" && details.contains("error"))
+        line += QString("  ERROR: %1").arg(details.value("error").toString());
 
-    if (event == "failed" && details.contains("error")) {
-        line += QString(" - %1").arg(details.value("error").toString());
-    }
-
-    if (event == "summary") {
-        return QString("%1[OK] %2: %3  jobs: %4, ok: %5, failed: %6, skipped: %7, %8 ms")
-            .arg(indent)
-            .arg(labelForEntity(entity))
-            .arg(text)
-            .arg(details.value("jobsStarted").toInt())
-            .arg(details.value("jobsFinished").toInt())
-            .arg(details.value("jobsFailed").toInt())
-            .arg(details.value("jobsSkipped").toInt())
-            .arg(details.value("durationMs").toULongLong());
-    }
+    if (event == "skipped" && details.contains("reason"))
+        line += QString("  SKIPPED: %1").arg(details.value("reason").toString());
 
     return line;
 }

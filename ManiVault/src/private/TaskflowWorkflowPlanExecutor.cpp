@@ -303,7 +303,7 @@ void TaskflowWorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, Shar
 {
     jobContext = requireContext(jobContext, __FUNCTION__);
 
-    jobContext->reportStarted();
+    WorkflowExecutionLifecycleScope lifecycle(jobContext);
 
     try {
         switch (job.getThreadAffinity()) {
@@ -322,8 +322,6 @@ void TaskflowWorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, Shar
         else if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Automatic && !jobContext->hasProgressChildren()) {
             jobContext->setProgress(1.0);
         }
-
-        jobContext->reportFinished();
     }
     catch (const std::exception& e) {
         jobContext->reportFailed(QString::fromUtf8(e.what()));

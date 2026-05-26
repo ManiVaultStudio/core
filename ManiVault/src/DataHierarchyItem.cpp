@@ -291,12 +291,12 @@ UniqueWorkflowPlan DataHierarchyItem::toVariantMapWorkflow() const
             sharedContext->setResultValue(key, value);
     });
 
-    jobs.emplace_back("Dataset", [this, sharedContext](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-        sharedContext->setResultValue("Dataset", _dataset->toVariantMap());
-    });
-
     jobs.emplace_back("Apply result", [this, sharedContext](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
         executionContext->publishResultValue("VariantMap", sharedContext->getResultValue("VariantMap").toMap());
+    });
+
+    plan->addNestedWorkflowStage("Dataset", [this, sharedContext](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        return _dataset->toVariantMapWorkflow();
     });
 
     plan->addSequentialStage("Save", jobs);

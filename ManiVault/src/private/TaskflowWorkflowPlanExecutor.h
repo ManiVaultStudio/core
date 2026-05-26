@@ -156,59 +156,44 @@ private: // Helpers
     }
 
     /**
-	 * @brief Compiles a workflow stage into the supplied Taskflow graph and adds lifecycle reporting.
+	 * @brief Compiles a workflow stage and wraps it with timed lifecycle reporting tasks.
 	 *
-	 * This function creates a typed stage execution context, compiles the stage jobs, and wraps the
-	 * compiled jobs between a stage-start task and a stage-finish task. This ensures that stage lifecycle
-	 * messages are emitted at execution time rather than at workflow compilation time.
+	 * The generated Taskflow structure emits the stage start event at execution time, executes
+	 * the compiled stage jobs, and then emits the stage finish event with the measured elapsed
+	 * wall-clock duration.
 	 *
-	 * For sequential stages, jobs are compiled in order.
-	 * For parallel stages, jobs are compiled as independent tasks.
-	 *
-	 * Empty stages are reported as skipped and do not contribute executable tasks.
-	 *
-	 * @tparam Flow Taskflow graph type, either tf::Taskflow or tf::Subflow.
-	 * @param stage The workflow stage to compile.
-	 * @param flow The Taskflow graph or subflow to which the stage tasks are added.
-	 * @param parentContext Parent workflow execution context.
-	 * @return The compiled start and end tasks for dependency chaining.
+	 * @tparam Flow Taskflow graph type.
+	 * @param stage Stage to compile.
+	 * @param flow Target Taskflow graph or subflow.
+	 * @param parentContext Parent execution context.
+	 * @return Start and end tasks for dependency chaining.
 	 */
     template<typename Flow>
-    CompiledTasks compileStage(const WorkflowPlan::Stage& stage, Flow& flow, SharedWorkflowExecutionContext parentContext)
+    CompiledTasks compileStage(
+        const WorkflowPlan::Stage& stage,
+        Flow& flow,
+        SharedWorkflowExecutionContext parentContext)
     {
-        SharedWorkflowExecutionContext stageContext;
+        const bool isSequential =
+            stage.getConcurrencyMode() == WorkflowPlan::ConcurrencyMode::Sequential;
 
-        const bool isSequential = stage.getConcurrencyMode() == WorkflowPlan::ConcurrencyMode::Sequential;
+        auto stageContext = isSequential
+            ? parentContext->createSequentialStageChild(stage.getName(), stage.getWeight(), WorkflowPlan::JobProgressMode::Nested)
+            : parentContext->createParallelStageChild(stage.getName(), stage.getWeight(), WorkflowPlan::JobProgressMode::Nested);
 
-        if (isSequential) {
-            stageContext = parentContext->createSequentialStageChild(stage.getName(), stage.getWeight(), WorkflowPlan::JobProgressMode::Nested);
-        }
-        else {
-            stageContext = parentContext->createParallelStageChild(stage.getName(), stage.getWeight(), WorkflowPlan::JobProgressMode::Nested);
-        }
+        auto timer = std::make_shared<QElapsedTimer>();
 
-        if (stage.getJobs().empty()) {
-            auto skippedTask = flow.emplace([stageContext]() {
-                stageContext->reportSkipped("stage has no jobs");
-                });
-
-            return {
-                { skippedTask },
-                { skippedTask }
-            };
-        }
-
-        auto startTask = flow.emplace([stageContext]() {
+        auto startTask = flow.emplace([stageContext, timer]() {
+            timer->start();
             stageContext->reportStarted();
             });
 
-        auto compiled =
-            isSequential
+        auto compiled = isSequential
             ? compileSequentialStage(stage, flow, stageContext)
             : compileParallelStage(stage, flow, stageContext);
 
-        auto finishTask = flow.emplace([stageContext]() {
-            stageContext->reportFinished();
+        auto finishTask = flow.emplace([stageContext, timer]() {
+            stageContext->reportFinished(static_cast<std::uint64_t>(timer->elapsed()));
             });
 
         for (auto& start : compiled.starts)
@@ -217,10 +202,7 @@ private: // Helpers
         for (auto& end : compiled.ends)
             end.precede(finishTask);
 
-        return {
-            { startTask },
-            { finishTask }
-        };
+        return { { startTask }, { finishTask } };
     }
 
     template<typename Graph>

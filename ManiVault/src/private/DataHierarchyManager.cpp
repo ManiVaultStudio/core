@@ -450,8 +450,6 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
     UniqueWorkflowPlan toPlan = std::make_unique<WorkflowPlan>("Save data hierarchy", context);
 
     if (!_items.empty()) {
-        WorkflowPlan::Jobs createItemMapJobs;
-
         std::int32_t sortIndex = 0;
 
         for (auto& dataHierarchyItem : _items) {
@@ -460,16 +458,16 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
             const auto datasetGuiName   = dataset->getGuiName();
             const auto itemSortIndex    = sortIndex++;
 
-            createItemMapJobs.emplace_back(datasetGuiName, [context, &dataHierarchyItem, datasetId, itemSortIndex, datasetGuiName](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-                auto itemMap = dataHierarchyItem->toVariantMap();
+            toPlan->addNestedWorkflowStage(datasetGuiName, [context, &dataHierarchyItem, datasetId, itemSortIndex, datasetGuiName](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+                return dataHierarchyItem->toVariantMapWorkflow();
 
+                /*
                 itemMap["SortIndex"] = itemSortIndex;
 
                 context->setDatasetMap(datasetId, itemMap);
+                */
             });
         }
-
-        toPlan->addSequentialStage("Create item maps", createItemMapJobs);
 
         toPlan->addSequentialStage("Assemble item maps", [this, &toPlan, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
             try {

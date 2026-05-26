@@ -211,12 +211,6 @@ QVariantMap WorkflowExecutionContext::makeLifecycleDetails(const QString& event,
     if (durationMs > 0)
         details["durationMs"] = QVariant::fromValue<qulonglong>(durationMs);
 
-    qDebug()
-        << "TYPE DEBUG"
-        << _name
-        << static_cast<int>(_type)
-        << getWorkflowExecutionContextTypeName(_type);
-
     return details;
 }
 
