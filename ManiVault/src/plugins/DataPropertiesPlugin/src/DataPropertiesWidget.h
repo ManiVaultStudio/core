@@ -10,10 +10,6 @@
 
 #include <QWidget>
 
-using namespace mv;
-using namespace mv::util;
-using namespace mv::gui;
-
 class DataPropertiesPlugin;
 
 /**
@@ -46,13 +42,13 @@ private:
     void endPopulate();
 
 protected:
-    DataPropertiesPlugin*   _dataPropertiesPlugin;      /** Pointer to owning data properties plugin */
-    QVBoxLayout             _layout;                    /** Main layout */
-    QTimer                  _populateTimer;             /** Timer for selectively populating the UI */
-    DataHierarchyItems      _scheduledItems;            /** Items scheduled to be shown */
-    DataHierarchyItems      _currentItems;              /** Items currently shown */
-    bool                    _abortPopulate;             /** Boolean determining whether the UI build process should be terminated */
-    bool                    _isPopulating;              /** Boolean determining whether the UI build process should be terminated */
-    GroupsAction            _groupsAction;              /** Groups action */
-    GroupsAction::Widget*   _groupsActionWidget;        /** Pointer to groups action widget (used to change label sizing) */
+    DataPropertiesPlugin*           _dataPropertiesPlugin;      /** Pointer to owning data properties plugin */
+    QVBoxLayout                     _layout;                    /** Main layout */
+    QTimer                          _populateTimer;             /** Timer for selectively populating the UI */
+    mv::DataHierarchyItems          _scheduledItems;            /** Items scheduled to be shown */
+    mv::DataHierarchyItems          _currentItems;              /** Items currently shown */
+    bool                            _abortPopulate;             /** Boolean determining whether the UI build process should be terminated */
+    bool                            _isPopulating;              /** Boolean determining whether the UI build process should be terminated */
+    mv::gui::GroupsAction           _groupsAction;              /** Groups action */
+    mv::gui::GroupsAction::Widget*  _groupsActionWidget;        /** Pointer to groups action widget (used to change label sizing) */
 };
