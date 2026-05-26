@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.22)
 set(TUTORIAL_PLUGIN "TutorialPlugin")
 PROJECT(${TUTORIAL_PLUGIN} LANGUAGES CXX)
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 set(PLUGIN
     src/TutorialPlugin.h
     src/TutorialPlugin.cpp

@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.22)
 set(DATAPROPERTIESPLUGIN "DataPropertiesPlugin")
 PROJECT(${DATAPROPERTIESPLUGIN} LANGUAGES CXX)
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 set(PLUGIN
     src/DataPropertiesPlugin.h
     src/DataPropertiesPlugin.cpp

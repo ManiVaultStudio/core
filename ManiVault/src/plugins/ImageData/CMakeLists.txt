@@ -80,4 +80,3 @@ add_custom_command(TARGET ${IMAGEDATA} POST_BUILD
 )
 
 mv_handle_plugin_config(${IMAGEDATA})
-

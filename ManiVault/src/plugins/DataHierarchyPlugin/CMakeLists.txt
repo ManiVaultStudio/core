@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.22)
 set(DATAHIERARCHYPLUGIN "DataHierarchyPlugin")
 PROJECT(${DATAHIERARCHYPLUGIN} LANGUAGES CXX)
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 set(PLUGIN
     src/DataHierarchyPlugin.h
     src/DataHierarchyPlugin.cpp
@@ -44,6 +46,7 @@ target_include_directories(${DATAHIERARCHYPLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<C
 
 target_compile_features(${DATAHIERARCHYPLUGIN} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
+target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::Core)
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE ${MV_PUBLIC_LIB})

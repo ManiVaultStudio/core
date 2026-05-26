@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.22)
 set(TASKS_PLUGIN "TasksPlugin")
 PROJECT(${TASKS_PLUGIN} LANGUAGES CXX)
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 set(PLUGIN
     src/TasksPlugin.h
     src/TasksPlugin.cpp

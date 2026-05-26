@@ -43,7 +43,7 @@ target_link_libraries(${COLORDATA} PRIVATE ${MV_PUBLIC_LIB})
 
 set_target_properties(${COLORDATA} PROPERTIES 
     AUTOMOC ON
-    PUBLIC_HEADER "${CLUSTER_HEADERS}"
+    PUBLIC_HEADER "${COLORDATA_HEADERS}"
     UNITY_BUILD ${MV_UNITY_BUILD}
 )
 
@@ -62,9 +62,4 @@ add_custom_command(TARGET ${COLORDATA} POST_BUILD
         --prefix ${MV_INSTALL_DIR}
 )
 
-add_custom_command(TARGET ${CLUSTERDATA} POST_BUILD
-    COMMAND ${CMAKE_COMMAND}
-        --install ${CMAKE_CURRENT_BINARY_DIR}
-        --config $<CONFIGURATION>
-        --prefix ${MV_INSTALL_DIR}
-)
+mv_handle_plugin_config(${COLORDATA})

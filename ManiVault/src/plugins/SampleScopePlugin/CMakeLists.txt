@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.22)
 set(SAMPLE_CONTEXT_PLUGIN "SampleScopePlugin")
 PROJECT(${SAMPLE_CONTEXT_PLUGIN} LANGUAGES CXX)
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 set(PLUGIN
     src/SampleScopePlugin.h
     src/SampleScopePlugin.cpp

@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.22)
 set(LOGGINGPLUGIN "LoggingPlugin")
 PROJECT(${LOGGINGPLUGIN} LANGUAGES CXX)
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 set(PLUGIN
     src/LoggingPlugin.h
     src/LoggingPlugin.cpp
