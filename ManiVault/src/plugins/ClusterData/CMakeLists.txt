@@ -67,7 +67,7 @@ set(DIALOG_SOURCES
     src/OverwriteClustersConfirmationDialog.cpp
 )
 
-set(AUX
+set(CLUSTER_AUX
     PluginInfo.json
 )
 
@@ -75,9 +75,9 @@ source_group(Plugin FILES ${CLUSTERD_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 source_group(Model FILES ${MODEL_SOURCES})
 source_group(Dialog FILES ${DIALOG_SOURCES})
-source_group(AUX FILES ${AUX})
+source_group(AUX FILES ${CLUSTER_AUX})
 
-add_library(${CLUSTERDATA} SHARED ${CLUSTERD_SOURCES} ${ACTIONS_SOURCES} ${MODEL_SOURCES} ${DIALOG_SOURCES} ${AUX})
+add_library(${CLUSTERDATA} SHARED ${CLUSTERD_SOURCES} ${ACTIONS_SOURCES} ${MODEL_SOURCES} ${DIALOG_SOURCES} ${CLUSTER_AUX})
 
 add_library(ManiVault::${CLUSTERDATA} ALIAS ${CLUSTERDATA})
 
@@ -123,4 +123,4 @@ add_custom_command(TARGET ${CLUSTERDATA} POST_BUILD
         --prefix ${MV_INSTALL_DIR}
 )
 
-mv_handle_plugin_config(${DATAHIERARCHYPLUGIN})
+mv_handle_plugin_config(${CLUSTERDATA})
