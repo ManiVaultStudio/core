@@ -10,6 +10,7 @@ Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::plugin;
 using namespace mv::util;
 
 DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :

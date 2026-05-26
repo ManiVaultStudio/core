@@ -16,9 +16,6 @@
 
 class QAction;
 
-using namespace mv;
-using namespace mv::plugin;
-
 /**
  * Data hierarchy widget context menu
  * 
@@ -35,7 +32,7 @@ public:
      * @param parent Parent widget
      * @param selectedDatasets Selected datasets in the data hierarchy widget
      */
-    DataHierarchyWidgetContextMenu(QWidget* parent, Datasets selectedDatasets);
+    DataHierarchyWidgetContextMenu(QWidget* parent, mv::Datasets selectedDatasets);
 
 private:
 
@@ -44,7 +41,7 @@ private:
      * Goes over all loaded plugins of \p pluginType and builds a hierarchical menu structure (based on plugin title)
      * @param type PluginType
      */
-    void addMenusForPluginType(plugin::Type pluginType);
+    void addMenusForPluginType(mv::plugin::Type pluginType);
 
     /** Add menus for scripts  */
     void addMenusForScripts();
@@ -92,8 +89,8 @@ private:
     QMenu* getUnhideMenu();
 
 private:
-    Datasets    _allDatasets;           /** All datasets in the data hierarchy */
-    Datasets    _selectedDatasets;      /** Selected datasets in the data hierarchy widget */
+    mv::Datasets    _allDatasets;           /** All datasets in the data hierarchy */
+    mv::Datasets    _selectedDatasets;      /** Selected datasets in the data hierarchy widget */
 };
 
 /**
@@ -130,8 +127,8 @@ signals:
     void closeDialog(bool onlyIndices);
 
 private:
-    gui::IntegralAction      _selectionIndexAction;      /** For setting the selection group index */
-    gui::TriggerAction       _confirmAction;             /** Triggers the grouping */
+    mv::gui::IntegralAction      _selectionIndexAction;      /** For setting the selection group index */
+    mv::gui::TriggerAction       _confirmAction;             /** Triggers the grouping */
 };
 
 /**
@@ -184,9 +181,9 @@ signals:
     void closeDialog(bool onlyIndices);
 
 private:
-    gui::IntegralAction     _selectionIndexAction;      /** For setting the selection group index */
-    gui::StringAction       _selectionPatternAction;    /** For setting the selection group pattern */
-    gui::OptionAction       _selectionOptionAction;     /** Action for choosing whether to use prefix or suffix */
-    gui::StringAction       _infoTextAction;            /** For displaying some information */
-    gui::TriggerAction      _confirmAction;             /** Triggers the grouping */
+    mv::gui::IntegralAction     _selectionIndexAction;      /** For setting the selection group index */
+    mv::gui::StringAction       _selectionPatternAction;    /** For setting the selection group pattern */
+    mv::gui::OptionAction       _selectionOptionAction;     /** Action for choosing whether to use prefix or suffix */
+    mv::gui::StringAction       _infoTextAction;            /** For displaying some information */
+    mv::gui::TriggerAction      _confirmAction;             /** Triggers the grouping */
 };
