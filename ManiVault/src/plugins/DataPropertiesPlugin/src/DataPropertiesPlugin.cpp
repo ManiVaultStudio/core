@@ -97,7 +97,7 @@ QUrl DataPropertiesPluginFactory::getReadmeMarkdownUrl() const
         return { "https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/DataPropertiesPlugin/README.md" };
     else
         return QUrl{
-            QString("https://raw.githubusercontent.com/ManiVaultStudio/core/v") +
+            QString("https://raw.githubusercontent.com/ManiVaultStudio/core/release/") +
             QString::fromStdString(MV_VERSION_STRING()) +
             "/ManiVault/src/plugins/DataPropertiesPlugin/README.md"
     };
@@ -109,7 +109,7 @@ QUrl DataPropertiesPluginFactory::getRepositoryUrl() const
         return { "https://www.github.com/ManiVaultStudio/core/tree/master/ManiVault/src/plugins/DataPropertiesPlugin" };
     else
         return QUrl{
-            QString("https://www.github.com/ManiVaultStudio/core/tree/v") +
+            QString("https://www.github.com/ManiVaultStudio/core/tree/release/") +
             QString::fromStdString(MV_VERSION_STRING()) +
             "/ManiVault/src/plugins/DataPropertiesPlugin"
     };
