@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.22)
 
 set(LOGGINGPLUGIN "LoggingPlugin")
-PROJECT(${LOGGINGPLUGIN})
+PROJECT(${LOGGINGPLUGIN} LANGUAGES CXX)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(PLUGIN
     src/LoggingPlugin.h
@@ -14,7 +16,7 @@ set(WIDGETS
 )
 
 set(AUX
-    src/LoggingPlugin.json
+    PluginInfo.json
 )
 
 set(LOGGING_SOURCES
@@ -40,7 +42,10 @@ target_link_libraries(${LOGGINGPLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${LOGGINGPLUGIN} ${MV_USE_AVX})
 
-set_target_properties(${LOGGINGPLUGIN} PROPERTIES AUTOMOC ON)
+set_target_properties(${LOGGINGPLUGIN} PROPERTIES
+    AUTOMOC ON
+    UNITY_BUILD ${MV_UNITY_BUILD}
+)
 
 install(TARGETS ${LOGGINGPLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
@@ -54,8 +59,10 @@ add_custom_command(TARGET ${LOGGINGPLUGIN} POST_BUILD
     --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
 )
 
+mv_handle_plugin_config(${LOGGINGPLUGIN})
+
 # Automatically set the debug environment (command + working directory) for MSVC
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set_property(TARGET ${LOGGINGPLUGIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>)
     set_property(TARGET ${LOGGINGPLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,"${MV_INSTALL_DIR}/Debug/${MV_APPLICATION_NAME}.exe",$<IF:$<CONFIG:RELWITHDEBINFO>,"${MV_INSTALL_DIR}/RelWithDebInfo/${MV_APPLICATION_NAME}.exe","${MV_INSTALL_DIR}/Release/${MV_APPLICATION_NAME}.exe">>)
 endif()

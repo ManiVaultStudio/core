@@ -14,8 +14,6 @@
 #include <QSize>
 #include <QString>
 
-#include <vector>
-
 class Points;
 
 const mv::DataType ImageType = mv::DataType(QString("Images"));
@@ -125,7 +123,7 @@ class ImageDataFactory : public mv::plugin::RawDataFactory
     Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID   "studio.manivault.ImageData"
-                      FILE  "ImageData.json")
+                      FILE  "PluginInfo.json")
 
 public:
     ImageDataFactory();

@@ -1,5 +1,0 @@
-{
-    "name" : "Images",
-    "version" : "1",
-    "dependencies" : ["Points", "Cluster"]
-}

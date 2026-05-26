@@ -20,7 +20,7 @@
 #include <QDebug>
 #include <QMap>
 #include <QString>
-#include <QVariant>
+#include <QVariantMap>
 
 #include <array>
 #include <cassert>
@@ -1024,7 +1024,7 @@ class PointDataFactory : public RawDataFactory
     Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
         Q_OBJECT
         Q_PLUGIN_METADATA(IID   "studio.manivault.PointData"
-                          FILE  "PointData.json")
+                          FILE  "PluginInfo.json")
 
 public:
     PointDataFactory();

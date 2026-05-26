@@ -1,12 +1,9 @@
 cmake_minimum_required(VERSION 3.22)
 
 set(IMAGEDATA "ImageData")
-PROJECT(${IMAGEDATA})
+PROJECT(${IMAGEDATA} LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-file(GLOB JSON src/*.json)
-set(AUX ${JSON})
 
 set(IMAGE_DATA_HEADERS 
     src/Image.h
@@ -27,11 +24,15 @@ set(ACTIONS_SOURCES
     src/InfoAction.cpp
 )
 
+set(IMAGE_DATA_AUX
+    PluginInfo.json
+)
+
 source_group(Actions FILES ${ACTIONS_SOURCES})
 source_group(Plugin FILES ${IMAGE_DATA_HEADERS} ${IMAGE_DATA_SOURCES})
-source_group(Aux FILES ${AUX})
+source_group(Aux FILES ${IMAGE_DATA_AUX})
 
-add_library(${IMAGEDATA} SHARED ${IMAGE_DATA_HEADERS} ${IMAGE_DATA_SOURCES} ${ACTIONS_SOURCES} ${AUX})
+add_library(${IMAGEDATA} SHARED ${IMAGE_DATA_HEADERS} ${IMAGE_DATA_SOURCES} ${ACTIONS_SOURCES} ${IMAGE_DATA_AUX})
 
 add_library(ManiVault::${IMAGEDATA} ALIAS ${IMAGEDATA})
 
@@ -57,12 +58,11 @@ target_link_libraries(${IMAGEDATA} PRIVATE ClusterData)
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${IMAGEDATA} ${MV_USE_AVX})
 
-set_target_properties(${IMAGEDATA} PROPERTIES PUBLIC_HEADER "${IMAGE_DATA_HEADERS}")
-set_target_properties(${IMAGEDATA} PROPERTIES AUTOMOC ON)
-
-if(MV_UNITY_BUILD)
-    set_target_properties(${IMAGEDATA} PROPERTIES UNITY_BUILD ON)
-endif()
+set_target_properties(${IMAGEDATA} PROPERTIES 
+    AUTOMOC ON
+    PUBLIC_HEADER "${IMAGE_DATA_HEADERS}"
+    UNITY_BUILD ${MV_UNITY_BUILD}
+)
 
 install(TARGETS ${IMAGEDATA}
     EXPORT "ManiVaultPublicExport"
@@ -78,3 +78,5 @@ add_custom_command(TARGET ${IMAGEDATA} POST_BUILD
         --config $<CONFIGURATION>
         --prefix ${MV_INSTALL_DIR}
 )
+
+mv_handle_plugin_config(${IMAGEDATA})

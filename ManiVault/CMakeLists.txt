@@ -481,11 +481,6 @@ set(MV_SYSTEM_PLUGINS
     TutorialPlugin
 )
 
-set_target_properties(${MV_SYSTEM_PLUGINS}
-    PROPERTIES
-    FOLDER SystemPlugins
-)
-
 foreach(system_plugin_target IN LISTS MV_SYSTEM_PLUGINS)
     target_compile_options(${system_plugin_target}
         PRIVATE
@@ -506,11 +501,6 @@ set(MV_DATA_PLUGINS
     TextData 
     ClusterData 
     ImageData
-)
-
-set_target_properties(${MV_DATA_PLUGINS}
-    PROPERTIES
-    FOLDER DataPlugins
 )
 
 foreach(data_plugin_target IN LISTS MV_DATA_PLUGINS)

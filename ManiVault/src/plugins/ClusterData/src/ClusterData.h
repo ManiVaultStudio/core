@@ -16,7 +16,6 @@
 
 #include <QString>
 #include <QColor>
-#include <QUuid>
 
 #include <vector>
 
@@ -286,7 +285,7 @@ class ClusterDataFactory : public mv::plugin::RawDataFactory
     Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID   "studio.manivault.ClusterData"
-                      FILE  "ClusterData.json")
+                      FILE  "PluginInfo.json")
     
 public:
     ClusterDataFactory();
