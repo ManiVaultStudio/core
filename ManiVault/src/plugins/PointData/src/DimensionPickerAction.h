@@ -11,10 +11,6 @@
 
 #include "pointdata_export.h"
 
-using namespace mv;
-using namespace mv::gui;
-using namespace mv::util;
-
 /**
  * Dimension picker action class
  *
@@ -23,14 +19,14 @@ using namespace mv::util;
  *
  * @author Thomas Kroes
  */
-class POINTDATA_EXPORT DimensionPickerAction : public WidgetAction
+class POINTDATA_EXPORT DimensionPickerAction : public mv::gui::WidgetAction
 {
 Q_OBJECT
 
 public:
 
     /** Widget class for points dimension picker action */
-    class Widget : public WidgetActionWidget
+    class Widget : public mv::gui::WidgetActionWidget
     {
     protected:
 
@@ -69,7 +65,7 @@ public:
      * Set the points dataset from which the dimension will be picked
      * @param points Dataset reference to points dataset
      */
-    void setPointsDataset(const Dataset<Points>& points);
+    void setPointsDataset(const mv::Dataset<Points>& points);
 
     /** Get the names of the dimensions */
     QStringList getDimensionNames() const;
@@ -152,12 +148,12 @@ signals:
 
 public: /** Action getters */
 
-    OptionAction& getCurrentDimensionAction() { return _currentDimensionAction; }
+    mv::gui::OptionAction& getCurrentDimensionAction() { return _currentDimensionAction; }
 
 protected:
-    Dataset<Points>     _points;                    /** Smart pointer to points dataset from which the dimension will be picked */
-    OptionAction        _currentDimensionAction;    /** Current dimension action */
-    std::uint32_t       _searchThreshold;           /** Select from a drop-down below the threshold and above use a search bar */
+    mv::Dataset<Points>     _points;                    /** Smart pointer to points dataset from which the dimension will be picked */
+    mv::gui::OptionAction   _currentDimensionAction;    /** Current dimension action */
+    std::uint32_t           _searchThreshold;           /** Select from a drop-down below the threshold and above use a search bar */
 
 protected:
     static constexpr std::uint32_t DEFAULT_SEARCH_THRESHOLD = 1000;     /** Default search threshold */

@@ -8,6 +8,7 @@
 #include <QHBoxLayout>
 
 using namespace mv;
+using namespace mv::gui;
 
 DimensionPickerAction::DimensionPickerAction(QObject* parent, const QString& title) :
     WidgetAction(parent, title),
@@ -189,7 +190,7 @@ DimensionPickerAction::Widget::Widget(QWidget* parent, DimensionPickerAction* di
     auto lineEditWidget = dimensionPickerAction->getCurrentDimensionAction().createWidget(this, OptionAction::LineEdit);
 
     // Gets search icon to decorate the line edit
-    const auto searchIcon = StyledIcon("magnifying-glass");
+    const auto searchIcon = mv::util::StyledIcon("magnifying-glass");
 
     // Add the icon to the line edit
     lineEditWidget->findChild<QLineEdit*>("LineEdit")->addAction(searchIcon, QLineEdit::TrailingPosition);

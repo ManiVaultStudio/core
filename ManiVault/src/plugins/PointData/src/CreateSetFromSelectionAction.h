@@ -9,10 +9,6 @@
 #include <actions/TriggerAction.h>
 #include <actions/StringAction.h>
 
-using namespace mv;
-using namespace mv::util;
-using namespace mv::gui;
-
 /**
  * Create set from selection action class
  *
@@ -20,7 +16,7 @@ using namespace mv::gui;
  *
  * @author Thomas Kroes
  */
-class CreateSetFromSelectionAction : public WidgetAction
+class CreateSetFromSelectionAction : public mv::gui::WidgetAction
 {
     Q_OBJECT
 
@@ -54,12 +50,12 @@ public:
      * @param parent Pointer to parent object
      * @param points Smart pointer to points dataset
      */
-    CreateSetFromSelectionAction(QObject* parent, const Dataset<Points>& points);
+    CreateSetFromSelectionAction(QObject* parent, const mv::Dataset<Points>& points);
 
 public: // Action getters
 
-    StringAction& getNameAction() { return _nameAction; }
-    TriggerAction& getCreateAction() { return _createAction; }
+    mv::gui::StringAction& getNameAction() { return _nameAction; }
+    mv::gui::TriggerAction& getCreateAction() { return _createAction; }
 
 signals:
 
@@ -69,7 +65,7 @@ signals:
     void dimensionNamesChanged(const QStringList& dimensionNames);
 
 protected:
-    Dataset<Points>     _points;            /** Points dataset reference */
-    StringAction        _nameAction;        /** Set name action */
-    TriggerAction       _createAction;      /** Create set action */
+    mv::Dataset<Points>         _points;            /** Points dataset reference */
+    mv::gui::StringAction       _nameAction;        /** Set name action */
+    mv::gui::TriggerAction      _createAction;      /** Create set action */
 };
