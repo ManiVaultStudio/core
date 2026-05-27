@@ -353,6 +353,21 @@ bool WorkflowExecutionContext::hasResultValue(const QString& localKey) const
 	return _state->hasResultValue(localKey);
 }
 
+QVariantMap WorkflowExecutionContext::getResultValues() const
+{
+    return _state->getResultValues(_resultScope);
+}
+
+QVariantMap WorkflowExecutionContext::takeResultValues()
+{
+    return _state->takeResultValues(_resultScope);
+}
+
+QString WorkflowExecutionContext::getResultScope() const
+{
+	return _resultScope;
+}
+
 QString WorkflowExecutionContext::scopedResultKey(const QString& localKey) const
 {
 	if (localKey.trimmed().isEmpty())
