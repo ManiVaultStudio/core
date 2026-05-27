@@ -6,9 +6,6 @@
 
 #include <actions/TriggerAction.h>
 
-using namespace mv;
-using namespace mv::gui;
-
 class ClustersActionWidget;
 
 /**
@@ -18,7 +15,7 @@ class ClustersActionWidget;
  *
  * @author Thomas Kroes
  */
-class RemoveClustersAction : public TriggerAction
+class RemoveClustersAction : public mv::gui::TriggerAction
 {
 public:
 

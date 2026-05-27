@@ -11,6 +11,8 @@
 #include <QHeaderView>
 #include <QVBoxLayout>
 
+using namespace mv;
+
 ClustersActionWidget::ClustersActionWidget(QWidget* parent, ClustersAction* clustersAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, clustersAction),
     _filterModel(),
@@ -104,11 +106,11 @@ ClustersActionWidget::ClustersActionWidget(QWidget* parent, ClustersAction* clus
 
         // Add remove cluster(s) widget
         if (widgetFlags & ClustersAction::Remove)
-            toolbarLayout->addWidget(_removeClustersAction.createWidget(this, TriggerAction::Icon));
+            toolbarLayout->addWidget(_removeClustersAction.createWidget(this, gui::TriggerAction::Icon));
 
         // Add merge clusters widget
         if (widgetFlags & ClustersAction::Merge)
-            toolbarLayout->addWidget(_mergeClustersAction.createWidget(this, TriggerAction::Icon));
+            toolbarLayout->addWidget(_mergeClustersAction.createWidget(this, gui::TriggerAction::Icon));
 
         // Add colorize widget if required
         if (widgetFlags & ClustersAction::Colorize)
@@ -124,7 +126,7 @@ ClustersActionWidget::ClustersActionWidget(QWidget* parent, ClustersAction* clus
 
         // Add refresh widget if required
         if (widgetFlags & ClustersAction::Refresh)
-            toolbarLayout->addWidget(_refreshClustersAction.createWidget(this, TriggerAction::Icon));
+            toolbarLayout->addWidget(_refreshClustersAction.createWidget(this, gui::TriggerAction::Icon));
 
         toolbarLayout->addStretch(1);
 

@@ -27,6 +27,8 @@ Q_PLUGIN_METADATA(IID "studio.manivault.PointData")
 // PointData
 // =============================================================================
 
+using namespace mv;
+using namespace mv::plugin;
 using namespace mv::util;
 
 namespace
@@ -335,7 +337,7 @@ void Points::init()
     };
 
     //if (isFull()) {
-        _dimensionsPickerGroupAction = new GroupAction(this, "Dimensions Group");
+        _dimensionsPickerGroupAction = new gui::GroupAction(this, "Dimensions Group");
 
         _dimensionsPickerGroupAction->setText("Dimensions");
         _dimensionsPickerGroupAction->setShowLabels(false);

@@ -8,6 +8,8 @@
 #include "ClusterData.h"
 #include "ClustersActionWidget.h"
 
+using namespace mv::gui;
+
 ColorizeClustersAction::ColorizeClustersAction(ClustersAction& clustersAction) :
     TriggerAction(&clustersAction, "Colorize"),
     _clustersAction(clustersAction),

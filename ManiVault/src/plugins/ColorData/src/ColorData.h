@@ -12,8 +12,6 @@
 #include <QColor>
 #include <vector>
 
-using namespace mv;
-
 const mv::DataType ColorType = mv::DataType(QString("Colors"));
 
 // =============================================================================
@@ -35,7 +33,7 @@ public:
      * @param guid Globally unique dataset identifier (use only for deserialization)
      * @return Smart pointer to dataset
      */
-    Dataset<DatasetImpl> createDataSet(const QString& guid = "") const override;
+    mv::Dataset<mv::DatasetImpl> createDataSet(const QString& guid = "") const override;
 
 private:
     std::vector<QColor> _colors;
@@ -55,14 +53,14 @@ public:
      * Get a copy of the dataset
      * @return Smart pointer to copy of dataset
      */
-    Dataset<DatasetImpl> copy() const override
+    mv::Dataset<DatasetImpl> copy() const override
     {
         auto colors = new Colors(getRawDataName());
 
         colors->setText(text());
         colors->indices = indices;
 
-        return Dataset<DatasetImpl>(colors);
+        return mv::Dataset<DatasetImpl>(colors);
     }
 
     /**
@@ -72,7 +70,7 @@ public:
      * @param visible Whether the subset will be visible in the UI
      * @return Smart pointer to the created subset
      */
-    Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const override {
+    mv::Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const mv::Dataset<DatasetImpl>& parentDataSet = mv::Dataset<DatasetImpl>(), const bool& visible = true) const override {
         return mv::data().createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
 

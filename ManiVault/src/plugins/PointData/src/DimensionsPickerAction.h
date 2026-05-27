@@ -22,9 +22,6 @@
 
 #include <QTableView>
 
-using namespace mv;
-using namespace mv::gui;
-
 class QMenu;
 
 /**
@@ -34,7 +31,7 @@ class QMenu;
  *
  * @author Thomas Kroes
  */
-class POINTDATA_EXPORT DimensionsPickerAction : public WidgetAction
+class POINTDATA_EXPORT DimensionsPickerAction : public mv::gui::WidgetAction
 {
 
     Q_OBJECT
@@ -42,7 +39,7 @@ class POINTDATA_EXPORT DimensionsPickerAction : public WidgetAction
 protected:
 
     /** Widget class for dimension selection action */
-    class Widget : public WidgetActionWidget {
+    class Widget : public mv::gui::WidgetActionWidget {
     public:
 
         /**
@@ -123,33 +120,32 @@ public:
 
     /**
      * Get the input points dataset
-     * @param Input points dataset
      */
-    Dataset<Points> getPointsDataset() const;
+    mv::Dataset<Points> getPointsDataset() const;
 
     /**
      * Set the input points dataset
      * @param points Smart pointer to points dataset
      */
-    void setPointsDataset(const Dataset<Points>& points);
+    void setPointsDataset(const mv::Dataset<Points>& points);
 
     /**
      * Get selection picker holder
      * @return Reference to dimensions picker holder
      */
-    DimensionsPickerHolder& getHolder();
+    mv::DimensionsPickerHolder& getHolder();
 
     /**
      * Get item model
      * @return Reference to item model
      */
-    DimensionsPickerItemModel& getItemModel();
+    mv::DimensionsPickerItemModel& getItemModel();
 
     /**
      * Get selection proxy model
      * @return Reference to selection proxy model
      */
-    DimensionsPickerProxyModel& getProxyModel();
+    mv::DimensionsPickerProxyModel& getProxyModel();
 
 public:
 
@@ -231,7 +227,7 @@ public:
             for (std::uint32_t i{}; i < n; ++i)
                 _holder.setDimensionEnabled(i, _proxyModel->filterAcceptsRow(i, QModelIndex()) == selectVisible);
 
-            const ModelResetter modelResetter(_proxyModel.get());
+            const mv::ModelResetter modelResetter(_proxyModel.get());
         }
     }
 
@@ -267,7 +263,7 @@ signals:
      * Signals that the proxy model changed
      * @param dimensionsPickerProxyModel Pointer to dimensions picker proxy model
      */
-    void proxyModelChanged(DimensionsPickerProxyModel* dimensionsPickerProxyModel);
+    void proxyModelChanged(mv::DimensionsPickerProxyModel* dimensionsPickerProxyModel);
 
     /**
      * Signals that the selected dimensions changed
@@ -277,24 +273,24 @@ signals:
 
 protected: // Action getters
 
-    DimensionsPickerFilterAction& getFilterAction() { return _filterAction; }
-    DimensionsPickerSelectAction& getSelectAction() { return _selectAction; }
-    StringAction& getSummaryAction() { return _summaryAction; }
-    DimensionsPickerMiscellaneousAction& getMiscellaneousAction() { return _miscellaneousAction; }
+    mv::gui::DimensionsPickerFilterAction& getFilterAction() { return _filterAction; }
+    mv::gui::DimensionsPickerSelectAction& getSelectAction() { return _selectAction; }
+    mv::gui::StringAction& getSummaryAction() { return _summaryAction; }
+    mv::gui::DimensionsPickerMiscellaneousAction& getMiscellaneousAction() { return _miscellaneousAction; }
 
 protected:
-    Dataset<Points>                                 _points;                            /** Smart pointer to points set */
-    DimensionsPickerHolder                          _holder;                            /** Selection holder */
-    std::unique_ptr<DimensionsPickerItemModel>      _itemModel;                         /** Selection item model */
-    std::unique_ptr<DimensionsPickerProxyModel>     _proxyModel;                        /** Selection proxy model for filtering etc. */
-    StringAction                                    _summaryAction;                     /** Summary action */
-    DimensionsPickerFilterAction                    _filterAction;                      /** Filter action */
-    DimensionsPickerSelectAction                    _selectAction;                      /** Select action */
-    DimensionsPickerMiscellaneousAction             _miscellaneousAction;               /** Miscellaneous settings action */
-    QMetaObject::Connection                         _summaryUpdateAwakeConnection;      /** Update summary view when idle */
+    mv::Dataset<Points>                                     _points;                            /** Smart pointer to points set */
+    mv::DimensionsPickerHolder                              _holder;                            /** Selection holder */
+    std::unique_ptr<mv::DimensionsPickerItemModel>          _itemModel;                         /** Selection item model */
+    std::unique_ptr<mv::DimensionsPickerProxyModel>         _proxyModel;                        /** Selection proxy model for filtering etc. */
+    mv::gui::StringAction                                   _summaryAction;                     /** Summary action */
+    mv::gui::DimensionsPickerFilterAction                   _filterAction;                      /** Filter action */
+    mv::gui::DimensionsPickerSelectAction                   _selectAction;                      /** Select action */
+    mv::gui::DimensionsPickerMiscellaneousAction            _miscellaneousAction;               /** Miscellaneous settings action */
+    QMetaObject::Connection                                 _summaryUpdateAwakeConnection;      /** Update summary view when idle */
 
     friend class Widget;
-    friend class AbstractActionsManager;
+    friend class mv::AbstractActionsManager;
 };
 
 Q_DECLARE_METATYPE(DimensionsPickerAction)

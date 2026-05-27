@@ -9,8 +9,6 @@
 
 #include <QDialog>
 
-using namespace mv::gui;
-
 /**
  * Overwrite clusters confirmation dialog class
  *
@@ -41,7 +39,7 @@ public:
     }
 
 protected:
-    ToggleAction    _alwaysAskPermissionAction;     /** Whether to always ask permission prior to overwriting clusters */
-    TriggerAction   _discardAction;                 /** Discard cluster change(s) action */
-    TriggerAction   _cancelAction;                  /** Cancel action */
+    mv::gui::ToggleAction    _alwaysAskPermissionAction;     /** Whether to always ask permission prior to overwriting clusters */
+    mv::gui::TriggerAction   _discardAction;                 /** Discard cluster change(s) action */
+    mv::gui::TriggerAction   _cancelAction;                  /** Cancel action */
 };

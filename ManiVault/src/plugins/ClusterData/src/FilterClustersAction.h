@@ -7,9 +7,6 @@
 #include <actions/WidgetAction.h>
 #include <actions/StringAction.h>
 
-using namespace mv;
-using namespace mv::gui;
-
 class ClustersActionWidget;
 
 /**
@@ -19,12 +16,12 @@ class ClustersActionWidget;
  *
  * @author Thomas Kroes
  */
-class FilterClustersAction : public WidgetAction
+class FilterClustersAction : public mv::gui::WidgetAction
 {
 protected:
 
     /** Widget class for filter clusters action */
-    class Widget : public WidgetActionWidget {
+    class Widget : public mv::gui::WidgetActionWidget {
     public:
 
         /**
@@ -55,9 +52,9 @@ public:
 
 public: // Action getters
 
-    StringAction& getNameFilterAction() { return _nameFilterAction; }
+    mv::gui::StringAction& getNameFilterAction() { return _nameFilterAction; }
 
 protected:
     ClustersActionWidget*   _clustersActionWidget;      /** Pointer to clusters action widget */
-    StringAction            _nameFilterAction;          /** Name filter action */
+    mv::gui::StringAction            _nameFilterAction;          /** Name filter action */
 };

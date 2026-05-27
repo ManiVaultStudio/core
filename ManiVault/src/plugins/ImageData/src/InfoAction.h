@@ -9,10 +9,6 @@
 
 #include "Images.h"
 
-using namespace mv;
-using namespace mv::gui;
-using namespace mv::util;
-
 /**
  * Info action class
  *
@@ -20,7 +16,7 @@ using namespace mv::util;
  *
  * @author Thomas Kroes
  */
-class InfoAction : public GroupAction
+class InfoAction : public mv::gui::GroupAction
 {
     Q_OBJECT
 
@@ -34,11 +30,11 @@ public:
     InfoAction(QObject* parent, Images& images);
 
 protected:
-    Dataset<Images>         _images;                            /** Points dataset reference */
-    StringAction            _typeAction;                        /** Image collection type action */
-    StringAction            _numberOfImagesAction;              /** Number of images action */
-    StringAction            _imageResolutionAction;             /** Image resolution action */
-    StringAction            _numberOfPixelsAction;              /** Number of pixels per image action */
-    StringAction            _numberComponentsPerPixelAction;    /** Number of components action */
-    mv::EventListener       _eventListener;                     /** Listen to ManiniVault events */
+    mv::Dataset<Images>              _images;                            /** Points dataset reference */
+    mv::gui::StringAction            _typeAction;                        /** Image collection type action */
+    mv::gui::StringAction            _numberOfImagesAction;              /** Number of images action */
+    mv::gui::StringAction            _imageResolutionAction;             /** Image resolution action */
+    mv::gui::StringAction            _numberOfPixelsAction;              /** Number of pixels per image action */
+    mv::gui::StringAction            _numberComponentsPerPixelAction;    /** Number of components action */
+    mv::EventListener                _eventListener;                     /** Listen to ManiniVault events */
 };
