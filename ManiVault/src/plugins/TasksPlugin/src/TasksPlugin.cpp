@@ -56,9 +56,9 @@ void TasksPlugin::init()
 
 void TasksPlugin::addTestSuite()
 {
-    auto testModalTaskGroupAction   = new GroupAction(this, "Test Modal Task");
-    auto modalTaskTestTypeAction    = new OptionAction(this, "Task Test Type", AbstractTaskTester::getTesterNames(), AbstractTaskTester::getTesterNames().first());
-    auto modalTaskStartTestAction   = new TriggerAction(this, "Start Test");
+    auto testModalTaskGroupAction   = new mv::gui::GroupAction(this, "Test Modal Task");
+    auto modalTaskTestTypeAction    = new mv::gui::OptionAction(this, "Task Test Type", AbstractTaskTester::getTesterNames(), AbstractTaskTester::getTesterNames().first());
+    auto modalTaskStartTestAction   = new mv::gui::TriggerAction(this, "Start Test");
 
     modalTaskTestTypeAction->setPlaceHolderString("<Pick Type>");
 
@@ -67,7 +67,7 @@ void TasksPlugin::addTestSuite()
 
     getWidget().layout()->addWidget(testModalTaskGroupAction->createWidget(&getWidget()));
 
-    connect(modalTaskStartTestAction, &TriggerAction::triggered, this, [this, modalTaskTestTypeAction]() -> void {
+    connect(modalTaskStartTestAction, &mv::gui::TriggerAction::triggered, this, [this, modalTaskTestTypeAction]() -> void {
         try {
             const auto metaTypeName = modalTaskTestTypeAction->getCurrentText();
             const auto metaType     = QMetaType::fromName(metaTypeName.toLatin1());
