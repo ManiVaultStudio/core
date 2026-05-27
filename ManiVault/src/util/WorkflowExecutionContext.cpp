@@ -24,6 +24,11 @@ WorkflowExecutionContext::WorkflowExecutionContext(QString name, ReportNodePtr r
 {
 }
 
+WorkflowExecutionContext::~WorkflowExecutionContext()
+{
+	//releasePublishedResultValues();
+}
+
 QString WorkflowExecutionContext::getWorkflowExecutionContextTypeName(Type type)
 {
     switch (type) {
@@ -62,7 +67,6 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString&
     context->_type          = Type::Workflow;
     context->_id            = QUuid::createUuid();
     context->_executionPath = { name };
-    context->_resultScope   = context->_id.toString(QUuid::WithoutBraces);
 
     return context;
 }
@@ -102,7 +106,6 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(const QStri
     child->_parentId = _id;
     child->_executionPath = _executionPath;
     child->_executionPath.append(name);
-    child->_resultScope = _resultScope;
 
     return child;
 }
@@ -124,18 +127,13 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createWorkflowChild(con
     child->_parentId = _id;
     child->_executionPath = _executionPath;
     child->_executionPath << name;
-    child->_resultScope = makeChildResultScope(child->_id);
 
     return child;
 }
 
 SharedWorkflowExecutionContext WorkflowExecutionContext::createNestedWorkflowChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
 {
-    auto child = createTypedChild(name, Type::NestedWorkflow, weight, progressMode);
-
-    child->_resultScope = makeChildResultScope(child->_id);
-
-    return child;
+    return createTypedChild(name, Type::NestedWorkflow, weight, progressMode);
 }
 
 SharedWorkflowExecutionContext WorkflowExecutionContext::createSequentialStageChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
@@ -342,48 +340,27 @@ QUuid WorkflowExecutionContext::getParentId() const
     return _parentId;
 }
 
-QVariant WorkflowExecutionContext::getResultValue(const QString& localKey) const
+QVariantMap WorkflowExecutionContext::takeResultValues()
 {
-	return _state->getResultValue(scopedResultKey(localKey));
+    return _state->takeResultValues();
+    QMutexLocker lock(&_publishedResultKeysMutex);
+
+    QVariantMap resultValues;
+
+    for (const auto& publishedResultKey : _publishedResultKeys)
+        resultValues[publishedResultKey] = _state->takeResultValue(publishedResultKey);
+
+    return resultValues;
 }
 
-QVariant WorkflowExecutionContext::takeResultValue(const QString& localKey) const
+void WorkflowExecutionContext::releasePublishedResultValues()
 {
-	return _state->takeResultValue(scopedResultKey(localKey));
+    QMutexLocker lock(&_publishedResultKeysMutex);
+
+    for (const auto& publishedResultKey : _publishedResultKeys)
+        [[maybe_unused]] const auto resultValue = _state->takeResultValue(publishedResultKey);
+
+    _publishedResultKeys.clear();
 }
 
-bool WorkflowExecutionContext::hasResultValue(const QString& localKey) const
-{
-	return _state->hasResultValue(scopedResultKey(localKey));
-}
-
-QVariantMap WorkflowExecutionContext::getResultValues() const
-{
-    return _state->getResultValues(_resultScope);
-}
-
-QVariantMap WorkflowExecutionContext::takeResultValues() const
-{
-    return _state->takeResultValues(_resultScope);
-}
-
-QString WorkflowExecutionContext::getResultScope() const
-{
-	return _resultScope;
-}
-
-QString WorkflowExecutionContext::makeChildResultScope(const QUuid& childId) const
-{
-    const auto childIdString = childId.toString(QUuid::WithoutBraces);
-
-    return _resultScope.isEmpty() ? childIdString : QString("%1/%2").arg(_resultScope, childIdString);
-}
-
-QString WorkflowExecutionContext::scopedResultKey(const QString& localKey) const
-{
-	if (localKey.trimmed().isEmpty())
-		throw std::invalid_argument("Workflow result key may not be empty");
-
-	return QString("%1/%2").arg(_resultScope, localKey);
-}
 }

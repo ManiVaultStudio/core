@@ -113,50 +113,11 @@ QVariant WorkflowExecutionState::takeResultValue(const QString& key)
     return value;
 }
 
-QVariantMap WorkflowExecutionState::getResultValues(const QString& scope) const
+QVariantMap WorkflowExecutionState::takeResultValues()
 {
     QMutexLocker lock(&_resultValuesMutex);
 
-    QVariantMap result;
-
-    const auto prefix = scope.isEmpty() ? QString() : scope + "/";
-
-    for (auto it = _resultValues.begin(); it != _resultValues.end(); ++it) {
-        if (scope.isEmpty()) {
-            result[it.key()] = it.value();
-        } else if (it.key().startsWith(prefix)) {
-            const auto localKey = it.key().mid(prefix.size());
-            result[localKey] = it.value();
-        }
-    }
-
-    return result;
-}
-
-QVariantMap WorkflowExecutionState::takeResultValues(const QString& scope)
-{
-    QMutexLocker lock(&_resultValuesMutex);
-
-    QVariantMap result;
-
-    const auto prefix = scope.isEmpty() ? QString() : scope.endsWith("/") ? scope : scope + "/";
-
-    for (auto it = _resultValues.begin(); it != _resultValues.end(); ) {
-        if (scope.isEmpty()) {
-            result[it.key()] = it.value();
-            it = _resultValues.erase(it);
-        }
-        else if (it.key().startsWith(prefix)) {
-            const auto localKey = it.key().mid(prefix.size());
-            result[localKey] = it.value();
-            it = _resultValues.erase(it);
-        }
-        else {
-            ++it;
-        }
-    }
-
-    return result;
+	return std::exchange(_resultValues, {});
 }
 
 std::shared_ptr<AbstractWorkflowTraceSink> WorkflowExecutionState::getTraceSink() const

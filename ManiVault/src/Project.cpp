@@ -159,7 +159,7 @@ QVariantMap Project::toVariantMap() const
         throw std::runtime_error("Workflow execution failed");
 
     qDebug() << result->value<QVariantMap>();
-    return {};
+    return result->value<QVariantMap>();
     //    { "Plugins", result->value<QVariantMap>("Plugins") },
     //    { "Actions", result->value<QVariantMap>("Actions") },
     //    { "Events", result->value<QVariantMap>("Events") },
@@ -194,10 +194,6 @@ UniqueWorkflowPlan Project::toVariantMapWorkflow() const
 
     toPlan->addSequentialStage("Events", [this](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
         executionContext->publishResultValue("Events", events().toVariantMap());
-    });
-
-    toPlan->addSequentialStage("Hierarchy", [this](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
-        executionContext->publishResultValue("Hierarchy", dataHierarchy().toVariantMap());
     });
 
     toPlan->addSequentialStage("Hierarchy", [this](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {

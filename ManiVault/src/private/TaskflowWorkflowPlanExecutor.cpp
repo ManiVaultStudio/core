@@ -220,7 +220,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
     auto result = std::make_shared<WorkflowResult>(workflowPlan.getName());
 
     if (auto state = rootContext->getState()) {
-        result->setValue(state->takeResultValues(rootContext->getResultScope()));
+        result->setValue(rootContext->takeResultValues());
         result->setMetrics(state->metrics().snapshot());
         result->setMessages(state->collectMessages());
         result->setDuration(lifecycle.elapsedMs());
