@@ -111,6 +111,22 @@ QVariant WorkflowExecutionState::takeResultValue(const QString& key)
     return value;
 }
 
+QVariantMap WorkflowExecutionState::getResultValues()
+{
+    QMutexLocker lock(&_resultValuesMutex);
+    return _resultValues;
+}
+
+QVariantMap WorkflowExecutionState::takeResultValues()
+{
+    QMutexLocker lock(&_resultValuesMutex);
+
+    auto resultValues = std::move(_resultValues);
+    _resultValues.clear();
+
+    return resultValues;
+}
+
 std::shared_ptr<AbstractWorkflowTraceSink> WorkflowExecutionState::getTraceSink() const
 {
 	return _executionOptions._traceSink;

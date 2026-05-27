@@ -75,6 +75,18 @@ public: // Temporary result values (key-value pairs that can be set and accessed
      */
     [[nodiscard]] QVariant takeResultValue(const QString& key);
 
+    /**
+     * @brief Retrieves all key-value pairs from the result values of the workflow execution without modifying or removing them. This function allows for accessing the entire set of information stored in the result values at once, which can be useful for scenarios where multiple pieces of information need to be accessed together or when the structure of the result values is not known in advance. The returned QVariantMap contains all key-value pairs currently stored in the result values, and any subsequent modifications to the result values will not affect the returned map.
+     * @return A QVariantMap containing all key-value pairs currently stored in the result values. If there are no key-value pairs in the result values, this function may return an empty QVariantMap.
+     */
+    [[nodiscard]] QVariantMap getResultValues();
+
+    /**
+     * @brief Retrieves and removes all key-value pairs from the result values of the workflow execution. This function allows for consuming all pieces of information stored in the result values at once, while also ensuring that once the values are taken, they will no longer be available in the result values. After calling this function, the result values will be cleared, and any subsequent attempts to access specific keys will indicate that they no longer exist.
+     * @return A QVariantMap containing all key-value pairs that were in the result values before they were removed. If there were no key-value pairs in the result values, this function may return an empty QVariantMap.
+     */
+    [[nodiscard]] QVariantMap takeResultValues();
+
 public: // Tracing
 
     std::shared_ptr<AbstractWorkflowTraceSink> getTraceSink() const;
