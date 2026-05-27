@@ -74,6 +74,8 @@ void WorkflowExecutionState::setResultValue(const QString& key, const QVariant& 
     QMutexLocker lock(&_resultValuesMutex);
 
     _resultValues.insert(key, value);
+
+    qDebug() << _resultValues;
 }
 
 QVariant WorkflowExecutionState::getResultValue(const QString& key) const

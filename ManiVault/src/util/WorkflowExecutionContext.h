@@ -266,13 +266,22 @@ public: // Result values
      * @brief Retrieves and removes all result values associated with this workflow execution context as a QVariantMap. This is useful for cases where all result values should be accessed at once and then removed from the execution state to prevent further access or to free up resources.
      * @return A QVariantMap containing all result values associated with this workflow execution context, where the keys are the local keys used when publishing the result values and the values are the corresponding result values wrapped in QVariants. After this call, the execution state will no longer contain these result values.
      */
-    [[nodiscard]] QVariantMap takeResultValues();
+    [[nodiscard]] QVariantMap takeResultValues() const;
 
     /**
      * @brief Gets the result scope associated with this workflow execution context. The result scope is a string that is used to namespace or scope result keys when publishing and retrieving result values in the execution state. This helps to ensure that result keys are unique across different levels of the workflow execution hierarchy, preventing conflicts and allowing for organized access to results based on the context in which they were produced.
      * @return The result scope associated with this workflow execution context, which can be used as a prefix or namespace for result keys when publishing and retrieving result values.
      */
     [[nodiscard]] QString getResultScope() const;
+
+private: // Result value helpers
+
+    /**
+     * @brief Constructs a scoped result key by combining the result scope of this workflow execution context with the provided child identifier.
+     * @param childId The unique identifier of the child workflow execution context for which to create the result scope.
+     * @return A fully scoped result key that combines the result scope of this workflow execution context with the provided child identifier, which can be used for storing and retrieving result values in the execution state.
+     */
+    [[nodiscard]] QString makeChildResultScope(const QUuid& childId) const;
 
 private: // Result value
 

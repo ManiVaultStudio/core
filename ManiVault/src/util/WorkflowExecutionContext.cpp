@@ -62,7 +62,7 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString&
     context->_type          = Type::Workflow;
     context->_id            = QUuid::createUuid();
     context->_executionPath = { name };
-    context->_resultScope   = name;
+    context->_resultScope   = context->_id.toString(QUuid::WithoutBraces);
 
     return context;
 }
@@ -124,14 +124,18 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createWorkflowChild(con
     child->_parentId = _id;
     child->_executionPath = _executionPath;
     child->_executionPath << name;
-    child->_resultScope = _resultScope.isEmpty() ? name : _resultScope + "/" + name;
+    child->_resultScope = makeChildResultScope(child->_id);
 
     return child;
 }
 
 SharedWorkflowExecutionContext WorkflowExecutionContext::createNestedWorkflowChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
 {
-    return createTypedChild(name, Type::NestedWorkflow, weight, progressMode);
+    auto child = createTypedChild(name, Type::NestedWorkflow, weight, progressMode);
+
+    child->_resultScope = makeChildResultScope(child->_id);
+
+    return child;
 }
 
 SharedWorkflowExecutionContext WorkflowExecutionContext::createSequentialStageChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
@@ -358,7 +362,7 @@ QVariantMap WorkflowExecutionContext::getResultValues() const
     return _state->getResultValues(_resultScope);
 }
 
-QVariantMap WorkflowExecutionContext::takeResultValues()
+QVariantMap WorkflowExecutionContext::takeResultValues() const
 {
     return _state->takeResultValues(_resultScope);
 }
@@ -366,6 +370,13 @@ QVariantMap WorkflowExecutionContext::takeResultValues()
 QString WorkflowExecutionContext::getResultScope() const
 {
 	return _resultScope;
+}
+
+QString WorkflowExecutionContext::makeChildResultScope(const QUuid& childId) const
+{
+    const auto childIdString = childId.toString(QUuid::WithoutBraces);
+
+    return _resultScope.isEmpty() ? childIdString : QString("%1/%2").arg(_resultScope, childIdString);
 }
 
 QString WorkflowExecutionContext::scopedResultKey(const QString& localKey) const
