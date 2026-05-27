@@ -257,51 +257,24 @@ void DataHierarchyItem::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap DataHierarchyItem::toVariantMap() const
 {
-    auto plan   = toVariantMapWorkflow();
-    auto result = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));
+    QVariantMap variantMap, children;
 
-    return result->value<QVariantMap>();
-}
+    try
+    {
+        variantMap = WidgetAction::toVariantMap();
+    }
+    catch (...)
+    {
+    }
 
-UniqueWorkflowPlan DataHierarchyItem::toVariantMapWorkflow() const
-{
-    auto sharedContext  = std::make_shared<ToVariantMapWorkflowContext>();
-    auto plan           = std::make_unique<WorkflowPlan>(__FUNCTION__, sharedContext);
+    variantMap["Name"]      = _dataset->text();
+    variantMap["Expanded"]  = QVariant::fromValue(_expanded);
+    variantMap["Visible"]   = QVariant::fromValue(isVisible());
+    variantMap["Selected"]  = QVariant::fromValue(isSelected());
+    variantMap["Children"]  = QVariant::fromValue(children);
+    variantMap["Dataset"]   = _dataset->toVariantMap();
 
-    WorkflowPlan::Jobs jobs;
-
-    jobs.emplace_back("Metadata", [this, sharedContext](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-        QVariantMap variantMap, children;
-
-        try
-        {
-            variantMap = WidgetAction::toVariantMap();
-        }
-        catch (...)
-        {
-        }
-        
-        variantMap["Name"]      = _dataset->text();
-        variantMap["Expanded"]  = QVariant::fromValue(_expanded);
-        variantMap["Visible"]   = QVariant::fromValue(isVisible());
-        variantMap["Selected"]  = QVariant::fromValue(isSelected());
-        variantMap["Children"]  = QVariant::fromValue(children);
-
-        for (auto [key, value] : variantMap.asKeyValueRange())
-            sharedContext->setResultValue(key, value);
-    });
-
-    jobs.emplace_back("Apply result", [this, sharedContext](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-        executionContext->publishResultValue("VariantMap", sharedContext->getResultValue("VariantMap").toMap());
-    });
-
-    plan->addNestedWorkflowStage("Dataset", [this, sharedContext](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
-        return _dataset->toVariantMapWorkflow();
-    });
-
-    plan->addSequentialStage("Save", jobs);
-
-    return plan;
+    return variantMap;
 }
 
 }

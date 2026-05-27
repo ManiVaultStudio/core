@@ -155,33 +155,53 @@ QVariantMap Project::toVariantMap() const
     auto plan   = toVariantMapWorkflow();
     auto result = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));
 
-    return result->value<QVariantMap>();
+    if (!result)
+        throw std::runtime_error("Workflow execution failed");
+
+    qDebug() << result->value<QVariantMap>();
+    return {};
+    //    { "Plugins", result->value<QVariantMap>("Plugins") },
+    //    { "Actions", result->value<QVariantMap>("Actions") },
+    //    { "Events", result->value<QVariantMap>("Events") },
+    //    { "Hierarchy", result->value<QVariantMap>("Hierarchy") }
+    //};
 }
 
 UniqueWorkflowPlan Project::toVariantMapWorkflow() const
 {
     UniqueWorkflowPlan toPlan = std::make_unique<WorkflowPlan>("Save project");
 
-    toPlan->addSequentialStage("Assemble item maps", [this](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
+    toPlan->addSequentialStage("Setup", [this](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
         auto variantMap = Serializable::toVariantMap();
 
         _projectMetaAction.insertIntoVariantMap(variantMap);
 
         _selectionGroupingAction.insertIntoVariantMap(variantMap);
 
+
         _overrideApplicationStatusBarAction.insertIntoVariantMap(variantMap);
         _statusBarVisibleAction.insertIntoVariantMap(variantMap);
         _statusBarOptionsAction.insertIntoVariantMap(variantMap);
+    });
 
-        plugins().insertIntoVariantMap(variantMap);
+    toPlan->addSequentialStage("Plugins", [this](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
+        executionContext->publishResultValue("Plugins", plugins().toVariantMap());
+    });
 
-        UniqueWorkflowPlan dataHierarchyPlan = dataHierarchy().fromVariantMapWorkflow(variantMap);
+    toPlan->addSequentialStage("Actions", [this](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
+        executionContext->publishResultValue("Actions", actions().toVariantMap());
+    });
 
-        auto future = Application::getWorkflowPlanExecutor().execute(std::move(dataHierarchyPlan), executionContext);
+    toPlan->addSequentialStage("Events", [this](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
+        executionContext->publishResultValue("Events", events().toVariantMap());
+    });
 
-        dataHierarchy().insertIntoVariantMap(variantMap);
-        actions().insertIntoVariantMap(variantMap);
-        events().insertIntoVariantMap(variantMap);
+    toPlan->addSequentialStage("Hierarchy", [this](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
+        executionContext->publishResultValue("Hierarchy", dataHierarchy().toVariantMap());
+    });
+
+    toPlan->addSequentialStage("Hierarchy", [this](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
+        executionContext->publishResultValue("Hierarchy", dataHierarchy().toVariantMap());
     });
 
     return toPlan;

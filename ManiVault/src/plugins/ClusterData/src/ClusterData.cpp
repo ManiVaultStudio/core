@@ -124,16 +124,16 @@ UniqueWorkflowPlan ClusterData::fromVariantMapWorkflow(const QVariantMap& varian
     const auto dataMap                      = variantMap["Data"].toMap();
     const auto projectApplicationVersion    = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
-    if (projectApplicationVersion < Version(1, 5, 0)) {
-        plan->addSequentialStage("Load (version <1.5.0)", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-            fromVariantMapPre150(variantMap);
-        }, WorkflowPlan::JobThreadAffinity::GuiThread);
-    }
-    else {
-        plan->addNestedWorkflowStage("Load", [this, dataMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-            return ClustersSerializer::fromVariantMapWorkflow(dataMap["Clusters"].toMap(), _clusters, executionContext);
-        }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
-    }
+    //if (projectApplicationVersion < Version(1, 5, 0)) {
+    //    plan->addSequentialStage("Load (version <1.5.0)", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+    //        fromVariantMapPre150(variantMap);
+    //    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+    //}
+    //else {
+    //    plan->addNestedWorkflowStage("Load", [this, dataMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+    //        return ClustersSerializer::fromVariantMapWorkflow(dataMap["Clusters"].toMap(), _clusters, executionContext);
+    //    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
+    //}
 
 	return plan;
 }
@@ -219,13 +219,7 @@ void ClusterData::fromVariantMapPre150(const QVariantMap& variantMap)
 
 QVariantMap ClusterData::toVariantMap() const
 {
-    auto plan       = toVariantMapWorkflow();
-    auto result     = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));
     auto variantMap = RawData::toVariantMap();
-
-    variantMap.insert({
-        { "Clusters", result->value<QVariantMap>() }
-    });
 
     return variantMap;
 }

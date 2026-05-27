@@ -37,8 +37,10 @@ protected:
 public:
 
     TaskflowWorkflowPlanExecutor(QObject* parent = nullptr);
+
     WorkflowResultFuture execute(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) override;
     SharedWorkflowResult executeBlocking(UniqueWorkflowPlan workflowPlan, mv::Task* task = nullptr, WorkflowExecutionOptions executionOptions = {}) override;
+    SharedWorkflowResult executeBlocking(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext) override;
 
 protected:
     WorkflowResultFuture executeAsyncImpl(UniqueWorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, const WorkflowExecutionOptions& executionOptions, SharedWorkflowExecutionContext executionContext) override;

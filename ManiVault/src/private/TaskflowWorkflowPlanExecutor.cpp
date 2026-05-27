@@ -50,6 +50,14 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(UniqueWorkflo
     return executeRoot(*workflowPlan, task, executionOptions);
 }
 
+SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext)
+{
+    if (parentContext)
+        return executeChild(*workflowPlan, parentContext);
+
+    return executeRoot(*workflowPlan, nullptr, {});
+}
+
 WorkflowResultFuture TaskflowWorkflowPlanExecutor::executeAsyncImpl(UniqueWorkflowPlan workflowPlan, Task::GuiScope guiScope, const WorkflowExecutionOptions& executionOptions, SharedWorkflowExecutionContext executionContext)
 {
     auto state = std::make_shared<WorkflowResultFuture::State>();
@@ -212,6 +220,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
     auto result = std::make_shared<WorkflowResult>(workflowPlan.getName());
 
     if (auto state = rootContext->getState()) {
+        result->setValue(state->takeResult());
         result->setMetrics(state->metrics().snapshot());
         result->setMessages(state->collectMessages());
         result->setDuration(lifecycle.elapsedMs());

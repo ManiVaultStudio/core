@@ -295,8 +295,6 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
-    util::UniqueWorkflowPlan toVariantMapWorkflow() const override;
-
 signals:
 
     /**

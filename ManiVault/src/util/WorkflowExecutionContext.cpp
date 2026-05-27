@@ -249,6 +249,9 @@ void WorkflowExecutionContext::message(SeverityLevel severity, QString text, QSt
 
 void WorkflowExecutionContext::info(QString text, QString location, QVariantMap details) const
 {
+    static QMutex mutex;
+    QMutexLocker lock(&mutex);
+
     qDebug().noquote() << WorkflowConsoleFormatter::format(SeverityLevel::Info, text, location, details);
 
     if (_reportNode) {
@@ -258,6 +261,9 @@ void WorkflowExecutionContext::info(QString text, QString location, QVariantMap 
 
 void WorkflowExecutionContext::warning(QString text, QString location, QVariantMap details) const
 {
+    static QMutex mutex;
+    QMutexLocker lock(&mutex);
+
     qDebug().noquote() << WorkflowConsoleFormatter::format(SeverityLevel::Warning, text, location, details);
 
 	if (_reportNode)
@@ -266,6 +272,9 @@ void WorkflowExecutionContext::warning(QString text, QString location, QVariantM
 
 void WorkflowExecutionContext::error(QString text, QString location, QVariantMap details) const
 {
+    static QMutex mutex;
+    QMutexLocker lock(&mutex);
+
     qDebug().noquote() << WorkflowConsoleFormatter::format(SeverityLevel::Error, text, location, details);
 
 	if (_reportNode)

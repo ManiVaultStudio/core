@@ -1109,25 +1109,25 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap,
             fromVariantMapPre150(variantMap);
         });
     } else {
-        if (isFull()) {
-            fromPlan->addSequentialStage("Load points", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) -> void {
-                getRawData<PointData>()->fromVariantMapWorkflow(variantMap, context);
-            }, WorkflowPlan::JobThreadAffinity::GuiThread);
+    //    if (isFull()) {
+    //        fromPlan->addSequentialStage("Load points", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) -> void {
+    //            getRawData<PointData>()->fromVariantMapWorkflow(variantMap, context);
+    //        }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
-            //return getRawData<PointData>()->fromVariantMapWorkflow(variantMap, context);
+    //        //return getRawData<PointData>()->fromVariantMapWorkflow(variantMap, context);
 
-	   //     fromPlan->addNestedWorkflowStage("Load raw point data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) mutable -> UniqueWorkflowPlan {
-				//return getRawData<PointData>()->fromVariantMapWorkflow(variantMap, context);
-	   //     });
-        } else {
-            variantMapMustContain(variantMap, "Indices");
+	   ////     fromPlan->addNestedWorkflowStage("Load raw point data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) mutable -> UniqueWorkflowPlan {
+				////return getRawData<PointData>()->fromVariantMapWorkflow(variantMap, context);
+	   ////     });
+    //    } else {
+    //        variantMapMustContain(variantMap, "Indices");
 
-            const auto& indicesMap = variantMap["Indices"].toMap();
+    //        const auto& indicesMap = variantMap["Indices"].toMap();
 
-            indices.resize(indicesMap["Count"].toUInt());
+    //        indices.resize(indicesMap["Count"].toUInt());
 
-            populateBytesFromBlobMap(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(uint32_t));
-        }
+    //        populateBytesFromBlobMap(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(uint32_t));
+    //    }
         /*
         fromPlan->addNestedWorkflowStage("Load dimension names", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) mutable -> UniqueWorkflowPlan {
             return DimensionNamesSerializer::fromVariantMapWorkflow(this, variantMap, context);
@@ -1282,6 +1282,7 @@ QVariantMap Points::toVariantMap() const
 {
     auto variantMap = DatasetImpl::toVariantMap();
 
+    
     /*
     QStringList dimensionNames;
     QByteArray dimensionsByteArray;
@@ -1305,6 +1306,7 @@ QVariantMap Points::toVariantMap() const
     indices["Count"]    = QVariant::fromValue(this->indices.size());
     indices["Raw"]      = bytesToBlobVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t), nullptr);
 
+    return variantMap;
     QVariantMap selection;
 
     if (isFull()) {
@@ -1313,20 +1315,23 @@ QVariantMap Points::toVariantMap() const
         selection["Count"]  = QVariant::fromValue(selectionSet->indices.size());
         selection["Raw"]    = bytesToBlobVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), nullptr);
     }
-
+    
 
     variantMap["Data"]                  = isFull() ? getRawData<PointData>()->toVariantMap() : QVariantMap();
     variantMap["NumberOfPoints"]        = QVariant::fromValue<std::uint64_t>(getNumPoints());
     variantMap["Indices"]               = indices;
     variantMap["Selection"]             = selection;
     variantMap["DimensionNames"]        = DimensionNamesSerializer::toVariantMap(getRawData<PointData>()->getDimensionNames());
+    //return variantMap;
+
     variantMap["NumberOfDimensions"]    = QVariant::fromValue<std::uint64_t>(getNumDimensions());
     variantMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
     variantMap["Dense"]                 = Experimental::isDense(this);
 
     if (!Experimental::isDense(this))
         variantMap["NumberOfNonZeroElements"] = QVariant::fromValue(Experimental::getNumNonZeroElements(this));
-    
+
+
     return variantMap;
 }
 
