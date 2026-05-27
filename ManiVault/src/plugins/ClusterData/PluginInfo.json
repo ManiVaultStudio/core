@@ -4,5 +4,5 @@
         "plugin" : "1.0.0"
     },
     "type" : "Data",
-    "dependencies" : []
+    "dependencies" : ["Points"]
 }

@@ -5,7 +5,7 @@ PROJECT(${CLUSTERDATA} LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(CLUSTERD_SOURCES
+set(CLUSTER_SOURCES
     src/ClusterData.h
     src/ClusterData.cpp
     src/Cluster.h
@@ -71,13 +71,13 @@ set(CLUSTER_AUX
     PluginInfo.json
 )
 
-source_group(Plugin FILES ${CLUSTERD_SOURCES})
+source_group(Plugin FILES ${CLUSTER_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 source_group(Model FILES ${MODEL_SOURCES})
 source_group(Dialog FILES ${DIALOG_SOURCES})
-source_group(AUX FILES ${CLUSTER_AUX})
+source_group(Aux FILES ${CLUSTER_AUX})
 
-add_library(${CLUSTERDATA} SHARED ${CLUSTERD_SOURCES} ${ACTIONS_SOURCES} ${MODEL_SOURCES} ${DIALOG_SOURCES} ${CLUSTER_AUX})
+add_library(${CLUSTERDATA} SHARED ${CLUSTER_SOURCES} ${ACTIONS_SOURCES} ${MODEL_SOURCES} ${DIALOG_SOURCES} ${CLUSTER_AUX})
 
 add_library(ManiVault::${CLUSTERDATA} ALIAS ${CLUSTERDATA})
 

@@ -81,8 +81,10 @@ set(POINT_DATA_AUX
     PluginInfo.json
 )
 
-source_group(Plugin FILES ${POINTS_SOURCES} ${POINT_DATA_AUX})
+source_group(Plugin FILES ${POINTS_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
+source_group(BFloat FILES ${BFLOAT_HEADER})
+source_group(Aux FILES ${POINT_DATA_AUX})
 
 add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINT_DATA_AUX})
 
