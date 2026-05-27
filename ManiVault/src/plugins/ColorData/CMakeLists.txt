@@ -18,9 +18,10 @@ set(COLORDATA_AUX
     PluginInfo.json
 )
 
-source_group( Plugin FILES ${COLORDATA_SOURCES} ${COLORDATA_AUX})
+source_group(Plugin FILES ${COLORDATA_SOURCES})
+source_group(Aux FILES ${COLORDATA_AUX})
 
-add_library(${COLORDATA} SHARED ${COLORDATA_SOURCES})
+add_library(${COLORDATA} SHARED ${COLORDATA_SOURCES} ${COLORDATA_AUX})
 
 add_library(ManiVault::${COLORDATA} ALIAS ${COLORDATA})
 

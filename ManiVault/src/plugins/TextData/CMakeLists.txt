@@ -24,7 +24,8 @@ set(TEXTDATA_AUX
     PluginInfo.json
 )
 
-source_group( Plugin FILES ${TEXTDATA_SOURCES} ${TEXTDATA_AUX})
+source_group(Plugin FILES ${TEXTDATA_SOURCES})
+source_group(Aux FILES ${TEXTDATA_AUX})
 
 add_library(${TEXTDATA} SHARED ${TEXTDATA_SOURCES} ${TEXTDATA_AUX})
 
