@@ -283,9 +283,12 @@ private: // Result value helpers
      */
     [[nodiscard]] QString makeChildResultScope(const QUuid& childId) const;
 
-private: // Result value
-
-    QString scopedResultKey(const QString& localKey) const;
+    /**
+     * @brief Constructs a fully scoped result key by combining the result scope of this workflow execution context with the provided local key. This ensures that the resulting key is unique across the workflow execution hierarchy and can be safely used for storing and retrieving result values in the execution state without conflicts.
+     * @param localKey The local key to be combined with the result scope of this workflow execution context to create a fully scoped result key.
+     * @return A fully scoped result key that combines the result scope of this workflow execution context with the provided local key, which can be used for storing and retrieving result values in the execution state.
+     */
+    [[nodiscard]] QString scopedResultKey(const QString& localKey) const;
 
 private:
     friend class WorkflowExecutionScope;

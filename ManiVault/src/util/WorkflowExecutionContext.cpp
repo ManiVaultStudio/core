@@ -344,17 +344,17 @@ QUuid WorkflowExecutionContext::getParentId() const
 
 QVariant WorkflowExecutionContext::getResultValue(const QString& localKey) const
 {
-	return _state->getResultValue(localKey);
+	return _state->getResultValue(scopedResultKey(localKey));
 }
 
 QVariant WorkflowExecutionContext::takeResultValue(const QString& localKey) const
 {
-	return _state->takeResultValue(localKey);
+	return _state->takeResultValue(scopedResultKey(localKey));
 }
 
 bool WorkflowExecutionContext::hasResultValue(const QString& localKey) const
 {
-	return _state->hasResultValue(localKey);
+	return _state->hasResultValue(scopedResultKey(localKey));
 }
 
 QVariantMap WorkflowExecutionContext::getResultValues() const

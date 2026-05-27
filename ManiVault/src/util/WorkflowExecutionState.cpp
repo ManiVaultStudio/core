@@ -113,7 +113,7 @@ QVariant WorkflowExecutionState::takeResultValue(const QString& key)
     return value;
 }
 
-QVariantMap WorkflowExecutionState::getResultValues(const QString& scope)
+QVariantMap WorkflowExecutionState::getResultValues(const QString& scope) const
 {
     QMutexLocker lock(&_resultValuesMutex);
 
@@ -139,14 +139,19 @@ QVariantMap WorkflowExecutionState::takeResultValues(const QString& scope)
 
     QVariantMap result;
 
-    const auto prefix = scope.endsWith("/") ? scope : scope + "/";
+    const auto prefix = scope.isEmpty() ? QString() : scope.endsWith("/") ? scope : scope + "/";
 
     for (auto it = _resultValues.begin(); it != _resultValues.end(); ) {
-        if (it.key().startsWith(prefix)) {
+        if (scope.isEmpty()) {
+            result[it.key()] = it.value();
+            it = _resultValues.erase(it);
+        }
+        else if (it.key().startsWith(prefix)) {
             const auto localKey = it.key().mid(prefix.size());
             result[localKey] = it.value();
             it = _resultValues.erase(it);
-        } else {
+        }
+        else {
             ++it;
         }
     }
