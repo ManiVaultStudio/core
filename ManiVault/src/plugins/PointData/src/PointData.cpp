@@ -314,28 +314,26 @@ QVariantMap PointData::toVariantMap() const
             { "NumberOfElements", QVariant::fromValue(numberOfElements) }
         };
     }
-    else
-    {
-        std::vector<char> bytes;
 
-        const std::vector<size_t>& indexPointers = _sparseData.getIndexPointers();
-        const std::vector<size_t>& colIndices = _sparseData.getColIndices();
-        const std::vector<float>& values = _sparseData.getValues();
+    std::vector<char> bytes;
 
-        const char* indexPointersBytes = (const char*) (indexPointers.data());
-        const char* colIndicesBytes = (const char*) (colIndices.data());
-        const char* valuesBytes = (const char*) (values.data());
+    const std::vector<size_t>& indexPointers = _sparseData.getIndexPointers();
+    const std::vector<size_t>& colIndices = _sparseData.getColIndices();
+    const std::vector<float>& values = _sparseData.getValues();
 
-        bytes.insert(bytes.end(), indexPointersBytes, indexPointersBytes + indexPointers.size() * sizeof(size_t));
-        bytes.insert(bytes.end(), colIndicesBytes, colIndicesBytes + colIndices.size() * sizeof(size_t));
-        bytes.insert(bytes.end(), valuesBytes, valuesBytes + values.size() * sizeof(float));
+    const char* indexPointersBytes = (const char*) (indexPointers.data());
+    const char* colIndicesBytes = (const char*) (colIndices.data());
+    const char* valuesBytes = (const char*) (values.data());
 
-        QVariantMap rawData = bytesToBlobVariantMap(bytes.data(), bytes.size());
+    bytes.insert(bytes.end(), indexPointersBytes, indexPointersBytes + indexPointers.size() * sizeof(size_t));
+    bytes.insert(bytes.end(), colIndicesBytes, colIndicesBytes + colIndices.size() * sizeof(size_t));
+    bytes.insert(bytes.end(), valuesBytes, valuesBytes + values.size() * sizeof(float));
 
-        return {
-            { "Raw", QVariant::fromValue(rawData) }
-        };
-    }
+    QVariantMap rawData = bytesToBlobVariantMap(bytes.data(), bytes.size());
+
+    return {
+        { "Raw", QVariant::fromValue(rawData) }
+    };
 }
 
 void PointData::extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const
@@ -1282,47 +1280,27 @@ QVariantMap Points::toVariantMap() const
 {
     auto variantMap = DatasetImpl::toVariantMap();
 
-    
-    /*
-    QStringList dimensionNames;
-    QByteArray dimensionsByteArray;
-    QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::WriteOnly);
+    QVariantMap indicesMap;
 
-    if (getDimensionNames().size() == getNumDimensions()) {
-        for (const auto& dimensionName : getDimensionNames())
-            dimensionNames << dimensionName;
-    }
-    else {
-        for (std::uint64_t dimensionIndex = 0; dimensionIndex < getNumDimensions(); dimensionIndex++)
-            dimensionNames << QString("Dim %1").arg(QString::number(dimensionIndex));
-    }
+    indicesMap["Count"] = QVariant::fromValue(this->indices.size());
+    indicesMap["Raw"]   = bytesToBlobVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t), nullptr);
 
-    if (dimensionNames.size() > 1000)
-        dimensionsDataStream << dimensionNames;
-        */
-
-    QVariantMap indices;
-
-    indices["Count"]    = QVariant::fromValue(this->indices.size());
-    indices["Raw"]      = bytesToBlobVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t), nullptr);
-
-    return variantMap;
     QVariantMap selection;
-
+    
     if (isFull()) {
         auto selectionSet = getSelection<Points>();
 
         selection["Count"]  = QVariant::fromValue(selectionSet->indices.size());
         selection["Raw"]    = bytesToBlobVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), nullptr);
     }
-    
 
     variantMap["Data"]                  = isFull() ? getRawData<PointData>()->toVariantMap() : QVariantMap();
     variantMap["NumberOfPoints"]        = QVariant::fromValue<std::uint64_t>(getNumPoints());
-    variantMap["Indices"]               = indices;
+    variantMap["Indices"]               = indicesMap;
     variantMap["Selection"]             = selection;
     variantMap["DimensionNames"]        = DimensionNamesSerializer::toVariantMap(getRawData<PointData>()->getDimensionNames());
-    //return variantMap;
+
+	
 
     variantMap["NumberOfDimensions"]    = QVariant::fromValue<std::uint64_t>(getNumDimensions());
     variantMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();

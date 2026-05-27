@@ -158,13 +158,7 @@ QVariantMap Project::toVariantMap() const
     if (!result)
         throw std::runtime_error("Workflow execution failed");
 
-    qDebug() << result->value<QVariantMap>();
     return result->value<QVariantMap>();
-    //    { "Plugins", result->value<QVariantMap>("Plugins") },
-    //    { "Actions", result->value<QVariantMap>("Actions") },
-    //    { "Events", result->value<QVariantMap>("Events") },
-    //    { "Hierarchy", result->value<QVariantMap>("Hierarchy") }
-    //};
 }
 
 UniqueWorkflowPlan Project::toVariantMapWorkflow() const
@@ -175,10 +169,7 @@ UniqueWorkflowPlan Project::toVariantMapWorkflow() const
         auto variantMap = Serializable::toVariantMap();
 
         _projectMetaAction.insertIntoVariantMap(variantMap);
-
         _selectionGroupingAction.insertIntoVariantMap(variantMap);
-
-
         _overrideApplicationStatusBarAction.insertIntoVariantMap(variantMap);
         _statusBarVisibleAction.insertIntoVariantMap(variantMap);
         _statusBarOptionsAction.insertIntoVariantMap(variantMap);

@@ -125,6 +125,7 @@ QVariantMap bytesToBlobVariantMap(const char* bytes, const std::uint64_t& number
 	        job._offset     = offset;
 	        job._size       = blockSize;
 	        job._rawData    = QByteArray(bytes + offset, static_cast<qsizetype>(blockSize));
+            job._codec      = createCodec();
 
 	        encodeBlockJobs.push_back(std::move(job));
 

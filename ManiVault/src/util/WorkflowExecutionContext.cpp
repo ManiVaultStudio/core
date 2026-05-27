@@ -24,11 +24,6 @@ WorkflowExecutionContext::WorkflowExecutionContext(QString name, ReportNodePtr r
 {
 }
 
-WorkflowExecutionContext::~WorkflowExecutionContext()
-{
-	//releasePublishedResultValues();
-}
-
 QString WorkflowExecutionContext::getWorkflowExecutionContextTypeName(Type type)
 {
     switch (type) {
@@ -343,24 +338,6 @@ QUuid WorkflowExecutionContext::getParentId() const
 QVariantMap WorkflowExecutionContext::takeResultValues()
 {
     return _state->takeResultValues();
-    QMutexLocker lock(&_publishedResultKeysMutex);
-
-    QVariantMap resultValues;
-
-    for (const auto& publishedResultKey : _publishedResultKeys)
-        resultValues[publishedResultKey] = _state->takeResultValue(publishedResultKey);
-
-    return resultValues;
-}
-
-void WorkflowExecutionContext::releasePublishedResultValues()
-{
-    QMutexLocker lock(&_publishedResultKeysMutex);
-
-    for (const auto& publishedResultKey : _publishedResultKeys)
-        [[maybe_unused]] const auto resultValue = _state->takeResultValue(publishedResultKey);
-
-    _publishedResultKeys.clear();
 }
 
 }

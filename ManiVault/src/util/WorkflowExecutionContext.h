@@ -73,8 +73,6 @@ public:
 
     WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, Task* task = nullptr, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
 
-    ~WorkflowExecutionContext();
-
     Type getType() const
     {
         return _type;
@@ -233,7 +231,6 @@ public: // Result values
      */
     template<typename T>
     void publishResultValue(const QString& localKey, T&& value) {
-        _publishedResultKeys << localKey;
         _state->setResultValue(localKey, QVariant::fromValue(std::forward<T>(value)));
     }
 
@@ -242,11 +239,6 @@ public: // Result values
      * @return A QVariantMap containing all result values associated with this workflow execution context, where the keys are the local keys used when publishing the result values and the values are the corresponding result values wrapped in QVariants. After this call, the execution state will no longer contain these result values.
      */
     [[nodiscard]] QVariantMap takeResultValues();
-
-    /**
-     * @brief Releases all result values associated with this workflow execution context without retrieving them. This is useful for cases where the result values should be discarded or when the context is being cleaned up and the result values are no longer needed. After this call, the execution state will no longer contain any result values associated with this context.
-     */
-    void releasePublishedResultValues();
 
 private:
     friend class WorkflowExecutionScope;
@@ -263,8 +255,6 @@ private:
     WorkflowPlan::JobProgressMode           _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /** Progress mode for this workflow execution context */
     Type                                    _type = Type::Workflow;                                     /** Semantic type of this workflow execution context, used for rendering, reporting, and diagnostics */
     std::weak_ptr<WorkflowExecutionContext> _parent;                                                    /** Weak pointer to the parent workflow execution context, if any */
-    QMutex                                  _publishedResultKeysMutex;                                  /** Mutex for synchronizing access to the set of published result keys */
-    QSet<QString>                           _publishedResultKeys;                                       /** List of keys for result values that have been published in this context, used to track which result values have been set and to ensure thread-safe access when publishing and retrieving result values */
 };
 
 /** Optional reference to a WorkflowExecutionContext */
