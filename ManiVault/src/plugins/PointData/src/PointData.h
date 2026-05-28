@@ -474,7 +474,7 @@ public: // Serialization
      */
     void fromVariantMap(const QVariantMap& variantMap) final;
 
-    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext = nullptr) override;
+    void fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext) override;
 
     /**
      * Load widget action from variant for app versions prior to 5.0.0
@@ -996,6 +996,8 @@ public: // Serialization
      * @return Variant representation of the widget action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
+
+    void fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext) override;
 
     /**
      * Create a workflow plan that loads the point data state from a variant map.

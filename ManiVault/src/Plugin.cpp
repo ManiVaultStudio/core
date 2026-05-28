@@ -142,7 +142,12 @@ void Plugin::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    Serializable::fromVariantMap(_guiNameAction, variantMap, "GuiName");
+    try {
+        Serializable::fromVariantMap(_guiNameAction, variantMap, "GuiName");
+    }
+    catch (const std::exception& e) {
+        qWarning() << "Error while deserializing GuiName:" << e.what();
+    }
 
     _learningCenterAction.fromParentVariantMap(variantMap);
 }

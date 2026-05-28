@@ -247,18 +247,59 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
 
 SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeChild(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext parentContext)
 {
-    auto childContext = parentContext->createWorkflowChild(
+    parentContext = requireContext(parentContext, __FUNCTION__);
+
+    auto childContext = parentContext->createNestedWorkflowChild(
         workflowPlan.getName(),
         workflowPlan.getWeight(),
         WorkflowPlan::JobProgressMode::Automatic);
 
-    //WorkflowReporter::info("Nested workflow started", workflowPlan.getName());
+    WorkflowExecutionLifecycleScope lifecycle(childContext);
 
-    //executeImpl(workflowPlan, childContext);
+    std::exception_ptr primaryException;
 
-    //WorkflowReporter::info("Nested workflow finished", workflowPlan.getName());
+    try {
+        tf::Taskflow taskflow;
 
-    return {};
+        compileWorkflow(workflowPlan, taskflow, childContext);
+
+        if (taskflow.num_tasks() > 0)
+            _executor.run(taskflow).get();
+    }
+    catch (...) {
+        primaryException = std::current_exception();
+    }
+
+    if (primaryException) {
+        try {
+            std::rethrow_exception(primaryException);
+        }
+        catch (const std::exception& exception) {
+            const auto message = QString::fromUtf8(exception.what());
+
+            childContext->error(message, workflowPlan.getName());
+            lifecycle.fail(message);
+
+            std::rethrow_exception(primaryException);
+        }
+        catch (...) {
+            const QString message = "Nested workflow failed with unknown error";
+
+            childContext->error(message, workflowPlan.getName());
+            lifecycle.fail(message);
+
+            std::rethrow_exception(primaryException);
+        }
+    }
+
+    auto result = std::make_shared<WorkflowResult>(workflowPlan.getName());
+
+    result->setValue(childContext->takeResultValues());
+    result->setDuration(lifecycle.elapsedMs());
+
+    lifecycle.finish();
+
+    return result;
 }
 
 void TaskflowWorkflowPlanExecutor::executeJobOnGuiThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)

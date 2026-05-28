@@ -120,15 +120,7 @@ public: // Serialization
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
-    /**
-     * Create a workflow plan that loads the data hierarchy manager state from a variant map.
-     *
-     * @note See the documentation of Serializable::fromVariantMapWorkflow() for important information about the expected behavior of this function.
-     * @param variantMap Variant map representation of the object state.
-     * @param parentContext Optional parent workflow execution context to which the loading workflow will be attached as a child. This can be used to integrate the loading workflow into a larger workflow hierarchy, allowing it to report progress and messages in the context of the parent workflow execution.
-     * @return Workflow plan that restores the object state when executed.
-     */
-    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext = nullptr) override;
+    void fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext) override;
 
     /**
      * Serialize the data hierarchy manager state to a variant map.

@@ -127,9 +127,7 @@ void Project::fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflow
 
 	_statusBarOptionsAction.fromParentVariantMap(variantMap);
 
-	auto plan   = dataHierarchy().fromVariantMapWorkflow(variantMap, parentExecutionContext);
-	auto result = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));
-
+    dataHierarchy().fromVariantMapScoped(variantMap, parentExecutionContext);
     actions().fromParentVariantMap(variantMap);
     plugins().fromParentVariantMap(variantMap);
     events().fromParentVariantMap(variantMap, true);
@@ -155,10 +153,10 @@ QVariantMap Project::toVariantMapScoped(SharedWorkflowExecutionContext parentExe
     _statusBarVisibleAction.insertIntoVariantMap(variantMap);
     _statusBarOptionsAction.insertIntoVariantMap(variantMap);
 
-    variantMap["Plugins"]   = plugins().toVariantMap();
-    variantMap["Actions"]   = actions().toVariantMap();
-    variantMap["Events"]    = events().toVariantMap();
-    variantMap["Hierarchy"] = dataHierarchy().toVariantMapScoped(parentExecutionContext);
+    variantMap["Plugins"]       = plugins().toVariantMap();
+    variantMap["Actions"]       = actions().toVariantMap();
+    variantMap["Events"]        = events().toVariantMap();
+    variantMap["DataHierarchy"] = dataHierarchy().toVariantMapScoped(parentExecutionContext);
 
     return variantMap;
 }

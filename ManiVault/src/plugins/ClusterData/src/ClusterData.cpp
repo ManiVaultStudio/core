@@ -298,30 +298,21 @@ std::vector<std::uint32_t> Clusters::getSelectedIndices() const
 
 void Clusters::fromVariantMap(const QVariantMap& variantMap)
 {
-    auto plan   = fromVariantMapWorkflow(variantMap);
-    auto result = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));
+    fromVariantMapScoped(variantMap, nullptr);
 }
 
-UniqueWorkflowPlan Clusters::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext)
+void Clusters::fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext)
 {
-    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
-
     DatasetImpl::fromVariantMap(variantMap);
 
-    const auto projectApplicationVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
+    const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
-    if (projectApplicationVersion < Version(1, 5, 0)) {
-        plan->addSequentialStage("Load (version < 1.5.0)", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
-            fromVariantMapPre150(variantMap);
-        }, WorkflowPlan::JobThreadAffinity::GuiThread);
+    if (appVersion < Version(1, 5, 0)) {
+    	fromVariantMapPre150(variantMap);
     }
     else {
-        plan->addNestedWorkflowStage("Load", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) mutable ->UniqueWorkflowPlan {
-            return getRawData<ClusterData>()->fromVariantMapWorkflow(variantMap, executionContext);
-        });
+		//getRawData<ClusterData>()->fromVariantMapScoped(variantMap, parentExecutionContext);
     }
-
-	return plan;
 }
 
 void Clusters::fromVariantMapPre150(const QVariantMap& variantMap)
