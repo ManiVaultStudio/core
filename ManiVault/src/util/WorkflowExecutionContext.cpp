@@ -122,11 +122,19 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createTypedChild(const 
 void WorkflowExecutionContext::reportStarted() const
 {
     info(_name, {}, makeLifecycleDetails("started"));
+
+    if (_progressNode)
+        _progressNode->markRunning();
 }
 
 void WorkflowExecutionContext::reportFinished(std::uint64_t durationMs) const
 {
     info(_name, {}, makeLifecycleDetails("finished", durationMs));
+
+    if (_progressNode) {
+        _progressNode->setProgress(1.0);
+        _progressNode->markCompleted();
+    }
 }
 
 void WorkflowExecutionContext::reportFailed(const QString& errorMessage) const
@@ -135,6 +143,9 @@ void WorkflowExecutionContext::reportFailed(const QString& errorMessage) const
     details["error"] = errorMessage;
 
     error(_name, {}, details);
+
+    if (_progressNode)
+        _progressNode->markFailed();
 }
 
 void WorkflowExecutionContext::reportSkipped(const QString& reason) const
@@ -143,6 +154,9 @@ void WorkflowExecutionContext::reportSkipped(const QString& reason) const
     details["reason"] = reason;
 
     warning(_name, {}, details);
+
+    if (_progressNode)
+        _progressNode->markSkipped();
 }
 
 void WorkflowExecutionContext::reportStageSummary(const WorkflowStageSummary& summary) const

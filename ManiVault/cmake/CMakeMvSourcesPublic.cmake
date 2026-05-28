@@ -631,6 +631,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/AsyncVariantMapResult.h
     src/util/WorkflowExecutionNodeType.h
     src/util/WorkflowConsoleDashboard.h
+    src/util/WorkflowConsoleDashboardScope.h
 )
 
 if(APPLE)
@@ -732,6 +733,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/WorkflowChromeTraceSink.cpp
     src/util/WorkflowExecutionNodeType.cpp
     src/util/WorkflowConsoleDashboard.cpp
+    src/util/WorkflowConsoleDashboardScope.cpp
 )
 
 if(APPLE)

@@ -5,6 +5,7 @@
 #include "WorkflowConsoleDashboard.h"
 #include "WorkflowConsoleFormatter.h"
 
+#include <chrono>
 #include <iostream>
 
 namespace mv::util
@@ -15,26 +16,60 @@ WorkflowConsoleDashboard::WorkflowConsoleDashboard(WorkflowExecutionState::Ptr s
 {
 }
 
-void WorkflowConsoleDashboard::render()
+WorkflowConsoleDashboard::~WorkflowConsoleDashboard()
+{
+    stop();
+}
+
+void WorkflowConsoleDashboard::start()
+{
+    if (_running.exchange(true))
+        return;
+
+    _thread = std::thread([this] {
+    	run();
+    });
+}
+
+void WorkflowConsoleDashboard::stop()
+{
+    if (!_running.exchange(false))
+        return;
+
+    if (_thread.joinable())
+        _thread.join();
+
+    render();
+
+    std::cout << std::endl;
+}
+
+void WorkflowConsoleDashboard::run() const
+{
+    using namespace std::chrono_literals;
+
+    while (_running) {
+        render();
+        std::this_thread::sleep_for(250ms);
+    }
+}
+
+void WorkflowConsoleDashboard::render() const
 {
     if (!_state)
         return;
 
-    auto root = _state->getProgressRoot();
+    const auto root = _state->getProgressRoot();
 
     if (!root)
         return;
 
     const auto snapshot = root->createSnapshot();
-    const auto text     = WorkflowConsoleFormatter::formatProgressTree(snapshot);
+    const auto text = WorkflowConsoleFormatter::formatProgressTree(snapshot);
 
-    // Clear screen
     std::cout << "\x1b[2J";
-
-    // Move cursor to top-left
     std::cout << "\x1b[H";
     std::cout << text.toStdString();
-
     std::cout.flush();
 }
 

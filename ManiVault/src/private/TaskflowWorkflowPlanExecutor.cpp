@@ -95,6 +95,8 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
 {
     auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task, executionOptions);
 
+    WorkflowConsoleDashboardScope dashboardScope(rootContext->getState());
+
     WorkflowExecutionLifecycleScope lifecycle(rootContext);
 
     const auto displayFailure = [&workflowPlan, executionOptions](const QString& message) {

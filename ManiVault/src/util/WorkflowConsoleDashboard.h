@@ -7,7 +7,9 @@
 #include "ManiVaultGlobals.h"
 #include "WorkflowExecutionState.h"
 
-#include <QString>
+#include <atomic>
+#include <memory>
+#include <thread>
 
 namespace mv::util
 {
@@ -16,11 +18,22 @@ class CORE_EXPORT WorkflowConsoleDashboard
 {
 public:
     explicit WorkflowConsoleDashboard(WorkflowExecutionState::Ptr state);
+    ~WorkflowConsoleDashboard();
 
-    void render();
+    void start();
+    void stop();
+
+    void render() const;
+
+private:
+    void run() const;
 
 private:
     WorkflowExecutionState::Ptr _state;
+
+    std::atomic_bool _running = false;
+    std::thread _thread;
 };
+
 
 } // namespace mv::util

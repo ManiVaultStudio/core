@@ -19,9 +19,7 @@ WorkflowExecutionLifecycleScope::WorkflowExecutionLifecycleScope(SharedWorkflowE
 WorkflowExecutionLifecycleScope::~WorkflowExecutionLifecycleScope()
 {
 	if (_context && !_finished) {
-		_context->reportFinished(
-			static_cast<std::uint64_t>(_timer.elapsed())
-		);
+        finish();
 	}
 }
 
