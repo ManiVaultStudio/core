@@ -2,50 +2,40 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "WorkflowExecutionNodeType.h"
+#include "WorkflowConsoleDashboard.h"
+#include "WorkflowConsoleFormatter.h"
 
-#include <QHash>
+#include <iostream>
 
 namespace mv::util
 {
 
-WorkflowExecutionNodeType getWorkflowExecutionNodeType(const QString& typeName)
+WorkflowConsoleDashboard::WorkflowConsoleDashboard(WorkflowExecutionState::Ptr state) :
+    _state(std::move(state))
 {
-    static const QHash<QString, WorkflowExecutionNodeType> map = {
-        { QStringLiteral("Workflow"), WorkflowExecutionNodeType::Workflow },
-        { QStringLiteral("NestedWorkflow"), WorkflowExecutionNodeType::NestedWorkflow },
-        { QStringLiteral("SequentialStage"), WorkflowExecutionNodeType::SequentialStage },
-        { QStringLiteral("ParallelStage"), WorkflowExecutionNodeType::ParallelStage },
-        { QStringLiteral("Job"), WorkflowExecutionNodeType::Job },
-        { QStringLiteral("Undefined"), WorkflowExecutionNodeType::Undefined }
-    };
-
-    return map.value(typeName, WorkflowExecutionNodeType::Undefined);
 }
 
-QString getWorkflowExecutionNodeTypeName(WorkflowExecutionNodeType type)
+void WorkflowConsoleDashboard::render()
 {
-    switch (type) {
-	    case WorkflowExecutionNodeType::Workflow:
-	        return QStringLiteral("Workflow");
+    if (!_state)
+        return;
 
-	    case WorkflowExecutionNodeType::NestedWorkflow:
-	        return QStringLiteral("NestedWorkflow");
+    auto root = _state->getProgressRoot();
 
-	    case WorkflowExecutionNodeType::SequentialStage:
-	        return QStringLiteral("SequentialStage");
+    if (!root)
+        return;
 
-	    case WorkflowExecutionNodeType::ParallelStage:
-	        return QStringLiteral("ParallelStage");
+    const auto snapshot = root->createSnapshot();
+    const auto text     = WorkflowConsoleFormatter::formatProgressTree(snapshot);
 
-	    case WorkflowExecutionNodeType::Job:
-	        return QStringLiteral("Job");
+    // Clear screen
+    std::cout << "\x1b[2J";
 
-	    case WorkflowExecutionNodeType::Undefined:
+    // Move cursor to top-left
+    std::cout << "\x1b[H";
+    std::cout << text.toStdString();
 
-	    default:
-	        return QStringLiteral("Undefined");
-    }
+    std::cout.flush();
 }
 
 }
