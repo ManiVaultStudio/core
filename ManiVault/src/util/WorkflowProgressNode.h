@@ -30,6 +30,26 @@ public:
         Skipped
     };
 
+    struct Snapshot
+    {
+        Type type = Type::Undefined;
+        Status status = Status::Pending;
+
+        QString name;
+
+        double progress = 0.0;
+        double weight = 1.0;
+
+        int childCount = 0;
+        int completedChildCount = 0;
+
+        qint64 elapsedMilliseconds = 0;
+
+        QVector<Snapshot> children;
+    };
+
+    Snapshot createSnapshot() const;
+
 public:
     using Ptr = std::shared_ptr<WorkflowProgressNode>;
 
@@ -56,7 +76,8 @@ public:
     int getChildCount() const;
     int getCompletedChildCount() const;
 
-    qint64 getElapsedMilliseconds() const;
+    std::int64_t getElapsedMilliseconds() const;
+    std::int64_t getElapsedMillisecondsUnlocked() const;
 
     void markRunning();
     void markCompleted();

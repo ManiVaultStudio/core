@@ -7,6 +7,42 @@
 namespace mv::util
 {
 
+WorkflowProgressNode::Snapshot WorkflowProgressNode::createSnapshot() const
+{
+    Snapshot snapshot;
+    QVector<Ptr> childrenCopy;
+
+    {
+        QMutexLocker lock(&_mutex);
+
+        snapshot.type                   = _type;
+        snapshot.status                 = _status;
+        snapshot.name                   = _name;
+        snapshot.weight                 = _weight;
+        snapshot.childCount             = _children.size();
+        snapshot.elapsedMilliseconds    = getElapsedMillisecondsUnlocked();
+
+        childrenCopy = _children;
+    }
+
+    snapshot.progress = getProgress();
+
+    for (const auto& child : childrenCopy) {
+        if (!child)
+            continue;
+
+        auto childSnapshot = child->createSnapshot();
+
+        if (childSnapshot.status == Status::Completed || childSnapshot.status == Status::Failed || childSnapshot.status == Status::Skipped) {
+            ++snapshot.completedChildCount;
+        }
+
+        snapshot.children.push_back(std::move(childSnapshot));
+    }
+
+    return snapshot;
+}
+
 WorkflowProgressNode::WorkflowProgressNode(Type type, QString name, Ptr parent, double weight /*= 1.0*/) :
     _type(type),
     _name(std::move(name)),
@@ -146,10 +182,14 @@ int WorkflowProgressNode::getCompletedChildCount() const
     return count;
 }
 
-qint64 WorkflowProgressNode::getElapsedMilliseconds() const
+std::int64_t WorkflowProgressNode::getElapsedMilliseconds() const
 {
-    QMutexLocker locker(&_mutex);
+    QMutexLocker lock(&_mutex);
+    return getElapsedMillisecondsUnlocked();
+}
 
+std::int64_t WorkflowProgressNode::getElapsedMillisecondsUnlocked() const
+{
     if (_status == Status::Pending)
         return 0;
 
