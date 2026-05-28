@@ -219,6 +219,13 @@ void WorkflowProgressNode::markSkipped()
     setStatus(Status::Skipped);
 }
 
+bool WorkflowProgressNode::isRoot() const
+{
+    QMutexLocker lock(&_mutex);
+
+    return _parent == nullptr;
+}
+
 void WorkflowProgressNode::setStatus(Status status)
 {
     QMutexLocker locker(&_mutex);

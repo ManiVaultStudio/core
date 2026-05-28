@@ -117,6 +117,11 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createTypedChild(Type t
     return createChild(type, name, weight, progressMode);
 }
 
+bool WorkflowExecutionContext::isRootExecution() const
+{
+    return getProgressNode() && getProgressNode()->isRoot();
+}
+
 void WorkflowExecutionContext::reportStarted() const
 {
     info(_name, {}, makeLifecycleDetails("started"));

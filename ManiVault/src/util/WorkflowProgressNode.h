@@ -84,6 +84,7 @@ public:
     void markFailed();
     void markSkipped();
 
+    bool isRoot() const;
 private:
     void setStatus(Status status);
     bool isFinished() const;

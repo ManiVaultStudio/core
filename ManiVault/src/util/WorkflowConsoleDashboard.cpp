@@ -5,11 +5,20 @@
 #include "WorkflowConsoleDashboard.h"
 #include "WorkflowConsoleFormatter.h"
 
+#include <QMutexLocker>
+
 #include <chrono>
 #include <iostream>
 
 namespace mv::util
 {
+
+QMutex& workflowConsoleMutex()
+{
+    static QMutex mutex;
+    return mutex;
+}
+
 
 WorkflowConsoleDashboard::WorkflowConsoleDashboard(WorkflowExecutionState::Ptr state) :
     _state(std::move(state))
@@ -41,7 +50,10 @@ void WorkflowConsoleDashboard::stop()
 
     render();
 
-    std::cout << std::endl;
+    {
+        QMutexLocker lock(&workflowConsoleMutex());
+        std::cout << std::endl;
+    }
 }
 
 void WorkflowConsoleDashboard::run() const
@@ -49,8 +61,7 @@ void WorkflowConsoleDashboard::run() const
     using namespace std::chrono_literals;
 
     while (_running) {
-        render();
-        std::this_thread::sleep_for(250ms);
+	    render();
     }
 }
 
@@ -66,6 +77,8 @@ void WorkflowConsoleDashboard::render() const
 
     const auto snapshot = root->createSnapshot();
     const auto text = WorkflowConsoleFormatter::formatProgressTree(snapshot);
+
+    QMutexLocker lock(&workflowConsoleMutex());
 
     std::cout << "\x1b[2J";
     std::cout << "\x1b[H";

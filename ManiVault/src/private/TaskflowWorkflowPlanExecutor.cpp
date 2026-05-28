@@ -95,7 +95,11 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
 {
     auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task, executionOptions);
 
-    WorkflowConsoleDashboardScope dashboardScope(rootContext->getState());
+    std::optional<WorkflowConsoleDashboardScope> dashboardScope;
+
+    if (rootContext->isRootExecution() && executionOptions._enableConsoleDashboard) {
+        dashboardScope.emplace(rootContext->getState());
+    }
 
     WorkflowExecutionLifecycleScope lifecycle(rootContext);
 

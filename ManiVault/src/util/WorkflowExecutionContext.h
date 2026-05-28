@@ -79,6 +79,8 @@ public:
     SharedWorkflowExecutionContext createJobChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic) const;
     SharedWorkflowExecutionContext createTypedChild(Type type, const QString& name, double weight,WorkflowPlan::JobProgressMode progressMode) const;
 
+    bool isRootExecution() const;
+
 public:
 
     void reportStarted() const;
