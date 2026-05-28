@@ -339,57 +339,37 @@ void DatasetImpl::fromVariantMapPre150(const QVariantMap& variantMap)
 
 QVariantMap DatasetImpl::toVariantMap() const
 {
-    auto plan = toVariantMapWorkflow();
-    auto result = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));
+    auto variantMap = WidgetAction::toVariantMap();
 
-    return result->value<QVariantMap>();
-}
+    QStringList proxyMemberGuids;
 
-UniqueWorkflowPlan DatasetImpl::toVariantMapWorkflow() const
-{
-    auto sharedContext  = std::make_shared<ToVariantMapWorkflowContext>();
-    auto plan           = std::make_unique<WorkflowPlan>(__FUNCTION__, sharedContext);
+    for (const auto& proxyMember : _proxyMembers)
+        proxyMemberGuids << proxyMember->getId();
 
-    plan->addSequentialStage("A TODO", [this, sharedContext](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-        auto variantMap = WidgetAction::toVariantMap();
+    QVariantList linkedDataList;
 
-        QStringList proxyMemberGuids;
+    for (const auto& ld : _linkedData)
+        linkedDataList.push_back(ld.toVariantMap());
 
-        for (const auto& proxyMember : _proxyMembers)
-            proxyMemberGuids << proxyMember->getId();
-
-        QVariantList linkedDataList;
-
-        for (const auto& ld : _linkedData)
-            linkedDataList.push_back(ld.toVariantMap());
-
-        variantMap.insert({
-            { "Name", QVariant::fromValue(text()) },
-            { "Locked", QVariant::fromValue(_locked) },
-            { "StorageType", QVariant::fromValue(static_cast<std::int32_t>(getStorageType())) },
-            { "ProxyMembers", QVariant::fromValue(proxyMemberGuids) },
-            { "DataType", QVariant::fromValue(getDataType().getTypeString()) },
-            { "PluginKind", QVariant::fromValue(_rawData->getKind()) },
-            { "PluginVersion", QVariant::fromValue(_rawData->getVersion()) },
-            { "Derived", QVariant::fromValue(isDerivedData()) },
-            { "MayUnderive", QVariant::fromValue(mayUnderive()) },
-            { "Full", QVariant::fromValue(isFull()) },
-            { "SourceDatasetID", isDerivedData() ? QVariant::fromValue(_sourceDataset->getId()) : "" },
-            { "FullDatasetID", isFull() ? "" : QVariant::fromValue(_fullDataset->getId()) },
-            { "GroupIndex", QVariant::fromValue(getGroupIndex()) },
-            { "LinkedData", linkedDataList }//,
-            //{ "Properties", PropertiesSerializer::toVariantMap(_properties)}
-        });
-
-        for (auto [key, value] : variantMap.asKeyValueRange())
-            sharedContext->setResultValue(key, value);
+    variantMap.insert({
+        { "Name", QVariant::fromValue(text()) },
+        { "Locked", QVariant::fromValue(_locked) },
+        { "StorageType", QVariant::fromValue(static_cast<std::int32_t>(getStorageType())) },
+        { "ProxyMembers", QVariant::fromValue(proxyMemberGuids) },
+        { "DataType", QVariant::fromValue(getDataType().getTypeString()) },
+        { "PluginKind", QVariant::fromValue(_rawData->getKind()) },
+        { "PluginVersion", QVariant::fromValue(_rawData->getVersion()) },
+        { "Derived", QVariant::fromValue(isDerivedData()) },
+        { "MayUnderive", QVariant::fromValue(mayUnderive()) },
+        { "Full", QVariant::fromValue(isFull()) },
+        { "SourceDatasetID", isDerivedData() ? QVariant::fromValue(_sourceDataset->getId()) : "" },
+        { "FullDatasetID", isFull() ? "" : QVariant::fromValue(_fullDataset->getId()) },
+        { "GroupIndex", QVariant::fromValue(getGroupIndex()) },
+        { "LinkedData", linkedDataList },
+        { "Properties", PropertiesSerializer::toVariantMap(_properties)}
     });
 
-    plan->addSequentialStage("B TODO", [this, sharedContext](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-        executionContext->publishResultValue("VariantMap", sharedContext->getResult());
-    });
-
-    return plan;
+    return variantMap;
 }
 
 std::int32_t DatasetImpl::getGroupIndex() const
