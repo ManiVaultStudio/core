@@ -171,9 +171,9 @@ class HdpsCoreConan(ConanFile):
         if self.settings.os == "Macos":
             MV_USE_ERROR_LOGGING = "OFF"
 
-        tc.variables["MV_PRECOMPILE_HEADERS"] = MV_PRECOMPILE_HEADERS
-        tc.variables["MV_UNITY_BUILD"] = MV_UNITY_BUILD
-        tc.variables["MV_USE_ERROR_LOGGING"] = MV_USE_ERROR_LOGGING
+        tc.cache_variables["MV_PRECOMPILE_HEADERS"] = MV_PRECOMPILE_HEADERS
+        tc.cache_variables["MV_UNITY_BUILD"] = MV_UNITY_BUILD
+        tc.cache_variables["MV_USE_ERROR_LOGGING"] = MV_USE_ERROR_LOGGING
         
         try:
             tc.generate()
