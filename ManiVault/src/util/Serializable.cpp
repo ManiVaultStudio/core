@@ -66,6 +66,12 @@ void Serializable::fromVariantMap(const QVariantMap& variantMap)
     _serializationCounter[static_cast<int>(Direction::From)]++;
 }
 
+void Serializable::fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext)
+{
+    Q_UNUSED(variantMap)
+    Q_UNUSED(parentExecutionContext)
+}
+
 UniqueWorkflowPlan Serializable::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext /*= nullptr*/)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1::fromVariantMap").arg(getSerializationName()));
@@ -89,6 +95,11 @@ QVariantMap Serializable::toVariantMap() const
     };
 }
 
+QVariantMap Serializable::toVariantMapScoped(SharedWorkflowExecutionContext parentExecutionContext) const
+{
+    return toVariantMap();
+}
+
 UniqueWorkflowPlan Serializable::toVariantMapWorkflow() const
 {
     UniqueWorkflowPlan workflowPlan = std::make_unique<WorkflowPlan>(QString("%1::toVariantMap").arg(getSerializationName()));
@@ -110,11 +121,11 @@ void Serializable::fromJsonDocument(const QJsonDocument& jsonDocument)
     fromVariantMap(const_cast<Serializable*>(this), variantMap[getSerializationName()].toMap());
 }
 
-QJsonDocument Serializable::toJsonDocument() const
+QJsonDocument Serializable::toJsonDocument(SharedWorkflowExecutionContext parentExecutionContext /*= nullptr*/) const
 {
     QVariantMap variantMap;
 
-    variantMap[getSerializationName()] = const_cast<Serializable*>(this)->toVariantMap(this);
+    variantMap[getSerializationName()] = toVariantMapScoped(parentExecutionContext);
 
     return QJsonDocument::fromVariant(variantMap);
 }
@@ -142,14 +153,14 @@ void Serializable::fromJsonFile(const QString& filePath /*= ""*/)
     fromJsonDocument(jsonDocument);
 }
 
-void Serializable::toJsonFile(const QString& filePath /*= ""*/) const
+void Serializable::toJsonFile(const QString& filePath /*= ""*/, SharedWorkflowExecutionContext parentExecutionContext /*= nullptr*/) const
 {
     QFile jsonFile(filePath);
 
     if (!jsonFile.open(QFile::WriteOnly))
         throw std::runtime_error("Unable to open file for writing");
 
-    auto jsonDocument = toJsonDocument();
+    auto jsonDocument = toJsonDocument(parentExecutionContext);
 
     if (jsonDocument.isNull() || jsonDocument.isEmpty())
         throw std::runtime_error("JSON document is invalid");

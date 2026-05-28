@@ -99,6 +99,9 @@ public:
      */
     virtual void fromVariantMap(const QVariantMap& variantMap);
 
+
+    virtual void fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext);
+
     /**
      * Create a workflow plan that loads the object state from a variant map.
      *
@@ -163,6 +166,8 @@ public:
 	 */
     virtual QVariantMap toVariantMap() const;
 
+    virtual QVariantMap toVariantMapScoped(SharedWorkflowExecutionContext parentExecutionContext) const;
+
     /**
 	 * Create a workflow plan that serializes the object state to a variant map.
 	 *
@@ -200,11 +205,8 @@ public:
      */
     void fromJsonDocument(const QJsonDocument& jsonDocument);
 
-    /**
-     * Save widget action to JSON document
-     * @return JSON document
-     */
-    QJsonDocument toJsonDocument() const;
+    // TODO
+    QJsonDocument toJsonDocument(SharedWorkflowExecutionContext parentExecutionContext = nullptr) const;
 
     /**
      * Load from JSON file
@@ -212,11 +214,8 @@ public:
      */
     void fromJsonFile(const QString& filePath = "");
 
-    /**
-     * Save to JSON file
-     * @param filePath Path to the JSON file
-     */
-    void toJsonFile(const QString& filePath = "") const;
+    // TODO
+    void toJsonFile(const QString& filePath = "", SharedWorkflowExecutionContext parentExecutionContext = nullptr) const;
 
     /** Assigns a fresh new identifier to the serializable object */
     void makeUnique();

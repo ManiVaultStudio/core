@@ -107,91 +107,60 @@ bool Project::isStartupProject() const
 
 void Project::fromVariantMap(const QVariantMap& variantMap)
 {
-    auto plan   = fromVariantMapWorkflow(variantMap);
-    auto result = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));
+    fromVariantMapScoped(variantMap, nullptr);
 }
 
-UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap, util::SharedWorkflowExecutionContext parentContext /*= nullptr*/)
+void Project::fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext)
 {
-    auto plan = std::make_unique<WorkflowPlan>("Load project");
+	Serializable::fromVariantMap(variantMap);
 
-    plan->addSequentialStage("Step 1", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
-        //Serializable::fromVariantMap(variantMap);
+	if (variantMap.contains(_selectionGroupingAction.getSerializationName())) {
+	    _selectionGroupingAction.fromParentVariantMap(variantMap);
+	}
+	else {
+	    _selectionGroupingAction.setChecked(true);
+	}
 
-        if (variantMap.contains(_selectionGroupingAction.getSerializationName())) {
-            _selectionGroupingAction.fromParentVariantMap(variantMap);
-        }
-        else {
-            _selectionGroupingAction.setChecked(true);
-        }
+	_overrideApplicationStatusBarAction.fromParentVariantMap(variantMap);
 
-        _overrideApplicationStatusBarAction.fromParentVariantMap(variantMap);
+	_statusBarVisibleAction.fromParentVariantMap(variantMap);
 
-        _statusBarVisibleAction.fromParentVariantMap(variantMap);
+	_statusBarOptionsAction.fromParentVariantMap(variantMap);
 
-        _statusBarOptionsAction.fromParentVariantMap(variantMap);
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+	auto plan   = dataHierarchy().fromVariantMapWorkflow(variantMap, parentExecutionContext);
+	auto result = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));
 
-    plan->addNestedWorkflowStage("Step 2", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) mutable -> UniqueWorkflowPlan {
-        return dataHierarchy().fromVariantMapWorkflow(variantMap, context);
-    });
+    actions().fromParentVariantMap(variantMap);
+    plugins().fromParentVariantMap(variantMap);
+    events().fromParentVariantMap(variantMap, true);
 
-    plan->addSequentialStage("Step 3", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
-        actions().fromParentVariantMap(variantMap);
-        plugins().fromParentVariantMap(variantMap);
-        events().fromParentVariantMap(variantMap, true);
-
-        if (getReadOnlyAction().isChecked() && getAllowedPluginsOnlyAction().isChecked()) {
-            for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
-                pluginFactory->setAllowPluginCreationFromStandardGui(_projectMetaAction.getAllowedPluginsAction().getStrings().contains(pluginFactory->getKind()));
-        }
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
-
-    return plan;
+    if (getReadOnlyAction().isChecked() && getAllowedPluginsOnlyAction().isChecked()) {
+        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
+            pluginFactory->setAllowPluginCreationFromStandardGui(_projectMetaAction.getAllowedPluginsAction().getStrings().contains(pluginFactory->getKind()));
+    }
 }
 
 QVariantMap Project::toVariantMap() const
 {
-    auto plan   = toVariantMapWorkflow();
-    auto result = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));
-
-    if (!result)
-        throw std::runtime_error("Workflow execution failed");
-
-    return result->value<QVariantMap>();
+    return toVariantMapScoped(nullptr);
 }
 
-UniqueWorkflowPlan Project::toVariantMapWorkflow() const
+QVariantMap Project::toVariantMapScoped(SharedWorkflowExecutionContext parentExecutionContext) const
 {
-    UniqueWorkflowPlan toPlan = std::make_unique<WorkflowPlan>("Save project");
+    auto variantMap = Serializable::toVariantMap();
 
-    toPlan->addSequentialStage("Setup", [this](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
-        auto variantMap = Serializable::toVariantMap();
+    _projectMetaAction.insertIntoVariantMap(variantMap);
+    _selectionGroupingAction.insertIntoVariantMap(variantMap);
+    _overrideApplicationStatusBarAction.insertIntoVariantMap(variantMap);
+    _statusBarVisibleAction.insertIntoVariantMap(variantMap);
+    _statusBarOptionsAction.insertIntoVariantMap(variantMap);
 
-        _projectMetaAction.insertIntoVariantMap(variantMap);
-        _selectionGroupingAction.insertIntoVariantMap(variantMap);
-        _overrideApplicationStatusBarAction.insertIntoVariantMap(variantMap);
-        _statusBarVisibleAction.insertIntoVariantMap(variantMap);
-        _statusBarOptionsAction.insertIntoVariantMap(variantMap);
-    });
+    variantMap["Plugins"]   = plugins().toVariantMap();
+    variantMap["Actions"]   = actions().toVariantMap();
+    variantMap["Events"]    = events().toVariantMap();
+    variantMap["Hierarchy"] = dataHierarchy().toVariantMapScoped(parentExecutionContext);
 
-    toPlan->addSequentialStage("Plugins", [this](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
-        executionContext->publishResultValue("Plugins", plugins().toVariantMap());
-    });
-
-    toPlan->addSequentialStage("Actions", [this](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
-        executionContext->publishResultValue("Actions", actions().toVariantMap());
-    });
-
-    toPlan->addSequentialStage("Events", [this](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
-        executionContext->publishResultValue("Events", events().toVariantMap());
-    });
-
-    toPlan->addSequentialStage("Hierarchy", [this](WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
-        executionContext->publishResultValue("Hierarchy", dataHierarchy().toVariantMap());
-    });
-
-    return toPlan;
+    return variantMap;
 }
 
 util::Version Project::getVersion() const

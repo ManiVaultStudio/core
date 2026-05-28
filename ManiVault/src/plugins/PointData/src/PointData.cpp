@@ -1083,11 +1083,87 @@ void Points::selectInvert()
 
 void Points::fromVariantMap(const QVariantMap& variantMap)
 {
-    auto plan = fromVariantMapWorkflow(variantMap);
+    DatasetImpl::fromVariantMap(variantMap);
 
-    const auto future = Application::getWorkflowPlanExecutor().execute(std::move(plan));
+    variantMapMustContain(variantMap, "DimensionNames");
+    variantMapMustContain(variantMap, "Selection");
 
-    auto result = future.get();
+    const auto dataMap      = variantMap["Data"].toMap();
+    const auto appVersion   = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
+
+    if (appVersion < Version(1, 5, 0)) {
+            fromVariantMapPre150(variantMap);
+    }
+    else {
+        //    if (isFull()) {
+        //        fromPlan->addSequentialStage("Load points", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) -> void {
+        //            getRawData<PointData>()->fromVariantMapWorkflow(variantMap, context);
+        //        }, WorkflowPlan::JobThreadAffinity::GuiThread);
+
+        //        //return getRawData<PointData>()->fromVariantMapWorkflow(variantMap, context);
+
+           ////     fromPlan->addNestedWorkflowStage("Load raw point data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) mutable -> UniqueWorkflowPlan {
+                    ////return getRawData<PointData>()->fromVariantMapWorkflow(variantMap, context);
+           ////     });
+        //    } else {
+        //        variantMapMustContain(variantMap, "Indices");
+
+        //        const auto& indicesMap = variantMap["Indices"].toMap();
+
+        //        indices.resize(indicesMap["Count"].toUInt());
+
+        //        populateBytesFromBlobMap(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(uint32_t));
+        //    }
+            /*
+            fromPlan->addNestedWorkflowStage("Load dimension names", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) mutable -> UniqueWorkflowPlan {
+                return DimensionNamesSerializer::fromVariantMapWorkflow(this, variantMap, context);
+            });
+
+
+            fromPlan->addSequentialStage("Process dimension names", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) -> void {
+                if (variantMap.contains("Dimensions"))
+                    _dimensionsPickerAction->fromParentVariantMap(variantMap);
+            });
+
+            if (isFull()) {
+                fromPlan->addSequentialStage("Load selection", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) -> void {
+                    const auto& selectionMap = variantMap["Selection"].toMap();
+
+                    const auto count = selectionMap["Count"].toUInt();
+
+                    if (count > 0) {
+                        auto selectionSet = getSelection<Points>();
+
+                        selectionSet->indices.resize(count);
+
+                        const auto bytes = bytesFromBlobVariantMap(selectionMap["Raw"].toMap());
+
+                        std::memcpy(const_cast<uint32_t*>(selectionSet->indices.data()), bytes.data(), bytes.size());
+
+                        //events().notifyDatasetDataSelectionChanged(this);
+                    }
+                });
+            }
+
+            fromPlan->addSequentialStage("Load points", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) -> void {
+                // For backwards compatibility, check PluginVersion
+                if (variantMap["PluginVersion"] == "No Version" && !variantMap["Full"].toBool())
+                {
+                    makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
+
+                    qWarning() << "[ManiVault deprecation warning]: This project was saved with an older ManiVault version (<1.0). "
+                        "Please save the project again to ensure compatibility with newer ManiVault versions. "
+                        "Future releases may not be able to load this projects otherwise. ";
+                }
+
+                //QTimer::singleShot(1000, this, [this]() {
+                //    events().notifyDatasetDataChanged(this);
+                //    events().notifyDatasetDataDimensionsChanged(this);
+                //    });
+
+            }, WorkflowPlan::JobThreadAffinity::GuiThread);
+            */
+    }
 }
 
 UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext)
