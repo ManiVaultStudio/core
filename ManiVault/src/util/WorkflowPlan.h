@@ -232,6 +232,8 @@ public:
 
     void addSequentialStage(QString name, Jobs jobs, double weight = 1.0);
 	void addParallelStage(QString name, Jobs jobs, double weight = 1.0);
+    void addBatchedParallelStage(const QString& name, Jobs jobs, std::size_t batchSize);
+
     void addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight = 1.0);
 
     template<typename Function>

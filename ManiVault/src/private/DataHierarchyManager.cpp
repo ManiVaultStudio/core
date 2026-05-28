@@ -381,7 +381,7 @@ void DataHierarchyManager::fromVariantMapScoped(const QVariantMap& variantMap, S
         });
     }
 
-    loadDatasetsPlan->addParallelStage("Load datasets", std::move(datasetJobs));
+    loadDatasetsPlan->addBatchedParallelStage("Load datasets", std::move(datasetJobs), 8);
     loadDatasetsPlan->addSequentialStage("Notify datasets", [this](const WorkflowPlan::Job& job) {
         for (const auto& item : _items) {
             events().notifyDatasetDataChanged(item->getDataset());

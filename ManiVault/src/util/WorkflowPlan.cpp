@@ -295,6 +295,29 @@ void WorkflowPlan::addParallelStage(QString name, Jobs jobs, double weight /*= 1
     addStage(Stage(std::move(name), ConcurrencyMode::Parallel, std::move(jobs), weight));
 }
 
+void WorkflowPlan::addBatchedParallelStage(const QString& name, Jobs jobs, std::size_t batchSize)
+{
+	if (batchSize == 0)
+		throw std::invalid_argument("batchSize must be greater than zero");
+
+	if (jobs.empty())
+		return;
+
+	std::size_t batchIndex = 0;
+
+	for (std::size_t begin = 0; begin < jobs.size(); begin += batchSize) {
+		const auto end = std::min(begin + batchSize, jobs.size());
+
+		Jobs batchJobs;
+		batchJobs.reserve(end - begin);
+
+		for (std::size_t i = begin; i < end; ++i)
+			batchJobs.emplace_back(std::move(jobs[i]));
+
+		addParallelStage(QString("%1 batch %2").arg(name).arg(++batchIndex), std::move(batchJobs));
+	}
+}
+
 void WorkflowPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight /*= 1.0*/)
 {
 	switch (mode) {
