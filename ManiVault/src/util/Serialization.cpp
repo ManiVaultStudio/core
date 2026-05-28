@@ -84,6 +84,79 @@ EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& saveDir)
     return result;
 }
 
+    struct ActiveDecodeKey
+    {
+        QString        _uri;
+        const char*    _destinationBase = nullptr;
+        std::uint64_t  _offset = 0;
+        std::uint64_t  _size = 0;
+
+        bool operator==(const ActiveDecodeKey& other) const
+        {
+            return _uri == other._uri &&
+                   _destinationBase == other._destinationBase &&
+                   _offset == other._offset &&
+                   _size == other._size;
+        }
+    };
+
+    QString makeActiveDecodeKey(
+        const QString& uri,
+        const char* destinationBase,
+        std::uint64_t offset,
+        std::uint64_t size)
+    {
+        return QString("%1|%2|%3|%4")
+            .arg(uri)
+            .arg(reinterpret_cast<quintptr>(destinationBase))
+            .arg(offset)
+            .arg(size);
+    }
+
+    QMutex g_activeDecodeMutex;
+    QSet<QString> g_activeDecodes;
+
+    class ActiveDecodeGuard
+    {
+    public:
+        ActiveDecodeGuard(
+            const QString& uri,
+            const char* destinationBase,
+            std::uint64_t offset,
+            std::uint64_t size) :
+            _uri(uri),
+            _destinationBase(destinationBase),
+            _offset(offset),
+            _size(size),
+            _key(makeActiveDecodeKey(uri, destinationBase, offset, size))
+        {
+            QMutexLocker lock(&g_activeDecodeMutex);
+
+            if (g_activeDecodes.contains(_key)) {
+                qWarning()
+                    << "Duplicate concurrent decode detected:"
+                    << "uri =" << _uri
+                    << "destination =" << static_cast<const void*>(_destinationBase)
+                    << "offset =" << _offset
+                    << "size =" << _size;
+            }
+
+            g_activeDecodes.insert(_key);
+        }
+
+        ~ActiveDecodeGuard()
+        {
+            QMutexLocker lock(&g_activeDecodeMutex);
+            g_activeDecodes.remove(_key);
+        }
+
+    private:
+        QString       _uri;
+        const char* _destinationBase = nullptr;
+        std::uint64_t _offset = 0;
+        std::uint64_t _size = 0;
+        QString       _key;
+    };
 }
 
 QVariantMap bytesToBlobVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
@@ -273,9 +346,13 @@ DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, ch
 	                { "URI", decodeBlockJob._uri }
 	            });
 
+        ActiveDecodeGuard activeDecodeGuard({ decodeBlockJob._uri, destination, offset, size });
+
 	    codec->decodeFromFileTo(decodeBlockJob._uri, destination + offset, size);
     }
-    catch (const ManiVaultException&) {
+    catch (const ManiVaultException& maniVaultException) {
+
+        qDebug() << maniVaultException._message << "-" << maniVaultException._what << "at" << maniVaultException._where << "with details:" << maniVaultException._details;
 
     	// Rethrow ManiVaultExceptions as they are already properly constructed
     	throw;
@@ -534,34 +611,56 @@ UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMa
         );
     }
 
-    UniqueWorkflowPlan decodeWorkflowPlan = std::make_unique<WorkflowPlan>("Decode Blocks");
+    UniqueWorkflowPlan decodeWorkflowPlan =
+        std::make_unique<WorkflowPlan>("Decode Blocks");
 
-    WorkflowPlan::Jobs decodeJobs;
+    constexpr qsizetype maxConcurrentDecodeJobs = 4;
 
+    WorkflowPlan::Jobs currentBatch;
     std::int32_t decodeBlockJobIndex = 0;
+    std::int32_t batchIndex = 0;
 
-    for (auto& decodeBlockJob : decodeBlockJobs) {
-        decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [decodeBlockJob, destination, destinationSize, createCodec](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
-            QByteArray dest;
-            dest.resize(destinationSize);
+    const auto flushBatch = [&]() {
+        if (currentBatch.empty())
+            return;
 
-            qDebug() << "Decoding block with offset" << decodeBlockJob._offset << "and size" << decodeBlockJob._size << "to destination buffer of size" << destinationSize;
-            if (decodeBlockJob._uri.isEmpty()) {
-                decodeBlockFromBase64To(decodeBlockJob, destination, destinationSize);
-            } else {
-				decodeBlockFromFileTo(decodeBlockJob, dest.data(), destinationSize);
+        decodeWorkflowPlan->addParallelStage(
+            QString("Decode Blocks %1").arg(batchIndex++),
+            std::move(currentBatch)
+        );
+
+        currentBatch = WorkflowPlan::Jobs{};
+        };
+
+    for (const auto& decodeBlockJob : decodeBlockJobs) {
+        const auto jobIndex = decodeBlockJobIndex++;
+
+        currentBatch.emplace_back(QString("Decode Block %1").arg(jobIndex), [decodeBlockJob, destination, destinationSize, createCodec] (const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
+                if (decodeBlockJob._offset + decodeBlockJob._size > destinationSize)
+                    throw std::runtime_error("Decode block range exceeds destination buffer");
+
+                if (decodeBlockJob._uri.isEmpty()) {
+                    decodeBlockFromBase64To(
+                        decodeBlockJob,
+                        destination,
+                        destinationSize
+                    );
+                }
+                else {
+                    decodeBlockFromFileTo(
+                        decodeBlockJob,
+                        destination,
+                        destinationSize
+                    );
+                }
             }
-        });
+        );
 
-        ++decodeBlockJobIndex;
+        if (currentBatch.size() >= maxConcurrentDecodeJobs)
+            flushBatch();
     }
 
-    decodeWorkflowPlan->addParallelStage("Decode blocks", decodeJobs);
-    decodeWorkflowPlan->addSequentialStage("Finalize", [totalSize](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
-        if (auto state = context->getState()) {
-	        state->metrics().addInteger("project.data.bytes_loaded", totalSize);
-        }
-    });
+    flushBatch();
 
     return decodeWorkflowPlan;
 

@@ -261,7 +261,21 @@ void ZstdBlobCodec::decodeTo(const QByteArray& encodedData, char* destination, s
             __FUNCTION__
         );
 
-    ZSTD_DCtx* dctx = ZSTD_createDCtx();
+    const auto frameSize = ZSTD_getFrameContentSize(encodedData.constData(), static_cast<size_t>(encodedData.size()));
+
+    if (frameSize == ZSTD_CONTENTSIZE_ERROR)
+        throw std::runtime_error("Invalid ZSTD frame");
+
+    if (frameSize == ZSTD_CONTENTSIZE_UNKNOWN)
+        throw std::runtime_error("Unknown ZSTD frame size");
+
+    if (frameSize != destinationSize)
+        throw std::runtime_error("ZSTD frame size mismatch");
+
+    auto* dctx = ZSTD_createDCtx();
+
+    if (!dctx)
+        throw std::runtime_error("ZSTD_createDCtx failed");
 
     const auto decodedSize = ZSTD_decompressDCtx(dctx, destination, destinationSize, encodedData.constData(), static_cast<size_t>(encodedData.size()));
 
@@ -305,6 +319,12 @@ QByteArray ZstdBlobCodec::decodeFromFile(const QString& filePath, qsizetype expe
         );
 
     const auto zstdBytes = mv::util::Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
+
+    qDebug()
+        << "Read zstd entry"
+        << filePath
+        << "encodedData.size =" << zstdBytes.size()
+        << "expectedCompressedSize =" << expectedSize;
 
     if (zstdBytes.isEmpty()) {
         throw mv::ManiVaultException(

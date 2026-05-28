@@ -117,6 +117,15 @@ std::int32_t ClusterData::getClusterIndex(const QString& clusterName) const
     return -1;
 }
 
+void ClusterData::fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext)
+{
+    Plugin::fromVariantMap(variantMap);
+
+    const auto dataMap = variantMap["Data"].toMap();
+
+    ClustersSerializer::fromVariantMapScoped(dataMap, _clusters, parentExecutionContext);
+}
+
 UniqueWorkflowPlan ClusterData::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext)
 {
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
@@ -311,7 +320,7 @@ void Clusters::fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflo
     	fromVariantMapPre150(variantMap);
     }
     else {
-		//getRawData<ClusterData>()->fromVariantMapScoped(variantMap, parentExecutionContext);
+		getRawData<ClusterData>()->fromVariantMapScoped(variantMap, parentExecutionContext);
     }
 }
 

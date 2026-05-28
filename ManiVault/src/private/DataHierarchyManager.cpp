@@ -59,26 +59,6 @@ namespace
         }
 
         /**
-         * @brief Get dataset IDs from the context
-         * @return List of dataset IDs
-         */
-        QStringList getDatasetIds() const
-        {
-            QMutexLocker lock(&_mutex);
-            return _datasetsMap.keys();
-        }
-
-        /**
-         * @brief Get data hierarchy map from the context
-         * @return Data hierarchy map
-         */
-        QVariantMap getDataHierachyMap() const
-        {
-            QMutexLocker lock(&_mutex);
-            return _dataHierarchyMap;
-        }
-
-        /**
          * @brief Set data hierarchy map in the context
          * @param dataHierarchyMap Data hierarchy map to set
          */
@@ -393,10 +373,10 @@ void DataHierarchyManager::fromVariantMapScoped(const QVariantMap& variantMap, S
     WorkflowPlan::Jobs datasetJobs;
 
     for (const auto& dataVariantMap : datasetMaps) {
-        const auto datasetId = dataVariantMap["ID"].toString();
-        const auto datasetName = dataVariantMap["Name"].toString();
+        const auto datasetId    = dataVariantMap["ID"].toString();
+        const auto datasetName  = dataVariantMap["Name"].toString();
+
         datasetJobs.emplace_back(datasetName, [datasetId, dataVariantMap, datasetName](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-            qDebug() << "Loading dataset" << datasetName << "with ID" << datasetId << dataVariantMap;
             mv::data().getDataset(datasetId)->fromVariantMapScoped(dataVariantMap, executionContext);
         });
     }
@@ -428,6 +408,8 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
     if (!_items.empty()) {
         WorkflowPlan::Jobs createItems;
 
+        QStringList ids;
+
     	std::int32_t sortIndex = 0;
 
         for (auto& dataHierarchyItem : _items) {
@@ -436,6 +418,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
             const auto datasetGuiName   = dataset->getGuiName();
             const auto itemSortIndex    = sortIndex++;
 
+            ids << datasetId;
             createItems.emplace_back(datasetId, [context, &dataHierarchyItem, datasetId, itemSortIndex, datasetGuiName](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
                 const auto itemMap = dataHierarchyItem->toVariantMap();
 
@@ -444,6 +427,9 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
                 context->setDatasetMap(datasetId, itemMap);
             });
         }
+
+        for (const auto& id : ids)
+			qDebug() << "Dataset ID:" << id;
 
         WorkflowPlan::Jobs loadDatasets;
 
@@ -458,6 +444,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
             traverseItem = [findItemMap, &traverseItem](DataHierarchyItem* item, QVariantMap& parentMap, std::int32_t sortIndex) -> QVariantMap {
                 const auto datasetId = item->getDataset()->getId();
 
+                qDebug() << "Traversing item with dataset ID" << datasetId << "and sort index" << sortIndex;
                 std::uint32_t childSortIndex = 0;
 
                 QVariantMap children;
@@ -467,12 +454,14 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 
                     itemMap["SortIndex"] = childSortIndex;
 
-                    children[datasetId] = traverseItem(childItem, children, childSortIndex);
+                    //children[datasetId] = traverseItem(childItem, children, childSortIndex);
+                    children[childItem->getDataset()->getId()] = traverseItem(childItem, children, childSortIndex);
+
                     childSortIndex++;
                 }
 
                 auto datasetMap = findItemMap(datasetId);
-
+                qDebug() << "-----------------" << children.size() << datasetMap;
                 datasetMap["Children"] = children;
                 datasetMap["SortIndex"] = sortIndex;
 

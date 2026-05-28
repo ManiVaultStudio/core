@@ -26,7 +26,7 @@ public:
      * @param parentExecutionContext The shared workflow execution context that will be passed to the workflow plan during its execution.
      * @return A UniqueWorkflowPlan object that represents the workflow plan for deserializing the given QVariantMap into a vector of Cluster objects.
      */
-    static UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& map, QVector<Cluster>& clusters, SharedWorkflowExecutionContext parentExecutionContext);
+    static void fromVariantMapScoped(const QVariantMap& map, QVector<Cluster>& clusters, SharedWorkflowExecutionContext parentExecutionContext);
 
     
     static QVariantMap toVariantMap(const QVector<Cluster>& clusters);

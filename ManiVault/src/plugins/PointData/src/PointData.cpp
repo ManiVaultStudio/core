@@ -159,7 +159,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 void PointData::fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext)
 {
     Plugin::fromVariantMap(variantMap);
-
+    
     variantMapMustContain(variantMap, "Data");
     variantMapMustContain(variantMap, "NumberOfPoints");
     variantMapMustContain(variantMap, "NumberOfDimensions");
@@ -1072,6 +1072,8 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 {
     DatasetImpl::fromVariantMap(variantMap);
 
+    qDebug() << "--------" << getGuiName() << "--------";
+
     variantMapMustContain(variantMap, "DimensionNames");
     variantMapMustContain(variantMap, "Selection");
 
@@ -1160,8 +1162,8 @@ void Points::fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflowE
     variantMapMustContain(variantMap, "DimensionNames");
     variantMapMustContain(variantMap, "Selection");
 
-    const auto dataMap = variantMap["Data"].toMap();
-    const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
+    const auto dataMap      = variantMap["Data"].toMap();
+    const auto appVersion   = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
     if (appVersion < Version(1, 5, 0)) {
     	fromVariantMapPre150(variantMap);

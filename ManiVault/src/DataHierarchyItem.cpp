@@ -272,7 +272,7 @@ QVariantMap DataHierarchyItem::toVariantMap() const
     variantMap["Visible"]   = QVariant::fromValue(isVisible());
     variantMap["Selected"]  = QVariant::fromValue(isSelected());
     variantMap["Children"]  = QVariant::fromValue(children);
-    variantMap["Dataset"]   = _dataset->toVariantMap();
+	variantMap["Dataset"]   = _dataset->toVariantMap();
 
     return variantMap;
 }
