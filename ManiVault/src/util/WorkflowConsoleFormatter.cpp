@@ -3,6 +3,10 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "WorkflowConsoleFormatter.h"
+#include "WorkflowExecutionNodeType.h"
+
+#include <QStringList>
+#include <QtMath>
 
 namespace mv::util
 {
@@ -88,6 +92,62 @@ QString WorkflowConsoleFormatter::format(SeverityLevel severity, const QString& 
         line += QString("  SKIPPED: %1").arg(details.value("reason").toString());
 
     return line;
+}
+
+QString WorkflowConsoleFormatter::formatProgressTree(const WorkflowProgressNode::Snapshot& root)
+{
+    QStringList lines;
+
+    lines << QStringLiteral("Kind              Name                                      Status      Progress  Children    Time");
+    lines << QStringLiteral("------------------------------------------------------------------------------------------------");
+
+    appendProgressNode(lines, root, 0);
+
+    return lines.join(QLatin1Char('\n'));
+}
+
+void WorkflowConsoleFormatter::appendProgressNode(QStringList& lines, const WorkflowProgressNode::Snapshot& node, int depth)
+{
+    const QString indent(depth * 2, QLatin1Char(' '));
+
+    const auto kind     = getWorkflowExecutionNodeTypeName(node.type);
+    const auto status   = statusName(node.status);
+    const auto progress = QStringLiteral("%1%").arg(qRound(node.progress * 100.0), 3);
+    const auto children = QStringLiteral("%1/%2").arg(node.completedChildCount).arg(node.childCount);
+    const auto time     = QStringLiteral("%1 ms").arg(node.elapsedMilliseconds);
+
+    lines << QStringLiteral("%1%2 %3 %4 %5 %6")
+        .arg(indent + kind, -18)
+        .arg(node.name.left(40), -40)
+        .arg(status, -10)
+        .arg(progress, -8)
+        .arg(children, -10)
+        .arg(time);
+
+    for (const auto& child : node.children)
+        appendProgressNode(lines, child, depth + 1);
+}
+
+QString WorkflowConsoleFormatter::statusName(WorkflowProgressNode::Status status)
+{
+    switch (status) {
+    case WorkflowProgressNode::Status::Pending:
+        return QStringLiteral("Pending");
+
+    case WorkflowProgressNode::Status::Running:
+        return QStringLiteral("Running");
+
+    case WorkflowProgressNode::Status::Completed:
+        return QStringLiteral("Completed");
+
+    case WorkflowProgressNode::Status::Failed:
+        return QStringLiteral("Failed");
+
+    case WorkflowProgressNode::Status::Skipped:
+        return QStringLiteral("Skipped");
+    }
+
+    return QStringLiteral("Unknown");
 }
 
 }
