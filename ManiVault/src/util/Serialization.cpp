@@ -611,58 +611,31 @@ UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMa
         );
     }
 
-    UniqueWorkflowPlan decodeWorkflowPlan =
-        std::make_unique<WorkflowPlan>("Decode Blocks");
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>("Decode Blocks");
 
-    constexpr qsizetype maxConcurrentDecodeJobs = 4;
+    std::int32_t jobIndex = 0;
 
-    WorkflowPlan::Jobs currentBatch;
-    std::int32_t decodeBlockJobIndex = 0;
-    std::int32_t batchIndex = 0;
-
-    const auto flushBatch = [&]() {
-        if (currentBatch.empty())
-            return;
-
-        decodeWorkflowPlan->addParallelStage(
-            QString("Decode Blocks %1").arg(batchIndex++),
-            std::move(currentBatch)
-        );
-
-        currentBatch = WorkflowPlan::Jobs{};
-        };
+    WorkflowPlan::Jobs jobs;
 
     for (const auto& decodeBlockJob : decodeBlockJobs) {
-        const auto jobIndex = decodeBlockJobIndex++;
+        jobs.emplace_back(QString("Decode Block %1").arg(jobIndex), [decodeBlockJob, destination, destinationSize, createCodec] (const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
+            if (decodeBlockJob._offset + decodeBlockJob._size > destinationSize)
+                throw std::runtime_error("Decode block range exceeds destination buffer");
 
-        currentBatch.emplace_back(QString("Decode Block %1").arg(jobIndex), [decodeBlockJob, destination, destinationSize, createCodec] (const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
-                if (decodeBlockJob._offset + decodeBlockJob._size > destinationSize)
-                    throw std::runtime_error("Decode block range exceeds destination buffer");
-
-                if (decodeBlockJob._uri.isEmpty()) {
-                    decodeBlockFromBase64To(
-                        decodeBlockJob,
-                        destination,
-                        destinationSize
-                    );
-                }
-                else {
-                    decodeBlockFromFileTo(
-                        decodeBlockJob,
-                        destination,
-                        destinationSize
-                    );
-                }
+            if (decodeBlockJob._uri.isEmpty()) {
+                decodeBlockFromBase64To(decodeBlockJob, destination, destinationSize);
             }
-        );
+            else {
+                decodeBlockFromFileTo(decodeBlockJob, destination, destinationSize);
+            }
+        });
 
-        if (currentBatch.size() >= maxConcurrentDecodeJobs)
-            flushBatch();
+        ++jobIndex;
     }
 
-    flushBatch();
+    plan->addBatchedParallelStage("Decode Blocks", jobs, 8);
 
-    return decodeWorkflowPlan;
+    return plan;
 
  //   auto sharedExecutor = SharedWorkflowPlanExecutor();
 
