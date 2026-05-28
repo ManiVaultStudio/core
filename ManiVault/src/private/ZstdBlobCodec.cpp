@@ -203,7 +203,7 @@ QByteArray ZstdBlobCodec::decode(const QByteArray& input, qsizetype expectedSize
             }
         );
 
-    const auto decompressedSize = ZSTD_decompress(output.data(), static_cast<size_t>(output.size()), input.constData(), static_cast<size_t>(input.size()));
+    const auto decompressedSize = ZSTD_decompressDCtx(ZSTD_createDCtx(), output.data(), static_cast<size_t>(output.size()), input.constData(), static_cast<size_t>(input.size()));
 
     if (ZSTD_isError(decompressedSize))
         throw std::runtime_error(getZstdErrorString("ZSTD_decompress failed", decompressedSize).toStdString());
@@ -261,9 +261,15 @@ void ZstdBlobCodec::decodeTo(const QByteArray& encodedData, char* destination, s
             __FUNCTION__
         );
 
-    auto dctx = getThreadLocalDCtx();
+    ZSTD_DCtx* dctx = ZSTD_createDCtx();
 
     const auto decodedSize = ZSTD_decompressDCtx(dctx, destination, destinationSize, encodedData.constData(), static_cast<size_t>(encodedData.size()));
+
+    ZSTD_freeDCtx(dctx);
+
+    if (ZSTD_isError(decodedSize)) {
+        throw std::runtime_error(ZSTD_getErrorName(decodedSize));
+    }
 
     if (ZSTD_isError(decodedSize))
         throw mv::ManiVaultException(

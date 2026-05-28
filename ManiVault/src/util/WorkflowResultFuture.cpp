@@ -28,8 +28,19 @@ bool WorkflowResultFuture::State::hasException() const
 
 void WorkflowResultFuture::State::rethrowExceptionIfAny() const
 {
-	if (auto exception = getException())
-		std::rethrow_exception(exception);
+    if (auto exception = getException()) {
+        try {
+            std::rethrow_exception(exception);
+        }
+        catch (const std::exception& e) {
+            qDebug() << "Workflow exception:" << e.what();
+            throw;
+        }
+        catch (...) {
+            qDebug() << "Unknown workflow exception";
+            throw;
+        }
+    }
 }
 
 WorkflowResultFuture::WorkflowResultFuture() = default;

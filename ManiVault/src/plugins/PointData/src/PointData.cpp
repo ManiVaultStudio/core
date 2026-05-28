@@ -188,7 +188,7 @@ void PointData::fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkfl
         resizeVector(numberOfElements);
 
     	if (_isDense) {
-    		populateBytesFromBlobMap(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), parentExecutionContext);
+    		populateBytesFromBlobMap(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize());
 
             //      	
                   //});

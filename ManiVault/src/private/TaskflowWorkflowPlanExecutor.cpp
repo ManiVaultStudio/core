@@ -53,6 +53,9 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(UniqueWorkflo
 
 SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext)
 {
+    if (!workflowPlan)
+        return {};
+
     if (parentContext)
         return executeChild(*workflowPlan, parentContext);
 
@@ -247,16 +250,9 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
 
 SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeChild(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext parentContext)
 {
-    parentContext = requireContext(parentContext, __FUNCTION__);
-
-    auto childContext = parentContext->createNestedWorkflowChild(
-        workflowPlan.getName(),
-        workflowPlan.getWeight(),
-        WorkflowPlan::JobProgressMode::Automatic);
+    auto childContext = parentContext->createNestedWorkflowChild(workflowPlan.getName(), workflowPlan.getWeight(), WorkflowPlan::JobProgressMode::Automatic);
 
     WorkflowExecutionLifecycleScope lifecycle(childContext);
-
-    std::exception_ptr primaryException;
 
     try {
         tf::Taskflow taskflow;
@@ -265,39 +261,21 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeChild(WorkflowPlan& wo
 
         if (taskflow.num_tasks() > 0)
             _executor.run(taskflow).get();
+
+        lifecycle.finish();
+    }
+    catch (const std::exception& e) {
+        const auto message = QString::fromUtf8(e.what());
+        lifecycle.fail(message);
+        throw;
     }
     catch (...) {
-        primaryException = std::current_exception();
-    }
-
-    if (primaryException) {
-        try {
-            std::rethrow_exception(primaryException);
-        }
-        catch (const std::exception& exception) {
-            const auto message = QString::fromUtf8(exception.what());
-
-            childContext->error(message, workflowPlan.getName());
-            lifecycle.fail(message);
-
-            std::rethrow_exception(primaryException);
-        }
-        catch (...) {
-            const QString message = "Nested workflow failed with unknown error";
-
-            childContext->error(message, workflowPlan.getName());
-            lifecycle.fail(message);
-
-            std::rethrow_exception(primaryException);
-        }
+        lifecycle.fail(QStringLiteral("Unknown nested workflow error"));
+        throw;
     }
 
     auto result = std::make_shared<WorkflowResult>(workflowPlan.getName());
-
     result->setValue(childContext->takeResultValues());
-    result->setDuration(lifecycle.elapsedMs());
-
-    lifecycle.finish();
 
     return result;
 }

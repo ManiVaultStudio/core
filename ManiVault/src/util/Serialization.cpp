@@ -6,6 +6,7 @@
 #include "CoreInterface.h"
 #include "Application.h"
 #include "CodecRegistry.h"
+#include "WorkflowRuntimeScoped.h"
 
 #include "Exception/SerializationException.h"
 
@@ -541,10 +542,14 @@ UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMa
 
     for (auto& decodeBlockJob : decodeBlockJobs) {
         decodeJobs.emplace_back(QString("Decode Block %1").arg(QString::number(decodeBlockJobIndex)), [decodeBlockJob, destination, destinationSize, createCodec](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
+            QByteArray dest;
+            dest.resize(destinationSize);
+
+            qDebug() << "Decoding block with offset" << decodeBlockJob._offset << "and size" << decodeBlockJob._size << "to destination buffer of size" << destinationSize;
             if (decodeBlockJob._uri.isEmpty()) {
                 decodeBlockFromBase64To(decodeBlockJob, destination, destinationSize);
             } else {
-				decodeBlockFromFileTo(decodeBlockJob, destination, destinationSize);
+				decodeBlockFromFileTo(decodeBlockJob, dest.data(), destinationSize);
             }
         });
 
@@ -575,8 +580,15 @@ UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMa
 
 void populateBytesFromBlobMap(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext)
 {
-    auto plan   = populateBytesFromBlobMapWorkflow(variantMap, destination, destinationSize, parentContext);
-    auto future = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));
+    if (!destination)
+        throw std::invalid_argument("populateBytesFromBlobMap destination is null");
+
+    if (destinationSize == 0)
+        return;
+
+    auto plan = populateBytesFromBlobMapWorkflow(variantMap, destination, destinationSize);
+
+    WorkflowRuntimeScoped::instance().executeBlocking(std::move(plan), std::move(parentContext));
 }
 
 QByteArray bytesFromBlobVariantMap(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext /*= nullptr*/)

@@ -632,6 +632,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/WorkflowExecutionNodeType.h
     src/util/WorkflowConsoleDashboard.h
     src/util/WorkflowConsoleDashboardScope.h
+    src/util/WorkflowRuntimeScoped.h
 )
 
 if(APPLE)
@@ -734,6 +735,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/WorkflowExecutionNodeType.cpp
     src/util/WorkflowConsoleDashboard.cpp
     src/util/WorkflowConsoleDashboardScope.cpp
+    src/util/WorkflowRuntimeScoped.cpp
 )
 
 if(APPLE)
