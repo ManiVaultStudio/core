@@ -43,7 +43,7 @@ public:
 
     static SharedWorkflowExecutionContext makeRoot(const QString& name, Task* task, WorkflowExecutionOptions executionOptions = {});
 
-    SharedWorkflowExecutionContext createChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic) const;
+    SharedWorkflowExecutionContext createChild(Type type, const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic) const;
 
     /**
 	 * @brief Creates a child workflow execution context representing a top-level workflow scope.
@@ -77,7 +77,7 @@ public:
     SharedWorkflowExecutionContext createSequentialStageChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic) const;
     SharedWorkflowExecutionContext createParallelStageChild(const QString& name, double weight = 1.0,WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic) const; 
     SharedWorkflowExecutionContext createJobChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic) const;
-    SharedWorkflowExecutionContext createTypedChild(const QString& name, Type type, double weight,WorkflowPlan::JobProgressMode progressMode) const;
+    SharedWorkflowExecutionContext createTypedChild(Type type, const QString& name, double weight,WorkflowPlan::JobProgressMode progressMode) const;
 
 public:
 

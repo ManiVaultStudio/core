@@ -44,7 +44,7 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString&
     return context;
 }
 
-SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
+SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(Type type, const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
 {
     if (!_reportNode || !_progressNode || !_state)
         return {};
@@ -61,16 +61,17 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(const QStri
     WorkflowProgressNode::Ptr progressChild;
 
     if (_progressMode == WorkflowPlan::JobProgressMode::Atomic) {
-        progressChild = WorkflowProgressNode::createRoot(Type::Workflow, name, effectiveWeight);
+        progressChild = WorkflowProgressNode::createRoot(type, name, effectiveWeight);
     }
     else {
-        progressChild = _progressNode->createChild(Type::Workflow, name, effectiveWeight);
+        progressChild = _progressNode->createChild(type, name, effectiveWeight);
     }
 
     auto child = std::make_shared<WorkflowExecutionContext>(name, _reportNode->createChild(name), progressChild, _state, _task, progressMode);
 
-    child->_parentId = _id;
-    child->_executionPath = _executionPath;
+    child->_type            = type;
+    child->_parentId        = _id;
+    child->_executionPath   = _executionPath;
     child->_executionPath.append(name);
 
     return child;
@@ -93,30 +94,27 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createWorkflowChild(con
 
 SharedWorkflowExecutionContext WorkflowExecutionContext::createNestedWorkflowChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
 {
-    return createTypedChild(name, Type::NestedWorkflow, weight, progressMode);
+    return createTypedChild(Type::NestedWorkflow, name, weight, progressMode);
 }
 
 SharedWorkflowExecutionContext WorkflowExecutionContext::createSequentialStageChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
 {
-    return createTypedChild(name, Type::SequentialStage, weight, progressMode);
+    return createTypedChild(Type::SequentialStage, name, weight, progressMode);
 }
 
 SharedWorkflowExecutionContext WorkflowExecutionContext::createParallelStageChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
 {
-    return createTypedChild(name, Type::ParallelStage, weight, progressMode);
+    return createTypedChild(Type::ParallelStage, name, weight, progressMode);
 }
 
 SharedWorkflowExecutionContext WorkflowExecutionContext::createJobChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
 {
-    return createTypedChild(name, Type::Job, weight, progressMode);
+    return createTypedChild(Type::Job, name, weight, progressMode);
 }
 
-SharedWorkflowExecutionContext WorkflowExecutionContext::createTypedChild(const QString& name, Type type, double weight, WorkflowPlan::JobProgressMode progressMode) const
+SharedWorkflowExecutionContext WorkflowExecutionContext::createTypedChild(Type type, const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
 {
-    auto child = createChild(name, weight, progressMode);
-    child->_type = type;
-
-    return child;
+    return createChild(type, name, weight, progressMode);
 }
 
 void WorkflowExecutionContext::reportStarted() const
@@ -132,7 +130,6 @@ void WorkflowExecutionContext::reportFinished(std::uint64_t durationMs) const
     info(_name, {}, makeLifecycleDetails("finished", durationMs));
 
     if (_progressNode) {
-        _progressNode->setProgress(1.0);
         _progressNode->markCompleted();
     }
 }

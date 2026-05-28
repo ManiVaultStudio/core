@@ -60,7 +60,7 @@ WorkflowResultFuture WorkflowPlanExecutor::execute(UniqueWorkflowPlan workflowPl
         const auto pendingWorkLabel = QString("Async workflow: %1").arg(workflowPlan->getName());
         const auto resolvedOptions  = executionOptions.value_or(parentContext->getState()->getExecutionOptions());
 
-        auto childContext   = parentContext->createChild(workflowPlan->getName(), workflowPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
+        auto childContext   = parentContext->createNestedWorkflowChild(workflowPlan->getName(), workflowPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
         auto future         = executeAsyncImpl(std::move(workflowPlan), resolvedOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, resolvedOptions, childContext);
 
         return future;
