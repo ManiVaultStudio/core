@@ -5,24 +5,38 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+#include "WorkflowExecutionNodeType.h"
 
 #include <QString>
 #include <QDateTime>
 #include <QMutex>
 #include <QVector>
 #include <QDebug>
+#include <QReadWriteLock>
 
 namespace mv::util
 {
 
-class WorkflowProgressNode
+class WorkflowProgressNode : public std::enable_shared_from_this<WorkflowProgressNode>
 {
+public:
+    using Type = WorkflowExecutionNodeType;
+
+    enum class Status {
+        Pending,
+        Running,
+        Completed,
+        Failed,
+        Skipped
+    };
+
 public:
     using Ptr = std::shared_ptr<WorkflowProgressNode>;
 
-    explicit WorkflowProgressNode(double weight = 1.0);
+    explicit WorkflowProgressNode(Type type, QString name, Ptr parent, double weight = 1.0);
 
-    Ptr createChild(double weight);
+    static Ptr createRoot(Type type, const QString& name, double weight = 1.0);
+    Ptr createChild(Type type, QString name, double weight = 1.0);
 
     bool hasChildren() const;
 
@@ -32,12 +46,39 @@ public:
 
     double getWeight() const;
 
-private:
-    double _weight = 1.0;
-    double _selfProgress = 0.0;
+    Type getType() const;
+    QString getName() const;
+    Status getStatus() const;
 
-    mutable QMutex _mutex;
-    QVector<Ptr> _children;
+    Ptr getParent() const;
+    QVector<Ptr> getChildren() const;
+
+    int getChildCount() const;
+    int getCompletedChildCount() const;
+
+    qint64 getElapsedMilliseconds() const;
+
+    void markRunning();
+    void markCompleted();
+    void markFailed();
+    void markSkipped();
+
+private:
+    void setStatus(Status status);
+    bool isFinished() const;
+    bool isFinishedUnlocked() const;
+
+private:
+    mutable QMutex  _mutex;
+    Type            _type = Type::Undefined;
+    QString         _name;
+    Ptr             _parent;
+    double          _weight = 1.0;
+    Status          _status = Status::Pending;
+    double          _selfProgress = 0.0;
+    QElapsedTimer   _timer;
+    qint64          _finishedElapsedMs = 0;
+    QVector<Ptr>    _children;
 };
 
 } // namespace mv::util

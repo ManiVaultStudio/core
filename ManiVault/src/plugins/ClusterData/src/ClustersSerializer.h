@@ -28,13 +28,8 @@ public:
      */
     static UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& map, QVector<Cluster>& clusters, SharedWorkflowExecutionContext parentExecutionContext);
 
-    /**
-     * @brief Creates a workflow plan that serializes the given clusters into a QVariantMap.
-     * @param clusters The vector of Cluster objects that need to be serialized into a QVariantMap.
-     * @param parentExecutionContext The shared workflow execution context that will be passed to the workflow plan during its execution.
-     * @return A UniqueWorkflowPlan object that represents the workflow plan for serializing the given clusters into a QVariantMap.
-     */
-    static UniqueWorkflowPlan toVariantMapWorkflow(const QVector<Cluster>& clusters, SharedWorkflowExecutionContext parentExecutionContext);
+    
+    static QVariantMap toVariantMap(const QVector<Cluster>& clusters);
 
 protected:
 
@@ -54,128 +49,6 @@ protected:
     using Headers       = std::vector<Header>;
     using Indices       = std::vector<unsigned int>;
     using HeadersRaw    = QByteArray;
-
-    /** Context used during the toVariantMapWorkflow execution to store intermediate data between workflow stages */
-    class ToVariantMapWorkflowContext : public WorkflowContextBase
-    {
-    public:
-
-        /**
-         * @brief Gets the headers from the context.
-         * @return The headers stored in the context
-         */
-        Headers getHeaders() const {
-            QMutexLocker locker(&_mutex);
-            return _headers;
-        }
-
-        /**
-         * @brief Sets the headers in the context.
-         * @param headers The headers to be set in the context
-         */
-        void setHeaders(Headers headers) {
-            QMutexLocker locker(&_mutex);
-            _headers = std::move(headers);
-        }
-
-        /**
-         * @brief Gets the indices from the context.
-         * @return The indices stored in the context
-         */
-        const Indices& getAllIndices() const {
-            QMutexLocker locker(&_mutex);
-            return _allIndices;
-        }
-
-        /**
-         * @brief Gets the indices from the context.
-         * @return The indices stored in the context
-         */
-        qsizetype getAllIndicesRawSize() const {
-            QMutexLocker locker(&_mutex);
-            return _allIndices.size() * sizeof(unsigned int);
-        }
-
-        /**
-         * @brief Sets the indices in the context.
-         * @param allIndices The indices to be set in the context
-         */
-        void setAllIndices(Indices allIndices) {
-            QMutexLocker locker(&_mutex);
-            _allIndices = std::move(allIndices);
-        }
-
-        /**
-         * @brief Gets the headers from the context.
-         * @return The headers stored in the context
-         */
-        void setHeadersRaw(HeadersRaw headersRaw) {
-            QMutexLocker locker(&_mutex);
-            _headersRaw = std::move(headersRaw);
-        }
-
-        /**
-         * @brief Gets the headers from the context.
-         * @return The headers stored in the context
-         */
-        HeadersRaw getHeadersRaw() const {
-            QMutexLocker locker(&_mutex);
-            return _headersRaw;
-        }
-
-        /**
-         * @brief Gets the headers from the context.
-         * @return The headers stored in the context
-         */
-        const HeadersRaw& getHeadersRaw() {
-            QMutexLocker locker(&_mutex);
-            return _headersRaw;
-        }
-
-        /**
-         * @brief Gets the size of the raw headers stored in the context.
-         * @return The size of the raw headers stored in the context
-         */
-        qsizetype getHeadersRawSize() const {
-            QMutexLocker locker(&_mutex);
-            return _headersRaw.size();
-        }
-
-        /**
-         * @brief Gets the indices from the context.
-         * @return The indices stored in the context
-         */
-        QVariantMap getResult() const {
-            QMutexLocker locker(&_mutex);
-            return _result;
-        }
-
-        /**
-         * @brief Sets the result in the context.
-         * @param result The result to be set in the context
-         */
-        void setResult(QVariantMap result) {
-            QMutexLocker locker(&_mutex);
-            _result = std::move(result);
-        }
-
-        /**
-         * @brief Sets a key-value pair in the result map of the context.
-         * @param key The key to be set in the result map
-         * @param value The value to be associated with the key in the result map
-         */
-        void setResultValue(const QString& key, const QVariant& value) {
-            QMutexLocker locker(&_mutex);
-            _result.insert(key, value);
-        }
-
-    private:
-        mutable QMutex      _mutex;         /** Mutex for synchronizing access to the context */
-        Headers             _headers;       /** The headers extracted from the clusters during the workflow execution. */
-        Indices             _allIndices;    /** The indices extracted from the clusters during the workflow execution. */
-        HeadersRaw          _headersRaw;    /** The serialized headers as a QByteArray, which will be stored in the QVariantMap for later deserialization during the fromVariantMapWorkflow execution. */
-        QVariantMap         _result;         /** The QVariantMap that will hold the final result of the workflow execution, containing the serialized headers and indices data. This map will be returned at the end of the workflow execution and can be used for further processing or storage. */
-    };
 
     /** Context used during the fromVariantMapWorkflow execution to store intermediate data between workflow stages */
     class FromVariantMapWorkflowContext : public WorkflowContextBase

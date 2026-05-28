@@ -629,6 +629,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/WorkflowConsoleTraceSink.h
     src/util/WorkflowChromeTraceSink.h
     src/util/AsyncVariantMapResult.h
+    src/util/WorkflowExecutionNodeType.h
 )
 
 if(APPLE)
@@ -728,6 +729,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/AbstractWorkflowTraceSink.cpp
     src/util/WorkflowConsoleTraceSink.cpp
     src/util/WorkflowChromeTraceSink.cpp
+    src/util/WorkflowExecutionNodeType.cpp
 )
 
 if(APPLE)

@@ -104,7 +104,6 @@ public: // Serialization
     void fromVariantMapPre150(const QVariantMap& variantMap);
 
     QVariantMap toVariantMap() const override;
-    UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 private:
     QVector<Cluster>    _clusters;      /** Clusters data */

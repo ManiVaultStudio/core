@@ -10,6 +10,7 @@
 #include "WorkflowExecutionState.h"
 #include "WorkflowPlan.h"
 #include "WorkflowStageSummary.h"
+#include "WorkflowExecutionNodeType.h"
 #include "Task.h"
 
 #include <QString>
@@ -21,53 +22,10 @@ namespace mv::util
 class CORE_EXPORT WorkflowExecutionContext
 {
 public:
-
-    /**
-	 * @brief Describes the semantic role of a workflow execution context within the workflow execution hierarchy.
-	 *
-	 * Workflow execution contexts are used to represent different levels and types of execution entities
-	 * within a workflow plan, such as entire workflows, stages, and individual jobs. The context type
-	 * determines how the execution context should be interpreted, visualized, and reported in logging,
-	 * progress reporting, tracing, and workflow diagnostics.
-	 *
-	 * This classification is primarily useful for:
-	 * - Rendering hierarchical console and debug output
-	 * - Distinguishing workflows from stages and jobs in reports
-	 * - Visualizing workflow execution trees
-	 * - Applying different progress aggregation strategies
-	 * - Improving workflow tracing and diagnostics
-	 * - Generating structured execution telemetry
-	 *
-	 * The different context types are:
-	 *
-	 * - Workflow:
-	 *   Represents a top-level workflow execution context.
-	 *
-	 * - NestedWorkflow:
-	 *   Represents a workflow executed as part of another workflow.
-	 *
-	 * - SequentialStage:
-	 *   Represents a stage whose jobs or child stages execute sequentially.
-	 *
-	 * - ParallelStage:
-	 *   Represents a stage whose jobs or child stages may execute concurrently.
-	 *
-	 * - Job:
-	 *   Represents an individual executable unit of work within a workflow stage.
-	 */
-    enum class Type
-    {
-        Workflow,          /** Top-level workflow execution context */
-        NestedWorkflow,    /** Workflow executed as part of another workflow */
-        SequentialStage,   /** Sequential execution stage */
-        ParallelStage,     /** Parallel execution stage */
-        Job                /** Individual executable job */
-    };
-
-public:
     using ReportNodePtr = WorkflowReportNode::SharedWorkflowReportNode;
     using ProgressNodePtr = WorkflowProgressNode::Ptr;
     using StatePtr = WorkflowExecutionState::Ptr;
+    using Type = WorkflowExecutionNodeType;
 
     WorkflowExecutionContext();
 
@@ -82,8 +40,6 @@ public:
     {
         _type = type;
     }
-
-    static QString getWorkflowExecutionContextTypeName(Type type);
 
     static SharedWorkflowExecutionContext makeRoot(const QString& name, Task* task, WorkflowExecutionOptions executionOptions = {});
 

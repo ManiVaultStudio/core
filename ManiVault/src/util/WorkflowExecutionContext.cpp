@@ -24,32 +24,10 @@ WorkflowExecutionContext::WorkflowExecutionContext(QString name, ReportNodePtr r
 {
 }
 
-QString WorkflowExecutionContext::getWorkflowExecutionContextTypeName(Type type)
-{
-    switch (type) {
-	    case Type::Workflow:
-	        return "workflow";
-
-	    case Type::NestedWorkflow:
-	        return "nested-workflow";
-
-	    case Type::SequentialStage:
-	        return "sequential-stage";
-
-	    case Type::ParallelStage:
-	        return "parallel-stage";
-
-	    case Type::Job:
-	        return "job";
-    }
-
-    return "unknown";
-}
-
 SharedWorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString& name, Task* task /*= nullptr*/, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
 	auto reportRoot     = std::make_shared<WorkflowReportNode>(name);
-	auto progressRoot   = std::make_shared<WorkflowProgressNode>(1.0);
+	auto progressRoot   = WorkflowProgressNode::createRoot(Type::Workflow, name);
 	auto state          = std::make_shared<WorkflowExecutionState>(reportRoot, progressRoot, std::move(executionOptions));
 	auto context        = std::make_shared<WorkflowExecutionContext>(
         name,
@@ -83,20 +61,13 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(const QStri
     WorkflowProgressNode::Ptr progressChild;
 
     if (_progressMode == WorkflowPlan::JobProgressMode::Atomic) {
-        progressChild = std::make_shared<WorkflowProgressNode>(effectiveWeight);
+        progressChild = WorkflowProgressNode::createRoot(Type::Workflow, name, effectiveWeight);
     }
     else {
-        progressChild = _progressNode->createChild(effectiveWeight);
+        progressChild = _progressNode->createChild(Type::Workflow, name, effectiveWeight);
     }
 
-    auto child = std::make_shared<WorkflowExecutionContext>(
-        name,
-        _reportNode->createChild(name),
-        progressChild,
-        _state,
-        _task,
-        progressMode
-    );
+    auto child = std::make_shared<WorkflowExecutionContext>(name, _reportNode->createChild(name), progressChild, _state, _task, progressMode);
 
     child->_parentId = _id;
     child->_executionPath = _executionPath;
@@ -108,19 +79,13 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(const QStri
 SharedWorkflowExecutionContext WorkflowExecutionContext::createWorkflowChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
 {
     auto childReportNode    = _reportNode ? _reportNode->createChild(name) : nullptr;
-    auto childProgressNode  = _progressNode ? _progressNode->createChild(weight) : nullptr;
-    auto child              = std::make_shared<WorkflowExecutionContext>(
-        name,
-        childReportNode,
-        childProgressNode,
-        _state,
-        _task,
-        progressMode
-    );
+    auto childProgressNode  = _progressNode ? _progressNode->createChild(Type::NestedWorkflow, name, weight) : nullptr;
+    auto child              = std::make_shared<WorkflowExecutionContext>(name, childReportNode, childProgressNode, _state, _task, progressMode);
 
-    child->_type = Type::Workflow;
-    child->_parentId = _id;
-    child->_executionPath = _executionPath;
+    child->_type            = Type::Workflow;
+    child->_parentId        = _id;
+    child->_executionPath   = _executionPath;
+
     child->_executionPath << name;
 
     return child;
@@ -197,7 +162,7 @@ QVariantMap WorkflowExecutionContext::makeLifecycleDetails(const QString& event,
     QVariantMap details;
 
     details["event"]    = event;
-    details["entity"]   = getWorkflowExecutionContextTypeName(_type);
+    details["entity"]   = getWorkflowExecutionNodeTypeName(_type);
     details["name"]     = _name;
     details["depth"]    = getDepth();
     details["path"]     = getExecutionPath(" / ");

@@ -208,13 +208,10 @@ private: // Helpers
     }
 
     template<typename Graph>
-    CompiledTasks compileWorkflowImpl(
-        const WorkflowPlan& workflowPlan,
-        Graph& graph,
-        SharedWorkflowExecutionContext parentContext)
+    CompiledTasks compileWorkflowImpl(const WorkflowPlan& workflowPlan, Graph& graph, SharedWorkflowExecutionContext parentContext)
     {
-        auto mainTasks = compileStages(workflowPlan.getStages(), graph, parentContext);
-        auto successTasks = compileStages(workflowPlan.getOnSuccessStages(), graph, parentContext);
+        auto mainTasks      = compileStages(workflowPlan.getStages(), graph, parentContext);
+        auto successTasks   = compileStages(workflowPlan.getOnSuccessStages(), graph, parentContext);
 
         if (!successTasks.starts.empty()) {
             for (auto& mainEnd : mainTasks.ends)

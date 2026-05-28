@@ -219,24 +219,7 @@ void ClusterData::fromVariantMapPre150(const QVariantMap& variantMap)
 
 QVariantMap ClusterData::toVariantMap() const
 {
-    auto variantMap = RawData::toVariantMap();
-
-    return variantMap;
-}
-
-UniqueWorkflowPlan ClusterData::toVariantMapWorkflow() const
-{
-    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
-
-    plan->addNestedWorkflowStage("Serialize raw data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan{
-    	return RawData::toVariantMapWorkflow();
-    });
-
-    plan->addNestedWorkflowStage("Serialize clusters", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
-        return ClustersSerializer::toVariantMapWorkflow(_clusters, executionContext);
-    });
-
-    return plan;
+    return ClustersSerializer::toVariantMap(_clusters);
 }
 
 void Clusters::init()
