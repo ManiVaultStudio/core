@@ -104,7 +104,7 @@ public: // Serialization
     
     void fromVariantMapPre150(const QVariantMap& variantMap);
 
-    QVariantMap toVariantMap() const override;
+    QVariantMap toVariantMapScoped(SharedWorkflowExecutionContext parentContext) const override;
 
 private:
     QVector<Cluster>    _clusters;      /** Clusters data */
@@ -266,11 +266,7 @@ public: // Serialization
 
     void fromVariantMapPre150(const QVariantMap& variantMap);
 
-    /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
-     */
-    QVariantMap toVariantMap() const override;
+    QVariantMap toVariantMapScoped(SharedWorkflowExecutionContext parentExecutionContext) const override;
 
 
     std::vector<unsigned int>       indices;

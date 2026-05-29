@@ -11,52 +11,6 @@
 
 #include <stdexcept>
 
-/*
-QDataStream& operator<<(QDataStream& out, const Cluster& cluster)
-{
-    out << kClusterStreamVersion;
-
-    out << cluster._name;
-    out << cluster._id;
-    out << cluster._color;
-
-    writeRawVector(out, cluster._indices);
-    writeRawVector(out, cluster._median);
-    writeRawVector(out, cluster._mean);
-    writeRawVector(out, cluster._stddev);
-
-    return out;
-}
-
-QDataStream& operator>>(QDataStream& in, Cluster& cluster)
-{
-    quint32 version = 0;
-    in >> version;
-
-    if (in.status() != QDataStream::Ok)
-        return in;
-
-    switch (version) {
-	    case 1:
-	        in >> cluster._name;
-	        in >> cluster._id;
-	        in >> cluster._color;
-
-	        readRawVector(in, cluster._indices);
-	        readRawVector(in, cluster._median);
-	        readRawVector(in, cluster._mean);
-	        readRawVector(in, cluster._stddev);
-	        break;
-
-	    default:
-	        in.setStatus(QDataStream::ReadCorruptData);
-	        break;
-    }
-
-    return in;
-}
-*/
-
 Cluster::Cluster(const QString& name /*= ""*/, const QColor& color /*= Qt::gray*/, const std::vector<std::uint32_t>& indices /*= std::vector<std::uint32_t>()*/) :
     _name(name),
     _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
@@ -70,11 +24,11 @@ QString Cluster::getName() const
     return _name;
 }
 
-void Cluster::setName(const QString& name)
+void Cluster::setName(QString name)
 {
     Q_ASSERT(!name.isEmpty());
 
-    _name = name;
+    _name = std::move(name);
 }
 
 QString Cluster::getId() const
@@ -82,9 +36,9 @@ QString Cluster::getId() const
     return _id;
 }
 
-void Cluster::setId(const QString& id)
+void Cluster::setId(QString id)
 {
-    _id = id;
+    _id = std::move(id);
 }
 
 QColor Cluster::getColor() const
@@ -92,7 +46,7 @@ QColor Cluster::getColor() const
     return _color;
 }
 
-void Cluster::setColor(const QColor& color)
+void Cluster::setColor(QColor color)
 {
     _color = color;
 }
@@ -112,9 +66,9 @@ std::uint32_t Cluster::getNumberOfIndices() const
     return static_cast<std::uint32_t>(_indices.size());
 }
 
-void Cluster::setIndices(const std::vector<unsigned int>& indices)
+void Cluster::setIndices(std::vector<unsigned int> indices)
 {
-    _indices = indices;
+    _indices = std::move(indices);
 }
 
 void Cluster::colorizeClusters(QVector<Cluster>& clusters, std::int32_t randomSeed /*= 0*/)

@@ -226,9 +226,9 @@ void ClusterData::fromVariantMapPre150(const QVariantMap& variantMap)
 
 
 
-QVariantMap ClusterData::toVariantMap() const
+QVariantMap ClusterData::toVariantMapScoped(SharedWorkflowExecutionContext parentExecutionContext) const
 {
-    return ClustersSerializer::toVariantMap(_clusters);
+    return ClustersSerializer::toVariantMapScoped(_clusters, parentExecutionContext);
 }
 
 void Clusters::init()
@@ -333,11 +333,11 @@ void Clusters::fromVariantMapPre150(const QVariantMap& variantMap)
     events().notifyDatasetDataChanged(this);
 }
 
-QVariantMap Clusters::toVariantMap() const
+QVariantMap Clusters::toVariantMapScoped(SharedWorkflowExecutionContext parentExecutionContext) const
 {
-    auto variantMap = DatasetImpl::toVariantMap();
+    auto variantMap = DatasetImpl::toVariantMapScoped(parentExecutionContext);
 
-    variantMap["Data"] = getRawData<ClusterData>()->toVariantMap();
+    variantMap["Data"] = getRawData<ClusterData>()->toVariantMapScoped(parentExecutionContext);
 
     return variantMap;
 }

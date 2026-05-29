@@ -631,7 +631,7 @@ UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMa
         ++jobIndex;
     }
 
-    plan->addBatchedParallelStage("Decode Blocks", jobs, 32);
+    plan->addBatchedParallelStage("Decode Blocks", jobs, 4);
 
     return plan;
 

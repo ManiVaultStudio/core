@@ -132,10 +132,12 @@ QString getNoBytesHumanReadable(std::uint64_t byteCount, bool useIEC /*= true*/)
 QString getElapsedTimeHumanReadable(std::uint64_t ms, bool compact)
 {
     if (ms < 1000)
-    {
+        return QString("%1 ms").arg(ms);
+
+    if (ms < 60'000) {
         double seconds = ms / 1000.0;
 
-        QString s = QString::number(seconds, 'f', 2);
+        QString s = QString::number(seconds, 'f', seconds < 10.0 ? 1 : 0);
 
         s.remove(QRegularExpression("0+$"));
         s.remove(QRegularExpression("\\.$"));
@@ -164,9 +166,9 @@ QString getElapsedTimeHumanReadable(std::uint64_t ms, bool compact)
         parts << QString("%1s").arg(seconds);
 
     if (parts.isEmpty())
-        return "0s";
+        return QStringLiteral("0s");
 
-    return parts.join(" ");
+    return parts.join(QLatin1Char(' '));
 }
 
 QString getTabIndentedMessage(QString message, const std::uint32_t& tabIndex)

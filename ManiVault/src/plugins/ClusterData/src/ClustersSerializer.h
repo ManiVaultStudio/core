@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <util/WorkflowContextBase.h>
-
 #include "ClusterData.h"
 
 /**
@@ -14,6 +12,20 @@
  */
 class ClustersSerializer : public QObject
 {
+protected:
+
+    /** Struct representing the header information of a cluster, including its name, id, color, indices offset and count, and statistical measures (median, mean, stddev) for the cluster's data. This struct is used to store and manage the metadata associated with each cluster during the serialization and deserialization processes. */
+    struct Header
+    {
+        QString                 name;               /** The name of the cluster, which will be serialized as part of the header information for each cluster.*/
+        QString                 id;                 /** The unique identifier for the cluster, which will be serialized as part of the header information for each cluster. */
+        QColor                  color;              /** The color of the cluster, which will be serialized as part of the header information for each cluster. */
+        quint64                 indexOffset = 0;    /** The offset of the cluster's indices in the serialized indices data, which will be used during serialization to determine where to read/write the indices for each cluster. */
+        quint64                 indexCount = 0;     /** The number of indices that belong to the cluster, which will be used during serialization to determine how many indices to read/write for each cluster. */
+    };
+
+    
+
 public:
 
     /** The format version number for the cluster serialization. This constant is used to indicate the version of the serialization format being used, allowing for compatibility checks and potential future updates to the serialization logic while maintaining backward compatibility with older versions. */
@@ -29,98 +41,36 @@ public:
     static void fromVariantMapScoped(const QVariantMap& map, QVector<Cluster>& clusters, SharedWorkflowExecutionContext parentExecutionContext);
 
     
-    static QVariantMap toVariantMap(const QVector<Cluster>& clusters);
+    static QVariantMap toVariantMapScoped(const QVector<Cluster>& clusters, SharedWorkflowExecutionContext parentExecutionContext);
 
-protected:
+    
 
-    /** Struct representing the header information of a cluster, including its name, id, color, indices offset and count, and statistical measures (median, mean, stddev) for the cluster's data. This struct is used to store and manage the metadata associated with each cluster during the serialization and deserialization processes. */
-    struct Header
+    using Headers = std::vector<Header>;
+    using Indices = std::vector<unsigned int>;
+    using HeadersRaw = QByteArray;
+
+    struct DecodedHeaders
     {
-        QString                 name;               /** The name of the cluster, which will be serialized as part of the header information for each cluster.*/
-        QString                 id;                 /** The unique identifier for the cluster, which will be serialized as part of the header information for each cluster. */
-        QColor                  color;              /** The color of the cluster, which will be serialized as part of the header information for each cluster. */
-        quint64                 indexOffset = 0;    /** The offset of the cluster's indices in the serialized indices data, which will be used during serialization to determine where to read/write the indices for each cluster. */
-        quint64                 indexCount = 0;     /** The number of indices that belong to the cluster, which will be used during serialization to determine how many indices to read/write for each cluster. */
-        std::vector<float>      median;             /** Median values for the cluster's data (will become re-located in the future) */
-        std::vector<float>      mean;               /** Mean values for the cluster's data (will become re-located in the future) */
-        std::vector<float>      stddev;             /** Standard deviation values for the cluster's data (will become re-located in the future) */
+        Headers headers;
+        Indices embeddedIndices;
+        bool hasEmbeddedIndices = false;
     };
 
-    using Headers       = std::vector<Header>;
-    using Indices       = std::vector<unsigned int>;
-    using HeadersRaw    = QByteArray;
+    static bool canUseSingletonHeaderFormat(const Headers& headers, const Indices& allIndices);
+    static QByteArray serializeHeaders(const Headers& headers, const Indices& allIndices);
+    static QByteArray serializeGeneralHeaders(const Headers& headers);
+    static QByteArray serializeSingletonHeaders(const Headers& headers, const Indices& allIndices);
 
-    /** Context used during the fromVariantMapWorkflow execution to store intermediate data between workflow stages */
-    class FromVariantMapWorkflowContext : public WorkflowContextBase
-    {
-    public:
-	    /**
-         * @brief Constructs a FromVariantMapWorkflowContext with the provided QVariantMap.
-         * @param map The QVariantMap containing the data to be used during the workflow execution. This map is expected to contain the necessary information for loading clusters, such as serialized headers and indices data. The context will store this map for use in different stages of the workflow, allowing for the deserialization and reconstruction of clusters from the provided data.
-	     */
-	    explicit FromVariantMapWorkflowContext(QVariantMap map) :
-            _map(std::move(map))
-        {
-        }
-
-        /**
-         * @brief Gets the headers from the context.
-         * @return The headers stored in the context
-         */
-        const Headers& getHeaders() const {
-            QMutexLocker locker(&_mutex);
-            return _headers;
-        }
-
-        /**
-         * @brief Sets the headers in the context.
-         * @param headers The headers to be set in the context
-         */
-        void setHeaders(const Headers& headers) {
-            QMutexLocker locker(&_mutex);
-            _headers = headers;
-        }
-
-        /**
-         * @brief Gets the indices from the context.
-         * @return The indices stored in the context
-         */
-        const Indices& getAllIndices() const {
-            QMutexLocker locker(&_mutex);
-            return _allIndices;
-        }
-
-        /**
-         * @brief Gets the headers from the context.
-         * @return The headers stored in the context
-         */
-        void setAllIndices(const Indices& allIndices) {
-            QMutexLocker locker(&_mutex);
-            _allIndices = allIndices;
-        }
-
-    private:
-        mutable QMutex      _mutex;         /** Mutex for synchronizing access to the context */
-        QVariantMap         _map;           /** The QVariantMap containing the data for the workflow execution */
-        Headers             _headers;       /** The deserialized headers from the QVariantMap */
-        Indices             _allIndices;    /** The deserialized indices from the QVariantMap */
-    };
+    
+      
 
 private:
 
-    /**
-     * @brief Serializes the headers of the clusters into a QByteArray format.
-     * @param headers The vector of headers to be serialized, where each header contains information about a cluster such as its name, id, color, index offset, index count, median, mean, and standard deviation.
-     * @return A QByteArray containing the serialized headers data, which can be stored in a QVariantMap or used for other purposes where a compact binary representation of the headers is needed.
-     */
-    static QByteArray serializeHeaders(const std::vector<Header>& headers);
+    
 
-    /**
-     * @brief Deserializes the headers from a QByteArray format back into a vector of Header structures.
-     * @param bytes The QByteArray containing the serialized headers data, which was previously generated by the serializeHeaders method.
-     * @return A vector of Header structures containing the deserialized headers data, which can be used for further processing or for reconstructing clusters during the workflow execution.
-     */
-    static std::vector<Header> deserializeHeaders(const QByteArray& bytes);
+    static DecodedHeaders deserializeHeaders(const QByteArray& bytes);
+    static DecodedHeaders deserializeGeneralHeaders(QDataStream& stream, quint32 count, quint32 recordSize, quint64 headerBytes, quint64 stringBytes);
+    static DecodedHeaders deserializeSingletonHeaders(QDataStream& stream, quint32 count, quint32 recordSize, quint64 headerBytes, quint64 stringBytes);
 
     /**
      * @brief Builds an index buffer by concatenating the indices from all clusters and creates corresponding headers with updated index offsets and counts.

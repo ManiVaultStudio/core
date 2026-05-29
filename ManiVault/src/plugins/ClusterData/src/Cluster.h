@@ -35,19 +35,19 @@ public:
 
 public:
     QString getName() const;
-    void setName(const QString& name);
+    void setName(QString name);
 
     QString getId() const;
-    void setId(const QString& id);
+    void setId(QString id);
 
     QColor getColor() const;
-    void setColor(const QColor& color);
+    void setColor(QColor color);
 
     const std::vector<std::uint32_t>& getIndices() const;
     std::vector<std::uint32_t>& getIndices();
 
     std::uint32_t getNumberOfIndices() const;
-    void setIndices(const std::vector<unsigned int>& indices);
+    void setIndices(std::vector<unsigned int> indices);
 
     std::vector<float>& getMedian() { return _median; }
     const std::vector<float>& getMedian() const { return _median; }
