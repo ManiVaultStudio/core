@@ -284,16 +284,17 @@ public: // Expansion
 public: // Serialization
 
     /**
-     * Load widget action from variant
-     * @param Variant representation of the widget action
+     * Initialize the data hierarchy item from \p variantMap
+     * @param variantMap Variant map representation of the data hierarchy item
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
-    /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
+    /*
+     * Convert to variant map, possibly with \p parentExecutionContext for context-aware serialization
+     * @param parentExecutionContext Parent execution context for context-aware serialization (if any)
+     * @return Variant map representation of the data hierarchy item
      */
-    QVariantMap toVariantMap() const override;
+    QVariantMap toVariantMapScoped(util::SharedWorkflowExecutionContext parentExecutionContext) const override;
 
 signals:
 

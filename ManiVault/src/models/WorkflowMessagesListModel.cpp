@@ -21,6 +21,7 @@ void WorkflowMessagesListModel::setWorkflowResult(const util::SharedWorkflowResu
 {
     for (const auto& message : workflowResult->getMessages()) {
         appendRow(Row(message));
+        qDebug() << "###Added message:" << message._text << "Level:" << getSeverityLevelName(message._level) << "Emitter:" << message._emitter;
     }
 }
 

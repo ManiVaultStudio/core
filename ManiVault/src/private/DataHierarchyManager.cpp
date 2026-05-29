@@ -421,7 +421,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 
             ids << datasetId;
             createItems.emplace_back(datasetId, [context, &dataHierarchyItem, datasetId, itemSortIndex, datasetGuiName](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-                const auto itemMap = dataHierarchyItem->toVariantMap();
+                const auto itemMap = dataHierarchyItem->toVariantMapScoped(executionContext);
 
                 itemMap["SortIndex"] = itemSortIndex;
 

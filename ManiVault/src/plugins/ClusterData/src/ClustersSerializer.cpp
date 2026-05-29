@@ -103,30 +103,17 @@ void ClustersSerializer::fromVariantMapScoped(
     QElapsedTimer timer;
     timer.start();
 
-    const auto metaData = bytesFromBlobVariantMap(
-        map.value("ClustersMetaData").toMap(),
-        parentExecutionContext);
-
-    qDebug() << "[INFO] read cluster metadata:" << timer.restart() << "ms";
+    const auto metaData = bytesFromBlobVariantMap(map.value("ClustersMetaData").toMap(), parentExecutionContext);
 
     auto decoded = deserializeHeaders(metaData);
-
-    qDebug() << "[INFO] deserialize cluster headers:" << timer.restart() << "ms";
 
     Indices allIndices;
 
     if (decoded.hasEmbeddedIndices) {
         allIndices = std::move(decoded.embeddedIndices);
-
-        qDebug() << "[INFO] read cluster indices: skipped, embedded in singleton headers";
-        qDebug() << "[INFO] copy cluster indices: skipped, embedded in singleton headers";
     }
     else {
-        const auto indicesRawData = bytesFromBlobVariantMap(
-            map.value("ClustersIndicesRawData").toMap(),
-            parentExecutionContext);
-
-        qDebug() << "[INFO] read cluster indices:" << timer.restart() << "ms";
+        const auto indicesRawData = bytesFromBlobVariantMap(map.value("ClustersIndicesRawData").toMap(), parentExecutionContext);
 
         if ((indicesRawData.size() % static_cast<qsizetype>(sizeof(unsigned int))) != 0)
             throw std::runtime_error("Invalid cluster index raw data size");
@@ -134,17 +121,10 @@ void ClustersSerializer::fromVariantMapScoped(
         allIndices.resize(
             static_cast<std::size_t>(indicesRawData.size()) / sizeof(unsigned int));
 
-        std::memcpy(
-            allIndices.data(),
-            indicesRawData.constData(),
-            static_cast<std::size_t>(indicesRawData.size()));
-
-        qDebug() << "[INFO] copy cluster indices:" << timer.restart() << "ms";
+        std::memcpy(allIndices.data(),indicesRawData.constData(), static_cast<std::size_t>(indicesRawData.size()));
     }
 
     clusters = rebuildClusters(decoded.headers, allIndices);
-
-    qDebug() << "[INFO] rebuild clusters:" << timer.restart() << "ms";
 }
 
 QVariantMap ClustersSerializer::toVariantMapScoped(
@@ -159,13 +139,21 @@ QVariantMap ClustersSerializer::toVariantMapScoped(
 
     allIndices = buildIndexBuffer(clusters, headers);
 
-    if (parentExecutionContext && headers.size() >= 1'000'000) {
+    if (parentExecutionContext && headers.size() >= 1000) {
         parentExecutionContext->warning(
             QString("This dataset contains approximately %1 clusters. "
                 "Datasets with very large numbers of clusters can take considerable "
                 "time to save and load. Consider reducing the number of clusters if "
                 "project serialization performance becomes a concern.")
             .arg(getIntegerCountHumanReadable(headers.size())));
+
+        parentExecutionContext->info("root warning count:" + QString::number(parentExecutionContext->getState()->getReportRoot()->getWarningCountRecursive()));
+
+        for (auto message : parentExecutionContext->getState()->collectMessages()) {
+            qDebug() << message._text;
+        }
+
+
     }
 
     const auto headersRaw = serializeHeaders(headers, allIndices);

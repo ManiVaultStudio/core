@@ -46,7 +46,7 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString&
 
 SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(Type type, const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
 {
-    if (!_reportNode || !_progressNode || !_state)
+    if (!_reportNode && !_progressNode && !_state)
         return {};
 
     const auto effectiveWeight = std::max(1.0, weight);
@@ -230,7 +230,9 @@ void WorkflowExecutionContext::info(QString text, QString location, QVariantMap 
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    const auto message = WorkflowConsoleFormatter::format(SeverityLevel::Info, text, location, details, getState()->getExecutionOptions()._maxConsoleLogDepth);
+    const auto maxDepth = _state ? _state->getExecutionOptions()._maxConsoleLogDepth : std::numeric_limits<int>::max();
+
+    const auto message = WorkflowConsoleFormatter::format(SeverityLevel::Info, text, location, details, maxDepth);
 
     if (!message.isEmpty())
         qDebug().noquote() << message;
@@ -245,7 +247,9 @@ void WorkflowExecutionContext::warning(QString text, QString location, QVariantM
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    const auto message = WorkflowConsoleFormatter::format(SeverityLevel::Warning, text, location, details, getState()->getExecutionOptions()._maxConsoleLogDepth);
+    const auto maxDepth = _state ? _state->getExecutionOptions()._maxConsoleLogDepth : std::numeric_limits<int>::max();
+		
+    const auto message = WorkflowConsoleFormatter::format(SeverityLevel::Warning, text, location, details, maxDepth);
 
     if (!message.isEmpty())
         qDebug().noquote() << message;
@@ -259,7 +263,9 @@ void WorkflowExecutionContext::error(QString text, QString location, QVariantMap
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    const auto message = WorkflowConsoleFormatter::format(SeverityLevel::Error, text, location, details, getState()->getExecutionOptions()._maxConsoleLogDepth);
+    const auto maxDepth = _state ? _state->getExecutionOptions()._maxConsoleLogDepth : std::numeric_limits<int>::max();
+
+    const auto message = WorkflowConsoleFormatter::format(SeverityLevel::Error, text, location, details, maxDepth);
 
     if (!message.isEmpty())
 		qDebug().noquote() << message;

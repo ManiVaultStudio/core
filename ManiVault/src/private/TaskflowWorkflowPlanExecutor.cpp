@@ -234,6 +234,10 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
         result->setMetrics(state->metrics().snapshot());
         result->setMessages(state->collectMessages());
         result->setDuration(lifecycle.elapsedMs());
+
+        for (const auto& message : state->collectMessages()) {
+            qDebug() << "###Message:" << message._text << "Level:" << getSeverityLevelName(message._level) << "Emitter:" << message._emitter;
+        }
     }
 
     if (rootContext->getState()->getExecutionOptions()._addNotification) {

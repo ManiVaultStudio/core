@@ -383,7 +383,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             ._reportProgress = true,
             ._addNotification = true,
             //._traceSink = std::make_shared<WorkflowChromeTraceSink>(QStringLiteral("D:/Temp/chrome_trace.json")),
-            ._maxConsoleLogDepth = 10
+            ._maxConsoleLogDepth = 2
         }));
         
         future.onFinished(this, [this](SharedWorkflowResult result) {
