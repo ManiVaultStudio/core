@@ -73,7 +73,7 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(Type type, 
     child->_parentId        = _id;
     child->_executionPath   = _executionPath;
     child->_executionPath.append(name);
-
+    
     return child;
 }
 
@@ -230,7 +230,10 @@ void WorkflowExecutionContext::info(QString text, QString location, QVariantMap 
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    qDebug().noquote() << WorkflowConsoleFormatter::format(SeverityLevel::Info, text, location, details, getState()->getExecutionOptions()._maxConsoleLogDepth);
+    const auto message = WorkflowConsoleFormatter::format(SeverityLevel::Info, text, location, details, getState()->getExecutionOptions()._maxConsoleLogDepth);
+
+    if (!message.isEmpty())
+        qDebug().noquote() << message;
 
     if (_reportNode) {
         _reportNode->addMessage(SeverityLevel::Info, getName(), text, location, details);
@@ -242,7 +245,10 @@ void WorkflowExecutionContext::warning(QString text, QString location, QVariantM
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    qDebug().noquote() << WorkflowConsoleFormatter::format(SeverityLevel::Warning, text, location, details, getState()->getExecutionOptions()._maxConsoleLogDepth);
+    const auto message = WorkflowConsoleFormatter::format(SeverityLevel::Warning, text, location, details, getState()->getExecutionOptions()._maxConsoleLogDepth);
+
+    if (!message.isEmpty())
+        qDebug().noquote() << message;
 
 	if (_reportNode)
 		_reportNode->addMessage(SeverityLevel::Warning, getName(), std::move(text), std::move(location), std::move(details));
@@ -253,7 +259,10 @@ void WorkflowExecutionContext::error(QString text, QString location, QVariantMap
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    qDebug().noquote() << WorkflowConsoleFormatter::format(SeverityLevel::Error, text, location, details, getState()->getExecutionOptions()._maxConsoleLogDepth);
+    const auto message = WorkflowConsoleFormatter::format(SeverityLevel::Error, text, location, details, getState()->getExecutionOptions()._maxConsoleLogDepth);
+
+    if (!message.isEmpty())
+		qDebug().noquote() << message;
 
 	if (_reportNode)
 		_reportNode->addMessage(SeverityLevel::Error, getName(), std::move(text), std::move(location), std::move(details));

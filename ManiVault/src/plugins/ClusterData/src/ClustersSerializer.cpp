@@ -77,7 +77,7 @@ void ClustersSerializer::fromVariantMapScoped(const QVariantMap& map, QVector<Cl
     if (version != FormatVersion)
         throw std::runtime_error("Unsupported cluster serialization format version");
 
-    const auto metaData = bytesFromBlobVariantMap(map.value("ClustersMetaData").toMap());
+    const auto metaData = bytesFromBlobVariantMap(map.value("ClustersMetaData").toMap(), parentExecutionContext);
 
     if (metaData.isEmpty()) {
 	    throw std::runtime_error("Cluster headers data is empty");
@@ -85,7 +85,7 @@ void ClustersSerializer::fromVariantMapScoped(const QVariantMap& map, QVector<Cl
 
 	auto headers = deserializeHeaders(metaData);
 
-    const auto indicesRawData = bytesFromBlobVariantMap(map.value("ClustersIndicesRawData").toMap());
+    const auto indicesRawData = bytesFromBlobVariantMap(map.value("ClustersIndicesRawData").toMap(), parentExecutionContext);
 
     if (indicesRawData.isEmpty())
         throw std::runtime_error("Cluster indices data is empty");

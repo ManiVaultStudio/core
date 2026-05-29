@@ -226,7 +226,7 @@ QVariantMap bytesToBlobVariantMap(const char* bytes, const std::uint64_t& number
         if (!encodeJobs.empty()) {
             encodeWorkflowPlan->addParallelStage("Encode Blocks", encodeJobs);
 
-            auto future = Application::getWorkflowPlanExecutor().executeBlocking(std::move(encodeWorkflowPlan));
+            auto future = Application::getWorkflowPlanExecutor().executeBlocking(std::move(encodeWorkflowPlan), parentContext);
 
             QVariantList blocks;
 
@@ -350,9 +350,7 @@ DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, ch
 
 	    codec->decodeFromFileTo(decodeBlockJob._uri, destination + offset, size);
     }
-    catch (const ManiVaultException& maniVaultException) {
-
-        qDebug() << maniVaultException._message << "-" << maniVaultException._what << "at" << maniVaultException._where << "with details:" << maniVaultException._details;
+    catch (const ManiVaultException&) {
 
     	// Rethrow ManiVaultExceptions as they are already properly constructed
     	throw;
@@ -633,7 +631,7 @@ UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMa
         ++jobIndex;
     }
 
-    plan->addBatchedParallelStage("Decode Blocks", jobs, 8);
+    plan->addBatchedParallelStage("Decode Blocks", jobs, 32);
 
     return plan;
 

@@ -64,9 +64,9 @@ QString WorkflowConsoleFormatter::format(SeverityLevel severity, const QString& 
         return text;
     }
 
-    const int depth = details.value("depth").toInt();
+	const auto depth = static_cast<std::uint32_t>(details.value("depth").toInt());
 
-    if (depth > maxDepth)
+    if (depth >= maxDepth)
         return {};
 
     const QString indent(depth * 2, QLatin1Char(' '));
