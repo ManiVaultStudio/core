@@ -451,12 +451,22 @@ endif()
 if(APPLE)
     # Find libraries relative to the executable in the macOS .app tree
     set_target_properties(${MV_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
+    set_target_properties(${MV_EXE} PROPERTIES INSTALL_RPATH "@loader_path;@executable_path/../Frameworks")
+
+
+    # Make required non-Qt dylibs available in the build-tree app bundle for debugger runs
+    add_custom_command(TARGET ${MV_EXE} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:qtadvanceddocking-qt6>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:${MV_PUBLIC_LIB}>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
+        COMMENT "Copying bundle framework dependencies for build-tree debugging"
+	)
 
     # Debug ManiVault Studio from the install directory
     set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_WORKING_DIRECTORY "$<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>")   
     set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING NO)
     set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_EXECUTABLE "${MV_INSTALL_DIR}/Debug/ManiVault Studio.app")
-    
+
 endif()
 
 # -----------------------------------------------------------------------------
@@ -526,11 +536,6 @@ if(APPLE)
     )
     # -always-overwrite
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
-
-    set(MACOSX_BUNDLE_ADDITIONAL_LIBS
-        \"$<TARGET_FILE:qtadvanceddocking-qt6>\"
-        \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\"
-    )
 
     if(${MV_USE_ERROR_LOGGING})
         list(APPEND MACOSX_BUNDLE_ADDITIONAL_LIBS \"$<TARGET_FILE:sentry>\" \"$<TARGET_FILE:crashpad_wer>\" \"$<TARGET_FILE:crashpad_handler}>\")
