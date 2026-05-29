@@ -381,8 +381,8 @@ void DataHierarchyManager::fromVariantMapScoped(const QVariantMap& variantMap, S
         });
     }
 
-    //loadDatasetsPlan->addBatchedParallelStage("Load datasets", std::move(datasetJobs), 8);
-    loadDatasetsPlan->addSequentialStage("Load datasets", std::move(datasetJobs));
+    loadDatasetsPlan->addBatchedParallelStage("Load datasets", std::move(datasetJobs), 32);
+    //loadDatasetsPlan->addSequentialStage("Load datasets", std::move(datasetJobs));
     loadDatasetsPlan->addSequentialStage("Notify datasets", [this](const WorkflowPlan::Job& job) {
         for (const auto& item : _items) {
             events().notifyDatasetDataChanged(item->getDataset());
@@ -429,9 +429,6 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
             });
         }
 
-        for (const auto& id : ids)
-			qDebug() << "Dataset ID:" << id;
-
         WorkflowPlan::Jobs loadDatasets;
 
         toPlan->addParallelStage("Create items", std::move(createItems));
@@ -445,7 +442,6 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
             traverseItem = [findItemMap, &traverseItem](DataHierarchyItem* item, QVariantMap& parentMap, std::int32_t sortIndex) -> QVariantMap {
                 const auto datasetId = item->getDataset()->getId();
 
-                qDebug() << "Traversing item with dataset ID" << datasetId << "and sort index" << sortIndex;
                 std::uint32_t childSortIndex = 0;
 
                 QVariantMap children;
@@ -462,7 +458,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
                 }
 
                 auto datasetMap = findItemMap(datasetId);
-                qDebug() << "-----------------" << children.size() << datasetMap;
+                
                 datasetMap["Children"] = children;
                 datasetMap["SortIndex"] = sortIndex;
 
