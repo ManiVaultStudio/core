@@ -45,6 +45,9 @@ public:
 protected:
     WorkflowResultFuture executeAsyncImpl(UniqueWorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, const WorkflowExecutionOptions& executionOptions, SharedWorkflowExecutionContext executionContext) override;
     SharedWorkflowResult executeRoot(WorkflowPlan& workflowPlan, mv::Task* task, const WorkflowExecutionOptions& executionOptions = {}) override;
+
+    SharedWorkflowResult executeWithContext(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext rootContext);
+
     SharedWorkflowResult executeChild(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext parentContext) override;
 
 private: // Execute individual jobs

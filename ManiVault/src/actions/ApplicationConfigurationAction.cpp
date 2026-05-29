@@ -69,7 +69,7 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
             const auto configurationFilePath = Application::getConfigurationFilePath();
 
             if (!configurationFilePath.isEmpty())
-				Application::current()->toJsonFile(configurationFilePath);
+				Application::current()->toJsonFileScoped(configurationFilePath);
 
         	//customizeDialog.accept();
         });

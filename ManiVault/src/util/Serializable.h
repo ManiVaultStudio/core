@@ -206,7 +206,7 @@ public:
     void fromJsonDocument(const QJsonDocument& jsonDocument);
 
     // TODO
-    QJsonDocument toJsonDocument(SharedWorkflowExecutionContext parentExecutionContext = nullptr) const;
+    QJsonDocument toJsonDocumentScoped(SharedWorkflowExecutionContext parentExecutionContext = nullptr) const;
 
     /**
      * Load from JSON file
@@ -215,7 +215,9 @@ public:
     void fromJsonFile(const QString& filePath = "");
 
     // TODO
-    void toJsonFile(const QString& filePath = "", SharedWorkflowExecutionContext parentExecutionContext = nullptr) const;
+    void toJsonFile(const QString& filePath = "") const;
+    
+    void toJsonFileScoped(const QString& filePath = "", SharedWorkflowExecutionContext parentExecutionContext = nullptr) const;
 
     /** Assigns a fresh new identifier to the serializable object */
     void makeUnique();

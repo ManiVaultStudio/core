@@ -138,11 +138,6 @@ void Project::fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflow
     }
 }
 
-QVariantMap Project::toVariantMap() const
-{
-    return toVariantMapScoped(nullptr);
-}
-
 QVariantMap Project::toVariantMapScoped(SharedWorkflowExecutionContext parentExecutionContext) const
 {
     auto variantMap = Serializable::toVariantMap();

@@ -327,7 +327,7 @@ void PresetsAction::exportPreset()
 
         const auto presetFilePath = fileDialog->selectedFiles().first();
 
-        _sourceAction->toJsonFile(presetFilePath);
+        _sourceAction->toJsonFileScoped(presetFilePath);
 
         emit presetExported(presetFilePath);
         });

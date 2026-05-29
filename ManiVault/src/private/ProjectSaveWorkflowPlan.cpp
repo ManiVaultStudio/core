@@ -56,7 +56,7 @@ UniqueWorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
         qDebug() << "Save project JSON";
 #endif
 
-        projects().toJsonFile(context->getProjectJsonPath(), jobExecutionContext);
+        projects().toJsonFileScoped(context->getProjectJsonPath(), jobExecutionContext);
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 10.0);
     
     plan->addSequentialStage("Save meta JSON", [context]() -> void {
@@ -65,7 +65,7 @@ UniqueWorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 #endif
 
         if (auto project = projects().getCurrentProject()) {
-            project->getProjectMetaAction().toJsonFile(context->getMetaJsonPath());
+            project->getProjectMetaAction().toJsonFileScoped(context->getMetaJsonPath());
         }
 
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);

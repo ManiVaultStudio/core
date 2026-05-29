@@ -456,7 +456,7 @@ void WorkspaceManager::saveWorkspace(QString filePath /*= ""*/, bool addToRecent
                 Application::current()->setSetting("Workspaces/WorkingDirectory", QFileInfo(filePath).absolutePath());
             }
 
-            toJsonFile(filePath);
+            toJsonFileScoped(filePath);
 
             setWorkspaceFilePath(filePath);
 

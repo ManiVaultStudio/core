@@ -119,7 +119,7 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createTypedChild(Type t
 
 bool WorkflowExecutionContext::isRootExecution() const
 {
-    return getProgressNode() && getProgressNode()->isRoot();
+    return _parentId.isNull();
 }
 
 void WorkflowExecutionContext::reportStarted() const

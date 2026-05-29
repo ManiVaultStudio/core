@@ -42,14 +42,14 @@ bool WorkflowMessagesFilterModel::filterAcceptsRow(int row, const QModelIndex& p
             return false;
     }
 
-    //const auto levelIndex   = index.siblingAtColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level)).data(Qt::EditRole).toInt();
-    //const auto levelName    = getSeverityLevelName(static_cast<SeverityLevel>(levelIndex));
+    const auto levelIndex   = index.siblingAtColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level)).data(Qt::EditRole).toInt();
+    const auto levelName    = getSeverityLevelName(static_cast<SeverityLevel>(levelIndex));
 
-    //if (!_filterLevelAction.hasSelectedOptions())
-    //    return false;
+    if (!_filterLevelAction.hasSelectedOptions())
+        return false;
 
-    //if (!_filterLevelAction.isOptionSelected(levelName))
-    //    return false;
+    if (!_filterLevelAction.isOptionSelected(levelName))
+        return false;
 
     return true;
 }

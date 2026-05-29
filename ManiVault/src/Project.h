@@ -93,14 +93,6 @@ public: // Serialization
 
     void fromVariantMapScoped(const QVariantMap& variantMap, util::SharedWorkflowExecutionContext parentExecutionContext) override;
 
-    /**
-     * Serialize the project state to a variant map.
-     *
-     * @note See the documentation of Serializable::toVariantMap() for important information about the expected behavior of this function.
-     * @return Variant map representation of the object state.
-     */
-    QVariantMap toVariantMap() const override;
-
     QVariantMap toVariantMapScoped(util::SharedWorkflowExecutionContext parentExecutionContext) const override;
 
 public:
