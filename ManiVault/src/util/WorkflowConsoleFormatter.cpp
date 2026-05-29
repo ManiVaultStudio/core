@@ -48,7 +48,7 @@ QString WorkflowConsoleFormatter::labelForEntity(const QString& entity)
     return "Item";
 }
 
-QString WorkflowConsoleFormatter::format(SeverityLevel severity, const QString& text, const QString&, const QVariantMap& details)
+QString WorkflowConsoleFormatter::format(SeverityLevel severity, const QString& text, const QString&, const QVariantMap& details, std::uint32_t maxDepth /*= std::numeric_limits<std::uint32_t>::max()*/)
 {
     const auto event = details.value("event").toString();
     const auto entity = details.value("entity").toString();
@@ -65,6 +65,9 @@ QString WorkflowConsoleFormatter::format(SeverityLevel severity, const QString& 
     }
 
     const int depth = details.value("depth").toInt();
+
+    if (depth > maxDepth)
+        return {};
 
     const QString indent(depth * 2, QLatin1Char(' '));
     const QString icon = iconForEvent(event);

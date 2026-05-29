@@ -381,8 +381,9 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             ._parallel = parameters._parallel,
         	._maxWorkerThreadCount = parameters._maxParallelThreads,
             ._reportProgress = true,
-            ._addNotification = true/*,
-            ._traceSink = std::make_shared<WorkflowChromeTraceSink>(QStringLiteral("D:/Temp/chrome_trace.json"))*/
+            ._addNotification = true,
+            ._traceSink = std::make_shared<WorkflowChromeTraceSink>(QStringLiteral("D:/Temp/chrome_trace.json")),
+            ._maxConsoleLogDepth = 2
         }));
         
         future.onFinished(this, [this](SharedWorkflowResult result) {

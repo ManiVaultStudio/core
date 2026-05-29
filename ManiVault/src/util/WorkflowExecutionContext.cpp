@@ -230,7 +230,7 @@ void WorkflowExecutionContext::info(QString text, QString location, QVariantMap 
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    qDebug().noquote() << WorkflowConsoleFormatter::format(SeverityLevel::Info, text, location, details);
+    qDebug().noquote() << WorkflowConsoleFormatter::format(SeverityLevel::Info, text, location, details, getState()->getExecutionOptions()._maxConsoleLogDepth);
 
     if (_reportNode) {
         _reportNode->addMessage(SeverityLevel::Info, getName(), text, location, details);
@@ -242,7 +242,7 @@ void WorkflowExecutionContext::warning(QString text, QString location, QVariantM
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    qDebug().noquote() << WorkflowConsoleFormatter::format(SeverityLevel::Warning, text, location, details);
+    qDebug().noquote() << WorkflowConsoleFormatter::format(SeverityLevel::Warning, text, location, details, getState()->getExecutionOptions()._maxConsoleLogDepth);
 
 	if (_reportNode)
 		_reportNode->addMessage(SeverityLevel::Warning, getName(), std::move(text), std::move(location), std::move(details));
@@ -253,7 +253,7 @@ void WorkflowExecutionContext::error(QString text, QString location, QVariantMap
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    qDebug().noquote() << WorkflowConsoleFormatter::format(SeverityLevel::Error, text, location, details);
+    qDebug().noquote() << WorkflowConsoleFormatter::format(SeverityLevel::Error, text, location, details, getState()->getExecutionOptions()._maxConsoleLogDepth);
 
 	if (_reportNode)
 		_reportNode->addMessage(SeverityLevel::Error, getName(), std::move(text), std::move(location), std::move(details));

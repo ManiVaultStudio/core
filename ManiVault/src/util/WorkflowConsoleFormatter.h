@@ -13,15 +13,15 @@ namespace mv::util
 class CORE_EXPORT WorkflowConsoleFormatter
 {
 public:
-    static QString format(SeverityLevel severity, const QString& text, const QString& location, const QVariantMap& details);
-    static QString formatProgressTree(const WorkflowProgressNode::Snapshot& root);
+    static QString [[nodiscard]] format(SeverityLevel severity, const QString& text, const QString& location, const QVariantMap& details, std::uint32_t maxDepth = std::numeric_limits<std::uint32_t>::max());
+    static QString [[nodiscard]] formatProgressTree(const WorkflowProgressNode::Snapshot& root);
 
 private:
     static void appendProgressNode(QStringList& lines, const WorkflowProgressNode::Snapshot& node, int depth);
-    static QString statusName(WorkflowProgressNode::Status status);
+    static [[nodiscard]] QString statusName(WorkflowProgressNode::Status status);
 
-    static QString iconForEvent(const QString& event);
-    static QString labelForEntity(const QString& entity);
+    static [[nodiscard]] QString iconForEvent(const QString& event);
+    static [[nodiscard]] QString labelForEntity(const QString& entity);
 };
 
 }
