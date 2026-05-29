@@ -77,9 +77,6 @@ void ClustersSerializer::fromVariantMapScoped(const QVariantMap& map, QVector<Cl
     if (version != FormatVersion)
         throw std::runtime_error("Unsupported cluster serialization format version");
 
-    auto context = std::make_shared<FromVariantMapWorkflowContext>(map);
-    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__, context);
-
     const auto metaData = bytesFromBlobVariantMap(map.value("ClustersMetaData").toMap());
 
     if (metaData.isEmpty()) {
@@ -102,10 +99,9 @@ void ClustersSerializer::fromVariantMapScoped(const QVariantMap& map, QVector<Cl
 
     if (!allIndices.empty()) {
         std::memcpy(allIndices.data(), indicesRawData.constData(), static_cast<std::size_t>(indicesRawData.size()));
-        context->setAllIndices(allIndices);
     }
 
-    clusters = rebuildClusters(context->getHeaders(), context->getAllIndices());
+    clusters = rebuildClusters(headers, allIndices);
 }
 
 QVariantMap ClustersSerializer::toVariantMap(const QVector<Cluster>& clusters)
@@ -116,7 +112,7 @@ QVariantMap ClustersSerializer::toVariantMap(const QVector<Cluster>& clusters)
 
     headers.reserve(static_cast<std::size_t>(clusters.size()));
 
-    buildIndexBuffer(clusters, headers);
+    allIndices = buildIndexBuffer(clusters, headers);
 
 	const auto headersRaw = serializeHeaders(headers);
 

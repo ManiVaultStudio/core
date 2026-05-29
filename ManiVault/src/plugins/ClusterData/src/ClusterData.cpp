@@ -314,7 +314,6 @@ void Clusters::fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflo
 {
     DatasetImpl::fromVariantMap(variantMap);
 
-    /*
     const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
     if (appVersion < Version(1, 5, 0)) {
@@ -323,7 +322,6 @@ void Clusters::fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflo
     else {
 		getRawData<ClusterData>()->fromVariantMapScoped(variantMap, parentExecutionContext);
     }
-    */
 }
 
 void Clusters::fromVariantMapPre150(const QVariantMap& variantMap)
