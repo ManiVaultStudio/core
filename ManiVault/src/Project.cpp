@@ -148,11 +148,12 @@ QVariantMap Project::toVariantMapScoped(SharedWorkflowExecutionContext parentExe
     _statusBarVisibleAction.insertIntoVariantMap(variantMap);
     _statusBarOptionsAction.insertIntoVariantMap(variantMap);
 
-    variantMap["Plugins"]       = plugins().toVariantMap();
-    variantMap["Actions"]       = actions().toVariantMap();
-    variantMap["Events"]        = events().toVariantMap();
-    variantMap["DataHierarchy"] = dataHierarchy().toVariantMapScoped(parentExecutionContext);
+    variantMap[plugins().getSerializationName()]        = plugins().toVariantMap();
+    variantMap[actions().getSerializationName()]        = actions().toVariantMap();
+    variantMap[events().getSerializationName()]         = events().toVariantMap();
+    variantMap[dataHierarchy().getSerializationName()]  = dataHierarchy().toVariantMapScoped(parentExecutionContext);
 
+    qDebug() << variantMap[dataHierarchy().getSerializationName()].toMap();
     return variantMap;
 }
 

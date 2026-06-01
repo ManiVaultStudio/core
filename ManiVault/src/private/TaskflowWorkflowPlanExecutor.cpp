@@ -285,17 +285,9 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
         if (rootContext->isRootExecution()) {
             const auto messages = state->collectMessages();
             result->setMessages(messages);
-
-            qDebug()
-                << "ROOT WorkflowResult warnings:"
-                << result->getWarningCount()
-                << "hasWarnings:"
-                << result->hasWarnings();
         }
 
-        if (rootContext->isRootExecution())
-            result->setValue(rootContext->takeResultValues());
-
+        result->setValue(rootContext->takeResultValues());
         result->setMetrics(state->metrics().snapshot());
         result->setDuration(lifecycle.elapsedMs());
     }
