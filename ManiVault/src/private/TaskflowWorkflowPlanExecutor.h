@@ -113,15 +113,14 @@ private: // Helpers
         CompiledTasks result;
         tf::Task previous;
 
+        const bool collapseSingleJob = stage.getJobs().size() == 1 && stage.getJobs().front().getName() == stage.getName();
+
         for (const auto& job : stage.getJobs()) {
-            auto jobContext = stageContext->createJobChild(
-                job.getName(),
-                job.getWeight(),
-                job.getProgressMode());
+            auto jobContext = collapseSingleJob ? stageContext : stageContext->createJobChild(job.getName(), job.getWeight(), job.getProgressMode());
 
             auto task = flow.emplace([this, job, jobContext](tf::Subflow& subflow) mutable {
                 executeCompiledJob(job, subflow, jobContext);
-                });
+            });
 
             if (result.starts.empty())
                 result.starts.push_back(task);
@@ -143,11 +142,10 @@ private: // Helpers
     {
         CompiledTasks result;
 
+        const bool collapseSingleJob = stage.getJobs().size() == 1 && stage.getJobs().front().getName() == stage.getName();
+
         for (const auto& job : stage.getJobs()) {
-            auto jobContext = stageContext->createJobChild(
-                job.getName(),
-                job.getWeight(),
-                job.getProgressMode());
+            auto jobContext = collapseSingleJob ? stageContext : stageContext->createJobChild(job.getName(), job.getWeight(), job.getProgressMode());
 
             auto task = flow.emplace([this, job, jobContext](tf::Subflow& subflow) mutable {
                 executeCompiledJob(job, subflow, jobContext);
