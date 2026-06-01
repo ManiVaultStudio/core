@@ -19,7 +19,7 @@
 namespace mv::util
 {
 
-class CORE_EXPORT WorkflowExecutionContext
+class CORE_EXPORT WorkflowExecutionContext : public std::enable_shared_from_this<WorkflowExecutionContext>
 {
 public:
     using ReportNodePtr = WorkflowReportNode::SharedWorkflowReportNode;
@@ -202,17 +202,17 @@ private:
     friend class WorkflowExecutionScope;
 
 private:
-    QString                                 _name;                                                      /** Name of the workflow execution context, typically derived from the name of the workflow plan or job it represents */
-    QUuid                                   _id;                                                        /** Unique identifier for this workflow execution context */
-    QUuid                                   _parentId;                                                  /** Unique identifier of the parent workflow execution context, if any */
-    QStringList                             _executionPath;                                             /** Execution path of this workflow execution context */
-    ReportNodePtr                           _reportNode;                                                /** Report node associated with this workflow execution context */
-    ProgressNodePtr                         _progressNode;                                              /** Progress node associated with this workflow execution context */
-    StatePtr                                _state;                                                     /** Execution state associated with this workflow execution context */
-    QPointer<Task>                          _task;                                                      /** Task associated with this workflow execution context */
-    WorkflowPlan::JobProgressMode           _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /** Progress mode for this workflow execution context */
-    Type                                    _type = Type::Workflow;                                     /** Semantic type of this workflow execution context, used for rendering, reporting, and diagnostics */
-    std::weak_ptr<WorkflowExecutionContext> _parent;                                                    /** Weak pointer to the parent workflow execution context, if any */
+    QString                             _name;                                                      /** Name of the workflow execution context, typically derived from the name of the workflow plan or job it represents */
+    QUuid                               _id;                                                        /** Unique identifier for this workflow execution context */
+    QUuid                               _parentId;                                                  /** Unique identifier of the parent workflow execution context, if any */
+    QStringList                         _executionPath;                                             /** Execution path of this workflow execution context */
+    ReportNodePtr                       _reportNode;                                                /** Report node associated with this workflow execution context */
+    ProgressNodePtr                     _progressNode;                                              /** Progress node associated with this workflow execution context */
+    StatePtr                            _state;                                                     /** Execution state associated with this workflow execution context */
+    QPointer<Task>                      _task;                                                      /** Task associated with this workflow execution context */
+    WorkflowPlan::JobProgressMode       _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /** Progress mode for this workflow execution context */
+    Type                                _type = Type::Workflow;                                     /** Semantic type of this workflow execution context, used for rendering, reporting, and diagnostics */
+    SharedWorkflowExecutionContext      _parent;                                                    /** Weak pointer to the parent workflow execution context, if any */
 };
 
 /** Optional reference to a WorkflowExecutionContext */

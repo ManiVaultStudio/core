@@ -11,7 +11,6 @@
 
 #include "util/Serialization.h"
 #include "util/Exception.h"
-#include "util/AsyncVariantMapResult.h"
 
 #include "exception/SerializationException.h"
 

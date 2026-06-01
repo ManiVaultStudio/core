@@ -628,7 +628,6 @@ set(PUBLIC_UTIL_HEADERS
     src/util/AbstractWorkflowTraceSink.h
     src/util/WorkflowConsoleTraceSink.h
     src/util/WorkflowChromeTraceSink.h
-    src/util/AsyncVariantMapResult.h
     src/util/WorkflowExecutionNodeType.h
     src/util/WorkflowConsoleDashboard.h
     src/util/WorkflowConsoleDashboardScope.h

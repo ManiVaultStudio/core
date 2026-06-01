@@ -44,7 +44,7 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString&
     return context;
 }
 
-SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(Type type, const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
+SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(Type type, const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode)
 {
     if (!_reportNode && !_progressNode && !_state)
         return {};
@@ -71,13 +71,14 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(Type type, 
 
     child->_type            = type;
     child->_parentId        = _id;
+    child->_parent          = shared_from_this();
     child->_executionPath   = _executionPath;
     child->_executionPath.append(name);
     
     return child;
 }
 
-SharedWorkflowExecutionContext WorkflowExecutionContext::createWorkflowChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
+SharedWorkflowExecutionContext WorkflowExecutionContext::createWorkflowChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode)
 {
     auto childReportNode    = _reportNode ? _reportNode->createChild(name) : nullptr;
     auto childProgressNode  = _progressNode ? _progressNode->createChild(Type::NestedWorkflow, name, weight) : nullptr;
@@ -85,6 +86,7 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createWorkflowChild(con
 
     child->_type            = Type::Workflow;
     child->_parentId        = _id;
+    child->_parent          = shared_from_this();
     child->_executionPath   = _executionPath;
 
     child->_executionPath << name;
@@ -92,34 +94,34 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createWorkflowChild(con
     return child;
 }
 
-SharedWorkflowExecutionContext WorkflowExecutionContext::createNestedWorkflowChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
+SharedWorkflowExecutionContext WorkflowExecutionContext::createNestedWorkflowChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode)
 {
     return createTypedChild(Type::NestedWorkflow, name, weight, progressMode);
 }
 
-SharedWorkflowExecutionContext WorkflowExecutionContext::createSequentialStageChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
+SharedWorkflowExecutionContext WorkflowExecutionContext::createSequentialStageChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode)
 {
     return createTypedChild(Type::SequentialStage, name, weight, progressMode);
 }
 
-SharedWorkflowExecutionContext WorkflowExecutionContext::createParallelStageChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
+SharedWorkflowExecutionContext WorkflowExecutionContext::createParallelStageChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode)
 {
     return createTypedChild(Type::ParallelStage, name, weight, progressMode);
 }
 
-SharedWorkflowExecutionContext WorkflowExecutionContext::createJobChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
+SharedWorkflowExecutionContext WorkflowExecutionContext::createJobChild(const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode)
 {
     return createTypedChild(Type::Job, name, weight, progressMode);
 }
 
-SharedWorkflowExecutionContext WorkflowExecutionContext::createTypedChild(Type type, const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode) const
+SharedWorkflowExecutionContext WorkflowExecutionContext::createTypedChild(Type type, const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode)
 {
     return createChild(type, name, weight, progressMode);
 }
 
 bool WorkflowExecutionContext::isRootExecution() const
 {
-    return _parentId.isNull();
+    return _parent.expired();
 }
 
 void WorkflowExecutionContext::reportStarted() const
