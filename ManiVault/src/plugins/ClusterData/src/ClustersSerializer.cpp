@@ -100,9 +100,6 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap&
         if (version != FormatVersion)
             throw std::runtime_error("Unsupported cluster serialization format version");
 
-        QElapsedTimer timer;
-        timer.start();
-
         const auto metaData = bytesFromBlobVariantMap(map.value("ClustersMetaData").toMap(), parentExecutionContext);
 
         auto decoded = deserializeHeaders(metaData);

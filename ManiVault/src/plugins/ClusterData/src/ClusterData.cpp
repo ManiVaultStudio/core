@@ -124,7 +124,7 @@ UniqueWorkflowPlan ClusterData::fromVariantMapWorkflow(const QVariantMap& varian
     const auto dataMap = variantMap["Data"].toMap();
 
     plan->addNestedWorkflowStage("Load", [this, dataMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
-        return ClustersSerializer::fromVariantMapWorkflow(dataMap["Clusters"].toMap(), _clusters, executionContext);
+        return ClustersSerializer::fromVariantMapWorkflow(dataMap, _clusters, executionContext);
     });
 
 	return plan;
@@ -296,11 +296,9 @@ UniqueWorkflowPlan Clusters::fromVariantMapWorkflow(const QVariantMap& variantMa
         return DatasetImpl::fromVariantMapWorkflow(variantMap, parentExecutionContext);
     });
 
-    const auto dataMap = variantMap["Data"].toMap();
-
     if (isFull()) {
-	    plan->addNestedWorkflowStage("Load raw data", [this, dataMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& parentExecutionContext) mutable -> UniqueWorkflowPlan {
-			return getRawData<ClusterData>()->fromVariantMapWorkflow(dataMap, parentExecutionContext);
+	    plan->addNestedWorkflowStage("Load raw data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& parentExecutionContext) mutable -> UniqueWorkflowPlan {
+			return getRawData<ClusterData>()->fromVariantMapWorkflow(variantMap, parentExecutionContext);
 	    });
     }
 
