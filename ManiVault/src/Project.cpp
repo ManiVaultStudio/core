@@ -219,29 +219,23 @@ UniqueWorkflowPlan Project::toVariantMapWorkflow() const
 
     WorkflowPlan::Jobs managerJobs;
 
-    //managerJobs.emplace_back(plugins().getSerializationName(), [context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
-    //    auto result = WorkflowRuntimeScoped::instance().executeBlocking(plugins().toVariantMapWorkflow(), executionContext);
+    const auto addManagerJob = [context, &managerJobs](AbstractManager& manager) {
+        managerJobs.emplace_back(manager.getSerializationName(), [context, &manager](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
+            auto result = WorkflowRuntimeScoped::instance().executeBlocking(manager.toVariantMapWorkflow(), executionContext);
 
-    //    context->insertInto(plugins().getSerializationName(), result->value<QVariantMap>());
-    //});
+            context->insertInto(manager.getSerializationName(), result->value<QVariantMap>()[manager.getSerializationName()].toMap());
+        });
+    };
 
-    //managerJobs.emplace_back(actions().getSerializationName(), [context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
-    //    auto result = WorkflowRuntimeScoped::instance().executeBlocking(actions().toVariantMapWorkflow(), executionContext);
-
-    //    context->insertInto(actions().getSerializationName(), result->value<QVariantMap>());
-    //});
+    addManagerJob(mv::plugins());
+    addManagerJob(mv::actions());
+    addManagerJob(mv::dataHierarchy());
 
     //managerJobs.emplace_back(events().getSerializationName(), [context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
     //    auto result = WorkflowRuntimeScoped::instance().executeBlocking(events().toVariantMapWorkflow(), executionContext);
 
     //    context->insertInto(events().getSerializationName(), result->value<QVariantMap>());
     //});
-
-    managerJobs.emplace_back(dataHierarchy().getSerializationName(), [context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
-        auto result = WorkflowRuntimeScoped::instance().executeBlocking(dataHierarchy().toVariantMapWorkflow(), executionContext);
-
-        context->insertInto(dataHierarchy().getSerializationName(), result->value<QVariantMap>()[dataHierarchy().getSerializationName()].toMap());
-    });
 
     plan->addParallelStage("Managers", managerJobs);
     plan->addFinalizationStage("Set result", [this, context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {

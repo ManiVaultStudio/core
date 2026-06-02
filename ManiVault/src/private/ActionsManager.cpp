@@ -67,79 +67,6 @@ void ActionsManager::reset()
     endReset();
 }
 
-void ActionsManager::fromVariantMap(const QVariantMap& variantMap)
-{
-    Serializable::fromVariantMap(variantMap);
-
-#ifdef ACTIONS_MANAGER_VERBOSE
-    qDebug() << "Loading public actions";
-#endif
-    
-    variantMapMustContain(variantMap, "PublicActions");
-
-    const auto publicActionsMap = variantMap["PublicActions"].toList();
-
-    for (const auto& publicActionVariant : publicActionsMap) {
-        try
-        {
-            const auto publicActionMap      = publicActionVariant.toMap();
-            const auto publicActionTitle    = publicActionMap["Title"].toString();
-            const auto metaTypeName         = publicActionMap["ActionType"].toString();
-
-            if (metaTypeName.isEmpty())
-                throw std::runtime_error(QString("Action type is not specified for %1").arg(publicActionTitle).toLatin1());
-
-            const auto metaType     = QMetaType::fromName(metaTypeName.toLatin1());
-            const auto metaObject   = metaType.metaObject();
-                
-            if (!metaObject)
-                throw std::runtime_error(QString("Meta object type '%1' for '%2' is not known. Did you forget to register the action correctly with Qt meta object system? See ToggleAction.h for an example.").arg(metaTypeName, publicActionTitle).toLatin1());
-
-            auto metaObjectInstance = metaObject->newInstance(Q_ARG(QObject*, this), Q_ARG(QString, publicActionTitle));
-            auto publicAction       = dynamic_cast<WidgetAction*>(metaObjectInstance);
-
-            if (!publicAction)
-                throw std::runtime_error(QString("Unable to create a new instance of type '%1'").arg(publicActionTitle).toLatin1());
-
-            publicAction->fromVariantMap(publicActionMap);
-
-            makeActionPublic(publicAction);
-        }
-        catch (std::exception& e)
-        {
-            exceptionMessageBox("Unable to load public action:", e);
-        }
-        catch (...)
-        {
-            exceptionMessageBox("Unable to load public action:");
-        }
-    }
-}
-
-QVariantMap ActionsManager::toVariantMap() const
-{
-    auto variantMap = Serializable::toVariantMap();
-
-    QVariantList publicActions;
-
-    for (auto publicAction : getPublicActions()) {
-        if (auto parentPublicAction = dynamic_cast<WidgetAction*>(publicAction->getParent()))
-            continue;
-
-        auto actionVariantMap = publicAction->toVariantMap();
-
-        actionVariantMap["Title"] = publicAction->text();
-        
-        publicActions << actionVariantMap;
-    }
-
-    variantMap.insert({
-        { "PublicActions", publicActions }
-    });
-
-    return variantMap;
-}
-
 bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QString& name /*= ""*/, bool recursive /*= true*/, bool allowDuplicateName /*= false*/)
 {
     try
@@ -313,6 +240,76 @@ bool ActionsManager::publishPrivateAction(WidgetAction* privateAction, const QSt
 ActionsListModel& ActionsManager::getActionsListModel()
 {
     return *_actionsListModel;
+}
+
+UniqueWorkflowPlan ActionsManager::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext executionContext)
+{
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
+
+    plan->addSequentialStage("Save", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        Serializable::fromVariantMap(variantMap);
+
+        variantMapMustContain(variantMap, "PublicActions");
+
+        const auto publicActionsMap = variantMap["PublicActions"].toList();
+
+        for (const auto& publicActionVariant : publicActionsMap) {
+            const auto publicActionMap      = publicActionVariant.toMap();
+            const auto publicActionTitle    = publicActionMap["Title"].toString();
+            const auto metaTypeName         = publicActionMap["ActionType"].toString();
+
+            if (metaTypeName.isEmpty())
+                throw std::runtime_error(QString("Action type is not specified for %1").arg(publicActionTitle).toLatin1());
+
+            const auto metaType     = QMetaType::fromName(metaTypeName.toLatin1());
+            const auto metaObject   = metaType.metaObject();
+
+            if (!metaObject)
+                throw std::runtime_error(QString("Meta object type '%1' for '%2' is not known. Did you forget to register the action correctly with Qt meta object system? See ToggleAction.h for an example.").arg(metaTypeName, publicActionTitle).toLatin1());
+
+            auto metaObjectInstance     = metaObject->newInstance(Q_ARG(QObject*, this), Q_ARG(QString, publicActionTitle));
+            auto publicAction           = dynamic_cast<WidgetAction*>(metaObjectInstance);
+
+            if (!publicAction)
+                throw std::runtime_error(QString("Unable to create a new instance of type '%1'").arg(publicActionTitle).toLatin1());
+
+            publicAction->fromVariantMap(publicActionMap);
+
+            makeActionPublic(publicAction);
+        }
+    });
+
+    return plan;
+}
+
+UniqueWorkflowPlan ActionsManager::toVariantMapWorkflow() const
+{
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
+
+    plan->addSequentialStage("Save", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        auto variantMap = Serializable::toVariantMap();
+
+        QVariantList publicActions;
+
+        for (auto publicAction : getPublicActions()) {
+            if (dynamic_cast<WidgetAction*>(publicAction->getParent()))
+                continue;
+
+            auto actionVariantMap = publicAction->toVariantMap();
+
+            actionVariantMap["Title"] = publicAction->text();
+
+            publicActions << actionVariantMap;
+        }
+
+        variantMap.insert({
+            { "PublicActions", publicActions }
+        });
+
+        executionContext->publishResultValue(getSerializationName(), variantMap);
+    });
+
+    return plan;
 }
 
 }

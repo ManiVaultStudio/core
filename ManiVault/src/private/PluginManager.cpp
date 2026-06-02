@@ -865,101 +865,114 @@ QIcon PluginManager::getPluginIcon(const QString& pluginKind) const
     return StyledIcon(_pluginFactories[pluginKind]->icon());
 }
 
-void PluginManager::fromVariantMap(const QVariantMap& variantMap)
+UniqueWorkflowPlan PluginManager::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext executionContext)
 {
-    Serializable::fromVariantMap(variantMap);
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
 
-    variantMapMustContain(variantMap, "UsedPlugins");
+    plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        Serializable::fromVariantMap(variantMap);
 
-    QStringList missingPluginKinds;
+        variantMapMustContain(variantMap, "UsedPlugins");
 
-    for (const auto& usedPlugin : variantMap["UsedPlugins"].toList())
-        if (!_pluginFactories.contains(usedPlugin.toString()))
-            missingPluginKinds << usedPlugin.toString();
+        QStringList missingPluginKinds;
 
-    if (variantMap.contains("LoadedAnalyses"))
-    {
-        for (const auto& loadedAnalysis : variantMap["LoadedAnalyses"].toList())
-            missingPluginKinds.removeAll(loadedAnalysis.toMap()["Kind"].toString());
+        for (const auto& usedPlugin : variantMap["UsedPlugins"].toList())
+            if (!_pluginFactories.contains(usedPlugin.toString()))
+                missingPluginKinds << usedPlugin.toString();
 
-        missingPluginKinds.squeeze();
+        if (variantMap.contains("LoadedAnalyses")) {
+	        for (const auto& loadedAnalysis : variantMap["LoadedAnalyses"].toList())
+	        	missingPluginKinds.removeAll(loadedAnalysis.toMap()["Kind"].toString());
 
-        if (!missingPluginKinds.isEmpty())
-            throw std::runtime_error(QString("One or more plugins are not available: %1").arg(missingPluginKinds.join(", ")).toLocal8Bit());
+			missingPluginKinds.squeeze();
 
-        for (const auto& loadedAnalysis : variantMap["LoadedAnalyses"].toList())
-        {
-            auto analysisPluginMap = loadedAnalysis.toMap();
+			if (!missingPluginKinds.isEmpty())
+				throw std::runtime_error(QString("One or more plugins are not available: %1").arg(missingPluginKinds.join(", ")).toLocal8Bit());
 
-            variantMapMustContain(analysisPluginMap, "Kind");
-            variantMapMustContain(analysisPluginMap, "InputDatasetsIDs");
-            variantMapMustContain(analysisPluginMap, "OutputDatasetsIDs");
+			for (const auto& loadedAnalysis : variantMap["LoadedAnalyses"].toList())
+			{
+				auto analysisPluginMap = loadedAnalysis.toMap();
 
-            auto analysisPluginKind = analysisPluginMap["Kind"].toString();
+				variantMapMustContain(analysisPluginMap, "Kind");
+				variantMapMustContain(analysisPluginMap, "InputDatasetsIDs");
+				variantMapMustContain(analysisPluginMap, "OutputDatasetsIDs");
 
-            if (_pluginFactories.contains(analysisPluginKind))
-            {
-                auto inputDatasetsGUIDs = analysisPluginMap["InputDatasetsIDs"].toStringList();
-                auto outputDatasetsGUIDs = analysisPluginMap["OutputDatasetsIDs"].toStringList();
+				auto analysisPluginKind = analysisPluginMap["Kind"].toString();
 
-                Datasets inputDatasets;
+				if (_pluginFactories.contains(analysisPluginKind))
+				{
+					auto inputDatasetsGUIDs = analysisPluginMap["InputDatasetsIDs"].toStringList();
+					auto outputDatasetsGUIDs = analysisPluginMap["OutputDatasetsIDs"].toStringList();
 
-                for (const auto& inputDatasetGUID : inputDatasetsGUIDs)
-                    inputDatasets << mv::data().getDataset(inputDatasetGUID);
+					Datasets inputDatasets;
 
-                Datasets outputDatasets;
+					for (const auto& inputDatasetGUID : inputDatasetsGUIDs)
+						inputDatasets << mv::data().getDataset(inputDatasetGUID);
 
-                for (const auto& outputDatasetGUID : outputDatasetsGUIDs)
-                    outputDatasets << mv::data().getDataset(outputDatasetGUID);
+					Datasets outputDatasets;
 
-                auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugins().requestPlugin(analysisPluginKind, inputDatasets, outputDatasets));
+					for (const auto& outputDatasetGUID : outputDatasetsGUIDs)
+						outputDatasets << mv::data().getDataset(outputDatasetGUID);
 
-                if (analysisPlugin)
-                    analysisPlugin->fromVariantMap(analysisPluginMap);
-            }
+					auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugins().requestPlugin(analysisPluginKind, inputDatasets, outputDatasets));
+
+					if (analysisPlugin)
+						analysisPlugin->fromVariantMap(analysisPluginMap);
+				}
+			}
         }
-    }
-}
 
-QVariantMap PluginManager::toVariantMap() const
-{
-    auto variantMap = Serializable::toVariantMap();
-
-    QVariantList usedPluginsList;     // Kinds of used plugins
-    QVariantList loadedAnalysesList;  // Opened analysis plugin instances
-
-    for (const auto& pluginFactory : _pluginFactories.values())
-        if ((pluginFactory->getType() == Type::DATA || pluginFactory->getType() == Type::ANALYSIS || pluginFactory->getType() == Type::VIEW) && pluginFactory->getNumberOfInstances() > 0)
-            usedPluginsList << pluginFactory->getKind();
-
-    for (const auto& loadedPlugin : _plugins) {
-        if (loadedPlugin->getType() == Type::ANALYSIS)
-        {
-            // Make sure the analysisPlugin overloads toVariantMap() and fromVariantMap(QVariantMap) before saving it in the project
-            auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(loadedPlugin.get());
-            const QMetaObject* metaObj = analysisPlugin->metaObject();
-
-            if (metaObj == nullptr)
-                continue;
-
-            auto toVariantMapIndex = metaObj->indexOfMethod(QMetaObject::normalizedSignature("toVariantMap()").constData());
-            auto fromVariantMapIndex = metaObj->indexOfMethod(QMetaObject::normalizedSignature("fromVariantMap(QVariantMap)").constData());
-
-            if (toVariantMapIndex != -1 && fromVariantMapIndex != -1)
-                loadedAnalysesList << analysisPlugin->toVariantMap();
-            else if (toVariantMapIndex != -1)
-                qWarning() << "PluginManager::toVariantMap(): " << analysisPlugin->getName() << " implements toVariantMap() but not fromVariantMap(QVariantMap) - analysis plugin is not saved.";
-            else if (fromVariantMapIndex != -1)
-                qWarning() << "PluginManager::toVariantMap(): " << analysisPlugin->getName() << " implements fromVariantMap(QVariantMap) but not toVariantMap() - analysis plugin is not saved.";
-        }
-    }
-
-    variantMap.insert({
-        { "UsedPlugins", usedPluginsList },
-        { "LoadedAnalyses", loadedAnalysesList }
+        executionContext->publishResultValue(getSerializationName(), QVariant());
     });
 
-    return variantMap;
+    return plan;
+}
+
+UniqueWorkflowPlan PluginManager::toVariantMapWorkflow() const
+{
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
+
+    plan->addSequentialStage("Save", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        auto variantMap = Serializable::toVariantMap();
+
+        QVariantList usedPluginsList;     // Kinds of used plugins
+        QVariantList loadedAnalysesList;  // Opened analysis plugin instances
+
+        for (const auto& pluginFactory : _pluginFactories.values())
+            if ((pluginFactory->getType() == Type::DATA || pluginFactory->getType() == Type::ANALYSIS || pluginFactory->getType() == Type::VIEW) && pluginFactory->getNumberOfInstances() > 0)
+                usedPluginsList << pluginFactory->getKind();
+
+        for (const auto& loadedPlugin : _plugins) {
+            if (loadedPlugin->getType() == Type::ANALYSIS)
+            {
+                // Make sure the analysisPlugin overloads toVariantMap() and fromVariantMap(QVariantMap) before saving it in the project
+                auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(loadedPlugin.get());
+                const QMetaObject* metaObj = analysisPlugin->metaObject();
+
+                if (metaObj == nullptr)
+                    continue;
+
+                auto toVariantMapIndex = metaObj->indexOfMethod(QMetaObject::normalizedSignature("toVariantMap()").constData());
+                auto fromVariantMapIndex = metaObj->indexOfMethod(QMetaObject::normalizedSignature("fromVariantMap(QVariantMap)").constData());
+
+                if (toVariantMapIndex != -1 && fromVariantMapIndex != -1)
+                    loadedAnalysesList << analysisPlugin->toVariantMap();
+                else if (toVariantMapIndex != -1)
+                    qWarning() << "PluginManager::toVariantMap(): " << analysisPlugin->getName() << " implements toVariantMap() but not fromVariantMap(QVariantMap) - analysis plugin is not saved.";
+                else if (fromVariantMapIndex != -1)
+                    qWarning() << "PluginManager::toVariantMap(): " << analysisPlugin->getName() << " implements fromVariantMap(QVariantMap) but not toVariantMap() - analysis plugin is not saved.";
+            }
+        }
+
+        variantMap.insert({
+            { "UsedPlugins", usedPluginsList },
+            { "LoadedAnalyses", loadedAnalysesList }
+        });
+
+        executionContext->publishResultValue(getSerializationName(), variantMap);
+    });
+
+    return plan;
 }
 
 const PluginsListModel& PluginManager::getListModel() const

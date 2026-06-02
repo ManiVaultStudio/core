@@ -55,17 +55,11 @@ public: // Models
 
 public: // Serialization
 
-    /**
-     * Load manager from variant map
-     * @param Variant map representation of the manager
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    // TODO
+    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext executionContext = nullptr) override;
 
-    /**
-     * Save manager to variant map
-     * @return Variant map representation of the manager
-     */
-    QVariantMap toVariantMap() const override;
+    // TODO
+    UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 private:
     ActionsListModel*    _actionsListModel;

@@ -220,17 +220,11 @@ public: // Plugin query
 
 public: // Serialization
 
-    /**
-     * Load widget action from variant
-     * @param variantMap Variant representation of the widget action
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    // TODO
+    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext executionContext = nullptr) override;
 
-    /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
-     */
-    QVariantMap toVariantMap() const override;
+    // TODO
+    UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 public: // Model access
 
