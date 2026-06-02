@@ -157,7 +157,7 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(
 
         clusters.resize(static_cast<qsizetype>(context->headers.size()));
 
-        constexpr std::size_t clustersPerJob = 100'000;
+        constexpr std::size_t clustersPerJob = 50'000;
 
         const auto clusterCount = context->headers.size();
         const auto jobCount     = (clusterCount + clustersPerJob - 1) / clustersPerJob;
@@ -181,7 +181,6 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(
                     }
 
                     Cluster cluster;
-
                     cluster.setName(header.name);
                     cluster.setId(header.id);
                     cluster.setColor(header.color);

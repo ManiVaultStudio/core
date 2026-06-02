@@ -634,21 +634,19 @@ UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMa
         ++jobIndex;
     }
 
-    plan->addParallelStage("Decode Blocks", jobs);
+    const auto idealThreads = std::max(1u, std::thread::hardware_concurrency());
+
+    std::size_t decodeBlockBatchSize = 4;
+
+	if (idealThreads <= 16)
+        decodeBlockBatchSize = 2;
+
+    if (idealThreads <= 4)
+        decodeBlockBatchSize = 1;
+
+    plan->addBatchedParallelStage("Decode Blocks", jobs, decodeBlockBatchSize);
 
     return plan;
-
- //   auto sharedExecutor = SharedWorkflowPlanExecutor();
-
- //   PopulateDataBufferResult result;
-
- //   result._data = sharedData;
-	//result._async = true;
- //   result._future = sharedExecutor->execute(std::move(decodeWorkflowPlan), parentContext);
-
- //   AbstractWorkflowPlanExecutor::waitWithEventLoop(result._future);
-
- //   return result;
 }
 
 void populateBytesFromBlobMap(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext)

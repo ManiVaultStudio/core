@@ -397,7 +397,17 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
             });
     }
 
-    plan->addParallelStage("Load datasets", std::move(datasetJobs));
+    const auto idealThreads = std::max(1u, std::thread::hardware_concurrency());
+
+    std::size_t datasetBatchSize = 4;
+
+    if (idealThreads <= 16)
+        datasetBatchSize = 2;
+
+    if (idealThreads <= 4)
+        datasetBatchSize = 1;
+
+    plan->addBatchedParallelStage("Load datasets", std::move(datasetJobs), datasetBatchSize);
 
     plan->addSequentialStage("Notify datasets", [this](const WorkflowPlan::Job& job) {
         for (const auto& item : _items) {
