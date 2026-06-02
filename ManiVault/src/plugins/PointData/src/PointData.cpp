@@ -1036,9 +1036,11 @@ void Points::selectInvert()
 
 UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext)
 {
-    UniqueWorkflowPlan fromPlan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    DatasetImpl::fromVariantMap(variantMap);
+    plan->addNestedWorkflowStage("Load common", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& parentExecutionContext) mutable -> UniqueWorkflowPlan {
+        return DatasetImpl::fromVariantMapWorkflow(variantMap, parentExecutionContext);
+    });
 
     variantMapMustContain(variantMap, "DimensionNames");
     variantMapMustContain(variantMap, "Selection");
@@ -1046,7 +1048,7 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap,
     const auto dataMap = variantMap["Data"].toMap();
 
     if (isFull()) {
-        fromPlan->addNestedWorkflowStage("Load raw data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& parentExecutionContext) mutable -> UniqueWorkflowPlan {
+        plan->addNestedWorkflowStage("Load raw data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& parentExecutionContext) mutable -> UniqueWorkflowPlan {
             return getRawData<PointData>()->fromVariantMapWorkflow(variantMap, parentExecutionContext);
         });
     }
@@ -1120,7 +1122,7 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap,
         */
    // }
 
-    return fromPlan;
+    return plan;
 }
 
 void Points::fromVariantMapPre150(const QVariantMap& variantMap)

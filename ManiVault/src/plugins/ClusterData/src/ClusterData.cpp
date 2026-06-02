@@ -292,10 +292,9 @@ UniqueWorkflowPlan Clusters::fromVariantMapWorkflow(const QVariantMap& variantMa
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    DatasetImpl::fromVariantMap(variantMap);
-
-    variantMapMustContain(variantMap, "DimensionNames");
-    variantMapMustContain(variantMap, "Selection");
+    plan->addNestedWorkflowStage("Load common", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& parentExecutionContext) mutable -> UniqueWorkflowPlan {
+        return DatasetImpl::fromVariantMapWorkflow(variantMap, parentExecutionContext);
+    });
 
     const auto dataMap = variantMap["Data"].toMap();
 

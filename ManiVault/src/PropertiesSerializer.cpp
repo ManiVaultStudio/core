@@ -26,29 +26,28 @@ QVariantMap PropertiesSerializer::toVariantMap(const QVariantMap& map)
     return result;
 }
 
-void PropertiesSerializer::fromVariantMap(const QVariantMap& propertiesMap, QVariantMap& destinationPropertiesMap, SharedWorkflowExecutionContext parentContext)
+UniqueWorkflowPlan PropertiesSerializer::fromVariantMapWorkflow(const QVariantMap& propertiesMap, QVariantMap& destinationPropertiesMap, SharedWorkflowExecutionContext parentContext)
 {
 #ifdef PROPERTIES_SERIALIZER_VERBOSE
     qDebug() << "Deserializing properties: " << propertiesMap.keys();
 #endif
-    return;
+
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
     const auto version = propertiesMap.value("PropertiesFormatVersion").toUInt();
 
     if (version != FormatVersion)
         throw std::runtime_error("Unsupported properties serialization format version");
 
-    UniqueWorkflowPlan fromPlan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+    WorkflowPlan::Jobs jobs;
 
-    WorkflowPlan::Jobs preprocessingJobs;
-
-    preprocessingJobs.emplace_back("Process headers", [propertiesMap, &destinationPropertiesMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
+    jobs.emplace_back("Process headers", [propertiesMap, &destinationPropertiesMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
         destinationPropertiesMap = loadOptimizedVariant(propertiesMap).toMap();
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 
-    fromPlan->addParallelStage("Preprocessing", preprocessingJobs);
+    plan->addParallelStage("Preprocessing", jobs);
 
-    auto result = Application::getWorkflowPlanExecutor().execute(std::move(fromPlan), parentContext);
+    return plan;
 }
 
 }

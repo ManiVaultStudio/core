@@ -28,16 +28,11 @@ public:
     /** Format version for the serialized properties */
     static constexpr quint32 FormatVersion = 2;
 
-    /** Serializes the given QVariantMap using optimized QVariant serialization and includes the format version in the resulting map. */
+    // TODO
     static QVariantMap toVariantMap(const QVariantMap& map);
 
-    /**
-     * Deserializes the properties from the given source QVariantMap into the destination QVariantMap. It checks the format version and throws a runtime error if it is not supported.
-     * @param propertiesMap The source QVariantMap containing the serialized properties, which should include the "PropertiesFormatVersion" key with the format version.
-     * @param destinationPropertiesMap The reference to the QVariantMap that will be populated with the deserialized properties. This map will be cleared before populating it with the deserialized properties.
-     * @param parentContext An optional shared pointer to a WorkflowExecutionContext that can be used for reporting progress or messages during the deserialization process. If not provided, it defaults to nullptr.
-     */
-    static void fromVariantMap(const QVariantMap& propertiesMap, QVariantMap& destinationPropertiesMap, SharedWorkflowExecutionContext parentContext = nullptr);
+    // TODO
+    static UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& propertiesMap, QVariantMap& destinationPropertiesMap, SharedWorkflowExecutionContext parentContext = nullptr);
 };
 
 }
