@@ -121,9 +121,11 @@ void Serializable::fromJsonDocument(const QJsonDocument& jsonDocument)
 
 QJsonDocument Serializable::toJsonDocumentScoped(SharedWorkflowExecutionContext parentExecutionContext /*= nullptr*/) const
 {
-    QVariantMap variantMap;
+    auto plan = toVariantMapWorkflow();
 
-    variantMap[getSerializationName()] = toVariantMapScoped(parentExecutionContext);
+    auto result = WorkflowRuntimeScoped::instance().executeBlocking(std::move(plan), parentExecutionContext);
+
+    const auto variantMap = result->value<QVariantMap>();
 
     return QJsonDocument::fromVariant(variantMap);
 }

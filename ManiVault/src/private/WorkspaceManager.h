@@ -203,11 +203,8 @@ public: // Serialization
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
-    /**
-     * Save layout to variant
-     * @return Variant representation of the layout
-     */
-    QVariantMap toVariantMap() const override;
+    // TODO
+    UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 public: // Menus
 

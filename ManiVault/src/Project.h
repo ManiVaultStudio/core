@@ -83,17 +83,11 @@ public: // Miscellaneous
 
 public: // Serialization
 
-    /**
-     * Load the project state from a variant map.
-     *
-     * @note See the documentation of Serializable::fromVariantMap() for important information about the expected behavior of this function.
-     * @param variantMap Variant map representation of the object state.
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
-
+    // TODO
     util::UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, util::SharedWorkflowExecutionContext parentExecutionContext = nullptr) override;
 
-    QVariantMap toVariantMapScoped(util::SharedWorkflowExecutionContext parentExecutionContext) const override;
+    // TODO
+    util::UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 public:
 

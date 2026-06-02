@@ -67,6 +67,16 @@ namespace
             _dataHierarchyMap = dataHierarchyMap;
         }
 
+        /**
+         * @brief Get data hierarchy map from the context
+         * @return Data hierarchy map from the context
+         */
+        QVariantMap getDataHierarchyMap() const
+        {
+            QMutexLocker lock(&_mutex);
+            return _dataHierarchyMap;
+        }
+
     private:
         mutable QMutex  _mutex;             /** Mutex for thread safety */
         QVariantMap     _datasetsMap;       /** Map of dataset IDs to dataset maps encountered during saving */
@@ -418,7 +428,7 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
     return plan;
 }
 
-QVariantMap DataHierarchyManager::toVariantMapScoped(SharedWorkflowExecutionContext parentExecutionContext) const
+UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 {
     auto context = std::make_shared<ToVariantMapWorkflowContext>();
 
@@ -441,10 +451,10 @@ QVariantMap DataHierarchyManager::toVariantMapScoped(SharedWorkflowExecutionCont
             createItems.emplace_back(datasetId, [context, &dataHierarchyItem, datasetId, itemSortIndex, datasetGuiName](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
                 const auto itemMap = dataHierarchyItem->toVariantMapScoped(executionContext);
 
-            	itemMap["SortIndex"] = itemSortIndex;
+                itemMap["SortIndex"] = itemSortIndex;
 
                 context->setDataset(datasetId, itemMap);
-            });
+                });
         }
 
         WorkflowPlan::Jobs loadDatasets;
@@ -453,7 +463,7 @@ QVariantMap DataHierarchyManager::toVariantMapScoped(SharedWorkflowExecutionCont
         plan->addSequentialStage("Assemble hierarchy", [this, &plan, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
             const auto findItemMap = [&plan, &job, context](const QString& datasetId) -> QVariantMap {
                 return context->getDataset(datasetId);
-            };
+                };
 
             std::function<QVariantMap(DataHierarchyItem*, QVariantMap&, std::int32_t)> traverseItem;
 
@@ -495,11 +505,13 @@ QVariantMap DataHierarchyManager::toVariantMapScoped(SharedWorkflowExecutionCont
 
             executionContext->publishResultValue(getSerializationName(), dataHierarchyMap);
         });
+
+        plan->addFinalizationStage("set result", [this, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> void {
+            executionContext->publishResultValue(getSerializationName(), context->getDataHierarchyMap());
+        });
     }
 
-    auto result = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan), parentExecutionContext);
-
-    return result->value<QVariantMap>()[getSerializationName()].toMap();
+    return plan;
 }
 
 }

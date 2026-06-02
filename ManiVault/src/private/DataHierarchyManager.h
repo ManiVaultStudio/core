@@ -112,9 +112,11 @@ protected:
 
 public: // Serialization
 
+    // TODO
     UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext) override;
 
-    QVariantMap toVariantMapScoped(SharedWorkflowExecutionContext parentExecutionContext) const override;
+    // TODO
+    UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 private:
     std::vector<std::unique_ptr<DataHierarchyItem>>     _items;                 /** Unique pointers to data hierarchy items */

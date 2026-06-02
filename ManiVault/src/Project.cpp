@@ -12,6 +12,49 @@
 using namespace mv::gui;
 using namespace mv::util;
 
+namespace 
+{
+    /** Thread-safe context for constructing the variant map */
+    class ToVariantMapWorkflowContext {
+    public:
+
+        /**
+         * Thread-safe getter for the variant map being constructed
+         * @return Variant map being constructed
+         */
+        QVariantMap getMap() const
+        {
+            QMutexLocker locker(&_mutex);
+            return _map;
+        }
+
+        /**
+         * Thread-safe inserter for the variant map being constructed
+         * @param key Key to insert into the variant map
+         * @param value Value to insert into the variant map
+         */
+        void insertInto(const QString& key, const QVariant& value)
+        {
+            QMutexLocker locker(&_mutex);
+            _map.insert(key, value);
+        }
+
+        /**
+         * Thread-safe setter for the variant map being constructed
+         * @param map Variant map to set
+         */
+        void setMap(const QVariantMap& map)
+        {
+            QMutexLocker locker(&_mutex);
+            _map = map;
+        }
+
+    private:
+        mutable QMutex  _mutex;     /** Mutex for thread-safe access to the variant map */
+        QVariantMap     _map;       /** Variant map being constructed */
+    };
+}
+
 namespace mv {
 
 Project::Project(QObject* parent /*= nullptr*/) :
@@ -105,11 +148,6 @@ bool Project::isStartupProject() const
     return _startupProject;
 }
 
-void Project::fromVariantMap(const QVariantMap& variantMap)
-{
-    fromVariantMapScoped(variantMap, nullptr);
-}
-
 UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1::fromVariantMap").arg(getSerializationName()));
@@ -161,26 +199,59 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap
     return plan;
 }
 
-QVariantMap Project::toVariantMapScoped(SharedWorkflowExecutionContext parentExecutionContext) const
+UniqueWorkflowPlan Project::toVariantMapWorkflow() const
 {
-    auto variantMap = Serializable::toVariantMap();
+    auto context = std::make_shared<ToVariantMapWorkflowContext>();
 
-    _projectMetaAction.insertIntoVariantMap(variantMap);
-    _selectionGroupingAction.insertIntoVariantMap(variantMap);
-    _overrideApplicationStatusBarAction.insertIntoVariantMap(variantMap);
-    _statusBarVisibleAction.insertIntoVariantMap(variantMap);
-    _statusBarOptionsAction.insertIntoVariantMap(variantMap);
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
 
-    variantMap[plugins().getSerializationName()]        = plugins().toVariantMap();
-    variantMap[actions().getSerializationName()]        = actions().toVariantMap();
-    variantMap[events().getSerializationName()]         = events().toVariantMap();
-    variantMap[dataHierarchy().getSerializationName()]  = dataHierarchy().toVariantMapScoped(parentExecutionContext);
+    plan->addSequentialStage("Common", [this, context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
+        auto variantMap = Serializable::toVariantMap();
 
-    qDebug() << variantMap[dataHierarchy().getSerializationName()].toMap();
-    return variantMap;
+        _projectMetaAction.insertIntoVariantMap(variantMap);
+        _selectionGroupingAction.insertIntoVariantMap(variantMap);
+        _overrideApplicationStatusBarAction.insertIntoVariantMap(variantMap);
+        _statusBarVisibleAction.insertIntoVariantMap(variantMap);
+        _statusBarOptionsAction.insertIntoVariantMap(variantMap);
+
+        context->setMap(variantMap);
+    });
+
+    WorkflowPlan::Jobs managerJobs;
+
+    //managerJobs.emplace_back(plugins().getSerializationName(), [context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
+    //    auto result = WorkflowRuntimeScoped::instance().executeBlocking(plugins().toVariantMapWorkflow(), executionContext);
+
+    //    context->insertInto(plugins().getSerializationName(), result->value<QVariantMap>());
+    //});
+
+    //managerJobs.emplace_back(actions().getSerializationName(), [context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
+    //    auto result = WorkflowRuntimeScoped::instance().executeBlocking(actions().toVariantMapWorkflow(), executionContext);
+
+    //    context->insertInto(actions().getSerializationName(), result->value<QVariantMap>());
+    //});
+
+    //managerJobs.emplace_back(events().getSerializationName(), [context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
+    //    auto result = WorkflowRuntimeScoped::instance().executeBlocking(events().toVariantMapWorkflow(), executionContext);
+
+    //    context->insertInto(events().getSerializationName(), result->value<QVariantMap>());
+    //});
+
+    managerJobs.emplace_back(dataHierarchy().getSerializationName(), [context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
+        auto result = WorkflowRuntimeScoped::instance().executeBlocking(dataHierarchy().toVariantMapWorkflow(), executionContext);
+
+        context->insertInto(dataHierarchy().getSerializationName(), result->value<QVariantMap>()[dataHierarchy().getSerializationName()].toMap());
+    });
+
+    plan->addParallelStage("Managers", managerJobs);
+    plan->addFinalizationStage("Set result", [this, context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
+        executionContext->publishResultValue(getSerializationName(), context->getMap());
+    });
+
+	return plan;
 }
 
-util::Version Project::getVersion() const
+Version Project::getVersion() const
 {
     return _applicationVersion;
 }
