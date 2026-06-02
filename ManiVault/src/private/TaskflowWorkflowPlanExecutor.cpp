@@ -452,23 +452,16 @@ TaskflowWorkflowPlanExecutor::CompiledTasks TaskflowWorkflowPlanExecutor::compil
     return compileWorkflowImpl(workflowPlan, subflow, parentContext);
 }
 
-void TaskflowWorkflowPlanExecutor::addWorkflowFinishedNotification(
-    const QString& workflowName,
-    const SharedWorkflowResult& result,
-    const QUuid& resultId)
+void TaskflowWorkflowPlanExecutor::addWorkflowFinishedNotification(const QString& workflowName, const SharedWorkflowResult& result, const QUuid& resultId)
 {
-    const auto url = QString("app://workflow/results?workflowResultId=%1")
-        .arg(resultId.toString(QUuid::WithoutBraces));
-
-    const auto title = QString("%1 finished in %2")
-        .arg(workflowName)
-        .arg(getElapsedTimeHumanReadable(result->getDuration(), true));
+    const auto url      = QString("app://workflow/results?workflowResultId=%1").arg(resultId.toString(QUuid::WithoutBraces));
+    const auto title    = QString("%1 finished in %2").arg(workflowName).arg(getElapsedTimeHumanReadable(result->getDuration(), true));
 
     QMetaObject::invokeMethod(&help(), [result, url, title]() {
         QString message;
 
         if (!result->hasWarnings() && !result->hasErrors()) {
-            message = QString("Completed successfully, see the <a href='%1'>report</a> for details").arg(QString("%1&levels=info").arg(url));
+            message = QStringLiteral("Completed successfully");
         }
 
         if (result->hasWarnings() && !result->hasErrors()) {
