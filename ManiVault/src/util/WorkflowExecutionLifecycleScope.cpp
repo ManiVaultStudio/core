@@ -23,10 +23,11 @@ WorkflowExecutionLifecycleScope::~WorkflowExecutionLifecycleScope()
 	}
 }
 
-void WorkflowExecutionLifecycleScope::fail(const QString& message)
+void WorkflowExecutionLifecycleScope::fail(SeverityLevel severity, const QString& message, QVariantMap details /*= {}*/)
 {
 	if (_context && !_finished) {
-		_context->reportFailed(message);
+		_context->reportFailed(severity, message, std::move(details));
+
 		_finished = true;
 	}
 }
@@ -34,9 +35,7 @@ void WorkflowExecutionLifecycleScope::fail(const QString& message)
 void WorkflowExecutionLifecycleScope::finish()
 {
 	if (_context && !_finished) {
-		_context->reportFinished(
-			static_cast<std::uint64_t>(_timer.elapsed())
-		);
+		_context->reportFinished(static_cast<std::uint64_t>(_timer.elapsed()));
 
 		_finished = true;
 	}
@@ -46,4 +45,5 @@ std::uint64_t WorkflowExecutionLifecycleScope::elapsedMs() const
 {
 	return static_cast<std::uint64_t>(_timer.elapsed());
 }
+
 }

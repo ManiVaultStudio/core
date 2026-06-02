@@ -806,6 +806,11 @@ void prettyPrintVariantMap(const QVariantMap& variantMap)
     qDebug().noquote() << QJsonDocument(QJsonObject::fromVariantMap(variantMap)).toJson(QJsonDocument::Indented);
 }
 
+QString prettyVariantMapString(const QVariantMap& variantMap)
+{
+    return QString::fromUtf8(QJsonDocument(QJsonObject::fromVariantMap(variantMap)).toJson(QJsonDocument::Indented));
+}
+
 QString variantMapToPrettyString(const QVariantMap& variantMap, int indent)
 {
     return QJsonDocument(QJsonObject::fromVariantMap(variantMap)).toJson(QJsonDocument::Indented);

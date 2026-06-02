@@ -141,12 +141,15 @@ void WorkflowExecutionContext::reportFinished(std::uint64_t durationMs) const
     }
 }
 
-void WorkflowExecutionContext::reportFailed(const QString& errorMessage) const
+void WorkflowExecutionContext::reportFailed(SeverityLevel severity, const QString& errorMessage, QVariantMap extraDetails /*= {}*/) const
 {
     auto details = makeLifecycleDetails("failed");
     details["error"] = errorMessage;
 
-    error(_name, {}, details);
+    for (auto it = extraDetails.begin(); it != extraDetails.end(); ++it)
+        details[it.key()] = it.value();
+
+    message(severity, _name, {}, details);
 
     if (_progressNode)
         _progressNode->markFailed();

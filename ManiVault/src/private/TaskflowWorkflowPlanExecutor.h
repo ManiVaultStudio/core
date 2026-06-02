@@ -57,6 +57,7 @@ private: // Execute individual jobs
 
 private: // Helpers
 
+    void handleFailure(SharedWorkflowExecutionContext parentContext, WorkflowPlan& workflowPlan, const QString& message);
     static void handleStageException(const WorkflowPlan::Stage& stage, const mv::ManiVaultException& exception, SharedWorkflowExecutionContext stageContext);
 
     CompiledTasks compileWorkflow(

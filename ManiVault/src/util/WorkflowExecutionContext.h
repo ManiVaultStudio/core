@@ -85,7 +85,7 @@ public:
 
     void reportStarted() const;
     void reportFinished(std::uint64_t durationMs = 0) const;
-    void reportFailed(const QString& errorMessage) const;
+    void reportFailed(SeverityLevel severity, const QString& errorMessage, QVariantMap extraDetails = {}) const;
     void reportSkipped(const QString& reason) const;
     void reportStageSummary(const WorkflowStageSummary& summary) const;
 

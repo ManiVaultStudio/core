@@ -98,7 +98,6 @@ public:
 
 public: // Serialization
 
-    void fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext) override;
     UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext = nullptr) override;
 
     
@@ -255,14 +254,7 @@ public: // Selection
 
 public: // Serialization
 
-    /**
-     * Load widget action from variant
-     * @param variantMap Variant representation of the widget action
-     * @return Variant representation of the widget action
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
-
-    void fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext) override;
+    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext = nullptr) override;
 
     void fromVariantMapPre150(const QVariantMap& variantMap);
 

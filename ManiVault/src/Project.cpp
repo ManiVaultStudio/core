@@ -110,32 +110,55 @@ void Project::fromVariantMap(const QVariantMap& variantMap)
     fromVariantMapScoped(variantMap, nullptr);
 }
 
-void Project::fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext)
+UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext)
 {
-	Serializable::fromVariantMap(variantMap);
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1::fromVariantMap").arg(getSerializationName()));
 
-	if (variantMap.contains(_selectionGroupingAction.getSerializationName())) {
-	    _selectionGroupingAction.fromParentVariantMap(variantMap);
-	}
-	else {
-	    _selectionGroupingAction.setChecked(true);
-	}
+    plan->addSequentialStage("Load", {
+        WorkflowPlan::Job("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& parentExecutionContext) {
+            Serializable::fromVariantMap(variantMap);
 
-	_overrideApplicationStatusBarAction.fromParentVariantMap(variantMap);
+		    if (variantMap.contains(_selectionGroupingAction.getSerializationName())) {
+		        _selectionGroupingAction.fromParentVariantMap(variantMap);
+		    }
+		    else {
+		        _selectionGroupingAction.setChecked(true);
+		    }
 
-	_statusBarVisibleAction.fromParentVariantMap(variantMap);
+		    _overrideApplicationStatusBarAction.fromParentVariantMap(variantMap);
 
-	_statusBarOptionsAction.fromParentVariantMap(variantMap);
+		    _statusBarVisibleAction.fromParentVariantMap(variantMap);
 
-    dataHierarchy().fromVariantMapScoped(variantMap, parentExecutionContext);
-    actions().fromParentVariantMap(variantMap);
-    plugins().fromParentVariantMap(variantMap);
-    events().fromParentVariantMap(variantMap, true);
+		    _statusBarOptionsAction.fromParentVariantMap(variantMap);
+        })
+    });
 
-    if (getReadOnlyAction().isChecked() && getAllowedPluginsOnlyAction().isChecked()) {
-        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
-            pluginFactory->setAllowPluginCreationFromStandardGui(_projectMetaAction.getAllowedPluginsAction().getStrings().contains(pluginFactory->getKind()));
-    }
+    plan->addNestedWorkflowStage("Data hierarchy", [variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        return mv::dataHierarchy().fromVariantMapWorkflow(variantMap, executionContext);
+    });
+
+    plan->addNestedWorkflowStage("Actions", [variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        return mv::actions().fromVariantMapWorkflow(variantMap, executionContext);
+    });
+
+    plan->addNestedWorkflowStage("Plugins", [variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        return mv::plugins().fromVariantMapWorkflow(variantMap, executionContext);
+    });
+
+    plan->addNestedWorkflowStage("Events", [variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        return mv::events().fromVariantMapWorkflow(variantMap, executionContext);
+    });
+
+    plan->addSequentialStage("Post-process", {
+        WorkflowPlan::Job("Post-process", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& parentExecutionContext) {
+	        if (getReadOnlyAction().isChecked() && getAllowedPluginsOnlyAction().isChecked()) {
+				for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
+					pluginFactory->setAllowPluginCreationFromStandardGui(_projectMetaAction.getAllowedPluginsAction().getStrings().contains(pluginFactory->getKind()));
+			}
+        })
+    });
+
+    return plan;
 }
 
 QVariantMap Project::toVariantMapScoped(SharedWorkflowExecutionContext parentExecutionContext) const

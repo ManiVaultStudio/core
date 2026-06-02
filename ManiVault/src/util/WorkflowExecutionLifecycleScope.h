@@ -71,9 +71,11 @@ public:
      * Calling this function prevents the destructor from reporting a successful finish.
      * This should normally be called from an exception handler before rethrowing the exception.
      *
+     * @param severity Severity level of the failure to include in the lifecycle report.
      * @param message Human-readable failure message to include in the lifecycle report.
+     * @param details Additional details to include in the lifecycle report.
      */
-    void fail(const QString& message);
+    void fail(SeverityLevel severity, const QString& message, QVariantMap details = {});
 
     /**
      * @brief Reports the context as successfully finished and completes the lifecycle scope.

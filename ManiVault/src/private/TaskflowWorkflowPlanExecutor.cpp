@@ -156,17 +156,6 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
 
     WorkflowExecutionLifecycleScope lifecycle(rootContext);
 
-    const auto displayFailure = [&workflowPlan, executionOptions](const QString& message) {
-        QMetaObject::invokeMethod(&help(), [&workflowPlan, executionOptions, message]() {
-            const auto title = QString("%1 failed").arg(workflowPlan.getName());
-
-            if (executionOptions._addNotification)
-                help().addNotification(title, message);
-
-            qDebug() << QString("%1: %2").arg(title, message);
-            });
-        };
-
     auto runStages = [this, rootContext](const WorkflowPlan::Stages& stages) {
         if (stages.empty())
             return;
@@ -199,8 +188,8 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
         }
         catch (const ManiVaultException& exception) {
             rootContext->error(exception._message, exception._where, exception._details);
-            lifecycle.fail(exception._message);
-            displayFailure(exception._message);
+            lifecycle.fail(exception._severity, exception._message, exception._details);
+            handleFailure(rootContext, workflowPlan, exception._message);
 
             try {
                 runStages(workflowPlan.getOnFailureStages());
@@ -221,8 +210,8 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
             const auto message = QString::fromUtf8(exception.what());
 
             rootContext->error(message, workflowPlan.getName());
-            lifecycle.fail(message);
-            displayFailure(message);
+            lifecycle.fail(SeverityLevel::Error, message);
+            handleFailure(rootContext, workflowPlan, message);
 
             try {
                 runStages(workflowPlan.getOnFailureStages());
@@ -240,8 +229,8 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
         }
         catch (...) {
             rootContext->error("Workflow failed with unknown error", workflowPlan.getName());
-            lifecycle.fail("Workflow failed with unknown error");
-            displayFailure("Unknown error");
+            lifecycle.fail(SeverityLevel::Error, "Workflow failed with unknown error");
+            handleFailure(rootContext, workflowPlan, "Unknown error");
 
             try {
                 runStages(workflowPlan.getOnFailureStages());
@@ -406,13 +395,28 @@ void TaskflowWorkflowPlanExecutor::executeJob(
         lifecycle.finish();
     }
     catch (const std::exception& e) {
-        jobContext->reportFailed(QString::fromUtf8(e.what()));
+        jobContext->reportFailed(SeverityLevel::Error, QString::fromUtf8(e.what()));
         throw;
     }
     catch (...) {
-        jobContext->reportFailed("Unknown exception");
+        jobContext->reportFailed(SeverityLevel::Error, "Unknown exception");
         throw;
     }
+}
+
+void TaskflowWorkflowPlanExecutor::handleFailure(SharedWorkflowExecutionContext parentContext, WorkflowPlan& workflowPlan, const QString& message)
+{
+    if (!parentContext)
+        return;
+
+    QMetaObject::invokeMethod(&help(), [&workflowPlan, parentContext, message]() {
+        const auto title = QString("%1 failed").arg(workflowPlan.getName());
+
+        if (parentContext->getState()->getExecutionOptions()._addNotification)
+            help().addNotification(title, message);
+
+        qDebug() << QString("%1: %2").arg(title, message);
+	});
 }
 
 void TaskflowWorkflowPlanExecutor::handleStageException(

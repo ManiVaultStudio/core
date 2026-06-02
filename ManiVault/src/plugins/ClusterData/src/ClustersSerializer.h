@@ -31,14 +31,8 @@ public:
     /** The format version number for the cluster serialization. This constant is used to indicate the version of the serialization format being used, allowing for compatibility checks and potential future updates to the serialization logic while maintaining backward compatibility with older versions. */
     static constexpr quint32 FormatVersion = 2;
 
-    /**
-     * @brief Creates a workflow plan that deserializes a QVariantMap into a vector of Cluster objects.
-     * @param map The QVariantMap that contains the serialized cluster data that needs to be deserialized into a vector of Cluster objects.
-     * @param clusters The vector of Cluster objects that will be populated with the deserialized data from the QVariantMap during the workflow execution.
-     * @param parentExecutionContext The shared workflow execution context that will be passed to the workflow plan during its execution.
-     * @return A UniqueWorkflowPlan object that represents the workflow plan for deserializing the given QVariantMap into a vector of Cluster objects.
-     */
-    static void fromVariantMapScoped(const QVariantMap& map, QVector<Cluster>& clusters, SharedWorkflowExecutionContext parentExecutionContext);
+   
+    static UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& map, QVector<Cluster>& clusters, SharedWorkflowExecutionContext parentExecutionContext);
 
     
     static QVariantMap toVariantMapScoped(const QVector<Cluster>& clusters, SharedWorkflowExecutionContext parentExecutionContext);

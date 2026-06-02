@@ -369,19 +369,15 @@ void DataHierarchyManager::fromVariantMapScoped(const QVariantMap& variantMap, S
         return getRawBlockObjectSize(rawA) > getRawBlockObjectSize(rawB);
     });
 
-    WorkflowPlan::Jobs datasetJobs;
-
     for (const auto& dataVariantMap : datasetMaps) {
         const auto datasetId    = dataVariantMap["ID"].toString();
         const auto datasetName  = dataVariantMap["Name"].toString();
 
-        datasetJobs.emplace_back(datasetName, [datasetId, dataVariantMap, datasetName](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-            mv::data().getDataset(datasetId)->fromVariantMapScoped(dataVariantMap, executionContext);
+        plan->addNestedWorkflowStage(datasetName, [datasetId, dataVariantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+            return mv::data().getDataset(datasetId)->fromVariantMapWorkflow(dataVariantMap, executionContext);
         });
     }
 
-    plan->addBatchedParallelStage("Load datasets", std::move(datasetJobs), 4);
-    //loadDatasetsPlan->addSequentialStage("Load datasets", std::move(datasetJobs));
     plan->addSequentialStage("Notify datasets", [this](const WorkflowPlan::Job& job) {
         for (const auto& item : _items) {
             events().notifyDatasetDataChanged(item->getDataset());

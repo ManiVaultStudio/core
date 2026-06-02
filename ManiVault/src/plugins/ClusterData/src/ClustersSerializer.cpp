@@ -90,46 +90,47 @@ namespace
     }
 }
 
-void ClustersSerializer::fromVariantMapScoped(
-    const QVariantMap& map,
-    QVector<Cluster>& clusters,
-    SharedWorkflowExecutionContext parentExecutionContext)
+UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap& map, QVector<Cluster>& clusters, SharedWorkflowExecutionContext parentExecutionContext)
 {
-    const auto version = map.value("ClustersFormatVersion").toUInt();
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    if (version != FormatVersion)
-        throw std::runtime_error("Unsupported cluster serialization format version");
+    plan->addSequentialStage("Load", [map, &clusters](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& parentExecutionContext) {
+        const auto version = map.value("ClustersFormatVersion").toUInt();
 
-    QElapsedTimer timer;
-    timer.start();
+        if (version != FormatVersion)
+            throw std::runtime_error("Unsupported cluster serialization format version");
 
-    const auto metaData = bytesFromBlobVariantMap(map.value("ClustersMetaData").toMap(), parentExecutionContext);
+        QElapsedTimer timer;
+        timer.start();
 
-    auto decoded = deserializeHeaders(metaData);
+        const auto metaData = bytesFromBlobVariantMap(map.value("ClustersMetaData").toMap(), parentExecutionContext);
 
-    Indices allIndices;
+        auto decoded = deserializeHeaders(metaData);
 
-    if (decoded.hasEmbeddedIndices) {
-        allIndices = std::move(decoded.embeddedIndices);
-    }
-    else {
-        const auto indicesRawData = bytesFromBlobVariantMap(map.value("ClustersIndicesRawData").toMap(), parentExecutionContext);
+        Indices allIndices;
 
-        if ((indicesRawData.size() % static_cast<qsizetype>(sizeof(unsigned int))) != 0)
-            throw std::runtime_error("Invalid cluster index raw data size");
+        if (decoded.hasEmbeddedIndices) {
+            allIndices = std::move(decoded.embeddedIndices);
+        }
+        else {
+            const auto indicesRawData = bytesFromBlobVariantMap(map.value("ClustersIndicesRawData").toMap(), parentExecutionContext);
 
-        allIndices.resize(
-            static_cast<std::size_t>(indicesRawData.size()) / sizeof(unsigned int));
+            if ((indicesRawData.size() % static_cast<qsizetype>(sizeof(unsigned int))) != 0)
+                throw std::runtime_error("Invalid cluster index raw data size");
 
-        std::memcpy(allIndices.data(),indicesRawData.constData(), static_cast<std::size_t>(indicesRawData.size()));
-    }
+            allIndices.resize(
+                static_cast<std::size_t>(indicesRawData.size()) / sizeof(unsigned int));
 
-    clusters = rebuildClusters(decoded.headers, allIndices);
+            std::memcpy(allIndices.data(), indicesRawData.constData(), static_cast<std::size_t>(indicesRawData.size()));
+        }
+
+        clusters = rebuildClusters(decoded.headers, allIndices);
+    });
+
+    return plan;
 }
 
-QVariantMap ClustersSerializer::toVariantMapScoped(
-    const QVector<Cluster>& clusters,
-    SharedWorkflowExecutionContext parentExecutionContext)
+QVariantMap ClustersSerializer::toVariantMapScoped(const QVector<Cluster>& clusters, SharedWorkflowExecutionContext parentExecutionContext)
 {
     Headers headers;
     Indices allIndices;

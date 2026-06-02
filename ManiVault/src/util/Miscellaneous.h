@@ -309,6 +309,13 @@ CORE_EXPORT void printLine(const QString& key, const QVariant& value = {}, int i
 CORE_EXPORT void prettyPrintVariantMap(const QVariantMap& variantMap);
 
 /**
+ * Convert a QVariantMap to a pretty-printed string with aligned colons
+ * @param variantMap Map to convert
+ * @return Pretty-printed string representation of the map
+ */
+CORE_EXPORT QString prettyVariantMapString(const QVariantMap& variantMap);
+
+/**
  * Convert a QVariantMap to a pretty-printed string with indentation
  * @param variantMap Map to convert
  * @param indent Number of spaces to indent (default is 0)

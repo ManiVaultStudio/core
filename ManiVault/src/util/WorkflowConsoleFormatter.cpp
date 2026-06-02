@@ -48,17 +48,17 @@ QString WorkflowConsoleFormatter::labelForEntity(const QString& entity)
     return "Item";
 }
 
-QString WorkflowConsoleFormatter::format(SeverityLevel severity, const QString& text, const QString&, const QVariantMap& details, std::uint32_t maxDepth /*= std::numeric_limits<std::uint32_t>::max()*/)
+QString WorkflowConsoleFormatter::format(SeverityLevel severity, const QString& text, const QString& location, const QVariantMap& details, std::uint32_t maxDepth /*= std::numeric_limits<std::uint32_t>::max()*/)
 {
     const auto event = details.value("event").toString();
     const auto entity = details.value("entity").toString();
 
     if (event.isEmpty() || entity.isEmpty()) {
         switch (severity) {
-        case SeverityLevel::Info:    return QString("[INFO] %1").arg(text);
-        case SeverityLevel::Warning: return QString("[WARNING] %1").arg(text);
-        case SeverityLevel::Error:
-        case SeverityLevel::Fatal:   return QString("[ERROR] %1").arg(text);
+	        case SeverityLevel::Info:    return QString("[INFO] %1").arg(text);
+	        case SeverityLevel::Warning: return QString("[WARNING] %1").arg(text);
+	        case SeverityLevel::Error:
+	        case SeverityLevel::Fatal:   return QString("[ERROR] %1").arg(text);
         }
 
         return text;
@@ -88,8 +88,12 @@ QString WorkflowConsoleFormatter::format(SeverityLevel severity, const QString& 
         line = line.leftJustified(durationColumn, QLatin1Char(' ')) + duration;
     }
 
-    if (event == "failed" && details.contains("error"))
-        line += QString("  ERROR: %1").arg(details.value("error").toString());
+    if (event == "failed") {
+        if (details.contains("error"))
+            line += QString("  ERROR: %1").arg(details.value("error").toString());
+
+        line += "\n" + prettyVariantMapString(details);
+    }
 
     if (event == "skipped" && details.contains("reason"))
         line += QString("  SKIPPED: %1").arg(details.value("reason").toString());

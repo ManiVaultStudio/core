@@ -91,7 +91,7 @@ public: // Serialization
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
-    void fromVariantMapScoped(const QVariantMap& variantMap, util::SharedWorkflowExecutionContext parentExecutionContext) override;
+    util::UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, util::SharedWorkflowExecutionContext parentExecutionContext = nullptr) override;
 
     QVariantMap toVariantMapScoped(util::SharedWorkflowExecutionContext parentExecutionContext) const override;
 

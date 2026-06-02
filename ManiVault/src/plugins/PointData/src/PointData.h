@@ -468,14 +468,8 @@ public: // Sparse data, test implementation
     };
 
 public: // Serialization
-    /**
-     * Load point data from variant map
-     * @param variantMap Variant map representation of the point data
-     */
-    void fromVariantMap(const QVariantMap& variantMap) final;
 
-    void fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext) override;
-
+    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext = nullptr) override;
     /**
      * Load widget action from variant for app versions prior to 5.0.0
      * @param variantMap Variant representation of the widget action
@@ -990,23 +984,7 @@ public: // Selection
 
 public: // Serialization
 
-    /**
-     * Load widget action from variant
-     * @param variantMap Variant map representation of the widget action
-     * @return Variant representation of the widget action
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
-
-    void fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext) override;
-
-    /**
-     * Create a workflow plan that loads the point data state from a variant map.
-     *
-     * @note See the documentation of Serializable::fromVariantMapWorkflow() for important information about the expected behavior of this function.
-     * @param variantMap Variant map representation of the object state.
-     * @param parentContext Optional parent workflow execution context to which the loading workflow will be attached as a child. This can be used to integrate the loading workflow into a larger workflow hierarchy, allowing it to report progress and messages in the context of the parent workflow execution.
-     * @return Workflow plan that restores the object state when executed.
-     */
+    // TODO
     UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext = nullptr) override;
 
     /**
