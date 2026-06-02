@@ -32,10 +32,10 @@ public:
     static constexpr quint32 FormatVersion = 2;
 
    
-    static UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& map, QVector<Cluster>& clusters, SharedWorkflowExecutionContext parentExecutionContext);
+    static UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& map, QVector<Cluster>& clusters, SharedWorkflowExecutionContext executionContext);
 
     
-    static QVariantMap toVariantMapScoped(const QVector<Cluster>& clusters, SharedWorkflowExecutionContext parentExecutionContext);
+    static QVariantMap toVariantMapScoped(const QVector<Cluster>& clusters, SharedWorkflowExecutionContext executionContext);
 
     
 
@@ -74,11 +74,6 @@ private:
      */
     static std::vector<unsigned int> buildIndexBuffer(const QVector<Cluster>& clusters, std::vector<Header>& headers);
 
-    /**
-     * @brief Reconstructs a vector of Cluster objects from the provided headers and index buffer.
-     * @param headers The vector of Header structures containing information about each cluster, including name, id, color, index offset, index count, median, mean, and standard deviation.
-     * @param allIndices The vector of unsigned int containing the concatenated indices for all clusters, where the indices for each cluster can be determined using the index offsets and counts specified in the headers.
-     * @return A QVector of Cluster objects reconstructed from the provided headers and index buffer, where each Cluster object is populated with its corresponding name, id, color, indices, median, mean, and standard deviation based on the information in the headers and the indices in the index buffer.
-     */
-    static QVector<Cluster> rebuildClusters(const std::vector<Header>& headers, const std::vector<unsigned int>& allIndices);
+    // TODO
+    //static QVector<Cluster> rebuildClusters(const std::vector<Header>& headers, const std::vector<unsigned int>& allIndices, SharedWorkflowExecutionContext executionContext);
 };
