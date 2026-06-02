@@ -197,11 +197,8 @@ public: // IO
 
 public: // Serialization
 
-    /**
-     * Load layout from variant
-     * @param variantMap Variant representation of the manager
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    // TODO
+    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext executionContext = nullptr) override;
 
     // TODO
     UniqueWorkflowPlan toVariantMapWorkflow() const override;

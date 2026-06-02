@@ -134,6 +134,47 @@ bool EventManager::areDatasetsPartOfSelectionGroup(Dataset<DatasetImpl> d1, Data
     return foundGroup;
 }
 
+UniqueWorkflowPlan EventManager::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext executionContext)
+{
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
+
+    plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, [[ maybe_unused ]] const SharedWorkflowExecutionContext& executionContext) {
+        AbstractEventManager::fromVariantMap(variantMap);
+
+        variantMapMustContain(variantMap, "SelectionGroups");
+
+        QVariantList selectionGroupsList = variantMap["SelectionGroups"].value<QVariantList>();
+
+        _selectionGroups.resize(selectionGroupsList.size());
+
+        for (int i = 0; i < selectionGroupsList.size(); i++)
+            _selectionGroups[i].fromVariantMap(selectionGroupsList[i].toMap());
+    });
+
+    return plan;
+}
+
+UniqueWorkflowPlan EventManager::toVariantMapWorkflow() const
+{
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
+
+    plan->addSequentialStage("Save", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        auto variantMap = AbstractEventManager::toVariantMap();
+
+        QVariantList selectionGroups;
+
+        for (auto& selectionGroup : _selectionGroups) {
+            selectionGroups.append(selectionGroup.toVariantMap());
+        }
+
+        variantMap["SelectionGroups"] = selectionGroups;
+
+        executionContext->publishResultValue(getSerializationName(), variantMap);
+	});
+
+    return plan;
+}
+
 void EventManager::notifyDatasetAdded(const Dataset<DatasetImpl>& dataset)
 {
     try {
@@ -348,35 +389,6 @@ void EventManager::notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset)
     catch (...) {
         exceptionMessageBox("Unable to notify that a data was unlocked");
     }
-}
-
-void EventManager::fromVariantMap(const QVariantMap& variantMap)
-{
-    AbstractEventManager::fromVariantMap(variantMap);
-
-    variantMapMustContain(variantMap, "SelectionGroups");
-
-    QVariantList selectionGroupsList = variantMap["SelectionGroups"].value<QVariantList>();
-
-    _selectionGroups.resize(selectionGroupsList.size());
-    for (int i = 0; i < selectionGroupsList.size(); i++)
-        _selectionGroups[i].fromVariantMap(selectionGroupsList[i].toMap());
-}
-
-QVariantMap EventManager::toVariantMap() const
-{
-    QVariantMap variantMap = AbstractEventManager::toVariantMap();
-
-    QVariantList selectionGroups;
-
-    for (auto& selectionGroup : _selectionGroups)
-    {
-        selectionGroups.append(selectionGroup.toVariantMap());
-    }
-
-    variantMap["SelectionGroups"] = selectionGroups;
-
-    return variantMap;
 }
 
 }

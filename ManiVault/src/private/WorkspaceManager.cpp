@@ -597,25 +597,31 @@ Workspace* WorkspaceManager::getCurrentWorkspace()
     return _workspace.get();
 }
 
-void WorkspaceManager::fromVariantMap(const QVariantMap& variantMap)
+UniqueWorkflowPlan WorkspaceManager::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext executionContext)
 {
-    getCurrentWorkspace()->fromVariantMap(variantMap);
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
 
-    variantMapMustContain(variantMap, "DockManagers");
+    plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, [[ maybe_unused ]] const SharedWorkflowExecutionContext& executionContext) {
+        getCurrentWorkspace()->fromVariantMap(variantMap);
 
-    const auto dockingManagersMap = variantMap["DockManagers"].toMap();
+        variantMapMustContain(variantMap, "DockManagers");
 
-    variantMapMustContain(dockingManagersMap, "Main");
-    variantMapMustContain(dockingManagersMap, "ViewPlugins");
+        const auto dockingManagersMap = variantMap["DockManagers"].toMap();
 
-    _mainDockManager->fromVariantMap(dockingManagersMap["Main"].toMap());
-    _viewPluginsDockManager->fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
+        variantMapMustContain(dockingManagersMap, "Main");
+        variantMapMustContain(dockingManagersMap, "ViewPlugins");
 
-    for (auto viewPluginDockWidget : _mainDockManager->getViewPluginDockWidgets(true))
-        viewPluginDockWidget->restoreViewPluginState();
+        _mainDockManager->fromVariantMap(dockingManagersMap["Main"].toMap());
+        _viewPluginsDockManager->fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
 
-    for (auto viewPluginDockWidget : _viewPluginsDockManager->getViewPluginDockWidgets(true))
-        viewPluginDockWidget->restoreViewPluginState();
+        for (auto viewPluginDockWidget : _mainDockManager->getViewPluginDockWidgets(true))
+            viewPluginDockWidget->restoreViewPluginState();
+
+        for (auto viewPluginDockWidget : _viewPluginsDockManager->getViewPluginDockWidgets(true))
+            viewPluginDockWidget->restoreViewPluginState();
+    });
+
+    return plan;
 }
 
 UniqueWorkflowPlan WorkspaceManager::toVariantMapWorkflow() const

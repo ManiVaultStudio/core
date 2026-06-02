@@ -106,17 +106,11 @@ public:
 
 public: // Serialization
 
-    /**
-     * Load event manager from variant
-     * @param Variant representation of the event manager
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    // TODO
+    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext executionContext = nullptr) override;
 
-    /**
-     * Save event manager to variant
-     * @return Variant representation of the event manager
-     */
-    QVariantMap toVariantMap() const override;
+    // TODO
+    UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 private:
     std::vector<EventListener*>         _eventListeners;    /** List of classes listening for core events */
