@@ -230,6 +230,7 @@ UniqueWorkflowPlan Project::toVariantMapWorkflow() const
     addManagerJob(mv::plugins());
     addManagerJob(mv::actions());
     addManagerJob(mv::dataHierarchy());
+    addManagerJob(mv::events());
 
     //managerJobs.emplace_back(events().getSerializationName(), [context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
     //    auto result = WorkflowRuntimeScoped::instance().executeBlocking(events().toVariantMapWorkflow(), executionContext);

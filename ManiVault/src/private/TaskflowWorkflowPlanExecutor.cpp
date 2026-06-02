@@ -468,23 +468,19 @@ void TaskflowWorkflowPlanExecutor::addWorkflowFinishedNotification(
         QString message;
 
         if (!result->hasWarnings() && !result->hasErrors()) {
-            message = QString("Completed successfully, see the <a href='%1'>report</a> for details")
-                .arg(QString("%1&levels=info").arg(url));
+            message = QString("Completed successfully, see the <a href='%1'>report</a> for details").arg(QString("%1&levels=info").arg(url));
         }
 
         if (result->hasWarnings() && !result->hasErrors()) {
-            message = QString("Completed with <a href=\"%1\">warnings</a>. Review the report.")
-                .arg(QString("%1&levels=warning").arg(url));
+            message = QString("Completed with <a href=\"%1\">warnings</a>. Review the report.").arg(QString("%1&levels=warning").arg(url));
         }
 
         if (!result->hasWarnings() && result->hasErrors()) {
-            message = QString("Completed with <a href=\"%1\">errors</a>. Review the report.")
-                .arg(QString("%1&levels=error").arg(url));
+            message = QString("Completed with <a href=\"%1\">errors</a>. Review the report.").arg(QString("%1&levels=warning,error").arg(url));
         }
 
         if (result->hasWarnings() && result->hasErrors()) {
-            message = QString("Completed with <a href=\"%1\">warnings</a> and <a href=\"%1\">errors</a>. Review the report.")
-                .arg(QString("%1&levels=warning,error,critical").arg(url));
+            message = QString("Completed with <a href=\"%1\">warnings</a> and <a href=\"%1\">errors</a>. Review the report.").arg(QString("%1&levels=warning,error,critical").arg(url));
         }
 
         if (!message.isEmpty()) {
