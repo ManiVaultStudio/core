@@ -11,6 +11,8 @@
 #include <QListView>
 #include <QStringListModel>
 
+using namespace mv;
+
 EditProxyDatasetsAction::EditProxyDatasetsAction(QObject* parent, const Dataset<Points>& points) :
     WidgetAction(parent, "Edit Proxy Datasets"),
     _points(points)

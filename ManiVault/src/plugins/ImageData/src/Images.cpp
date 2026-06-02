@@ -8,7 +8,7 @@
 #include "InfoAction.h"
 
 #include <util/Exception.h>
-#include <util/Timer.h>
+//#include <util/Timer.h>
 
 #include <DataHierarchyItem.h>
 #include <Dataset.h>
@@ -25,6 +25,7 @@
 
 #include <QDebug>
 
+using namespace mv;
 using namespace mv::util;
 
 Images::Images(QString dataName, bool mayUnderive /*= false*/, const QString& guid /*= ""*/) :

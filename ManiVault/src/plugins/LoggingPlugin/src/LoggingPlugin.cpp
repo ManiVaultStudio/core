@@ -13,6 +13,7 @@ Q_PLUGIN_METADATA(IID "studio.manivault.LoggingPlugin")
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::plugin;
 
 LoggingPlugin::LoggingPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),

@@ -8,8 +8,6 @@
 
 #include <ViewPlugin.h>
 
-using namespace mv::plugin;
-
 /**
  * Logging view plugin
  *
@@ -17,7 +15,7 @@ using namespace mv::plugin;
  *
  * @author Thomas Kroes
  */
-class LoggingPlugin : public ViewPlugin
+class LoggingPlugin : public mv::plugin::ViewPlugin
 {
     Q_OBJECT
     
@@ -27,7 +25,7 @@ public:
      * Construct with pointer to plugin \p factory
      * @param factory Pointer to plugin factory
      */
-    LoggingPlugin(const PluginFactory* factory);
+    LoggingPlugin(const mv::plugin::PluginFactory* factory);
 
     /** Perform plugin initialization */
     void init() override;
@@ -41,7 +39,7 @@ private:
  *
  * @author Thomas Kroes
  */
-class LoggingPluginFactory : public ViewPluginFactory
+class LoggingPluginFactory : public mv::plugin::ViewPluginFactory
 {
     Q_INTERFACES(mv::plugin::ViewPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
@@ -63,5 +61,5 @@ public:
      * Produces the plugin
      * @return Pointer to the produced plugin
      */
-    ViewPlugin* produce() override;
+    mv::plugin::ViewPlugin* produce() override;
 };

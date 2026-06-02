@@ -10,8 +10,6 @@
 
 #include <actions/TriggerAction.h>
 
-using namespace mv::plugin;
-
 /**
  * Data properties plugin
  *
@@ -19,7 +17,7 @@ using namespace mv::plugin;
  *
  * @author Thomas Kroes
  */
-class DataPropertiesPlugin : public ViewPlugin
+class DataPropertiesPlugin : public mv::plugin::ViewPlugin
 {
     Q_OBJECT
     
@@ -29,7 +27,7 @@ public:
      * Construct with pointer to plugin \p factory
      * @param factory Pointer to plugin factory
      */
-    DataPropertiesPlugin(const PluginFactory* factory);
+    DataPropertiesPlugin(const mv::plugin::PluginFactory* factory);
 
     /** Perform plugin initialization */
     void init() override;
@@ -40,14 +38,14 @@ protected:
      * Updates the window title based on the \p selectedDataHierarchyItems in the data hierarchy
      * @param selectedDataHierarchyItems Items selected in the data hierarchy
      */
-    void updateWindowTitle(DataHierarchyItems selectedDataHierarchyItems);
+    void updateWindowTitle(mv::DataHierarchyItems selectedDataHierarchyItems);
 
 private:
-    gui::TriggerAction      _additionalEditorAction;    /** Trigger action to start the data set editor */
+    mv::gui::TriggerAction  _additionalEditorAction;    /** Trigger action to start the data set editor */
     DataPropertiesWidget    _dataPropertiesWidget;      /** Data properties widget */
 };
 
-class DataPropertiesPluginFactory : public ViewPluginFactory
+class DataPropertiesPluginFactory : public mv::plugin::ViewPluginFactory
 {
     Q_INTERFACES(mv::plugin::ViewPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
@@ -75,5 +73,5 @@ public:
      * Produces the plugin
      * @return Pointer to the produced plugin
      */
-    ViewPlugin* produce() override;
+    mv::plugin::ViewPlugin* produce() override;
 };

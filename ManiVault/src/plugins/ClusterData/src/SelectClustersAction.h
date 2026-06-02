@@ -8,9 +8,6 @@
 #include <actions/WidgetAction.h>
 #include <actions/WidgetActionWidget.h>
 
-using namespace mv;
-using namespace mv::gui;
-
 class ClustersActionWidget;
 
 /**
@@ -20,12 +17,12 @@ class ClustersActionWidget;
  *
  * @author Thomas Kroes
  */
-class SelectClustersAction : public WidgetAction
+class SelectClustersAction : public mv::gui::WidgetAction
 {
 protected:
 
     /** Widget class for select clusters action */
-    class Widget : public WidgetActionWidget {
+    class Widget : public mv::gui::WidgetActionWidget {
     public:
 
         /**
@@ -56,13 +53,13 @@ public:
 
 public: // Action getters
 
-    TriggerAction& getSelectAllAction() { return _selectAllAction; }
-    TriggerAction& getSelectNoneAction() { return _selectNoneAction; }
-    TriggerAction& getSelectInvertAction() { return _selectInvertAction; }
+    mv::gui::TriggerAction& getSelectAllAction() { return _selectAllAction; }
+    mv::gui::TriggerAction& getSelectNoneAction() { return _selectNoneAction; }
+    mv::gui::TriggerAction& getSelectInvertAction() { return _selectInvertAction; }
 
 protected:
     ClustersActionWidget*   _clustersActionWidget;      /** Pointer to clusters action widget */
-    TriggerAction           _selectAllAction;           /** Select all clusters action */
-    TriggerAction           _selectNoneAction;          /** Clear cluster selection action */
-    TriggerAction           _selectInvertAction;        /** Invert the cluster selection action */
+    mv::gui::TriggerAction           _selectAllAction;           /** Select all clusters action */
+    mv::gui::TriggerAction           _selectNoneAction;          /** Clear cluster selection action */
+    mv::gui::TriggerAction           _selectInvertAction;        /** Invert the cluster selection action */
 };

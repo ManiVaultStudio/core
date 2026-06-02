@@ -28,8 +28,6 @@
 #include <variant>
 #include <vector>
 
-using namespace mv::plugin;
-
 namespace mv
 {
     // From "graphics/Vector2f.h"
@@ -205,7 +203,7 @@ public:
     template <std::size_t N>
     using ElementTypeAt = typename std::variant_alternative_t<N, VariantOfVectors>::value_type;
 
-    PointData(PluginFactory* factory) : RawData(factory, PointType) { }
+    PointData(mv::plugin::PluginFactory* factory) : RawData(factory, PointType) { }
     ~PointData() override = default;
 
     void init() override;
@@ -1019,7 +1017,7 @@ public:
 // Factory
 // =============================================================================
 
-class PointDataFactory : public RawDataFactory
+class PointDataFactory : public mv::plugin::RawDataFactory
 {
     Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
         Q_OBJECT

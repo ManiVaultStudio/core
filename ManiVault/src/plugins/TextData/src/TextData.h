@@ -14,9 +14,6 @@
 #include <QString>
 #include <vector>
 
-using namespace mv;
-using namespace mv::plugin;
-
 class InfoAction;
 
 // =============================================================================
@@ -32,7 +29,7 @@ const mv::DataType TextType = mv::DataType(QString("Text"));
 class TEXTDATA_EXPORT TextData : public mv::plugin::RawData
 {
 public:
-    TextData(PluginFactory* factory) :
+    TextData(mv::plugin::PluginFactory* factory) :
         mv::plugin::RawData(factory, TextType)
     {
     }
@@ -46,7 +43,7 @@ public:
      * @param guid Globally unique dataset identifier (use only for deserialization)
      * @return Smart pointer to dataset
      */
-    Dataset<DatasetImpl> createDataSet(const QString& guid = "") const override;
+    mv::Dataset<mv::DatasetImpl> createDataSet(const QString& guid = "") const override;
 
     /**
      * Determine if a column exists with the given header name
@@ -113,14 +110,14 @@ public: // Serialization
     QVariantMap toVariantMap() const override;
 
 private:
-    OrderedMap _data;
+    mv::OrderedMap _data;
 };
 
-class TEXTDATA_EXPORT Text : public DatasetImpl
+class TEXTDATA_EXPORT Text : public mv::DatasetImpl
 {
 public:
     Text(QString dataName, bool mayUnderive = true, const QString& guid = "") :
-        DatasetImpl(dataName, mayUnderive, guid),
+        mv::DatasetImpl(dataName, mayUnderive, guid),
         _infoAction(nullptr)
     {
     }
@@ -129,7 +126,7 @@ public:
 
     void init() override;
 
-    Dataset<DatasetImpl> copy() const override
+    mv::Dataset<DatasetImpl> copy() const override
     {
         auto text = new Text(getRawDataName());
 
@@ -173,7 +170,7 @@ public: // Subsetting
      * @param visible Whether the subset will be visible in the UI
      * @return Smart pointer to the created subset
      */
-    Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const override
+    mv::Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const mv::Dataset<DatasetImpl>& parentDataSet = mv::Dataset<DatasetImpl>(), const bool& visible = true) const override
     {
         return mv::data().createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
@@ -239,7 +236,7 @@ public: // Selection
 // Factory
 // =============================================================================
 
-class TextDataFactory : public RawDataFactory
+class TextDataFactory : public mv::plugin::RawDataFactory
 {
     Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
     Q_OBJECT

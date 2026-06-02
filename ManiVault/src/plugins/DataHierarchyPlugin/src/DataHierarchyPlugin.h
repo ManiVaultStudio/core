@@ -8,16 +8,14 @@
 
 #include <ViewPlugin.h>
 
-using namespace mv::plugin;
-
 /**
  * Data hierarchy view plugin
  *
- * This plugin visualizes the data hierarchy and allows users the interact with it.
+ * This plugin visualizes the data hierarchy and allows users to interact with it.
  *
  * @author Thomas Kroes
  */
-class DataHierarchyPlugin : public ViewPlugin
+class DataHierarchyPlugin : public mv::plugin::ViewPlugin
 {
     Q_OBJECT
     
@@ -27,7 +25,7 @@ public:
      * Construct with pointer to plugin \p factory
      * @param factory Pointer to plugin factory
      */
-    DataHierarchyPlugin(const PluginFactory* factory);
+    DataHierarchyPlugin(const mv::plugin::PluginFactory* factory);
 
     /** Perform plugin initialization */
     void init() override;
@@ -36,7 +34,7 @@ private:
     DataHierarchyWidget     _dataHierarchyWidget;       /** Data hierarchy widget */
 };
 
-class DataHierarchyPluginFactory : public ViewPluginFactory
+class DataHierarchyPluginFactory : public mv::plugin::ViewPluginFactory
 {
     Q_INTERFACES(mv::plugin::ViewPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
@@ -67,5 +65,5 @@ public:
      * Produces the plugin
      * @return Pointer to the produced plugin
      */
-    ViewPlugin* produce() override;
+    mv::plugin::ViewPlugin* produce() override;
 };
