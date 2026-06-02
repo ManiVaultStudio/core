@@ -41,8 +41,8 @@ UniqueWorkflowPlan PropertiesSerializer::fromVariantMapWorkflow(const QVariantMa
 
     WorkflowPlan::Jobs jobs;
 
-    jobs.emplace_back("Process headers", [propertiesMap, &destinationPropertiesMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& context) {
-        destinationPropertiesMap = loadOptimizedVariant(propertiesMap).toMap();
+    jobs.emplace_back("Process headers", [propertiesMap, &destinationPropertiesMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) {
+        destinationPropertiesMap = loadOptimizedVariant(propertiesMap, jobExecutionContext).toMap();
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 
     plan->addParallelStage("Preprocessing", jobs);

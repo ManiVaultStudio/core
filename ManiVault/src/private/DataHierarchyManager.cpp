@@ -292,12 +292,7 @@ void DataHierarchyManager::removeAllItems()
     _items.clear();
 }
 
-void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
-{
-    fromVariantMapScoped(variantMap, nullptr);
-}
-
-void DataHierarchyManager::fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext)
+UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
@@ -384,7 +379,7 @@ void DataHierarchyManager::fromVariantMapScoped(const QVariantMap& variantMap, S
         }
 	});
 
-    auto result = Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan), parentExecutionContext);
+    return plan;
 }
 
 QVariantMap DataHierarchyManager::toVariantMapScoped(SharedWorkflowExecutionContext parentExecutionContext) const

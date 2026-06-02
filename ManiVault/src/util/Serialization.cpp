@@ -477,6 +477,9 @@ DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, 
 
 UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
 {
+    if (!parentContext)
+        throw std::invalid_argument("parentContext is null");
+
     if (variantMap.isEmpty()) {
 	    throw ManiVaultException(
 			SeverityLevel::Error,
@@ -650,6 +653,9 @@ UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMa
 
 void populateBytesFromBlobMap(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext)
 {
+    if (!parentContext)
+        throw std::invalid_argument("parentContext is null");
+
     if (!destination)
         throw std::invalid_argument("populateBytesFromBlobMap destination is null");
 
@@ -663,6 +669,9 @@ void populateBytesFromBlobMap(const QVariantMap& variantMap, char* destination, 
 
 QByteArray bytesFromBlobVariantMap(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
 {
+    if (!parentContext)
+        throw std::invalid_argument("parentContext is null");
+
     if (variantMap.isEmpty()) {
         throw ManiVaultException(
             SeverityLevel::Error,
@@ -1046,10 +1055,7 @@ QVariant saveTypedVector(const QVariantList& list, const QString& typeName)
     raw["Type"] = typeName;
     raw["Count"] = static_cast<qulonglong>(values.size());
 
-    raw["Data"] = bytesToBlobVariantMap(
-        reinterpret_cast<const char*>(values.constData()),
-        static_cast<std::uint64_t>(values.size() * sizeof(T))
-    );
+    raw["Data"] = bytesToBlobVariantMap(reinterpret_cast<const char*>(values.constData()), static_cast<std::uint64_t>(values.size() * sizeof(T)));
 
     return raw;
 }
@@ -1179,25 +1185,25 @@ QVariant saveOptimizedVariantList(const QVariantList& list)
 	return target;
 }
 
-QVariantMap loadOptimizedVariantMap(const QVariantMap& source)
+QVariantMap loadOptimizedVariantMap(const QVariantMap& source, const SharedWorkflowExecutionContext& context)
 {
 	QVariantMap target;
 
 	for (auto it = source.cbegin(); it != source.cend(); ++it)
-		target.insert(it.key(), loadOptimizedVariant(it.value()));
+		target.insert(it.key(), loadOptimizedVariant(it.value(), context));
 
 	return target;
 }
 
-QVariant loadOptimizedVariant(const QVariant& source)
+QVariant loadOptimizedVariant(const QVariant& source, const SharedWorkflowExecutionContext& context)
 {
 	if (source.metaType().id() == QMetaType::QVariantMap) {
 		const QVariantMap map = source.toMap();
 
 		if (map.value("__OptimizedVariantList").toBool())
-			return loadOptimizedVariantList(map);
+			return loadOptimizedVariantList(map, context);
 
-		return loadOptimizedVariantMap(map);
+		return loadOptimizedVariantMap(map, context);
 	}
 
 	if (source.metaType().id() == QMetaType::QVariantList) {
@@ -1207,7 +1213,7 @@ QVariant loadOptimizedVariant(const QVariant& source)
 		target.reserve(list.size());
 
 		for (const QVariant& item : list)
-			target.append(loadOptimizedVariant(item));
+			target.append(loadOptimizedVariant(item, context));
 
 		return target;
 	}
@@ -1266,7 +1272,7 @@ QVariantList loadBoolList(const QByteArray& bytes, qsizetype count)
     return list;
 }
 
-QVariant loadStringList(const QVariantMap& block)
+QVariant loadStringList(const QVariantMap& block, const SharedWorkflowExecutionContext& context)
 {
     if (!block.value("__OptimizedVariantList").toBool())
         return block;
@@ -1278,7 +1284,7 @@ QVariant loadStringList(const QVariantMap& block)
         static_cast<qsizetype>(block.value("Count").toULongLong());
 
     const QVariantMap dataMap = block.value("Data").toMap();
-    QByteArray bytes = bytesFromBlobVariantMap(dataMap);
+    QByteArray bytes = bytesFromBlobVariantMap(dataMap, context);
 
 	QDataStream stream(bytes);
     stream.setVersion(QDataStream::Qt_6_8);
@@ -1317,19 +1323,19 @@ QVariant loadStringList(const QVariantMap& block)
     return list;
 }
 
-QVariant loadOptimizedVariantList(const QVariantMap& map)
+QVariant loadOptimizedVariantList(const QVariantMap& map, const SharedWorkflowExecutionContext& context)
 {
     const QString type = map.value("Type").toString();
 
     if (type == "QStringList")
-        return loadStringList(map);
+        return loadStringList(map, context);
 
     const auto count =
         static_cast<qsizetype>(map.value("Count").toULongLong());
 
     const QVariantMap dataMap = map.value("Data").toMap();
 
-    QByteArray bytes = bytesFromBlobVariantMap(dataMap);
+    QByteArray bytes = bytesFromBlobVariantMap(dataMap, context);
 
     if (type == "BoolArray")
         return loadBoolList(bytes, count);

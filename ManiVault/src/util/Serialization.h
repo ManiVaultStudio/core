@@ -196,9 +196,9 @@ QVariant saveOptimizedVariant(const QVariant& source);
 
 QVariant saveOptimizedVariantList(const QVariantList& list);
 
-QVariantMap loadOptimizedVariantMap(const QVariantMap& source);
+QVariantMap loadOptimizedVariantMap(const QVariantMap& source, const SharedWorkflowExecutionContext& context);
 
-QVariant loadOptimizedVariant(const QVariant& source);
+QVariant loadOptimizedVariant(const QVariant& source, const SharedWorkflowExecutionContext& context);
 
-QVariant loadOptimizedVariantList(const QVariantMap& map);
+QVariant loadOptimizedVariantList(const QVariantMap& map, const SharedWorkflowExecutionContext& context);
 }
