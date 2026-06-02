@@ -662,7 +662,7 @@ void populateBytesFromBlobMap(const QVariantMap& variantMap, char* destination, 
     if (destinationSize == 0)
         return;
 
-    auto plan = populateBytesFromBlobMapWorkflow(variantMap, destination, destinationSize);
+    auto plan = populateBytesFromBlobMapWorkflow(variantMap, destination, destinationSize, parentContext);
 
     WorkflowRuntimeScoped::instance().executeBlocking(std::move(plan), std::move(parentContext));
 }
