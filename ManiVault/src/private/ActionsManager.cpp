@@ -246,14 +246,19 @@ UniqueWorkflowPlan ActionsManager::fromVariantMapWorkflow(const QVariantMap& var
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
 
-    plan->addSequentialStage("Save", [this, variantMap](const WorkflowPlan::Job&, [[ maybe_unused ]] const SharedWorkflowExecutionContext& executionContext) {
+    plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, [[ maybe_unused ]] const SharedWorkflowExecutionContext& executionContext) {
         Serializable::fromVariantMap(variantMap);
 
-        variantMapMustContain(variantMap, "PublicActions");
+        QVariantList publicActionsList;
 
-        const auto publicActionsMap = variantMap["PublicActions"].toList();
+        if (variantMap.contains(getSerializationName()))
+            publicActionsList = variantMap[getSerializationName()].toList();
 
-        for (const auto& publicActionVariant : publicActionsMap) {
+        // Pre 1.5.0
+    	if (variantMap.contains("PublicActions"))
+            publicActionsList = variantMap["PublicActions"].toList();
+
+        for (const auto& publicActionVariant : publicActionsList) {
             const auto publicActionMap      = publicActionVariant.toMap();
             const auto publicActionTitle    = publicActionMap["Title"].toString();
             const auto metaTypeName         = publicActionMap["ActionType"].toString();

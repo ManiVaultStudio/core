@@ -374,15 +374,6 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
         return getRawBlockObjectSize(rawA) > getRawBlockObjectSize(rawB);
     });
 
-    //for (const auto& dataVariantMap : datasetMaps) {
-    //    const auto datasetId    = dataVariantMap["ID"].toString();
-    //    const auto datasetName  = dataVariantMap["Name"].toString();
-
-    //    plan->addNestedWorkflowStage(datasetName, [datasetId, dataVariantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
-    //        return mv::data().getDataset(datasetId)->fromVariantMapWorkflow(dataVariantMap, executionContext);
-    //    });
-    //}
-
     WorkflowPlan::Jobs datasetJobs;
 
     for (const auto& dataVariantMap : datasetMaps) {

@@ -872,11 +872,18 @@ UniqueWorkflowPlan PluginManager::fromVariantMapWorkflow(const QVariantMap& vari
     plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         Serializable::fromVariantMap(variantMap);
 
-        variantMapMustContain(variantMap, "UsedPlugins");
+        QVariantList usedPluginsList;
+
+        if (variantMap.contains(getSerializationName()))
+            usedPluginsList = variantMap[getSerializationName()].toList();
+
+        // Pre 1.5.0
+        if (variantMap.contains("UsedPlugins"))
+            usedPluginsList = variantMap["UsedPlugins"].toList();
 
         QStringList missingPluginKinds;
 
-        for (const auto& usedPlugin : variantMap["UsedPlugins"].toList())
+        for (const auto& usedPlugin : usedPluginsList)
             if (!_pluginFactories.contains(usedPlugin.toString()))
                 missingPluginKinds << usedPlugin.toString();
 
