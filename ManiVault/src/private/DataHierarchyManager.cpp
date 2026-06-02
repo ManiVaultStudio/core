@@ -364,14 +364,40 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
         return getRawBlockObjectSize(rawA) > getRawBlockObjectSize(rawB);
     });
 
-    for (const auto& dataVariantMap : datasetMaps) {
-        const auto datasetId    = dataVariantMap["ID"].toString();
-        const auto datasetName  = dataVariantMap["Name"].toString();
+    //for (const auto& dataVariantMap : datasetMaps) {
+    //    const auto datasetId    = dataVariantMap["ID"].toString();
+    //    const auto datasetName  = dataVariantMap["Name"].toString();
 
-        plan->addNestedWorkflowStage(datasetName, [datasetId, dataVariantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
-            return mv::data().getDataset(datasetId)->fromVariantMapWorkflow(dataVariantMap, executionContext);
-        });
+    //    plan->addNestedWorkflowStage(datasetName, [datasetId, dataVariantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+    //        return mv::data().getDataset(datasetId)->fromVariantMapWorkflow(dataVariantMap, executionContext);
+    //    });
+    //}
+
+    WorkflowPlan::Jobs datasetJobs;
+
+    for (const auto& dataVariantMap : datasetMaps) {
+        const auto datasetId = dataVariantMap["ID"].toString();
+        const auto datasetName = dataVariantMap["Name"].toString();
+
+        datasetJobs.emplace_back(
+            datasetName,
+            [datasetId, dataVariantMap](
+                const WorkflowPlan::Job&,
+                const SharedWorkflowExecutionContext& executionContext) {
+
+                    auto dataset = mv::data().getDataset(datasetId);
+
+                    auto nestedPlan = dataset->fromVariantMapWorkflow(
+                        dataVariantMap,
+                        executionContext);
+
+                    WorkflowRuntimeScoped::instance().executeBlocking(
+                        std::move(nestedPlan),
+                        executionContext);
+            });
     }
+
+    plan->addParallelStage("Load datasets", std::move(datasetJobs));
 
     plan->addSequentialStage("Notify datasets", [this](const WorkflowPlan::Job& job) {
         for (const auto& item : _items) {

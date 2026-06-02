@@ -478,7 +478,7 @@ DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, 
 UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
 {
     if (!parentContext)
-        throw std::invalid_argument("parentContext is null");
+        throw ManiVaultException(SeverityLevel::Warning, "Parent context is null", "Please provide a valid parent context to avoid detached parallel work", __FUNCTION__, variantMap);
 
     if (variantMap.isEmpty()) {
 	    throw ManiVaultException(
@@ -654,7 +654,7 @@ UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMa
 void populateBytesFromBlobMap(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext)
 {
     if (!parentContext)
-        throw std::invalid_argument("parentContext is null");
+        throw ManiVaultException(SeverityLevel::Warning, "Parent context is null", "Please provide a valid parent context to avoid detached parallel work", __FUNCTION__, variantMap);
 
     if (!destination)
         throw std::invalid_argument("populateBytesFromBlobMap destination is null");
@@ -670,7 +670,7 @@ void populateBytesFromBlobMap(const QVariantMap& variantMap, char* destination, 
 QByteArray bytesFromBlobVariantMap(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
 {
     if (!parentContext)
-        throw std::invalid_argument("parentContext is null");
+        throw ManiVaultException(SeverityLevel::Warning, "Parent context is null", "Please provide a valid parent context to avoid detached parallel work", __FUNCTION__, variantMap);
 
     if (variantMap.isEmpty()) {
         throw ManiVaultException(
