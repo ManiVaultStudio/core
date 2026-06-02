@@ -399,7 +399,7 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
 
     const auto idealThreads = std::max(1u, std::thread::hardware_concurrency());
 
-    std::size_t datasetBatchSize = 4;
+    std::size_t datasetBatchSize = 8;
 
     if (idealThreads <= 16)
         datasetBatchSize = 2;

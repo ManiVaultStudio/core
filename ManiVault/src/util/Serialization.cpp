@@ -636,7 +636,13 @@ UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMa
 
     const auto idealThreads = std::max(1u, std::thread::hardware_concurrency());
 
-    std::size_t decodeBlockBatchSize = 4;
+    std::size_t decodeBlockBatchSize = 8;
+
+    if (idealThreads <= 64)
+        decodeBlockBatchSize = 16;
+
+    if (idealThreads <= 32)
+        decodeBlockBatchSize = 4;
 
 	if (idealThreads <= 16)
         decodeBlockBatchSize = 2;
@@ -1239,10 +1245,10 @@ QVariantList loadTypedList(const QByteArray& bytes, qsizetype count)
     const auto* src = reinterpret_cast<const T*>(bytes.constData());
 
     QVariantList list;
-    list.reserve(count);
+    list.resize(count);
 
     for (qsizetype i = 0; i < count; ++i)
-        list.append(QVariant::fromValue(src[i]));
+        list[i] = QVariant::fromValue(src[i]);
 
     return list;
 }

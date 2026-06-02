@@ -90,10 +90,7 @@ namespace
     }
 }
 
-UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(
-    const QVariantMap& map,
-    QVector<Cluster>& clusters,
-    SharedWorkflowExecutionContext executionContext)
+UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap& map, QVector<Cluster>& clusters, SharedWorkflowExecutionContext executionContext)
 {
     struct Context {
         std::vector<Header> headers;
