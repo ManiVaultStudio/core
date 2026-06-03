@@ -1042,27 +1042,44 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap,
         DatasetImpl::fromVariantMapWorkflow(variantMap, executionContext);
     });
 
-    //variantMapMustContain(variantMap, "DimensionNames");
-    //variantMapMustContain(variantMap, "Selection");
-
-    //const auto dataMap = variantMap["Data"].toMap();
-
     if (isFull()) {
         plan->addNestedWorkflowStage("Load raw data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
             return getRawData<PointData>()->fromVariantMapWorkflow(variantMap, executionContext);
         });
+
+        plan->addSequentialStage("Load selection", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+            variantMapMustContain(variantMap, "Selection");
+
+            const auto& selectionMap = variantMap["Selection"].toMap();
+
+            const auto count = selectionMap["Count"].toUInt();
+
+            if (count > 0) {
+                auto selectionSet = getSelection<Points>();
+
+                selectionSet->indices.resize(count);
+
+                populateBytesFromBlobMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), count * sizeof(uint32_t));
+
+                events().notifyDatasetDataSelectionChanged(this);
+            }
+        }, WorkflowPlan::JobThreadAffinity::GuiThread);
     }
     else {
-        //variantMapMustContain(variantMap, "Indices");
+        plan->addSequentialStage("Load indices", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+            variantMapMustContain(variantMap, "Indices");
 
-        //const auto& indicesMap = variantMap["Indices"].toMap();
+	        const auto& indicesMap = variantMap["Indices"].toMap();
 
-        //indices.resize(indicesMap["Count"].toUInt());
+	        indices.resize(indicesMap["Count"].toUInt());
 
-        //populateBytesFromBlobMap(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(uint32_t), parentExecutionContext);
+	        populateBytesFromBlobMap(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(uint32_t), executionContext);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread);
     }
 
     plan->addSequentialStage("Load dimensions", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        variantMapMustContain(variantMap, "DimensionNames");
+
         // Load dimension names
         QStringList dimensionNameList;
         std::vector<QString> dimensionNames;
@@ -1099,7 +1116,6 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap,
                 dimensionNames.emplace_back(QString("Dim %1").arg(QString::number(dimensionIndex)));
         }
 
-        qDebug() << "Loaded dimension names:" << dimensionNames;
         setDimensionNames(dimensionNames);
 
         if (variantMap.contains("Dimensions")) {
