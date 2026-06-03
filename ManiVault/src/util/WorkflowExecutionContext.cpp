@@ -336,6 +336,12 @@ QUuid WorkflowExecutionContext::getParentId() const
     return _parentId;
 }
 
+void WorkflowExecutionContext::publishResult(const QVariantMap& values)
+{
+	for (auto it = values.constBegin(); it != values.constEnd(); ++it)
+		publishResultValue(it.key(), it.value());
+}
+
 QVariantMap WorkflowExecutionContext::takeResultValues()
 {
     return _state->takeResultValues();

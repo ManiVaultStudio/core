@@ -302,48 +302,61 @@ void DataHierarchyManager::removeAllItems()
     _items.clear();
 }
 
-UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext)
+UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    const auto loadDataHierarchyItem = [parentExecutionContext](const QVariantMap& dataHierarchyItemMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
-        const auto dataset          = dataHierarchyItemMap["Dataset"].toMap();
-        const auto datasetId        = dataset["ID"].toString();
-        const auto datasetName      = dataset["Name"].toString();
-        const auto pluginKind       = dataset["PluginKind"].toString();
-        const auto isDerived        = dataset["Derived"].toBool();
-        const auto isFull           = dataset["Full"].toBool();
-        const auto sourceDatasetID  = dataset["SourceDatasetID"].toString();
+    const auto loadDataHierarchyItem =
+        [parentExecutionContext](
+            const QVariantMap& itemMap,
+            Dataset<DatasetImpl> parent
+            ) -> Dataset<DatasetImpl>
+        {
+            const auto datasetMap = itemMap["Dataset"].toMap();
+            const auto datasetId = datasetMap["ID"].toString();
+            const auto guiName = itemMap["Name"].toString();
+            const auto pluginKind = datasetMap["PluginKind"].toString();
+            const auto isDerived = datasetMap["Derived"].toBool();
+            const auto isFull = datasetMap["Full"].toBool();
+            const auto sourceDatasetId = datasetMap["SourceDatasetID"].toString();
 
-        auto loadedDataset = (isDerived || !isFull) ? mv::data().createDatasetWithoutSelection(pluginKind, guiName, parent, datasetId) : mv::data().createDataset(pluginKind, guiName, parent, datasetId);
+            auto loadedDataset =
+                (isDerived || !isFull)
+                ? mv::data().createDatasetWithoutSelection(pluginKind, guiName, parent, datasetId)
+                : mv::data().createDataset(pluginKind, guiName, parent, datasetId);
 
-        if (isDerived)
-            loadedDataset->setSourceDataset(sourceDatasetID);
+            if (isDerived && !sourceDatasetId.isEmpty())
+                loadedDataset->setSourceDataset(sourceDatasetId);
 
-        loadedDataset->getDataHierarchyItem().fromVariantMapScoped(dataHierarchyItemMap, parentExecutionContext);
+            loadedDataset->getDataHierarchyItem().fromVariantMap(itemMap);
 
-        return loadedDataset;
-    };
+            return loadedDataset;
+        };
 
-    const std::function<void(const QVariantMap&, Dataset<DatasetImpl>)> populateDataHierarchy = [&populateDataHierarchy, loadDataHierarchyItem](const QVariantMap& variantMap, Dataset<DatasetImpl> parent) -> void {
-        QVector<QPair<QString, std::int32_t>> sortedDatasets;
+    const std::function<void(const QVariantMap&, Dataset<DatasetImpl>)> populateDataHierarchy =
+        [&populateDataHierarchy, &loadDataHierarchyItem](
+            const QVariantMap& itemsMap,
+            Dataset<DatasetImpl> parent
+            )
+        {
+            QVector<QVariantMap> sortedItems;
+            sortedItems.reserve(itemsMap.size());
 
-        sortedDatasets.reserve(variantMap.keys().size());
+            for (const auto& itemId : itemsMap.keys())
+                sortedItems << itemsMap[itemId].toMap();
 
-        for (const auto& datasetId : variantMap.keys()) {
-            const auto sortIndex = variantMap[datasetId].toMap()["SortIndex"].toInt();
-            sortedDatasets.emplace_back(datasetId, sortIndex);
-        }
+            std::sort(sortedItems.begin(), sortedItems.end(),
+                [](const QVariantMap& a, const QVariantMap& b) {
+                    return a["SortIndex"].toInt() < b["SortIndex"].toInt();
+                });
 
-        std::sort(sortedDatasets.begin(), sortedDatasets.end(), [](const auto& a, const auto& b) {
-            return a.second < b.second;  // ascending
-        });
+            for (const auto& itemMap : sortedItems) {
+                auto dataset = loadDataHierarchyItem(itemMap, parent);
+                populateDataHierarchy(itemMap["Children"].toMap(), dataset);
+            }
+        };
 
-        for (const auto& [datasetId, sortIndex] : sortedDatasets)
-            populateDataHierarchy(variantMap[datasetId].toMap()["Children"].toMap(), loadDataHierarchyItem(variantMap[datasetId].toMap(), variantMap[datasetId].toMap()["Name"].toString(), parent));
-    };
-
-    populateDataHierarchy(variantMap[getSerializationName()].toMap(), Dataset<>());
+    populateDataHierarchy(variantMap, Dataset<DatasetImpl>());
 
     std::vector<QVariantMap> datasetMaps;
 
@@ -357,7 +370,7 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
         }
         };
 
-    enumerateDatasetNames(variantMap[getSerializationName()].toMap());
+    enumerateDatasetNames(variantMap);
 
     std::sort(datasetMaps.begin(), datasetMaps.end(), [](const auto& a, const auto& b) {
         const auto rawA = findRawBlockObject(a);
@@ -377,25 +390,15 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
     WorkflowPlan::Jobs datasetJobs;
 
     for (const auto& dataVariantMap : datasetMaps) {
-        const auto datasetId = dataVariantMap["ID"].toString();
-        const auto datasetName = dataVariantMap["Name"].toString();
+        const auto datasetId    = dataVariantMap["ID"].toString();
+        const auto datasetName  = dataVariantMap["Name"].toString();
 
-        datasetJobs.emplace_back(
-            datasetName,
-            [datasetId, dataVariantMap](
-                const WorkflowPlan::Job&,
-                const SharedWorkflowExecutionContext& executionContext) {
+        datasetJobs.emplace_back(datasetName, [datasetId, dataVariantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            auto dataset    = mv::data().getDataset(datasetId);
+            auto nestedPlan = dataset->fromVariantMapWorkflow(dataVariantMap,executionContext);
 
-                    auto dataset = mv::data().getDataset(datasetId);
-
-                    auto nestedPlan = dataset->fromVariantMapWorkflow(
-                        dataVariantMap,
-                        executionContext);
-
-                    WorkflowRuntimeScoped::instance().executeBlocking(
-                        std::move(nestedPlan),
-                        executionContext);
-            });
+            WorkflowRuntimeScoped::executeBlocking(std::move(nestedPlan), executionContext);
+        });
     }
 
     const auto idealThreads = std::max(1u, std::thread::hardware_concurrency());

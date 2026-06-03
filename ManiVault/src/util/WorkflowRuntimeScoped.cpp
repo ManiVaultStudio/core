@@ -14,7 +14,7 @@ WorkflowRuntimeScoped& WorkflowRuntimeScoped::instance()
     return runtime;
 }
 
-SharedWorkflowResult WorkflowRuntimeScoped::executeBlocking(UniqueWorkflowPlan plan, SharedWorkflowExecutionContext parentContext)
+SharedWorkflowResult WorkflowRuntimeScoped::executeBlocking(UniqueWorkflowPlan plan, const SharedWorkflowExecutionContext& parentContext)
 {
     if (!plan)
         return {};

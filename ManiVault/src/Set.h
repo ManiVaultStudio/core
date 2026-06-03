@@ -396,7 +396,7 @@ public: // Analysis
 public: // Serialization
 
     // TODO
-    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext) override;
+    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext) override;
 
     /**
      * Load widget action from variant for app versions prior to 1.5.0 (backwards compatibility)

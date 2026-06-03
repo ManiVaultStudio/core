@@ -233,6 +233,8 @@ private: // Helpers
         const WorkflowPlan::Stages& stages,
         SharedWorkflowExecutionContext rootContext);
 
+    void runTaskflowBlocking(tf::Taskflow& taskflow);
+
 private:
     tf::Executor    _executor;  
 };

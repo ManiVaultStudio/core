@@ -294,7 +294,7 @@ public: // Serialization
      * @param parentExecutionContext Parent execution context for context-aware serialization (if any)
      * @return Variant map representation of the data hierarchy item
      */
-    QVariantMap toVariantMapScoped(util::SharedWorkflowExecutionContext parentExecutionContext) const override;
+    QVariantMap toVariantMapScoped(const util::SharedWorkflowExecutionContext& parentExecutionContext) const override;
 
 signals:
 

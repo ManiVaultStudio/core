@@ -15,7 +15,7 @@ class CORE_EXPORT WorkflowRuntimeScoped
 public:
     static WorkflowRuntimeScoped& instance();
 
-    SharedWorkflowResult executeBlocking(UniqueWorkflowPlan plan, SharedWorkflowExecutionContext parentContext);
+    static SharedWorkflowResult executeBlocking(UniqueWorkflowPlan plan, const SharedWorkflowExecutionContext& parentContext);
 };
 
 }

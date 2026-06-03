@@ -46,38 +46,38 @@ public:
     SharedWorkflowExecutionContext createChild(Type type, const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
 
     /**
-	 * @brief Creates a child workflow execution context representing a top-level workflow scope.
-	 *
-	 * This function creates a new workflow execution context that inherits execution state,
-	 * reporting infrastructure, progress tracking infrastructure, and task association from
-	 * the current context while establishing a new execution hierarchy level for a child workflow.
-	 *
-	 * The created child context:
-	 * - Shares the same workflow execution state
-	 * - Shares the same task association
-	 * - Extends the execution path hierarchy
-	 * - Creates child report and progress nodes
-	 * - Establishes a unique result scope
-	 * - Receives its own unique execution identifier
-	 * - Is classified as a Workflow execution context
-	 *
-	 * This function is typically used when:
-	 * - Executing a root workflow from another workflow executor
-	 * - Creating logical workflow boundaries
-	 * - Constructing nested execution hierarchies
-	 * - Establishing workflow-level progress aggregation
-	 *
-	 * @param name Human-readable name of the child workflow context.
-	 * @param weight Relative progress contribution weight of the child workflow.
-	 * @param progressMode Progress reporting mode used by the child workflow.
-	 * @return Shared pointer to the newly created workflow execution context.
-	 */
+     * @brief Creates a child workflow execution context representing a top-level workflow scope.
+     *
+     * This function creates a new workflow execution context that inherits execution state,
+     * reporting infrastructure, progress tracking infrastructure, and task association from
+     * the current context while establishing a new execution hierarchy level for a child workflow.
+     *
+     * The created child context:
+     * - Shares the same workflow execution state
+     * - Shares the same task association
+     * - Extends the execution path hierarchy
+     * - Creates child report and progress nodes
+     * - Establishes a unique result scope
+     * - Receives its own unique execution identifier
+     * - Is classified as a Workflow execution context
+     *
+     * This function is typically used when:
+     * - Executing a root workflow from another workflow executor
+     * - Creating logical workflow boundaries
+     * - Constructing nested execution hierarchies
+     * - Establishing workflow-level progress aggregation
+     *
+     * @param name Human-readable name of the child workflow context.
+     * @param weight Relative progress contribution weight of the child workflow.
+     * @param progressMode Progress reporting mode used by the child workflow.
+     * @return Shared pointer to the newly created workflow execution context.
+     */
     SharedWorkflowExecutionContext createWorkflowChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
     SharedWorkflowExecutionContext createNestedWorkflowChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
     SharedWorkflowExecutionContext createSequentialStageChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
-    SharedWorkflowExecutionContext createParallelStageChild(const QString& name, double weight = 1.0,WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic); 
+    SharedWorkflowExecutionContext createParallelStageChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
     SharedWorkflowExecutionContext createJobChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
-    SharedWorkflowExecutionContext createTypedChild(Type type, const QString& name, double weight,WorkflowPlan::JobProgressMode progressMode);
+    SharedWorkflowExecutionContext createTypedChild(Type type, const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode);
 
     bool isRootExecution() const;
 
@@ -145,24 +145,24 @@ public:
     QString getExecutionPath(const QString& separator = "/") const;
 
     /**
-	 * @brief Gets the hierarchical depth of this workflow execution context within the workflow execution tree.
-	 *
-	 * The depth represents how deeply nested this context is relative to the root workflow execution context.
-	 * A root workflow execution context has a depth of 0, its direct children have a depth of 1, and so on.
-	 *
-	 * The depth is derived from the execution path associated with this context. Since the execution path
-	 * always contains at least the name of the current context itself, the depth is computed as:
-	 *
-	 *     executionPath.size() - 1
-	 *
-	 * This value is primarily useful for:
-	 * - Rendering hierarchical console or log output with indentation
-	 * - Visualizing nested workflows, stages, and jobs
-	 * - Debugging workflow execution structure
-	 * - Computing relative execution scope information
-	 *
-	 * @return The hierarchical depth of this workflow execution context, where 0 represents the root context.
-	 */
+     * @brief Gets the hierarchical depth of this workflow execution context within the workflow execution tree.
+     *
+     * The depth represents how deeply nested this context is relative to the root workflow execution context.
+     * A root workflow execution context has a depth of 0, its direct children have a depth of 1, and so on.
+     *
+     * The depth is derived from the execution path associated with this context. Since the execution path
+     * always contains at least the name of the current context itself, the depth is computed as:
+     *
+     *     executionPath.size() - 1
+     *
+     * This value is primarily useful for:
+     * - Rendering hierarchical console or log output with indentation
+     * - Visualizing nested workflows, stages, and jobs
+     * - Debugging workflow execution structure
+     * - Computing relative execution scope information
+     *
+     * @return The hierarchical depth of this workflow execution context, where 0 represents the root context.
+     */
     std::int32_t getDepth() const;
 
 public: // ID
@@ -180,6 +180,16 @@ public: // ID
     QUuid getParentId() const;
 
 public: // Result values
+
+    /**
+     * @brief Publishes multiple result values associated with this workflow execution context.
+     * @param values Map containing local result keys and their corresponding values.
+     *
+     * Each entry in @p values is published as an individual result value using its
+     * map key as the local result key. Existing values with the same keys are
+     * replaced.
+     */
+    void publishResult(const QVariantMap& values);
 
     /**
      * @brief Publishes a result value associated with this workflow execution context. The result value is stored in the execution state and can be retrieved later using the specified key. This allows different parts of the workflow to share data and results in a structured way, enabling better communication and coordination between different steps and components of the workflow.

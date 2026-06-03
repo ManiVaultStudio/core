@@ -5,13 +5,11 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
-//#include "WorkflowPlan.h"
+#include "WorkflowPlan.h"
 
 #include <QString>
 #include <QJsonDocument>
 #include <QPointer>
-
-#include "WorkflowPlan.h"
 
 namespace mv
 {
@@ -23,11 +21,52 @@ namespace mv::util {
 class WorkflowExecutionContext;
 
 /**
- * Serializable class
- * 
- * Serialize objects using Qt variants.
- * 
- * @author Thomas Kroes
+ * Serializable base class.
+ *
+ * Serializable provides a workflow-first serialization framework for
+ * persisting and restoring object state.
+ *
+ * Objects may participate in serialization through either:
+ *
+ * - the synchronous serialization contract:
+ *   fromVariantMap() / toVariantMap()
+ *
+ * - the workflow-based serialization contract:
+ *   fromVariantMapWorkflow() / toVariantMapWorkflow()
+ *
+ * Framework code should generally use the scoped entry points:
+ *
+ * - fromVariantMapScoped()
+ * - toVariantMapScoped()
+ * - fromJsonDocumentScoped()
+ * - fromJsonFileScoped()
+ * - toJsonDocumentScoped()
+ * - toJsonFileScoped()
+ *
+ * These functions execute the workflow-based serialization contract and
+ * automatically fall back to the synchronous implementation when no
+ * custom workflow is provided.
+ *
+ * Plugin developers should typically:
+ *
+ * - override fromVariantMap() and toVariantMap() for simple objects
+ * - override fromVariantMapWorkflow() and/or
+ *   toVariantMapWorkflow() for expensive, staged, parallelizable,
+ *   or progress-reporting serialization operations
+ *
+ * The synchronous serialization functions remain the fundamental
+ * implementation layer, while workflow-based serialization adds
+ * progress reporting, nested workflows, parallel execution,
+ * diagnostics, and integration into larger workflow hierarchies.
+ *
+ * In addition to the primary serialization contract, Serializable
+ * provides convenience helpers for:
+ *
+ * - working with parent QVariantMaps
+ * - inserting serialized child objects into QVariantMaps
+ * - reading and writing JSON documents
+ * - reading and writing JSON files
+ * - object identity management and serialization diagnostics
  */
 class CORE_EXPORT Serializable
 {
@@ -49,284 +88,727 @@ public:
 public:
 
     /**
-     * Construct with serialization name
-     * @param serializationName Serialization name
+     * Construct a serializable object.
+     *
+     * @param serializationName Serialization name used when storing
+     * and retrieving this object from parent variant maps and JSON
+     * documents.
      */
     Serializable(const QString& serializationName = "");
 
-    /** Destructor */
-    virtual ~Serializable() { }
+    /**
+     * Destructor.
+     */
+    virtual ~Serializable() {}
 
     /**
-     * Get globally unique identifier, possibly \p truncated
-     * @param truncated Whether to only return the first six characters of the ID
-     * @return Globally unique identifier of the serializable object
+     * Get this object's globally unique identifier.
+     *
+     * The identifier represents the persistent identity of the object
+     * and is used by the equality operators.
+     *
+     * @param truncated Whether to return a shortened representation of
+     * the identifier for diagnostic or display purposes.
+     *
+     * @return Globally unique identifier of this object.
      */
     QString getId(bool truncated = false) const;
 
     /**
-     * Set globally unique identifier (only use this function when strictly necessary and when the ramifications are understood, undefined behaviour might happen otherwise)
-     * @param id Globally unique identifier of the serializable object
+     * Set this object's globally unique identifier.
+     *
+     * Changing the identifier changes the logical identity of the
+     * object and should therefore only be done when the implications
+     * are fully understood.
+     *
+     * In most cases, makeUnique() should be preferred when a new
+     * identity is required.
+     *
+     * @param id Globally unique identifier to assign.
      */
     void setId(const QString& id);
 
     /**
-     * Get serialization name
-     * @return Serialization name
+     * Get this object's serialization name.
+     *
+     * The serialization name is used as the key under which the object
+     * is stored in parent variant maps and JSON documents.
+     *
+     * @return Serialization name.
      */
     QString getSerializationName() const;
 
     /**
-     * Set serialization name to \p name
-     * @param serializationName Serialization name
-     */
+	 * Set this object's serialization name.
+	 *
+	 * The serialization name is used as the key under which the object is
+	 * stored in parent variant maps and JSON documents.
+	 *
+	 * Changing the serialization name after serialized data has already
+	 * been persisted may render that data unreadable by this object,
+	 * because the expected serialization key no longer matches the key
+	 * stored in the serialized representation.
+	 *
+	 * Changing the serialization name may also introduce collisions with
+	 * other serialized objects or make existing serialized state
+	 * unreachable.
+	 *
+	 * Use this function sparingly and only when the object's serialization
+	 * identity is intentionally being changed and the implications are
+	 * fully understood.
+	 *
+	 * @param serializationName Serialization name to assign.
+	 */
     void setSerializationName(const QString& serializationName);
 
+public: // Reading
+
     /**
-     * Load the object state from a variant map.
-     *
-     * This function is strictly synchronous. When this function returns, all state
-     * represented by the variant map must have been fully applied to the object.
-     *
-     * Implementations must not start background work, schedule workflow jobs, or
-     * return before the object is in a fully restored and usable state.
-     *
-     * If loading requires long-running, parallel, or asynchronous work, implement
-     * fromVariantMapWorkflow() instead and keep this function as the blocking
-     * fallback.
-     *
-     * @param variantMap Variant map representation of the object state.
-     */
+	 * Load the object state from a variant map.
+	 *
+	 * This is the low-level synchronous loading implementation.
+	 *
+	 * When this function returns, all state represented by the variant map
+	 * must have been fully applied to the object.
+	 *
+	 * Implementations must not:
+	 * - start background work
+	 * - schedule workflow jobs
+	 * - return before restoration is complete
+	 *
+	 * Most framework code should not call this function directly.
+	 * Instead, use fromVariantMapScoped(), which executes the workflow-based
+	 * loading path and automatically falls back to this function through the
+	 * default workflow implementation.
+	 *
+	 * Override this function for simple objects whose state can be restored
+	 * synchronously.
+	 *
+	 * Override fromVariantMapWorkflow() instead when loading is expensive,
+	 * staged, parallelizable, or requires progress reporting.
+	 *
+	 * @param variantMap Serialized object state.
+	 */
     virtual void fromVariantMap(const QVariantMap& variantMap);
 
-
-    virtual void fromVariantMapScoped(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext);
+    /**
+	 * Load the object state from a variant map using the workflow-based
+	 * serialization contract.
+	 *
+	 * This is the preferred loading entry point for framework code.
+	 *
+	 * The function obtains a workflow from fromVariantMapWorkflow(),
+	 * executes it synchronously, and returns only after the object has been
+	 * fully restored.
+	 *
+	 * The default workflow implementation delegates to fromVariantMap(),
+	 * ensuring that all Serializable objects support this entry point even
+	 * when they do not provide a custom workflow.
+	 *
+	 * @param variantMap Serialized object state.
+	 * @param parentExecutionContext Optional parent workflow context.
+	 */
+    virtual void fromVariantMapScoped(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext);
 
     /**
-     * Create a workflow plan that loads the object state from a variant map.
-     *
-     * This function only constructs and returns a workflow plan. It must not execute
-     * the plan, schedule background work, or modify object state except for trivial
-     * preparation required to build the plan.
-     *
-     * The caller owns the scheduling decision and may execute the returned workflow
-     * blocking, asynchronously, or as a child of another workflow execution context.
-     *
-     * Implement this function when restoring the object involves long-running,
-     * parallelizable, staged, or progress-reporting work.
-     *
-     * The default implementation may return a simple workflow that calls
-     * fromVariantMap() synchronously.
-     *
-     * @param variantMap Variant map representation of the object state.
-     * @param parentExecutionContext Optional parent workflow execution context to which the loading workflow will be attached as a child. This can be used to integrate the loading workflow into a larger workflow hierarchy, allowing it to report progress and messages in the context of the parent workflow execution.
-     * @return Workflow plan that loads the object state when executed.
-     */
-    virtual UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext = nullptr);
+	 * Create a workflow that restores the object state.
+	 *
+	 * This function constructs a workflow but does not execute it.
+	 *
+	 * The returned workflow must fully restore the object when executed.
+	 *
+	 * Implementations may use sequential, parallel, nested, or batched
+	 * stages and may publish progress, warnings, messages, and results.
+	 *
+	 * The default implementation creates a simple workflow that invokes
+	 * fromVariantMap().
+	 *
+	 * Framework code should generally call fromVariantMapScoped() rather
+	 * than executing this workflow directly.
+	 *
+	 * @param variantMap Serialized object state.
+	 * @param parentExecutionContext Optional parent workflow context.
+	 * @return Workflow plan that restores the object state.
+	 */
+    virtual UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext = nullptr);
+
+public: // Reading helpers
 
     /**
-     * Load the object state from a parent variant map.
-     *
-     * This utility function looks up the variant map entry associated with the
-     * object's serialization name, extracts the corresponding child variant map,
-     * and forwards it to fromVariantMap().
-     *
-     * If no entry with the serialization name exists:
-     *
-     * - an exception is thrown when ignoreLoadingErrors is false
-     * - the function returns silently when ignoreLoadingErrors is true
-     *
-     * This function is synchronous and blocking, matching the contract of
-     * fromVariantMap().
-     *
-     * @param parentVariantMap Parent variant map containing serialized child objects.
-     * @param ignoreLoadingErrors Whether missing or invalid serialized data should
-     * be ignored instead of causing a loading failure (default: false).
-     */
+	 * Restore this object from a parent variant map.
+	 *
+	 * This convenience function looks up the child variant map associated
+	 * with this object's serialization name and forwards it to
+	 * fromVariantMap().
+	 *
+	 * The function expects the parent variant map to contain an entry whose
+	 * key matches getSerializationName(). The associated value must be a
+	 * QVariantMap representing the serialized state of this object.
+	 *
+	 * This function uses the synchronous serialization contract and
+	 * therefore invokes fromVariantMap() directly. It does not execute
+	 * fromVariantMapWorkflow() and does not participate in workflow
+	 * execution, progress reporting, or parent workflow hierarchies.
+	 *
+	 * Use fromVariantMapScoped() when workflow-based loading behavior is
+	 * required.
+	 *
+	 * @param parentVariantMap Parent variant map containing serialized child
+	 * objects.
+	 * @param ignoreLoadingErrors Whether missing serialized data should be
+	 * ignored. When false, missing entries result in an exception. When
+	 * true, missing entries may be handled according to the application's
+	 * loading error policy.
+	 *
+	 * @throws std::runtime_error If the serialization name is empty.
+	 * @throws ManiVaultException If the required entry is not present.
+	 */
     virtual void fromParentVariantMap(const QVariantMap& parentVariantMap, bool ignoreLoadingErrors = false);
+
+    /**
+	 * Restore this object from a parent variant map using the workflow-based
+	 * serialization contract.
+	 *
+	 * This convenience function looks up the child variant map associated
+	 * with this object's serialization name and forwards it to
+	 * fromVariantMapScoped().
+	 *
+	 * Unlike fromParentVariantMap(), this function executes the
+	 * workflow-based loading contract and therefore honors custom
+	 * implementations of fromVariantMapWorkflow().
+	 *
+	 * @param parentVariantMap Parent variant map containing serialized child
+	 * objects.
+	 * @param parentExecutionContext Optional parent workflow context.
+	 */
+    virtual void fromParentVariantMapScoped(const QVariantMap& parentVariantMap, const SharedWorkflowExecutionContext& parentExecutionContext = nullptr);
+
+    /**
+	 * Restore the object state from a JSON document.
+	 *
+	 * This function extracts the variant map associated with this object's
+	 * serialization name from the JSON document and forwards it directly to
+	 * fromVariantMap().
+	 *
+	 * This function uses the synchronous serialization contract and does not
+	 * execute fromVariantMapWorkflow(). As a result, custom workflow-based
+	 * loading behavior, progress reporting, nested workflows, and parent
+	 * workflow hierarchies are not used.
+	 *
+	 * Most framework code should prefer fromJsonDocumentScoped(), which
+	 * executes the workflow-based serialization contract and automatically
+	 * honors custom implementations of fromVariantMapWorkflow().
+	 *
+	 * @param jsonDocument JSON document containing the serialized object
+	 * state.
+	 *
+	 * @throws ManiVaultException If the required serialization entry is
+	 * missing or invalid.
+	 */
+    void fromJsonDocument(const QJsonDocument& jsonDocument);
+
+    /**
+	 * Restore the object state from a JSON document.
+	 *
+	 * This is the preferred JSON document loading entry point for
+	 * framework code.
+	 *
+	 * The function extracts the object's serialized variant map from the
+	 * JSON document and forwards it to fromVariantMapScoped().
+	 *
+	 * @param jsonDocument JSON document containing serialized object state.
+	 * @param parentExecutionContext Optional parent workflow context.
+	 */
+    void fromJsonDocumentScoped(const QJsonDocument& jsonDocument, const SharedWorkflowExecutionContext& parentExecutionContext = nullptr);
+
+    /**
+	 * Restore the object state from a JSON file.
+	 *
+	 * This function reads a JSON document from disk, validates that the file
+	 * exists, can be opened, contains data, and contains a valid JSON
+	 * document, then forwards the document to fromJsonDocument().
+	 *
+	 * This function follows the same loading contract as fromJsonDocument().
+	 * If fromJsonDocument() uses the synchronous serialization path, this
+	 * function also bypasses workflow-based loading. If fromJsonDocument()
+	 * delegates to fromJsonDocumentScoped(), this function honors the
+	 * workflow-based serialization contract.
+	 *
+	 * Prefer fromJsonFileScoped() when an explicit parent workflow context is
+	 * required.
+	 *
+	 * @param filePath Path to the JSON file to load.
+	 *
+	 * @throws std::runtime_error If the file does not exist.
+	 * @throws std::runtime_error If the file cannot be opened for reading.
+	 * @throws std::runtime_error If no data could be read.
+	 * @throws std::runtime_error If the JSON document is invalid or empty.
+	 * @throws std::exception Any exception propagated by fromJsonDocument().
+	 */
+    void fromJsonFile(const QString& filePath = "");
+
+    /**
+	 * Restore the object state from a JSON file using the workflow-based
+	 * serialization contract.
+	 *
+	 * This is the preferred JSON file loading entry point for framework
+	 * code.
+	 *
+	 * The function reads a JSON document from disk, validates the file
+	 * contents, and restores the object through
+	 * fromJsonDocumentScoped().
+	 *
+	 * Custom implementations of fromVariantMapWorkflow() are therefore
+	 * honored automatically, including staged, parallel, and
+	 * progress-reporting loading workflows.
+	 *
+	 * The function returns only after the loading workflow has completed.
+	 *
+	 * @param filePath Path of the JSON file to read.
+	 * @param parentExecutionContext Optional parent workflow context into
+	 * which the loading workflow will be integrated.
+	 *
+	 * @throws std::runtime_error If the file does not exist.
+	 * @throws std::runtime_error If the file cannot be opened for reading.
+	 * @throws std::runtime_error If no data could be read.
+	 * @throws std::runtime_error If the JSON document is invalid or empty.
+	 * @throws std::exception Any exception propagated by the loading
+	 * workflow execution.
+	 */
+    void fromJsonFileScoped(const QString& filePath = "", const SharedWorkflowExecutionContext& parentExecutionContext = nullptr);
+
+public: // Writing
 
     /**
 	 * Serialize the object state to a variant map.
 	 *
-	 * This function returns a complete and self-contained variant map
-	 * representation of the object state suitable for persistence,
-	 * reconstruction, or transfer.
+	 * This is the low-level synchronous serialization implementation.
 	 *
-	 * The returned variant map should contain all data required by
-	 * fromVariantMap() to fully restore the object.
+	 * The returned variant map must contain all information required to
+	 * restore the object through fromVariantMap().
 	 *
-	 * This function is synchronous and blocking. Implementations must not
-	 * schedule asynchronous work or defer serialization to background tasks.
+	 * The base implementation serializes only the object's unique
+	 * identifier and updates the serialization counter.
 	 *
-	 * For large, staged, or parallelizable serialization operations,
-	 * implement toVariantMapWorkflow() instead and keep this function as
-	 * the blocking fallback.
+	 * Derived classes should extend the returned variant map with their
+	 * own serialized state and should generally invoke the base
+	 * implementation first.
 	 *
-	 * @return Variant map representation of the object state.
-	 */
+	 * Implementations must not schedule asynchronous work, create
+	 * workflows, or defer serialization beyond the lifetime of this call.
+	 *
+	 * Most framework code should prefer toVariantMapScoped(), which
+	 * executes the workflow-based serialization contract and automatically
+	 * honors custom implementations of toVariantMapWorkflow().
+	 *
+	 * @return Complete variant map representation of the object state.
+	*/
     virtual QVariantMap toVariantMap() const;
 
-    virtual QVariantMap toVariantMapScoped(SharedWorkflowExecutionContext parentExecutionContext) const;
+    /**
+	 * Serialize the object state using the workflow-based serialization
+	 * contract.
+	 *
+	 * This is the preferred serialization entry point for framework code.
+	 *
+	 * The function obtains a workflow from toVariantMapWorkflow(),
+	 * executes it synchronously, and returns the resulting variant map.
+	 *
+	 * The default workflow implementation delegates to toVariantMap(),
+	 * ensuring that all Serializable objects support this entry point even
+	 * when they do not provide a custom workflow.
+	 *
+	 * @param parentExecutionContext Optional parent workflow context.
+	 * @return Serialized object state.
+	 */
+    virtual QVariantMap toVariantMapScoped(const SharedWorkflowExecutionContext& parentExecutionContext) const;
 
     /**
-	 * Create a workflow plan that serializes the object state to a variant map.
+	 * Create a workflow that serializes the object state to a variant map.
 	 *
-	 * This function only constructs and returns a workflow plan. It must not
-	 * execute the plan, schedule background work, or perform deferred execution
-	 * outside the returned workflow structure.
+	 * This is the workflow-based serialization hook.
 	 *
-	 * The caller owns the execution and scheduling strategy of the returned
-	 * workflow plan and may execute it blocking, asynchronously, or as part
-	 * of another workflow hierarchy.
+	 * The function only constructs and returns a workflow plan. It does not
+	 * execute the workflow.
 	 *
-	 * Implement this function when serialization involves long-running,
-	 * staged, parallelizable, or progress-reporting work.
+	 * The returned workflow must publish the serialized QVariantMap as the
+	 * result value for this object's serialization name.
 	 *
-	 * The default implementation may return a simple workflow that calls
-	 * toVariantMap() synchronously.
+	 * The base implementation creates a simple GUI-thread workflow stage
+	 * that calls toVariantMap() synchronously and publishes the result.
 	 *
-	 * The resulting workflow is expected to produce a complete and
-	 * self-contained variant map representation of the object state
-	 * equivalent to the result of toVariantMap().
+	 * Derived classes may override this function when serialization is
+	 * expensive, staged, parallelizable, or requires progress reporting.
+	 *
+	 * Implementations must not perform the serialization immediately unless
+	 * that work is part of a job in the returned workflow.
+	 *
+	 * Most framework code should prefer toVariantMapScoped(), which executes
+	 * this workflow and returns the published variant map.
 	 *
 	 * @return Workflow plan that serializes the object state when executed.
 	 */
     virtual UniqueWorkflowPlan toVariantMapWorkflow() const;
 
+public: // Writing helpers
+
     /**
-     * Save into \p variantMap
-     * @param variantMap Variant map
-     */
+	 * Insert this object's serialized state into a parent variant map.
+	 *
+	 * This convenience function serializes the object using toVariantMap()
+	 * and stores the resulting child variant map under the object's
+	 * serialization name.
+	 *
+	 * The function requires:
+	 * - a non-empty serialization name
+	 * - that the parent variant map does not already contain an entry with
+	 *   that name
+	 *
+	 * This function uses the synchronous serialization contract and
+	 * therefore invokes toVariantMap() directly. It does not execute
+	 * toVariantMapWorkflow() and does not participate in workflow
+	 * execution.
+	 *
+	 * Use toVariantMapScoped() when workflow-based serialization behavior
+	 * is required.
+	 *
+	 * Example:
+	 *
+	 * @code
+	 * QVariantMap parentMap;
+	 * child.insertIntoVariantMap(parentMap);
+	 * @endcode
+	 *
+	 * Result:
+	 *
+	 * @code
+	 * {
+	 *     "ChildSerializationName" : { ... }
+	 * }
+	 * @endcode
+	 *
+	 * @param variantMap Parent variant map into which the serialized object
+	 * state will be inserted.
+	 *
+	 * @throws std::runtime_error If the serialization name is empty.
+	 * @throws std::runtime_error If the parent variant map already contains
+	 * an entry with the same serialization name.
+	 */
     void insertIntoVariantMap(QVariantMap& variantMap) const;
 
     /**
-     * Load widget action from JSON document
-     * @param jsonDocument The JSON document
-     */
-    void fromJsonDocument(const QJsonDocument& jsonDocument);
-
-    // TODO
-    QJsonDocument toJsonDocumentScoped(SharedWorkflowExecutionContext parentExecutionContext = nullptr) const;
+	 * Insert this object's serialized state into a parent variant map using
+	 * the workflow-based serialization contract.
+	 *
+	 * This convenience function serializes the object using
+	 * toVariantMapScoped() and stores the resulting child variant map under
+	 * the object's serialization name.
+	 *
+	 * Unlike insertIntoVariantMap(), this function executes the
+	 * workflow-based serialization contract and therefore honors custom
+	 * implementations of toVariantMapWorkflow().
+	 *
+	 * The function requires:
+	 * - a non-empty serialization name
+	 * - that the parent variant map does not already contain an entry with
+	 *   that name
+	 *
+	 * Example:
+	 *
+	 * @code
+	 * QVariantMap parentMap;
+	 * child.insertIntoVariantMapScoped(parentMap, executionContext);
+	 * @endcode
+	 *
+	 * Result:
+	 *
+	 * @code
+	 * {
+	 *     "ChildSerializationName" : { ... }
+	 * }
+	 * @endcode
+	 *
+	 * @param variantMap Parent variant map into which the serialized object
+	 * state will be inserted.
+	 * @param parentExecutionContext Optional parent workflow context used
+	 * when executing the serialization workflow.
+	 *
+	 * @throws std::runtime_error If the serialization name is empty.
+	 * @throws std::runtime_error If the parent variant map already contains
+	 * an entry with the same serialization name.
+	 */
+    void insertIntoVariantMapScoped(QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext = nullptr) const;
+    
+    /**
+	 * Serialize the object state to a JSON document using the workflow-based
+	 * serialization contract.
+	 *
+	 * This is the preferred JSON serialization entry point for framework
+	 * code.
+	 *
+	 * The function obtains a workflow from toVariantMapWorkflow(),
+	 * executes it synchronously, retrieves the resulting QVariantMap, and
+	 * converts it to a QJsonDocument.
+	 *
+	 * Custom implementations of toVariantMapWorkflow() are honored
+	 * automatically.
+	 *
+	 * The function returns only after the serialization workflow has
+	 * completed.
+	 *
+	 * @param parentExecutionContext Optional parent workflow context into
+	 * which the serialization workflow will be integrated.
+	 *
+	 * @return JSON document containing the serialized object state.
+	 *
+	 * @throws std::exception Any exception propagated from the serialization
+	 * workflow execution.
+	 */
+    QJsonDocument toJsonDocumentScoped(const SharedWorkflowExecutionContext& parentExecutionContext = nullptr) const;
 
     /**
-     * Load from JSON file
-     * @param filePath Path to the JSON file
-     */
-    void fromJsonFile(const QString& filePath = "");
-
-    // TODO
+	 * Serialize the object state to a JSON file.
+	 *
+	 * This convenience overload of toJsonFileScoped() executes the
+	 * workflow-based serialization contract using the default workflow
+	 * execution context.
+	 *
+	 * @param filePath Path of the JSON file to write.
+	 *
+	 * @throws std::exception Any exception propagated by
+	 * toJsonFileScoped().
+	 */
     void toJsonFile(const QString& filePath = "") const;
-    
-    void toJsonFileScoped(const QString& filePath = "", SharedWorkflowExecutionContext parentExecutionContext = nullptr) const;
 
-    /** Assigns a fresh new identifier to the serializable object */
+    /**
+	 * Serialize the object state to a JSON file using the workflow-based
+	 * serialization contract.
+	 *
+	 * This is the preferred JSON file serialization entry point for
+	 * framework code.
+	 *
+	 * The function serializes the object through
+	 * toJsonDocumentScoped(), validates the resulting JSON document, and
+	 * writes it to disk.
+	 *
+	 * Custom implementations of toVariantMapWorkflow() are therefore
+	 * honored automatically, including staged, parallel, and
+	 * progress-reporting serialization workflows.
+	 *
+	 * The function returns only after the serialization workflow has
+	 * completed and the JSON document has been written successfully.
+	 *
+	 * @param filePath Path of the JSON file to write.
+	 * @param parentExecutionContext Optional parent workflow context into
+	 * which the serialization workflow will be integrated.
+	 *
+	 * @throws std::runtime_error If the file cannot be opened for writing.
+	 * @throws std::runtime_error If serialization produced an invalid or
+	 * empty JSON document.
+	 * @throws std::exception Any exception propagated by the serialization
+	 * workflow execution.
+	 */
+    void toJsonFileScoped(const QString& filePath = "", const SharedWorkflowExecutionContext& parentExecutionContext = nullptr) const;
+
+public: // Identity and diagnostics
+
+    /**
+     * Assign a fresh globally unique identifier to this object.
+     *
+     * This function replaces the current identifier with a newly
+     * generated identifier produced by createId().
+     *
+     * Use this function when creating a logically distinct copy of a
+     * serializable object that must not share identity with the
+     * original object.
+     */
     void makeUnique();
 
     /**
-     * Creates a new globally unique identifier for a serializable object
-     * @return Globally unique identifier
+     * Create a new globally unique identifier.
+     *
+     * The returned identifier is suitable for use as the persistent
+     * identity of a Serializable instance.
+     *
+     * @return Newly generated globally unique identifier.
      */
     static QString createId();
 
     /**
-     * Get serialization count
-     * @param direction Serialization direction
-     * @return Serialization count
+     * Get the number of times this object has been serialized in the
+     * specified direction.
+     *
+     * Serialization counters are maintained automatically by the base
+     * Serializable implementation and may be useful for debugging,
+     * diagnostics, and testing.
+     *
+     * @param direction Serialization direction to query.
+     * @return Number of serialization operations performed in the
+     * specified direction.
      */
     std::int32_t getSerializationCount(const Direction& direction) const;
 
     /**
-     * Get serialization count from
-     * @return Serialization count from
-     */
+	 * Get the number of times fromVariantMap() has been invoked.
+	 *
+	 * This counter is maintained automatically by the base Serializable
+	 * implementation and may be useful for diagnostics and testing.
+	 *
+	 * @return Number of deserialization operations performed through the
+	 * low-level deserialization implementation.
+	 */
     std::int32_t getSerializationCountFrom() const;
 
     /**
-     * Get serialization count to
-     * @return Serialization count to
-     */
+	 * Get the number of times toVariantMap() has been invoked.
+	 *
+	 * This counter is maintained automatically by the base Serializable
+	 * implementation and may be useful for diagnostics and testing.
+	 *
+	 * @return Number of serialization operations performed through the
+	 * low-level serialization implementation.
+	 */
     std::int32_t getSerializationCountTo() const;
 
     /**
-     * Handle the case where an item with a specific key is not found in a variant map (e.g. by throwing an exception with an informative error message)
-     * @param serializable Serializable object for which the key was not found in the map
-     * @param map QVariantMap that should contain the key
-     * @param key Item name that was not found in the map
+     * Handle a missing required key in a variant map.
+     *
+     * This helper centralizes error reporting for serialization-related
+     * lookup failures and typically throws a descriptive exception that
+     * includes contextual information about the missing key and the
+     * available entries in the variant map.
+     *
+     * @param serializable Serializable object for which the lookup
+     * failed.
+     * @param map Variant map that was expected to contain the key.
+     * @param key Required key that could not be found.
      */
     static void handleKeyNotFoundInVariantMap(const Serializable& serializable, const QVariantMap& map, const QString& key);
 
 public: // Task related
 
     /**
-     * Get task that the serializable object belongs to (if any)
-     * @return Task that the serializable object belongs to (if any)
+     * Get the task associated with this object.
+     *
+     * @return Associated task, or a null pointer if no task is
+     * associated with this object.
      */
     QPointer<Task> getTask() const;
 
     /**
-     * Whether the serializable object belongs to a task
-     * @return Whether the serializable object belongs to a task
+     * Determine whether this object is associated with a task.
+     *
+     * @return True if a task is associated with this object, false
+     * otherwise.
      */
     bool hasTask() const;
 
     /**
-     * Set task that the serializable object belongs to (if any)
-     * @param task Task that the serializable object belongs to (if any)
+     * Associate this object with a task.
+     *
+     * The task association may be used by higher-level infrastructure
+     * for ownership, lifecycle management, or contextual integration.
+     *
+     * @param task Task to associate with this object, or nullptr to
+     * clear the association.
      */
     void setTask(Task* task);
 
 protected: // Serialization
 
     /**
-     * Load serializable object from variant map
-     * @param serializable Pointer to serializable object
-     * @param variantMap The Variant map
+     * Restore a serializable object from a variant map.
+     *
+     * This convenience helper forwards the supplied variant map to the
+     * object's synchronous deserialization implementation.
+     *
+     * This function is not part of the primary serialization contract.
+     *
+     * @param serializable Serializable object to restore.
+     * @param variantMap Serialized object state.
      */
     static void fromVariantMap(Serializable* serializable, const QVariantMap& variantMap);
 
     /**
-     * Load from variant map
-     * @param serializable Reference to serializable object
-     * @param variantMap Variant map
-     * @param key Variant map key
+     * Restore a serializable object from a child variant map contained
+     * within a parent variant map.
+     *
+     * This convenience helper extracts the child variant map associated
+     * with the specified key and forwards it to the object's synchronous
+     * deserialization implementation.
+     *
+     * This function is not part of the primary serialization contract.
+     *
+     * @param serializable Serializable object to restore.
+     * @param variantMap Parent variant map.
+     * @param key Key identifying the serialized child object.
      */
     static void fromVariantMap(Serializable& serializable, const QVariantMap& variantMap, const QString& key);
 
     /**
-     * Save serializable object to variant map
-     * @param serializable Pointer to serializable object
-     * @return Variant map
+     * Serialize a serializable object to a variant map.
+     *
+     * This convenience helper invokes the object's synchronous
+     * serialization implementation.
+     *
+     * This function is not part of the primary serialization contract.
+     *
+     * @param serializable Serializable object to serialize.
+     * @return Serialized object state.
      */
     static QVariantMap toVariantMap(const Serializable* serializable);
 
     /**
-     * Save \p serializable object in \p variantMap with \p key
-     * @param serializable Reference to serializable object
-     * @param variantMap Variant map
-     * @param key Variant map key
+     * Serialize a serializable object and insert the resulting child
+     * variant map into a parent variant map under the specified key.
+     *
+     * This convenience helper is not part of the primary serialization
+     * contract.
+     *
+     * @param serializable Serializable object to serialize.
+     * @param variantMap Parent variant map.
+     * @param key Key under which the serialized object state will be
+     * stored.
      */
     static void insertIntoVariantMap(const Serializable& serializable, QVariantMap& variantMap, const QString& key);
 
     /**
-     * Save \p serializable object in \p variantMap
-     * @param serializable Reference to serializable object
-     * @param variantMap Variant map
+     * Serialize a serializable object and insert the resulting child
+     * variant map into a parent variant map using the object's
+     * serialization name as the key.
+     *
+     * This convenience helper is not part of the primary serialization
+     * contract.
+     *
+     * @param serializable Serializable object to serialize.
+     * @param variantMap Parent variant map.
      */
     static void insertIntoVariantMap(const Serializable& serializable, QVariantMap& variantMap);
 
 public: // Operators
 
     /**
-     * Equality operator
-     * @param rhs Right-hand-side operator
+     * Compare two serializable objects for identity equality.
+     *
+     * Two Serializable instances are considered equal when their
+     * globally unique identifiers are equal.
+     *
+     * @param rhs Object to compare against.
+     * @return True if both objects have the same identifier, false
+     * otherwise.
      */
     bool operator == (const Serializable& rhs) const {
         return rhs.getId() == getId();
     }
-    
+
     /**
-     * Inequality operator
-     * @param rhs Right-hand-side operator
+     * Compare two serializable objects for identity inequality.
+     *
+     * Two Serializable instances are considered different when their
+     * globally unique identifiers differ.
+     *
+     * @param rhs Object to compare against.
+     * @return True if the identifiers differ, false otherwise.
      */
     bool operator != (const Serializable& rhs) const {
         return rhs.getId() != getId();

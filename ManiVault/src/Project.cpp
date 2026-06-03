@@ -148,14 +148,16 @@ bool Project::isStartupProject() const
     return _startupProject;
 }
 
-UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext)
+UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1::fromVariantMap").arg(getSerializationName()));
 
+    plan->addNestedWorkflowStage("Load common", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        return Serializable::fromVariantMapWorkflow(variantMap);
+    });
+
     plan->addSequentialStage("Load", {
         WorkflowPlan::Job("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& parentExecutionContext) {
-            Serializable::fromVariantMap(variantMap);
-
 		    if (variantMap.contains(_selectionGroupingAction.getSerializationName())) {
 		        _selectionGroupingAction.fromParentVariantMap(variantMap);
 		    }
@@ -164,28 +166,24 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap
 		    }
 
 		    _overrideApplicationStatusBarAction.fromParentVariantMap(variantMap);
-
 		    _statusBarVisibleAction.fromParentVariantMap(variantMap);
-
 		    _statusBarOptionsAction.fromParentVariantMap(variantMap);
         })
     });
 
-    plan->addNestedWorkflowStage("Data hierarchy", [variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
-        return mv::dataHierarchy().fromVariantMapWorkflow(variantMap, executionContext);
-    });
+    const auto addManagerLoadStage = [&plan, variantMap](AbstractManager& manager) {
+        const auto managerMap = variantMap[manager.getSerializationName()].toMap();
 
-    plan->addNestedWorkflowStage("Actions", [variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
-        return mv::actions().fromVariantMapWorkflow(variantMap, executionContext);
-    });
+        plan->addNestedWorkflowStage(QString("Load %1").arg(manager.getSerializationName()), [managerMap, &manager](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+            return manager.fromVariantMapWorkflow(managerMap, executionContext);
+        });
+    };
 
-    plan->addNestedWorkflowStage("Plugins", [variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
-        return mv::plugins().fromVariantMapWorkflow(variantMap, executionContext);
-    });
-
-    plan->addNestedWorkflowStage("Events", [variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
-        return mv::events().fromVariantMapWorkflow(variantMap, executionContext);
-    });
+    addManagerLoadStage(mv::plugins());
+    addManagerLoadStage(mv::actions());
+    addManagerLoadStage(mv::dataHierarchy());
+    addManagerLoadStage(mv::events());
+    //addManagerLoadStage(mv::workspaces());
 
     plan->addSequentialStage("Post-process", {
         WorkflowPlan::Job("Post-process", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& parentExecutionContext) {
@@ -205,7 +203,7 @@ UniqueWorkflowPlan Project::toVariantMapWorkflow() const
 
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
 
-    plan->addSequentialStage("Common", [this, context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
+    plan->addSequentialStage("Save common", [this, context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
         auto variantMap = Serializable::toVariantMap();
 
         _projectMetaAction.insertIntoVariantMap(variantMap);
@@ -217,29 +215,24 @@ UniqueWorkflowPlan Project::toVariantMapWorkflow() const
         context->setMap(variantMap);
     });
 
-    WorkflowPlan::Jobs managerJobs;
+    WorkflowPlan::Jobs saveManagerJobs;
 
-    const auto addManagerJob = [context, &managerJobs](AbstractManager& manager) {
-        managerJobs.emplace_back(manager.getSerializationName(), [context, &manager](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
+    const auto addSaveManagerJob = [context, &saveManagerJobs](AbstractManager& manager) {
+        saveManagerJobs.emplace_back(QString("Save %1").arg(manager.getSerializationName()), [context, &manager](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
             auto result = WorkflowRuntimeScoped::instance().executeBlocking(manager.toVariantMapWorkflow(), executionContext);
 
             context->insertInto(manager.getSerializationName(), result->value<QVariantMap>()[manager.getSerializationName()].toMap());
         });
     };
 
-    addManagerJob(mv::plugins());
-    addManagerJob(mv::actions());
-    addManagerJob(mv::dataHierarchy());
-    addManagerJob(mv::events());
+    addSaveManagerJob(mv::plugins());
+    addSaveManagerJob(mv::actions());
+    addSaveManagerJob(mv::dataHierarchy());
+    addSaveManagerJob(mv::events());
+    //addSaveManagerJob(mv::workspaces());
 
-    //managerJobs.emplace_back(events().getSerializationName(), [context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
-    //    auto result = WorkflowRuntimeScoped::instance().executeBlocking(events().toVariantMapWorkflow(), executionContext);
-
-    //    context->insertInto(events().getSerializationName(), result->value<QVariantMap>());
-    //});
-
-    plan->addParallelStage("Managers", managerJobs);
-    plan->addFinalizationStage("Set result", [this, context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
+    plan->addSequentialStage("Save managers", saveManagerJobs);
+    plan->addSequentialStage("Publish result", [this, context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
         executionContext->publishResultValue(getSerializationName(), context->getMap());
     });
 

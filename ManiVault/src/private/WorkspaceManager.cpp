@@ -597,11 +597,11 @@ Workspace* WorkspaceManager::getCurrentWorkspace()
     return _workspace.get();
 }
 
-UniqueWorkflowPlan WorkspaceManager::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext executionContext)
+UniqueWorkflowPlan WorkspaceManager::fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& executionContext)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
 
-    plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, [[ maybe_unused ]] const SharedWorkflowExecutionContext& executionContext) {
+    plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
         getCurrentWorkspace()->fromVariantMap(variantMap);
 
         variantMapMustContain(variantMap, "DockManagers");
@@ -619,7 +619,7 @@ UniqueWorkflowPlan WorkspaceManager::fromVariantMapWorkflow(const QVariantMap& v
 
         for (auto viewPluginDockWidget : _viewPluginsDockManager->getViewPluginDockWidgets(true))
             viewPluginDockWidget->restoreViewPluginState();
-    });
+    }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     return plan;
 }

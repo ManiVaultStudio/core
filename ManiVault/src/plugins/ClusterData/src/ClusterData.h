@@ -98,12 +98,12 @@ public:
 
 public: // Serialization
 
-    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext = nullptr) override;
+    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentContext = nullptr) override;
 
     
     void fromVariantMapPre150(const QVariantMap& variantMap);
 
-    QVariantMap toVariantMapScoped(SharedWorkflowExecutionContext parentContext) const override;
+    QVariantMap toVariantMapScoped(const SharedWorkflowExecutionContext& parentContext) const override;
 
 private:
     QVector<Cluster>    _clusters;      /** Clusters data */
@@ -254,11 +254,11 @@ public: // Selection
 
 public: // Serialization
 
-    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext = nullptr) override;
+    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentContext = nullptr) override;
 
     void fromVariantMapPre150(const QVariantMap& variantMap);
 
-    QVariantMap toVariantMapScoped(SharedWorkflowExecutionContext parentExecutionContext) const override;
+    QVariantMap toVariantMapScoped(const SharedWorkflowExecutionContext& parentExecutionContext) const override;
 
 
     std::vector<unsigned int>       indices;

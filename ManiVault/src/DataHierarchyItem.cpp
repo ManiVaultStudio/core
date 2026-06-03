@@ -255,7 +255,7 @@ void DataHierarchyItem::fromVariantMap(const QVariantMap& variantMap)
         setSelected(variantMap["Selected"].toBool(), false);
 }
 
-QVariantMap DataHierarchyItem::toVariantMapScoped(util::SharedWorkflowExecutionContext parentExecutionContext) const
+QVariantMap DataHierarchyItem::toVariantMapScoped(const SharedWorkflowExecutionContext& parentExecutionContext) const
 {
     QVariantMap variantMap, children;
 

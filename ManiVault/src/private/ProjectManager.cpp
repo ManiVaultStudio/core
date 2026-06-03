@@ -1411,7 +1411,7 @@ void ProjectManager::fromVariantMap(const QVariantMap& variantMap)
     _project->fromVariantMap(variantMap);
 }
 
-QVariantMap ProjectManager::toVariantMapScoped(util::SharedWorkflowExecutionContext parentExecutionContext) const
+QVariantMap ProjectManager::toVariantMapScoped(const SharedWorkflowExecutionContext& parentExecutionContext) const
 {
     if (hasProject())
         return _project->toVariantMapScoped(parentExecutionContext);

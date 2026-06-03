@@ -113,7 +113,7 @@ protected:
 public: // Serialization
 
     // TODO
-    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentExecutionContext) override;
+    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext) override;
 
     // TODO
     UniqueWorkflowPlan toVariantMapWorkflow() const override;

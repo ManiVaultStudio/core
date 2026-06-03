@@ -134,18 +134,16 @@ bool EventManager::areDatasetsPartOfSelectionGroup(Dataset<DatasetImpl> d1, Data
     return foundGroup;
 }
 
-UniqueWorkflowPlan EventManager::fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext executionContext)
+UniqueWorkflowPlan EventManager::fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& executionContext)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
 
-    plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, [[ maybe_unused ]] const SharedWorkflowExecutionContext& executionContext) {
+    plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
         AbstractEventManager::fromVariantMap(variantMap);
 
-        const auto eventsMap = variantMap[getSerializationName()].toMap();
+        variantMapMustContain(variantMap, "SelectionGroups");
 
-        variantMapMustContain(eventsMap, "SelectionGroups");
-
-        auto selectionGroupsList = eventsMap["SelectionGroups"].value<QVariantList>();
+        auto selectionGroupsList = variantMap["SelectionGroups"].value<QVariantList>();
 
         _selectionGroups.resize(selectionGroupsList.size());
 

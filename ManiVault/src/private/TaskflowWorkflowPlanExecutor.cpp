@@ -9,6 +9,11 @@
 
 #include <util/WorkflowExecutionLifecycleScope.h>
 
+#include <QCoreApplication>
+#include <QEventLoop>
+#include <QThread>
+
+#include <chrono>
 #include <future>
 
 #ifdef _DEBUG
@@ -165,7 +170,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
         compileStages(stages, taskflow, rootContext);
 
         if (taskflow.num_tasks() > 0)
-            _executor.run(taskflow).get();
+            runTaskflowBlocking(taskflow);
         };
 
     std::exception_ptr primaryException;
@@ -176,7 +181,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
         compileWorkflow(workflowPlan, taskflow, rootContext);
 
         if (taskflow.num_tasks() > 0)
-            _executor.run(taskflow).get();
+            runTaskflowBlocking(taskflow);
     }
     catch (...) {
         primaryException = std::current_exception();
@@ -529,5 +534,23 @@ void TaskflowWorkflowPlanExecutor::runStagesRoot(
     compileStages(stages, taskflow, rootContext);
 
     if (taskflow.num_tasks() > 0)
-        _executor.run(taskflow).get();
+        runTaskflowBlocking(taskflow);
+}
+
+void TaskflowWorkflowPlanExecutor::runTaskflowBlocking(tf::Taskflow& taskflow)
+{
+    if (taskflow.num_tasks() == 0)
+        return;
+
+    auto future = _executor.run(taskflow);
+
+    if (QThread::currentThread() != qApp->thread()) {
+        future.get();
+        return;
+    }
+
+    while (future.wait_for(std::chrono::milliseconds(10)) != std::future_status::ready)
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 10);
+
+    future.get();
 }

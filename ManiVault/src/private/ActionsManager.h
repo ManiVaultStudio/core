@@ -56,7 +56,7 @@ public: // Models
 public: // Serialization
 
     // TODO
-    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, SharedWorkflowExecutionContext executionContext = nullptr) override;
+    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& executionContext = nullptr) override;
 
     // TODO
     UniqueWorkflowPlan toVariantMapWorkflow() const override;
