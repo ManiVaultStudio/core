@@ -199,54 +199,54 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap&
     return plan;
 }
 
-QVariantMap ClustersSerializer::toVariantMapScoped(const QVector<Cluster>& clusters, SharedWorkflowExecutionContext executionContext)
+UniqueWorkflowPlan ClustersSerializer::toVariantMapWorkflow(const QVector<Cluster>& clusters)
 {
-    Headers headers;
-    Indices allIndices;
-    QVariantMap result;
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    headers.reserve(static_cast<std::size_t>(clusters.size()));
+    plan->addSequentialStage("Save common", [&clusters](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        Headers headers;
+        Indices allIndices;
+        QVariantMap result;
 
-    allIndices = buildIndexBuffer(clusters, headers);
+        headers.reserve(static_cast<std::size_t>(clusters.size()));
 
-    if (executionContext && headers.size() >= 1000) {
-        executionContext->warning(
-            QString("This dataset contains approximately %1 clusters. "
-                "Datasets with very large numbers of clusters can take considerable "
-                "time to save and load. Consider reducing the number of clusters if "
-                "project serialization performance becomes a concern.")
-            .arg(getIntegerCountHumanReadable(headers.size())));
+        allIndices = buildIndexBuffer(clusters, headers);
 
-        executionContext->info("root warning count:" + QString::number(executionContext->getState()->getReportRoot()->getWarningCountRecursive()));
+        if (executionContext && headers.size() >= 1000) {
+            executionContext->warning(
+                QString("This dataset contains approximately %1 clusters. "
+                    "Datasets with very large numbers of clusters can take considerable "
+                    "time to save and load. Consider reducing the number of clusters if "
+                    "project serialization performance becomes a concern.")
+                .arg(getIntegerCountHumanReadable(headers.size())));
 
-        for (auto message : executionContext->getState()->collectMessages()) {
-            qDebug() << message._text;
+            executionContext->info("root warning count:" + QString::number(executionContext->getState()->getReportRoot()->getWarningCountRecursive()));
         }
 
+        const auto headersRaw = serializeHeaders(headers, allIndices);
 
-    }
+        result.insert("ClustersFormatVersion", FormatVersion);
+        result.insert("ClustersMetaDataSize", headersRaw.size());
+        result.insert("ClustersIndicesRawDataSize", allIndices.size() * sizeof(unsigned int));
 
-    const auto headersRaw = serializeHeaders(headers, allIndices);
+        result.insert(
+            "ClustersMetaData",
+            bytesToBlobVariantMap(headersRaw.constData(), headersRaw.size(), executionContext)
+        );
 
-    result.insert("ClustersFormatVersion", FormatVersion);
-    result.insert("ClustersMetaDataSize", headersRaw.size());
-    result.insert("ClustersIndicesRawDataSize", allIndices.size() * sizeof(unsigned int));
+        result.insert(
+            "ClustersIndicesRawData",
+            bytesToBlobVariantMap(
+                reinterpret_cast<const char*>(allIndices.data()),
+                allIndices.size() * sizeof(unsigned int),
+                executionContext
+            )
+        );
 
-    result.insert(
-        "ClustersMetaData",
-        bytesToBlobVariantMap(headersRaw.constData(), headersRaw.size(), executionContext)
-    );
+        executionContext->publishResult(result);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
-    result.insert(
-        "ClustersIndicesRawData",
-        bytesToBlobVariantMap(
-            reinterpret_cast<const char*>(allIndices.data()),
-            allIndices.size() * sizeof(unsigned int),
-            executionContext
-        )
-    );
-
-    return result;
+    return plan;
 }
 
 bool ClustersSerializer::canUseSingletonHeaderFormat(const Headers& headers, const Indices& allIndices)

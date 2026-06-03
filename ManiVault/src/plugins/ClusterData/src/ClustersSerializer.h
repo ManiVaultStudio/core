@@ -35,7 +35,7 @@ public:
     static UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& map, QVector<Cluster>& clusters, SharedWorkflowExecutionContext executionContext);
 
     
-    static QVariantMap toVariantMapScoped(const QVector<Cluster>& clusters, SharedWorkflowExecutionContext executionContext);
+    static UniqueWorkflowPlan toVariantMapWorkflow(const QVector<Cluster>& clusters);
 
     
 
