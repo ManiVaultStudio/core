@@ -3,11 +3,6 @@ cmake_minimum_required(VERSION 3.22)
 set(MV_MAIN "mv-main")
 PROJECT(${MV_MAIN})
 
-if(APPLE)
-  enable_language(OBJC)
-  enable_language(OBJCXX)
-endif()
-
 # -----------------------------------------------------------------------------
 # User options
 # -----------------------------------------------------------------------------
