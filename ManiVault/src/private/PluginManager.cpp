@@ -378,15 +378,15 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets input
         
         return privateRequestPlugin(kind, inputDatasets, outputDatasets);
 
-    } catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to create plugin", e);
+    } catch (std::exception& exception) {
+        throw ManiVaultException(SeverityLevel::Error, "Unable to create plugin", exception.what(), __FUNCTION__, {
+             { "Plugin kind", kind }
+        });
+    } catch (...) {
+        throw ManiVaultException(SeverityLevel::Error, "Unable to create plugin", "Unknown error", __FUNCTION__, {
+             { "Plugin kind", kind }
+		});
     }
-    catch (...) {
-	    exceptionMessageBox("Unable to create plugin");
-    }
-
-    return {};
 }
 
 plugin::Plugin* PluginManager::privateRequestPlugin(const QString& kind, Datasets inputDatasets /*= Datasets()*/, Datasets outputDatasets /*= Datasets()*/)
@@ -456,16 +456,17 @@ plugin::Plugin* PluginManager::privateRequestPlugin(const QString& kind, Dataset
         emit pluginAdded(pluginInstance);
 
         return pluginInstance;
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to create plugin", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to create plugin");
-    }
-
-    return {};
+	}
+	catch (std::exception& exception) {
+	    throw ManiVaultException(SeverityLevel::Error, "Unable to create plugin", exception.what(), __FUNCTION__, {
+	         { "Plugin kind", kind }
+	    });
+	}
+	catch (...) {
+	    throw ManiVaultException(SeverityLevel::Error, "Unable to create plugin", "Unknown error", __FUNCTION__, {
+	         { "Plugin kind", kind }
+	    });
+	}
 }
 
 plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin /*= nullptr*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, Datasets datasets /*= Datasets()*/)
@@ -488,12 +489,15 @@ plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin
             return viewPlugin;
         }
     }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to create view plugin", e);
+    catch (std::exception& exception) {
+        throw ManiVaultException(SeverityLevel::Error, "Unable to create view plugin", exception.what(), __FUNCTION__, {
+             { "Plugin kind", kind }
+        });
     }
     catch (...) {
-        exceptionMessageBox("Unable to create view plugin");
+        throw ManiVaultException(SeverityLevel::Error, "Unable to create view plugin", "Unknown error", __FUNCTION__, {
+             { "Plugin kind", kind }
+        });
     }
 
     return {};
@@ -576,12 +580,15 @@ void PluginManager::addPlugin(plugin::Plugin* plugin)
                 break;
         }
     }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to add plugin", e);
+    catch (std::exception& exception) {
+        throw ManiVaultException(SeverityLevel::Error, "Unable to add plugin", exception.what(), __FUNCTION__, {
+             { "Plugin name", plugin->getGuiName() }
+        });
     }
     catch (...) {
-        exceptionMessageBox("Unable to add plugin");
+        throw ManiVaultException(SeverityLevel::Error, "Unable to add plugin", "Unknown error", __FUNCTION__, {
+             { "Plugin name", plugin->getGuiName() }
+        });
     }
 }
 
@@ -613,12 +620,15 @@ void PluginManager::destroyPlugin(plugin::Plugin* plugin)
         }
         emit pluginDestroyed(pluginId);
     }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to destroy plugin", e);
+    catch (std::exception& exception) {
+        throw ManiVaultException(SeverityLevel::Error, "Unable to destroy plugin", exception.what(), __FUNCTION__, {
+             { "Plugin name", plugin->getGuiName() }
+        });
     }
     catch (...) {
-        exceptionMessageBox("Unable to destroy plugin");
+        throw ManiVaultException(SeverityLevel::Error, "Unable to destroy plugin", "Unknown error", __FUNCTION__, {
+             { "Plugin name", plugin->getGuiName() }
+        });
     }
 }
 
@@ -645,12 +655,15 @@ void PluginManager::destroyPluginById(const QString& pluginId)
         }
         emit pluginDestroyed(pluginId);
     }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to destroy plugin", e);
+    catch (std::exception& exception) {
+        throw ManiVaultException(SeverityLevel::Error, "Unable to destroy plugin", exception.what(), __FUNCTION__, {
+             { "Plugin ID", pluginId }
+            });
     }
     catch (...) {
-        exceptionMessageBox("Unable to destroy plugin");
+        throw ManiVaultException(SeverityLevel::Error, "Unable to destroy plugin", "Unknown error", __FUNCTION__, {
+             { "Plugin ID", pluginId }
+        });
     }
 }
 
