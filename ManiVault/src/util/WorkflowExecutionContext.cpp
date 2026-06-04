@@ -344,7 +344,27 @@ void WorkflowExecutionContext::publishResult(const QVariantMap& values)
 
 QVariantMap WorkflowExecutionContext::takeResultValues()
 {
-    return _state->takeResultValues();
+    QMutexLocker lock(&_resultValuesMutex);
+
+    auto result = _resultValues;
+    _resultValues.clear();
+
+    return result;
 }
 
+QVariant WorkflowExecutionContext::takeResultValue(const QString& localKey)
+{
+    QMutexLocker lock(&_resultValuesMutex);
+
+    auto it = _resultValues.find(localKey);
+
+    if (it == _resultValues.end())
+        return {};
+
+    QVariant result = std::move(it.value());
+    _resultValues.erase(it);
+
+    return result;
 }
+}
+

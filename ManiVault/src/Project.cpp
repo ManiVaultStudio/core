@@ -219,7 +219,7 @@ UniqueWorkflowPlan Project::toVariantMapWorkflow() const
 
     const auto addSaveManagerJob = [context, &saveManagerJobs](AbstractManager& manager) {
         saveManagerJobs.emplace_back(QString("Save %1").arg(manager.getSerializationName()), [context, &manager](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
-            auto result = WorkflowRuntimeScoped::instance().executeBlocking(manager.toVariantMapWorkflow(), executionContext);
+            auto result = WorkflowRuntimeScoped::executeBlocking(manager.toVariantMapWorkflow(), executionContext);
 
             context->insertInto(manager.getSerializationName(), result->value<QVariantMap>()[manager.getSerializationName()].toMap());
         });

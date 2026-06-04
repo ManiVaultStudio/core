@@ -181,32 +181,18 @@ public: // ID
 
 public: // Result values
 
-    /**
-     * @brief Publishes multiple result values associated with this workflow execution context.
-     * @param values Map containing local result keys and their corresponding values.
-     *
-     * Each entry in @p values is published as an individual result value using its
-     * map key as the local result key. Existing values with the same keys are
-     * replaced.
-     */
     void publishResult(const QVariantMap& values);
 
-    /**
-     * @brief Publishes a result value associated with this workflow execution context. The result value is stored in the execution state and can be retrieved later using the specified key. This allows different parts of the workflow to share data and results in a structured way, enabling better communication and coordination between different steps and components of the workflow.
-     * @tparam T The type of the value being published. This can be any type that can be stored in a QVariant, such as basic types (e.g., int, double, QString) or custom types that have been registered with the Qt meta-object system.
-     * @param localKey The key associated with the result value, used to identify and access the value later. This key should be unique within the context of this workflow execution to avoid conflicts with other result values. The actual key used for storage may be scoped or namespaced based on the hierarchy of workflow execution contexts to ensure uniqueness across the entire workflow execution.
-     * @param value The value to be published and stored in the execution state. This can be any value that can be converted to a QVariant, and will be stored in a way that allows it to be retrieved later using the specified key.
-     */
     template<typename T>
-    void publishResultValue(const QString& localKey, T&& value) {
-        _state->setResultValue(localKey, QVariant::fromValue(std::forward<T>(value)));
+    void publishResultValue(const QString& key, const T& value)
+    {
+        QMutexLocker lock(&_resultValuesMutex);
+        _resultValues[key] = QVariant::fromValue(value);
     }
 
-    /**
-     * @brief Retrieves and removes all result values associated with this workflow execution context as a QVariantMap. This is useful for cases where all result values should be accessed at once and then removed from the execution state to prevent further access or to free up resources.
-     * @return A QVariantMap containing all result values associated with this workflow execution context, where the keys are the local keys used when publishing the result values and the values are the corresponding result values wrapped in QVariants. After this call, the execution state will no longer contain these result values.
-     */
     [[nodiscard]] QVariantMap takeResultValues();
+    
+    [[nodiscard]] QVariant takeResultValue(const QString& localKey);
 
 private:
     friend class WorkflowExecutionScope;
@@ -223,6 +209,8 @@ private:
     WorkflowPlan::JobProgressMode           _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /** Progress mode for this workflow execution context */
     Type                                    _type = Type::Workflow;                                     /** Semantic type of this workflow execution context, used for rendering, reporting, and diagnostics */
     std::weak_ptr<WorkflowExecutionContext> _parent;                                                    /** Weak pointer to the parent workflow execution context, if any */
+    mutable QMutex                          _resultValuesMutex;                                         /** Mutex to protect access to the result values map */
+    QVariantMap                             _resultValues;                                              /** Map of result values published by this workflow execution context, where keys are local result keys and values are the corresponding result values */
 };
 
 /** Optional reference to a WorkflowExecutionContext */

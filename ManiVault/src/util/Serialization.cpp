@@ -226,7 +226,7 @@ QVariantMap bytesToBlobVariantMap(const char* bytes, const std::uint64_t& number
         if (!encodeJobs.empty()) {
             encodeWorkflowPlan->addParallelStage("Encode Blocks", encodeJobs);
 
-            auto future = Application::getWorkflowPlanExecutor().executeBlocking(std::move(encodeWorkflowPlan), parentContext);
+            auto future = WorkflowRuntimeScoped::executeBlocking(std::move(encodeWorkflowPlan), parentContext);
 
             QVariantList blocks;
 
@@ -668,7 +668,7 @@ void populateBytesFromBlobMap(const QVariantMap& variantMap, char* destination, 
 
     auto plan = populateBytesFromBlobMapWorkflow(variantMap, destination, destinationSize, parentContext);
 
-    WorkflowRuntimeScoped::instance().executeBlocking(std::move(plan), std::move(parentContext));
+    WorkflowRuntimeScoped::executeBlocking(std::move(plan), std::move(parentContext));
 }
 
 QByteArray bytesFromBlobVariantMap(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext /*= nullptr*/)

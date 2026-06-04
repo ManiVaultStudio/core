@@ -300,7 +300,9 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
             result->setMessages(messages);
         }
 
-        result->setValue(rootContext->takeResultValues());
+        auto resultValues = rootContext->takeResultValues();
+
+        result->setValue(resultValues);
         result->setMetrics(state->metrics().snapshot());
         result->setDuration(lifecycle.elapsedMs());
     }

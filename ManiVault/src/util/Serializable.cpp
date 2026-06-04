@@ -69,10 +69,7 @@ void Serializable::fromVariantMapScoped(const QVariantMap& variantMap, const Sha
 {
     auto plan = fromVariantMapWorkflow(variantMap, parentExecutionContext);
 
-    WorkflowRuntimeScoped::instance().executeBlocking(
-        std::move(plan),
-        parentExecutionContext
-    );
+    WorkflowRuntimeScoped::executeBlocking(std::move(plan), parentExecutionContext);
 }
 
 UniqueWorkflowPlan Serializable::fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext /*= nullptr*/)
@@ -101,7 +98,7 @@ QVariantMap Serializable::toVariantMapScoped(const SharedWorkflowExecutionContex
 {
     auto plan = toVariantMapWorkflow();
 
-    const auto result = WorkflowRuntimeScoped::instance().executeBlocking(std::move(plan), parentExecutionContext);
+    const auto result = WorkflowRuntimeScoped::executeBlocking(std::move(plan), parentExecutionContext);
 
     return result->value<QVariantMap>();
 }
@@ -140,7 +137,7 @@ QJsonDocument Serializable::toJsonDocumentScoped(const SharedWorkflowExecutionCo
 {
     auto plan = toVariantMapWorkflow();
 
-    auto result = WorkflowRuntimeScoped::instance().executeBlocking(std::move(plan), parentExecutionContext);
+    auto result = WorkflowRuntimeScoped::executeBlocking(std::move(plan), parentExecutionContext);
 
     const auto variantMap = result->value<QVariantMap>();
 

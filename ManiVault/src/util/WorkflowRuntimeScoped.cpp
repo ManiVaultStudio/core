@@ -20,7 +20,11 @@ SharedWorkflowResult WorkflowRuntimeScoped::executeBlocking(UniqueWorkflowPlan p
         return {};
 
     if (parentContext) {
-        return Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan), parentContext);
+        auto nestedContext = parentContext->createNestedWorkflowChild(plan->getName());
+
+        return Application::getWorkflowPlanExecutor().executeBlocking(
+            std::move(plan),
+            nestedContext);
     }
 
     return Application::getWorkflowPlanExecutor().executeBlocking(std::move(plan));

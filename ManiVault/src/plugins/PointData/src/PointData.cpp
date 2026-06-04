@@ -1185,7 +1185,7 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
     //}, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     plan->addSequentialStage("Publish result", [this, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-        executionContext->publishResult(context->getMap());
+        executionContext->publishResultValue(getId(), context->getMap());
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     return plan;
