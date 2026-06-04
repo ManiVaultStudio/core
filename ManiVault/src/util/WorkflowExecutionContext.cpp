@@ -366,5 +366,21 @@ QVariant WorkflowExecutionContext::takeResultValue(const QString& localKey)
 
     return result;
 }
+
+SharedWorkflowExecutionContext WorkflowExecutionContext::getResultScope()
+{
+    auto current = shared_from_this();
+
+    while (current) {
+        if (current->_type == Type::Workflow || current->_type == Type::NestedWorkflow) {
+            return current;
+        }
+
+        current = current->_parent.lock();
+    }
+
+    return {};
+}
+
 }
 

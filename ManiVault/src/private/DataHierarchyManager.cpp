@@ -386,8 +386,8 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
 
 UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 {
-    auto context = std::make_shared<ToVariantMapWorkflowContext>();
-    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__, context);
+    auto context    = std::make_shared<ToVariantMapWorkflowContext>();
+    auto plan       = std::make_unique<WorkflowPlan>(__FUNCTION__, context);
 
     if (_items.empty())
         return plan;
@@ -400,22 +400,15 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 
         const auto datasetId = item->getDataset()->getId();
 
-        saveItemsJobs.emplace_back(
-            datasetId,
-            [context, item, datasetId](
-                const WorkflowPlan::Job&,
-                const SharedWorkflowExecutionContext& executionContext)
-            {
-                auto itemMap = item->toVariantMapScoped(executionContext);
+        saveItemsJobs.emplace_back(datasetId, [context, item, datasetId](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            auto itemMap = item->toVariantMapScoped(executionContext);
 
-                // DataHierarchyItem::toVariantMapScoped() may still contain
-                // an empty or stale Dataset entry. The manager owns this field.
-                itemMap.remove("Dataset");
+            itemMap.remove("Dataset");
 
-                itemMap["Children"] = QVariantMap{};
+            itemMap["Children"] = QVariantMap{};
 
-                context->setItemMap(datasetId, itemMap);
-            });
+            context->setItemMap(datasetId, itemMap);
+        });
     }
 
     plan->addParallelStage("Save items", std::move(saveItemsJobs));
@@ -450,67 +443,52 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 
     plan->addParallelStage("Save datasets", std::move(saveDatasetsJobs));
 
-    plan->addSequentialStage(
-        "Assemble hierarchy",
-        [this, context](
-            const WorkflowPlan::Job&,
-            const SharedWorkflowExecutionContext&)
-        {
-            std::function<QVariantMap(DataHierarchyItem*, std::int32_t)> assembleItem;
+    plan->addSequentialStage("Assemble hierarchy", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&){
+        std::function<QVariantMap(DataHierarchyItem*, std::int32_t)> assembleItem;
 
-            qDebug() << context->getItemIds();
-            qDebug() << context->getDatasetIds();
-            assembleItem =
-                [context, &assembleItem](DataHierarchyItem* item, std::int32_t sortIndex)
-                {
-                    const auto datasetId    = item->getDataset()->getId();
-                    const auto itemMap      = context->getItemMap(datasetId);
-                    const auto datasetMap   = context->getDatasetMap(datasetId);
+        assembleItem = [context, &assembleItem](DataHierarchyItem* item, std::int32_t sortIndex) {
+            const auto datasetId    = item->getDataset()->getId();
+            const auto datasetMap   = context->getDatasetMap(datasetId);
 
-                    Q_ASSERT(!itemMap.isEmpty());
-                    Q_ASSERT(!datasetMap.isEmpty());
-                    Q_ASSERT(datasetMap["ID"].toString() == datasetId);
+            auto itemMap = context->getItemMap(datasetId);
 
-                    QVariantMap children;
-                    std::int32_t childSortIndex = 0;
+            Q_ASSERT(!itemMap.isEmpty());
+            Q_ASSERT(!datasetMap.isEmpty());
+            Q_ASSERT(datasetMap["ID"].toString() == datasetId);
 
-                    for (auto child : item->getChildren()) {
-                        const auto childDatasetId = child->getDataset()->getId();
+            QVariantMap children;
+            std::int32_t childSortIndex = 0;
 
-                        children[childDatasetId] =
-                            assembleItem(child, childSortIndex++);
-                    }
+            for (auto child : item->getChildren()) {
+                const auto childDatasetId = child->getDataset()->getId();
 
-                    itemMap["Dataset"] = datasetMap;
-                    itemMap["Children"] = children;
-                    itemMap["SortIndex"] = sortIndex;
-
-                    return itemMap;
-                };
-
-            QVariantMap dataHierarchyMap;
-            std::int32_t topLevelSortIndex = 0;
-
-            for (auto topLevelItem : const_cast<DataHierarchyManager*>(this)->getTopLevelItems()) {
-                const auto datasetId = topLevelItem->getDataset()->getId();
-
-                dataHierarchyMap[datasetId] =
-                    assembleItem(topLevelItem, topLevelSortIndex++);
+                children[childDatasetId] =
+                    assembleItem(child, childSortIndex++);
             }
 
-            context->setDataHierarchyMap(dataHierarchyMap);
-        });
+            itemMap["Dataset"]      = datasetMap;
+            itemMap["Children"]     = children;
+            itemMap["SortIndex"]    = sortIndex;
 
-    plan->addFinalizationStage(
-        "Publish result",
-        [this, context](
-            const WorkflowPlan::Job&,
-            const SharedWorkflowExecutionContext& executionContext)
-        {
-            executionContext->publishResultValue(
-                getSerializationName(),
-                context->getDataHierarchyMap());
-        });
+            return itemMap;
+        };
+
+        QVariantMap dataHierarchyMap;
+        std::int32_t topLevelSortIndex = 0;
+
+        for (auto topLevelItem : const_cast<DataHierarchyManager*>(this)->getTopLevelItems()) {
+            const auto datasetId = topLevelItem->getDataset()->getId();
+
+            dataHierarchyMap[datasetId] =
+                assembleItem(topLevelItem, topLevelSortIndex++);
+        }
+
+        context->setDataHierarchyMap(dataHierarchyMap);
+    });
+
+    plan->addFinalizationStage("Publish result", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext){
+        executionContext->publishResultValue(getSerializationName(), context->getDataHierarchyMap());
+    });
 
     return plan;
 }

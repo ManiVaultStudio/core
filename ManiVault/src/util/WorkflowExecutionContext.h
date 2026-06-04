@@ -186,13 +186,20 @@ public: // Result values
     template<typename T>
     void publishResultValue(const QString& key, const T& value)
     {
-        QMutexLocker lock(&_resultValuesMutex);
-        _resultValues[key] = QVariant::fromValue(value);
+        auto target = getResultScope();
+
+        if (!target)
+            target = shared_from_this();
+
+        QMutexLocker lock(&target->_resultValuesMutex);
+        target->_resultValues[key] = QVariant::fromValue(value);
     }
 
     [[nodiscard]] QVariantMap takeResultValues();
     
     [[nodiscard]] QVariant takeResultValue(const QString& localKey);
+
+    [[nodiscard]] SharedWorkflowExecutionContext getResultScope();
 
 private:
     friend class WorkflowExecutionScope;
