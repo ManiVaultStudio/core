@@ -261,7 +261,7 @@ QVariantMap DataHierarchyItem::toVariantMapScoped(const SharedWorkflowExecutionC
 
     try
     {
-        variantMap = WidgetAction::toVariantMapScoped(parentExecutionContext);
+        variantMap = WidgetAction::toVariantMap();
     }
     catch (...)
     {

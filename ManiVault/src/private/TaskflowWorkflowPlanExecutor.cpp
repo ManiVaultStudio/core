@@ -70,6 +70,25 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(
     UniqueWorkflowPlan workflowPlan,
     SharedWorkflowExecutionContext parentContext)
 {
+    static thread_local int depth = 0;
+
+    ++depth;
+
+    qDebug()
+        << "ENTER"
+        << depth
+        << workflowPlan->getName();
+
+    Q_ASSERT(depth < 50);
+
+    auto guard = qScopeGuard([&] {
+        qDebug()
+            << "EXIT"
+            << depth
+            << workflowPlan->getName();
+        --depth;
+        });
+
     if (!workflowPlan)
         throw std::runtime_error("Workflow plan is null");
 

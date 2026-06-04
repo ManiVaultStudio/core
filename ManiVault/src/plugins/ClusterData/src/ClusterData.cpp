@@ -241,12 +241,12 @@ UniqueWorkflowPlan Clusters::toVariantMapWorkflow() const
 
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    plan->addSequentialStage("Save common", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
-        context->setMap(DatasetImpl::toVariantMap());
+    plan->addSequentialStage("Save common", [this, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        context->setMap(this->DatasetImpl::toVariantMap());
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     plan->addSequentialStage("Save raw data", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
-        const auto data = getRawData<PointData>()->toVariantMap();
+        const auto data = getRawData<ClusterData>()->toVariantMap();
 
         context->setValue("Data", data);
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
