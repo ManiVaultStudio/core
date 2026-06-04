@@ -306,57 +306,7 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    const auto loadDataHierarchyItem =
-        [parentExecutionContext](
-            const QVariantMap& itemMap,
-            Dataset<DatasetImpl> parent
-            ) -> Dataset<DatasetImpl>
-        {
-            const auto datasetMap = itemMap["Dataset"].toMap();
-            const auto datasetId = datasetMap["ID"].toString();
-            const auto guiName = itemMap["Name"].toString();
-            const auto pluginKind = datasetMap["PluginKind"].toString();
-            const auto isDerived = datasetMap["Derived"].toBool();
-            const auto isFull = datasetMap["Full"].toBool();
-            const auto sourceDatasetId = datasetMap["SourceDatasetID"].toString();
-
-            auto loadedDataset =
-                (isDerived || !isFull)
-                ? mv::data().createDatasetWithoutSelection(pluginKind, guiName, parent, datasetId)
-                : mv::data().createDataset(pluginKind, guiName, parent, datasetId);
-
-            if (isDerived && !sourceDatasetId.isEmpty())
-                loadedDataset->setSourceDataset(sourceDatasetId);
-
-            loadedDataset->getDataHierarchyItem().fromVariantMap(itemMap);
-
-            return loadedDataset;
-        };
-
-    const std::function<void(const QVariantMap&, Dataset<DatasetImpl>)> populateDataHierarchy =
-        [&populateDataHierarchy, &loadDataHierarchyItem](
-            const QVariantMap& itemsMap,
-            Dataset<DatasetImpl> parent
-            )
-        {
-            QVector<QVariantMap> sortedItems;
-            sortedItems.reserve(itemsMap.size());
-
-            for (const auto& itemId : itemsMap.keys())
-                sortedItems << itemsMap[itemId].toMap();
-
-            std::sort(sortedItems.begin(), sortedItems.end(),
-                [](const QVariantMap& a, const QVariantMap& b) {
-                    return a["SortIndex"].toInt() < b["SortIndex"].toInt();
-                });
-
-            for (const auto& itemMap : sortedItems) {
-                auto dataset = loadDataHierarchyItem(itemMap, parent);
-                populateDataHierarchy(itemMap["Children"].toMap(), dataset);
-            }
-        };
-
-    populateDataHierarchy(variantMap, Dataset<DatasetImpl>());
+    populateDataHierarchy(variantMap);
 
     std::vector<QVariantMap> datasetMaps;
 
@@ -506,6 +456,49 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
     }
 
     return plan;
+}
+
+QVector<QVariantMap> DataHierarchyManager::sortedDataHierarchyItems(const QVariantMap& itemsMap)
+{
+    QVector<QVariantMap> items;
+    items.reserve(itemsMap.size());
+
+    for (const auto& item : itemsMap)
+        items << item.toMap();
+
+    std::ranges::sort(items, {}, [](const QVariantMap& item) {
+        return item["SortIndex"].toInt();
+        });
+
+    return items;
+}
+
+void DataHierarchyManager::populateDataHierarchy(const QVariantMap& itemsMap, const Dataset<DatasetImpl>& parent)
+{
+    for (const auto& itemMap : sortedDataHierarchyItems(itemsMap)) {
+        auto dataset = createDatasetFromItem(itemMap, parent);
+        populateDataHierarchy(itemMap["Children"].toMap(), dataset);
+    }
+}
+
+Dataset<DatasetImpl> DataHierarchyManager::createDatasetFromItem(const QVariantMap& itemMap, const Dataset<DatasetImpl>& parent)
+{
+    const auto datasetMap       = itemMap["Dataset"].toMap();
+    const auto datasetId        = datasetMap["ID"].toString();
+    const auto guiName          = itemMap["Name"].toString();
+    const auto pluginKind       = datasetMap["PluginKind"].toString();
+    const auto isDerived        = datasetMap["Derived"].toBool();
+    const auto isFull           = datasetMap["Full"].toBool();
+    const auto sourceDatasetId  = datasetMap["SourceDatasetID"].toString();
+
+    auto dataset = isDerived || !isFull ? mv::data().createDatasetWithoutSelection(pluginKind, guiName, parent, datasetId) : mv::data().createDataset(pluginKind, guiName, parent, datasetId);
+
+    if (isDerived && !sourceDatasetId.isEmpty())
+        dataset->setSourceDataset(sourceDatasetId);
+
+    dataset->getDataHierarchyItem().fromVariantMap(itemMap);
+
+    return dataset;
 }
 
 }

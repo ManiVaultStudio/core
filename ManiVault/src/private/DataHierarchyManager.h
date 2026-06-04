@@ -118,6 +118,14 @@ public: // Serialization
     // TODO
     UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
+private: // Serialization helpers
+
+    static QVector<QVariantMap> sortedDataHierarchyItems(const QVariantMap& itemsMap);
+
+    static void populateDataHierarchy(const QVariantMap& itemsMap, const Dataset<DatasetImpl>& parent = {});
+
+    static Dataset<DatasetImpl> createDatasetFromItem(const QVariantMap& itemMap, const Dataset<DatasetImpl>& parent);
+
 private:
     std::vector<std::unique_ptr<DataHierarchyItem>>     _items;                 /** Unique pointers to data hierarchy items */
 };
