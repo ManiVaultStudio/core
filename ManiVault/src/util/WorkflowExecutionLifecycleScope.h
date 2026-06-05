@@ -83,6 +83,8 @@ public:
      * The reported duration is the elapsed time measured since construction. Calling this
      * function prevents the destructor from reporting completion a second time.
      */
+    void finish(std::uint64_t durationMs);
+
     void finish();
 
     /**

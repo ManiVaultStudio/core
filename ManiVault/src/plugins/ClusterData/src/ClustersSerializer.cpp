@@ -96,10 +96,11 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap&
         std::vector<Header> headers;
         Indices allIndices;
     };
-
+    
     auto context = std::make_shared<Context>();
-    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
-
+    
+	auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+    
     plan->addSequentialStage("Read cluster data",
         [map, context](const WorkflowPlan::Job&,
             const SharedWorkflowExecutionContext& parentExecutionContext) {
@@ -142,13 +143,14 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap&
             const SharedWorkflowExecutionContext&) {
                 clusters.resize(static_cast<qsizetype>(context->headers.size()));
         });
-
+/*
     WorkflowPlan::Jobs rebuildJobs;
 
     // Important: this loop cannot use context->headers.size() yet,
     // because headers are loaded only when the workflow runs.
     // So instead use a dynamic nested workflow stage:
 
+    
     plan->addNestedWorkflowStage("Rebuild clusters", [context, &clusters](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
         auto rebuildPlan = std::make_unique<WorkflowPlan>("Rebuild clusters");
 
@@ -195,7 +197,7 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap&
 
         return rebuildPlan;
     });
-
+    */
     return plan;
 }
 

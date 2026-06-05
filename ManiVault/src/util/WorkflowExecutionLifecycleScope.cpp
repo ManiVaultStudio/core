@@ -32,13 +32,17 @@ void WorkflowExecutionLifecycleScope::fail(SeverityLevel severity, const QString
 	}
 }
 
+void WorkflowExecutionLifecycleScope::finish(std::uint64_t durationMs)
+{
+    if (_context && !_finished) {
+        _context->reportFinished(durationMs);
+        _finished = true;
+    }
+}
+
 void WorkflowExecutionLifecycleScope::finish()
 {
-	if (_context && !_finished) {
-		_context->reportFinished(static_cast<std::uint64_t>(_timer.elapsed()));
-
-		_finished = true;
-	}
+	finish(elapsedMs());
 }
 
 std::uint64_t WorkflowExecutionLifecycleScope::elapsedMs() const

@@ -227,15 +227,13 @@ UniqueWorkflowPlan Clusters::fromVariantMapWorkflow(const QVariantMap& variantMa
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    plan->addSequentialStage("Load common", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-        this->DatasetImpl::fromVariantMap(variantMap);
+    plan->addNestedWorkflowStage("Load common", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
+        return this->DatasetImpl::fromVariantMapWorkflow(variantMap, executionContext);
     });
 
-    if (isFull()) {
-	    plan->addNestedWorkflowStage("Load raw data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
-			return getRawData<ClusterData>()->fromVariantMapWorkflow(variantMap, executionContext);
-	    });
-    }
+    plan->addNestedWorkflowStage("Load raw data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
+		return getRawData<ClusterData>()->fromVariantMapWorkflow(variantMap, executionContext);
+    });
 
     return plan;
 }

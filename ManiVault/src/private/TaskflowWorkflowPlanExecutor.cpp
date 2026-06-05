@@ -74,20 +74,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(
 
     ++depth;
 
-    qDebug()
-        << "ENTER"
-        << depth
-        << workflowPlan->getName();
-
     Q_ASSERT(depth < 50);
-
-    auto guard = qScopeGuard([&] {
-        qDebug()
-            << "EXIT"
-            << depth
-            << workflowPlan->getName();
-        --depth;
-        });
 
     if (!workflowPlan)
         throw std::runtime_error("Workflow plan is null");
@@ -169,9 +156,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
 {
     rootContext = requireContext(rootContext, __FUNCTION__);
 
-    const auto executionOptions = rootContext->getState()
-        ? rootContext->getState()->getExecutionOptions()
-        : WorkflowExecutionOptions{};
+    const auto executionOptions = rootContext->getState() ? rootContext->getState()->getExecutionOptions() : WorkflowExecutionOptions{};
 
     std::optional<WorkflowConsoleDashboardScope> dashboardScope;
 
@@ -291,6 +276,8 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
 
     auto result = std::make_shared<WorkflowResult>(workflowPlan.getName());
 
+    const auto durationMs = lifecycle.elapsedMs();
+
     if (auto state = rootContext->getState()) {
         if (rootContext->isRootExecution()) {
             const auto messages = state->collectMessages();
@@ -301,8 +288,11 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
 
         result->setValue(resultValues);
         result->setMetrics(state->metrics().snapshot());
-        result->setDuration(lifecycle.elapsedMs());
     }
+
+    result->setDuration(durationMs);
+
+    lifecycle.finish(durationMs);
 
     if (rootContext->isRootExecution() &&
         rootContext->getState() &&
@@ -312,8 +302,6 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
             result,
             WorkflowResultRegistry::instance().add(result));
     }
-
-    lifecycle.finish();
 
     return result;
 }
