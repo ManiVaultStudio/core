@@ -223,7 +223,7 @@ UniqueWorkflowPlan Clusters::fromVariantMapWorkflow(const QVariantMap& variantMa
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
     plan->addSequentialStage("Load common", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-        DatasetImpl::fromVariantMapWorkflow(variantMap, executionContext);
+        this->DatasetImpl::fromVariantMap(variantMap);
     });
 
     if (isFull()) {

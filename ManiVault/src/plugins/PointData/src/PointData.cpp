@@ -1044,7 +1044,7 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap,
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
     plan->addSequentialStage("Load common", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-        DatasetImpl::fromVariantMapScoped(variantMap, executionContext);
+        this->DatasetImpl::fromVariantMap(variantMap);
     });
 
     if (isFull()) {

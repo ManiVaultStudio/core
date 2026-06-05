@@ -213,7 +213,6 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
         catch (const ManiVaultException& exception) {
             rootContext->error(exception._message, exception._where, exception._details);
             lifecycle.fail(exception._severity, exception._message, exception._details);
-            handleFailure(rootContext, workflowPlan, exception._message);
 
             try {
                 runStages(workflowPlan.getOnFailureStages());
@@ -235,7 +234,6 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
 
             rootContext->error(message, workflowPlan.getName());
             lifecycle.fail(SeverityLevel::Error, message);
-            handleFailure(rootContext, workflowPlan, message);
 
             try {
                 runStages(workflowPlan.getOnFailureStages());
@@ -249,12 +247,11 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
                 rootContext->error("Failure stages failed with unknown error", workflowPlan.getName());
             }
 
-            std::rethrow_exception(primaryException);
+            //std::rethrow_exception(primaryException);
         }
         catch (...) {
             rootContext->error("Workflow failed with unknown error", workflowPlan.getName());
             lifecycle.fail(SeverityLevel::Error, "Workflow failed with unknown error");
-            handleFailure(rootContext, workflowPlan, "Unknown error");
 
             try {
                 runStages(workflowPlan.getOnFailureStages());
@@ -391,9 +388,7 @@ void TaskflowWorkflowPlanExecutor::executeJobOnWorkerThread(
     job.run(jobContext);
 }
 
-void TaskflowWorkflowPlanExecutor::executeJob(
-    const WorkflowPlan::Job& job,
-    SharedWorkflowExecutionContext jobContext)
+void TaskflowWorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
 {
     jobContext = requireContext(jobContext, __FUNCTION__);
 
@@ -430,25 +425,7 @@ void TaskflowWorkflowPlanExecutor::executeJob(
     }
 }
 
-void TaskflowWorkflowPlanExecutor::handleFailure(SharedWorkflowExecutionContext parentContext, WorkflowPlan& workflowPlan, const QString& message)
-{
-    if (!parentContext)
-        return;
-
-    QMetaObject::invokeMethod(&help(), [&workflowPlan, parentContext, message]() {
-        const auto title = QString("%1 failed").arg(workflowPlan.getName());
-
-        if (parentContext->getState()->getExecutionOptions()._addNotification)
-            help().addNotification(title, message);
-
-        qDebug() << QString("%1: %2").arg(title, message);
-	});
-}
-
-void TaskflowWorkflowPlanExecutor::handleStageException(
-    const WorkflowPlan::Stage& stage,
-    const ManiVaultException& exception,
-    SharedWorkflowExecutionContext stageContext)
+void TaskflowWorkflowPlanExecutor::handleStageException(const WorkflowPlan::Stage& stage, const ManiVaultException& exception, SharedWorkflowExecutionContext stageContext)
 {
     stageContext->message(
         exception._severity,
