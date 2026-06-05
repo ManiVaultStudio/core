@@ -1178,11 +1178,11 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
         }, WorkflowPlan::JobThreadAffinity::GuiThread);
     }
     
-    //plan->addSequentialStage("Save dimensions", [this, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-    //    context->setValue("DimensionNames", DimensionNamesSerializer::toVariantMap(getRawData<PointData>()->getDimensionNames()));
-    //    context->setValue("NumberOfDimensions", QVariant::fromValue<std::uint64_t>(getNumDimensions()));
-    //    context->setValue("Dimensions", _dimensionsPickerAction->toVariantMap());
-    //}, WorkflowPlan::JobThreadAffinity::GuiThread);
+    plan->addSequentialStage("Save dimensions", [this, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        context->setValue("DimensionNames", DimensionNamesSerializer::toVariantMap(getRawData<PointData>()->getDimensionNames()));
+        context->setValue("NumberOfDimensions", QVariant::fromValue<std::uint64_t>(getNumDimensions()));
+        context->setValue("Dimensions", _dimensionsPickerAction->toVariantMap());
+    }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     plan->addSequentialStage("Publish result", [this, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
         executionContext->publishResultValue(getId(), context->getMap());

@@ -14,6 +14,7 @@
 
 #include <util/Serialization.h>
 #include <util/VariantMapWorkflowContext.h>
+#include <util/WorkflowRuntimeScoped.h>
 
 #include <QtCore>
 #include <QtDebug>
@@ -239,16 +240,19 @@ UniqueWorkflowPlan Clusters::toVariantMapWorkflow() const
 {
     auto context = std::make_shared<VariantMapWorkflowContext>();
 
-    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__, context);
 
     plan->addSequentialStage("Save common", [this, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
         context->setMap(this->DatasetImpl::toVariantMap());
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
-    plan->addSequentialStage("Save raw data", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
-        const auto data = getRawData<ClusterData>()->toVariantMap();
+    plan->addSequentialStage("Save raw data", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        auto plan = getRawData<ClusterData>()->toVariantMapWorkflow();
 
-        context->setValue("Data", data);
+        const auto result = WorkflowRuntimeScoped::executeBlocking(std::move(plan), executionContext);
+
+        const auto resultValues = result->value<QVariantMap>();
+        context->setValue("Data", resultValues.value("Data").toMap());
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     plan->addSequentialStage("Publish result", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {

@@ -49,6 +49,15 @@ public: // Tracing
 
     void trace(WorkflowTraceEvent event) const;
 
+public: // Result values
+
+    void publishResultValue(
+        const QUuid& contextId,
+        const QString& key,
+        const QVariant& value);
+
+    [[nodiscard]] QVariantMap takeResultValues(const QUuid& contextId);
+
 private:
     static void collectMessagesRecursive(const WorkflowReportNode::SharedWorkflowReportNode& node, QVector<WorkflowMessage>& out);
 
@@ -59,6 +68,8 @@ private:
     mutable QMutex                                  _mutex;                                     /** Mutex to protect access to mutable members that may be updated from multiple threads during execution. */
     WorkflowExecutionStatus                         _status = WorkflowExecutionStatus::Idle;    /** The execution status is protected by a mutex since it may be updated from multiple threads during execution and needs to be read and updated atomically. */
     WorkflowExecutionMetrics                        _metrics;                                   /** Metrics are stored in the execution state since they may be updated from multiple threads during execution and need to be accessible from the context. */
+    mutable QMutex                                  _resultValuesMutex;
+    QHash<QUuid, QVariantMap>                       _resultValuesByContext;
 };
 
 }

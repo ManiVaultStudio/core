@@ -186,18 +186,11 @@ public: // Result values
     template<typename T>
     void publishResultValue(const QString& key, const T& value)
     {
-        auto target = getResultScope();
+        if (!_state)
+            return;
 
-        if (!target)
-            target = shared_from_this();
-
-        QMutexLocker lock(&target->_resultValuesMutex);
-        target->_resultValues[key] = QVariant::fromValue(value);
+        _state->publishResultValue(getId(), key, value);
     }
-
-    [[nodiscard]] QVariantMap takeResultValues();
-    
-    [[nodiscard]] QVariant takeResultValue(const QString& localKey);
 
     [[nodiscard]] SharedWorkflowExecutionContext getResultScope();
 
@@ -216,8 +209,6 @@ private:
     WorkflowPlan::JobProgressMode           _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /** Progress mode for this workflow execution context */
     Type                                    _type = Type::Workflow;                                     /** Semantic type of this workflow execution context, used for rendering, reporting, and diagnostics */
     std::weak_ptr<WorkflowExecutionContext> _parent;                                                    /** Weak pointer to the parent workflow execution context, if any */
-    mutable QMutex                          _resultValuesMutex;                                         /** Mutex to protect access to the result values map */
-    QVariantMap                             _resultValues;                                              /** Map of result values published by this workflow execution context, where keys are local result keys and values are the corresponding result values */
 };
 
 /** Optional reference to a WorkflowExecutionContext */

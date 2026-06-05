@@ -297,7 +297,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
             result->setMessages(messages);
         }
 
-        auto resultValues = rootContext->takeResultValues();
+        auto resultValues = state->takeResultValues(rootContext->getId());
 
         result->setValue(resultValues);
         result->setMetrics(state->metrics().snapshot());

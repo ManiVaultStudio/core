@@ -229,21 +229,11 @@ UniqueWorkflowPlan ClustersSerializer::toVariantMapWorkflow(const QVector<Cluste
         result.insert("ClustersMetaDataSize", headersRaw.size());
         result.insert("ClustersIndicesRawDataSize", allIndices.size() * sizeof(unsigned int));
 
-        result.insert(
-            "ClustersMetaData",
-            bytesToBlobVariantMap(headersRaw.constData(), headersRaw.size(), executionContext)
-        );
+        result.insert("ClustersMetaData",bytesToBlobVariantMap(headersRaw.constData(), headersRaw.size(), executionContext));
+        result.insert("ClustersIndicesRawData", bytesToBlobVariantMap(reinterpret_cast<const char*>(allIndices.data()), allIndices.size() * sizeof(unsigned int), executionContext));
 
-        result.insert(
-            "ClustersIndicesRawData",
-            bytesToBlobVariantMap(
-                reinterpret_cast<const char*>(allIndices.data()),
-                allIndices.size() * sizeof(unsigned int),
-                executionContext
-            )
-        );
-
-        executionContext->publishResult(result);
+        qDebug() << result;
+        executionContext->publishResultValue("Data", result);
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     return plan;

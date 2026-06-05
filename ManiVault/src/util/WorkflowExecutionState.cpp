@@ -82,6 +82,20 @@ void WorkflowExecutionState::trace(WorkflowTraceEvent event) const
     getTraceSink()->trace(event);
 }
 
+void WorkflowExecutionState::publishResultValue(const QUuid& contextId, const QString& key, const QVariant& value)
+{
+    QMutexLocker lock(&_resultValuesMutex);
+    _resultValuesByContext[contextId].insert(key, value);
+}
+
+QVariantMap WorkflowExecutionState::takeResultValues(const QUuid& contextId)
+{
+    QMutexLocker lock(&_resultValuesMutex);
+
+    auto values = _resultValuesByContext.take(contextId);
+    return values;
+}
+
 void WorkflowExecutionState::collectMessagesRecursive(const WorkflowReportNode::SharedWorkflowReportNode& node, QVector<WorkflowMessage>& out)
 {
 	if (!node)

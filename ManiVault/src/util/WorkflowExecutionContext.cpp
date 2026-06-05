@@ -342,31 +342,6 @@ void WorkflowExecutionContext::publishResult(const QVariantMap& values)
 		publishResultValue(it.key(), it.value());
 }
 
-QVariantMap WorkflowExecutionContext::takeResultValues()
-{
-    QMutexLocker lock(&_resultValuesMutex);
-
-    auto result = _resultValues;
-    _resultValues.clear();
-
-    return result;
-}
-
-QVariant WorkflowExecutionContext::takeResultValue(const QString& localKey)
-{
-    QMutexLocker lock(&_resultValuesMutex);
-
-    auto it = _resultValues.find(localKey);
-
-    if (it == _resultValues.end())
-        return {};
-
-    QVariant result = std::move(it.value());
-    _resultValues.erase(it);
-
-    return result;
-}
-
 SharedWorkflowExecutionContext WorkflowExecutionContext::getResultScope()
 {
     auto current = shared_from_this();
