@@ -189,7 +189,7 @@ public: // Result values
         if (!_state)
             return;
 
-        _state->publishResultValue(getId(), key, value);
+        _state->publishResultValue(getResultScope()->getId(), key, value);
     }
 
     [[nodiscard]] SharedWorkflowExecutionContext getResultScope();

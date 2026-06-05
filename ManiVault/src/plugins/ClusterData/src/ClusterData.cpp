@@ -136,11 +136,15 @@ UniqueWorkflowPlan ClusterData::toVariantMapWorkflow() const
 {
     auto context = std::make_shared<VariantMapWorkflowContext>();
 
-    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__, context);
 
-    plan->addNestedWorkflowStage("Save", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
-        return ClustersSerializer::toVariantMapWorkflow(_clusters);
-    });
+    plan->addSequentialStage("Save", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        auto serializerPlan = ClustersSerializer::toVariantMapWorkflow(_clusters);
+
+        const auto result = WorkflowRuntimeScoped::executeBlocking(std::move(serializerPlan), executionContext);
+
+        executionContext->publishResultValue("Data", result->value<QVariantMap>()["Data"].toMap());
+	});
 
     return plan;
 }
@@ -252,6 +256,7 @@ UniqueWorkflowPlan Clusters::toVariantMapWorkflow() const
         const auto result = WorkflowRuntimeScoped::executeBlocking(std::move(plan), executionContext);
 
         const auto resultValues = result->value<QVariantMap>();
+        qDebug() << "-----" << resultValues;
         context->setValue("Data", resultValues.value("Data").toMap());
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
