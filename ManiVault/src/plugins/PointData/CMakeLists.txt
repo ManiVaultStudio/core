@@ -8,6 +8,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(POINTS_SOURCES
     src/PointData.h
     src/PointData.cpp
+    src/PointDataLegacySerialization.h
+    src/PointDataLegacySerialization.cpp
     src/PointData.json
     src/PointDataIterator.h
     src/PointDataRange.h
@@ -20,6 +22,7 @@ set(POINTS_SOURCES
 
 set(POINTS_HEADERS
     src/PointData.h
+    src/PointDataLegacySerialization.h
     src/PointDataIterator.h
     src/PointDataRange.h
     src/PointView.h

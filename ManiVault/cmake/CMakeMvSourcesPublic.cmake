@@ -823,6 +823,7 @@ set(PUBLIC_DATASET_HEADERS
     src/DataType.h
     src/RawData.h
     src/Set.h
+    src/SetLegacySerialization.h
     src/LinkedData.h
     src/SelectionGroup.h
     src/Dataset.h
@@ -833,6 +834,7 @@ set(PUBLIC_DATASET_HEADERS
 
 set(PUBLIC_DATASET_SOURCES
     src/Set.cpp
+    src/SetLegacySerialization.cpp
     src/LinkedData.cpp
     src/SelectionGroup.cpp
     src/Dataset.cpp

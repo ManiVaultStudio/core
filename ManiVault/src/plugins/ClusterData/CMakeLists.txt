@@ -8,6 +8,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CLUSTERD_SOURCES
     src/ClusterData.h
     src/ClusterData.cpp
+    src/ClusterDataLegacySerialization.h
+    src/ClusterDataLegacySerialization.cpp
     src/ClustersSerializer.h
     src/ClustersSerializer.cpp
     src/Cluster.h
@@ -18,6 +20,7 @@ set(CLUSTERD_SOURCES
 set(CLUSTER_HEADERS
     src/Cluster.h
     src/ClusterData.h
+    src/ClusterDataLegacySerialization.h
     src/ClustersAction.h
     src/ClustersActionWidget.h
     src/ClustersModel.h
