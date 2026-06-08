@@ -1,0 +1,8 @@
+{
+  "dependencies": [
+    { 
+      "name": "qt", 
+      "features": [ "target-desktop" ] 
+    }
+  ]
+}

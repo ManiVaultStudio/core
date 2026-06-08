@@ -1,0 +1,36 @@
+{
+	"version": 3,
+	"configurePresets": [
+    {
+      "name": "vcpkg-base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+          "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+          "USING_VCPKG": "ON"
+      }
+    },
+		{
+			"name": "vcpkg-windows",
+      "inherits": "vcpkg-base",
+			"cacheVariables": {
+				"VCPKG_TARGET_TRIPLET": "x64-windows-release",
+				"CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded"
+			}
+    },
+    {
+      "name": "vcpkg-linux",
+      "inherits": "vcpkg-base",
+      "cacheVariables": {
+          "VCPKG_TARGET_TRIPLET": "x64-linux-release"
+      }
+    },
+    {
+      "name": "vcpkg-macos",
+      "inherits": "vcpkg-base",
+      "cacheVariables": {
+          "VCPKG_TARGET_TRIPLET": "arm64-osx-release"
+      }
+    }
+	]
+}
