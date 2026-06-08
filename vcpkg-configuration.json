@@ -6,8 +6,7 @@
   },
   "registries": [
     {
-      "kind": "filesystem",
-      "path": "../..",
+      "kind": "https://github.com/ManiVaultStudio/vcpkg-registry",
       "baseline": "default",
       "packages": [
         "qt"
