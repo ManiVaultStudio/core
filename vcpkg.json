@@ -1,8 +1,11 @@
 {
   "dependencies": [
     { 
-      "name": "qt", 
-      "features": [ "target-desktop" ] 
+      "name": "qt"
     }
+  ],
+  "overrides": [
+    {"name": "qt", "version": "6.9.3"}
   ]
+
 }
