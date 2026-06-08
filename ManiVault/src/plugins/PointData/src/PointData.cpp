@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "PointData.h"
+#include "PointDataLegacySerialization.h"
 
 #include "DimensionsPickerAction.h"
 #include "InfoAction.h"
@@ -153,99 +154,48 @@ void PointData::setValueAt(const std::size_t index, const float newValue)
 
 UniqueWorkflowPlan PointData::fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentContext)
 {
-    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1::fromVariantMap").arg(getSerializationName()));
+    const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
-    plan->addSequentialStage("Allocate storage", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& parentExecutionContext) {
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(
+        QString("%1(%2)").arg(getSerializationName()).arg(__FUNCTION__));
+
+    if (appVersion < Version(1, 5, 0)) {
+        plan->addSequentialStage("Load legacy point data (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+            Plugin::fromVariantMap(variantMap);
+            legacy::pointDataFromVariantMapPre150(*this, variantMap);
+        });
+
+        return plan;
+    }
+
+    plan->addSequentialStage("Allocate storage", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
         Plugin::fromVariantMap(variantMap);
 
         variantMapMustContain(variantMap, "Data");
         variantMapMustContain(variantMap, "NumberOfPoints");
         variantMapMustContain(variantMap, "NumberOfDimensions");
 
-        const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
-        const auto dataMap = variantMap["Data"].toMap();
-        const auto numberOfPoints = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
-        const auto numberOfDimensions = variantMap["NumberOfDimensions"].toUInt();
-        const auto numberOfElements = numberOfPoints * numberOfDimensions;
-        const auto elementTypeIndex = static_cast<ElementTypeSpecifier>(dataMap["TypeIndex"].toInt());
-        const auto rawDataMap = dataMap["Raw"].toMap();
+        const auto dataMap              = variantMap["Data"].toMap();
+        const auto numberOfPoints       = static_cast<std::size_t>(variantMap["NumberOfPoints"].toULongLong());
+        const auto numberOfDimensions   = static_cast<std::size_t>(variantMap["NumberOfDimensions"].toULongLong());
+        const auto numberOfElements     = numberOfPoints * numberOfDimensions;
+        const auto elementTypeIndex     = static_cast<ElementTypeSpecifier>(dataMap["TypeIndex"].toInt());
 
-        bool isDense = true;
-
-        if (variantMap.contains("Dense"))
-            isDense = variantMap["Dense"].toBool();
-
-        _isDense = isDense;
-        _numDimensions = numberOfDimensions;
+        _isDense        = variantMap.value("Dense", true).toBool();
+        _numDimensions  = numberOfDimensions;
 
         setElementTypeSpecifier(elementTypeIndex);
         resizeVector(numberOfElements);
     });
 
     plan->addNestedWorkflowStage("Populate data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& parentExecutionContext) -> UniqueWorkflowPlan {
-    	return populateBytesFromBlobMapWorkflow(variantMap["Data"].toMap()["Raw"].toMap(), static_cast<char*>(getDataVoidPtr()), getRawDataSize(), parentExecutionContext);
+        const auto dataMap      = variantMap["Data"].toMap();
+        const auto rawDataMap   = dataMap["Raw"].toMap();
+
+        return populateBytesFromBlobMapWorkflow(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), parentExecutionContext);
     });
 
     return plan;
-}
-
-void PointData::fromVariantMapPre150(const QVariantMap& variantMap)
-{
-    variantMapMustContain(variantMap, "Data");
-    variantMapMustContain(variantMap, "NumberOfPoints");
-    variantMapMustContain(variantMap, "NumberOfDimensions");
-
-    const auto data = variantMap["Data"].toMap();
-    const auto numberOfPoints = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
-    const auto numberOfDimensions = variantMap["NumberOfDimensions"].toUInt();
-    const auto numberOfElements = numberOfPoints * numberOfDimensions;
-    const auto elementTypeIndex = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
-    const auto rawData = data["Raw"].toMap();
-
-    bool isDense = true;
-    if (variantMap.contains("Dense"))
-        isDense = variantMap["Dense"].toBool();
-
-    _isDense        = isDense;
-    _numDimensions  = numberOfDimensions;
-
-    if (_isDense)
-    {
-        setElementTypeSpecifier(elementTypeIndex);
-
-        if (numberOfElements > 0) {
-            resizeVector(numberOfElements);
-
-            populateBytesFromBlobMap(rawData, (char*)getDataVoidPtr(), getRawDataSize());
-        }
-    }
-    else
-    {
-        variantMapMustContain(variantMap, "NumberOfNonZeroElements");
-
-        const auto numberOfNonZeroElements = variantMap["NumberOfNonZeroElements"].toULongLong();
-
-        std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
-
-        populateBytesFromBlobMap(rawData, bytes.data(), bytes.size());
-        _numRows = static_cast<std::uint64_t>(numberOfPoints); // FIXME should be redundant
-
-        size_t offset = 0;
-        std::vector<size_t> rowPointers(numberOfPoints + 1);
-        std::memcpy(rowPointers.data(), bytes.data() + offset, rowPointers.size() * sizeof(size_t));
-
-        offset += rowPointers.size() * sizeof(size_t);
-        std::vector<size_t> colIndices(numberOfNonZeroElements);
-        std::memcpy(colIndices.data(), bytes.data() + offset, colIndices.size() * sizeof(size_t));
-
-        offset += colIndices.size() * sizeof(float);
-        std::vector<float> values(numberOfNonZeroElements);
-        std::memcpy(values.data(), bytes.data() + offset, values.size() * sizeof(float));
-
-        _sparseData.setData(numberOfPoints, numberOfDimensions, std::move(rowPointers), std::move(colIndices), std::move(values));
-
-        qDebug() << "Loaded sparse data with" << _numRows << "points and" << _numDimensions << "dimensions.";
-    }
 }
 
 QVariantMap PointData::toVariantMap() const
@@ -1041,11 +991,22 @@ void Points::selectInvert()
 
 UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& executionContext)
 {
-    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    plan->addSequentialStage("Load common", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-        this->DatasetImpl::fromVariantMap(variantMap);
+    plan->addNestedWorkflowStage("Load dataset base", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        return this->DatasetImpl::fromVariantMapWorkflow(variantMap, executionContext);
     });
+
+    const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
+
+    if (appVersion < Version(1, 5, 0)) {
+        plan->addSequentialStage("Load legacy points (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+            legacy::pointsFromVariantMapPre150(*this, variantMap);
+        },
+        WorkflowPlan::JobThreadAffinity::GuiThread);
+
+        return plan;
+    }
 
     if (isFull()) {
         plan->addNestedWorkflowStage("Load raw data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {

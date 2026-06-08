@@ -470,12 +470,6 @@ public: // Sparse data, test implementation
 public: // Serialization
 
     UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentContext = nullptr) override;
-    /**
-     * Load widget action from variant for app versions prior to 5.0.0
-     * @param variantMap Variant representation of the widget action
-     * @return Variant representation of the widget action
-     */
-    void fromVariantMapPre150(const QVariantMap& variantMap);
 
     /**
      * Save point data to variant map
