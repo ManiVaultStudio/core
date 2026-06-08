@@ -198,50 +198,52 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(const QVariantMap& variantM
     return plan;
 }
 
-QVariantMap PointData::toVariantMap() const
+UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 {
-    const auto numberOfElements = getNumberOfElements();
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    if (numberOfElements == 0)
-    {
-        qWarning() << "PointData has no elements, returning empty variant map";
-        return {};
-    }
-    if (_isDense)
-    {
-        const auto typeSpecifier        = getElementTypeSpecifier();
-        const auto typeSpecifierName    = getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
-        const auto typeIndex            = static_cast<std::int32_t>(typeSpecifier);
+    plan->addSequentialStage("Save", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        const auto numberOfElements = getNumberOfElements();
 
-        QVariantMap rawData = bytesToBlobVariantMap((const char*)getDataConstVoidPtr(), getRawDataSize());
+        if (numberOfElements == 0)
+            return;
 
-        return {
-            { "TypeIndex", QVariant::fromValue(typeIndex) },
-            { "TypeName", QVariant(typeSpecifierName) },
-            { "Raw", QVariant::fromValue(rawData) },
-            { "NumberOfElements", QVariant::fromValue(numberOfElements) }
-        };
-    }
+        if (_isDense)
+        {
+            const auto typeSpecifier        = getElementTypeSpecifier();
+            const auto typeSpecifierName    = getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
+            const auto typeIndex            = static_cast<std::int32_t>(typeSpecifier);
 
-    std::vector<char> bytes;
+        	const auto resultMap = QVariantMap({
+                { "TypeIndex", QVariant::fromValue(typeIndex) },
+                { "TypeName", QVariant(typeSpecifierName) },
+                { "Raw", QVariant::fromValue(bytesToBlobVariantMap((const char*)getDataConstVoidPtr(), getRawDataSize())) },
+                { "NumberOfElements", QVariant::fromValue(numberOfElements) }
+            });
 
-    const std::vector<size_t>& indexPointers = _sparseData.getIndexPointers();
-    const std::vector<size_t>& colIndices = _sparseData.getColIndices();
-    const std::vector<float>& values = _sparseData.getValues();
+            executionContext->publishResultValue("Raw", resultMap);
+        } else {
+            std::vector<char> bytes;
 
-    const char* indexPointersBytes = (const char*) (indexPointers.data());
-    const char* colIndicesBytes = (const char*) (colIndices.data());
-    const char* valuesBytes = (const char*) (values.data());
+            const std::vector<size_t>& indexPointers    = _sparseData.getIndexPointers();
+            const std::vector<size_t>& colIndices       = _sparseData.getColIndices();
+            const std::vector<float>& values            = _sparseData.getValues();
 
-    bytes.insert(bytes.end(), indexPointersBytes, indexPointersBytes + indexPointers.size() * sizeof(size_t));
-    bytes.insert(bytes.end(), colIndicesBytes, colIndicesBytes + colIndices.size() * sizeof(size_t));
-    bytes.insert(bytes.end(), valuesBytes, valuesBytes + values.size() * sizeof(float));
+            const char* indexPointersBytes  = (const char*)(indexPointers.data());
+            const char* colIndicesBytes     = (const char*)(colIndices.data());
+            const char* valuesBytes         = (const char*)(values.data());
 
-    QVariantMap rawData = bytesToBlobVariantMap(bytes.data(), bytes.size());
+            bytes.insert(bytes.end(), indexPointersBytes, indexPointersBytes + indexPointers.size() * sizeof(size_t));
+            bytes.insert(bytes.end(), colIndicesBytes, colIndicesBytes + colIndices.size() * sizeof(size_t));
+            bytes.insert(bytes.end(), valuesBytes, valuesBytes + values.size() * sizeof(float));
 
-    return {
-        { "Raw", QVariant::fromValue(rawData) }
-    };
+            const auto resultMap = bytesToBlobVariantMap(bytes.data(), bytes.size());
+
+            executionContext->publishResultValue("Raw", resultMap);
+        }
+	});
+
+    return plan;
 }
 
 void PointData::extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const
@@ -1101,6 +1103,20 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
     plan->addSequentialStage("Save common", [this, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
         context->setMap(this->DatasetImpl::toVariantMap());
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
+
+    plan->addNestedWorkflowStage("Save raw data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        return getRawData<PointData>()->toVariantMapWorkflow();
+    });
+
+    plan->addSequentialStage("Store raw data metadata", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        const auto data = isFull() ? executionContext->getResultValue("Data").toMap() : QVariantMap{};
+
+        context->setValue("Data", data);
+        context->setValue("NumberOfPoints", QVariant::fromValue<std::uint64_t>(getNumPoints()));
+
+        context->setValue("Dense", Experimental::isDense(this));
+    },
+    WorkflowPlan::JobThreadAffinity::GuiThread);
 
     plan->addSequentialStage("Save indices", [this, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
         QVariantMap indicesMap;

@@ -469,13 +469,19 @@ public: // Sparse data, test implementation
 
 public: // Serialization
 
+    /**
+     * Create a workflow plan for creating a PointData object from the specified variant map
+     * @param variantMap A QVariantMap containing the necessary information for creating a PointData object. The expected format of the map should be consistent with the output of toVariantMapWorkflow().
+     * @param parentContext A shared pointer to the parent workflow execution context. This context can be used to manage dependencies and execution order of workflow stages.
+     * @return A unique pointer to a WorkflowPlan object that defines the steps for creating a PointData object from the variant map.
+     */
     UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentContext = nullptr) override;
 
     /**
-     * Save point data to variant map
-     * @return Variant map representation of the point data
+     * Create a workflow plan for converting this PointData object to a QVariantMap, which can be used for serialization.
+     * @return A unique pointer to a WorkflowPlan object that defines the steps for converting this PointData object to a QVariantMap. The resulting QVariantMap should contain all necessary information to recreate this PointData object using fromVariantMapWorkflow().
      */
-    QVariantMap toVariantMap() const final;
+    UniqueWorkflowPlan toVariantMapWorkflow() const final;
 
 private:
     VariantOfVectors _variantOfVectors;
