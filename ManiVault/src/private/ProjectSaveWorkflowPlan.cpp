@@ -51,26 +51,28 @@ UniqueWorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     
-    plan->addSequentialStage("Save project JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> void {
+    plan->addNestedWorkflowStage("Save project JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> UniqueWorkflowPlan {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Save project JSON";
 #endif
 
         if (auto project = projects().getCurrentProject()) {
-            project->toJsonFileScoped(context->getProjectJsonPath(), jobExecutionContext);
+            return project->toJsonFileWorkflow(context->getProjectJsonPath());
         }
 
+        return nullptr;
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 10.0);
     
-    plan->addSequentialStage("Save meta JSON", [context]() -> void {
+    plan->addNestedWorkflowStage("Save meta JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> UniqueWorkflowPlan {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Save meta JSON";
 #endif
 
         if (auto project = projects().getCurrentProject()) {
-            project->getProjectMetaAction().toJsonFileScoped(context->getMetaJsonPath());
+            return project->getProjectMetaAction().toJsonFileWorkflow(context->getMetaJsonPath());
         }
 
+        return nullptr;
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);
 
     plan->addSequentialStage("Save workspace JSON", [&plan, context]() -> void {

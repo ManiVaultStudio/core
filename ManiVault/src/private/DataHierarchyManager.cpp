@@ -386,81 +386,84 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
 
 UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 {
-    auto context    = std::make_shared<ToVariantMapWorkflowContext>();
-    auto plan       = std::make_unique<WorkflowPlan>(__FUNCTION__, context);
+    auto context = std::make_shared<ToVariantMapWorkflowContext>();
+
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
     if (_items.empty())
         return plan;
 
-    WorkflowPlan::Jobs saveItemsJobs;
-    saveItemsJobs.reserve(_items.size());
+    const auto saveItemMapsStage = plan->addSequentialStage("Save items", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        QVariantMap itemMaps;
 
-    for (const auto& uniqueItem : _items) {
-        auto* item = uniqueItem.get();
+        for (const auto& uniqueItem : _items) {
+            auto* item = uniqueItem.get();
 
-        const auto datasetId = item->getDataset()->getId();
-
-        saveItemsJobs.emplace_back(datasetId, [context, item, datasetId](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            const auto datasetId = item->getDataset()->getId();
             auto itemMap = item->toVariantMapScoped(executionContext);
 
             itemMap.remove("Dataset");
 
             itemMap["Children"] = QVariantMap{};
 
-            context->setItemMap(datasetId, itemMap);
-        });
-    }
+            itemMaps[datasetId] = itemMap;
+        }
 
-    const auto idealThreads = std::max(1u, std::thread::hardware_concurrency());
-
-    std::size_t datasetBatchSize = 8;
-
-    if (idealThreads <= 16)
-        datasetBatchSize = 2;
-
-    if (idealThreads <= 4)
-        datasetBatchSize = 1;
-
-    plan->addSequentialStage("Save items", std::move(saveItemsJobs), datasetBatchSize);
+        executionContext->setOutput(itemMaps);
+    });
 
     WorkflowPlan::Jobs saveDatasetsJobs;
     saveDatasetsJobs.reserve(_items.size());
 
+    QHash<QString, WorkflowHandle> datasetHandles;
+
     for (const auto& uniqueItem : _items) {
         auto* item = uniqueItem.get();
 
-        const auto dataset      = item->getDataset();
-        const auto datasetId    = dataset->getId();
+        const auto dataset = item->getDataset();
+        const auto datasetId = dataset->getId();
 
-        saveDatasetsJobs.emplace_back(datasetId, [context, datasetId](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        const auto handle = plan->addNestedWorkflowStage(QString("Save dataset %1").arg(datasetId), [datasetId](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
             auto dataset = mv::data().getDataset(datasetId);
 
             if (!dataset.isValid())
-                return;
+                return {};
 
-            auto datasetPlan    = dataset->toVariantMapWorkflow();
-            auto result         = WorkflowRuntimeScoped::executeBlocking(std::move(datasetPlan), executionContext);
-
-            const auto resultMap = result->value<QVariantMap>();
-
-            if (resultMap.contains(datasetId)) {
-                context->setDatasetMap(datasetId, resultMap[datasetId].toMap());
-            } else {
-                throw std::runtime_error(QString("Dataset workflow did not return expected dataset map for dataset ID %1").arg(datasetId).toStdString());
-            }
+            return dataset->toVariantMapWorkflow();
         });
+
+        datasetHandles.insert(datasetId, handle);
     }
+   
+    const auto collectDatasetMapsStage = plan->addSequentialStage("Collect dataset maps", [saveItemMapsStage, datasetHandles](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        const auto itemMaps = executionContext->takeOutput(saveItemMapsStage).toMap();
 
-    plan->addSequentialStage("Save datasets", std::move(saveDatasetsJobs));
+        QVariantMap datasetMaps;
 
-    plan->addSequentialStage("Assemble hierarchy", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&){
+        for (auto it = datasetHandles.constBegin(); it != datasetHandles.constEnd(); ++it) {
+            const auto datasetId    = it.key();
+            const auto handle       = it.value();
+            const auto datasetMap   = executionContext->takeOutput(handle).toMap();
+
+            datasetMaps.insert(datasetId, datasetMap);
+        }
+
+        executionContext->setOutput(QVariantMap{
+            { "Items", itemMaps },
+            { "Datasets", datasetMaps }
+        });
+    });
+    
+    plan->addSequentialStage("Assemble hierarchy", [this, collectDatasetMapsStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext){
+        const auto itemsAndDatasetsMap = executionContext->takeOutput(collectDatasetMapsStage).toMap();
+
         std::function<QVariantMap(DataHierarchyItem*, std::int32_t)> assembleItem;
 
-        assembleItem = [context, &assembleItem](DataHierarchyItem* item, std::int32_t sortIndex) {
+        assembleItem = [&assembleItem, &itemsAndDatasetsMap](DataHierarchyItem* item, std::int32_t sortIndex) {
             const auto datasetId    = item->getDataset()->getId();
-            const auto datasetMap   = context->getDatasetMap(datasetId);
+            const auto datasetMap   = itemsAndDatasetsMap["Datasets"].toMap()[datasetId].toMap();
 
-            auto itemMap = context->getItemMap(datasetId);
+            auto itemMap = itemsAndDatasetsMap["Items"].toMap()[datasetId].toMap();
 
             Q_ASSERT(!itemMap.isEmpty());
             Q_ASSERT(!datasetMap.isEmpty());
@@ -472,8 +475,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
             for (auto child : item->getChildren()) {
                 const auto childDatasetId = child->getDataset()->getId();
 
-                children[childDatasetId] =
-                    assembleItem(child, childSortIndex++);
+                children[childDatasetId] = assembleItem(child, childSortIndex++);
             }
 
             itemMap["Dataset"]      = datasetMap;
@@ -489,15 +491,11 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
         for (auto topLevelItem : const_cast<DataHierarchyManager*>(this)->getTopLevelItems()) {
             const auto datasetId = topLevelItem->getDataset()->getId();
 
-            dataHierarchyMap[datasetId] =
-                assembleItem(topLevelItem, topLevelSortIndex++);
+            dataHierarchyMap[datasetId] = assembleItem(topLevelItem, topLevelSortIndex++);
         }
 
-        context->setDataHierarchyMap(dataHierarchyMap);
-    });
-
-    plan->addFinalizationStage("Publish result", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext){
-        executionContext->setOutput(context->getDataHierarchyMap());
+        qDebug() << "Data hierarchy map assembled:" << dataHierarchyMap;
+        executionContext->setOutput(dataHierarchyMap);
     });
 
     return plan;

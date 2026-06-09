@@ -205,9 +205,6 @@ public: // Child context and output  management
 
     bool hasExplicitOutputId() const;
 
-    bool isOutputForwarding() const;
-    void setOutputForwarding(bool forwardOutputToParent);
-
 private:
     friend class WorkflowExecutionScope;
 
@@ -226,7 +223,6 @@ private:
     std::weak_ptr<WorkflowExecutionContext>         _parent;                                                    /** Weak pointer to the parent workflow execution context, if any */
     mutable QMutex                                  _childrenMutex;
     QHash<QString, SharedWorkflowExecutionContext>  _childrenByName;
-    bool _forwardOutputToParent = false;
 };
 
 /** Optional reference to a WorkflowExecutionContext */

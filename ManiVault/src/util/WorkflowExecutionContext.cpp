@@ -404,15 +404,5 @@ bool WorkflowExecutionContext::hasExplicitOutputId() const
 	return _outputId != _id;
 }
 
-bool WorkflowExecutionContext::isOutputForwarding() const
-{
-    return _forwardOutputToParent;
-}
-
-void WorkflowExecutionContext::setOutputForwarding(bool forwardOutputToParent)
-{
-    _forwardOutputToParent = forwardOutputToParent;
-}
-
 }
 

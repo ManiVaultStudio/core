@@ -178,10 +178,7 @@ private: // Helpers
 
         auto stageContext = isSequential ? parentContext->createSequentialStageChild(stage.getName(), stage.getWeight(), WorkflowPlan::JobProgressMode::Nested) : parentContext->createParallelStageChild(stage.getName(), stage.getWeight(), WorkflowPlan::JobProgressMode::Nested);
 
-        if (parentContext->isOutputForwarding())
-            stageContext->setOutputId(parentContext->getOutputId());
-        else
-            stageContext->setOutputId(stage.getId());
+        stageContext->setOutputId(stage.getId());
 
         auto timer = std::make_shared<QElapsedTimer>();
 
@@ -207,24 +204,45 @@ private: // Helpers
         return { { startTask }, { finishTask } };
     }
 
+    static WorkflowHandle getFinalStageHandle(const WorkflowPlan& workflowPlan);
+
     template<typename Graph>
     CompiledTasks compileWorkflowImpl(const WorkflowPlan& workflowPlan, Graph& graph, SharedWorkflowExecutionContext parentContext)
     {
         auto mainTasks      = compileStages(workflowPlan.getStages(), graph, parentContext);
         auto successTasks   = compileStages(workflowPlan.getOnSuccessStages(), graph, parentContext);
 
+        CompiledTasks result = mainTasks;
+
         if (!successTasks.starts.empty()) {
             for (auto& mainEnd : mainTasks.ends)
                 for (auto& successStart : successTasks.starts)
                     mainEnd.precede(successStart);
 
-            return {
+            result = {
                 mainTasks.starts,
                 successTasks.ends
             };
         }
 
-        return mainTasks;
+        const auto finalHandle = getFinalStageHandle(workflowPlan);
+
+        if (finalHandle.isValid() && !result.ends.empty()) {
+            auto publishWorkflowOutputTask =
+                graph.emplace([parentContext, finalHandle]() {
+                auto output = parentContext->takeOutput(finalHandle);
+
+                if (output.isValid() && !output.isNull())
+                    parentContext->setOutput(output);
+                    });
+
+            for (auto& end : result.ends)
+                end.precede(publishWorkflowOutputTask);
+
+            result.ends = { publishWorkflowOutputTask };
+        }
+
+        return result;
     }
 
     void runStagesRoot(

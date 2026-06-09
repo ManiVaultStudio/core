@@ -539,32 +539,8 @@ public: // Writing helpers
 	 */
     void insertIntoVariantMapScoped(QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext = nullptr) const;
     
-    /**
-	 * Serialize the object state to a JSON document using the workflow-based
-	 * serialization contract.
-	 *
-	 * This is the preferred JSON serialization entry point for framework
-	 * code.
-	 *
-	 * The function obtains a workflow from toVariantMapWorkflow(),
-	 * executes it synchronously, retrieves the resulting QVariantMap, and
-	 * converts it to a QJsonDocument.
-	 *
-	 * Custom implementations of toVariantMapWorkflow() are honored
-	 * automatically.
-	 *
-	 * The function returns only after the serialization workflow has
-	 * completed.
-	 *
-	 * @param parentExecutionContext Optional parent workflow context into
-	 * which the serialization workflow will be integrated.
-	 *
-	 * @return JSON document containing the serialized object state.
-	 *
-	 * @throws std::exception Any exception propagated from the serialization
-	 * workflow execution.
-	 */
-    QJsonDocument toJsonDocumentScoped(const SharedWorkflowExecutionContext& parentExecutionContext = nullptr) const;
+    // TODO
+    QJsonDocument toJsonDocument() const;
 
     /**
 	 * Serialize the object state to a JSON file.
@@ -580,35 +556,8 @@ public: // Writing helpers
 	 */
     void toJsonFile(const QString& filePath = "") const;
 
-    /**
-	 * Serialize the object state to a JSON file using the workflow-based
-	 * serialization contract.
-	 *
-	 * This is the preferred JSON file serialization entry point for
-	 * framework code.
-	 *
-	 * The function serializes the object through
-	 * toJsonDocumentScoped(), validates the resulting JSON document, and
-	 * writes it to disk.
-	 *
-	 * Custom implementations of toVariantMapWorkflow() are therefore
-	 * honored automatically, including staged, parallel, and
-	 * progress-reporting serialization workflows.
-	 *
-	 * The function returns only after the serialization workflow has
-	 * completed and the JSON document has been written successfully.
-	 *
-	 * @param filePath Path of the JSON file to write.
-	 * @param parentExecutionContext Optional parent workflow context into
-	 * which the serialization workflow will be integrated.
-	 *
-	 * @throws std::runtime_error If the file cannot be opened for writing.
-	 * @throws std::runtime_error If serialization produced an invalid or
-	 * empty JSON document.
-	 * @throws std::exception Any exception propagated by the serialization
-	 * workflow execution.
-	 */
-    void toJsonFileScoped(const QString& filePath = "", const SharedWorkflowExecutionContext& parentExecutionContext = nullptr) const;
+    // TODO
+    UniqueWorkflowPlan toJsonFileWorkflow(const QString& filePath = "") const;
 
 public: // Identity and diagnostics
 

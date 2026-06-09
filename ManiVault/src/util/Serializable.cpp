@@ -132,17 +132,6 @@ void Serializable::fromJsonDocumentScoped(const QJsonDocument& jsonDocument, con
     fromVariantMapScoped(objectMap, parentExecutionContext);
 }
 
-QJsonDocument Serializable::toJsonDocumentScoped(const SharedWorkflowExecutionContext& parentExecutionContext /*= nullptr*/) const
-{
-    auto plan = toVariantMapWorkflow();
-
-    auto result = WorkflowRuntimeScoped::executeBlocking(std::move(plan), parentExecutionContext);
-
-    const auto variantMap = result->value<QVariantMap>();
-
-    return QJsonDocument::fromVariant(variantMap);
-}
-
 void Serializable::fromJsonFile(const QString& filePath /*= ""*/)
 {
     if (!QFileInfo(filePath).exists())
@@ -189,29 +178,49 @@ void Serializable::fromJsonFileScoped(const QString& filePath, const SharedWorkf
     fromJsonDocumentScoped(jsonDocument, parentExecutionContext);
 }
 
-void Serializable::toJsonFile(const QString& filePath) const
+QJsonDocument Serializable::toJsonDocument() const
 {
-    toJsonFileScoped(filePath);
+    return QJsonDocument::fromVariant(toVariantMap());
 }
 
-void Serializable::toJsonFileScoped(const QString& filePath /*= ""*/, const SharedWorkflowExecutionContext& parentExecutionContext /*= nullptr*/) const
+void Serializable::toJsonFile(const QString& filePath) const
 {
     QFile jsonFile(filePath);
 
     if (!jsonFile.open(QFile::WriteOnly))
         throw std::runtime_error("Unable to open file for writing");
 
-    auto jsonDocument = toJsonDocumentScoped(parentExecutionContext);
+    auto jsonDocument = toJsonDocument();
 
     if (jsonDocument.isNull() || jsonDocument.isEmpty())
         throw std::runtime_error("JSON document is invalid");
 
-#ifdef SERIALIZABLE_VERBOSE
-    qDebug().noquote() << jsonDocument.toJson(QJsonDocument::Indented);
-#endif
-
     jsonFile.write(jsonDocument.toJson());
+}
 
+UniqueWorkflowPlan Serializable::toJsonFileWorkflow(const QString& filePath) const
+{
+    auto plan = std::make_unique<WorkflowPlan>(QString("%1::toJsonFile").arg(getSerializationName()));
+
+    const auto createMapStage = plan->addNestedWorkflowStage("Create map", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+        return toVariantMapWorkflow();
+    });
+
+    plan->addSequentialStage("Serialize", [this, filePath, createMapStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        QFile jsonFile(filePath);
+
+        if (!jsonFile.open(QFile::WriteOnly))
+            throw std::runtime_error("Unable to open file for writing");
+
+        auto jsonDocument = QJsonDocument::fromVariant(executionContext->takeOutput(createMapStage));
+
+        if (jsonDocument.isNull() || jsonDocument.isEmpty())
+            throw std::runtime_error("JSON document is invalid");
+
+        jsonFile.write(jsonDocument.toJson());
+    });
+
+    return plan;
 }
 
 void Serializable::makeUnique()

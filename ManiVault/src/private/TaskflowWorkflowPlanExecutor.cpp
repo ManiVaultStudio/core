@@ -284,9 +284,15 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
             result->setMessages(messages);
         }
 
-        auto resultValues = state->takeResultValues(rootContext->getId());
+        auto output = rootContext->takeOutput();
 
-        result->setValue(resultValues);
+        if (output.isValid() && !output.isNull()) {
+            result->setValue(output);
+        }
+        else {
+            auto resultValues = state->takeResultValues(rootContext->getId());
+            result->setValue(resultValues);
+        }
         result->setMetrics(state->metrics().snapshot());
     }
 
@@ -500,7 +506,6 @@ void TaskflowWorkflowPlanExecutor::executeCompiledJob(
     Q_ASSERT(childContext->getState() == jobContext->getState());
 
     childContext->setOutputId(jobContext->getOutputId());
-    childContext->setOutputForwarding(true);
 
     WorkflowExecutionLifecycleScope lifecycle(childContext);
 
@@ -514,6 +519,19 @@ void TaskflowWorkflowPlanExecutor::executeCompiledJob(
         jobContext->setOutput(nestedOutput);
 
     lifecycle.finish();
+}
+
+WorkflowHandle TaskflowWorkflowPlanExecutor::getFinalStageHandle(const WorkflowPlan& workflowPlan)
+{
+	const auto& successStages = workflowPlan.getOnSuccessStages();
+	if (!successStages.empty())
+		return successStages.back().getHandle();
+
+	const auto& stages = workflowPlan.getStages();
+	if (!stages.empty())
+		return stages.back().getHandle();
+
+	return {};
 }
 
 void TaskflowWorkflowPlanExecutor::runStagesRoot(
