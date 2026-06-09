@@ -239,7 +239,7 @@ UniqueWorkflowPlan Project::toVariantMapWorkflow() const
 
     plan->addSequentialStage("Save managers", saveManagerJobs);
     plan->addSequentialStage("Publish result", [this, context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
-        executionContext->publishResultValue(getSerializationName(), context->getMap());
+        executionContext->setOutput(context->getMap());
     });
 
 	return plan;

@@ -169,7 +169,7 @@ UniqueWorkflowPlan EventManager::toVariantMapWorkflow() const
 
         variantMap["SelectionGroups"] = selectionGroups;
 
-        executionContext->publishResultValue(getSerializationName(), variantMap);
+        executionContext->setOutput(variantMap);
 	});
 
     return plan;

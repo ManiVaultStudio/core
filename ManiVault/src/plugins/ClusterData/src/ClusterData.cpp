@@ -143,7 +143,7 @@ UniqueWorkflowPlan ClusterData::toVariantMapWorkflow() const
 
         const auto result = WorkflowRuntimeScoped::executeBlocking(std::move(serializerPlan), executionContext);
 
-        executionContext->publishResultValue("Data", result->value<QVariantMap>()["Data"].toMap());
+        executionContext->setOutput(result->value<QVariantMap>()["Data"].toMap());
 	});
 
     return plan;
@@ -254,12 +254,12 @@ UniqueWorkflowPlan Clusters::toVariantMapWorkflow() const
         const auto result = WorkflowRuntimeScoped::executeBlocking(std::move(plan), executionContext);
 
         const auto resultValues = result->value<QVariantMap>();
-        qDebug() << "-----" << resultValues;
+        
         context->setValue("Data", resultValues.value("Data").toMap());
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     plan->addSequentialStage("Publish result", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-        executionContext->publishResultValue(getId(), context->getMap());
+        executionContext->setOutput(context->getMap());
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     return plan;

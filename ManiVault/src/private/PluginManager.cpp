@@ -942,7 +942,7 @@ UniqueWorkflowPlan PluginManager::fromVariantMapWorkflow(const QVariantMap& vari
 			}
         }
 
-        executionContext->publishResultValue(getSerializationName(), QVariant());
+        executionContext->setOutput(QVariant());
     });
 
     return plan;
@@ -989,7 +989,7 @@ UniqueWorkflowPlan PluginManager::toVariantMapWorkflow() const
             { "LoadedAnalyses", loadedAnalysesList }
         });
 
-        executionContext->publishResultValue(getSerializationName(), variantMap);
+        executionContext->setOutput(variantMap);
     });
 
     return plan;

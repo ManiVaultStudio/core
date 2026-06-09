@@ -8,13 +8,15 @@ namespace mv::util
 {
 
 WorkflowExecutionContext::WorkflowExecutionContext() :
-    _id(QUuid::createUuid())
+    _id(QUuid::createUuid()),
+    _outputId(_id)
 {
 }
 
 WorkflowExecutionContext::WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, Task* task /*= nullptr*/, WorkflowPlan::JobProgressMode progressMode /*= WorkflowPlan::JobProgressMode::Automatic*/) :
 	_name(std::move(name)),
     _id(QUuid::createUuid()),
+    _outputId(_id),
     _executionPath({ _name }),
 	_reportNode(std::move(reportNode)),
 	_progressNode(std::move(progressNode)),
@@ -74,7 +76,11 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(Type type, 
     child->_parent          = shared_from_this();
     child->_executionPath   = _executionPath;
     child->_executionPath.append(name);
-    
+
+    child->_outputId = _outputId;
+
+    registerChildContext(name, child);
+
     return child;
 }
 
@@ -90,6 +96,8 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createWorkflowChild(con
     child->_executionPath   = _executionPath;
 
     child->_executionPath << name;
+
+    child->_outputId = _outputId;
 
     return child;
 }
@@ -331,30 +339,64 @@ QUuid WorkflowExecutionContext::getId() const
     return _id;
 }
 
+void WorkflowExecutionContext::setOutputId(const QUuid& outputId)
+{
+	_outputId = outputId;
+}
+
+QUuid WorkflowExecutionContext::getOutputId() const
+{
+	return _outputId;
+}
+
 QUuid WorkflowExecutionContext::getParentId() const
 {
     return _parentId;
 }
 
-void WorkflowExecutionContext::publishResult(const QVariantMap& values)
+void WorkflowExecutionContext::registerChildContext(const QString& name, const SharedWorkflowExecutionContext& child)
 {
-	for (auto it = values.constBegin(); it != values.constEnd(); ++it)
-		publishResultValue(it.key(), it.value());
+	QMutexLocker lock(&_childrenMutex);
+	_childrenByName.insert(name, child);
 }
 
-SharedWorkflowExecutionContext WorkflowExecutionContext::getResultScope()
+SharedWorkflowExecutionContext WorkflowExecutionContext::getChildContext(const QString& name) const
 {
-    auto current = shared_from_this();
+	QMutexLocker lock(&_childrenMutex);
+	return _childrenByName.value(name);
+}
 
-    while (current) {
-        if (current->_type == Type::Workflow || current->_type == Type::NestedWorkflow) {
-            return current;
-        }
+void WorkflowExecutionContext::setOutput(const QVariant& value)
+{
+    if (_state)
+        _state->setOutput(_outputId, value);
+}
 
-        current = current->_parent.lock();
-    }
+QVariant WorkflowExecutionContext::takeOutput()
+{
+    if (!_state)
+        return {};
 
-    return {};
+    return _state->takeOutput(_outputId);
+}
+
+QVariant WorkflowExecutionContext::takeOutput(const WorkflowHandle& handle)
+{
+	if (!_state || !handle.isValid())
+		return {};
+
+	return _state->takeOutput(handle.getId());
+}
+
+SharedWorkflowExecutionContext WorkflowExecutionContext::getParent() const
+{
+	return _parent.lock();
+}
+
+QStringList WorkflowExecutionContext::getChildNames() const
+{
+	QMutexLocker lock(&_childrenMutex);
+	return _childrenByName.keys();
 }
 
 }

@@ -497,7 +497,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
     });
 
     plan->addFinalizationStage("Publish result", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext){
-        executionContext->publishResultValue(getSerializationName(), context->getDataHierarchyMap());
+        executionContext->setOutput(context->getDataHierarchyMap());
     });
 
     return plan;

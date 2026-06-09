@@ -659,7 +659,7 @@ UniqueWorkflowPlan WorkspaceManager::toVariantMapWorkflow() const
             { "DockManagers", dockManagers }
         });
 
-        executionContext->publishResultValue(getSerializationName(), currentWorkspaceMap);
+        executionContext->setOutput(currentWorkspaceMap);
     });
 
     return plan;

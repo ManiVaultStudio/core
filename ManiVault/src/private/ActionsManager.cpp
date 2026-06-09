@@ -311,7 +311,7 @@ UniqueWorkflowPlan ActionsManager::toVariantMapWorkflow() const
             { "PublicActions", publicActions }
         });
 
-        executionContext->publishResultValue(getSerializationName(), variantMap);
+        executionContext->setOutput(variantMap);
     });
 
     return plan;

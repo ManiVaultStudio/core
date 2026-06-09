@@ -172,17 +172,13 @@ private: // Helpers
 	 * @return Start and end tasks for dependency chaining.
 	 */
     template<typename Flow>
-    CompiledTasks compileStage(
-        const WorkflowPlan::Stage& stage,
-        Flow& flow,
-        SharedWorkflowExecutionContext parentContext)
+    CompiledTasks compileStage(const WorkflowPlan::Stage& stage, Flow& flow, SharedWorkflowExecutionContext parentContext)
     {
-        const bool isSequential =
-            stage.getConcurrencyMode() == WorkflowPlan::ConcurrencyMode::Sequential;
+        const bool isSequential = stage.getConcurrencyMode() == WorkflowPlan::ConcurrencyMode::Sequential;
 
-        auto stageContext = isSequential
-            ? parentContext->createSequentialStageChild(stage.getName(), stage.getWeight(), WorkflowPlan::JobProgressMode::Nested)
-            : parentContext->createParallelStageChild(stage.getName(), stage.getWeight(), WorkflowPlan::JobProgressMode::Nested);
+        auto stageContext = isSequential ? parentContext->createSequentialStageChild(stage.getName(), stage.getWeight(), WorkflowPlan::JobProgressMode::Nested) : parentContext->createParallelStageChild(stage.getName(), stage.getWeight(), WorkflowPlan::JobProgressMode::Nested);
+
+        stageContext->setOutputId(stage.getId());
 
         auto timer = std::make_shared<QElapsedTimer>();
 

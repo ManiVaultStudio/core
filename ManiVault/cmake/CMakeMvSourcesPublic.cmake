@@ -633,6 +633,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/WorkflowConsoleDashboardScope.h
     src/util/WorkflowRuntimeScoped.h
     src/util/VariantMapWorkflowContext.h
+    src/util/WorkflowHandle.h
 )
 
 if(APPLE)
@@ -737,6 +738,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/WorkflowConsoleDashboardScope.cpp
     src/util/WorkflowRuntimeScoped.cpp
     src/util/VariantMapWorkflowContext.cpp
+    src/util/WorkflowHandle.cpp
 )
 
 if(APPLE)

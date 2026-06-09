@@ -173,6 +173,10 @@ public: // ID
      */
     QUuid getId() const;
 
+    void setOutputId(const QUuid& outputId);
+
+    QUuid getOutputId() const;
+
     /**
      * Get the unique identifier of the parent workflow execution context, if any. This can be used to correlate log messages and trace events with parent-child relationships between workflow executions.
      * @return The unique identifier of the parent workflow execution context, or a null QUuid if this is a root context.
@@ -181,34 +185,42 @@ public: // ID
 
 public: // Result values
 
-    void publishResult(const QVariantMap& values);
 
-    template<typename T>
-    void publishResultValue(const QString& key, const T& value)
-    {
-        if (!_state)
-            return;
 
-        _state->publishResultValue(getResultScope()->getId(), key, value);
-    }
+public: // Child context and output  management
 
-    [[nodiscard]] SharedWorkflowExecutionContext getResultScope();
+    void registerChildContext(const QString& name, const SharedWorkflowExecutionContext& child);
+
+    [[nodiscard]] SharedWorkflowExecutionContext getChildContext(const QString& name) const;
+
+    void setOutput(const QVariant& value);
+
+    [[nodiscard]] QVariant takeOutput();
+
+    QVariant takeOutput(const WorkflowHandle& handle);
+
+    [[nodiscard]] SharedWorkflowExecutionContext getParent() const;
+
+    [[nodiscard]] QStringList getChildNames() const;
 
 private:
     friend class WorkflowExecutionScope;
 
 private:
-    QString                                 _name;                                                      /** Name of the workflow execution context, typically derived from the name of the workflow plan or job it represents */
-    QUuid                                   _id;                                                        /** Unique identifier for this workflow execution context */
-    QUuid                                   _parentId;                                                  /** Unique identifier of the parent workflow execution context, if any */
-    QStringList                             _executionPath;                                             /** Execution path of this workflow execution context */
-    ReportNodePtr                           _reportNode;                                                /** Report node associated with this workflow execution context */
-    ProgressNodePtr                         _progressNode;                                              /** Progress node associated with this workflow execution context */
-    StatePtr                                _state;                                                     /** Execution state associated with this workflow execution context */
-    QPointer<Task>                          _task;                                                      /** Task associated with this workflow execution context */
-    WorkflowPlan::JobProgressMode           _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /** Progress mode for this workflow execution context */
-    Type                                    _type = Type::Workflow;                                     /** Semantic type of this workflow execution context, used for rendering, reporting, and diagnostics */
-    std::weak_ptr<WorkflowExecutionContext> _parent;                                                    /** Weak pointer to the parent workflow execution context, if any */
+    QString                                         _name;                                                      /** Name of the workflow execution context, typically derived from the name of the workflow plan or job it represents */
+    QUuid                                           _id;                                                        /** Unique identifier for this workflow execution context */
+    QUuid                                           _outputId;                                                  /** Unique identifier for the output of this workflow execution context */  
+    QUuid                                           _parentId;                                                  /** Unique identifier of the parent workflow execution context, if any */
+    QStringList                                     _executionPath;                                             /** Execution path of this workflow execution context */
+    ReportNodePtr                                   _reportNode;                                                /** Report node associated with this workflow execution context */
+    ProgressNodePtr                                 _progressNode;                                              /** Progress node associated with this workflow execution context */
+    StatePtr                                        _state;                                                     /** Execution state associated with this workflow execution context */
+    QPointer<Task>                                  _task;                                                      /** Task associated with this workflow execution context */
+    WorkflowPlan::JobProgressMode                   _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /** Progress mode for this workflow execution context */
+    Type                                            _type = Type::Workflow;                                     /** Semantic type of this workflow execution context, used for rendering, reporting, and diagnostics */
+    std::weak_ptr<WorkflowExecutionContext>         _parent;                                                    /** Weak pointer to the parent workflow execution context, if any */
+    mutable QMutex                                  _childrenMutex;
+    QHash<QString, SharedWorkflowExecutionContext>  _childrenByName;
 };
 
 /** Optional reference to a WorkflowExecutionContext */

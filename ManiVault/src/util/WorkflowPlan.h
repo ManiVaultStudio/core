@@ -10,6 +10,7 @@
 #include "WorkflowResultFuture.h"
 #include "WorkflowExecutionOptions.h"
 #include "WorkflowJobResult.h"
+#include "WorkflowHandle.h"
 
 #include <QString>
 #include <QVariant>
@@ -98,6 +99,8 @@ public:
         Job(QString name, NestedWorkflowFunction nestedWorkflowFunction, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, JobProgressMode progressMode = JobProgressMode::Automatic, double weight = 1.0);
         Job(QString name, NestedWorkflowJob job, JobThreadAffinity threadAffinity, double weight);
 
+        QUuid getId() const { return _id; }
+
         QString getName() const;
 
         void run(SharedWorkflowExecutionContext context) const;
@@ -171,10 +174,11 @@ public:
         void setWorkflowContext(SharedWorkflowContext workflowContext);
 
     private:
+        QUuid                       _id = QUuid::createUuid();
         QString                     _name;
         JobKind                     _kind = JobKind::Function;
         JobFunction                 _function;
-        NestedWorkflowFunction _nestedWorkflowFunction;
+        NestedWorkflowFunction      _nestedWorkflowFunction;
         QVariant                    _result;
         std::optional<QString>      _error;
         JobThreadAffinity           _threadAffinity = JobThreadAffinity::CurrentWorkerThread;
@@ -192,6 +196,13 @@ public:
     public:
 
         Stage(QString name, ConcurrencyMode concurrencyMode, Jobs jobs, double weight = 1.0);
+
+        QUuid getId() const { return _id; }
+
+        WorkflowHandle getHandle() const
+        {
+            return WorkflowHandle(_id, _name);
+        }
 
         ConcurrencyMode getConcurrencyMode() const;
 
@@ -211,6 +222,7 @@ public:
         bool isThreadAffinityCompatible() const;
 
     private:
+        QUuid           _id = QUuid::createUuid();
         QString         _name;
         ConcurrencyMode _concurrencyMode;
         Jobs            _jobs;
@@ -221,20 +233,22 @@ public:
 
     WorkflowPlan(const QString& title, SharedWorkflowContext context = SharedWorkflowContext());
 
-    void addStage(Stage stage);
+    WorkflowHandle addStage(Stage stage);
 
     template<typename Function>
-    void addSequentialStage(QString name, Function&& function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, double weight = 1.0) {
-        addStageTo(_stages, std::move(name), std::forward<Function>(function), threadAffinity, weight);
+    WorkflowHandle addSequentialStage(QString name, Function&& function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, double weight = 1.0) {
+        return addStageTo(_stages, std::move(name), std::forward<Function>(function), threadAffinity, weight);
     }
 
     QString getName() const;
 
-    void addSequentialStage(QString name, Jobs jobs, double weight = 1.0);
-	void addParallelStage(QString name, Jobs jobs, double weight = 1.0);
-    void addBatchedParallelStage(const QString& name, Jobs jobs, std::size_t batchSize);
+    WorkflowHandle addSequentialStage(QString name, Jobs jobs, double weight = 1.0);
+    WorkflowHandle addParallelStage(QString name, Jobs jobs, double weight = 1.0);
 
-    void addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight = 1.0);
+    // Returns an invalid handle until batched stages have a logical parent stage
+    WorkflowHandle addBatchedParallelStage(const QString& name, Jobs jobs, std::size_t batchSize);
+
+    WorkflowHandle addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight = 1.0);
 
     template<typename Function>
     void addOnSuccessStage(QString name, Function&& function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, double weight = 0.0) {
@@ -304,7 +318,7 @@ public:
     //    );
     //}
 
-    void addNestedWorkflowStage(const QString& name, NestedWorkflowFunction function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, double weight = 1.0);
+    WorkflowHandle addNestedWorkflowStage(const QString& name, NestedWorkflowFunction function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, double weight = 1.0);
 
 private:
     template<typename Function>
@@ -337,48 +351,21 @@ private:
     }
 
     template<typename Function>
-    void addStageTo(Stages& stages, QString name, Function&& function, JobThreadAffinity threadAffinity, double weight)
+    WorkflowHandle addStageTo(Stages& stages, QString name, Function&& function, JobThreadAffinity threadAffinity, double weight)
     {
         if constexpr (std::is_invocable_r_v<WorkflowResultFuture, Function, const Job&, const SharedWorkflowExecutionContext&>) {
-            stages.emplace_back(
-                name,
-                ConcurrencyMode::Sequential,
-                Jobs{
-                    Job(
-                        name,
-                        AsyncJobFunction(std::forward<Function>(function)),
-                        threadAffinity
-                    )
-                },
-                weight
-            );
+				stages.emplace_back(name, ConcurrencyMode::Sequential, Jobs{ Job(name, AsyncJobFunction(std::forward<Function>(function)), threadAffinity)
+            }, weight);
         }
-        else if constexpr (
-            std::is_invocable_v<Function, const Job&, const SharedWorkflowExecutionContext&> ||
-            std::is_invocable_v<Function, Job&, const SharedWorkflowExecutionContext&> ||
-            std::is_invocable_v<Function, const SharedWorkflowExecutionContext&> ||
-            std::is_invocable_v<Function>
-            ) {
+        else if constexpr (std::is_invocable_v<Function, const Job&, const SharedWorkflowExecutionContext&> || std::is_invocable_v<Function, Job&, const SharedWorkflowExecutionContext&> || std::is_invocable_v<Function, const SharedWorkflowExecutionContext&> || std::is_invocable_v<Function>) {
             const auto jobName = name;
 
-            stages.emplace_back(
-                std::move(name),
-                ConcurrencyMode::Sequential,
-                Jobs{
-                    Job(
-                        jobName,
-                        [fn = std::forward<Function>(function)](
-                            const Job& job,
-                            const SharedWorkflowExecutionContext& context) mutable
-                        {
-                            invokeJobFunction(fn, job, context);
-                        },
-                        threadAffinity
-                    )
-                },
-                weight
-            );
+            stages.emplace_back(std::move(name), ConcurrencyMode::Sequential, Jobs{ Job(jobName, [fn = std::forward<Function>(function)](const Job& job, const SharedWorkflowExecutionContext& context) mutable {
+                invokeJobFunction(fn, job, context);
+            }, threadAffinity)}, weight);
         }
+
+        return stages.back().getHandle();
     }
 
 private:

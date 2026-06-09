@@ -109,8 +109,7 @@ UniqueWorkflowPlan Serializable::toVariantMapWorkflow() const
 
     workflowPlan->addSequentialStage("Serialize", {
         WorkflowPlan::Job("Serialize", [this](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-                const QVariantMap variantMap = toVariantMap();
-                executionContext->publishResultValue(getSerializationName(), variantMap);//job.setResult("variantMap", variantMap);
+                executionContext->setOutput(toVariantMap());
             }, WorkflowPlan::JobThreadAffinity::GuiThread)
         });
 

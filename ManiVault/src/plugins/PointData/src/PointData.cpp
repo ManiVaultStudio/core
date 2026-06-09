@@ -202,7 +202,11 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 {
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    plan->addSequentialStage("Save", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+    plan->addNestedWorkflowStage("Save raw data base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+        return this->Plugin::toVariantMapWorkflow();
+    });
+
+    plan->addSequentialStage("Save raw data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         const auto numberOfElements = getNumberOfElements();
 
         if (numberOfElements == 0)
@@ -221,7 +225,7 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
                 { "NumberOfElements", QVariant::fromValue(numberOfElements) }
             });
 
-            executionContext->publishResultValue("Raw", resultMap);
+            executionContext->setOutput(resultMap);
         } else {
             std::vector<char> bytes;
 
@@ -239,7 +243,7 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 
             const auto resultMap = bytesToBlobVariantMap(bytes.data(), bytes.size());
 
-            executionContext->publishResultValue("Raw", resultMap);
+            executionContext->setOutput(resultMap);
         }
 	});
 
@@ -1100,23 +1104,30 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
 
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    plan->addSequentialStage("Save common", [this, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-        context->setMap(this->DatasetImpl::toVariantMap());
+    const auto saveDatasetBaseHandle = plan->addNestedWorkflowStage("Save dataset base", [this, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        return this->DatasetImpl::toVariantMapWorkflow();
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
-    plan->addNestedWorkflowStage("Save raw data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+    const auto encodeRawDataHandle = plan->addNestedWorkflowStage("Encode raw data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
         return getRawData<PointData>()->toVariantMapWorkflow();
     });
 
-    plan->addSequentialStage("Store raw data metadata", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-        const auto data = isFull() ? executionContext->getResultValue("Data").toMap() : QVariantMap{};
+    plan->addSequentialStage("Store raw data", [this, encodeRawDataHandle](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> void {
+        const auto rawData = executionContext->takeOutput(encodeRawDataHandle).toMap();
 
-        context->setValue("Data", data);
-        context->setValue("NumberOfPoints", QVariant::fromValue<std::uint64_t>(getNumPoints()));
+        qDebug() << rawData;
+    });
 
-        context->setValue("Dense", Experimental::isDense(this));
-    },
-    WorkflowPlan::JobThreadAffinity::GuiThread);
+    //plan->addSequentialStage("Store raw data metadata", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+    //    const auto data = isFull() ? executionContext->takeChildOutput("Save raw data") : QVariantMap{};
+
+    //    executionContext->
+    //    context->setValue("Data", data);
+    //    context->setValue("NumberOfPoints", QVariant::fromValue<std::uint64_t>(getNumPoints()));
+
+    //    context->setValue("Dense", Experimental::isDense(this));
+    //},
+    //WorkflowPlan::JobThreadAffinity::GuiThread);
 
     plan->addSequentialStage("Save indices", [this, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
         QVariantMap indicesMap;
@@ -1162,7 +1173,7 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     plan->addSequentialStage("Publish result", [this, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-        executionContext->publishResultValue(getId(), context->getMap());
+        executionContext->setOutput(context->getMap());
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     return plan;

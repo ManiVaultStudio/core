@@ -58,6 +58,29 @@ public: // Result values
 
     [[nodiscard]] QVariantMap takeResultValues(const QUuid& contextId);
 
+public: // Workflow outputs
+
+    void setOutput(const QUuid& id, const QVariant& value)
+    {
+        QMutexLocker lock(&_outputsMutex);
+        _outputs[id] = value;
+    }
+
+    [[nodiscard]] QVariant takeOutput(const QUuid& id)
+    {
+        QMutexLocker lock(&_outputsMutex);
+
+        auto it = _outputs.find(id);
+
+        if (it == _outputs.end())
+            return {};
+
+        QVariant value = std::move(it.value());
+        _outputs.erase(it);
+
+        return value;
+    }
+
 private:
     static void collectMessagesRecursive(const WorkflowReportNode::SharedWorkflowReportNode& node, QVector<WorkflowMessage>& out);
 
@@ -68,8 +91,10 @@ private:
     mutable QMutex                                  _mutex;                                     /** Mutex to protect access to mutable members that may be updated from multiple threads during execution. */
     WorkflowExecutionStatus                         _status = WorkflowExecutionStatus::Idle;    /** The execution status is protected by a mutex since it may be updated from multiple threads during execution and needs to be read and updated atomically. */
     WorkflowExecutionMetrics                        _metrics;                                   /** Metrics are stored in the execution state since they may be updated from multiple threads during execution and need to be accessible from the context. */
-    mutable QMutex                                  _resultValuesMutex;
-    QHash<QUuid, QVariantMap>                       _resultValuesByContext;
+    mutable QMutex                                  _resultValuesMutex;                         // TODO
+    QHash<QUuid, QVariantMap>                       _resultValuesByContext;                     // TODO
+    mutable QMutex                                  _outputsMutex;                              // TODO
+    QHash<QUuid, QVariant>                          _outputs;                                   // TODO
 };
 
 }

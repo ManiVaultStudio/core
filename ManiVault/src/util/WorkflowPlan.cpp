@@ -225,11 +225,14 @@ double WorkflowPlan::getWeight() const
 	return _weight;
 }
 
-void WorkflowPlan::addNestedWorkflowStage(const QString& name, NestedWorkflowFunction function, JobThreadAffinity threadAffinity /*= JobThreadAffinity::CurrentWorkerThread*/, double weight /*= 1.0*/)
+WorkflowHandle WorkflowPlan::addNestedWorkflowStage(const QString& name, NestedWorkflowFunction function, JobThreadAffinity threadAffinity /*= JobThreadAffinity::CurrentWorkerThread*/, double weight /*= 1.0*/)
 {
-	Stage stage(name, ConcurrencyMode::Sequential, Jobs{ Job(name, NestedWorkflowJob{ std::move(function) }, threadAffinity, weight) });
 
-	_stages.push_back(std::move(stage));
+    Job job(name, std::move(function), threadAffinity, JobProgressMode::Automatic, weight);
+
+    _stages.emplace_back(name, ConcurrencyMode::Sequential, Jobs{ std::move(job) }, weight);
+
+    return _stages.back().getHandle();
 }
 
 WorkflowPlan::Stage::Stage(QString name, ConcurrencyMode concurrencyMode, Jobs jobs, double weight /*= 1.0*/) :
@@ -266,69 +269,84 @@ WorkflowPlan::WorkflowPlan(const QString& title, SharedWorkflowContext context) 
 {
 }
 
-void WorkflowPlan::addStage(Stage stage)
+WorkflowHandle WorkflowPlan::addStage(Stage stage)
 {
     for (auto& job : stage.getJobs()) {
         job.setWorkflowContext(_workflowContext);
     }
 
     _stages.emplace_back(std::move(stage));
+
+	return _stages.back().getHandle();
 }
 
-void WorkflowPlan::addSequentialStage(QString name, Jobs jobs, double weight /*= 1.0*/)
+WorkflowHandle WorkflowPlan::addSequentialStage(QString name, Jobs jobs, double weight /*= 1.0*/)
 {
     if (jobs.empty()) {
         qWarning() << "Attempted to add empty sequential stage:" << name;
-	    return;
+	    return {};
     }
         
-    addStage(Stage(std::move(name), ConcurrencyMode::Sequential, std::move(jobs), weight));
+    return addStage(Stage(std::move(name), ConcurrencyMode::Sequential, std::move(jobs), weight));
 }
 
-void WorkflowPlan::addParallelStage(QString name, Jobs jobs, double weight /*= 1.0*/)
+WorkflowHandle WorkflowPlan::addParallelStage(QString name, Jobs jobs, double weight /*= 1.0*/)
 {
     if (jobs.empty()) {
         qWarning() << "Attempted to add empty parallel stage:" << name;
-        return;
+        return {};
     }
 
-    addStage(Stage(std::move(name), ConcurrencyMode::Parallel, std::move(jobs), weight));
+    return addStage(Stage(std::move(name), ConcurrencyMode::Parallel, std::move(jobs), weight));
 }
 
-void WorkflowPlan::addBatchedParallelStage(const QString& name, Jobs jobs, std::size_t batchSize)
+WorkflowHandle WorkflowPlan::addBatchedParallelStage(const QString& name, Jobs jobs, std::size_t batchSize)
 {
-	if (batchSize == 0)
-		throw std::invalid_argument("batchSize must be greater than zero");
+    if (batchSize == 0)
+        throw std::invalid_argument("batchSize must be greater than zero");
 
-	if (jobs.empty())
-		return;
+    if (jobs.empty())
+        return {};
 
-	std::size_t batchIndex = 0;
+    std::size_t batchIndex = 0;
 
-	for (std::size_t begin = 0; begin < jobs.size(); begin += batchSize) {
-		const auto end = std::min(begin + batchSize, jobs.size());
+    Stages batchStages;
 
-		Jobs batchJobs;
-		batchJobs.reserve(end - begin);
+    for (std::size_t begin = 0; begin < jobs.size(); begin += batchSize) {
+        const auto end = std::min(begin + batchSize, jobs.size());
 
-		for (std::size_t i = begin; i < end; ++i)
-			batchJobs.emplace_back(std::move(jobs[i]));
+        Jobs batchJobs;
+        batchJobs.reserve(end - begin);
 
-		addParallelStage(QString("%1 batch %2").arg(name).arg(++batchIndex), std::move(batchJobs));
-	}
+        for (std::size_t i = begin; i < end; ++i)
+            batchJobs.emplace_back(std::move(jobs[i]));
+
+        batchStages.emplace_back(
+            QString("%1 batch %2").arg(name).arg(++batchIndex),
+            ConcurrencyMode::Parallel,
+            std::move(batchJobs));
+    }
+
+    // Temporary version: keep existing flat stage model.
+    // Return a logical handle is not possible yet without a real parent stage.
+    // So better return invalid than lie by returning the last batch.
+    for (auto& stage : batchStages)
+        addStage(std::move(stage));
+
+    return {};
 }
 
-void WorkflowPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight /*= 1.0*/)
+WorkflowHandle WorkflowPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight /*= 1.0*/)
 {
 	switch (mode) {
 		case ConcurrencyMode::Sequential:
-            addSequentialStage(std::move(name), std::move(jobs), weight);
-            break;
+            return addSequentialStage(std::move(name), std::move(jobs), weight);
 
         case ConcurrencyMode::Parallel:
-            addParallelStage(std::move(name), std::move(jobs), weight);
-            break;
+            return addParallelStage(std::move(name), std::move(jobs), weight);
 	}
+
+    return {};
 }
 
 }
