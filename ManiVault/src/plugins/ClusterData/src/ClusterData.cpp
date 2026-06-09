@@ -249,6 +249,10 @@ UniqueWorkflowPlan Clusters::toVariantMapWorkflow() const
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     plan->addSequentialStage("Save raw data", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        if (getClusters().size() > 500000) {
+            executionContext->warning(QString("%1 clusters dataset contains approximately %2 clusters; very large numbers of clusters can take considerable time to save and load. Consider reducing the number of clusters if project serialization performance becomes a concern.").arg(getGuiName()).arg(getIntegerCountHumanReadable(getClusters().size())));
+        }
+
         auto plan = getRawData<ClusterData>()->toVariantMapWorkflow();
 
         const auto result = WorkflowRuntimeScoped::executeBlocking(std::move(plan), executionContext);

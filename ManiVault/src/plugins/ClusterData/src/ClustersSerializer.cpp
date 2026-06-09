@@ -214,17 +214,6 @@ UniqueWorkflowPlan ClustersSerializer::toVariantMapWorkflow(const QVector<Cluste
 
         allIndices = buildIndexBuffer(clusters, headers);
 
-        if (executionContext && headers.size() >= 1000) {
-            executionContext->warning(
-                QString("This dataset contains approximately %1 clusters. "
-                    "Datasets with very large numbers of clusters can take considerable "
-                    "time to save and load. Consider reducing the number of clusters if "
-                    "project serialization performance becomes a concern.")
-                .arg(getIntegerCountHumanReadable(headers.size())));
-
-            executionContext->info("root warning count:" + QString::number(executionContext->getState()->getReportRoot()->getWarningCountRecursive()));
-        }
-
         const auto headersRaw = serializeHeaders(headers, allIndices);
 
         result.insert("ClustersFormatVersion", FormatVersion);

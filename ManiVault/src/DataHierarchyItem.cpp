@@ -272,7 +272,7 @@ QVariantMap DataHierarchyItem::toVariantMapScoped(const SharedWorkflowExecutionC
     variantMap["Visible"]   = QVariant::fromValue(isVisible());
     variantMap["Selected"]  = QVariant::fromValue(isSelected());
     variantMap["Children"]  = QVariant::fromValue(children);
-    variantMap["Dataset"]   = _dataset->toVariantMapScoped(parentExecutionContext);
+    //variantMap["Dataset"]   = _dataset->toVariantMapScoped(parentExecutionContext);
 
     return variantMap;
 }
