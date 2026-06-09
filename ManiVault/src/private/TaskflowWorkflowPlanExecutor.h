@@ -178,7 +178,10 @@ private: // Helpers
 
         auto stageContext = isSequential ? parentContext->createSequentialStageChild(stage.getName(), stage.getWeight(), WorkflowPlan::JobProgressMode::Nested) : parentContext->createParallelStageChild(stage.getName(), stage.getWeight(), WorkflowPlan::JobProgressMode::Nested);
 
-        stageContext->setOutputId(stage.getId());
+        if (parentContext->isOutputForwarding())
+            stageContext->setOutputId(parentContext->getOutputId());
+        else
+            stageContext->setOutputId(stage.getId());
 
         auto timer = std::make_shared<QElapsedTimer>();
 

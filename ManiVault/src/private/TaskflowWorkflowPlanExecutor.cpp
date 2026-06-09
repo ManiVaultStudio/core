@@ -499,11 +499,19 @@ void TaskflowWorkflowPlanExecutor::executeCompiledJob(
     Q_ASSERT(childContext);
     Q_ASSERT(childContext->getState() == jobContext->getState());
 
+    childContext->setOutputId(jobContext->getOutputId());
+    childContext->setOutputForwarding(true);
+
     WorkflowExecutionLifecycleScope lifecycle(childContext);
 
     compileWorkflow(*childPlan, subflow, childContext);
 
     subflow.join();
+
+    auto nestedOutput = childContext->takeOutput();
+
+    if (nestedOutput.isValid() && !nestedOutput.isNull())
+        jobContext->setOutput(nestedOutput);
 
     lifecycle.finish();
 }
