@@ -202,17 +202,17 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 {
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    const auto baseSaveHandle = plan->addNestedWorkflowStage("Save raw data base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+    const auto baseSaveStage = plan->addNestedWorkflowStage("Save raw data base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
         return this->Plugin::toVariantMapWorkflow();
     });
 
-    plan->addSequentialStage("Save raw data", [this, baseSaveHandle](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-        QVariantMap resultMap = executionContext->takeOutput(baseSaveHandle).toMap();
+    plan->addSequentialStage("Save raw data", [this, baseSaveStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        auto outputMap = executionContext->takeOutput(baseSaveStage).toMap();
 
         const auto numberOfElements = getNumberOfElements();
 
         if (numberOfElements == 0) {
-            executionContext->setOutput(resultMap);
+            executionContext->setOutput(outputMap);
             return;
         }
 
@@ -221,10 +221,10 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
             const auto typeSpecifierName    = getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
             const auto typeIndex            = static_cast<std::int32_t>(typeSpecifier);
 
-            resultMap.insert("TypeIndex", QVariant::fromValue(typeIndex));
-            resultMap.insert("TypeName", QVariant(typeSpecifierName));
-            resultMap.insert("Raw", QVariant::fromValue(bytesToBlobVariantMap(static_cast<const char*>(getDataConstVoidPtr()), getRawDataSize())));
-            resultMap.insert("NumberOfElements", QVariant::fromValue(numberOfElements));
+            outputMap.insert("TypeIndex", QVariant::fromValue(typeIndex));
+            outputMap.insert("TypeName", QVariant(typeSpecifierName));
+            outputMap.insert("Raw", QVariant::fromValue(bytesToBlobVariantMap(static_cast<const char*>(getDataConstVoidPtr()), getRawDataSize())));
+            outputMap.insert("NumberOfElements", QVariant::fromValue(numberOfElements));
         }
         else {
             std::vector<char> bytes;
@@ -241,10 +241,10 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
             bytes.insert(bytes.end(), colIndicesBytes, colIndicesBytes + colIndices.size() * sizeof(size_t));
             bytes.insert(bytes.end(), valuesBytes, valuesBytes + values.size() * sizeof(float));
 
-            resultMap.insert("Raw", bytesToBlobVariantMap(bytes.data(), bytes.size()));
+            outputMap.insert("Raw", bytesToBlobVariantMap(bytes.data(), bytes.size()));
         }
 
-        executionContext->setOutput(resultMap);
+        executionContext->setOutput(outputMap);
     });
 
     return plan;
@@ -1102,18 +1102,18 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    const auto saveDatasetBaseHandle = plan->addNestedWorkflowStage("Save dataset base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+    const auto saveDatasetBaseStage = plan->addNestedWorkflowStage("Save dataset base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
         return this->DatasetImpl::toVariantMapWorkflow();
     });
 
-    const auto encodeRawDataHandle = plan->addNestedWorkflowStage("Encode raw data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+    const auto encodeRawDataStage = plan->addNestedWorkflowStage("Encode raw data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
         return getRawData<PointData>()->toVariantMapWorkflow();
     });
 
-    const auto storeRawDataHandle = plan->addSequentialStage("Store raw data", [this, saveDatasetBaseHandle, encodeRawDataHandle](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> void {
-        auto datasetMap = executionContext->takeOutput(saveDatasetBaseHandle).toMap();
+    const auto storeRawDataStage = plan->addSequentialStage("Store raw data", [this, saveDatasetBaseStage, encodeRawDataStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> void {
+        auto datasetMap = executionContext->takeOutput(saveDatasetBaseStage).toMap();
 
-        datasetMap["Data"]                      = executionContext->takeOutput(encodeRawDataHandle).toMap();
+        datasetMap["Data"]                      = executionContext->takeOutput(encodeRawDataStage).toMap();
         datasetMap["NumberOfPoints"]            = QVariant::fromValue<std::uint64_t>(getNumPoints());
         datasetMap["Dense"]                     = Experimental::isDense(this);
         datasetMap["NumberOfNonZeroElements"]   = QVariant::fromValue(Experimental::getNumNonZeroElements(this));
@@ -1121,8 +1121,8 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
         executionContext->setOutput(datasetMap);
     });
 
-    const auto storeIndicesHandle = plan->addSequentialStage("Save indices", [this, storeRawDataHandle](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-        auto datasetMap = executionContext->takeOutput(storeRawDataHandle).toMap();
+    const auto storeIndicesStage = plan->addSequentialStage("Save indices", [this, storeRawDataStage](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        auto datasetMap = executionContext->takeOutput(storeRawDataStage).toMap();
 
         QVariantMap indicesMap;
 
@@ -1134,8 +1134,8 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
         executionContext->setOutput(datasetMap);
     });
 
-    const auto saveSelectionHandle = plan->addSequentialStage("Save selection", [this, storeIndicesHandle](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-        auto datasetMap = executionContext->takeOutput(storeIndicesHandle).toMap();
+    const auto saveSelectionStage = plan->addSequentialStage("Save selection", [this, storeIndicesStage](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        auto datasetMap = executionContext->takeOutput(storeIndicesStage).toMap();
 
         QVariantMap selection;
 
@@ -1151,8 +1151,8 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
         executionContext->setOutput(datasetMap);
     });
 
-    const auto saveDimensionsHandle = plan->addSequentialStage("Save dimensions", [this, saveSelectionHandle](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-        auto datasetMap = executionContext->takeOutput(saveSelectionHandle).toMap();
+    const auto saveDimensionsStage = plan->addSequentialStage("Save dimensions", [this, saveSelectionStage](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        auto datasetMap = executionContext->takeOutput(saveSelectionStage).toMap();
 
         datasetMap["DimensionNames"]        = DimensionNamesSerializer::toVariantMap(getRawData<PointData>()->getDimensionNames());
         datasetMap["NumberOfDimensions"]    = QVariant::fromValue<std::uint64_t>(getNumDimensions());

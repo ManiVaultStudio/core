@@ -134,17 +134,29 @@ UniqueWorkflowPlan ClusterData::fromVariantMapWorkflow(const QVariantMap& varian
 
 UniqueWorkflowPlan ClusterData::toVariantMapWorkflow() const
 {
-    auto context = std::make_shared<VariantMapWorkflowContext>();
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__, context);
+    const auto baseSaveStage = plan->addNestedWorkflowStage("Save raw data base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+        return this->Plugin::toVariantMapWorkflow();
+    });
 
-    plan->addSequentialStage("Save", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-        auto serializerPlan = ClustersSerializer::toVariantMapWorkflow(_clusters);
+    plan->addSequentialStage("Preflight", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        if (getClusters().size() > 500000) {
+            executionContext->warning(QString("%1 clusters dataset contains approximately %2 clusters; very large numbers of clusters can take considerable time to save and load. Consider reducing the number of clusters if project serialization performance becomes a concern.").arg(getGuiName()).arg(getIntegerCountHumanReadable(getClusters().size())));
+        }
+    });
 
-        const auto result = WorkflowRuntimeScoped::executeBlocking(std::move(serializerPlan), executionContext);
-
-        executionContext->setOutput(result->value<QVariantMap>()["Data"].toMap());
+    const auto serializeClustersStage = plan->addNestedWorkflowStage("Serialize clusters", [this, baseSaveStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        return ClustersSerializer::toVariantMapWorkflow(_clusters);
 	});
+
+    plan->addSequentialStage("Save data", [this, baseSaveStage, serializeClustersStage](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        auto outputMap = executionContext->takeOutput(baseSaveStage).toMap();
+
+        outputMap["Data"] = executionContext->takeOutput(serializeClustersStage).toMap();
+
+        executionContext->setOutput(outputMap);
+    });
 
     return plan;
 }
@@ -240,31 +252,23 @@ UniqueWorkflowPlan Clusters::fromVariantMapWorkflow(const QVariantMap& variantMa
 
 UniqueWorkflowPlan Clusters::toVariantMapWorkflow() const
 {
-    auto context = std::make_shared<VariantMapWorkflowContext>();
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__, context);
+    const auto saveDatasetBaseStage = plan->addNestedWorkflowStage("Save dataset base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+        return this->DatasetImpl::toVariantMapWorkflow();
+    });
 
-    plan->addSequentialStage("Save common", [this, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-        context->setMap(this->DatasetImpl::toVariantMap());
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+    const auto encodeRawDataStage = plan->addNestedWorkflowStage("Encode raw data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+        return getRawData<ClusterData>()->toVariantMapWorkflow();
+    });
 
-    plan->addSequentialStage("Save raw data", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-        if (getClusters().size() > 500000) {
-            executionContext->warning(QString("%1 clusters dataset contains approximately %2 clusters; very large numbers of clusters can take considerable time to save and load. Consider reducing the number of clusters if project serialization performance becomes a concern.").arg(getGuiName()).arg(getIntegerCountHumanReadable(getClusters().size())));
-        }
+    const auto storeIndicesStage = plan->addSequentialStage("Save data", [this, saveDatasetBaseStage, encodeRawDataStage](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        auto outputMap = executionContext->takeOutput(saveDatasetBaseStage).toMap();
 
-        auto plan = getRawData<ClusterData>()->toVariantMapWorkflow();
+        outputMap.insert("Data", executionContext->takeOutput(encodeRawDataStage));
 
-        const auto result = WorkflowRuntimeScoped::executeBlocking(std::move(plan), executionContext);
-
-        const auto resultValues = result->value<QVariantMap>();
-        
-        context->setValue("Data", resultValues.value("Data").toMap());
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
-
-    plan->addSequentialStage("Publish result", [this, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-        executionContext->setOutput(context->getMap());
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+        executionContext->setOutput(outputMap);
+    });
 
     return plan;
 }
