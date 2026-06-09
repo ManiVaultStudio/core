@@ -40,49 +40,6 @@ using namespace mv::plugin;
 using namespace mv::util;
 using namespace mv::gui;
 
-namespace
-{
-    /** Thread-safe context for constructing the variant map */
-    class ToVariantMapWorkflowContext {
-    public:
-
-        /**
-         * Thread-safe getter for the variant map being constructed
-         * @return Variant map being constructed
-         */
-        QVariantMap getMap() const
-        {
-            QMutexLocker locker(&_mutex);
-            return _map;
-        }
-
-        /**
-         * Thread-safe inserter for the variant map being constructed
-         * @param key Key to insert into the variant map
-         * @param value Value to insert into the variant map
-         */
-        void insertInto(const QString& key, const QVariant& value)
-        {
-            QMutexLocker locker(&_mutex);
-            _map.insert(key, value);
-        }
-
-        /**
-         * Thread-safe setter for the variant map being constructed
-         * @param map Variant map to set
-         */
-        void setMap(const QVariantMap& map)
-        {
-            QMutexLocker locker(&_mutex);
-            _map = map;
-        }
-
-    private:
-        mutable QMutex  _mutex;     /** Mutex for thread-safe access to the variant map */
-        QVariantMap     _map;       /** Variant map being constructed */
-    };
-}
-
 namespace mv
 {
 
@@ -626,34 +583,23 @@ UniqueWorkflowPlan WorkspaceManager::fromVariantMapWorkflow(const QVariantMap& v
 
 UniqueWorkflowPlan WorkspaceManager::toVariantMapWorkflow() const
 {
-    auto context = std::make_shared<ToVariantMapWorkflowContext>();
-
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
 
-    plan->addSequentialStage("Common", [this, context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
-        context->insertInto("CurrentWorkspace", getCurrentWorkspace()->toVariantMap());
+    const auto saveCurrentWorkspaceStage = plan->addSequentialStage("Save current workspace", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        executionContext->setOutput(QVariantMap{
+            { "CurrentWorkspace", getCurrentWorkspace()->toVariantMap() }
+        });
 	});
 
     WorkflowPlan::Jobs dockManagerJobs;
 
-    dockManagerJobs.emplace_back(dataHierarchy().getSerializationName(), [this, context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
-        context->insertInto("Main", _mainDockManager->toVariantMap());
-    });
-
-    dockManagerJobs.emplace_back(dataHierarchy().getSerializationName(), [this, context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
-        context->insertInto("ViewPlugins", _viewPluginsDockManager->toVariantMap());
-    });
-
-    plan->addParallelStage("Dock managers", dockManagerJobs);
-    plan->addFinalizationStage("Set result", [this, context](const WorkflowPlan::Job&, [[maybe_unused]] const SharedWorkflowExecutionContext& executionContext) {
-        auto map = context->getMap();
+    plan->addSequentialStage("Save dock managers", [this, saveCurrentWorkspaceStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        auto currentWorkspaceMap = executionContext->takeOutput(saveCurrentWorkspaceStage).toMap();
 
         QVariantMap dockManagers{
-			{ "Main", map["Main"].toMap()},
-			{ "ViewPlugins", map["ViewPlugins"].toMap() }
+            { "Main", _mainDockManager->toVariantMap()},
+            { "ViewPlugins", _viewPluginsDockManager->toVariantMap() }
         };
-
-        auto currentWorkspaceMap = map["CurrentWorkspace"].toMap();
 
         currentWorkspaceMap.insert({
             { "DockManagers", dockManagers }
