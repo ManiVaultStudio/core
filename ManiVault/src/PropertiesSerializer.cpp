@@ -13,17 +13,23 @@ using namespace mv::util;
 namespace mv
 {
 
-QVariantMap PropertiesSerializer::toVariantMap(const QVariantMap& map)
+UniqueWorkflowPlan PropertiesSerializer::toVariantMapWorkflow(const QVariantMap& propertiesMap)
 {
 #ifdef PROPERTIES_SERIALIZER_VERBOSE
     qDebug() << "Serializing properties: " << map.keys();
 #endif
 
-    auto result = saveOptimizedVariant(map).toMap();
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    result["PropertiesFormatVersion"] = FormatVersion;
+    const auto serializeStage = plan->addSequentialStage("Serialize", [propertiesMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        auto optimizedPropertiesMap = saveOptimizedVariant(propertiesMap).toMap();
 
-    return result;
+        optimizedPropertiesMap["PropertiesFormatVersion"] = FormatVersion;
+
+        executionContext->setOutput(optimizedPropertiesMap);
+    });
+
+    return plan;
 }
 
 UniqueWorkflowPlan PropertiesSerializer::fromVariantMapWorkflow(const QVariantMap& propertiesMap, QVariantMap& destinationPropertiesMap, SharedWorkflowExecutionContext parentContext)

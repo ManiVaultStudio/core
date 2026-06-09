@@ -1102,11 +1102,11 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    const auto saveDatasetBaseHandle = plan->addNestedWorkflowStage("Save dataset base", [this](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+    const auto saveDatasetBaseHandle = plan->addNestedWorkflowStage("Save dataset base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
         return this->DatasetImpl::toVariantMapWorkflow();
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+    });
 
-    const auto encodeRawDataHandle = plan->addNestedWorkflowStage("Encode raw data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+    const auto encodeRawDataHandle = plan->addNestedWorkflowStage("Encode raw data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
         return getRawData<PointData>()->toVariantMapWorkflow();
     });
 
@@ -1119,7 +1119,7 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
         datasetMap["NumberOfNonZeroElements"]   = QVariant::fromValue(Experimental::getNumNonZeroElements(this));
 
         executionContext->setOutput(datasetMap);
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+    });
 
     const auto storeIndicesHandle = plan->addSequentialStage("Save indices", [this, storeRawDataHandle](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
         auto datasetMap = executionContext->takeOutput(storeRawDataHandle).toMap();
@@ -1132,7 +1132,7 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
         datasetMap["Indices"] = indicesMap;
 
         executionContext->setOutput(datasetMap);
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+    });
 
     const auto saveSelectionHandle = plan->addSequentialStage("Save selection", [this, storeIndicesHandle](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
         auto datasetMap = executionContext->takeOutput(storeIndicesHandle).toMap();
@@ -1149,7 +1149,7 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
         datasetMap["Selection"] = selection;
 
         executionContext->setOutput(datasetMap);
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+    });
 
     const auto saveDimensionsHandle = plan->addSequentialStage("Save dimensions", [this, saveSelectionHandle](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
         auto datasetMap = executionContext->takeOutput(saveSelectionHandle).toMap();
@@ -1160,7 +1160,7 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
 
         executionContext->setOutput(datasetMap);
 
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+    });
 
     return plan;
 }

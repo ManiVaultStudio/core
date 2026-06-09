@@ -398,18 +398,8 @@ public: // Serialization
     // TODO
     UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext) override;
 
-    /**
-     * Load widget action from variant for app versions prior to 1.5.0 (backwards compatibility)
-     * @param variantMap Variant representation of the widget action
-     * @return Variant representation of the widget action
-     */
-    void fromVariantMapPre150(const QVariantMap& variantMap);
-
-    /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
-     */
-    QVariantMap toVariantMap() const override;
+    // TODO
+    UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 public: // Grouping
 

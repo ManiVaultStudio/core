@@ -28,10 +28,22 @@ public:
     /** Format version for the serialized properties */
     static constexpr quint32 FormatVersion = 2;
 
-    // TODO
-    static QVariantMap toVariantMap(const QVariantMap& map);
+    /**
+     * Serializes the given properties map into a workflow plan.
+     *
+     * @param propertiesMap The properties map to serialize.
+     * @return A unique pointer to the workflow plan that performs the serialization.
+     */
+    static UniqueWorkflowPlan toVariantMapWorkflow(const QVariantMap& propertiesMap);
 
-    // TODO
+    /**
+     * Deserializes the given properties map into a workflow plan.
+     *
+     * @param propertiesMap The properties map to deserialize.
+     * @param destinationPropertiesMap The map to populate with the deserialized properties.
+     * @param parentContext The parent workflow execution context.
+     * @return A unique pointer to the workflow plan that performs the deserialization.
+     */
     static UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& propertiesMap, QVariantMap& destinationPropertiesMap, SharedWorkflowExecutionContext parentContext = nullptr);
 };
 
