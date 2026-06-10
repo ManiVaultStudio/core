@@ -185,19 +185,19 @@ mv::plugin::AnalysisPlugin* DatasetImpl::getAnalysis()
     return _analysis;
 }
 
-UniqueWorkflowPlan DatasetImpl::fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext)
+UniqueWorkflowPlan DatasetImpl::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    plan->addNestedWorkflowStage("Load widget action", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& parentExecutionContext) mutable -> UniqueWorkflowPlan {
-	    return this->WidgetAction::fromVariantMapWorkflow(variantMap, parentExecutionContext);
+    plan->addNestedWorkflowStage("Load widget action", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) mutable -> UniqueWorkflowPlan {
+	    return this->WidgetAction::fromVariantMapWorkflow(variantMap);
     });
 
-    plan->addNestedWorkflowStage("Load properties", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& parentExecutionContext) mutable -> UniqueWorkflowPlan {
-        return PropertiesSerializer::fromVariantMapWorkflow(variantMap["Properties"].toMap(), _properties, parentExecutionContext);
+    plan->addNestedWorkflowStage("Load properties", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
+        return PropertiesSerializer::fromVariantMapWorkflow(variantMap["Properties"].toMap(), _properties, executionContext);
     });
 
-    plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& parentExecutionContext) {
+    plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
         variantMapMustContain(variantMap, "Name");
         variantMapMustContain(variantMap, "Locked");
         variantMapMustContain(variantMap, "StorageType");

@@ -128,7 +128,7 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1);
 
     plan->addNestedWorkflowStage("Open project JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
-        return mv::projects().getCurrentProject()->fromVariantMapWorkflow(context->getProjectMap()["Project"].toMap(), executionContext);
+        return mv::projects().getCurrentProject()->fromVariantMapWorkflow(context->getProjectMap()["Project"].toMap());
     });
 
     plan->addSequentialStage("Open workspace JSON", [context]() -> void {

@@ -878,7 +878,7 @@ QIcon PluginManager::getPluginIcon(const QString& pluginKind) const
     return StyledIcon(_pluginFactories[pluginKind]->icon());
 }
 
-UniqueWorkflowPlan PluginManager::fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& executionContext)
+UniqueWorkflowPlan PluginManager::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
 

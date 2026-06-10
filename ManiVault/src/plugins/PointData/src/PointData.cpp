@@ -152,12 +152,11 @@ void PointData::setValueAt(const std::size_t index, const float newValue)
         _variantOfVectors);
 }
 
-UniqueWorkflowPlan PointData::fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentContext)
+UniqueWorkflowPlan PointData::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
     const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
-    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(
-        QString("%1(%2)").arg(getSerializationName()).arg(__FUNCTION__));
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1(%2)").arg(getSerializationName()).arg(__FUNCTION__));
 
     if (appVersion < Version(1, 5, 0)) {
         plan->addSequentialStage("Load legacy point data (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
@@ -188,11 +187,11 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(const QVariantMap& variantM
         resizeVector(numberOfElements);
     });
 
-    plan->addNestedWorkflowStage("Populate data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& parentExecutionContext) -> UniqueWorkflowPlan {
+    plan->addNestedWorkflowStage("Populate data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
         const auto dataMap      = variantMap["Data"].toMap();
         const auto rawDataMap   = dataMap["Raw"].toMap();
 
-        return populateBytesFromBlobMapWorkflow(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), parentExecutionContext);
+        return populateBytesFromBlobMapWorkflow(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), executionContext);
     });
 
     return plan;
@@ -995,12 +994,12 @@ void Points::selectInvert()
     events().notifyDatasetDataSelectionChanged(this);
 }
 
-UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& executionContext)
+UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
     plan->addNestedWorkflowStage("Load dataset base", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
-        return this->DatasetImpl::fromVariantMapWorkflow(variantMap, executionContext);
+        return this->DatasetImpl::fromVariantMapWorkflow(variantMap);
     });
 
     const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
@@ -1016,7 +1015,7 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap,
 
     if (isFull()) {
         plan->addNestedWorkflowStage("Load raw data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
-            return getRawData<PointData>()->fromVariantMapWorkflow(variantMap, executionContext);
+            return getRawData<PointData>()->fromVariantMapWorkflow(variantMap);
         });
 
         plan->addSequentialStage("Load selection", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
@@ -1159,7 +1158,6 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
         datasetMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
 
         executionContext->setOutput(datasetMap);
-
     });
 
     return plan;

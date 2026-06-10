@@ -148,7 +148,7 @@ bool Project::isStartupProject() const
     return _startupProject;
 }
 
-UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext)
+UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1::fromVariantMap").arg(getSerializationName()));
 
@@ -157,7 +157,7 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap
     });
 
     plan->addSequentialStage("Load", {
-        WorkflowPlan::Job("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& parentExecutionContext) {
+        WorkflowPlan::Job("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
 		    if (variantMap.contains(_selectionGroupingAction.getSerializationName())) {
 		        _selectionGroupingAction.fromParentVariantMap(variantMap);
 		    }
@@ -177,7 +177,7 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap
         const auto managerMap = variantMap[manager.getSerializationName()].toMap();
 
         loadManagerJobs.emplace_back(QString("Load %1").arg(manager.getSerializationName()), [managerMap, &manager](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-            auto plan= manager.fromVariantMapWorkflow(managerMap, executionContext);
+            auto plan= manager.fromVariantMapWorkflow(managerMap);
 
             WorkflowRuntimeScoped::executeBlocking(std::move(plan), executionContext);
         }, WorkflowPlan::JobThreadAffinity::GuiThread);

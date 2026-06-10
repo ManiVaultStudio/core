@@ -119,13 +119,13 @@ std::int32_t ClusterData::getClusterIndex(const QString& clusterName) const
     return -1;
 }
 
-UniqueWorkflowPlan ClusterData::fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext)
+UniqueWorkflowPlan ClusterData::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
     const auto dataMap = variantMap["Data"].toMap();
 
-    plan->addNestedWorkflowStage("Load", [this, dataMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+    plan->addNestedWorkflowStage("Load", [this, dataMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
         return ClustersSerializer::fromVariantMapWorkflow(dataMap, _clusters, executionContext);
     });
 
@@ -235,16 +235,16 @@ std::vector<std::uint32_t> Clusters::getSelectedIndices() const
     return selectedIndices;
 }
 
-UniqueWorkflowPlan Clusters::fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentContext)
+UniqueWorkflowPlan Clusters::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
     plan->addNestedWorkflowStage("Load common", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
-        return this->DatasetImpl::fromVariantMapWorkflow(variantMap, executionContext);
+        return this->DatasetImpl::fromVariantMapWorkflow(variantMap);
     });
 
     plan->addNestedWorkflowStage("Load raw data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
-		return getRawData<ClusterData>()->fromVariantMapWorkflow(variantMap, executionContext);
+		return getRawData<ClusterData>()->fromVariantMapWorkflow(variantMap);
     });
 
     return plan;

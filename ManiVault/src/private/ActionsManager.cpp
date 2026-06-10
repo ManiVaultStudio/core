@@ -242,7 +242,7 @@ ActionsListModel& ActionsManager::getActionsListModel()
     return *_actionsListModel;
 }
 
-UniqueWorkflowPlan ActionsManager::fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& executionContext)
+UniqueWorkflowPlan ActionsManager::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
 

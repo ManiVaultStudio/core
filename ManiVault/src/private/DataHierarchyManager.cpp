@@ -314,7 +314,7 @@ void DataHierarchyManager::removeAllItems()
     _items.clear();
 }
 
-UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext)
+UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
@@ -357,7 +357,7 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
 
         datasetJobs.emplace_back(datasetName, [datasetId, dataVariantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
             auto dataset    = mv::data().getDataset(datasetId);
-            auto nestedPlan = dataset->fromVariantMapWorkflow(dataVariantMap,executionContext);
+            auto nestedPlan = dataset->fromVariantMapWorkflow(dataVariantMap);
 
             WorkflowRuntimeScoped::executeBlocking(std::move(nestedPlan), executionContext);
         });
