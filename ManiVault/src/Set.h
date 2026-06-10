@@ -395,10 +395,26 @@ public: // Analysis
 
 public: // Serialization
 
-    // TODO
+    /**
+	 * Create a workflow that restores this object's state from a variant map.
+	 *
+	 * See Serializable::fromVariantMapWorkflow() for the full contract,
+	 * execution semantics, and implementation requirements.
+	 *
+	 * @param variantMap Serialized object state.
+	 * @param parentExecutionContext Optional parent workflow context.
+	 * @return Workflow plan that restores the object state when executed.
+	 */
     UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext) override;
 
-    // TODO
+    /**
+ * Create a workflow that serializes this object's state to a variant map.
+ *
+ * See Serializable::toVariantMapWorkflow() for the full contract,
+ * execution semantics, and implementation requirements.
+ *
+ * @return Workflow plan that serializes the object state when executed.
+ */
     UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 public: // Grouping

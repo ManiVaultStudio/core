@@ -190,7 +190,7 @@ UniqueWorkflowPlan DatasetImpl::fromVariantMapWorkflow(const QVariantMap& varian
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
     plan->addNestedWorkflowStage("Load widget action", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& parentExecutionContext) mutable -> UniqueWorkflowPlan {
-	    return WidgetAction::fromVariantMapWorkflow(variantMap, parentExecutionContext);
+	    return this->WidgetAction::fromVariantMapWorkflow(variantMap, parentExecutionContext);
     });
 
     plan->addNestedWorkflowStage("Load properties", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& parentExecutionContext) mutable -> UniqueWorkflowPlan {
