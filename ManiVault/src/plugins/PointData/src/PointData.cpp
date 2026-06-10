@@ -1056,11 +1056,11 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap)
         std::vector<QString> dimensionNames;
 
         // Fetch dimension names from map
-        const auto fetchDimensionNames = [&variantMap]() -> QStringList {
+        const auto fetchDimensionNames = [&variantMap, executionContext]() -> QStringList {
             QStringList dimensionNames;
 
             // Dimension names in byte array format
-            QByteArray dimensionsByteArray = bytesFromBlobVariantMap(variantMap["DimensionNames"].toMap());
+            QByteArray dimensionsByteArray = bytesFromBlobVariantMap(variantMap["DimensionNames"].toMap(), executionContext);
 
             // Open input data stream
             QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::ReadOnly);

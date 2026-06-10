@@ -176,13 +176,9 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap
     const auto addManagerLoadStage = [&plan, &loadManagerJobs, variantMap](AbstractManager& manager) {
         const auto managerMap = variantMap[manager.getSerializationName()].toMap();
 
-        loadManagerJobs.emplace_back(QString("Load %1").arg(manager.getSerializationName()), [managerMap, &manager](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-            auto plan= manager.fromVariantMapWorkflow(managerMap);
-
-            WorkflowRuntimeScoped::executeBlocking(std::move(plan), executionContext);
+        plan->addNestedWorkflowStage(QString("Load %1").arg(manager.getSerializationName()), [managerMap, &manager](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+            return manager.fromVariantMapWorkflow(managerMap);
         }, WorkflowPlan::JobThreadAffinity::GuiThread);
-
-        plan->addSequentialStage(QString("Load %1").arg(manager.getSerializationName()), loadManagerJobs);
     };
 
     addManagerLoadStage(mv::plugins());
