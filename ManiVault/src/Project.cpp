@@ -242,11 +242,11 @@ UniqueWorkflowPlan Project::toVariantMapWorkflow() const
     plan->addSequentialStage("Publish result", [this, saveCommonStage, savePluginsStage, saveActionsStage, saveDataHierarchyStage, saveEventsStage, saveWorkspacesStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         auto outputMap = executionContext->takeOutput(saveCommonStage).toMap();
 
-        outputMap[mv::plugins().getSerializationName()]         = executionContext->takeOutput(savePluginsStage);
-        outputMap[mv::actions().getSerializationName()]         = executionContext->takeOutput(saveActionsStage);
+        outputMap[mv::plugins().getSerializationName()]         = executionContext->takeOutput(savePluginsStage).toMap();
+        outputMap[mv::actions().getSerializationName()]         = executionContext->takeOutput(saveActionsStage).toMap();
         outputMap[mv::dataHierarchy().getSerializationName()]   = executionContext->takeOutput(saveDataHierarchyStage).toMap();
-        outputMap[mv::events().getSerializationName()]          = executionContext->takeOutput(saveEventsStage);
-        outputMap[mv::workspaces().getSerializationName()]      = executionContext->takeOutput(saveWorkspacesStage);
+        outputMap[mv::events().getSerializationName()]          = executionContext->takeOutput(saveEventsStage).toMap();
+        outputMap[mv::workspaces().getSerializationName()]      = executionContext->takeOutput(saveWorkspacesStage).toMap();
 
     	executionContext->setOutput(outputMap);
     });

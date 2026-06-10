@@ -227,10 +227,9 @@ public: // Reading
 	 * than executing this workflow directly.
 	 *
 	 * @param variantMap Serialized object state.
-	 * @param parentExecutionContext Optional parent workflow context.
 	 * @return Workflow plan that restores the object state.
 	 */
-    virtual UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext = nullptr);
+    virtual UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap);
 
 public: // Reading helpers
 

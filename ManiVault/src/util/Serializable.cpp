@@ -67,12 +67,12 @@ void Serializable::fromVariantMap(const QVariantMap& variantMap)
 
 void Serializable::fromVariantMapScoped(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext)
 {
-    auto plan = fromVariantMapWorkflow(variantMap, parentExecutionContext);
+    auto plan = fromVariantMapWorkflow(variantMap);
 
     WorkflowRuntimeScoped::executeBlocking(std::move(plan), parentExecutionContext);
 }
 
-UniqueWorkflowPlan Serializable::fromVariantMapWorkflow(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext /*= nullptr*/)
+UniqueWorkflowPlan Serializable::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1::fromVariantMap").arg(getSerializationName()));
 
@@ -212,7 +212,7 @@ UniqueWorkflowPlan Serializable::toJsonFileWorkflow(const QString& filePath) con
         if (!jsonFile.open(QFile::WriteOnly))
             throw std::runtime_error("Unable to open file for writing");
 
-        auto jsonDocument = QJsonDocument::fromVariant(executionContext->takeOutput(createMapStage));
+        auto jsonDocument = QJsonDocument::fromVariant(QVariantMap({ { getSerializationName(), executionContext->takeOutput(createMapStage) } }));
 
         if (jsonDocument.isNull() || jsonDocument.isEmpty())
             throw std::runtime_error("JSON document is invalid");

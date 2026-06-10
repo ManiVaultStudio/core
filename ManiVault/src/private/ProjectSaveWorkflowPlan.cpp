@@ -61,7 +61,7 @@ UniqueWorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
         }
 
         return nullptr;
-    }, WorkflowPlan::JobThreadAffinity::GuiThread, 10.0);
+    });
     
     plan->addNestedWorkflowStage("Save meta JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> UniqueWorkflowPlan {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
@@ -73,7 +73,7 @@ UniqueWorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
         }
 
         return nullptr;
-    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);
+    });
 
     plan->addSequentialStage("Save workspace JSON", [&plan, context]() -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
