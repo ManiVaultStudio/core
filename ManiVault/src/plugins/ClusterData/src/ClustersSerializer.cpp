@@ -90,7 +90,7 @@ namespace
     }
 }
 
-UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap& map, QVector<Cluster>& clusters, SharedWorkflowExecutionContext executionContext)
+UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap& map, QVector<Cluster>& clusters)
 {
     struct Context {
         std::vector<Header> headers;
@@ -101,55 +101,46 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap&
     
 	auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
     
-    plan->addSequentialStage("Read cluster data",
-        [map, context](const WorkflowPlan::Job&,
-            const SharedWorkflowExecutionContext& parentExecutionContext) {
-                const auto version = map.value("ClustersFormatVersion").toUInt();
+    plan->addSequentialStage("Read cluster data", [map, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& parentExecutionContext) {
+        const auto version = map.value("ClustersFormatVersion").toUInt();
 
-                if (version != FormatVersion)
-                    throw std::runtime_error("Unsupported cluster serialization format version");
+        if (version != FormatVersion)
+            throw std::runtime_error("Unsupported cluster serialization format version");
 
-                const auto metaData = bytesFromBlobVariantMap(
-                    map.value("ClustersMetaData").toMap(),
-                    parentExecutionContext);
+        const auto metaData = bytesFromBlobVariantMap(map.value("ClustersMetaData").toMap(), parentExecutionContext);
 
-                auto decoded = deserializeHeaders(metaData);
+        auto decoded = deserializeHeaders(metaData);
 
-                context->headers = std::move(decoded.headers);
+        context->headers = std::move(decoded.headers);
 
-                if (decoded.hasEmbeddedIndices) {
-                    context->allIndices = std::move(decoded.embeddedIndices);
-                    return;
-                }
+        if (decoded.hasEmbeddedIndices) {
+            context->allIndices = std::move(decoded.embeddedIndices);
+            return;
+        }
 
-                const auto indicesRawData = bytesFromBlobVariantMap(
-                    map.value("ClustersIndicesRawData").toMap(),
-                    parentExecutionContext);
+        const auto indicesRawData = bytesFromBlobVariantMap(map.value("ClustersIndicesRawData").toMap(), parentExecutionContext);
 
-                if ((indicesRawData.size() % static_cast<qsizetype>(sizeof(unsigned int))) != 0)
-                    throw std::runtime_error("Invalid cluster index raw data size");
+        if ((indicesRawData.size() % static_cast<qsizetype>(sizeof(unsigned int))) != 0)
+            throw std::runtime_error("Invalid cluster index raw data size");
 
-                context->allIndices.resize(
-                    static_cast<std::size_t>(indicesRawData.size()) / sizeof(unsigned int));
+        context->allIndices.resize(static_cast<std::size_t>(indicesRawData.size()) / sizeof(unsigned int));
 
-                std::memcpy(
-                    context->allIndices.data(),
-                    indicesRawData.constData(),
-                    static_cast<std::size_t>(indicesRawData.size()));
-        });
+        std::memcpy(
+            context->allIndices.data(),
+            indicesRawData.constData(),
+            static_cast<std::size_t>(indicesRawData.size()));
+    });
 
-    plan->addSequentialStage("Prepare clusters",
-        [context, &clusters](const WorkflowPlan::Job&,
-            const SharedWorkflowExecutionContext&) {
-                clusters.resize(static_cast<qsizetype>(context->headers.size()));
-        });
-/*
+    plan->addSequentialStage("Prepare clusters", [context, &clusters](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+    	clusters.resize(static_cast<qsizetype>(context->headers.size()));
+    });
+
+
     WorkflowPlan::Jobs rebuildJobs;
 
     // Important: this loop cannot use context->headers.size() yet,
     // because headers are loaded only when the workflow runs.
     // So instead use a dynamic nested workflow stage:
-
     
     plan->addNestedWorkflowStage("Rebuild clusters", [context, &clusters](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
         auto rebuildPlan = std::make_unique<WorkflowPlan>("Rebuild clusters");
@@ -197,7 +188,7 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap&
 
         return rebuildPlan;
     });
-    */
+    /**/
     return plan;
 }
 
@@ -208,7 +199,7 @@ UniqueWorkflowPlan ClustersSerializer::toVariantMapWorkflow(const QVector<Cluste
     plan->addSequentialStage("Save common", [&clusters](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
         Headers headers;
         Indices allIndices;
-        QVariantMap result;
+        QVariantMap outputMap;
 
         headers.reserve(static_cast<std::size_t>(clusters.size()));
 
@@ -216,16 +207,16 @@ UniqueWorkflowPlan ClustersSerializer::toVariantMapWorkflow(const QVector<Cluste
 
         const auto headersRaw = serializeHeaders(headers, allIndices);
 
-        result.insert("ClustersFormatVersion", FormatVersion);
-        result.insert("ClustersMetaDataSize", headersRaw.size());
-        result.insert("ClustersIndicesRawDataSize", allIndices.size() * sizeof(unsigned int));
+        outputMap.insert("ClustersFormatVersion", FormatVersion);
+        outputMap.insert("ClustersMetaDataSize", headersRaw.size());
+        outputMap.insert("ClustersIndicesRawDataSize", allIndices.size() * sizeof(unsigned int));
 
-        result.insert("ClustersMetaData",bytesToBlobVariantMap(headersRaw.constData(), headersRaw.size(), executionContext));
-        result.insert("ClustersIndicesRawData", bytesToBlobVariantMap(reinterpret_cast<const char*>(allIndices.data()), allIndices.size() * sizeof(unsigned int), executionContext));
+        outputMap.insert("ClustersMetaData",bytesToBlobVariantMap(headersRaw.constData(), headersRaw.size(), executionContext));
+        outputMap.insert("ClustersIndicesRawData", bytesToBlobVariantMap(reinterpret_cast<const char*>(allIndices.data()), allIndices.size() * sizeof(unsigned int), executionContext));
 
-        executionContext->setOutput(result);
+        executionContext->setOutput(outputMap);
 
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+    });
 
     return plan;
 }
