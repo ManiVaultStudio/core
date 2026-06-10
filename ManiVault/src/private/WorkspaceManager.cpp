@@ -257,90 +257,79 @@ void WorkspaceManager::newWorkspace()
 
 void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecentWorkspaces /*= true*/)
 {
-    try
-    {
 #ifdef WORKSPACE_MANAGER_VERBOSE
         qDebug() << __FUNCTION__ << filePath;
 #endif
 
-        createWorkspace();
+    createWorkspace();
 
-        setWorkspaceFilePath(filePath);
+    setWorkspaceFilePath(filePath);
 
-        beginLoadWorkspace();
-        {
-            if (filePath.isEmpty()) {
-                FileOpenDialog fileOpenDialog;
+    beginLoadWorkspace();
+    {
+        if (filePath.isEmpty()) {
+            FileOpenDialog fileOpenDialog;
 
-                fileOpenDialog.setWindowTitle("Load ManiVault Workspace");
-                fileOpenDialog.setNameFilters({ "ManiVault workspace files (*.json)" });
-                fileOpenDialog.setDefaultSuffix(".json");
-                fileOpenDialog.setDirectory(Application::current()->getSetting("Workspaces/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
-                fileOpenDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+            fileOpenDialog.setWindowTitle("Load ManiVault Workspace");
+            fileOpenDialog.setNameFilters({ "ManiVault workspace files (*.json)" });
+            fileOpenDialog.setDefaultSuffix(".json");
+            fileOpenDialog.setDirectory(Application::current()->getSetting("Workspaces/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+            fileOpenDialog.setOption(QFileDialog::DontUseNativeDialog, true);
 
-                StringAction descriptionAction(this, "Description");
-                StringAction tagsAction(this, "Tags");
-                StringAction commentsAction(this, "Comments");
+            StringAction descriptionAction(this, "Description");
+            StringAction tagsAction(this, "Tags");
+            StringAction commentsAction(this, "Comments");
 
-                descriptionAction.setEnabled(false);
-                tagsAction.setEnabled(false);
-                commentsAction.setEnabled(false);
+            descriptionAction.setEnabled(false);
+            tagsAction.setEnabled(false);
+            commentsAction.setEnabled(false);
 
-                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileOpenDialog.layout());
-                auto rowCount           = fileDialogLayout->rowCount();
+            auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileOpenDialog.layout());
+            auto rowCount           = fileDialogLayout->rowCount();
 
-                fileDialogLayout->addWidget(descriptionAction.createLabelWidget(&fileOpenDialog), rowCount, 0);
-                fileDialogLayout->addWidget(descriptionAction.createWidget(&fileOpenDialog), rowCount, 1, 1, 2);
+            fileDialogLayout->addWidget(descriptionAction.createLabelWidget(&fileOpenDialog), rowCount, 0);
+            fileDialogLayout->addWidget(descriptionAction.createWidget(&fileOpenDialog), rowCount, 1, 1, 2);
 
-                fileDialogLayout->addWidget(tagsAction.createLabelWidget(&fileOpenDialog), rowCount + 1, 0);
-                fileDialogLayout->addWidget(tagsAction.createWidget(&fileOpenDialog), rowCount + 1, 1, 1, 2);
+            fileDialogLayout->addWidget(tagsAction.createLabelWidget(&fileOpenDialog), rowCount + 1, 0);
+            fileDialogLayout->addWidget(tagsAction.createWidget(&fileOpenDialog), rowCount + 1, 1, 1, 2);
 
-                fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileOpenDialog), rowCount + 2, 0);
-                fileDialogLayout->addWidget(commentsAction.createWidget(&fileOpenDialog), rowCount + 2, 1, 1, 2);
+            fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileOpenDialog), rowCount + 2, 0);
+            fileDialogLayout->addWidget(commentsAction.createWidget(&fileOpenDialog), rowCount + 2, 1, 1, 2);
 
-                connect(&fileOpenDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
-                    if (!QFileInfo(filePath).isFile())
-                        return;
-
-                    Workspace workspace(filePath);
-
-                    descriptionAction.setString(workspace.getDescriptionAction().getString());
-                    tagsAction.setString(workspace.getTagsAction().getStrings().join(", "));
-                    commentsAction.setString(workspace.getDescriptionAction().getString());
-                });
-
-                fileOpenDialog.open();
-
-                QEventLoop eventLoop;
-                QObject::connect(&fileOpenDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
-                eventLoop.exec();
-
-                if (fileOpenDialog.result() != QDialog::Accepted)
+            connect(&fileOpenDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
+                if (!QFileInfo(filePath).isFile())
                     return;
 
-                if (fileOpenDialog.selectedFiles().count() != 1)
-                    throw std::runtime_error("Only one file may be selected");
+                Workspace workspace(filePath);
 
-                filePath = fileOpenDialog.selectedFiles().first();
+                descriptionAction.setString(workspace.getDescriptionAction().getString());
+                tagsAction.setString(workspace.getTagsAction().getStrings().join(", "));
+                commentsAction.setString(workspace.getCommentsAction().getString());
+            });
 
-                Application::current()->setSetting("Workspaces/WorkingDirectory", QFileInfo(filePath).absolutePath());
-            }           
+            fileOpenDialog.open();
 
-            fromJsonFile(filePath);
+            QEventLoop eventLoop;
+            QObject::connect(&fileOpenDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
+            eventLoop.exec();
 
-            if (addToRecentWorkspaces)
-                _recentWorkspacesAction.addRecentFilePath(filePath);
-        }
-        endLoadWorkspace();
+            if (fileOpenDialog.result() != QDialog::Accepted)
+                return;
+
+            if (fileOpenDialog.selectedFiles().count() != 1)
+                throw std::runtime_error("Only one file may be selected");
+
+            filePath = fileOpenDialog.selectedFiles().first();
+
+            Application::current()->setSetting("Workspaces/WorkingDirectory", QFileInfo(filePath).absolutePath());
+        }           
+
+        fromJsonFile(filePath);
+
+        if (addToRecentWorkspaces)
+            _recentWorkspacesAction.addRecentFilePath(filePath);
     }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to load workspace", e);
-    }
-    catch (...)
-    {
-        exceptionMessageBox("Unable to load workspace");
-    }
+    endLoadWorkspace();
 }
 
 void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*= ""*/, bool addToRecentWorkspaces /*= true*/)
@@ -594,7 +583,7 @@ UniqueWorkflowPlan WorkspaceManager::toVariantMapWorkflow() const
     WorkflowPlan::Jobs dockManagerJobs;
 
     plan->addSequentialStage("Save dock managers", [this, saveCurrentWorkspaceStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-        auto currentWorkspaceMap = executionContext->takeOutput(saveCurrentWorkspaceStage).toMap();
+        auto currentWorkspaceMap = executionContext->takeOutput(saveCurrentWorkspaceStage).toMap()["CurrentWorkspace"].toMap();
 
         QVariantMap dockManagers{
             { "Main", _mainDockManager->toVariantMap()},
