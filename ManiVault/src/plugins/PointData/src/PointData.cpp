@@ -1150,10 +1150,14 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
         executionContext->setOutput(datasetMap);
     });
 
-    const auto saveDimensionsStage = plan->addSequentialStage("Save dimensions", [this, saveSelectionStage](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+    const auto serializeDimensionsStage = plan->addNestedWorkflowStage("Serialize dimensions", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+        return DimensionNamesSerializer::toVariantMapWorkflow(getRawData<PointData>()->getDimensionNames());
+    });
+
+    const auto saveDimensionsStage = plan->addSequentialStage("Save dimensions", [this, saveSelectionStage, serializeDimensionsStage](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
         auto datasetMap = executionContext->takeOutput(saveSelectionStage).toMap();
 
-        datasetMap["DimensionNames"]        = DimensionNamesSerializer::toVariantMap(getRawData<PointData>()->getDimensionNames());
+        datasetMap["DimensionNames"]        = executionContext->takeOutput(serializeDimensionsStage).toMap();
         datasetMap["NumberOfDimensions"]    = QVariant::fromValue<std::uint64_t>(getNumDimensions());
         datasetMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
 

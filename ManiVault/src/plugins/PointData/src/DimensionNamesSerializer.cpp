@@ -60,29 +60,35 @@ UniqueWorkflowPlan DimensionNamesSerializer::fromVariantMapWorkflow(Points* poin
     return fromPlan;
 }
 
-QVariantMap DimensionNamesSerializer::toVariantMap(const std::vector<QString>& dimensionNames)
+mv::util::UniqueWorkflowPlan DimensionNamesSerializer::toVariantMapWorkflow(const std::vector<QString>& dimensionNames)
 {
 #ifdef DIMENSIONS_SERIALIZER_VERBOSE
     qDebug() << "Serializing dimensions: " << dimensionNames;
 #endif
 
-    QByteArray dimensionsByteArray;
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::WriteOnly);
+    plan->addSequentialStage("Read cluster data", [dimensionNames](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        QByteArray dimensionsByteArray;
 
-    QStringList dimensionNameList;
+        QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::WriteOnly);
 
-    dimensionNameList.reserve(static_cast<qsizetype>(dimensionNames.size()));
+        QStringList dimensionNameList;
 
-    for (const auto& dimensionName : dimensionNames) {
-        dimensionNameList << dimensionName;
-    }
+        dimensionNameList.reserve(static_cast<qsizetype>(dimensionNames.size()));
 
-    dimensionsDataStream << dimensionNameList;
+        for (const auto& dimensionName : dimensionNames) {
+            dimensionNameList << dimensionName;
+        }
 
-    auto result = bytesToBlobVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size());
+        dimensionsDataStream << dimensionNameList;
 
-    result["FormatVersion"] = FormatVersion;
+        auto outputMap = bytesToBlobVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), executionContext);
 
-    return result;
+        outputMap["FormatVersion"] = FormatVersion;
+
+        executionContext->setOutput(outputMap);
+    });
+
+    return plan;
 }

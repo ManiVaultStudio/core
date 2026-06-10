@@ -37,11 +37,11 @@ public:
     static mv::util::UniqueWorkflowPlan fromVariantMapWorkflow(Points* points, const QVariantMap& variantMap, mv::util::SharedWorkflowExecutionContext parentContext = nullptr);
 
     /**
-     * Serializes the provided dimension names into a QVariantMap.
-     * @param dimensionNames The dimension names to serialize.
-     * @return A QVariantMap containing the serialized dimension names.
+     * Serializes the dimension names of a Points object into a QVariantMap.
+     * @param dimensionNames The list of dimension names to serialize.
+     * @return A UniqueWorkflowPlan representing the serialization workflow.
      */
-    static QVariantMap toVariantMap(const std::vector<QString>& dimensionNames);
+    static mv::util::UniqueWorkflowPlan toVariantMapWorkflow(const std::vector<QString>& dimensionNames);
 
 protected:
 

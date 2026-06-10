@@ -101,13 +101,13 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap&
     
 	auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
     
-    plan->addSequentialStage("Read cluster data", [map, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& parentExecutionContext) {
+    plan->addSequentialStage("Read cluster data", [map, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         const auto version = map.value("ClustersFormatVersion").toUInt();
 
         if (version != FormatVersion)
             throw std::runtime_error("Unsupported cluster serialization format version");
 
-        const auto metaData = bytesFromBlobVariantMap(map.value("ClustersMetaData").toMap(), parentExecutionContext);
+        const auto metaData = bytesFromBlobVariantMap(map.value("ClustersMetaData").toMap(), executionContext);
 
         auto decoded = deserializeHeaders(metaData);
 
@@ -118,7 +118,7 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap&
             return;
         }
 
-        const auto indicesRawData = bytesFromBlobVariantMap(map.value("ClustersIndicesRawData").toMap(), parentExecutionContext);
+        const auto indicesRawData = bytesFromBlobVariantMap(map.value("ClustersIndicesRawData").toMap(), executionContext);
 
         if ((indicesRawData.size() % static_cast<qsizetype>(sizeof(unsigned int))) != 0)
             throw std::runtime_error("Invalid cluster index raw data size");
