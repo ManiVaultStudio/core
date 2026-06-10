@@ -188,7 +188,7 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap&
 
         return rebuildPlan;
     });
-    /**/
+
     return plan;
 }
 
@@ -196,7 +196,7 @@ UniqueWorkflowPlan ClustersSerializer::toVariantMapWorkflow(const QVector<Cluste
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    plan->addSequentialStage("Save common", [&clusters](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+    plan->addSequentialStage("Save common", [&clusters](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         Headers headers;
         Indices allIndices;
         QVariantMap outputMap;
@@ -207,15 +207,13 @@ UniqueWorkflowPlan ClustersSerializer::toVariantMapWorkflow(const QVector<Cluste
 
         const auto headersRaw = serializeHeaders(headers, allIndices);
 
-        outputMap.insert("ClustersFormatVersion", FormatVersion);
-        outputMap.insert("ClustersMetaDataSize", headersRaw.size());
-        outputMap.insert("ClustersIndicesRawDataSize", allIndices.size() * sizeof(unsigned int));
-
-        outputMap.insert("ClustersMetaData",bytesToBlobVariantMap(headersRaw.constData(), headersRaw.size(), executionContext));
-        outputMap.insert("ClustersIndicesRawData", bytesToBlobVariantMap(reinterpret_cast<const char*>(allIndices.data()), allIndices.size() * sizeof(unsigned int), executionContext));
+        outputMap["ClustersFormatVersion"]      = FormatVersion;
+        outputMap["ClustersMetaDataSize"]       = headersRaw.size();
+        outputMap["ClustersIndicesRawDataSize"] = allIndices.size() * sizeof(unsigned int);
+        outputMap["ClustersMetaData"]           = bytesToBlobVariantMap(headersRaw.constData(), headersRaw.size(), executionContext);
+        outputMap["ClustersIndicesRawData"]     = bytesToBlobVariantMap(reinterpret_cast<const char*>(allIndices.data()), allIndices.size() * sizeof(unsigned int), executionContext);
 
         executionContext->setOutput(outputMap);
-
     });
 
     return plan;

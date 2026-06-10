@@ -494,7 +494,6 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
             dataHierarchyMap[datasetId] = assembleItem(topLevelItem, topLevelSortIndex++);
         }
 
-        qDebug() << "Data hierarchy map assembled:" << dataHierarchyMap;
         executionContext->setOutput(dataHierarchyMap);
     });
 

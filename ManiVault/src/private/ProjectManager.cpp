@@ -744,10 +744,11 @@ void ProjectManager::saveProject(QString filePath)
         setTemporaryDirPath(TemporaryDirType::Save, workflowPlan->getWorkflowContextAs<ProjectSaveContext>()->getTemporaryDirectoryPath());
 
         auto future = Application::getWorkflowPlanExecutor().execute(std::move(workflowPlan), nullptr, WorkflowExecutionOptions({
-            parameters._parallel,
-	        parameters._maxParallelThreads,
-            true,   // Show progress
-            true    // Add notification
+            ._parallel = parameters._parallel,
+	        ._maxWorkerThreadCount = parameters._maxParallelThreads,
+	        ._reportProgress = true,
+	        ._addNotification = true,
+	        ._maxConsoleLogDepth = 3
         }));
 
         future.onFinished(this, [this](SharedWorkflowResult result) {

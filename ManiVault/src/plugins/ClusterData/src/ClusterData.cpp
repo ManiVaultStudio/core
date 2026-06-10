@@ -146,14 +146,14 @@ UniqueWorkflowPlan ClusterData::toVariantMapWorkflow() const
         }
     });
 
-    const auto serializeClustersStage = plan->addNestedWorkflowStage("Serialize clusters", [this, baseSaveStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+    const auto serializeClustersStage = plan->addNestedWorkflowStage("Serialize clusters", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
         return ClustersSerializer::toVariantMapWorkflow(_clusters);
 	});
 
-    plan->addSequentialStage("Save data", [this, baseSaveStage, serializeClustersStage](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+    plan->addSequentialStage("Save data", [this, baseSaveStage, serializeClustersStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         auto outputMap = executionContext->takeOutput(baseSaveStage).toMap();
 
-        outputMap["Data"] = executionContext->takeOutput(serializeClustersStage).toMap();
+        outputMap.insert(executionContext->takeOutput(serializeClustersStage).toMap());
 
         executionContext->setOutput(outputMap);
     });
