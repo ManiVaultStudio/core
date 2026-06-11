@@ -36,7 +36,7 @@ UniqueWorkflowPlan DimensionNamesSerializer::fromVariantMapWorkflow(Points* poin
     auto context    = std::make_shared<DimensionNamesLoadContext>();
     auto fromPlan   = std::make_unique<WorkflowPlan>(__FUNCTION__, context);
 
-    fromPlan->addSequentialStage("Read dimension names", [context, variantMap, points](const WorkflowPlan::Job& job) -> void {
+    fromPlan->addSequentialStage("Read dimension names", [context, variantMap, points](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> void {
         context->_dimensionNames.reserve(variantMap.value("DimensionNames").toMap().value("Size").toUInt());
 
         auto bytes = bytesFromBlobVariantMap(variantMap["DimensionNames"].toMap());

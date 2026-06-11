@@ -168,7 +168,7 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap
 		    _overrideApplicationStatusBarAction.fromParentVariantMap(variantMap);
 		    _statusBarVisibleAction.fromParentVariantMap(variantMap);
 		    _statusBarOptionsAction.fromParentVariantMap(variantMap);
-        })
+        }, WorkflowPlan::JobThreadAffinity::GuiThread)
     });
 
     WorkflowPlan::Jobs loadManagerJobs;

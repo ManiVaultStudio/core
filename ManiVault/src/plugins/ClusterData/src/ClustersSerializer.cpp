@@ -95,99 +95,95 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap&
     struct Context {
         std::vector<Header> headers;
         Indices allIndices;
+        QByteArray metadataBytes;
+        QByteArray indicesBytes;
     };
-    
+
     auto context = std::make_shared<Context>();
-    
-	auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
-    
-    plan->addSequentialStage("Read cluster data", [map, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-        const auto version = map.value("ClustersFormatVersion").toUInt();
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-        if (version != FormatVersion)
-            throw std::runtime_error("Unsupported cluster serialization format version");
+    const auto metadataMap = map.value("ClustersMetaData").toMap();
+    const auto indicesMap = map.value("ClustersIndicesRawData").toMap();
 
-        const auto metaData = bytesFromBlobVariantMap(map.value("ClustersMetaData").toMap(), executionContext);
+    WorkflowPlan::Jobs dataJobs;
 
-        auto decoded = deserializeHeaders(metaData);
+    dataJobs.emplace_back("Read metadata", WorkflowPlan::NestedWorkflowFunction([metadataMap, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        context->metadataBytes.resize(metadataMap["Size"].toULongLong());
 
-        context->headers = std::move(decoded.headers);
+        return populateBytesFromBlobMapWorkflow(metadataMap, context->metadataBytes.data(), context->metadataBytes.size(), executionContext);
+    }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 
-        if (decoded.hasEmbeddedIndices) {
-            context->allIndices = std::move(decoded.embeddedIndices);
-            return;
-        }
+    dataJobs.emplace_back("Read indices", WorkflowPlan::NestedWorkflowFunction([indicesMap, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        context->indicesBytes.resize(indicesMap["Size"].toULongLong());
 
-        const auto indicesRawData = bytesFromBlobVariantMap(map.value("ClustersIndicesRawData").toMap(), executionContext);
+        return populateBytesFromBlobMapWorkflow(indicesMap, context->indicesBytes.data(), context->indicesBytes.size(), executionContext);
+    }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 
-        if ((indicesRawData.size() % static_cast<qsizetype>(sizeof(unsigned int))) != 0)
-            throw std::runtime_error("Invalid cluster index raw data size");
+    plan->addParallelStage("Load data", std::move(dataJobs));
 
-        context->allIndices.resize(static_cast<std::size_t>(indicesRawData.size()) / sizeof(unsigned int));
+    plan->addSequentialStage("Deserialize cluster data", [map, context](
+        const WorkflowPlan::Job&,
+        const SharedWorkflowExecutionContext&)
+        {
+            const auto version = map.value("ClustersFormatVersion").toUInt();
 
-        std::memcpy(
-            context->allIndices.data(),
-            indicesRawData.constData(),
-            static_cast<std::size_t>(indicesRawData.size()));
-    });
+            if (version != FormatVersion)
+                throw std::runtime_error("Unsupported cluster serialization format version");
 
-    plan->addSequentialStage("Prepare clusters", [context, &clusters](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
-    	clusters.resize(static_cast<qsizetype>(context->headers.size()));
-    });
+            auto decoded = deserializeHeaders(context->metadataBytes);
 
+            context->headers = std::move(decoded.headers);
 
-    WorkflowPlan::Jobs rebuildJobs;
+            if (decoded.hasEmbeddedIndices) {
+                context->allIndices = std::move(decoded.embeddedIndices);
+                return;
+            }
 
-    // Important: this loop cannot use context->headers.size() yet,
-    // because headers are loaded only when the workflow runs.
-    // So instead use a dynamic nested workflow stage:
-    
-    plan->addNestedWorkflowStage("Rebuild clusters", [context, &clusters](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
-        auto rebuildPlan = std::make_unique<WorkflowPlan>("Rebuild clusters");
+            const auto& indicesRawData = context->indicesBytes;
 
-        clusters.resize(static_cast<qsizetype>(context->headers.size()));
+            if ((indicesRawData.size() % static_cast<qsizetype>(sizeof(unsigned int))) != 0)
+                throw std::runtime_error("Invalid cluster index raw data size");
 
-        constexpr std::size_t clustersPerJob = 50'000;
+            context->allIndices.resize(
+                static_cast<std::size_t>(indicesRawData.size()) / sizeof(unsigned int));
 
-        const auto clusterCount = context->headers.size();
-        const auto jobCount     = (clusterCount + clustersPerJob - 1) / clustersPerJob;
+            std::memcpy(
+                context->allIndices.data(),
+                indicesRawData.constData(),
+                static_cast<std::size_t>(indicesRawData.size()));
+        });
 
-        WorkflowPlan::Jobs rebuildJobs;
-        rebuildJobs.reserve(jobCount);
+    plan->addSequentialStage("Rebuild clusters", [context, &clusters](
+        const WorkflowPlan::Job&,
+        const SharedWorkflowExecutionContext&)
+        {
+            clusters.resize(static_cast<qsizetype>(context->headers.size()));
 
-        for (std::size_t jobIndex = 0; jobIndex < jobCount; ++jobIndex) {
-            const std::size_t begin = jobIndex * clustersPerJob;
-            const std::size_t end   = std::min(begin + clustersPerJob, clusterCount);
+            for (std::size_t i = 0; i < context->headers.size(); ++i) {
+                const Header& header = context->headers[i];
 
-            rebuildJobs.emplace_back(QString("Rebuild clusters %1-%2").arg(begin).arg(end - 1), [context, &clusters, begin, end](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
-                for (std::size_t i = begin; i < end; ++i) {
-                    const Header& header = context->headers[i];
+                const auto offset = static_cast<std::size_t>(header.indexOffset);
+                const auto count = static_cast<std::size_t>(header.indexCount);
 
-                    const auto offset   = static_cast<std::size_t>(header.indexOffset);
-                    const auto count    = static_cast<std::size_t>(header.indexCount);
-
-                    if (offset > context->allIndices.size() || count > context->allIndices.size() - offset) {
-                        throw std::runtime_error("Cluster index range exceeds index buffer");
-                    }
-
-                    Cluster cluster;
-                    cluster.setName(header.name);
-                    cluster.setId(header.id);
-                    cluster.setColor(header.color);
-
-                    std::vector<unsigned int> indices(context->allIndices.begin() + offset, context->allIndices.begin() + offset + count);
-
-                    cluster.setIndices(std::move(indices));
-
-                    clusters[static_cast<qsizetype>(i)] = std::move(cluster);
+                if (offset > context->allIndices.size() ||
+                    count > context->allIndices.size() - offset) {
+                    throw std::runtime_error("Cluster index range exceeds index buffer");
                 }
-            });
-        }
 
-        rebuildPlan->addParallelStage("Rebuild cluster chunks", std::move(rebuildJobs));
+                Cluster cluster;
+                cluster.setName(header.name);
+                cluster.setId(header.id);
+                cluster.setColor(header.color);
 
-        return rebuildPlan;
-    });
+                std::vector<unsigned int> indices(
+                    context->allIndices.begin() + offset,
+                    context->allIndices.begin() + offset + count);
+
+                cluster.setIndices(std::move(indices));
+
+                clusters[static_cast<qsizetype>(i)] = std::move(cluster);
+            }
+        });
 
     return plan;
 }
@@ -616,70 +612,3 @@ std::vector<unsigned int> ClustersSerializer::buildIndexBuffer(
 
     return allIndices;
 }
-/*
-QVector<Cluster> ClustersSerializer::rebuildClusters(
-    const std::vector<Header>& headers,
-    const std::vector<unsigned int>& allIndices)
-{
-    const auto clusterCount = headers.size();
-
-    std::uint64_t totalClusterIndices = 0;
-
-    for (const Header& header : headers) {
-        const auto offset = static_cast<std::size_t>(header.indexOffset);
-        const auto count = static_cast<std::size_t>(header.indexCount);
-
-        if (offset > allIndices.size() || count > allIndices.size() - offset)
-            throw std::runtime_error("Cluster index range exceeds index buffer");
-
-        totalClusterIndices += count;
-    }
-
-    constexpr std::size_t minParallelClusters = 8;
-    constexpr std::uint64_t minParallelIndices = 250'000;
-
-    const bool useParallel =
-        clusterCount >= minParallelClusters &&
-        totalClusterIndices >= minParallelIndices;
-
-    QVector<Cluster> clusters;
-    clusters.resize(static_cast<qsizetype>(clusterCount));
-
-    auto rebuildOne = [&](std::size_t i) {
-        const Header& header = headers[i];
-
-        const auto offset = static_cast<std::size_t>(header.indexOffset);
-        const auto count = static_cast<std::size_t>(header.indexCount);
-
-        Cluster cluster;
-
-        cluster.setName(header.name);
-        cluster.setId(header.id);
-        cluster.setColor(header.color);
-
-        std::vector<unsigned int> indices(
-            allIndices.begin() + offset,
-            allIndices.begin() + offset + count
-        );
-
-        cluster.setIndices(std::move(indices));
-
-        clusters[static_cast<qsizetype>(i)] = std::move(cluster);
-        };
-
-    if (!useParallel) {
-        for (std::size_t i = 0; i < clusterCount; ++i)
-            rebuildOne(i);
-
-        return clusters;
-    }
-
-    std::vector<std::size_t> indices(clusterCount);
-
-    std::iota(indices.begin(), indices.end(), std::size_t{ 0 });
-
-    //QtConcurrent::blockingMap(indices, rebuildOne);
-
-    return clusters;
-}
-*/

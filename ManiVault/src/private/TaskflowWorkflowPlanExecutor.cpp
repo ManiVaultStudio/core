@@ -489,31 +489,46 @@ void TaskflowWorkflowPlanExecutor::executeCompiledJob(const WorkflowPlan::Job& j
         return;
     }
 
-    auto childContext = jobContext->createNestedWorkflowChild(job.getName(), job.getWeight(), job.getProgressMode());
+    auto childContext = jobContext->createNestedWorkflowChild(
+        job.getName(),
+        job.getWeight(),
+        job.getProgressMode());
 
     Q_ASSERT(childContext);
     Q_ASSERT(childContext->getState() == jobContext->getState());
 
     childContext->setOutputId(job.getOutputId());
 
-    auto childPlan = job.createNestedWorkflow(childContext);
-
-    if (!childPlan)
-        throw std::runtime_error("Nested workflow job returned null workflow plan");
-
     WorkflowExecutionLifecycleScope lifecycle(childContext);
 
-    compileWorkflow(*childPlan, subflow, childContext);
+    try {
+        auto childPlan = job.createNestedWorkflow(childContext);
 
-    subflow.join();
+        if (!childPlan)
+            throw std::runtime_error("Nested workflow job returned null workflow plan");
 
-   // auto nestedOutput = childContext->takeOutput();
+        compileWorkflow(*childPlan, subflow, childContext);
 
-   //if (nestedOutput.isValid() && !nestedOutput.isNull())
-   //    jobContext->setOutput(nestedOutput);
+        subflow.join();
 
-
-    lifecycle.finish();
+        lifecycle.finish();
+    }
+    catch (const ManiVaultException& maniVaultException) {
+        childContext->reportFailed(maniVaultException._severity, maniVaultException._message, maniVaultException._details);
+        throw;
+    }
+    catch (const std::exception& exception) {
+        childContext->reportFailed(
+            SeverityLevel::Error,
+            QString::fromUtf8(exception.what()));
+        throw;
+    }
+    catch (...) {
+        childContext->reportFailed(
+            SeverityLevel::Error,
+            "Unknown exception");
+        throw;
+    }
 }
 
 WorkflowHandle TaskflowWorkflowPlanExecutor::getFinalStageHandle(const WorkflowPlan& workflowPlan)

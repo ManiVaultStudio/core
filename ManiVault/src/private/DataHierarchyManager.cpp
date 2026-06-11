@@ -318,7 +318,9 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    populateDataHierarchy(variantMap);
+    plan->addSequentialStage("Populate", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        populateDataHierarchy(variantMap);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     std::vector<QVariantMap> datasetMaps;
 
@@ -364,7 +366,7 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
 
     plan->addParallelStage("Load datasets", std::move(datasetJobs));
 
-    plan->addSequentialStage("Notify datasets", [this](const WorkflowPlan::Job& job) {
+    plan->addSequentialStage("Notify datasets", [this](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext&) {
         for (const auto& item : _items) {
             events().notifyDatasetDataChanged(item->getDataset());
         }

@@ -373,6 +373,9 @@ private:
                 invokeJobFunction(fn, job, context);
             }, threadAffinity)}, weight);
         }
+        else {
+            static_assert(std::is_invocable_v<Function>, "Unsupported workflow stage function signature");
+        }
 
         return stages.back().getHandle();
     }
