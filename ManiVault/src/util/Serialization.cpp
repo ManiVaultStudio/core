@@ -650,7 +650,7 @@ UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMa
     if (idealThreads <= 4)
         decodeBlockBatchSize = 1;
 
-    plan->addBatchedParallelStage("Decode Blocks", jobs, decodeBlockBatchSize);
+    plan->addParallelStage("Decode Blocks", jobs);//, decodeBlockBatchSize);
 
     return plan;
 }

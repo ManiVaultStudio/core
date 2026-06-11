@@ -101,6 +101,10 @@ public:
 
         QUuid getId() const { return _id; }
 
+        void setOutputId(const QUuid& outputId);
+
+        QUuid getOutputId() const;
+
         WorkflowHandle getHandle() const;
 
         QString getName() const;
@@ -177,6 +181,7 @@ public:
 
     private:
         QUuid                       _id = QUuid::createUuid();
+        QUuid                       _outputId;
         QString                     _name;
         JobKind                     _kind = JobKind::Function;
         JobFunction                 _function;

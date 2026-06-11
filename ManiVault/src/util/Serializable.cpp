@@ -212,7 +212,7 @@ UniqueWorkflowPlan Serializable::toJsonFileWorkflow(const QString& filePath) con
         if (!jsonFile.open(QFile::WriteOnly))
             throw std::runtime_error("Unable to open file for writing");
 
-        auto jsonDocument = QJsonDocument::fromVariant(QVariantMap({ { getSerializationName(), executionContext->takeOutput(createMapStage) } }));
+        auto jsonDocument = QJsonDocument::fromVariant(QVariantMap({ { getSerializationName(), executionContext->takeOutput(createMapStage).toMap() } }));
 
         if (jsonDocument.isNull() || jsonDocument.isEmpty())
             throw std::runtime_error("JSON document is invalid");

@@ -389,7 +389,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
             auto* item = uniqueItem.get();
 
             const auto datasetId = item->getDataset()->getId();
-            auto itemMap = item->toVariantMapScoped(executionContext);
+            auto itemMap = item->toVariantMap();
 
             itemMap.remove("Dataset");
 
@@ -412,17 +412,21 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
         const auto dataset = item->getDataset();
         const auto datasetId = dataset->getId();
 
-        const auto handle = plan->addNestedWorkflowStage(QString("Save dataset %1").arg(datasetId), [datasetId](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+        WorkflowPlan::Job job(QString("Save dataset %1").arg(datasetId), WorkflowPlan::NestedWorkflowFunction([datasetId](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
             auto dataset = mv::data().getDataset(datasetId);
 
             if (!dataset.isValid())
                 return {};
 
             return dataset->toVariantMapWorkflow();
-        });
+        }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Nested, 1.0);
 
-        datasetHandles.insert(datasetId, handle);
+        datasetHandles.insert(datasetId, job.getHandle());
+
+        saveDatasetsJobs.emplace_back(std::move(job));
     }
+
+    plan->addParallelStage("Save datasets", std::move(saveDatasetsJobs));
    
     const auto collectDatasetMapsStage = plan->addSequentialStage("Collect dataset maps", [saveItemMapsStage, datasetHandles](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         const auto itemMaps = executionContext->takeOutput(saveItemMapsStage).toMap();
@@ -432,11 +436,13 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
         for (auto it = datasetHandles.constBegin(); it != datasetHandles.constEnd(); ++it) {
             const auto datasetId    = it.key();
             const auto handle       = it.value();
-            const auto datasetMap   = executionContext->takeOutput(handle).toMap();
+            const auto output       = executionContext->takeOutput(handle);
+            const auto datasetMap   = output.toMap();
 
             datasetMaps.insert(datasetId, datasetMap);
         }
 
+        qDebug() << "Collected" << itemMaps.keys() << datasetMaps.keys();
         executionContext->setOutput(QVariantMap{
             { "Items", itemMaps },
             { "Datasets", datasetMaps }

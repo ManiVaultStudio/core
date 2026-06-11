@@ -42,6 +42,16 @@ WorkflowPlan::Job::Job(QString name, NestedWorkflowJob job, JobThreadAffinity th
 {
 }
 
+void WorkflowPlan::Job::setOutputId(const QUuid& outputId)
+{
+	_outputId = outputId;
+}
+
+QUuid WorkflowPlan::Job::getOutputId() const
+{
+	return _outputId.isNull() ? _id : _outputId;
+}
+
 WorkflowHandle WorkflowPlan::Job::getHandle() const
 {
 	return WorkflowHandle(_id, _name);
@@ -233,12 +243,15 @@ double WorkflowPlan::getWeight() const
 
 WorkflowHandle WorkflowPlan::addNestedWorkflowStage(const QString& name, NestedWorkflowFunction function, JobThreadAffinity threadAffinity /*= JobThreadAffinity::CurrentWorkerThread*/, double weight /*= 1.0*/)
 {
-
     Job job(name, std::move(function), threadAffinity, JobProgressMode::Automatic, weight);
 
-    _stages.emplace_back(name, ConcurrencyMode::Sequential, Jobs{ std::move(job) }, weight);
+    Stage stage(name, ConcurrencyMode::Sequential, Jobs{ std::move(job) }, weight);
 
-    return _stages.back().getHandle();
+    const auto handle = stage.getHandle();
+
+    stage.getJobs().front().setOutputId(handle.getId());
+
+    return addStage(std::move(stage));
 }
 
 WorkflowPlan::Stage::Stage(QString name, ConcurrencyMode concurrencyMode, Jobs jobs, double weight /*= 1.0*/) :

@@ -290,11 +290,10 @@ public: // Serialization
     void fromVariantMap(const QVariantMap& variantMap) override;
 
     /*
-     * Convert to variant map, possibly with \p parentExecutionContext for context-aware serialization
-     * @param parentExecutionContext Parent execution context for context-aware serialization (if any)
+     * Convert to variant map
      * @return Variant map representation of the data hierarchy item
      */
-    QVariantMap toVariantMapScoped(const util::SharedWorkflowExecutionContext& parentExecutionContext) const override;
+    QVariantMap toVariantMap() const override;
 
 signals:
 

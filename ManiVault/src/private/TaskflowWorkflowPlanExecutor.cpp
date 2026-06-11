@@ -489,17 +489,17 @@ void TaskflowWorkflowPlanExecutor::executeCompiledJob(const WorkflowPlan::Job& j
         return;
     }
 
-    auto childPlan = job.createNestedWorkflow(jobContext);
-
-    if (!childPlan)
-        throw std::runtime_error("Nested workflow job returned null workflow plan");
-
-    auto childContext = jobContext->createNestedWorkflowChild(childPlan->getName(), childPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
+    auto childContext = jobContext->createNestedWorkflowChild(job.getName(), job.getWeight(), job.getProgressMode());
 
     Q_ASSERT(childContext);
     Q_ASSERT(childContext->getState() == jobContext->getState());
 
-    childContext->setOutputId(job.getId());
+    childContext->setOutputId(job.getOutputId());
+
+    auto childPlan = job.createNestedWorkflow(childContext);
+
+    if (!childPlan)
+        throw std::runtime_error("Nested workflow job returned null workflow plan");
 
     WorkflowExecutionLifecycleScope lifecycle(childContext);
 
@@ -507,10 +507,11 @@ void TaskflowWorkflowPlanExecutor::executeCompiledJob(const WorkflowPlan::Job& j
 
     subflow.join();
 
-    //auto nestedOutput = childContext->takeOutput();
+   // auto nestedOutput = childContext->takeOutput();
 
-    //if (nestedOutput.isValid() && !nestedOutput.isNull())
-    //    jobContext->setOutput(nestedOutput);
+   //if (nestedOutput.isValid() && !nestedOutput.isNull())
+   //    jobContext->setOutput(nestedOutput);
+
 
     lifecycle.finish();
 }
