@@ -243,7 +243,6 @@ UniqueWorkflowPlan Project::toVariantMapWorkflow() const
         outputMap[mv::events().getSerializationName()]          = executionContext->takeOutput(saveEventsStage).toMap();
         outputMap[mv::workspaces().getSerializationName()]      = executionContext->takeOutput(saveWorkspacesStage).toMap();
 
-        qDebug() << outputMap;
     	executionContext->setOutput(outputMap);
     });
 

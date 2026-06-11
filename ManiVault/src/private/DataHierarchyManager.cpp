@@ -442,7 +442,6 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
             datasetMaps.insert(datasetId, datasetMap);
         }
 
-        qDebug() << "Collected" << itemMaps.keys() << datasetMaps.keys();
         executionContext->setOutput(QVariantMap{
             { "Items", itemMaps },
             { "Datasets", datasetMaps }
