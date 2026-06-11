@@ -316,8 +316,6 @@ void DataHierarchyManager::removeAllItems()
 
 UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
-    qDebug() << "LOOOOOOOOOOAD";
-
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
     populateDataHierarchy(variantMap);
@@ -352,23 +350,19 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
     });
 
     WorkflowPlan::Jobs datasetJobs;
+    datasetJobs.reserve(datasetMaps.size());
 
     for (const auto& dataVariantMap : datasetMaps) {
-        const auto datasetId    = dataVariantMap["ID"].toString();
-        const auto datasetName  = dataVariantMap["Name"].toString();
+        const auto datasetId = dataVariantMap["ID"].toString();
+        const auto datasetName = dataVariantMap["Name"].toString();
 
-        datasetJobs.emplace_back(datasetName, [datasetId, dataVariantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-            auto dataset    = mv::data().getDataset(datasetId);
-            auto nestedPlan = dataset->fromVariantMapWorkflow(dataVariantMap);
-
-            WorkflowRuntimeScoped::executeBlocking(std::move(nestedPlan), executionContext);
-        });
-
-        plan->addNestedWorkflowStage(QString("Load %1").arg(datasetName), [datasetId, dataVariantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
-            auto dataset = mv::data().getDataset(datasetId);
-            return dataset->fromVariantMapWorkflow(dataVariantMap);
-        });
+        datasetJobs.emplace_back(QString("Load %1").arg(datasetName), WorkflowPlan::NestedWorkflowFunction([datasetId, dataVariantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+                auto dataset = mv::data().getDataset(datasetId);
+                return dataset->fromVariantMapWorkflow(dataVariantMap);
+        }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Nested, 1.0);
     }
+
+    plan->addParallelStage("Load datasets", std::move(datasetJobs));
 
     plan->addSequentialStage("Notify datasets", [this](const WorkflowPlan::Job& job) {
         for (const auto& item : _items) {

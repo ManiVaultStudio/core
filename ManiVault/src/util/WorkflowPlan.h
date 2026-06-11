@@ -97,9 +97,11 @@ public:
 
         Job(QString name, JobFunction function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, JobProgressMode progressMode = JobProgressMode::Automatic);
         Job(QString name, NestedWorkflowFunction nestedWorkflowFunction, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, JobProgressMode progressMode = JobProgressMode::Automatic, double weight = 1.0);
-        Job(QString name, NestedWorkflowJob job, JobThreadAffinity threadAffinity, double weight);
+        Job(QString name, NestedWorkflowJob job, JobThreadAffinity threadAffinity, JobProgressMode progressMode, double weight);
 
         QUuid getId() const { return _id; }
+
+        WorkflowHandle getHandle() const;
 
         QString getName() const;
 
@@ -244,6 +246,8 @@ public:
 
     WorkflowHandle addSequentialStage(QString name, Jobs jobs, double weight = 1.0);
     WorkflowHandle addParallelStage(QString name, Jobs jobs, double weight = 1.0);
+
+    WorkflowHandle addParallelNestedWorkflowStage(QString name, Jobs jobs, double weight = 1.0);
 
     // Returns an invalid handle until batched stages have a logical parent stage
     WorkflowHandle addBatchedParallelStage(const QString& name, Jobs jobs, std::size_t batchSize);

@@ -32,13 +32,19 @@ WorkflowPlan::Job::Job(QString name, NestedWorkflowFunction nestedWorkflowFuncti
 {
 }
 
-WorkflowPlan::Job::Job(QString name, NestedWorkflowJob job, JobThreadAffinity threadAffinity, double weight):
+WorkflowPlan::Job::Job(QString name, NestedWorkflowJob job, JobThreadAffinity threadAffinity, JobProgressMode progressMode, double weight):
 	_name(std::move(name)),
 	_kind(JobKind::NestedWorkflow),
 	_nestedWorkflowFunction(std::move(job.function)),
 	_threadAffinity(threadAffinity),
+    _progressMode(progressMode),
 	_weight(weight)
 {
+}
+
+WorkflowHandle WorkflowPlan::Job::getHandle() const
+{
+	return WorkflowHandle(_id, _name);
 }
 
 QString WorkflowPlan::Job::getName() const
@@ -295,6 +301,28 @@ WorkflowHandle WorkflowPlan::addParallelStage(QString name, Jobs jobs, double we
     if (jobs.empty()) {
         qWarning() << "Attempted to add empty parallel stage:" << name;
         return {};
+    }
+
+    return addStage(Stage(std::move(name), ConcurrencyMode::Parallel, std::move(jobs), weight));
+}
+
+WorkflowHandle WorkflowPlan::addParallelNestedWorkflowStage(QString name, Jobs jobs, double weight)
+{
+    if (jobs.empty()) {
+        qWarning() << "Attempted to add empty parallel nested workflow stage:" << name;
+        return {};
+    }
+
+    for (const auto& job : jobs) {
+        if (!job.isNestedWorkflow()) {
+            qWarning() << "Parallel nested workflow stage contains non-nested job:" << job.getName();
+            return {};
+        }
+
+        if (job.getThreadAffinity() == JobThreadAffinity::GuiThread) {
+            qWarning() << "Parallel nested workflow stage cannot contain GUI-thread jobs:" << job.getName();
+            return {};
+        }
     }
 
     return addStage(Stage(std::move(name), ConcurrencyMode::Parallel, std::move(jobs), weight));

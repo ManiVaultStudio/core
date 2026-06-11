@@ -480,10 +480,7 @@ void TaskflowWorkflowPlanExecutor::addWorkflowFinishedNotification(const QString
         }, Qt::QueuedConnection);
 }
 
-void TaskflowWorkflowPlanExecutor::executeCompiledJob(
-    const WorkflowPlan::Job& job,
-    tf::Subflow& subflow,
-    SharedWorkflowExecutionContext jobContext)
+void TaskflowWorkflowPlanExecutor::executeCompiledJob(const WorkflowPlan::Job& job, tf::Subflow& subflow, SharedWorkflowExecutionContext jobContext)
 {
     jobContext = requireContext(jobContext, __FUNCTION__);
 
@@ -497,15 +494,12 @@ void TaskflowWorkflowPlanExecutor::executeCompiledJob(
     if (!childPlan)
         throw std::runtime_error("Nested workflow job returned null workflow plan");
 
-    auto childContext = jobContext->createNestedWorkflowChild(
-        childPlan->getName(),
-        childPlan->getWeight(),
-        WorkflowPlan::JobProgressMode::Automatic);
+    auto childContext = jobContext->createNestedWorkflowChild(childPlan->getName(), childPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
 
     Q_ASSERT(childContext);
     Q_ASSERT(childContext->getState() == jobContext->getState());
 
-    childContext->setOutputId(jobContext->getOutputId());
+    childContext->setOutputId(job.getId());
 
     WorkflowExecutionLifecycleScope lifecycle(childContext);
 
@@ -513,10 +507,10 @@ void TaskflowWorkflowPlanExecutor::executeCompiledJob(
 
     subflow.join();
 
-    auto nestedOutput = childContext->takeOutput();
+    //auto nestedOutput = childContext->takeOutput();
 
-    if (nestedOutput.isValid() && !nestedOutput.isNull())
-        jobContext->setOutput(nestedOutput);
+    //if (nestedOutput.isValid() && !nestedOutput.isNull())
+    //    jobContext->setOutput(nestedOutput);
 
     lifecycle.finish();
 }
