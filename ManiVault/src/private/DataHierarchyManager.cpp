@@ -320,7 +320,7 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
 
     plan->addSequentialStage("Populate", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
         populateDataHierarchy(variantMap);
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     std::vector<QVariantMap> datasetMaps;
     std::map<QString, std::uint64_t> approximateDatasetSizes;
@@ -370,7 +370,7 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
     }
 
     const auto cores        = std::max(1u, std::thread::hardware_concurrency());
-    const auto batchSize    = std::clamp<std::size_t>(cores / 4, 4, 16);
+    const auto batchSize    = std::clamp<std::size_t>(cores / 2, 4, 32);
 
     plan->addBatchedParallelStage("Load datasets", std::move(datasetJobs), batchSize);
     //plan->addParallelStage("Load datasets", std::move(datasetJobs));
@@ -437,7 +437,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
         saveDatasetsJobs.emplace_back(std::move(job));
     }
 
-    plan->addParallelStage("Save datasets", std::move(saveDatasetsJobs), 50.0);
+    plan->addParallelStage("Save datasets", std::move(saveDatasetsJobs), 80.0);
    
     const auto collectDatasetMapsStage = plan->addSequentialStage("Collect dataset maps", [saveItemMapsStage, datasetHandles](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         const auto itemMaps = executionContext->takeOutput(saveItemMapsStage).toMap();

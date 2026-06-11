@@ -12,7 +12,9 @@
 #include <QCoreApplication>
 #include <QEventLoop>
 #include <QThread>
+#include <QDateTime>
 
+#include <fstream>
 #include <chrono>
 #include <future>
 
@@ -26,6 +28,7 @@ using namespace mv::util;
 TaskflowWorkflowPlanExecutor::TaskflowWorkflowPlanExecutor(QObject* parent) :
     AbstractWorkflowPlanExecutor(parent)
 {
+    _observer = _executor.make_observer<tf::ChromeObserver>();
 }
 
 WorkflowResultFuture TaskflowWorkflowPlanExecutor::execute(
@@ -126,22 +129,17 @@ WorkflowResultFuture TaskflowWorkflowPlanExecutor::executeAsyncImpl(
     return WorkflowResultFuture(state);
 }
 
-SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(
-    WorkflowPlan& workflowPlan,
-    Task* task,
-    const WorkflowExecutionOptions& executionOptions)
+SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& workflowPlan, Task* task, const WorkflowExecutionOptions& executionOptions)
 {
-    auto rootContext = WorkflowExecutionContext::makeRoot(
-        workflowPlan.getName(),
-        task,
-        executionOptions);
+    //_observer.reset();
+    //_observer = _executor.make_observer<tf::ChromeObserver>();
+
+    auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task, executionOptions);
 
     return executeWithContext(workflowPlan, rootContext);
 }
 
-SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
-    WorkflowPlan& workflowPlan,
-    SharedWorkflowExecutionContext rootContext)
+SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext rootContext)
 {
     rootContext = requireContext(rootContext, __FUNCTION__);
 
@@ -298,16 +296,24 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
         }
     }
 
-    if (rootContext->isRootExecution() &&
-        rootContext->getState() &&
-        rootContext->getState()->getExecutionOptions()._addNotification) {
+    if (rootContext->isRootExecution() && rootContext->getState() && rootContext->getState()->getExecutionOptions()._addNotification) {
         addWorkflowFinishedNotification(
             workflowPlan.getName(),
             result,
             WorkflowResultRegistry::instance().add(result));
     }
 
-    
+    if (rootContext->isRootExecution() && _observer) {
+        const auto fileName = QString("workflow_trace_%1.json").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"));
+
+        std::ofstream traceFile(fileName.toStdString());
+
+        if (traceFile.is_open()) {
+            _observer->dump(traceFile);
+            qDebug() << "Chrome trace written to" << fileName;
+        }
+    }
+
     return result;
 }
 

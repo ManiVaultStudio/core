@@ -252,6 +252,7 @@ private: // Helpers
     void runTaskflowBlocking(tf::Taskflow& taskflow);
 
 private:
-    tf::Executor    _executor;  
+    tf::Executor                        _executor;
+    std::shared_ptr<tf::ChromeObserver> _observer;
 };
 

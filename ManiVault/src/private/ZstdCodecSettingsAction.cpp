@@ -14,7 +14,7 @@ using namespace mv::util;
 
 ZstdCodecSettingsAction::ZstdCodecSettingsAction(QObject* parent, const QString& title) :
     CodecSettingsAction(parent, title),
-    _levelAction(this, "Level", 1, 22, 2)
+    _levelAction(this, "Level", 1, 22, 3)
 {
 #ifdef ZSTD_CODEC_SETTINGS_ACTION_VERBOSE
     qDebug() << __FUNCTION__;

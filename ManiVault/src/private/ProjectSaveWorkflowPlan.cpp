@@ -48,9 +48,8 @@ UniqueWorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 		qDebug() << "Project JSON" << context->getProjectJsonPath();
 		qDebug() << "Meta JSON" << context->getMetaJsonPath();
 #endif
-    });
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);
 
-    
     plan->addNestedWorkflowStage("Save project JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> UniqueWorkflowPlan {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Save project JSON";
@@ -61,7 +60,7 @@ UniqueWorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
         }
 
         return nullptr;
-    });
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 80.0);
     
     plan->addNestedWorkflowStage("Save meta JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> UniqueWorkflowPlan {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
@@ -73,7 +72,7 @@ UniqueWorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
         }
 
         return nullptr;
-    });
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);
 
     plan->addNestedWorkflowStage("Save workspace JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> UniqueWorkflowPlan {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
@@ -81,7 +80,7 @@ UniqueWorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 #endif
 
         return workspaces().toJsonFileWorkflow(context->getWorkspaceJsonPath());
-    });
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 5.0);
 
     plan->addSequentialStage("Archive", [&plan, context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
@@ -93,7 +92,7 @@ UniqueWorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
     	QStringList files = tempDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
 
         context->getArchiver().compressDirectory(context->getTemporaryDirectoryPath(), context->getFilePath(), true, 0);
-    });
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 10.0);
 
     plan->addSequentialStage("Finalize", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
