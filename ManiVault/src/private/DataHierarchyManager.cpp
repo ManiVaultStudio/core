@@ -357,9 +357,9 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
         const auto datasetName = dataVariantMap["Name"].toString();
 
         datasetJobs.emplace_back(QString("Load %1").arg(datasetName), WorkflowPlan::NestedWorkflowFunction([datasetId, dataVariantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
-                auto dataset = mv::data().getDataset(datasetId);
-                return dataset->fromVariantMapWorkflow(dataVariantMap);
-        }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Nested, 1.0);
+            auto dataset = mv::data().getDataset(datasetId);
+            return dataset->fromVariantMapWorkflow(dataVariantMap);
+        }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic, 1.0);
     }
 
     plan->addParallelStage("Load datasets", std::move(datasetJobs));

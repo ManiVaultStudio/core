@@ -31,13 +31,7 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString&
 	auto reportRoot     = std::make_shared<WorkflowReportNode>(name);
 	auto progressRoot   = WorkflowProgressNode::createRoot(Type::Workflow, name);
 	auto state          = std::make_shared<WorkflowExecutionState>(reportRoot, progressRoot, std::move(executionOptions));
-	auto context        = std::make_shared<WorkflowExecutionContext>(
-        name,
-        reportRoot,
-        progressRoot,
-        state,
-        task
-    );
+	auto context        = std::make_shared<WorkflowExecutionContext>(name, reportRoot, progressRoot, state, task);
 
     context->_type          = Type::Workflow;
     context->_id            = QUuid::createUuid();
@@ -51,11 +45,18 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(Type type, 
     if (!_reportNode && !_progressNode && !_state)
         return {};
 
-    const auto effectiveWeight = std::max(1.0, weight);
+    const auto effectiveWeight  = std::max(1.0, weight);
+    const auto parentProgress   = getProgress();
 
-    if (getProgress() > 0.0 && effectiveWeight > 0.0) {
-        qWarning() << "Adding child to progress node after progress already started"
-            << "current progress =" << getProgress()
+    if (_progressMode == WorkflowPlan::JobProgressMode::Automatic && type != WorkflowExecutionNodeType::NestedWorkflow && parentProgress > 0.0 && parentProgress < 1.0 && effectiveWeight > 0.0) {
+        qWarning()
+            << "Adding child to progress node after progress already started"
+            << "parent =" << getExecutionPath(" / ")
+            << "parent type =" << getWorkflowExecutionNodeTypeName(_type)
+            << "parent progressMode =" << static_cast<int>(_progressMode)
+            << "current progress =" << parentProgress
+            << "child =" << name
+            << "child type =" << getWorkflowExecutionNodeTypeName(type)
             << "child weight =" << effectiveWeight
             << "original weight =" << weight;
     }
