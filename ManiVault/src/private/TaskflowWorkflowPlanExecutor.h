@@ -105,10 +105,7 @@ private: // Helpers
     }
 
     template<typename Flow>
-    CompiledTasks compileSequentialStage(
-        const WorkflowPlan::Stage& stage,
-        Flow& flow,
-        SharedWorkflowExecutionContext stageContext)
+    CompiledTasks compileSequentialStage(const WorkflowPlan::Stage& stage, Flow& flow, SharedWorkflowExecutionContext stageContext)
     {
         CompiledTasks result;
         tf::Task previous;
@@ -121,6 +118,8 @@ private: // Helpers
             auto task = flow.emplace([this, job, jobContext](tf::Subflow& subflow) mutable {
                 executeCompiledJob(job, subflow, jobContext);
             });
+
+            task.name(makeTraceName(job.isNestedWorkflow() ? "Nested" : "Job", collapseSingleJob ? stage.getName() : job.getName()));
 
             if (result.starts.empty())
                 result.starts.push_back(task);
@@ -135,10 +134,7 @@ private: // Helpers
     }
 
     template<typename Flow>
-    CompiledTasks compileParallelStage(
-        const WorkflowPlan::Stage& stage,
-        Flow& flow,
-        SharedWorkflowExecutionContext stageContext)
+    CompiledTasks compileParallelStage(const WorkflowPlan::Stage& stage, Flow& flow, SharedWorkflowExecutionContext stageContext)
     {
         CompiledTasks result;
 
@@ -149,7 +145,9 @@ private: // Helpers
 
             auto task = flow.emplace([this, job, jobContext](tf::Subflow& subflow) mutable {
                 executeCompiledJob(job, subflow, jobContext);
-                });
+            });
+
+            task.name(makeTraceName(job.isNestedWorkflow() ? "Nested" : "Job", collapseSingleJob ? stage.getName() : job.getName()));
 
             result.starts.push_back(task);
             result.ends.push_back(task);
@@ -185,15 +183,17 @@ private: // Helpers
         auto startTask = flow.emplace([stageContext, timer]() {
             timer->start();
             stageContext->reportStarted();
-            });
+        });
 
-        auto compiled = isSequential
-            ? compileSequentialStage(stage, flow, stageContext)
-            : compileParallelStage(stage, flow, stageContext);
+        startTask.name(makeTraceName("Stage begin", stage.getName()));
+
+        auto compiled = isSequential ? compileSequentialStage(stage, flow, stageContext) : compileParallelStage(stage, flow, stageContext);
 
         auto finishTask = flow.emplace([stageContext, timer]() {
             stageContext->reportFinished(static_cast<std::uint64_t>(timer->elapsed()));
-            });
+        });
+
+        finishTask.name(makeTraceName("Stage end", stage.getName()));
 
         for (auto& start : compiled.starts)
             startTask.precede(start);
@@ -228,13 +228,14 @@ private: // Helpers
         const auto finalHandle = getFinalStageHandle(workflowPlan);
 
         if (finalHandle.isValid() && !result.ends.empty()) {
-            auto publishWorkflowOutputTask =
-                graph.emplace([parentContext, finalHandle]() {
+            auto publishWorkflowOutputTask = graph.emplace([parentContext, finalHandle]() {
                 auto output = parentContext->takeOutput(finalHandle);
 
                 if (output.isValid() && !output.isNull())
                     parentContext->setOutput(output);
-                    });
+            });
+
+            publishWorkflowOutputTask.name(makeTraceName("Workflow output", workflowPlan.getName()));
 
             for (auto& end : result.ends)
                 end.precede(publishWorkflowOutputTask);
@@ -250,6 +251,8 @@ private: // Helpers
         SharedWorkflowExecutionContext rootContext);
 
     void runTaskflowBlocking(tf::Taskflow& taskflow);
+
+    static std::string makeTraceName(const QString& kind, const QString& name);
 
 private:
     tf::Executor                        _executor;

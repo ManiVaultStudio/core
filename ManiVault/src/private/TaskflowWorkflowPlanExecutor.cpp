@@ -584,3 +584,8 @@ void TaskflowWorkflowPlanExecutor::runTaskflowBlocking(tf::Taskflow& taskflow)
 
     future.get();
 }
+
+std::string TaskflowWorkflowPlanExecutor::makeTraceName(const QString& kind, const QString& name)
+{
+	return QString("%1 | %2").arg(kind, name).toStdString();
+}
