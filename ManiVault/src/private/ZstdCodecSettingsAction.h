@@ -25,8 +25,6 @@ public:
      */
     ZstdCodecSettingsAction(QObject* parent, const QString& title);
 
-    ~ZstdCodecSettingsAction();
-
 public: // Action getters
 
      /** Get compression level action (1-22) */

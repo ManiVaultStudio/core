@@ -9,7 +9,7 @@ namespace mv::gui {
 CodecSettingsAction::CodecSettingsAction(QObject* parent, const QString& title) :
     VerticalGroupAction(parent, title),
     _typeAction(this, "Type"),
-    _blockSizeAction(this, "Block size (MiB)", 1, 1024, 32)
+    _blockSizeAction(this, "Block size (MiB)", 1, 1024, 64)
 {
     setIconByName("gear");
     setConfigurationFlag(ConfigurationFlag::ForceCollapsedInGroup);
