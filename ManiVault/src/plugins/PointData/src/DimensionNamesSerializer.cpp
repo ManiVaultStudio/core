@@ -33,31 +33,41 @@ UniqueWorkflowPlan DimensionNamesSerializer::fromVariantMapWorkflow(Points* poin
     if (version != FormatVersion)
         throw std::runtime_error("Unsupported dimensions serialization format version");
 
-    auto context    = std::make_shared<DimensionNamesLoadContext>();
-    auto fromPlan   = std::make_unique<WorkflowPlan>(__FUNCTION__, context);
+    // Context struct to hold intermediate data during workflow execution
+    struct Context : WorkflowContextBase {
+        QStringList     dimensionNames;
+        QByteArray      bytes;
+    };
 
-    fromPlan->addSequentialStage("Read dimension names", [context, variantMap, points](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> void {
-        context->_dimensionNames.reserve(variantMap.value("DimensionNames").toMap().value("Size").toUInt());
+    auto context    = std::make_shared<Context>();
+    auto plan       = std::make_unique<WorkflowPlan>(__FUNCTION__, context);
 
-        auto bytes = bytesFromBlobVariantMap(variantMap["DimensionNames"].toMap());
+    const auto dimensionNamesMap = variantMap["DimensionNames"].toMap();
 
-        QDataStream dimensionsDataStream(&bytes, QIODevice::ReadOnly);
+    plan->addNestedWorkflowStage("Load dimension data", [dimensionNamesMap, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        return populateBytesFromBlobMapWorkflow(dimensionNamesMap, context->bytes.data(), context->bytes.size(), executionContext);
+    });
 
-        dimensionsDataStream >> context->_dimensionNames;
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+    plan->addSequentialStage("Read dimension names", [context, dimensionNamesMap, points](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> void {
+        context->dimensionNames.reserve(dimensionNamesMap["Size"].toUInt());
 
-	fromPlan->addSequentialStage("Set dimension names", [context, points](const WorkflowPlan::Job& job) -> void {
+        QDataStream dimensionsDataStream(&context->bytes, QIODevice::ReadOnly);
+
+        dimensionsDataStream >> context->dimensionNames;
+    });
+
+	plan->addSequentialStage("Set dimension names", [context, points](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> void {
         std::vector<QString> dimensionNames;
 
 		dimensionNames.reserve(points->getNumDimensions());
 
-        for (const auto& dimensionName : context->_dimensionNames)
+        for (const auto& dimensionName : context->dimensionNames)
 			dimensionNames.emplace_back(dimensionName);
 
 		points->setDimensionNames(dimensionNames);
 	}, WorkflowPlan::JobThreadAffinity::GuiThread);
 
-    return fromPlan;
+    return plan;
 }
 
 mv::util::UniqueWorkflowPlan DimensionNamesSerializer::toVariantMapWorkflow(const std::vector<QString>& dimensionNames)

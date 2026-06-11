@@ -42,14 +42,4 @@ public:
      * @return A UniqueWorkflowPlan representing the serialization workflow.
      */
     static mv::util::UniqueWorkflowPlan toVariantMapWorkflow(const std::vector<QString>& dimensionNames);
-
-protected:
-
-    /** Workflow context for loading dimension names. */
-    struct DimensionNamesLoadContext : public WorkflowContextBase
-    {
-        QStringList     _dimensionNames;
-        QByteArray      _bytes;
-    };
-    
 };
