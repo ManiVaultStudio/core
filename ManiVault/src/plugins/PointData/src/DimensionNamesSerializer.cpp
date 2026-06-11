@@ -65,7 +65,6 @@ UniqueWorkflowPlan DimensionNamesSerializer::fromVariantMapWorkflow(Points* poin
         for (const auto& dimensionName : context->dimensionNames)
 			dimensionNames.emplace_back(dimensionName);
 
-        qDebug() << "Setting dimension names: " << dimensionNames;
 		points->setDimensionNames(dimensionNames);
 	}, WorkflowPlan::JobThreadAffinity::GuiThread);
 
