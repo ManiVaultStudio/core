@@ -1048,6 +1048,11 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap)
         }, WorkflowPlan::JobThreadAffinity::GuiThread);
     }
 
+    const auto serializeDimensionsStage = plan->addNestedWorkflowStage("Load dimensions", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+        return DimensionNamesSerializer::fromVariantMapWorkflow(this, variantMap);
+    });
+
+    /*
     plan->addSequentialStage("Load dimensions", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
         variantMapMustContain(variantMap, "DimensionNames");
 
@@ -1093,6 +1098,7 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap)
             _dimensionsPickerAction->fromParentVariantMap(variantMap);
         }
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
+    */
 
     return plan;
 }

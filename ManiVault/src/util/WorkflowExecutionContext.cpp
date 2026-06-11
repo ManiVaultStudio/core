@@ -141,16 +141,18 @@ void WorkflowExecutionContext::reportStarted() const
         _progressNode->markRunning();
 }
 
-void WorkflowExecutionContext::reportFinished(std::uint64_t durationMs) const
+void WorkflowExecutionContext::reportFinished(std::uint64_t durationMs)
 {
     info(_name, {}, makeLifecycleDetails("finished", durationMs));
 
     if (_progressNode) {
         _progressNode->markCompleted();
     }
+
+    syncTaskProgress();
 }
 
-void WorkflowExecutionContext::reportFailed(SeverityLevel severity, const QString& errorMessage, QVariantMap extraDetails /*= {}*/) const
+void WorkflowExecutionContext::reportFailed(SeverityLevel severity, const QString& errorMessage, QVariantMap extraDetails /*= {}*/)
 {
     auto details = makeLifecycleDetails("failed");
     details["error"] = errorMessage;
@@ -162,9 +164,11 @@ void WorkflowExecutionContext::reportFailed(SeverityLevel severity, const QStrin
 
     if (_progressNode)
         _progressNode->markFailed();
+
+    syncTaskProgress();
 }
 
-void WorkflowExecutionContext::reportSkipped(const QString& reason) const
+void WorkflowExecutionContext::reportSkipped(const QString& reason)
 {
     auto details = makeLifecycleDetails("skipped");
     details["reason"] = reason;
@@ -173,6 +177,8 @@ void WorkflowExecutionContext::reportSkipped(const QString& reason) const
 
     if (_progressNode)
         _progressNode->markSkipped();
+
+    syncTaskProgress();
 }
 
 void WorkflowExecutionContext::reportStageSummary(const WorkflowStageSummary& summary) const
@@ -290,13 +296,10 @@ void WorkflowExecutionContext::error(QString text, QString location, QVariantMap
 
 void WorkflowExecutionContext::setProgress(double value) const
 {
-	if (_progressNode)
-		_progressNode->setProgress(value);
+    if (_progressNode)
+        _progressNode->setProgress(value);
 
-	const double overall = _state ? _state->getOverallProgress() : 0.0;
-
-	if (_task && _state)
-		_task->setProgress(static_cast<float>(overall));
+    syncTaskProgress();
 }
 
 double WorkflowExecutionContext::getProgress() const
@@ -355,6 +358,11 @@ QUuid WorkflowExecutionContext::getParentId() const
     return _parentId;
 }
 
+Task* WorkflowExecutionContext::getTask() const
+{
+    return _task;
+}
+
 void WorkflowExecutionContext::registerChildContext(const QString& name, const SharedWorkflowExecutionContext& child)
 {
 	QMutexLocker lock(&_childrenMutex);
@@ -403,6 +411,19 @@ QStringList WorkflowExecutionContext::getChildNames() const
 bool WorkflowExecutionContext::hasExplicitOutputId() const
 {
 	return _outputId != _id;
+}
+
+void WorkflowExecutionContext::syncTaskProgress() const
+{
+    if (!_task || !_state)
+        return;
+
+    const auto progress = static_cast<float>(_state->getOverallProgress());
+
+    QMetaObject::invokeMethod(_task, [task = _task, progress]() {
+    	if (task)
+			task->setProgress(progress);
+    }, Qt::QueuedConnection);
 }
 
 }

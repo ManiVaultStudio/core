@@ -109,7 +109,7 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
         context->setProjectMap(jsonDocument.toVariant().toMap());
 
-    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     plan->addSequentialStage("Open meta JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
@@ -129,7 +129,7 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
     plan->addNestedWorkflowStage("Open project JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
         return mv::projects().getCurrentProject()->fromVariantMapWorkflow(context->getProjectMap()["Project"].toMap());
-    });
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 20.0);
 
     plan->addSequentialStage("Open workspace JSON", [context]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE

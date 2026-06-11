@@ -59,8 +59,6 @@ TasksFilterModel::TasksFilterModel(QObject* parent /*= nullptr*/) :
 
 bool TasksFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
-    return false;
-
     const auto index = sourceModel()->index(row, 0, parent);
 
     if (!index.isValid())

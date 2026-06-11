@@ -154,10 +154,10 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap
 
     plan->addNestedWorkflowStage("Load common", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
         return Serializable::fromVariantMapWorkflow(variantMap);
-    });
+    }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     plan->addSequentialStage("Load", {
-        WorkflowPlan::Job("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        WorkflowPlan::Job("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
 		    if (variantMap.contains(_selectionGroupingAction.getSerializationName())) {
 		        _selectionGroupingAction.fromParentVariantMap(variantMap);
 		    }
@@ -168,26 +168,26 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap
 		    _overrideApplicationStatusBarAction.fromParentVariantMap(variantMap);
 		    _statusBarVisibleAction.fromParentVariantMap(variantMap);
 		    _statusBarOptionsAction.fromParentVariantMap(variantMap);
-        }, WorkflowPlan::JobThreadAffinity::GuiThread)
-    });
+        })
+    }, 1.0);
 
     WorkflowPlan::Jobs loadManagerJobs;
 
-    const auto addManagerLoadStage = [&plan, &loadManagerJobs, variantMap](AbstractManager& manager) {
+    const auto addManagerLoadStage = [&plan, &loadManagerJobs, variantMap](AbstractManager& manager, double weight) {
         const auto managerMap = variantMap[manager.getSerializationName()].toMap();
 
-        plan->addNestedWorkflowStage(QString("Load %1").arg(manager.getSerializationName()), [managerMap, &manager](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        plan->addNestedWorkflowStage(QString("Load %1").arg(manager.getSerializationName()), [managerMap, &manager](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
             return manager.fromVariantMapWorkflow(managerMap);
-        }, WorkflowPlan::JobThreadAffinity::GuiThread);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread, weight);
     };
 
-    addManagerLoadStage(mv::plugins());
-    addManagerLoadStage(mv::actions());
-    addManagerLoadStage(mv::dataHierarchy());
-    addManagerLoadStage(mv::events());
+    addManagerLoadStage(mv::plugins(), 1.0);
+    addManagerLoadStage(mv::actions(), 2.0);
+    addManagerLoadStage(mv::dataHierarchy(), 20.0);
+    addManagerLoadStage(mv::events(), 1.0);
 
     plan->addSequentialStage("Post-process", {
-        WorkflowPlan::Job("Post-process", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& parentExecutionContext) {
+        WorkflowPlan::Job("Post-process", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
 	        if (getReadOnlyAction().isChecked() && getAllowedPluginsOnlyAction().isChecked()) {
 				for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
 					pluginFactory->setAllowPluginCreationFromStandardGui(_projectMetaAction.getAllowedPluginsAction().getStrings().contains(pluginFactory->getKind()));

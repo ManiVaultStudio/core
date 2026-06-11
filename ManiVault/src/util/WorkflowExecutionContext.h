@@ -84,9 +84,9 @@ public:
 public:
 
     void reportStarted() const;
-    void reportFinished(std::uint64_t durationMs = 0) const;
-    void reportFailed(SeverityLevel severity, const QString& errorMessage, QVariantMap extraDetails = {}) const;
-    void reportSkipped(const QString& reason) const;
+    void reportFinished(std::uint64_t durationMs = 0);
+    void reportFailed(SeverityLevel severity, const QString& errorMessage, QVariantMap extraDetails = {});
+    void reportSkipped(const QString& reason);
     void reportStageSummary(const WorkflowStageSummary& summary) const;
 
     QVariantMap makeLifecycleDetails(const QString& event, std::uint64_t durationMs = 0) const;
@@ -185,7 +185,7 @@ public: // ID
 
 public: // Result values
 
-
+    Task* getTask() const;
 
 public: // Child context and output  management
 
@@ -204,6 +204,10 @@ public: // Child context and output  management
     [[nodiscard]] QStringList getChildNames() const;
 
     bool hasExplicitOutputId() const;
+
+private:
+
+    void syncTaskProgress() const;
 
 private:
     friend class WorkflowExecutionScope;

@@ -323,16 +323,21 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     std::vector<QVariantMap> datasetMaps;
+    std::map<QString, std::uint64_t> approximateDatasetSizes;
 
-    const std::function<void(const QVariantMap&)> enumerateDatasetNames = [&enumerateDatasetNames, &datasetMaps](const QVariantMap& variantMap) -> void {
+    const std::function<void(const QVariantMap&)> enumerateDatasetNames = [&enumerateDatasetNames, &datasetMaps, &approximateDatasetSizes](const QVariantMap& variantMap) -> void {
         for (const auto& variant : variantMap.values()) {
             enumerateDatasetNames(variant.toMap()["Children"].toMap());
 
-            const auto datasetMap = variant.toMap()["Dataset"].toMap();
+            auto datasetMap = variant.toMap()["Dataset"].toMap();
+
+            datasetMap.remove("Children");
 
             datasetMaps.emplace_back(datasetMap);
+
+            approximateDatasetSizes[datasetMap["ID"].toString()] = getRawBlockObjectSize(datasetMap);
         }
-        };
+    };
 
     enumerateDatasetNames(variantMap);
 
@@ -358,10 +363,10 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
         const auto datasetId = dataVariantMap["ID"].toString();
         const auto datasetName = dataVariantMap["Name"].toString();
 
-        datasetJobs.emplace_back(QString("Load %1").arg(datasetName), WorkflowPlan::NestedWorkflowFunction([datasetId, dataVariantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+        datasetJobs.emplace_back(QString("Load %1").arg(datasetName), WorkflowPlan::NestedWorkflowFunction([datasetId, dataVariantMap, approximateDatasetSizes](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
             auto dataset = mv::data().getDataset(datasetId);
             return dataset->fromVariantMapWorkflow(dataVariantMap);
-        }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic, 1.0);
+        }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Automatic, approximateDatasetSizes[datasetId]);
     }
 
     plan->addParallelStage("Load datasets", std::move(datasetJobs));
@@ -401,7 +406,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
         }
 
         executionContext->setOutput(itemMaps);
-    });
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     WorkflowPlan::Jobs saveDatasetsJobs;
     saveDatasetsJobs.reserve(_items.size());
@@ -421,14 +426,14 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
                 return {};
 
             return dataset->toVariantMapWorkflow();
-        }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Nested, 1.0);
+        }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Nested);
 
         datasetHandles.insert(datasetId, job.getHandle());
 
         saveDatasetsJobs.emplace_back(std::move(job));
     }
 
-    plan->addParallelStage("Save datasets", std::move(saveDatasetsJobs));
+    plan->addParallelStage("Save datasets", std::move(saveDatasetsJobs), 50.0);
    
     const auto collectDatasetMapsStage = plan->addSequentialStage("Collect dataset maps", [saveItemMapsStage, datasetHandles](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         const auto itemMaps = executionContext->takeOutput(saveItemMapsStage).toMap();
@@ -448,7 +453,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
             { "Items", itemMaps },
             { "Datasets", datasetMaps }
         });
-    });
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
     
     plan->addSequentialStage("Assemble hierarchy", [this, collectDatasetMapsStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext){
         const auto itemsAndDatasetsMap = executionContext->takeOutput(collectDatasetMapsStage).toMap();
@@ -491,7 +496,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
         }
 
         executionContext->setOutput(dataHierarchyMap);
-    });
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     return plan;
 }

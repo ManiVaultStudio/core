@@ -37,25 +37,14 @@ WorkflowResultFuture TaskflowWorkflowPlanExecutor::execute(
         const auto resolvedOptions =
             executionOptions.value_or(parentContext->getState()->getExecutionOptions());
 
-        auto childContext = parentContext->createWorkflowChild(
-            workflowPlan->getName(),
-            workflowPlan->getWeight(),
-            WorkflowPlan::JobProgressMode::Automatic);
+        auto childContext = parentContext->createWorkflowChild(workflowPlan->getName(), workflowPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
 
-        return executeAsyncImpl(
-            std::move(workflowPlan),
-            resolvedOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None,
-            resolvedOptions,
-            childContext);
+        return executeAsyncImpl(std::move(workflowPlan), resolvedOptions._reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, resolvedOptions, childContext);
     }
 
     const auto resolvedOptions = executionOptions.value_or({});
 
-    return executeAsyncImpl(
-        std::move(workflowPlan),
-        resolvedOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None,
-        resolvedOptions,
-        nullptr);
+    return executeAsyncImpl(std::move(workflowPlan), resolvedOptions._reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, resolvedOptions, nullptr);
 }
 
 SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(
@@ -300,6 +289,15 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
 
     lifecycle.finish(durationMs);
 
+    if (rootContext->isRootExecution()) {
+        if (auto task = rootContext->getTask()) {
+            QMetaObject::invokeMethod(task, [task]() {
+                task->setProgress(1.0f);
+                task->setStatus(Task::Status::Finished);
+            }, Qt::QueuedConnection);
+        }
+    }
+
     if (rootContext->isRootExecution() &&
         rootContext->getState() &&
         rootContext->getState()->getExecutionOptions()._addNotification) {
@@ -309,6 +307,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(
             WorkflowResultRegistry::instance().add(result));
     }
 
+    
     return result;
 }
 
@@ -510,6 +509,9 @@ void TaskflowWorkflowPlanExecutor::executeCompiledJob(const WorkflowPlan::Job& j
         compileWorkflow(*childPlan, subflow, childContext);
 
         subflow.join();
+
+        if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Atomic)
+            jobContext->setProgress(1.0);
 
         lifecycle.finish();
     }
