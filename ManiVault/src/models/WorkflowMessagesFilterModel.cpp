@@ -3,14 +3,17 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "WorkflowMessagesFilterModel.h"
+#include "AbstractWorkflowMessagesModel.h"
 
-#include "util/WorkflowMessage.h"
+#include "workflow/WorkflowMessage.h"
 
 #ifdef _DEBUG
     #define WORKFLOW_MESSAGES_FILTER_MODEL_VERBOSE
 #endif
 
+using namespace mv;
 using namespace mv::util;
+using namespace mv::workflow;
 
 namespace mv {
 

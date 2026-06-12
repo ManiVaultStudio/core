@@ -4,14 +4,11 @@
 
 #pragma once
 
-#include <util/AbstractWorkflowPlanExecutor.h>
-#include <util/WorkflowPlan.h>
-#include <util/WorkflowResult.h>
+#include <workflow/AbstractWorkflowPlanExecutor.h>
+#include <workflow/WorkflowPlan.h>
+#include <workflow/WorkflowResult.h>
 
 #include <exception/ManiVaultException.h>
-
-#include <QString>
-#include <QThreadPool>
 
 namespace mv
 {
@@ -22,31 +19,31 @@ namespace mv
  *
  * @author T. Kroes
  */
-class WorkflowPlanExecutor final : public AbstractWorkflowPlanExecutor
+class WorkflowPlanExecutor final : public mv::workflow::AbstractWorkflowPlanExecutor
 {
 public:
 
     WorkflowPlanExecutor(QObject* parent = nullptr);
 
-    WorkflowResultFuture execute(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) override;
+    mv::workflow::WorkflowResultFuture execute(mv::workflow::UniqueWorkflowPlan workflowPlan, mv::workflow::SharedWorkflowExecutionContext parentContext = nullptr, mv::workflow::OptionalWorkflowExecutionOptions executionOptions = std::nullopt) override;
 
 protected:
-    WorkflowResultFuture executeAsyncImpl(UniqueWorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, const WorkflowExecutionOptions& executionOptions, SharedWorkflowExecutionContext executionContext) override;
+    mv::workflow::WorkflowResultFuture executeAsyncImpl(mv::workflow::UniqueWorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, const mv::workflow::WorkflowExecutionOptions& executionOptions, mv::workflow::SharedWorkflowExecutionContext executionContext) override;
 	//SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, mv::Task* task, const WorkflowExecutionOptions& executionOptions = {}) override;
  //   SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, mv::Task* task, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) override;
 
 private:
-    SharedWorkflowResult executeRoot(WorkflowPlan& workflowPlan, mv::Task* task, const WorkflowExecutionOptions& executionOptions = {}) override;
-    SharedWorkflowResult executeChild(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext parentContext) override;
+    mv::workflow::SharedWorkflowResult executeRoot(mv::workflow::WorkflowPlan& workflowPlan, mv::Task* task, const mv::workflow::WorkflowExecutionOptions& executionOptions = {}) override;
+    mv::workflow::SharedWorkflowResult executeChild(mv::workflow::WorkflowPlan& workflowPlan, mv::workflow::SharedWorkflowExecutionContext parentContext) override;
 
 private: // Execute individual jobs
-	void executeJobOnGuiThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext) override;
-	void executeJobOnWorkerThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext) override;
-	void executeJob(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext) override;
+	void executeJobOnGuiThread(const mv::workflow::WorkflowPlan::Job& job, mv::workflow::SharedWorkflowExecutionContext jobContext) override;
+	void executeJobOnWorkerThread(const mv::workflow::WorkflowPlan::Job& job, mv::workflow::SharedWorkflowExecutionContext jobContext) override;
+	void executeJob(const mv::workflow::WorkflowPlan::Job& job, mv::workflow::SharedWorkflowExecutionContext jobContext) override;
 
 private: // Helpers
 
-    static void handleStageException(const WorkflowPlan::Stage& stage, const mv::ManiVaultException& exception, SharedWorkflowExecutionContext stageContext);
+    static void handleStageException(const mv::workflow::WorkflowPlan::Stage& stage, const mv::ManiVaultException& exception, mv::workflow::SharedWorkflowExecutionContext stageContext);
 
 };
 

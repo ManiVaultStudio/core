@@ -10,6 +10,8 @@
     #define WORKFLOW_MESSAGES_LIST_MODEL_VERBOSE
 #endif
 
+using namespace mv::workflow;
+
 namespace mv {
 
 WorkflowMessagesListModel::WorkflowMessagesListModel(QObject* parent /*= nullptr*/) :
@@ -17,7 +19,7 @@ WorkflowMessagesListModel::WorkflowMessagesListModel(QObject* parent /*= nullptr
 {
 }
 
-void WorkflowMessagesListModel::setWorkflowResult(const util::SharedWorkflowResult& workflowResult)
+void WorkflowMessagesListModel::setWorkflowResult(const workflow::SharedWorkflowResult& workflowResult)
 {
     for (const auto& message : workflowResult->getMessages()) {
         appendRow(Row(message));

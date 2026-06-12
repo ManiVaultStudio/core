@@ -10,11 +10,11 @@
 #include "util/Version.h"
 #include "util/Serializable.h"
 #include "util/CodecRegistry.h"
-#include "util/WorkflowGuiThreadDispatcher.h"
-#include "util/AbstractWorkflowPlanExecutor.h"
+
+#include "workflow/WorkflowGuiThreadDispatcher.h"
+#include "workflow/AbstractWorkflowPlanExecutor.h"
 
 #include "actions/TriggerAction.h"
-#include "actions/OptionsAction.h"
 #include "actions/ApplicationConfigurationAction.h"
 
 #include "ApplicationStartupTask.h"
@@ -28,8 +28,12 @@
 class QMainWindow;
 
 namespace mv {
+	namespace workflow
+	{
+		class WorkflowGuiThreadDispatcher;
+	}
 
-class CoreInterface;
+	class CoreInterface;
 class ProjectMetaAction;
 
 /**
@@ -178,7 +182,7 @@ public: // Miscellaneous
      * Get workflow GUI thread dispatcher
      * @return Reference to workflow GUI thread dispatcher
      */
-    static util::WorkflowGuiThreadDispatcher& workflowGuiThreadDispatcher();
+    static workflow::WorkflowGuiThreadDispatcher& workflowGuiThreadDispatcher();
 
 public: // Settings API
 
@@ -307,13 +311,13 @@ public: // Workflow plan executor
      * Get workflow plan executor
      * @return Reference to workflow plan executor
      */
-    static util::AbstractWorkflowPlanExecutor& getWorkflowPlanExecutor();
+    static workflow::AbstractWorkflowPlanExecutor& getWorkflowPlanExecutor();
 
     /**
      * Set workflow plan executor to \p workflowPlanExecutor (the application takes ownership of the pointer)
      * @param workflowPlanExecutor Pointer to workflow plan executor
      */
-    static void setWorkflowPlanExecutor(util::UniqueWorkflowPlanExecutor workflowPlanExecutor);
+    static void setWorkflowPlanExecutor(workflow::UniqueWorkflowPlanExecutor workflowPlanExecutor);
 
 public: // Action getters
 
@@ -340,22 +344,22 @@ signals:
     void coreManagersCreated(CoreInterface* core);
 
 protected:
-    CoreInterface*                      _core;                              /** Pointer to the ManiVault core */
-    const util::Version                 _version;                           /** Application version */
-    QSettings                           _settings;                          /** Settings */
-    QString                             _serializationTemporaryDirectory;   /** Temporary directory for serialization */
-    util::Logger                        _logger;                            /** Logger instance */
-    gui::TriggerAction*                 _exitAction;                        /** Action for exiting the application */
-    QUrl                                _startupProjectUrl;                 /** URL of the project to automatically open upon startup (if set) */
-    ProjectMetaAction*                  _startupProjectMetaAction;          /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
-    ApplicationStartupTask*             _startupTask;                       /** Application startup task */
-    QTemporaryDir                       _temporaryDir;                      /** Directory where application temporary files reside */
-    TemporaryDirs                       _temporaryDirs;                     /** ManiVault application temporary directories manager */
-    QLockFile                           _lockFile;                          /** Lock file is used for fail-safe purging of the temporary directory */
-    gui::ApplicationConfigurationAction _configurationAction;               /** Application configuration action */
-    util::CodecRegistry                 _codecRegistry;                     /** Codec registry */
-    util::WorkflowGuiThreadDispatcher   _workflowGuiThreadDispatcher;       /** Workflow GUI thread dispatcher */
-    util::UniqueWorkflowPlanExecutor    _workflowPlanExecutor;              /** Workflow plan executor */
+    CoreInterface*                          _core;                              /** Pointer to the ManiVault core */
+    const util::Version                     _version;                           /** Application version */
+    QSettings                               _settings;                          /** Settings */
+    QString                                 _serializationTemporaryDirectory;   /** Temporary directory for serialization */
+    util::Logger                            _logger;                            /** Logger instance */
+    gui::TriggerAction*                     _exitAction;                        /** Action for exiting the application */
+    QUrl                                    _startupProjectUrl;                 /** URL of the project to automatically open upon startup (if set) */
+    ProjectMetaAction*                      _startupProjectMetaAction;          /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
+    ApplicationStartupTask*                 _startupTask;                       /** Application startup task */
+    QTemporaryDir                           _temporaryDir;                      /** Directory where application temporary files reside */
+    TemporaryDirs                           _temporaryDirs;                     /** ManiVault application temporary directories manager */
+    QLockFile                               _lockFile;                          /** Lock file is used for fail-safe purging of the temporary directory */
+    gui::ApplicationConfigurationAction     _configurationAction;               /** Application configuration action */
+    util::CodecRegistry                     _codecRegistry;                     /** Codec registry */
+    workflow::WorkflowGuiThreadDispatcher   _workflowGuiThreadDispatcher;       /** Workflow GUI thread dispatcher */
+    workflow::UniqueWorkflowPlanExecutor    _workflowPlanExecutor;              /** Workflow plan executor */
 
     /** Count of cursor overrides for each cursor shape */
     static QList<CursorShapeCount> cursorOverridesCount;

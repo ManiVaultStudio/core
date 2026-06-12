@@ -7,7 +7,10 @@
 
 #include <Task.h>
 
-#include <util/WorkflowExecutionLifecycleScope.h>
+#include <workflow/WorkflowExecutionContext.h>
+#include <workflow/WorkflowConsoleDashboardScope.h>
+#include <workflow/WorkflowExecutionLifecycleScope.h>
+#include <workflow/WorkflowResultRegistry.h>
 
 #include <QCoreApplication>
 #include <QEventLoop>
@@ -24,6 +27,7 @@
 
 using namespace mv;
 using namespace mv::util;
+using namespace mv::workflow;
 
 TaskflowWorkflowPlanExecutor::TaskflowWorkflowPlanExecutor(QObject* parent) :
     AbstractWorkflowPlanExecutor(parent)

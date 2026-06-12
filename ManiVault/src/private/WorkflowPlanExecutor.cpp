@@ -5,9 +5,9 @@
 #include "WorkflowPlanExecutor.h"
 #include "Taskflow.h"
 
-#include <util/WorkflowResultRegistry.h>
-#include <util/WorkflowMetric.h>
-#include <util/WorkflowConsoleTraceSink.h>
+#include <workflow/WorkflowResultRegistry.h>
+#include <workflow/WorkflowMetric.h>
+#include <workflow/WorkflowConsoleTraceSink.h>
 
 #include <Task.h>
 
@@ -24,6 +24,7 @@
 
 using namespace mv;
 using namespace mv::util;
+using namespace mv::workflow;
 
 void testTaskflow()
 {

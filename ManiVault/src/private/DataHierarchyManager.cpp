@@ -13,6 +13,7 @@
 #include <stdexcept>
 
 using namespace mv::util;
+using namespace mv::workflow;
 
 #ifdef _DEBUG
     //#define DATA_HIERARCHY_MANAGER_VERBOSE
@@ -437,7 +438,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
         saveDatasetsJobs.emplace_back(std::move(job));
     }
 
-    plan->addParallelStage("Save datasets", std::move(saveDatasetsJobs), 80.0);
+    plan->addBatchedParallelStage("Save datasets", std::move(saveDatasetsJobs), 8);
    
     const auto collectDatasetMapsStage = plan->addSequentialStage("Collect dataset maps", [saveItemMapsStage, datasetHandles](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         const auto itemMaps = executionContext->takeOutput(saveItemMapsStage).toMap();

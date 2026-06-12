@@ -10,12 +10,12 @@
 #include <actions/WidgetAction.h>
 #include <util/Exception.h>
 
-#include <QDialogButtonBox>
 #include <QMetaType>
 #include <QMetaObject>
 
 using namespace mv::gui;
 using namespace mv::util;
+using namespace mv::workflow;
 
 #ifdef _DEBUG
     //#define ACTIONS_MANAGER_VERBOSE

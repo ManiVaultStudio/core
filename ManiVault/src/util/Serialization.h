@@ -5,8 +5,9 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
-#include "WorkflowPlan.h"
 #include "BlobCodec.h"
+
+#include "workflow/WorkflowPlan.h"
 
 #include <QFileInfo>
 #include <QFile>
@@ -65,7 +66,7 @@ struct DecodeBlockJob
 
 using DecodeBlockJobs = QVector<DecodeBlockJob>;
 
-CORE_EXPORT QVariantMap bytesToBlobVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, SharedWorkflowExecutionContext parentContext = nullptr);
+CORE_EXPORT QVariantMap bytesToBlobVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, workflow::SharedWorkflowExecutionContext parentContext = nullptr);
 
 /**
  * Decode a block of data from a file on disk and populate the provided output buffer with the decoded data
@@ -90,9 +91,9 @@ CORE_EXPORT DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decode
  */
 CORE_EXPORT DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec);
 
-CORE_EXPORT UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext = nullptr);
-CORE_EXPORT void populateBytesFromBlobMap(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, SharedWorkflowExecutionContext parentContext = nullptr);
-CORE_EXPORT QByteArray bytesFromBlobVariantMap(const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext = nullptr);
+CORE_EXPORT workflow::UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, workflow::SharedWorkflowExecutionContext parentContext = nullptr);
+CORE_EXPORT void                         populateBytesFromBlobMap(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, workflow::SharedWorkflowExecutionContext parentContext = nullptr);
+CORE_EXPORT QByteArray                   bytesFromBlobVariantMap(const QVariantMap& variantMap, workflow::SharedWorkflowExecutionContext parentContext = nullptr);
 
 /**
  * Raises an exception if an item with key is not found in a variant map
@@ -196,9 +197,9 @@ QVariant saveOptimizedVariant(const QVariant& source);
 
 QVariant saveOptimizedVariantList(const QVariantList& list);
 
-QVariantMap loadOptimizedVariantMap(const QVariantMap& source, const SharedWorkflowExecutionContext& context);
+QVariantMap loadOptimizedVariantMap(const QVariantMap& source, const workflow::SharedWorkflowExecutionContext& context);
 
-QVariant loadOptimizedVariant(const QVariant& source, const SharedWorkflowExecutionContext& context);
+QVariant loadOptimizedVariant(const QVariant& source, const workflow::SharedWorkflowExecutionContext& context);
 
-QVariant loadOptimizedVariantList(const QVariantMap& map, const SharedWorkflowExecutionContext& context);
+QVariant loadOptimizedVariantList(const QVariantMap& map, const workflow::SharedWorkflowExecutionContext& context);
 }

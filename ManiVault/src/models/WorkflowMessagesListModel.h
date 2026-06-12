@@ -23,7 +23,7 @@ public:
      */
     WorkflowMessagesListModel(QObject* parent = nullptr);
 
-    void setWorkflowResult(const util::SharedWorkflowResult& workflowResult);
+    void setWorkflowResult(const workflow::SharedWorkflowResult& workflowResult);
 
 };
 

@@ -41,13 +41,13 @@ public:
          * Construct with reference to \p message
          * @param message The workflow message
          */
-        Item(util::WorkflowMessage message);
+        Item(workflow::WorkflowMessage message);
 
         /**
          * Get workflow message
          * @return Reference to workflow message
          */
-        const util::WorkflowMessage& getWorkflowMessage() const;
+        const workflow::WorkflowMessage& getWorkflowMessage() const;
 
         /**
          * Get tooltip for item
@@ -56,7 +56,7 @@ public:
         QString getTooltip() const;
 
     private:
-        util::WorkflowMessage   _workflowMessage;  /** Pointer to script */
+        workflow::WorkflowMessage   _workflowMessage;  /** Pointer to script */
     };
 
     /** Item class for displaying the workflow message type */
@@ -268,7 +268,7 @@ protected:
          * Construct with reference to \p message
          * @param message Reference to the workflow message
          */
-        Row(const util::WorkflowMessage& message) : QList<QStandardItem*>()
+        Row(const workflow::WorkflowMessage& message) : QList<QStandardItem*>()
         {
             append(new LevelItem(message));
             append(new TextItem(message));

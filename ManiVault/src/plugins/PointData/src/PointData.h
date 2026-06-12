@@ -478,7 +478,7 @@ public: // Serialization
      * @param variantMap Serialized object state.
      * @return Workflow plan that restores the object state when executed.
      */
-    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap) override;
+    mv::workflow::UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap) override;
 
     /**
      * Create a workflow that serializes this object's state to a variant map.
@@ -488,7 +488,7 @@ public: // Serialization
      *
      * @return Workflow plan that serializes the object state when executed.
      */
-    UniqueWorkflowPlan toVariantMapWorkflow() const final;
+    mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const final;
 
 private:
     VariantOfVectors _variantOfVectors;
@@ -1000,7 +1000,7 @@ public: // Serialization
      * @param variantMap Serialized object state.
      * @return Workflow plan that restores the object state when executed.
      */
-    UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap) override;
+    mv::workflow::UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap) override;
 
     /**
      * Create a workflow that serializes this object's state to a variant map.
@@ -1010,7 +1010,7 @@ public: // Serialization
      *
      * @return Workflow plan that serializes the object state when executed.
      */
-    UniqueWorkflowPlan toVariantMapWorkflow() const override;
+    mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 public: // Linked data
 

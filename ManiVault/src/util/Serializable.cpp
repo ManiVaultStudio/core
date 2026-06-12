@@ -5,7 +5,9 @@
 #include "Serializable.h"
 #include "Application.h"
 #include "CoreInterface.h"
-#include "WorkflowExecutionContext.h"
+
+#include "workflow/WorkflowExecutionContext.h"
+#include "workflow/WorkflowRuntimeScoped.h"
 
 #include "actions/WidgetAction.h"
 
@@ -23,6 +25,7 @@
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::workflow;
 
 namespace mv::util {
 

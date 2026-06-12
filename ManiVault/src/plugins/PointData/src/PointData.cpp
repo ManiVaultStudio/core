@@ -16,7 +16,8 @@
 #include <graphics/Vector2f.h>
 
 #include <util/Serialization.h>
-#include <util/VariantMapWorkflowContext.h>
+
+#include <workflow/WorkflowContextVariantMap.h>
 
 #include <QDebug>
 #include <QtCore>
@@ -32,6 +33,7 @@ Q_PLUGIN_METADATA(IID "studio.manivault.PointData")
 // =============================================================================
 
 using namespace mv::util;
+using namespace mv::workflow;
 
 namespace
 {

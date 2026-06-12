@@ -11,6 +11,7 @@
 
 using namespace mv::gui;
 using namespace mv::util;
+using namespace mv::workflow;
 
 namespace 
 {

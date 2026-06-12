@@ -6,9 +6,9 @@
 
 #include "Taskflow.h"
 
-#include <util/AbstractWorkflowPlanExecutor.h>
-#include <util/WorkflowPlan.h>
-#include <util/WorkflowResult.h>
+#include <workflow/AbstractWorkflowPlanExecutor.h>
+#include <workflow/WorkflowPlan.h>
+#include <workflow/WorkflowResult.h>
 
 #include <exception/ManiVaultException.h>
 
@@ -18,6 +18,8 @@ namespace mv
 {
     class Task;
 }
+
+using namespace mv::workflow;
 
 /*
  *

@@ -12,9 +12,7 @@
 
 #include "Application.h"
 
-#include <util/Serialization.h>
-#include <util/VariantMapWorkflowContext.h>
-#include <util/WorkflowRuntimeScoped.h>
+#include <workflow/WorkflowContextVariantMap.h>
 
 #include <QtCore>
 #include <QtDebug>
@@ -24,6 +22,8 @@
 #include "ClustersSerializer.h"
 
 Q_PLUGIN_METADATA(IID "studio.manivault.ClusterData")using namespace mv::util;
+
+using namespace mv::workflow;
 
 ClusterData::ClusterData(const mv::plugin::PluginFactory* factory) :
     mv::plugin::RawData(factory, ClusterType)

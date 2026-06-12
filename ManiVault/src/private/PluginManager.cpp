@@ -41,6 +41,7 @@ namespace mv {
 using namespace util;
 using namespace plugin;
 using namespace gui;
+using namespace workflow;
 
 PluginManager::PluginManager(QObject* parent) :
     AbstractPluginManager(parent),

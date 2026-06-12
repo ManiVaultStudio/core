@@ -17,6 +17,7 @@
 
 using namespace mv::gui;
 using namespace mv::util;
+using namespace mv::workflow;
 
 namespace mv
 {
@@ -24,7 +25,7 @@ namespace mv
 namespace
 {
     /** Utility class for managing workflow context in a thread-safe manner */
-    class ToVariantMapWorkflowContext final : public WorkflowContextBase
+    class ToVariantMapWorkflowContext final : public workflow::WorkflowContextBase
     {
     public:
 

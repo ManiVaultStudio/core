@@ -5,13 +5,10 @@
 #include "DataHierarchyItem.h"
 #include "Set.h"
 #include "Dataset.h"
-#include "Application.h"
 
 #include "util/Serialization.h"
 
 #include <QMenu>
-
-#include <stdexcept>
 
 #ifdef _DEBUG
     #define DATA_HIERARCHY_ITEM_VERBOSE
@@ -26,7 +23,7 @@ namespace mv
 namespace 
 {
     /** Utility class for managing workflow context in a thread-safe manner */
-    class ToVariantMapWorkflowContext final : public WorkflowContextBase
+    class ToVariantMapWorkflowContext final : public workflow::WorkflowContextBase
     {
     public:
 

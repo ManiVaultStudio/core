@@ -23,7 +23,6 @@
 #include <QMainWindow>
 #include <QPainter>
 #include <QStandardPaths>
-#include <QBuffer>
 #include <QOpenGLWidget>
 #include <QEventLoop>
 
@@ -39,6 +38,7 @@ using namespace mv;
 using namespace mv::plugin;
 using namespace mv::util;
 using namespace mv::gui;
+using namespace mv::workflow;
 
 namespace mv
 {

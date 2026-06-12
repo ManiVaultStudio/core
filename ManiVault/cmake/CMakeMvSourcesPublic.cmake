@@ -598,42 +598,6 @@ set(PUBLIC_UTIL_HEADERS
     src/util/CodecActionBinding.h
     src/util/DecodeExecutor.h
     src/util/SeverityLevel.h
-    src/util/WorkflowExecutionContext.h
-    src/util/WorkflowContextBase.h
-    src/util/WorkflowResultBase.h
-    src/util/WorkflowJobResult.h
-    src/util/WorkflowStageResult.h
-    src/util/WorkflowResult.h
-    src/util/WorkflowMessage.h
-    src/util/WorkflowReportNode.h
-    src/util/WorkflowProgressNode.h
-    src/util/WorkflowExecutionNotifier.h
-    src/util/WorkflowExecutionState.h
-    src/util/WorkflowResultFuture.h
-    src/util/WorkflowGuiThreadDispatcher.h
-    src/util/DecodeRequestState.h
-    src/util/WorkflowPlan.h
-    src/util/AbstractWorkflowPlanExecutor.h
-    src/util/OperationContext.h
-    src/util/OperationContextScope.h
-    src/util/WorkflowExecutionOptions.h
-    src/util/WorkflowMetric.h
-    src/util/WorkflowExecutionMetrics.h
-    src/util/WorkflowResultRegistry.h
-    src/util/WorkflowResultDialog.h
-    src/util/WorkflowTraceEvent.h
-    src/util/WorkflowConsoleFormatter.h
-    src/util/WorkflowExecutionLifecycleScope.h
-    src/util/WorkflowStageSummary.h
-    src/util/AbstractWorkflowTraceSink.h
-    src/util/WorkflowConsoleTraceSink.h
-    src/util/WorkflowChromeTraceSink.h
-    src/util/WorkflowExecutionNodeType.h
-    src/util/WorkflowConsoleDashboard.h
-    src/util/WorkflowConsoleDashboardScope.h
-    src/util/WorkflowRuntimeScoped.h
-    src/util/VariantMapWorkflowContext.h
-    src/util/WorkflowHandle.h
 )
 
 if(APPLE)
@@ -703,42 +667,6 @@ set(PUBLIC_UTIL_SOURCES
     src/util/CodecActionBinding.cpp
     src/util/DecodeExecutor.cpp
     src/util/SeverityLevel.cpp
-    src/util/WorkflowContextBase.cpp
-    src/util/WorkflowResultBase.cpp
-    src/util/WorkflowJobResult.cpp
-    src/util/WorkflowStageResult.cpp
-    src/util/WorkflowResult.cpp
-    src/util/WorkflowExecutionContext.cpp
-    src/util/WorkflowMessage.cpp
-    src/util/WorkflowReportNode.cpp
-    src/util/WorkflowProgressNode.cpp
-    src/util/WorkflowExecutionNotifier.cpp
-    src/util/WorkflowExecutionState.cpp
-    src/util/WorkflowResultFuture.cpp
-    src/util/DecodeRequestState.cpp
-    src/util/WorkflowPlan.cpp
-    src/util/WorkflowGuiThreadDispatcher.cpp
-    src/util/AbstractWorkflowPlanExecutor.cpp
-    src/util/OperationContext.cpp
-    src/util/OperationContextScope.cpp
-    src/util/WorkflowExecutionOptions.cpp
-    src/util/WorkflowMetric.cpp
-    src/util/WorkflowExecutionMetrics.cpp
-    src/util/WorkflowResultRegistry.cpp
-    src/util/WorkflowResultDialog.cpp
-    src/util/WorkflowTraceEvent.cpp
-    src/util/WorkflowConsoleFormatter.cpp
-    src/util/WorkflowExecutionLifecycleScope.cpp
-    src/util/WorkflowStageSummary.cpp
-    src/util/AbstractWorkflowTraceSink.cpp
-    src/util/WorkflowConsoleTraceSink.cpp
-    src/util/WorkflowChromeTraceSink.cpp
-    src/util/WorkflowExecutionNodeType.cpp
-    src/util/WorkflowConsoleDashboard.cpp
-    src/util/WorkflowConsoleDashboardScope.cpp
-    src/util/WorkflowRuntimeScoped.cpp
-    src/util/VariantMapWorkflowContext.cpp
-    src/util/WorkflowHandle.cpp
 )
 
 if(APPLE)
@@ -751,6 +679,85 @@ endif()
 set(PUBLIC_UTIL_FILES
     ${PUBLIC_UTIL_HEADERS}    
     ${PUBLIC_UTIL_SOURCES}
+)
+
+set(PUBLIC_WORKFLOW_HEADERS
+    src/workflow/AbstractWorkflowPlanExecutor.h
+    src/workflow/AbstractWorkflowTraceSink.h
+    src/workflow/WorkflowExecutionContext.h
+    src/workflow/WorkflowContextBase.h
+    src/workflow/WorkflowResultBase.h
+    src/workflow/WorkflowJobResult.h
+    src/workflow/WorkflowStageResult.h
+    src/workflow/WorkflowResult.h
+    src/workflow/WorkflowMessage.h
+    src/workflow/WorkflowReportNode.h
+    src/workflow/WorkflowProgressNode.h
+    src/workflow/WorkflowExecutionNotifier.h
+    src/workflow/WorkflowExecutionState.h
+    src/workflow/WorkflowResultFuture.h
+    src/workflow/WorkflowGuiThreadDispatcher.h
+    src/workflow/WorkflowPlan.h
+    src/workflow/WorkflowExecutionOptions.h
+    src/workflow/WorkflowMetric.h
+    src/workflow/WorkflowExecutionMetrics.h
+    src/workflow/WorkflowResultRegistry.h
+    src/workflow/WorkflowResultDialog.h
+    src/workflow/WorkflowTraceEvent.h
+    src/workflow/WorkflowConsoleFormatter.h
+    src/workflow/WorkflowExecutionLifecycleScope.h
+    src/workflow/WorkflowStageSummary.h
+    src/workflow/WorkflowConsoleTraceSink.h
+    src/workflow/WorkflowChromeTraceSink.h
+    src/workflow/WorkflowExecutionNodeType.h
+    src/workflow/WorkflowConsoleDashboard.h
+    src/workflow/WorkflowConsoleDashboardScope.h
+    src/workflow/WorkflowRuntimeScoped.h
+    src/workflow/WorkflowContextVariantMap.h
+    src/workflow/WorkflowHandle.h
+    src/workflow/WorkflowContextVariantMap.h
+)
+
+set(PUBLIC_WORKFLOW_SOURCES
+    src/workflow/AbstractWorkflowPlanExecutor.cpp    
+    src/workflow/AbstractWorkflowTraceSink.cpp
+    src/workflow/WorkflowContextBase.cpp
+    src/workflow/WorkflowResultBase.cpp
+    src/workflow/WorkflowJobResult.cpp
+    src/workflow/WorkflowStageResult.cpp
+    src/workflow/WorkflowResult.cpp
+    src/workflow/WorkflowExecutionContext.cpp
+    src/workflow/WorkflowMessage.cpp
+    src/workflow/WorkflowReportNode.cpp
+    src/workflow/WorkflowProgressNode.cpp
+    src/workflow/WorkflowExecutionNotifier.cpp
+    src/workflow/WorkflowExecutionState.cpp
+    src/workflow/WorkflowResultFuture.cpp
+    src/workflow/WorkflowPlan.cpp
+    src/workflow/WorkflowGuiThreadDispatcher.cpp
+    src/workflow/WorkflowExecutionOptions.cpp
+    src/workflow/WorkflowMetric.cpp
+    src/workflow/WorkflowExecutionMetrics.cpp
+    src/workflow/WorkflowResultRegistry.cpp
+    src/workflow/WorkflowResultDialog.cpp
+    src/workflow/WorkflowTraceEvent.cpp
+    src/workflow/WorkflowConsoleFormatter.cpp
+    src/workflow/WorkflowExecutionLifecycleScope.cpp
+    src/workflow/WorkflowStageSummary.cpp
+    src/workflow/WorkflowConsoleTraceSink.cpp
+    src/workflow/WorkflowChromeTraceSink.cpp
+    src/workflow/WorkflowExecutionNodeType.cpp
+    src/workflow/WorkflowConsoleDashboard.cpp
+    src/workflow/WorkflowConsoleDashboardScope.cpp
+    src/workflow/WorkflowRuntimeScoped.cpp
+    src/workflow/WorkflowContextVariantMap.cpp
+    src/workflow/WorkflowHandle.cpp
+    src/workflow/WorkflowContextVariantMap.cpp
+)
+
+set(PUBLIC_WORKFLOW_FILES
+    ${PUBLIC_WORKFLOW_HEADERS}
+    ${PUBLIC_WORKFLOW_SOURCES}
 )
 
 set(PUBLIC_HARDWARE_SPEC_UTIL_HEADERS
@@ -1353,6 +1360,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_RENDERERS_HEADERS}
     ${PUBLIC_GRAPHICS_HEADERS}
     ${PUBLIC_UTIL_HEADERS}
+    ${PUBLIC_WORKFLOW_HEADERS}
     ${PUBLIC_HARDWARE_SPEC_UTIL_HEADERS}
     ${PUBLIC_APPLICATION_HEADERS}
     ${PUBLIC_PROJECT_HEADERS}
@@ -1408,6 +1416,7 @@ set(PUBLIC_SOURCES
     ${PUBLIC_RENDERERS_SOURCES}
     ${PUBLIC_GRAPHICS_SOURCES}
     ${PUBLIC_UTIL_SOURCES}
+    ${PUBLIC_WORKFLOW_SOURCES}
     ${PUBLIC_HARDWARE_SPEC_UTIL_SOURCES}
     ${PUBLIC_APPLICATION_SOURCES}
     ${PUBLIC_PROJECT_SOURCES}
@@ -1477,6 +1486,7 @@ source_group(Renderers FILES ${PUBLIC_RENDERERS_FILES})
 source_group(Graphics FILES ${PUBLIC_GRAPHICS_FILES})
 source_group(Util FILES ${PUBLIC_UTIL_FILES})
 source_group(Util\\HardwareSpec FILES ${PUBLIC_HARDWARE_SPEC_UTIL_FILES})
+source_group(Workflow FILES ${PUBLIC_WORKFLOW_FILES})
 source_group(Application FILES ${PUBLIC_APPLICATION_FILES} ${PUBLIC_GLOBALS_HEADERS} ${PUBLIC_VERSION_HEADERS})
 source_group(Project FILES ${PUBLIC_PROJECT_FILES})
 source_group(Workspace FILES ${PUBLIC_WORKSPACE_FILES})

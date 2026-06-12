@@ -7,7 +7,8 @@
 
 #include <CoreInterface.h>
 
-#include <util/WorkflowPlan.h>
+#include <workflow/WorkflowPlan.h>
+
 #include <util/Serialization.h>
 
 #ifdef _DEBUG
@@ -16,8 +17,9 @@
 
 using namespace mv;
 using namespace mv::util;
+using namespace mv::workflow;
 
-UniqueWorkflowPlan DimensionNamesSerializer::fromVariantMapWorkflow(Points* points, const QVariantMap& variantMap, mv::util::SharedWorkflowExecutionContext parentContext /*= nullptr*/)
+UniqueWorkflowPlan DimensionNamesSerializer::fromVariantMapWorkflow(Points* points, const QVariantMap& variantMap, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
 {
 #ifdef DIMENSIONS_SERIALIZER_VERBOSE
     qDebug() << "Deserializing dimensions: " << pointsMap.keys();
@@ -71,7 +73,7 @@ UniqueWorkflowPlan DimensionNamesSerializer::fromVariantMapWorkflow(Points* poin
     return plan;
 }
 
-mv::util::UniqueWorkflowPlan DimensionNamesSerializer::toVariantMapWorkflow(const std::vector<QString>& dimensionNames)
+UniqueWorkflowPlan DimensionNamesSerializer::toVariantMapWorkflow(const std::vector<QString>& dimensionNames)
 {
 #ifdef DIMENSIONS_SERIALIZER_VERBOSE
     qDebug() << "Serializing dimensions: " << dimensionNames;

@@ -7,13 +7,12 @@
 #include <QFontDatabase>
 #include <QToolTip>
 
-using namespace mv;
-
 #ifdef _DEBUG
     #define WORKFLOW_MESSAGES_MODEL_VERBOSE
 #endif
 
-using namespace mv::util;
+using namespace mv;
+using namespace mv::workflow;
 
 namespace mv {
 

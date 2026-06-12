@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <util/WorkflowPlan.h>
+#include <workflow/WorkflowPlan.h>
 
-mv::util::UniqueWorkflowPlan createProjectPublishWorkflowPlan(const QString& filePath);
+mv::workflow::UniqueWorkflowPlan createProjectPublishWorkflowPlan(const QString& filePath);
     

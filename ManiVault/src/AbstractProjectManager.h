@@ -16,9 +16,7 @@
 #include "models/ProjectsTreeModel.h"
 #include "models/ProjectsModelProject.h"
 
-#include "util/Exception.h"
-#include "util/WorkflowPlan.h"
-#include "util/WorkflowExecutionOptions.h"
+#include "workflow/WorkflowPlan.h"
 
 #include <QObject>
 #include <QMenu>
@@ -26,7 +24,6 @@
 #include <QFuture>
 
 #include "Task.h"
-#include "ModalTask.h"
 #include "exception/ManiVaultException.h"
 
 namespace mv {

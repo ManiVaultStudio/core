@@ -13,9 +13,9 @@
 #include <cstring>
 #include <limits>
 #include <stdexcept>
-#include <numeric>
 
 using namespace mv::util;
+using namespace mv::workflow;
 
 namespace
 {

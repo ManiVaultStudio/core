@@ -11,6 +11,7 @@
 using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
+using namespace mv::workflow;
 
 #ifdef _DEBUG
 	//#define PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE

@@ -18,15 +18,11 @@
 #include <models/HardwareSpecTreeModel.h>
 
 #include <util/Exception.h>
-#include <util/Serialization.h>
 #include <util/StandardPaths.h>
-
-#include <ModalTask.h>
 
 #include <widgets/FileDialog.h>
 
 #include <QGridLayout>
-#include <QEventLoop>
 #include <QHeaderView>
 #include <QFuture>
 #include <QFutureWatcher>
@@ -43,6 +39,7 @@
 
 using namespace mv::util;
 using namespace mv::gui;
+using namespace mv::workflow;
 
 namespace mv
 {

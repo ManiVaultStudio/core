@@ -4,9 +4,9 @@
 
 #include "Serialization.h"
 #include "CoreInterface.h"
-#include "Application.h"
 #include "CodecRegistry.h"
-#include "WorkflowRuntimeScoped.h"
+
+#include "workflow/WorkflowRuntimeScoped.h"
 
 #include "Exception/SerializationException.h"
 
@@ -16,6 +16,8 @@
 
 #include <math.h>
 #include <limits>
+
+using namespace mv::workflow;
 
 namespace mv::util {
 

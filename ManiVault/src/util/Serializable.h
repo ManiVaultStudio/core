@@ -5,7 +5,8 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
-#include "WorkflowPlan.h"
+
+#include "workflow/WorkflowPlan.h"
 
 #include <QString>
 #include <QJsonDocument>
@@ -14,11 +15,14 @@
 namespace mv
 {
     class Task;
+
+	namespace workflow
+    {
+        class WorkflowExecutionContext;
+    }
 }
 
 namespace mv::util {
-
-class WorkflowExecutionContext;
 
 /**
  * Serializable base class.
@@ -208,7 +212,7 @@ public: // Reading
 	 * @param variantMap Serialized object state.
 	 * @param parentExecutionContext Optional parent workflow context.
 	 */
-    virtual void fromVariantMapScoped(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext);
+    virtual void fromVariantMapScoped(const QVariantMap& variantMap, const workflow::SharedWorkflowExecutionContext& parentExecutionContext);
 
     /**
 	 * Create a workflow that restores the object state.
@@ -229,7 +233,7 @@ public: // Reading
 	 * @param variantMap Serialized object state.
 	 * @return Workflow plan that restores the object state.
 	 */
-    virtual UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap);
+    virtual workflow::UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap);
 
 public: // Reading helpers
 
@@ -280,7 +284,7 @@ public: // Reading helpers
 	 * objects.
 	 * @param parentExecutionContext Optional parent workflow context.
 	 */
-    virtual void fromParentVariantMapScoped(const QVariantMap& parentVariantMap, const SharedWorkflowExecutionContext& parentExecutionContext = nullptr);
+    virtual void fromParentVariantMapScoped(const QVariantMap& parentVariantMap, const workflow::SharedWorkflowExecutionContext& parentExecutionContext = nullptr);
 
     /**
 	 * Restore the object state from a JSON document.
@@ -318,7 +322,7 @@ public: // Reading helpers
 	 * @param jsonDocument JSON document containing serialized object state.
 	 * @param parentExecutionContext Optional parent workflow context.
 	 */
-    void fromJsonDocumentScoped(const QJsonDocument& jsonDocument, const SharedWorkflowExecutionContext& parentExecutionContext = nullptr);
+    void fromJsonDocumentScoped(const QJsonDocument& jsonDocument, const workflow::SharedWorkflowExecutionContext& parentExecutionContext = nullptr);
 
     /**
 	 * Restore the object state from a JSON file.
@@ -374,7 +378,7 @@ public: // Reading helpers
 	 * @throws std::exception Any exception propagated by the loading
 	 * workflow execution.
 	 */
-    void fromJsonFileScoped(const QString& filePath = "", const SharedWorkflowExecutionContext& parentExecutionContext = nullptr);
+    void fromJsonFileScoped(const QString& filePath = "", const workflow::SharedWorkflowExecutionContext& parentExecutionContext = nullptr);
 
 public: // Writing
 
@@ -420,7 +424,7 @@ public: // Writing
 	 * @param parentExecutionContext Optional parent workflow context.
 	 * @return Serialized object state.
 	 */
-    virtual QVariantMap toVariantMapScoped(const SharedWorkflowExecutionContext& parentExecutionContext) const;
+    virtual QVariantMap toVariantMapScoped(const workflow::SharedWorkflowExecutionContext& parentExecutionContext) const;
 
     /**
 	 * Create a workflow that serializes the object state to a variant map.
@@ -447,7 +451,7 @@ public: // Writing
 	 *
 	 * @return Workflow plan that serializes the object state when executed.
 	 */
-    virtual UniqueWorkflowPlan toVariantMapWorkflow() const;
+    virtual workflow::UniqueWorkflowPlan toVariantMapWorkflow() const;
 
 public: // Writing helpers
 
@@ -536,7 +540,7 @@ public: // Writing helpers
 	 * @throws std::runtime_error If the parent variant map already contains
 	 * an entry with the same serialization name.
 	 */
-    void insertIntoVariantMapScoped(QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext = nullptr) const;
+    void insertIntoVariantMapScoped(QVariantMap& variantMap, const workflow::SharedWorkflowExecutionContext& parentExecutionContext = nullptr) const;
     
     // TODO
     QJsonDocument toJsonDocument() const;
@@ -556,7 +560,7 @@ public: // Writing helpers
     void toJsonFile(const QString& filePath = "") const;
 
     // TODO
-    UniqueWorkflowPlan toJsonFileWorkflow(const QString& filePath = "") const;
+    workflow::UniqueWorkflowPlan toJsonFileWorkflow(const QString& filePath = "") const;
 
 public: // Identity and diagnostics
 

@@ -34,7 +34,7 @@ public:
      * @param propertiesMap The properties map to serialize.
      * @return A unique pointer to the workflow plan that performs the serialization.
      */
-    static UniqueWorkflowPlan toVariantMapWorkflow(const QVariantMap& propertiesMap);
+    static workflow::UniqueWorkflowPlan toVariantMapWorkflow(const QVariantMap& propertiesMap);
 
     /**
      * Deserializes the given properties map into a workflow plan.
@@ -44,7 +44,7 @@ public:
      * @param parentContext The parent workflow execution context.
      * @return A unique pointer to the workflow plan that performs the deserialization.
      */
-    static UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& propertiesMap, QVariantMap& destinationPropertiesMap, SharedWorkflowExecutionContext parentContext = nullptr);
+    static workflow::UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& propertiesMap, QVariantMap& destinationPropertiesMap, workflow::SharedWorkflowExecutionContext parentContext = nullptr);
 };
 
 }

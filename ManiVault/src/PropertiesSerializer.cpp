@@ -9,6 +9,7 @@
 #endif
 
 using namespace mv::util;
+using namespace mv::workflow;
 
 namespace mv
 {

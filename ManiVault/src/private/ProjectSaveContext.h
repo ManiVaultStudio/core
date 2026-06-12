@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <util/WorkflowContextBase.h>
+#include <workflow/WorkflowContextBase.h>
 
 #include "Application.h"
 #include "Archiver.h"
@@ -20,7 +20,7 @@ using UniqueTemporaryDir = std::unique_ptr<QTemporaryDir>;
  *
  * @author Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
-class ProjectSaveContext : public WorkflowContextBase
+class ProjectSaveContext : public mv::workflow::WorkflowContextBase
 {
 public:
 

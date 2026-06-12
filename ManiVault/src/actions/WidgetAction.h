@@ -14,7 +14,7 @@
 #include <QWidgetAction>
 #include <QPointer>
 
-#include "util/WorkflowPlan.h"
+#include "workflow/WorkflowPlan.h"
 
 class QLabel;
 class QMenu;
