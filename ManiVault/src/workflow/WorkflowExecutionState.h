@@ -7,6 +7,8 @@
 #include "ManiVaultGlobals.h"
 #include "WorkflowExecutionMetrics.h"
 #include "WorkflowExecutionOptions.h"
+#include "WorkflowReportNode.h"
+#include "WorkflowProgressNode.h"
 
 namespace mv::workflow
 {

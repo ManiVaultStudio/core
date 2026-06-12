@@ -6,6 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "WorkflowResult.h"
+
 #include <QObject>
 #include <QHash>
 #include <QUuid>

@@ -6,6 +6,7 @@
 #include "DataManager.h"
 
 #include <util/Exception.h>
+#include <util/Serialization.h>
 
 #include <QtConcurrent>
 

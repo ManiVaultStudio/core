@@ -6,6 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "WorkflowResultBase.h"
+
 #include <QFuture>
 
 namespace mv::workflow

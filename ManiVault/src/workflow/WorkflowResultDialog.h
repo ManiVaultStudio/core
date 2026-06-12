@@ -7,6 +7,8 @@
 #include "ManiVaultGlobals.h"
 #include "WorkflowResult.h"
 
+#include "util/SeverityLevel.h"
+
 #include "models/WorkflowMessagesListModel.h"
 #include "models/WorkflowMessagesFilterModel.h"
 
@@ -25,7 +27,7 @@ class CORE_EXPORT WorkflowResultDialog : public QDialog
 
 public:
 
-    WorkflowResultDialog(const SharedWorkflowResult& workflowResult, SeverityLevels levels = allSeverityLevels, QWidget* parent = nullptr);
+    WorkflowResultDialog(const SharedWorkflowResult& workflowResult, util::SeverityLevels levels = util::allSeverityLevels, QWidget* parent = nullptr);
 
     QSize sizeHint() const override;
 

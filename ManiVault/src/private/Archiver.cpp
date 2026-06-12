@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QThread>
+#include <QMutexLocker>
 
 #include <quazip/JlCompress.h>
 

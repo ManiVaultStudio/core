@@ -4,6 +4,8 @@
 
 #include "LearningCenterVideo.h"
 
+#include "exception/ManiVaultException.h"
+
 #include <QMovie>
 #include <QFutureWatcher>
 

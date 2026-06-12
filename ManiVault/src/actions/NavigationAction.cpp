@@ -3,7 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "NavigationAction.h"
-
+#include "CoreInterface.h"
 #include "GroupSectionTreeItem.h"
 
 #include "util/StyledIcon.h"

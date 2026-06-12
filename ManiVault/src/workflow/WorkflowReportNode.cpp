@@ -4,6 +4,8 @@
 
 #include "WorkflowReportNode.h"
 
+using namespace mv::util;
+
 namespace mv::workflow
 {
 

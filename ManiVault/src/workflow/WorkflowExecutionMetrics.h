@@ -9,6 +9,8 @@
 
 #include <QString>
 
+#include <mutex>
+
 namespace mv::workflow
 {
 

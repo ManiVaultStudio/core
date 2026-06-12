@@ -8,6 +8,8 @@
 #include "AbstractWorkflowTraceSink.h"
 
 #include <QString>
+#include <QFile>
+#include <QMutex>
 
 namespace mv::workflow
 {

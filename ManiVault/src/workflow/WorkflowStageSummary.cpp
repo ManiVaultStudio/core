@@ -4,6 +4,8 @@
 
 #include "WorkflowStageSummary.h"
 
+#include <QVariantMap>
+
 namespace mv::workflow
 {
 

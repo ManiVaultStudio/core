@@ -6,6 +6,8 @@
 
 #include "Set.h"
 
+#include "util/Serialization.h"
+
 using namespace mv::util;
 
 namespace mv

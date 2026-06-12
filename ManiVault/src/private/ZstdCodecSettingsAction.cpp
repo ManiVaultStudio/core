@@ -4,6 +4,8 @@
 
 #include "ZstdCodecSettingsAction.h"
 
+#include "util/BlobCodec.h"
+
 #ifdef _DEBUG
 	#define ZSTD_CODEC_SETTINGS_ACTION_VERBOSE
 #endif

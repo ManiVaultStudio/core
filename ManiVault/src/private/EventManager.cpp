@@ -5,6 +5,7 @@
 #include "EventManager.h"
 
 #include <util/Exception.h>
+#include <util/Serialization.h>
 
 #include <event/Event.h>
 

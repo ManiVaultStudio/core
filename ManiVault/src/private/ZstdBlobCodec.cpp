@@ -9,9 +9,15 @@
 
 #include <zstd.h>
 
+#include <CoreInterface.h>
+
+#include <exception/ManiVaultException.h>
+
 #ifdef _DEBUG
 	#define ZSTD_CODEC_VERBOSE
 #endif
+
+using namespace mv::util;
 
 namespace {
 

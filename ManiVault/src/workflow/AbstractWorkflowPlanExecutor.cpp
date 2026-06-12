@@ -3,10 +3,13 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #include "AbstractWorkflowPlanExecutor.h"
+#include "CoreInterface.h"
 #include "WorkflowResultDialog.h"
 #include "WorkflowResultRegistry.h"
 
 #include <QUrlQuery>
+
+using namespace mv::util;
 
 namespace mv::workflow
 {

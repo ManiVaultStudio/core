@@ -3,7 +3,10 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "WorkflowMetric.h"
+
 #include "util/Miscellaneous.h"
+
+using namespace mv::util;
 
 namespace mv::workflow
 {

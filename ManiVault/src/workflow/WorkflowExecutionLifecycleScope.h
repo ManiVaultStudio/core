@@ -5,6 +5,9 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+#include "WorkflowExecutionContext.h"
+
+#include "util/SeverityLevel.h"
 
 namespace mv::workflow
 {
@@ -75,7 +78,7 @@ public:
      * @param message Human-readable failure message to include in the lifecycle report.
      * @param details Additional details to include in the lifecycle report.
      */
-    void fail(SeverityLevel severity, const QString& message, QVariantMap details = {});
+    void fail(util::SeverityLevel severity, const QString& message, QVariantMap details = {});
 
     /**
      * @brief Reports the context as successfully finished and completes the lifecycle scope.

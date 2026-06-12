@@ -5,9 +5,7 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
-
-#include <QString>
-#include <QDateTime>
+#include "Task.h"
 
 namespace mv::workflow
 {
@@ -27,4 +25,4 @@ signals:
     void statusChanged();
 };
 
-} // namespace mv::util
+}

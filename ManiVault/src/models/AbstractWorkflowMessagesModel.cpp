@@ -4,6 +4,9 @@
 
 #include "AbstractWorkflowMessagesModel.h"
 
+#include "util/Serialization.h"
+#include "util/Miscellaneous.h"
+
 #include <QFontDatabase>
 #include <QToolTip>
 
@@ -12,6 +15,7 @@
 #endif
 
 using namespace mv;
+using namespace mv::util;
 using namespace mv::workflow;
 
 namespace mv {

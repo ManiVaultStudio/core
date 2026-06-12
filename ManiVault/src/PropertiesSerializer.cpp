@@ -4,6 +4,10 @@
 
 #include "PropertiesSerializer.h"
 
+#include "util/Serialization.h"
+
+#include "workflow/WorkflowExecutionContext.h"
+
 #ifdef _DEBUG
 	#define PROPERTIES_SERIALIZER_VERBOSE
 #endif

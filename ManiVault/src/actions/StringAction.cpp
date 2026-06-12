@@ -3,8 +3,9 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "StringAction.h"
-
 #include "ColorAction.h"
+
+#include "util/Serialization.h"
 
 #include <QHBoxLayout>
 #include <QCompleter>

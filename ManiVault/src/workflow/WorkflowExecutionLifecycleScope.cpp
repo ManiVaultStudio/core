@@ -4,6 +4,8 @@
 
 #include "WorkflowExecutionLifecycleScope.h"
 
+using namespace mv::util;
+
 namespace mv::workflow
 {
 

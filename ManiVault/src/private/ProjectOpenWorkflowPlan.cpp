@@ -6,7 +6,8 @@
 #include "ProjectOpenContext.h"
 #include "ProjectManager.h"
 #include "Archiver.h"
-#include "Exception/SerializationException.h"
+
+#include <CoreInterface.h>
 
 using namespace mv;
 using namespace mv::gui;

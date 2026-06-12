@@ -5,6 +5,7 @@
 #include "WorkflowExecutionState.h"
 
 #include <QMutexLocker>
+#include <QThread>
 
 namespace mv::workflow
 {

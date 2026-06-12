@@ -6,6 +6,10 @@
 
 #include "actions/CodecSettingsAction.h"
 
+#include "exception/ManiVaultException.h"
+
+#include <QFile>
+
 #include <stdexcept>
 
 #ifdef _DEBUG

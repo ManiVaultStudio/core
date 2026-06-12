@@ -6,7 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 
-#include <QString>
+#include <QVariantMap>
 #include <QUuid>
 
 namespace mv::workflow

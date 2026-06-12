@@ -7,13 +7,18 @@
 
 #include "Archiver.h"
 
+#include <CoreInterface.h>
+
 #ifdef _DEBUG
 	#define PASSTHROUGH_CODEC_VERBOSE
 #endif
 
 //#define PASSTHROUGH_CODEC_VERBOSE
 
-PassthroughBlobCodec::PassthroughBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction) :
+using namespace mv;
+using namespace mv::util;
+
+PassthroughBlobCodec::PassthroughBlobCodec(QObject* parent, gui::CodecSettingsAction* codecSettingsAction) :
     BlobCodec(parent, codecSettingsAction)
 {
 #ifdef PASSTHROUGH_CODEC_VERBOSE
@@ -21,7 +26,7 @@ PassthroughBlobCodec::PassthroughBlobCodec(QObject* parent, mv::gui::CodecSettin
 #endif
 }
 
-mv::util::BlobCodec::Type PassthroughBlobCodec::getType() const
+BlobCodec::Type PassthroughBlobCodec::getType() const
 {
     return Type::None;
 }
@@ -58,7 +63,7 @@ QByteArray PassthroughBlobCodec::decodeFromFile(const QString& filePath, qsizety
     qDebug() << __FUNCTION__ << filePath;
 #endif
 
-    const auto encodedData = Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
+    const auto encodedData = mv::util::Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
 
     return encodedData;
 }
@@ -70,15 +75,14 @@ void PassthroughBlobCodec::decodeFromFileTo(const QString& filePath, char* desti
 #endif
 
     if (destination == nullptr)
-        throw mv::ManiVaultException(
-            SeverityLevel::Error,
-            "Failed to decode from file to buffer",
-            "Destination buffer is null",
-            __FUNCTION__,
-            {
-                { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination), 16) },
-                { "DestinationSize", QString::number(destinationSize) }
-            }
+        throw mv::ManiVaultException(mv::util::SeverityLevel::Error,
+                                     "Failed to decode from file to buffer",
+                                     "Destination buffer is null",
+                                     __FUNCTION__,
+                                     {
+	                                     { "DestinationPointer", QString::number(reinterpret_cast<std::uintptr_t>(destination), 16) },
+	                                     { "DestinationSize", QString::number(destinationSize) }
+                                     }
         );
 
     const auto encodedData = mv::util::Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);

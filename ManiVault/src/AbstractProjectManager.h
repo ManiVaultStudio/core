@@ -16,7 +16,7 @@
 #include "models/ProjectsTreeModel.h"
 #include "models/ProjectsModelProject.h"
 
-#include "workflow/WorkflowPlan.h"
+#include "util/SeverityLevel.h"
 
 #include <QObject>
 #include <QMenu>
@@ -85,7 +85,7 @@ public:
     public:
 
         explicit ProjectDownloadException(const QString& message) :
-	        ManiVaultException(SeverityLevel::Error, message, "ProjectDownload", "Project", { {"icon", util::StyledIcon("download")} })
+	        ManiVaultException(util::SeverityLevel::Error, message, "ProjectDownload", "Project", { {"icon", util::StyledIcon("download")} })
         {
         }
     };

@@ -4,8 +4,12 @@
 
 #include "WorkflowResult.h"
 
+#include "util/SeverityLevel.h"
+
 #include <optional>
 #include <ranges>
+
+using namespace mv::util;
 
 namespace mv::workflow
 {

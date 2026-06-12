@@ -8,6 +8,10 @@
 #include <QStringList>
 #include <QtMath>
 
+#include "util/Miscellaneous.h"
+
+using namespace mv::util;
+
 namespace mv::workflow
 {
 

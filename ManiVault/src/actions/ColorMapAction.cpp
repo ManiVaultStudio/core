@@ -6,6 +6,8 @@
 #include "Application.h"
 #include "CoreInterface.h"
 
+#include "util/Serialization.h"
+
 #include <QHBoxLayout>
 #include <QPaintEvent>
 #include <QPainter>

@@ -7,13 +7,15 @@
 #include "ManiVaultGlobals.h"
 #include "WorkflowProgressNode.h"
 
+#include "util/SeverityLevel.h"
+
 namespace mv::workflow
 {
 
 class CORE_EXPORT WorkflowConsoleFormatter
 {
 public:
-    static QString [[nodiscard]] format(SeverityLevel severity, const QString& text, const QString& location, const QVariantMap& details, std::uint32_t maxDepth = std::numeric_limits<std::uint32_t>::max());
+    static QString [[nodiscard]] format(util::SeverityLevel severity, const QString& text, const QString& location, const QVariantMap& details, std::uint32_t maxDepth = std::numeric_limits<std::uint32_t>::max());
     static QString [[nodiscard]] formatProgressTree(const WorkflowProgressNode::Snapshot& root);
 
 private:

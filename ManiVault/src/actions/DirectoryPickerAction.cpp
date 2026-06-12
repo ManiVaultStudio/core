@@ -7,6 +7,8 @@
 
 #include "widgets/FileDialog.h"
 
+#include "util/Serialization.h"
+
 #include <QDir>
 #include <QHBoxLayout>
 

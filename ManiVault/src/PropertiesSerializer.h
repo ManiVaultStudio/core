@@ -4,6 +4,10 @@
 
 #pragma once
 
+#include "workflow/WorkflowPlan.h"
+
+#include <QObject>
+
 namespace mv
 {
 

@@ -4,7 +4,11 @@
 
 #pragma once
 
+#include <Application.h>
+
 #include <workflow/WorkflowContextBase.h>
+
+#include <QTemporaryDir>
 
 using UniqueTemporaryDir = std::unique_ptr<QTemporaryDir>;
 

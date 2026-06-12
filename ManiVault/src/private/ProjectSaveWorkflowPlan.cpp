@@ -7,6 +7,8 @@
 #include "ProjectManager.h"
 #include "Archiver.h"
 
+#include <CoreInterface.h>
+
 using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;

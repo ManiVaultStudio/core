@@ -5,6 +5,10 @@
 #include "WorkflowExecutionContext.h"
 #include "WorkflowConsoleFormatter.h"
 
+#include "util/SeverityLevel.h"
+
+using namespace mv::util;
+
 namespace mv::workflow
 {
 

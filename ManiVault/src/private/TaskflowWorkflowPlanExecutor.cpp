@@ -5,12 +5,17 @@
 #include "TaskflowWorkflowPlanExecutor.h"
 #include "Taskflow.h"
 
+#include <CoreInterface.h>
+#include <Application.h>
+
 #include <Task.h>
 
 #include <workflow/WorkflowExecutionContext.h>
 #include <workflow/WorkflowConsoleDashboardScope.h>
 #include <workflow/WorkflowExecutionLifecycleScope.h>
 #include <workflow/WorkflowResultRegistry.h>
+
+#include <util/Miscellaneous.h>
 
 #include <QCoreApplication>
 #include <QEventLoop>

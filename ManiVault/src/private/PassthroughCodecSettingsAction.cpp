@@ -4,6 +4,8 @@
 
 #include "PassthroughCodecSettingsAction.h"
 
+#include "util/BlobCodec.h"
+
 #ifdef _DEBUG
 	#define PASSTHROUGH_CODEC_SETTINGS_VERBOSE
 #endif

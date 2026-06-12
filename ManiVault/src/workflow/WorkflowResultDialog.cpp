@@ -4,7 +4,11 @@
 
 #include "WorkflowResultDialog.h"
 
+#include "util/SeverityLevel.h"
+
 #include <QHeaderView>
+
+using namespace mv::util;
 
 namespace mv::workflow
 {

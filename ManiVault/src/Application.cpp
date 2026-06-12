@@ -8,6 +8,8 @@
 #include "ForegroundTask.h"
 #include "ManiVaultVersion.h"
 
+#include "ModalTask.h"
+
 #include "util/Exception.h"
 #include "util/Icon.h"
 #include "util/StandardPaths.h"

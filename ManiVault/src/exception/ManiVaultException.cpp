@@ -6,6 +6,8 @@
 
 #include <QDebug>
 
+using namespace mv::util;
+
 namespace mv {
 
 ManiVaultException::ManiVaultException(SeverityLevel severity, QString message, QString what, QString where, QVariantMap details) :

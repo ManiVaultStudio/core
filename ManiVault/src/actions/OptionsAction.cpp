@@ -6,6 +6,7 @@
 #include "ModelSelectionAction.h"
 
 #include "util/Miscellaneous.h"
+#include "util/Serialization.h"
 
 #include "widgets/FileDialog.h"
 
