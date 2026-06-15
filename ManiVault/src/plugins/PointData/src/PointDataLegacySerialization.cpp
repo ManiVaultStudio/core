@@ -43,7 +43,8 @@ void PointDataLegacySerializer::fromVariantMapPre150(PointData& pointData, const
         pointData.setElementTypeSpecifier(elementTypeIndex);
         pointData.resizeVector(numberOfElements);
 
-    	populateBytesFromBlobMap(rawData, (char*)pointData.getDataVoidPtr(), pointData.getRawDataSize(), executionContext);
+        if (numberOfPoints > 0 && numberOfDimensions > 0)
+    		populateBytesFromBlobMap(rawData, (char*)pointData.getDataVoidPtr(), pointData.getRawDataSize(), executionContext);
     }
     else
     {

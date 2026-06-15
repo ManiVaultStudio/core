@@ -61,6 +61,8 @@ public: // Serialization
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
+    workflow::UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap) override;
+
     /**
      * Save project to variant
      * @return Variant representation of the project

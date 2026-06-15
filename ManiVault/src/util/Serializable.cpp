@@ -292,7 +292,8 @@ void Serializable::fromParentVariantMap(const QVariantMap& parentVariantMap, boo
         throw std::runtime_error("Serialization name may not be empty");
 
     if (!parentVariantMap.contains(getSerializationName())) {
-        handleKeyNotFoundInVariantMap(*this, parentVariantMap, getSerializationName());
+        if (!ignoreLoadingErrors)
+			handleKeyNotFoundInVariantMap(*this, parentVariantMap, getSerializationName());
     }
     else {
         fromVariantMap(parentVariantMap[getSerializationName()].toMap());

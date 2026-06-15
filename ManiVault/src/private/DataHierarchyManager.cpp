@@ -367,8 +367,11 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
 
         datasetJobs.emplace_back(QString("Load %1").arg(datasetName), WorkflowPlan::NestedWorkflowFunction([datasetId, dataVariantMap, approximateDatasetSizes](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
             auto dataset = mv::data().getDataset(datasetId);
+
+            Q_ASSERT(dataset.isValid());
+
             return dataset->fromVariantMapWorkflow(dataVariantMap);
-        }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Automatic, approximateDatasetSizes[datasetId]);
+        }), WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Automatic, approximateDatasetSizes[datasetId]);
     }
 
     const auto cores        = std::max(1u, std::thread::hardware_concurrency());

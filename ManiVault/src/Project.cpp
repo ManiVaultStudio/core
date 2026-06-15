@@ -157,8 +157,7 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap
         return Serializable::fromVariantMapWorkflow(variantMap);
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
-    plan->addSequentialStage("Load", {
-        WorkflowPlan::Job("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+    plan->addSequentialStage("Configure", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
 		    if (variantMap.contains(_selectionGroupingAction.getSerializationName())) {
 		        _selectionGroupingAction.fromParentVariantMap(variantMap);
 		    }
@@ -169,8 +168,7 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap
 		    _overrideApplicationStatusBarAction.fromParentVariantMap(variantMap);
 		    _statusBarVisibleAction.fromParentVariantMap(variantMap);
 		    _statusBarOptionsAction.fromParentVariantMap(variantMap);
-        })
-    }, 1.0);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     WorkflowPlan::Jobs loadManagerJobs;
 

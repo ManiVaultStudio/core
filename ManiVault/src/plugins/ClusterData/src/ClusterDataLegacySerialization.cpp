@@ -29,7 +29,8 @@ void ClusterDataLegacySerializer::fromVariantMapPre150(ClusterData& clusterData,
     packedIndices.resize(dataMap["NumberOfIndices"].toInt());
 
     // Convert raw data to indices
-    populateBytesFromBlobMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), packedIndices.size() * sizeof(std::uint32_t), executionContext);
+    if (!packedIndices.empty())
+		populateBytesFromBlobMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), packedIndices.size() * sizeof(std::uint32_t), executionContext);
 
     if (dataMap.contains("ClustersRawData")) {
         QByteArray clustersByteArray;
