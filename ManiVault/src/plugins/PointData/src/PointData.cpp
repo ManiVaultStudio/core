@@ -156,13 +156,14 @@ void PointData::setValueAt(const std::size_t index, const float newValue)
 
 UniqueWorkflowPlan PointData::fromVariantMapWorkflow(const QVariantMap& variantMap)
 {
+    Plugin::fromVariantMap(variantMap);
+
     const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1(%2)").arg(getSerializationName()).arg(__FUNCTION__));
 
     if (appVersion < Version(1, 5, 0)) {
         plan->addSequentialStage("Load legacy point data (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
-            Plugin::fromVariantMap(variantMap);
             legacy::PointDataLegacySerializer::fromVariantMapPre150(*this, variantMap);
         });
 
@@ -170,8 +171,6 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(const QVariantMap& variantM
     }
 
     plan->addSequentialStage("Allocate storage", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
-        Plugin::fromVariantMap(variantMap);
-
         variantMapMustContain(variantMap, "Data");
         variantMapMustContain(variantMap, "NumberOfPoints");
         variantMapMustContain(variantMap, "NumberOfDimensions");
