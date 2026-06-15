@@ -677,7 +677,7 @@ if(NOT APPLE)
 
     if(${MV_USE_ERROR_LOGGING} AND NOT APPLE)
         # Install sentry artifacts
-        add_custom_command(TARGET ${MV_EXE}  POST_BUILD
+        add_custom_command(TARGET ${MV_EXE} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E echo "Installing: crashpad_handler executable"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:crashpad_handler> ${MV_INSTALL_DIR}/$<CONFIGURATION>/
         )
