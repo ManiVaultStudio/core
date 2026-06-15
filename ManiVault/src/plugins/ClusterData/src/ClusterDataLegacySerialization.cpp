@@ -3,18 +3,100 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ClusterDataLegacySerialization.h"
+#include "ClusterData.h"
+
+#include <util/Serialization.h>
+
+using namespace mv::util;
 
 namespace mv::legacy
 {
 
-void clusterDataFromVariantMapPre150(ClusterData& clusterData, const QVariantMap& variantMap)
+void ClusterDataLegacySerializer::fromVariantMapPre150(ClusterData& clusterData, const QVariantMap& variantMap)
 {
     qDebug() << "Deserializing ClusterData from legacy format (pre-1.5.0). This may result in loss of information if the format has changed significantly since then.";
+
+    const auto dataMap = variantMap["Data"].toMap();
+
+    variantMapMustContain(dataMap, "IndicesRawData");
+    variantMapMustContain(dataMap, "NumberOfIndices");
+
+    // Packed indices for all clusters
+    QVector<std::uint32_t> packedIndices;
+
+    packedIndices.resize(dataMap["NumberOfIndices"].toInt());
+
+    // Convert raw data to indices
+    populateBytesFromBlobMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), packedIndices.size() * sizeof(std::uint32_t));
+
+    if (dataMap.contains("ClustersRawData")) {
+        QByteArray clustersByteArray;
+
+        QDataStream clustersDataStream(&clustersByteArray, QIODevice::ReadOnly);
+
+        const auto clustersRawDataSize = dataMap["ClustersRawDataSize"].toInt();
+
+        clustersByteArray.resize(clustersRawDataSize);
+
+        populateBytesFromBlobMap(dataMap["ClustersRawData"].toMap(), (char*)clustersByteArray.data(), clustersByteArray.size());
+
+        QVariantList clusters;
+
+        clustersDataStream >> clusters;
+
+        clusterData._clusters.resize(clusters.count());
+
+        long clusterIndex = 0;
+
+        for (const auto& clusterVariant : clusters) {
+            const auto clusterMap = clusterVariant.toMap();
+
+            auto& cluster = clusterData._clusters[clusterIndex];
+
+            cluster.setName(clusterMap["Name"].toString());
+            cluster.setId(clusterMap["ID"].toString());
+            cluster.setColor(clusterMap["Color"].toString());
+
+            const auto globalIndicesOffset = clusterMap["GlobalIndicesOffset"].toInt();
+            const auto numberOfIndices = clusterMap["NumberOfIndices"].toInt();
+
+            cluster.getIndices() = std::vector<std::uint32_t>(packedIndices.begin() + globalIndicesOffset, packedIndices.begin() + globalIndicesOffset + numberOfIndices);
+
+            ++clusterIndex;
+        }
+    }
+
+    // For backwards compatibility
+    if (dataMap.contains("Clusters")) {
+        const auto clustersList = dataMap["Clusters"].toList();
+
+        clusterData._clusters.resize(clustersList.count());
+
+        for (const auto& clusterVariant : clustersList) {
+            const auto clusterMap = clusterVariant.toMap();
+            const auto clusterIndex = clustersList.indexOf(clusterMap);
+
+            auto& cluster = clusterData._clusters[clusterIndex];
+
+            cluster.setName(clusterMap["Name"].toString());
+            cluster.setId(clusterMap["ID"].toString());
+            cluster.setColor(clusterMap["Color"].toString());
+
+            const auto globalIndicesOffset = clusterMap["GlobalIndicesOffset"].toInt();
+            const auto numberOfIndices = clusterMap["NumberOfIndices"].toInt();
+
+            cluster.getIndices() = std::vector<std::uint32_t>(packedIndices.begin() + globalIndicesOffset, packedIndices.begin() + globalIndicesOffset + numberOfIndices);
+        }
+    }
 }
 
-void clustersFromVariantMapPre150(Clusters& clusters, const QVariantMap& variantMap)
+void ClustersLegacySerializer::fromVariantMapPre150(Clusters& clusters, const QVariantMap& variantMap)
 {
     qDebug() << "Deserializing Clusters from legacy format (pre-1.5.0). This may result in loss of information if the format has changed significantly since then.";
+
+    clusters.getRawData<ClusterData>()->fromVariantMap(variantMap);
+
+    events().notifyDatasetDataChanged(clusters);
 }
 
 }

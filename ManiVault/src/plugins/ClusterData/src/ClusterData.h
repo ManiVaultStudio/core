@@ -26,6 +26,15 @@ const mv::DataType ClusterType = mv::DataType(QString("Clusters"));
 
 class InfoAction;
 
+namespace mv
+{
+    namespace legacy
+    {
+        class ClusterDataLegacySerializer;
+        class ClustersLegacySerializer;
+    }
+}
+
 class CLUSTERDATA_EXPORT ClusterData : public mv::plugin::RawData
 {
 public:
@@ -121,6 +130,8 @@ public: // Serialization
 
 private:
     QVector<Cluster>    _clusters;      /** Clusters data */
+
+    friend class mv::legacy::ClusterDataLegacySerializer;
 };
 
 // =============================================================================
@@ -292,6 +303,8 @@ public: // Serialization
     std::vector<unsigned int>       indices;
     QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */
     EventListener                   _eventListener;     /** Listen to HDPS events */
+
+    friend class mv::legacy::ClustersLegacySerializer;
 };
 
 // =============================================================================

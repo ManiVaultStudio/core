@@ -112,13 +112,7 @@ void PassthroughBlobCodec::decodeFromFileTo(const QString& filePath, char* desti
         );
 
     try {
-        //QMutex mutex;
-
-        //QMutexLocker<QMutex> locker(&mutex);
-
-        //{
-            //memcpy(destination, encodedData.constData(), encodedData.size());
-        //}
+    	memcpy(destination, encodedData.constData(), encodedData.size());
     }
     catch (const std::exception& exception) {
 	    throw mv::ManiVaultException(

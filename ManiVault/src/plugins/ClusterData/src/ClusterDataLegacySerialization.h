@@ -12,18 +12,30 @@ class Clusters;
 namespace mv::legacy
 {
 
-/**
- * Deserializes cluster data from a variant map in the format used by ManiVault versions prior to 1.5.0.
- * @param clusterData The cluster data object to populate with the deserialized data
- * @param variantMap A QVariantMap containing the serialized cluster data in the legacy format
- */
-void clusterDataFromVariantMapPre150(ClusterData& clusterData, const QVariantMap& variantMap);
+/** Utility class for managing legacy serialization of cluster data */
+class ClusterDataLegacySerializer final
+{
+public:
 
-/**
- * Deserializes clusters from a variant map in the format used by ManiVault versions prior to 1.5.0.
- * @param clusters The clusters object to populate with the deserialized data
- * @param variantMap A QVariantMap containing the serialized clusters in the legacy format
- */
-void clustersFromVariantMapPre150(Clusters& clusters, const QVariantMap& variantMap);
+    /**
+     * Deserializes cluster data from a variant map in the format used by ManiVault versions prior to 1.5.0.
+     * @param clusterData The cluster data object to populate with the deserialized data
+     * @param variantMap A QVariantMap containing the serialized cluster data in the legacy format
+     */
+    static void fromVariantMapPre150(ClusterData& clusterData, const QVariantMap& variantMap);
+};
+
+/** Utility class for managing legacy serialization of clusters */
+class ClustersLegacySerializer final
+{
+public:
+
+	/**
+	 * Deserializes clusters from a variant map in the format used by ManiVault versions prior to 1.5.0.
+	 * @param clusters The clusters object to populate with the deserialized data
+	 * @param variantMap A QVariantMap containing the serialized clusters in the legacy format
+	 */
+    static void fromVariantMapPre150(Clusters& clusters, const QVariantMap& variantMap);
+};
 
 }

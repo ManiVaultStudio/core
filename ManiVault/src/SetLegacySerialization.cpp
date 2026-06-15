@@ -5,6 +5,7 @@
 #include "SetLegacySerialization.h"
 
 #include "Set.h"
+#include "RawData.h"
 
 #include "util/Serialization.h"
 
@@ -30,7 +31,7 @@ void SetLegacySerializer::fromVariantMapPre150(DatasetImpl& dataset, const QVari
     dataset.setLocked(variantMap["Locked"].toBool());
     dataset.setStorageType(static_cast<DatasetImpl::StorageType>(variantMap["StorageType"].toInt()));
 
-    assert(variantMap["DataType"].toString() == getDataType().getTypeString());
+    assert(variantMap["DataType"].toString() == dataset.getDataType().getTypeString());
 
     if (variantMap["Derived"].toBool())
     {
@@ -39,7 +40,7 @@ void SetLegacySerializer::fromVariantMapPre150(DatasetImpl& dataset, const QVari
         else
             dataset.setSourceDataset(dataset.getParent());
 
-        assert(_sourceDataset.isValid());
+        assert(dataset._sourceDataset.isValid());
     }
 
     // For backwards compatibility, check PluginVersion
@@ -50,8 +51,8 @@ void SetLegacySerializer::fromVariantMapPre150(DatasetImpl& dataset, const QVari
         else
             dataset.makeSubsetOf(dataset.getParent()->getFullDataset<mv::DatasetImpl>());
 
-        assert(variantMap["PluginKind"].toString() == dataset.getRawData()->getKind());
-        assert(_fullDataset.isValid());
+        assert(variantMap["PluginKind"].toString() == dataset.getRawData<mv::plugin::RawData>()->getKind());
+        assert(dataset._fullDataset.isValid());
     }
 
     if (variantMap.contains("GroupIndex") && variantMap["GroupIndex"].toInt() >= 0)

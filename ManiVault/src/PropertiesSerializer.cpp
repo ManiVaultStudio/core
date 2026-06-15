@@ -252,7 +252,7 @@ UniqueWorkflowPlan PropertiesSerializer::fromVariantMapWorkflow(const QVariantMa
 UniqueWorkflowPlan PropertiesSerializer::toVariantMapWorkflow(const QVariantMap& propertiesMap)
 {
 #ifdef PROPERTIES_SERIALIZER_VERBOSE
-    qDebug() << "Serializing properties: " << map.keys();
+    qDebug() << "Serializing properties: " << propertiesMap.keys();
 #endif
 
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);

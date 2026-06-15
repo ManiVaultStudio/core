@@ -19,6 +19,7 @@
 
 #include <set>
 
+#include "ClusterDataLegacySerialization.h"
 #include "ClustersSerializer.h"
 
 Q_PLUGIN_METADATA(IID "studio.manivault.ClusterData")using namespace mv::util;
@@ -123,8 +124,18 @@ UniqueWorkflowPlan ClusterData::fromVariantMapWorkflow(const QVariantMap& varian
 {
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    const auto dataMap = variantMap["Data"].toMap();
+    const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
+    if (appVersion < Version(1, 5, 0)) {
+        plan->addSequentialStage("Load legacy clusters raw data (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+            legacy::ClusterDataLegacySerializer::fromVariantMapPre150(*this, variantMap);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread);
+
+        return plan;
+    }
+
+    const auto dataMap = variantMap["Data"].toMap();
+    
     plan->addNestedWorkflowStage("Load", [this, dataMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
         return ClustersSerializer::fromVariantMapWorkflow(dataMap, _clusters);
     });
@@ -242,6 +253,16 @@ UniqueWorkflowPlan Clusters::fromVariantMapWorkflow(const QVariantMap& variantMa
     plan->addNestedWorkflowStage("Load common", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
         return this->DatasetImpl::fromVariantMapWorkflow(variantMap);
     });
+
+    const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
+
+    if (appVersion < Version(1, 5, 0)) {
+        plan->addSequentialStage("Load legacy clusters (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+            legacy::ClustersLegacySerializer::fromVariantMapPre150(*this, variantMap);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread);
+
+        return plan;
+    }
 
     plan->addNestedWorkflowStage("Load raw data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
 		return getRawData<ClusterData>()->fromVariantMapWorkflow(variantMap);

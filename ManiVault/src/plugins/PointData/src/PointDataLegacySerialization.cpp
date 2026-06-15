@@ -8,12 +8,14 @@
 
 #include <util/Serialization.h>
 
+#include <workflow/WorkflowRuntimeScoped.h>
+
 using namespace mv::util;
 
 namespace mv::legacy
 {
 
-void PointDataLegacySerializer::fromVariantMapPre150(PointData& pointData, const QVariantMap& variantMap)
+void PointDataLegacySerializer::fromVariantMapPre150(PointData& pointData, const QVariantMap& variantMap, const workflow::SharedWorkflowExecutionContext& executionContext)
 {
     qDebug() << "Deserializing PointData from legacy format (pre-1.5.0). This may result in loss of information if the format has changed significantly since then.";
 
@@ -21,16 +23,17 @@ void PointDataLegacySerializer::fromVariantMapPre150(PointData& pointData, const
     variantMapMustContain(variantMap, "NumberOfPoints");
     variantMapMustContain(variantMap, "NumberOfDimensions");
 
-    const auto data = variantMap["Data"].toMap();
-    const auto numberOfPoints = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
-    const auto numberOfDimensions = variantMap["NumberOfDimensions"].toUInt();
-    const auto numberOfElements = numberOfPoints * numberOfDimensions;
-    const auto elementTypeIndex = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
-    const auto rawData = data["Raw"].toMap();
+    const auto data                 = variantMap["Data"].toMap();
+    const auto numberOfPoints       = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
+    const auto numberOfDimensions   = variantMap["NumberOfDimensions"].toUInt();
+    const auto numberOfElements     = numberOfPoints * numberOfDimensions;
+    const auto elementTypeIndex     = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
+    const auto rawData              = data["Raw"].toMap();
 
     bool isDense = true;
+
     if (variantMap.contains("Dense"))
-        isDense = variantMap["Dense"].toBool();;
+        isDense = variantMap["Dense"].toBool();
 
     pointData._isDense          = isDense;
     pointData._numDimensions    = numberOfDimensions;
@@ -40,7 +43,7 @@ void PointDataLegacySerializer::fromVariantMapPre150(PointData& pointData, const
         pointData.setElementTypeSpecifier(elementTypeIndex);
         pointData.resizeVector(numberOfElements);
 
-    	populateBytesFromBlobMap(rawData, (char*)pointData.getDataVoidPtr(), pointData.getRawDataSize());
+    	populateBytesFromBlobMap(rawData, (char*)pointData.getDataVoidPtr(), pointData.getRawDataSize(), executionContext);
     }
     else
     {
@@ -50,7 +53,7 @@ void PointDataLegacySerializer::fromVariantMapPre150(PointData& pointData, const
 
         std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
 
-        populateBytesFromBlobMap(rawData, bytes.data(), bytes.size());
+        populateBytesFromBlobMap(rawData, bytes.data(), bytes.size(), executionContext);
 
         pointData._numRows = static_cast<std::uint64_t>(numberOfPoints); // FIXME should be redundant
 
@@ -72,7 +75,7 @@ void PointDataLegacySerializer::fromVariantMapPre150(PointData& pointData, const
     }
 }
 
-void PointsLegacySerializer::fromVariantMapPre150(Points& points, const QVariantMap& variantMap)
+void PointsLegacySerializer::fromVariantMapPre150(Points& points, const QVariantMap& variantMap, const workflow::SharedWorkflowExecutionContext& executionContext)
 {
     qDebug() << "Deserializing Points from legacy format (pre-1.5.0). This may result in loss of information if the format has changed significantly since then.";
 
@@ -90,8 +93,11 @@ void PointsLegacySerializer::fromVariantMapPre150(Points& points, const QVariant
     }
 
     // Load raw point data
-    if (points.isFull())
-        points.getRawData<PointData>()->fromVariantMap(variantMap);
+    if (points.isFull()) {
+        auto plan = points.getRawData<PointData>()->fromVariantMapWorkflow(variantMap);
+
+		workflow::WorkflowRuntimeScoped::executeBlocking(std::move(plan), nullptr);
+    }
     else
     {
         variantMapMustContain(variantMap, "Indices");
@@ -100,7 +106,7 @@ void PointsLegacySerializer::fromVariantMapPre150(Points& points, const QVariant
 
         points.indices.resize(indicesMap["Count"].toUInt());
 
-        populateBytesFromBlobMap(indicesMap["Raw"].toMap(), (char*)points.indices.data(), points.indices.size() * sizeof(decltype(points.indices)::value_type));
+        populateBytesFromBlobMap(indicesMap["Raw"].toMap(), (char*)points.indices.data(), points.indices.size() * sizeof(decltype(points.indices)::value_type), executionContext);
     }
 
     // Load dimension names
@@ -158,7 +164,7 @@ void PointsLegacySerializer::fromVariantMapPre150(Points& points, const QVariant
 
             selectionSet->indices.resize(count);
 
-            populateBytesFromBlobMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(decltype(selectionSet->indices)::value_type));
+            populateBytesFromBlobMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(decltype(selectionSet->indices)::value_type), executionContext);
 
             events().notifyDatasetDataSelectionChanged(points);
         }
