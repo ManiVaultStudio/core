@@ -15,6 +15,8 @@
 
 #include <algorithm>
 
+#include "SetLegacySerialization.h"
+
 using namespace mv::gui;
 using namespace mv::util;
 using namespace mv::workflow;
@@ -193,6 +195,16 @@ UniqueWorkflowPlan DatasetImpl::fromVariantMapWorkflow(const QVariantMap& varian
     plan->addNestedWorkflowStage("Load widget action", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) mutable -> UniqueWorkflowPlan {
 	    return this->WidgetAction::fromVariantMapWorkflow(variantMap);
     });
+
+    const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
+
+    if (appVersion < Version(1, 5, 0)) {
+        plan->addSequentialStage("Load legacy points (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+            legacy::SetLegacySerializer::fromVariantMapPre150(*this, variantMap);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread);
+
+        return plan;
+    }
 
     plan->addNestedWorkflowStage("Load properties", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
         return PropertiesSerializer::fromVariantMapWorkflow(variantMap["Properties"].toMap(), _properties, executionContext);
