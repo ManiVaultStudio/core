@@ -38,6 +38,12 @@ namespace mv
     namespace gui {
         class GroupAction;
     }
+
+    namespace legacy
+    {
+        class PointDataLegacySerializer;
+        class PointsLegacySerializer;
+    }
 }
 
 // =============================================================================
@@ -503,6 +509,8 @@ private: // Sparse data, experimental
     SparseMatrix<size_t, size_t, float> _sparseData = {};
 
     bool _isDense = true;
+
+    friend class mv::legacy::PointDataLegacySerializer;
 };
 
 // =============================================================================
@@ -1028,6 +1036,8 @@ public:
     mv::gui::GroupAction*       _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
     DimensionsPickerAction*     _dimensionsPickerAction;        /** Non-owning pointer to dimensions picker action */
     mv::EventListener           _eventListener;                 /** Listen to HDPS events */
+
+    friend class mv::legacy::PointsLegacySerializer;
 };
 
 // =============================================================================

@@ -163,7 +163,7 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(const QVariantMap& variantM
     if (appVersion < Version(1, 5, 0)) {
         plan->addSequentialStage("Load legacy point data (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
             Plugin::fromVariantMap(variantMap);
-            legacy::pointDataFromVariantMapPre150(*this, variantMap);
+            legacy::PointDataLegacySerializer::fromVariantMapPre150(*this, variantMap);
         });
 
         return plan;
@@ -1008,7 +1008,7 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap)
 
     if (appVersion < Version(1, 5, 0)) {
         plan->addSequentialStage("Load legacy points (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
-            legacy::pointsFromVariantMapPre150(*this, variantMap);
+            legacy::PointsLegacySerializer::fromVariantMapPre150(*this, variantMap);
         },
         WorkflowPlan::JobThreadAffinity::GuiThread);
 

@@ -12,18 +12,30 @@ class Points;
 namespace mv::legacy
 {
 
-/**
- * Deserializes point data from a variant map in the format used by ManiVault versions prior to 1.5.0.
- * @param pointData The point data object to populate with the deserialized data
- * @param variantMap A QVariantMap containing the serialized point data in the legacy format
- */
-void pointDataFromVariantMapPre150(PointData& pointData, const QVariantMap& variantMap);
+/** Utility class for managing legacy serialization of point data */
+class PointDataLegacySerializer final
+{
+public:
 
-/**
- * Deserializes points from a variant map in the format used by ManiVault versions prior to 1.5.0.
- * @param points The points object to populate with the deserialized data
- * @param variantMap A QVariantMap containing the serialized points in the legacy format
- */
-void pointsFromVariantMapPre150(Points& points, const QVariantMap& variantMap);
+    /**
+	 * Deserializes point data from a variant map in the format used by ManiVault versions prior to 1.5.0.
+	 * @param pointData The point data object to populate with the deserialized data
+	 * @param variantMap A QVariantMap containing the serialized point data in the legacy format
+	 */
+    static void fromVariantMapPre150(PointData& pointData, const QVariantMap& variantMap);
+};
+
+/** Utility class for managing legacy serialization of points */
+class PointsLegacySerializer final
+{
+public:
+
+    /**
+     * Deserializes points from a variant map in the format used by ManiVault versions prior to 1.5.0.
+     * @param points The points object to populate with the deserialized data
+     * @param variantMap A QVariantMap containing the serialized points in the legacy format
+     */
+    static void fromVariantMapPre150(Points& points, const QVariantMap& variantMap);
+};
 
 }
