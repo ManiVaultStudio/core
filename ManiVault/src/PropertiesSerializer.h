@@ -33,7 +33,7 @@ public:
     static constexpr quint32 FormatVersion = 2;
 
     /**
-     * Serializes the given properties map into a workflow plan.
+     * Creates a workflow plan that serializes the given properties map into a QVariantMap using the optimized serialization format.
      *
      * @param propertiesMap The properties map to serialize.
      * @return A unique pointer to the workflow plan that performs the serialization.
@@ -49,6 +49,45 @@ public:
      * @return A unique pointer to the workflow plan that performs the deserialization.
      */
     static workflow::UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& propertiesMap, QVariantMap& destinationPropertiesMap, workflow::SharedWorkflowExecutionContext parentContext = nullptr);
+
+private: // Utility methods for optimized QVariant serialization and deserialization
+
+    /**
+     * Deserializes a QVariantMap that was serialized using the optimized serialization format.
+     * @param source The QVariantMap to deserialize, which is expected to be in the optimized serialization format.
+     * @param context The workflow execution context to use for any necessary operations during deserialization.
+     * @return A QVariantMap containing the deserialized data.
+     */
+    static QVariantMap loadOptimizedVariantMap(const QVariantMap& source, const workflow::SharedWorkflowExecutionContext& context);
+
+    /**
+     * Deserializes a QVariant that was serialized using the optimized serialization format.
+     * @param source The QVariant to deserialize, which is expected to be in the optimized serialization format.
+     * @param context The workflow execution context to use for any necessary operations during deserialization.
+     * @return A QVariant containing the deserialized data.
+     */
+    static QVariant loadOptimizedVariant(const QVariant& source, const workflow::SharedWorkflowExecutionContext& context);
+
+    /**
+     * Serializes a QVariantMap using an optimized serialization format that is more efficient than the default QVariant serialization.
+     * @param source The QVariantMap to serialize.
+     * @return A QVariantMap containing the serialized data in the optimized format.
+     */
+    static QVariantMap saveOptimizedVariantMap(const QVariantMap& source);
+
+    /**
+     * Serializes a QVariant using an optimized serialization format that is more efficient than the default QVariant serialization.
+     * @param source The QVariant to serialize.
+     * @return A QVariant containing the serialized data in the optimized format.
+     */
+    static QVariant saveOptimizedVariant(const QVariant& source);
+
+    /**
+     * Serializes a QVariantList using an optimized serialization format that is more efficient than the default QVariant serialization.
+     * @param list The QVariantList to serialize.
+     * @return A QVariant containing the serialized data in the optimized format.
+     */
+    static QVariant saveOptimizedVariantList(const QVariantList& list);
 };
 
 }

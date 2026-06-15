@@ -6,16 +6,25 @@
 
 #include <QVariantMap>
 
-class DatasetImpl;
+namespace mv
+{
+    class DatasetImpl;
+}
 
 namespace mv::legacy
 {
 
-/**
- * Deserializes point data from a variant map in the format used by ManiVault versions prior to 1.5.0.
- * @param dataset The dataset object to populate with the deserialized data
- * @param variantMap A QVariantMap containing the serialized point data in the legacy format
- */
-void setFromVariantMapPre150(DatasetImpl& dataset, const QVariantMap& variantMap);
+/** Utility class for managing legacy serialization of sets */
+class SetLegacySerializer final
+{
+public:
+
+     /**
+	  * Deserializes point data from a variant map in the format used by ManiVault versions prior to 1.5.0.
+	  * @param dataset The dataset object to populate with the deserialized data
+	  * @param variantMap A QVariantMap containing the serialized point data in the legacy format
+	  */
+    static void fromVariantMapPre150(DatasetImpl& dataset, const QVariantMap& variantMap);
+};
 
 }

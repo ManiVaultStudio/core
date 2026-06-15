@@ -33,6 +33,10 @@ namespace plugin {
     class AnalysisPlugin;
 }
 
+namespace legacy {
+    class SetLegacySerializer;
+}
+
 class DataHierarchyItem;
 
 /**
@@ -636,6 +640,7 @@ private:
     friend class EventListener;
     friend class EventManager;
     friend class KeyBasedSelectionGroup;
+    friend class mv::legacy::SetLegacySerializer;
 };
 
 }

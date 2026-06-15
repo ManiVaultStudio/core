@@ -190,16 +190,5 @@ CORE_EXPORT QMetaType::Type getVariantListHomogenousType(const QVariantList& lis
  * @param source QVariant to optimize
  * @return 
  */
-QVariantMap saveOptimizedVariantMap(const QVariantMap& source);
 
-
-QVariant saveOptimizedVariant(const QVariant& source);
-
-QVariant saveOptimizedVariantList(const QVariantList& list);
-
-QVariantMap loadOptimizedVariantMap(const QVariantMap& source, const workflow::SharedWorkflowExecutionContext& context);
-
-QVariant loadOptimizedVariant(const QVariant& source, const workflow::SharedWorkflowExecutionContext& context);
-
-QVariant loadOptimizedVariantList(const QVariantMap& map, const workflow::SharedWorkflowExecutionContext& context);
 }
