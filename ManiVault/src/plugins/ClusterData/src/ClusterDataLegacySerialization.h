@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <workflow/WorkflowExecutionContext.h>
+
 #include <QVariantMap>
 
 class ClusterData;
@@ -22,7 +24,7 @@ public:
      * @param clusterData The cluster data object to populate with the deserialized data
      * @param variantMap A QVariantMap containing the serialized cluster data in the legacy format
      */
-    static void fromVariantMapPre150(ClusterData& clusterData, const QVariantMap& variantMap);
+    static void fromVariantMapPre150(ClusterData& clusterData, const QVariantMap& variantMap, const workflow::SharedWorkflowExecutionContext& executionContext);
 };
 
 /** Utility class for managing legacy serialization of clusters */
@@ -35,7 +37,7 @@ public:
 	 * @param clusters The clusters object to populate with the deserialized data
 	 * @param variantMap A QVariantMap containing the serialized clusters in the legacy format
 	 */
-    static void fromVariantMapPre150(Clusters& clusters, const QVariantMap& variantMap);
+    static void fromVariantMapPre150(Clusters& clusters, const QVariantMap& variantMap, const workflow::SharedWorkflowExecutionContext& executionContext);
 };
 
 }

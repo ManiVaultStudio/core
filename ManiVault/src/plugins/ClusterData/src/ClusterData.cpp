@@ -127,8 +127,8 @@ UniqueWorkflowPlan ClusterData::fromVariantMapWorkflow(const QVariantMap& varian
     const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
     if (appVersion < Version(1, 5, 0)) {
-        plan->addSequentialStage("Load legacy clusters raw data (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
-            legacy::ClusterDataLegacySerializer::fromVariantMapPre150(*this, variantMap);
+        plan->addSequentialStage("Load legacy clusters raw data (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            legacy::ClusterDataLegacySerializer::fromVariantMapPre150(*this, variantMap, executionContext);
         }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
         return plan;
@@ -257,8 +257,8 @@ UniqueWorkflowPlan Clusters::fromVariantMapWorkflow(const QVariantMap& variantMa
     const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
     if (appVersion < Version(1, 5, 0)) {
-        plan->addSequentialStage("Load legacy clusters (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
-            legacy::ClustersLegacySerializer::fromVariantMapPre150(*this, variantMap);
+        plan->addSequentialStage("Load legacy clusters (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            legacy::ClustersLegacySerializer::fromVariantMapPre150(*this, variantMap, executionContext);
         }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
         return plan;

@@ -7,12 +7,14 @@
 
 #include <util/Serialization.h>
 
+#include <workflow/WorkflowRuntimeScoped.h>
+
 using namespace mv::util;
 
 namespace mv::legacy
 {
 
-void ClusterDataLegacySerializer::fromVariantMapPre150(ClusterData& clusterData, const QVariantMap& variantMap)
+void ClusterDataLegacySerializer::fromVariantMapPre150(ClusterData& clusterData, const QVariantMap& variantMap, const workflow::SharedWorkflowExecutionContext& executionContext)
 {
     qDebug() << "Deserializing ClusterData from legacy format (pre-1.5.0). This may result in loss of information if the format has changed significantly since then.";
 
@@ -27,7 +29,7 @@ void ClusterDataLegacySerializer::fromVariantMapPre150(ClusterData& clusterData,
     packedIndices.resize(dataMap["NumberOfIndices"].toInt());
 
     // Convert raw data to indices
-    populateBytesFromBlobMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), packedIndices.size() * sizeof(std::uint32_t));
+    populateBytesFromBlobMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), packedIndices.size() * sizeof(std::uint32_t), executionContext);
 
     if (dataMap.contains("ClustersRawData")) {
         QByteArray clustersByteArray;
@@ -38,7 +40,7 @@ void ClusterDataLegacySerializer::fromVariantMapPre150(ClusterData& clusterData,
 
         clustersByteArray.resize(clustersRawDataSize);
 
-        populateBytesFromBlobMap(dataMap["ClustersRawData"].toMap(), (char*)clustersByteArray.data(), clustersByteArray.size());
+        populateBytesFromBlobMap(dataMap["ClustersRawData"].toMap(), (char*)clustersByteArray.data(), clustersByteArray.size(), executionContext);
 
         QVariantList clusters;
 
@@ -90,11 +92,13 @@ void ClusterDataLegacySerializer::fromVariantMapPre150(ClusterData& clusterData,
     }
 }
 
-void ClustersLegacySerializer::fromVariantMapPre150(Clusters& clusters, const QVariantMap& variantMap)
+void ClustersLegacySerializer::fromVariantMapPre150(Clusters& clusters, const QVariantMap& variantMap, const workflow::SharedWorkflowExecutionContext& executionContext)
 {
     qDebug() << "Deserializing Clusters from legacy format (pre-1.5.0). This may result in loss of information if the format has changed significantly since then.";
 
-    clusters.getRawData<ClusterData>()->fromVariantMap(variantMap);
+    auto plan = clusters.getRawData<ClusterData>()->fromVariantMapWorkflow(variantMap);
+
+    workflow::WorkflowRuntimeScoped::executeBlocking(std::move(plan), executionContext);
 
     events().notifyDatasetDataChanged(clusters);
 }
