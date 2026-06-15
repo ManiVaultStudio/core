@@ -672,10 +672,18 @@ if(NOT APPLE)
     # on windows, the DLLs should be placed in the same directory as the executable
     add_custom_command(TARGET ${MV_EXE} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency runtime libraries"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qtadvanceddocking-qt6> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qtadvanceddocking-qt6> ${MV_INSTALL_DIR}/$<CONFIGURATION>/$<IF:$<CXX_COMPILER_ID:MSVC>,,lib/>$<TARGET_FILE_NAME:qtadvanceddocking-qt6>
     )
 
     if(${MV_USE_ERROR_LOGGING} AND NOT APPLE)
+    # Create a symlink, e.g. libqtadvanceddockingd.so.4 -> libqtadvanceddockingd.so.4.5.0
+    if(NOT MSVC)
+        add_custom_command(TARGET ${MV_EXE} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E create_symlink
+                $<TARGET_FILE_NAME:qtadvanceddocking-qt6>
+                ${MV_INSTALL_DIR}/$<CONFIGURATION>/lib/$<TARGET_SONAME_FILE_NAME:qtadvanceddocking-qt6>
+        )
+    endif()
         # Install sentry artifacts
         add_custom_command(TARGET ${MV_EXE} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E echo "Installing: crashpad_handler executable"
