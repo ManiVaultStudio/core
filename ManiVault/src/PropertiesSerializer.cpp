@@ -122,7 +122,7 @@ namespace
     }
 
     template<typename T>
-    QVariant saveTypedVector(const QVariantList& list, const QString& typeName)
+    QVariant saveTypedVector(const QVariantList& list, const QString& typeName, const SharedWorkflowExecutionContext& executionContext)
     {
         QVector<T> values;
         values.reserve(list.size());
@@ -132,18 +132,18 @@ namespace
 
         QVariantMap raw;
 
-        raw["__OptimizedVariantList"] = true;
-        raw["Type"] = typeName;
-        raw["Count"] = static_cast<qulonglong>(values.size());
-
-        raw["Data"] = bytesToBlobVariantMap(reinterpret_cast<const char*>(values.constData()), static_cast<std::uint64_t>(values.size() * sizeof(T)));
+        raw["__OptimizedVariantList"]   = true;
+        raw["Type"]                     = typeName;
+        raw["Count"]                    = static_cast<qulonglong>(values.size());
+        raw["Data"]                     = bytesToBlobVariantMap(reinterpret_cast<const char*>(values.constData()), static_cast<std::uint64_t>(values.size() * sizeof(T)), executionContext);
 
         return raw;
     }
 
-    QVariant saveBoolVector(const QVariantList& list)
+    QVariant saveBoolVector(const QVariantList& list, const SharedWorkflowExecutionContext& executionContext)
     {
         QByteArray bytes;
+
         bytes.resize(list.size());
 
         for (qsizetype i = 0; i < list.size(); ++i)
@@ -151,21 +151,18 @@ namespace
 
         QVariantMap raw;
 
-        raw["__OptimizedVariantList"] = true;
-        raw["Type"] = "BoolArray";
-        raw["Count"] = static_cast<qulonglong>(list.size());
-
-        raw["Data"] = bytesToBlobVariantMap(
-            bytes.constData(),
-            static_cast<std::uint64_t>(bytes.size())
-        );
+        raw["__OptimizedVariantList"]   = true;
+        raw["Type"]                     = "BoolArray";
+        raw["Count"]                    = static_cast<qulonglong>(list.size());
+        raw["Data"]                     = bytesToBlobVariantMap(bytes.constData(), static_cast<std::uint64_t>(bytes.size()), executionContext);
 
         return raw;
     }
 
-    QVariant saveStringList(const QVariantList& list)
+    QVariant saveStringList(const QVariantList& list, const SharedWorkflowExecutionContext& executionContext)
     {
         QStringList strings;
+
         strings.reserve(list.size());
 
         for (const QVariant& item : list)
@@ -174,16 +171,15 @@ namespace
         QByteArray bytes;
         QDataStream stream(&bytes, QIODevice::WriteOnly);
         stream.setVersion(QDataStream::Qt_6_8);
+
         stream << strings;
 
         QVariantMap block;
-        block["__OptimizedVariantList"] = true;
-        block["Type"] = "QStringList";
-        block["Count"] = static_cast<qulonglong>(strings.size());
-        block["Data"] = bytesToBlobVariantMap(
-            bytes.constData(),
-            static_cast<std::uint64_t>(bytes.size())
-        );
+
+        block["__OptimizedVariantList"]   = true;
+        block["Type"]                     = "QStringList";
+        block["Count"]                    = static_cast<qulonglong>(strings.size());
+        block["Data"]                     = bytesToBlobVariantMap(bytes.constData(), static_cast<std::uint64_t>(bytes.size()), executionContext);
 
         return block;
     }
@@ -346,13 +342,13 @@ QVariant PropertiesSerializer::loadOptimizedVariantList(const QVariantMap& map, 
     return map;
 }
 
-QVariantMap PropertiesSerializer::saveOptimizedVariantMap(const QVariantMap& source)
+QVariantMap PropertiesSerializer::saveOptimizedVariantMap(const QVariantMap& source, const SharedWorkflowExecutionContext& executionContext)
 {
     QVariantMap target;
     //target.reserve(source.size());
 
     for (auto it = source.cbegin(); it != source.cend(); ++it)
-        target.insert(it.key(), saveOptimizedVariant(it.value()));
+        target.insert(it.key(), saveOptimizedVariant(it.value(), executionContext));
 
     return target;
 }
@@ -360,10 +356,10 @@ QVariantMap PropertiesSerializer::saveOptimizedVariantMap(const QVariantMap& sou
 QVariant PropertiesSerializer::saveOptimizedVariant(const QVariant& source, const SharedWorkflowExecutionContext& executionContext)
 {
     if (source.metaType().id() == QMetaType::QVariantMap)
-        return PropertiesSerializer::saveOptimizedVariantMap(source.toMap());
+        return PropertiesSerializer::saveOptimizedVariantMap(source.toMap(), executionContext);
 
     if (source.metaType().id() == QMetaType::QVariantList)
-        return PropertiesSerializer::saveOptimizedVariantList(source.toList());
+        return PropertiesSerializer::saveOptimizedVariantList(source.toList(), executionContext);
 
     return source;
 }
@@ -402,36 +398,37 @@ QVariant PropertiesSerializer::saveOptimizedVariantList(const QVariantList& list
         target.reserve(list.size());
 
         for (const QVariant& item : list)
-            target.append(saveOptimizedVariantMap(item.toMap()));
+            target.append(saveOptimizedVariantMap(item.toMap(), executionContext));
 
         return target;
     }
 
     if (homogeneousType == QMetaType::QString)
-        return saveStringList(list);
+        return saveStringList(list, executionContext);
 
     if (homogeneousType == QMetaType::Int)
-        return saveTypedVector<int>(list, "Int32Array");
+        return saveTypedVector<int>(list, "Int32Array", executionContext);
 
     if (homogeneousType == QMetaType::UInt)
-        return saveTypedVector<uint>(list, "UInt32Array");
+        return saveTypedVector<uint>(list, "UInt32Array", executionContext);
 
     if (homogeneousType == QMetaType::LongLong)
-        return saveTypedVector<qlonglong>(list, "Int64Array");
+        return saveTypedVector<qlonglong>(list, "Int64Array", executionContext);
 
     if (homogeneousType == QMetaType::ULongLong)
-        return saveTypedVector<qulonglong>(list, "UInt64Array");
+        return saveTypedVector<qulonglong>(list, "UInt64Array", executionContext);
 
     if (homogeneousType == QMetaType::Float)
-        return saveTypedVector<float>(list, "Float32Array");
+        return saveTypedVector<float>(list, "Float32Array", executionContext);
 
     if (homogeneousType == QMetaType::Double)
-        return saveTypedVector<double>(list, "Float64Array");
+        return saveTypedVector<double>(list, "Float64Array", executionContext);
 
     if (homogeneousType == QMetaType::Bool)
-        return saveBoolVector(list);
+        return saveBoolVector(list, executionContext);
 
     QVariantList target;
+
     target.reserve(list.size());
 
     for (const QVariant& item : list)

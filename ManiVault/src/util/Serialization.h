@@ -178,17 +178,4 @@ CORE_EXPORT QByteArray serializeVariantMap(const QVariantMap& map);
  */
 CORE_EXPORT QVariantMap deserializeVariantMap(const QByteArray& bytes);
 
-/**
- * Check if all items in a QVariantList are of the same type and return that type, or return QMetaType::UnknownType if the list is empty or if the items are of different types.
- * @param list QVariantList to check
- * @return QMetaType of the items in the list if they are all of the same type, or QMetaType::UnknownType if the list is empty or if the items are of different types
- */
-CORE_EXPORT QMetaType::Type getVariantListHomogenousType(const QVariantList& list);
-
-/**
- * 
- * @param source QVariant to optimize
- * @return 
- */
-
 }

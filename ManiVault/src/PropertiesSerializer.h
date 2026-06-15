@@ -79,9 +79,10 @@ private: // Utility methods for optimized QVariant serialization and deserializa
     /**
      * Serializes a QVariantMap using an optimized serialization format that is more efficient than the default QVariant serialization.
      * @param source The QVariantMap to serialize.
+     * @param executionContext The workflow execution context to use for any necessary operations during serialization.
      * @return A QVariantMap containing the serialized data in the optimized format.
      */
-    static QVariantMap saveOptimizedVariantMap(const QVariantMap& source);
+    static QVariantMap saveOptimizedVariantMap(const QVariantMap& source, const workflow::SharedWorkflowExecutionContext& executionContext);
 
     /**
      * Serializes a QVariant using an optimized serialization format that is more efficient than the default QVariant serialization.
