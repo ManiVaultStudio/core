@@ -121,44 +121,6 @@ namespace
         return list;
     }
 
-    QVariant loadOptimizedVariantList(const QVariantMap& map, const SharedWorkflowExecutionContext& context)
-    {
-        const QString type = map.value("Type").toString();
-
-        if (type == "QStringList")
-            return loadStringList(map, context);
-
-        const auto count =
-            static_cast<qsizetype>(map.value("Count").toULongLong());
-
-        const QVariantMap dataMap = map.value("Data").toMap();
-
-        QByteArray bytes = bytesFromBlobVariantMap(dataMap, context);
-
-        if (type == "BoolArray")
-            return loadBoolList(bytes, count);
-
-        if (type == "Int32Array")
-            return loadTypedList<int>(bytes, count);
-
-        if (type == "UInt32Array")
-            return loadTypedList<uint>(bytes, count);
-
-        if (type == "Int64Array")
-            return loadTypedList<qlonglong>(bytes, count);
-
-        if (type == "UInt64Array")
-            return loadTypedList<qulonglong>(bytes, count);
-
-        if (type == "Float32Array")
-            return loadTypedList<float>(bytes, count);
-
-        if (type == "Float64Array")
-            return loadTypedList<double>(bytes, count);
-
-        return map;
-    }
-
     template<typename T>
     QVariant saveTypedVector(const QVariantList& list, const QString& typeName)
     {
@@ -225,29 +187,47 @@ namespace
 
         return block;
     }
+
+    QMetaType::Type getVariantListHomogenousType(const QVariantList& list)
+    {
+        if (list.isEmpty())
+            return QMetaType::UnknownType;
+
+        auto classifyOne = [](const QVariant& value) -> QMetaType::Type {
+            switch (value.metaType().id()) {
+            case QMetaType::Int:
+            case QMetaType::UInt:
+            case QMetaType::LongLong:
+            case QMetaType::ULongLong:
+            case QMetaType::Double:
+            case QMetaType::Bool:
+            case QMetaType::QString:
+                return static_cast<QMetaType::Type>(value.metaType().id());
+
+            case QMetaType::QVariantMap:
+                return QMetaType::QVariantMap;
+
+            case QMetaType::QByteArray:
+                return QMetaType::UnknownType;
+
+            default:
+                return QMetaType::UnknownType;
+            }
+            };
+
+        const auto firstKind = classifyOne(list.front());
+
+        for (const QVariant& item : list) {
+            if (classifyOne(item) != firstKind)
+                return QMetaType::UnknownType;
+        }
+
+        return firstKind;
+    }
 }
 
 namespace mv
 {
-
-UniqueWorkflowPlan PropertiesSerializer::toVariantMapWorkflow(const QVariantMap& propertiesMap)
-{
-#ifdef PROPERTIES_SERIALIZER_VERBOSE
-    qDebug() << "Serializing properties: " << map.keys();
-#endif
-
-    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
-
-    const auto serializeStage = plan->addSequentialStage("Serialize", [propertiesMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-        auto optimizedPropertiesMap = saveOptimizedVariant(propertiesMap).toMap();
-
-        optimizedPropertiesMap["PropertiesFormatVersion"] = FormatVersion;
-
-        executionContext->setOutput(optimizedPropertiesMap);
-    });
-
-    return plan;
-}
 
 UniqueWorkflowPlan PropertiesSerializer::fromVariantMapWorkflow(const QVariantMap& propertiesMap, QVariantMap& destinationPropertiesMap, SharedWorkflowExecutionContext parentContext)
 {
@@ -273,14 +253,23 @@ UniqueWorkflowPlan PropertiesSerializer::fromVariantMapWorkflow(const QVariantMa
     return plan;
 }
 
-QVariantMap PropertiesSerializer::loadOptimizedVariantMap(const QVariantMap& source, const SharedWorkflowExecutionContext& context)
+UniqueWorkflowPlan PropertiesSerializer::toVariantMapWorkflow(const QVariantMap& propertiesMap)
 {
-    QVariantMap target;
+#ifdef PROPERTIES_SERIALIZER_VERBOSE
+    qDebug() << "Serializing properties: " << map.keys();
+#endif
 
-    for (auto it = source.cbegin(); it != source.cend(); ++it)
-        target.insert(it.key(), PropertiesSerializer::loadOptimizedVariant(it.value(), context));
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    return target;
+    const auto serializeStage = plan->addSequentialStage("Serialize", [propertiesMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        auto optimizedPropertiesMap = saveOptimizedVariant(propertiesMap, executionContext).toMap();
+
+        optimizedPropertiesMap["PropertiesFormatVersion"] = FormatVersion;
+
+        executionContext->setOutput(optimizedPropertiesMap);
+    });
+
+    return plan;
 }
 
 QVariant PropertiesSerializer::loadOptimizedVariant(const QVariant& source, const SharedWorkflowExecutionContext& context)
@@ -309,6 +298,54 @@ QVariant PropertiesSerializer::loadOptimizedVariant(const QVariant& source, cons
     return source;
 }
 
+QVariantMap PropertiesSerializer::loadOptimizedVariantMap(const QVariantMap& source, const SharedWorkflowExecutionContext& context)
+{
+    QVariantMap target;
+
+    for (auto it = source.cbegin(); it != source.cend(); ++it)
+        target.insert(it.key(), PropertiesSerializer::loadOptimizedVariant(it.value(), context));
+
+    return target;
+}
+
+QVariant PropertiesSerializer::loadOptimizedVariantList(const QVariantMap& map, const SharedWorkflowExecutionContext& context)
+{
+    const QString type = map.value("Type").toString();
+
+    if (type == "QStringList")
+        return loadStringList(map, context);
+
+    const auto count =
+        static_cast<qsizetype>(map.value("Count").toULongLong());
+
+    const QVariantMap dataMap = map.value("Data").toMap();
+
+    QByteArray bytes = bytesFromBlobVariantMap(dataMap, context);
+
+    if (type == "BoolArray")
+        return loadBoolList(bytes, count);
+
+    if (type == "Int32Array")
+        return loadTypedList<int>(bytes, count);
+
+    if (type == "UInt32Array")
+        return loadTypedList<uint>(bytes, count);
+
+    if (type == "Int64Array")
+        return loadTypedList<qlonglong>(bytes, count);
+
+    if (type == "UInt64Array")
+        return loadTypedList<qulonglong>(bytes, count);
+
+    if (type == "Float32Array")
+        return loadTypedList<float>(bytes, count);
+
+    if (type == "Float64Array")
+        return loadTypedList<double>(bytes, count);
+
+    return map;
+}
+
 QVariantMap PropertiesSerializer::saveOptimizedVariantMap(const QVariantMap& source)
 {
     QVariantMap target;
@@ -320,7 +357,7 @@ QVariantMap PropertiesSerializer::saveOptimizedVariantMap(const QVariantMap& sou
     return target;
 }
 
-QVariant PropertiesSerializer::saveOptimizedVariant(const QVariant& source)
+QVariant PropertiesSerializer::saveOptimizedVariant(const QVariant& source, const SharedWorkflowExecutionContext& executionContext)
 {
     if (source.metaType().id() == QMetaType::QVariantMap)
         return PropertiesSerializer::saveOptimizedVariantMap(source.toMap());
@@ -331,43 +368,7 @@ QVariant PropertiesSerializer::saveOptimizedVariant(const QVariant& source)
     return source;
 }
 
-QMetaType::Type getVariantListHomogenousType(const QVariantList& list)
-{
-    if (list.isEmpty())
-        return QMetaType::UnknownType;
-
-    auto classifyOne = [](const QVariant& value) -> QMetaType::Type {
-        switch (value.metaType().id()) {
-        case QMetaType::Int:
-        case QMetaType::UInt:
-        case QMetaType::LongLong:
-        case QMetaType::ULongLong:
-        case QMetaType::Double:
-        case QMetaType::Bool:
-        case QMetaType::QString:
-            return static_cast<QMetaType::Type>(value.metaType().id());
-
-        case QMetaType::QVariantMap:
-            return QMetaType::QVariantMap;
-
-        case QMetaType::QByteArray:
-            return QMetaType::UnknownType;
-
-        default:
-            return QMetaType::UnknownType;
-        }
-        };
-
-    const auto firstKind = classifyOne(list.front());
-
-    for (const QVariant& item : list) {
-        if (classifyOne(item) != firstKind)
-            return QMetaType::UnknownType;
-    }
-
-    return firstKind;
-}
-QVariant PropertiesSerializer::saveOptimizedVariantList(const QVariantList& list)
+QVariant PropertiesSerializer::saveOptimizedVariantList(const QVariantList& list, const SharedWorkflowExecutionContext& executionContext)
 {
     if (list.isEmpty())
         return list;
@@ -379,7 +380,7 @@ QVariant PropertiesSerializer::saveOptimizedVariantList(const QVariantList& list
         target.reserve(list.size());
 
         for (const QVariant& item : list)
-            target.append(saveOptimizedVariant(item));
+            target.append(saveOptimizedVariant(item, executionContext));
 
         return target;
     }
@@ -391,7 +392,7 @@ QVariant PropertiesSerializer::saveOptimizedVariantList(const QVariantList& list
         target.reserve(list.size());
 
         for (const QVariant& item : list)
-            target.append(saveOptimizedVariant(item));
+            target.append(saveOptimizedVariant(item, executionContext));
 
         return target;
     }
@@ -434,7 +435,7 @@ QVariant PropertiesSerializer::saveOptimizedVariantList(const QVariantList& list
     target.reserve(list.size());
 
     for (const QVariant& item : list)
-        target.append(saveOptimizedVariant(item));
+        target.append(saveOptimizedVariant(item, executionContext));
 
     return target;
 }
