@@ -1084,7 +1084,7 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
         QVariantMap indicesMap;
 
         indicesMap["Count"] = QVariant::fromValue(this->indices.size());
-        indicesMap["Raw"]   = bytesToBlobVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t), nullptr);
+        indicesMap["Raw"]   = bytesToBlobVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t), executionContext);
 
         datasetMap["Indices"] = indicesMap;
 
@@ -1100,7 +1100,7 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
             auto selectionSet = getSelection<Points>();
 
             selection["Count"] = QVariant::fromValue(selectionSet->indices.size());
-            selection["Raw"] = bytesToBlobVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), nullptr);
+            selection["Raw"] = bytesToBlobVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), executionContext);
         }
 
         datasetMap["Selection"] = selection;
