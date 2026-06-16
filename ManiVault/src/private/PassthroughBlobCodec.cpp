@@ -42,7 +42,40 @@ QByteArray PassthroughBlobCodec::encode(const QByteArray& input) const
     qDebug() << __FUNCTION__;
 #endif
 
-    return input;
+    return encode(input.constData(), input.size());
+}
+
+QByteArray PassthroughBlobCodec::encode(const char* data, qsizetype size) const
+{
+#ifdef PASSTHROUGH_CODEC_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    if (data == nullptr)
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to encode input data",
+            "Input data pointer is null",
+            __FUNCTION__,
+            {
+                { "InputPointer", QString::number(reinterpret_cast<std::uintptr_t>(data), 16) },
+                { "InputSize", QString::number(size) }
+            }
+        );
+
+    if (size <= 0)
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to encode input data",
+            "Input data is empty",
+            __FUNCTION__,
+            {
+                { "InputPointer", QString::number(reinterpret_cast<std::uintptr_t>(data), 16) },
+                { "InputSize", QString::number(size) }
+            }
+        );
+
+    return QByteArray(data, size);
 }
 
 QByteArray PassthroughBlobCodec::decode(const QByteArray& input, qsizetype expectedSize) const

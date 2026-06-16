@@ -61,14 +61,36 @@ QByteArray ZstdBlobCodec::encode(const QByteArray& input) const
     qDebug() << __FUNCTION__;
 #endif
 
-    if (input.isEmpty())
+    return encode(input.constData(), input.size());
+}
+
+QByteArray ZstdBlobCodec::encode(const char* data, qsizetype size) const
+{
+#ifdef ZSTD_CODEC_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    if (data == nullptr)
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to encode input data",
+            "Input data pointer is null",
+            __FUNCTION__,
+            {
+                { "InputPointer", QString::number(reinterpret_cast<std::uintptr_t>(data), 16) },
+                { "InputSize", QString::number(size) }
+            }
+        );
+
+    if (size <= 0)
         throw mv::ManiVaultException(
             SeverityLevel::Error,
             "Failed to encode input data",
             "Input data is empty",
             __FUNCTION__,
             {
-                { "InputSize", QString::number(input.size()) }
+                { "InputPointer", QString::number(reinterpret_cast<std::uintptr_t>(data), 16) },
+                { "InputSize", QString::number(size) }
             }
         );
 
@@ -81,17 +103,49 @@ QByteArray ZstdBlobCodec::encode(const QByteArray& input) const
             "Invalid codec settings action",
             __FUNCTION__,
             {
-                { "InputSize", QString::number(input.size()) }
+                { "InputPointer", QString::number(reinterpret_cast<std::uintptr_t>(data), 16) },
+                { "InputSize", QString::number(size) }
             }
         );
 
-    const auto bound = ZSTD_compressBound(static_cast<size_t>(input.size()));
+    const auto inputSize = static_cast<size_t>(size);
+    const auto bound = ZSTD_compressBound(inputSize);
+
+    if (ZSTD_isError(bound))
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to encode input data",
+            getZstdErrorString("ZSTD_compressBound failed", bound),
+            __FUNCTION__,
+            {
+                { "InputPointer", QString::number(reinterpret_cast<std::uintptr_t>(data), 16) },
+                { "InputSize", QString::number(size) }
+            }
+        );
+
+    if (bound > static_cast<size_t>(std::numeric_limits<qsizetype>::max()))
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to encode input data",
+            "Compressed buffer bound exceeds QByteArray maximum size",
+            __FUNCTION__,
+            {
+                { "InputPointer", QString::number(reinterpret_cast<std::uintptr_t>(data), 16) },
+                { "InputSize", QString::number(size) },
+                { "CompressBound", QString::number(bound) }
+            }
+        );
 
     QByteArray output;
-
     output.resize(static_cast<qsizetype>(bound));
 
-    const auto compressedSize = ZSTD_compress(output.data(), bound, input.constData(), static_cast<size_t>(input.size()),settings->getLevelAction().getValue());
+    const auto compressedSize = ZSTD_compress(
+        output.data(),
+        bound,
+        data,
+        inputSize,
+        settings->getLevelAction().getValue()
+    );
 
     if (ZSTD_isError(compressedSize))
         throw mv::ManiVaultException(
@@ -100,7 +154,22 @@ QByteArray ZstdBlobCodec::encode(const QByteArray& input) const
             getZstdErrorString("ZSTD_compress failed", compressedSize),
             __FUNCTION__,
             {
-                { "InputSize", QString::number(input.size()) }
+                { "InputPointer", QString::number(reinterpret_cast<std::uintptr_t>(data), 16) },
+                { "InputSize", QString::number(size) },
+                { "CompressBound", QString::number(bound) }
+            }
+        );
+
+    if (compressedSize > static_cast<size_t>(std::numeric_limits<qsizetype>::max()))
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to encode input data",
+            "Compressed size exceeds QByteArray maximum size",
+            __FUNCTION__,
+            {
+                { "InputPointer", QString::number(reinterpret_cast<std::uintptr_t>(data), 16) },
+                { "InputSize", QString::number(size) },
+                { "CompressedSize", QString::number(compressedSize) }
             }
         );
 

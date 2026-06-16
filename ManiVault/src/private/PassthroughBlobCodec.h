@@ -37,6 +37,15 @@ public:
     [[nodiscard]] QByteArray encode(const QByteArray& input) const override;
 
     /**
+     * @brief Encode a block of raw bytes and return the encoded data.
+     * @note This method will throw an exception if encoding fails. The returned QByteArray is only valid if the encoding was successful.
+     * @param data Pointer to raw input bytes
+     * @param size Size of the raw input bytes in bytes
+     * @return Encoded bytes
+     */
+    [[nodiscard]] QByteArray encode(const char* data, qsizetype size) const override;
+
+    /**
      * @brief Decode a previously encoded block of bytes and return the decoded data.
      * @note This method will throw an exception if decoding fails. The returned QByteArray is only valid if the decoding was successful.
      * @param input Encoded input bytes

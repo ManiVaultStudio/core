@@ -97,35 +97,46 @@ void BlobCodec::encodeToFile(const QByteArray& input, const QString& filePath, s
     qDebug() << __FUNCTION__ << filePath;
 #endif
 
-    auto encodedBytes = encode(input);
+    encodeToFile(input.constData(), input.size(), filePath, numberOfEncodedBytes);
+}
+
+void BlobCodec::encodeToFile(const char* data, qsizetype size, const QString& filePath, std::uint64_t* numberOfEncodedBytes) const
+{
+#ifdef CODEC_VERBOSE
+    qDebug() << __FUNCTION__ << filePath;
+#endif
+
+    auto encodedBytes = encode(data, size);
 
     QFile file(filePath);
 
-    if (!file.open(QIODevice::WriteOnly))
-        throw mv::ManiVaultException(
-            SeverityLevel::Error,
-            "Failed to open file for writing",
-            QString("Unable to open file for writing: %1").arg(filePath),
-            __FUNCTION__,
-            {
-                { "FilePath", filePath },
-                { "InputSize", QString::number(input.size()) },
-                { "EncodedDataSize", QString::number(encodedBytes.size()) }
-            }
-        );
+    if (!file.open(QIODevice::WriteOnly)) {
+	    throw mv::ManiVaultException(
+			SeverityLevel::Error,
+			"Failed to open file for writing",
+			QString("Unable to open file for writing: %1").arg(filePath),
+			__FUNCTION__,
+			{
+				{ "FilePath", filePath },
+				{ "InputSize", QString::number(size) },
+				{ "EncodedDataSize", QString::number(encodedBytes.size()) }
+			}
+		);
+    }
 
-    if (file.write(encodedBytes) != encodedBytes.size())
-        throw mv::ManiVaultException(
-            SeverityLevel::Error,
-            "Failed to write file",
-            QString("Unable to write file: %1").arg(filePath),
-            __FUNCTION__,
-            {
-                { "FilePath", filePath },
-                { "InputSize", QString::number(input.size()) },
-                { "EncodedDataSize", QString::number(encodedBytes.size()) }
-            }
-        );
+    if (file.write(encodedBytes) != encodedBytes.size()) {
+	    throw mv::ManiVaultException(
+			SeverityLevel::Error,
+			"Failed to write file",
+			QString("Unable to write file: %1").arg(filePath),
+			__FUNCTION__,
+			{
+				{ "FilePath", filePath },
+				{ "InputSize", QString::number(size) },
+				{ "EncodedDataSize", QString::number(encodedBytes.size()) }
+			}
+		);
+    }
 
     if (numberOfEncodedBytes != nullptr)
         *numberOfEncodedBytes = static_cast<std::uint64_t>(encodedBytes.size());

@@ -47,7 +47,13 @@ EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& saveDir)
     EncodeBlockResult result;
 
     try {
-        QVariantMap blockVariantMap;
+        if (job._data == nullptr)
+            throw std::invalid_argument("EncodeBlockJob data pointer is null");
+
+        if (job._size > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max()))
+            throw std::overflow_error("EncodeBlockJob block size exceeds qsizetype range");
+
+    	QVariantMap blockVariantMap;
 
         blockVariantMap["Offset"] = QVariant::fromValue(job._offset);
         blockVariantMap["Size"]   = QVariant::fromValue(job._size);
@@ -57,7 +63,7 @@ EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& saveDir)
 
         std::uint64_t numberOfEncodedBytes = 0;
 
-        job._codec->encodeToFile(job._rawData, filePath, &numberOfEncodedBytes);
+        job._codec->encodeToFile(job._data + job._offset, static_cast<qsizetype>(job._size), filePath, &numberOfEncodedBytes);
 
         blockVariantMap["CompressedSize"]   = QVariant::fromValue<std::uint64_t>(numberOfEncodedBytes);
         blockVariantMap["URI"]              = fileName;
@@ -200,10 +206,10 @@ QVariantMap bytesToBlobVariantMap(const char* bytes, const std::uint64_t& number
 
 	        EncodeBlockJob job;
 
-	        job._offset     = offset;
-	        job._size       = blockSize;
-	        job._rawData    = QByteArray(bytes + offset, static_cast<qsizetype>(blockSize));
-            job._codec      = createCodec();
+            job._data   = bytes;
+	        job._offset = offset;
+	        job._size   = blockSize;
+            job._codec  = createCodec();
 
 	        encodeBlockJobs.push_back(std::move(job));
 

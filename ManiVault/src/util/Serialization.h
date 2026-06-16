@@ -33,9 +33,9 @@ using EncodeBlockResults = QVector<EncodeBlockResult>;
 
 struct EncodeBlockJob
 {
+    const char*         _data = nullptr;        /** Pointer to the start of the original raw data buffer */
     std::uint64_t       _offset = 0;            /** Offset of the block in the original data buffer */
     std::uint64_t       _size = 0;              /** Size of the block in the original data buffer */
-    QByteArray          _rawData;               /** Raw data block to encode */
     EncodeBlockResult   _result;                /** Result of encoding the block, populated after the block is encoded */
     SharedCodec         _codec;                 /** Codec to use for encoding the block (if applicable) */
 };

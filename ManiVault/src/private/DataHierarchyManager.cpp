@@ -449,7 +449,8 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
             ._workflowBatchingOptions
             ._datasetLoadingBatchSize;
     });
-   
+
+    qDebug() << datasetHandles.keys();
     const auto collectDatasetMapsStage = plan->addSequentialStage("Collect dataset maps", [saveItemMapsStage, datasetHandles](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         const auto itemMaps = executionContext->takeOutput(saveItemMapsStage).toMap();
 
