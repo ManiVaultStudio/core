@@ -6,6 +6,7 @@
 #include "WidgetAction.h"
 #include "WidgetActionContextMenu.h"
 #include "Application.h"
+#include "CoreInterface.h"
 
 #include <QDebug>
 #include <QHBoxLayout>
