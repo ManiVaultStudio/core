@@ -480,10 +480,6 @@ if(APPLE)
     # -always-overwrite
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
 
-    if(${MV_USE_ERROR_LOGGING})
-        list(APPEND MACOSX_BUNDLE_ADDITIONAL_LIBS \"$<TARGET_FILE:sentry>\" \"$<TARGET_FILE:crashpad_wer>\" \"$<TARGET_FILE:crashpad_handler}>\")
-    endif()
-
     install(CODE "
         message(\"**** MacOS bundle install ****\")
 
@@ -496,13 +492,8 @@ if(APPLE)
             if(NOT retval EQUAL 0)
                 message(FATAL_ERROR \"macdeployqt failed\")
             endif()
-
-
-            message(\"**** Copy additional libs: \${MACOSX_BUNDLE_ADDITIONAL_LIBS}\")
-            file(COPY \${MACOSX_BUNDLE_ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")
         endif()
     " COMPONENT MACOS_BUNDLE)
-
       
     install(CODE "execute_process(
             COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt6_DIR} \"${BUNDLE_DIR}\"
@@ -665,6 +656,15 @@ if(APPLE)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:${MV_PUBLIC_LIB}>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
         COMMENT "Copying bundle framework dependencies for build-tree debugging"
 	)
+
+    if(${MV_USE_ERROR_LOGGING})
+        add_custom_command(TARGET ${MV_EXE} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:sentry>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:crashpad_wer>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:crashpad_handler>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
+            COMMENT "Copying bundle framework dependencies for build-tree debugging (error logging)"
+        )
+    endif()
 
 endif()
 
