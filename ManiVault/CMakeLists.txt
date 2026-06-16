@@ -676,7 +676,7 @@ if(NOT APPLE)
     )
 
     # Create a symlink, e.g. libqtadvanceddockingd.so.4 -> libqtadvanceddockingd.so.4.5.0
-    if(NOT MSVC)
+    if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         add_custom_command(TARGET ${MV_EXE} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E create_symlink
                 $<TARGET_FILE_NAME:qtadvanceddocking-qt6>
