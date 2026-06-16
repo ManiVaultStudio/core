@@ -68,16 +68,16 @@ public:
         Nested      /** Nested workflows contribute fine-grained progress */
     };
 
-    
-
     using SharedState = std::shared_ptr<QVariantMap>;
 
 public:
     class Job;
 
-    using JobFunction               = std::function<void(const Job&, const SharedWorkflowExecutionContext& )>;
-    using JobFunctions              = std::vector<JobFunction>;
-    using NestedWorkflowFunction    = std::function<UniqueWorkflowPlan(const Job&,const SharedWorkflowExecutionContext&)>;
+    using JobFunction                       = std::function<void(const Job&, const SharedWorkflowExecutionContext& )>;
+    using JobFunctions                      = std::vector<JobFunction>;
+    using NestedWorkflowFunction            = std::function<UniqueWorkflowPlan(const Job&,const SharedWorkflowExecutionContext&)>;
+    using WorkflowBatchSizeFunction         = std::function<std::size_t(const SharedWorkflowExecutionContext&)>;
+    using OptionalWorkflowBatchSizeFunction = std::optional<WorkflowBatchSizeFunction>;
 
     struct NestedWorkflowJob
     {
@@ -204,14 +204,23 @@ public:
 
         Stage(QString name, ConcurrencyMode concurrencyMode, Jobs jobs, double weight = 1.0);
 
-        QUuid getId() const { return _id; }
+        Stage(QString name, Jobs jobs, WorkflowBatchSizeFunction batchSizeFunction, double weight);
 
-        WorkflowHandle getHandle() const
-        {
-            return WorkflowHandle(_id, _name);
-        }
+        QUuid getId() const;
+
+        WorkflowHandle getHandle() const;
 
         ConcurrencyMode getConcurrencyMode() const;
+
+        bool isSequential() const;
+
+        bool isParallel() const;
+
+        bool isBatchedParallel() const;
+
+        void setBatchSizeFunction(WorkflowBatchSizeFunction batchSizeFunction);
+
+        std::size_t resolveBatchSize(const SharedWorkflowExecutionContext& executionContext) const;
 
         QString getName() const;
 
@@ -229,11 +238,12 @@ public:
         bool isThreadAffinityCompatible() const;
 
     private:
-        QUuid           _id = QUuid::createUuid();
-        QString         _name;
-        ConcurrencyMode _concurrencyMode;
-        Jobs            _jobs;
-        double          _weight = 1.0;
+        QUuid                               _id = QUuid::createUuid();
+        QString                             _name;
+        ConcurrencyMode                     _concurrencyMode;
+        Jobs                                _jobs;
+        double                              _weight = 1.0;
+        OptionalWorkflowBatchSizeFunction   _batchSizeFunction;
     };
 
     using Stages = std::vector<Stage>;
@@ -256,6 +266,8 @@ public:
 
     // Returns an invalid handle until batched stages have a logical parent stage
     WorkflowHandle addBatchedParallelStage(const QString& name, Jobs jobs, std::size_t batchSize);
+
+    WorkflowHandle addBatchedParallelStage(const QString& name, Jobs jobs, WorkflowBatchSizeFunction batchSizeFunction);
 
     WorkflowHandle addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight = 1.0);
 

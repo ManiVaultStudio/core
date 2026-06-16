@@ -262,6 +262,64 @@ WorkflowPlan::Stage::Stage(QString name, ConcurrencyMode concurrencyMode, Jobs j
 {
 }
 
+WorkflowPlan::Stage::Stage(QString name, Jobs jobs, WorkflowBatchSizeFunction batchSizeFunction, double weight) :
+	_name(std::move(name)),
+	_concurrencyMode(ConcurrencyMode::Parallel),
+	_jobs(std::move(jobs)),
+	_weight(weight),
+	_batchSizeFunction(std::move(batchSizeFunction))
+{
+}
+
+QUuid WorkflowPlan::Stage::getId() const
+{
+	return _id;
+}
+
+WorkflowHandle WorkflowPlan::Stage::getHandle() const
+{
+	return WorkflowHandle(_id, _name);
+}
+
+bool WorkflowPlan::Stage::isSequential() const
+{
+	return _concurrencyMode == ConcurrencyMode::Sequential;
+}
+
+bool WorkflowPlan::Stage::isParallel() const
+{
+	return _concurrencyMode == ConcurrencyMode::Parallel;
+}
+
+bool WorkflowPlan::Stage::isBatchedParallel() const
+{
+    return _concurrencyMode == ConcurrencyMode::Parallel && _batchSizeFunction.has_value();
+}
+
+void WorkflowPlan::Stage::setBatchSizeFunction(WorkflowBatchSizeFunction batchSizeFunction)
+{
+	if (!batchSizeFunction)
+		throw std::invalid_argument("batchSizeFunction must be valid");
+
+	if (_concurrencyMode != ConcurrencyMode::Parallel)
+		throw std::logic_error("Only parallel stages can be batched");
+
+	_batchSizeFunction = std::move(batchSizeFunction);
+}
+
+std::size_t WorkflowPlan::Stage::resolveBatchSize(const SharedWorkflowExecutionContext& executionContext) const
+{
+	if (!_batchSizeFunction)
+		throw std::logic_error("Stage has no batch size function");
+
+	const auto batchSize = (*_batchSizeFunction)(executionContext);
+
+	if (batchSize == 0)
+		throw std::invalid_argument("Resolved batch size must be greater than zero");
+
+	return batchSize;
+}
+
 WorkflowPlan::ConcurrencyMode WorkflowPlan::Stage::getConcurrencyMode() const
 {
 	return _concurrencyMode;
@@ -346,35 +404,30 @@ WorkflowHandle WorkflowPlan::addBatchedParallelStage(const QString& name, Jobs j
     if (batchSize == 0)
         throw std::invalid_argument("batchSize must be greater than zero");
 
-    if (jobs.empty())
+    return addBatchedParallelStage(name, std::move(jobs), [batchSize](const SharedWorkflowExecutionContext&) {
+    	return batchSize;
+    });
+}
+
+WorkflowHandle WorkflowPlan::addBatchedParallelStage(const QString& name, Jobs jobs, WorkflowBatchSizeFunction batchSizeFunction)
+{
+    if (jobs.empty()) {
+        qWarning() << "Attempted to add empty batched parallel stage:" << name;
         return {};
-
-    std::size_t batchIndex = 0;
-
-    Stages batchStages;
-
-    for (std::size_t begin = 0; begin < jobs.size(); begin += batchSize) {
-        const auto end = std::min(begin + batchSize, jobs.size());
-
-        Jobs batchJobs;
-        batchJobs.reserve(end - begin);
-
-        for (std::size_t i = begin; i < end; ++i)
-            batchJobs.emplace_back(std::move(jobs[i]));
-
-        batchStages.emplace_back(
-            QString("%1 batch %2").arg(name).arg(++batchIndex),
-            ConcurrencyMode::Parallel,
-            std::move(batchJobs));
     }
 
-    // Temporary version: keep existing flat stage model.
-    // Return a logical handle is not possible yet without a real parent stage.
-    // So better return invalid than lie by returning the last batch.
-    for (auto& stage : batchStages)
-        addStage(std::move(stage));
+    if (!batchSizeFunction)
+        throw std::invalid_argument("batchSizeFunction must be valid");
 
-    return {};
+    Stage stage(
+        name,
+        ConcurrencyMode::Parallel,
+        std::move(jobs)
+    );
+
+    stage.setBatchSizeFunction(std::move(batchSizeFunction));
+
+    return addStage(std::move(stage));
 }
 
 WorkflowHandle WorkflowPlan::addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight /*= 1.0*/)

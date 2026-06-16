@@ -7,14 +7,14 @@
 namespace mv::workflow
 {
 
-std::size_t WorkflowBatchingOptions::conservativeBatchSize()
+std::size_t WorkflowBatchingOptions::conservativeDatasetsSerializationBatchSize()
 {
 	const auto cores = std::max(1u, std::thread::hardware_concurrency());
 
 	return std::clamp<std::size_t>(static_cast<std::size_t>(cores / 8), 2, 8);
 }
 
-std::size_t WorkflowBatchingOptions::conservativeBlockBatchSize()
+std::size_t WorkflowBatchingOptions::conservativeBlockSerializationBatchSize()
 {
 	const auto cores = std::max(1u, std::thread::hardware_concurrency());
 

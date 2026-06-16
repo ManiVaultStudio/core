@@ -343,7 +343,7 @@ std::int32_t WorkflowExecutionContext::getDepth() const
 	return _executionPath.isEmpty() ? 0 : static_cast<std::int32_t>(_executionPath.size()) - 1;
 }
 
-const WorkflowExecutionOptions& WorkflowExecutionContext::getExecutionOptions() const
+WorkflowExecutionOptions WorkflowExecutionContext::getExecutionOptions() const
 {
     if (!_state)
         return {};

@@ -165,7 +165,7 @@ public:
      */
     std::int32_t getDepth() const;
 
-    const WorkflowExecutionOptions& getExecutionOptions() const;
+    WorkflowExecutionOptions getExecutionOptions() const;
 
 public: // ID
 
