@@ -6,6 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 #include "AbstractWorkflowTraceSink.h"
+#include "WorkflowBatchingOptions.h"
 
 namespace mv::workflow
 {
@@ -21,6 +22,7 @@ struct CORE_EXPORT WorkflowExecutionOptions
     SharedWorkflowTraceSink         _traceSink;                                                         /** Initialized based on _executionOptions._traceSinkType */
     bool                            _enableConsoleDashboard = false;                                    /** Whether to enable the console dashboard for this workflow execution. This will be ignored if a trace sink is provided, as the trace sink is responsible for managing its own dashboard if needed. */
     std::uint32_t                   _maxConsoleLogDepth = std::numeric_limits<std::uint32_t>::max();    /** The maximum depth of the workflow execution graph to log to the console */
+    WorkflowBatchingOptions         _workflowBatchingOptions;                                           /** Batching options for workflow execution. These options control the degree of parallelism for various operations during workflow execution, such as loading and saving datasets, and encoding and decoding data blocks. Adjust these options based on the expected workload and system capabilities to achieve optimal performance without overwhelming system resources. (under normal circumstances this should be sufficient) */
 };
 
 /** Optional WorkflowExecutionOptions for configuring workflow execution behavior */
