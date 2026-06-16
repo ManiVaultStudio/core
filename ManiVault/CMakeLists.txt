@@ -391,18 +391,6 @@ if(MV_PRECOMPILE_HEADERS)
 endif()
 
 if(APPLE)
-
-    # Make required non-Qt dylibs available in the build-tree app bundle for debugger runs
-    add_custom_command(TARGET ${MV_EXE} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:qtadvanceddocking-qt6>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
-        # Keep one real dylib and add a SONAME alias so dyld can resolve @rpath/libqtadvanceddocking*.4.dylib. Make sure to remove any existing SONAME (symlink) first.
-        COMMAND ${CMAKE_COMMAND} -E rm -f "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/$<TARGET_SONAME_FILE_NAME:qtadvanceddocking-qt6>"
-        COMMAND ${CMAKE_COMMAND} -E create_symlink "$<TARGET_FILE_NAME:qtadvanceddocking-qt6>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/$<TARGET_SONAME_FILE_NAME:qtadvanceddocking-qt6>"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:${MV_PUBLIC_LIB}>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
-        COMMENT "Copying bundle framework dependencies for build-tree debugging"
-	)
-
     set_target_properties(${MV_EXE} PROPERTIES
         # Find libraries relative to the executable in the macOS .app tree
         BUILD_WITH_INSTALL_RPATH True
@@ -412,7 +400,6 @@ if(APPLE)
         XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING NO
         XCODE_SCHEME_EXECUTABLE "${MV_INSTALL_DIR}/Debug/ManiVault Studio.app"
     )
-
 endif()
 
 # -----------------------------------------------------------------------------
@@ -667,6 +654,18 @@ if(APPLE)
             --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
             --verbose
     )
+
+    # Make required non-Qt dylibs available in the build-tree app bundle for debugger runs
+    add_custom_command(TARGET ${MV_EXE} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:qtadvanceddocking-qt6>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
+        # Keep one real dylib and add a SONAME alias so dyld can resolve @rpath/libqtadvanceddocking*.4.dylib. Make sure to remove any existing SONAME (symlink) first.
+        COMMAND ${CMAKE_COMMAND} -E rm -f "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/$<TARGET_SONAME_FILE_NAME:qtadvanceddocking-qt6>"
+        COMMAND ${CMAKE_COMMAND} -E create_symlink "$<TARGET_FILE_NAME:qtadvanceddocking-qt6>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/$<TARGET_SONAME_FILE_NAME:qtadvanceddocking-qt6>"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:${MV_PUBLIC_LIB}>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
+        COMMENT "Copying bundle framework dependencies for build-tree debugging"
+	)
+
 endif()
 
 if(NOT APPLE)
