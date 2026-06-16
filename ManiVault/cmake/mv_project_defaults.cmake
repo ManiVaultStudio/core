@@ -50,14 +50,14 @@ function(mv_project_defaults)
         set(CMAKE_XCODE_GENERATE_SCHEME ON CACHE BOOL "" FORCE)
 
         # macOS-specific RPATH
-        set(MV_INSTALL_RPATH "@loader_path" CACHE INTERNAL)
+        set(MV_INSTALL_RPATH "@loader_path")
     endif()
 
     # -----------------------------------------------------------------------------
     # Other Unix settings
     # -----------------------------------------------------------------------------
     if(UNIX AND NOT APPLE)
-        set(MV_INSTALL_RPATH "${MV_INSTALL_DIR}/$<CONFIGURATION>/lib" CACHE INTERNAL)
+        set(MV_INSTALL_RPATH "${MV_INSTALL_DIR}/$<CONFIGURATION>/lib")
     endif()
 
     # -----------------------------------------------------------------------------
