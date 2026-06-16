@@ -124,18 +124,25 @@ void BlobCodec::encodeToFile(const char* data, qsizetype size, const QString& fi
 		);
     }
 
-    if (file.write(encodedBytes) != encodedBytes.size()) {
-	    throw mv::ManiVaultException(
-			SeverityLevel::Error,
-			"Failed to write file",
-			QString("Unable to write file: %1").arg(filePath),
-			__FUNCTION__,
-			{
-				{ "FilePath", filePath },
-				{ "InputSize", QString::number(size) },
-				{ "EncodedDataSize", QString::number(encodedBytes.size()) }
-			}
-		);
+    const auto bytesWritten = file.write(encodedBytes);
+
+    if (bytesWritten != encodedBytes.size()) {
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to write file",
+            QString("Wrote %1 of %2 bytes to: %3. QFile error: %4")
+            .arg(bytesWritten)
+            .arg(encodedBytes.size())
+            .arg(filePath)
+            .arg(file.errorString()),
+            __FUNCTION__,
+            {
+                { "FilePath", filePath },
+                { "BytesWritten", QString::number(bytesWritten) },
+                { "ExpectedBytes", QString::number(encodedBytes.size()) },
+                { "QFileError", file.errorString() }
+            }
+        );
     }
 
     if (numberOfEncodedBytes != nullptr)

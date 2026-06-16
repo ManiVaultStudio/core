@@ -79,7 +79,7 @@ EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& saveDir)
     }
     catch (const std::exception& exception) {
         throw ManiVaultException(SeverityLevel::Error,
-            "Enable to encode block",
+            "Unable to encode block",
             exception.what(),
             __FUNCTION__,
             {

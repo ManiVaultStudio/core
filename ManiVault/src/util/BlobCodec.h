@@ -115,7 +115,7 @@ public:
      * @param filePath Path of the file on disk to which the encoded data is saved
      * @param numberOfEncodedBytes Optional output parameter to receive the number of bytes that were encoded and written to the file
      */
-    void encodeToFile(const char* data, qsizetype size, const QString& filePath, std::uint64_t* numberOfEncodedBytes = nullptr) const;
+    virtual void encodeToFile(const char* data, qsizetype size, const QString& filePath, std::uint64_t* numberOfEncodedBytes = nullptr) const;
 
     /*
      * @brief Load encoded data from a file on disk and decode it.

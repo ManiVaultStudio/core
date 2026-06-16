@@ -46,6 +46,16 @@ public:
     [[nodiscard]] QByteArray encode(const char* data, qsizetype size) const override;
 
     /**
+     * @brief Encode a block of raw bytes and save the encoded data to a file on disk.
+     * @note This method will throw an exception if encoding fails. The encoded data is only valid if the encoding was successful.
+     * @param data Pointer to raw input bytes
+     * @param size Size of the raw input bytes in bytes
+     * @param filePath Path of the file on disk to which the encoded data is saved
+     * @param numberOfEncodedBytes Pointer to a variable that receives the number of encoded bytes written to the file, or nullptr if not needed
+     */
+    void encodeToFile(const char* data, qsizetype size, const QString& filePath, std::uint64_t* numberOfEncodedBytes) const;
+
+    /**
      * @brief Decode a previously encoded block of bytes and return the decoded data.
      * @note This method will throw an exception if decoding fails. The returned QByteArray is only valid if the decoding was successful.
      * @param input Encoded input bytes

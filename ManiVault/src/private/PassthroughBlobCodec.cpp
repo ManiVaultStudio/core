@@ -75,7 +75,41 @@ QByteArray PassthroughBlobCodec::encode(const char* data, qsizetype size) const
             }
         );
 
-    return QByteArray(data, size);
+    return { data, size };
+}
+
+void PassthroughBlobCodec::encodeToFile(const char* data, qsizetype size, const QString& filePath, std::uint64_t* numberOfEncodedBytes) const
+{
+    QFile file(filePath);
+
+    if (!file.open(QIODevice::WriteOnly))
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to open file for writing",
+            file.errorString(),
+            __FUNCTION__,
+            {
+                { "FilePath", filePath }
+            }
+        );
+
+    const auto bytesWritten = file.write(data, size);
+
+    if (bytesWritten != size)
+        throw mv::ManiVaultException(
+            SeverityLevel::Error,
+            "Failed to write all data to file",
+            file.errorString(),
+            __FUNCTION__,
+            {
+                { "FilePath", filePath },
+                { "BytesWritten", QString::number(bytesWritten) },
+                { "ExpectedBytes", QString::number(size) }
+            }
+        );
+
+    if (numberOfEncodedBytes)
+        *numberOfEncodedBytes = static_cast<std::uint64_t>(bytesWritten);
 }
 
 QByteArray PassthroughBlobCodec::decode(const QByteArray& input, qsizetype expectedSize) const
