@@ -66,7 +66,7 @@ struct DecodeBlockJob
 
 using DecodeBlockJobs = QVector<DecodeBlockJob>;
 
-CORE_EXPORT QVariantMap bytesToBlobVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, workflow::SharedWorkflowExecutionContext parentContext = nullptr);
+CORE_EXPORT QVariantMap bytesToBlobVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, const workflow::SharedWorkflowExecutionContext& executionContext = nullptr);
 
 /**
  * Decode a block of data from a file on disk and populate the provided output buffer with the decoded data

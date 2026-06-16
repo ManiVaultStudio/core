@@ -161,7 +161,7 @@ EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& saveDir)
     };
 }
 
-QVariantMap bytesToBlobVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, SharedWorkflowExecutionContext parentContext /*= nullptr*/)
+QVariantMap bytesToBlobVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, const SharedWorkflowExecutionContext& executionContext /*= nullptr*/)
 {
     try {
         if (!mv::projects().hasProject())
@@ -226,9 +226,9 @@ QVariantMap bytesToBlobVariantMap(const char* bytes, const std::uint64_t& number
         }
 
         if (!encodeJobs.empty()) {
-            encodeWorkflowPlan->addParallelStage("Encode Blocks", encodeJobs);
+            encodeWorkflowPlan->addBatchedParallelStage("Encode Blocks", encodeJobs, );
 
-            auto future = WorkflowRuntimeScoped::executeBlocking(std::move(encodeWorkflowPlan), parentContext);
+            auto future = WorkflowRuntimeScoped::executeBlocking(std::move(encodeWorkflowPlan), executionContext);
 
             QVariantList blocks;
 
