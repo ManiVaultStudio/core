@@ -1052,54 +1052,6 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap)
         return DimensionNamesSerializer::fromVariantMapWorkflow(this, variantMap);
     });
 
-    /*
-    plan->addSequentialStage("Load dimensions", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
-        variantMapMustContain(variantMap, "DimensionNames");
-
-        // Load dimension names
-        QStringList dimensionNameList;
-        std::vector<QString> dimensionNames;
-
-        // Fetch dimension names from map
-        const auto fetchDimensionNames = [&variantMap, executionContext]() -> QStringList {
-            QStringList dimensionNames;
-
-            // Dimension names in byte array format
-            QByteArray dimensionsByteArray = bytesFromBlobVariantMap(variantMap["DimensionNames"].toMap(), executionContext);
-
-            // Open input data stream
-            QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::ReadOnly);
-
-            // Stream the data to the dimension names
-            dimensionsDataStream >> dimensionNames;
-
-            return dimensionNames;
-        };
-
-        if (variantMap["NumberOfDimensions"].toUInt() > 1000)
-            dimensionNameList = fetchDimensionNames();
-        else
-            dimensionNameList = variantMap["DimensionNames"].toStringList();
-
-        if (dimensionNameList.size() == getNumDimensions())
-        {
-            for (const auto& dimensionName : dimensionNameList)
-                dimensionNames.push_back(dimensionName);
-        }
-        else
-        {
-            for (std::uint64_t dimensionIndex = 0; dimensionIndex < getNumDimensions(); dimensionIndex++)
-                dimensionNames.emplace_back(QString("Dim %1").arg(QString::number(dimensionIndex)));
-        }
-
-        setDimensionNames(dimensionNames);
-
-        if (variantMap.contains("Dimensions")) {
-            _dimensionsPickerAction->fromParentVariantMap(variantMap);
-        }
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
-    */
-
     return plan;
 }
 

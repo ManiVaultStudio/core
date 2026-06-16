@@ -95,9 +95,7 @@ void PointsLegacySerializer::fromVariantMapPre150(Points& points, const QVariant
 
     // Load raw point data
     if (points.isFull()) {
-        auto plan = points.getRawData<PointData>()->fromVariantMapWorkflow(variantMap);
-
-		workflow::WorkflowRuntimeScoped::executeBlocking(std::move(plan), nullptr);
+        PointDataLegacySerializer::fromVariantMapPre150(*points.getRawData<PointData>(), variantMap, executionContext);
     }
     else
     {
@@ -115,11 +113,11 @@ void PointsLegacySerializer::fromVariantMapPre150(Points& points, const QVariant
     std::vector<QString> dimensionNames;
 
     // Fetch dimension names from map
-    const auto fetchDimensionNames = [&variantMap]() -> QStringList {
+    const auto fetchDimensionNames = [&variantMap, executionContext]() -> QStringList {
         QStringList dimensionNames;
 
         // Dimension names in byte array format
-        QByteArray dimensionsByteArray = bytesFromBlobVariantMap(variantMap["DimensionNames"].toMap());
+        QByteArray dimensionsByteArray = bytesFromBlobVariantMap(variantMap["DimensionNames"].toMap(), executionContext);
 
         // Open input data stream
         QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::ReadOnly);

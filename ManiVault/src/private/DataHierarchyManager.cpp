@@ -375,7 +375,7 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMa
     }
 
     const auto cores        = std::max(1u, std::thread::hardware_concurrency());
-    const auto batchSize    = std::clamp<std::size_t>(cores / 2, 4, 32);
+    const auto batchSize    = std::clamp<std::size_t>(cores / 4, 4, 16);
 
     plan->addBatchedParallelStage("Load datasets", std::move(datasetJobs), batchSize);
     //plan->addParallelStage("Load datasets", std::move(datasetJobs));
