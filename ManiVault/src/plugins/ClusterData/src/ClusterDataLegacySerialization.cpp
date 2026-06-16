@@ -16,7 +16,7 @@ namespace mv::legacy
 
 void ClusterDataLegacySerializer::fromVariantMapPre150(ClusterData& clusterData, const QVariantMap& variantMap, const workflow::SharedWorkflowExecutionContext& executionContext)
 {
-    qDebug() << "Deserializing ClusterData from legacy format (pre-1.5.0). This may result in loss of information if the format has changed significantly since then.";
+    executionContext->warning("Deserializing ClusterData from legacy format (pre-1.5.0)");
 
     const auto dataMap = variantMap["Data"].toMap();
 
@@ -95,7 +95,7 @@ void ClusterDataLegacySerializer::fromVariantMapPre150(ClusterData& clusterData,
 
 void ClustersLegacySerializer::fromVariantMapPre150(Clusters& clusters, const QVariantMap& variantMap, const workflow::SharedWorkflowExecutionContext& executionContext)
 {
-    qDebug() << "Deserializing Clusters from legacy format (pre-1.5.0). This may result in loss of information if the format has changed significantly since then.";
+    executionContext->warning(QString("Deserializing %1 Clusters from legacy format (pre-1.5.0)").arg(clusters.getGuiName()));
 
     auto plan = clusters.getRawData<ClusterData>()->fromVariantMapWorkflow(variantMap);
 

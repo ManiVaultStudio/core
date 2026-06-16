@@ -162,16 +162,16 @@ void NavigationAction::fromVariantMap(const QVariantMap& variantMap)
 {
     HorizontalToolbarAction::fromVariantMap(variantMap);
 
-    _zoomOutAction.fromParentVariantMap(variantMap);
-    _zoomPercentageAction.fromParentVariantMap(variantMap);
-    _zoomInAction.fromParentVariantMap(variantMap);
-    _zoomExtentsAction.fromParentVariantMap(variantMap);
-    _zoomSelectionAction.fromParentVariantMap(variantMap);
-    _zoomRegionAction.fromParentVariantMap(variantMap);
-    _freezeNavigation.fromParentVariantMap(variantMap);
+    _zoomOutAction.fromParentVariantMap(variantMap, true);
+    _zoomPercentageAction.fromParentVariantMap(variantMap, true);
+    _zoomInAction.fromParentVariantMap(variantMap, true);
+    _zoomExtentsAction.fromParentVariantMap(variantMap, true);
+    _zoomSelectionAction.fromParentVariantMap(variantMap, true);
+    _zoomRegionAction.fromParentVariantMap(variantMap, true);
+    _freezeNavigation.fromParentVariantMap(variantMap, true);
     //_zoomRectangleAction.fromParentVariantMap(variantMap); // Buggy behavior if uncommented
-    _zoomCenterAction.fromParentVariantMap(variantMap);
-    _zoomFactorAction.fromParentVariantMap(variantMap);
+    _zoomCenterAction.fromParentVariantMap(variantMap, true);
+    _zoomFactorAction.fromParentVariantMap(variantMap, true);
     _zoomMarginAction.fromParentVariantMap(variantMap, true);
 }
 

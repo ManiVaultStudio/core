@@ -17,7 +17,7 @@ namespace mv::legacy
 
 void PointDataLegacySerializer::fromVariantMapPre150(PointData& pointData, const QVariantMap& variantMap, const workflow::SharedWorkflowExecutionContext& executionContext)
 {
-    qDebug() << "Deserializing PointData from legacy format (pre-1.5.0). This may result in loss of information if the format has changed significantly since then.";
+    executionContext->warning("Deserializing PointData from legacy format (pre-1.5.0)");
 
     variantMapMustContain(variantMap, "Data");
     variantMapMustContain(variantMap, "NumberOfPoints");
@@ -78,7 +78,7 @@ void PointDataLegacySerializer::fromVariantMapPre150(PointData& pointData, const
 
 void PointsLegacySerializer::fromVariantMapPre150(Points& points, const QVariantMap& variantMap, const workflow::SharedWorkflowExecutionContext& executionContext)
 {
-    qDebug() << "Deserializing Points from legacy format (pre-1.5.0). This may result in loss of information if the format has changed significantly since then.";
+    executionContext->warning(QString("Deserializing %1 Points from legacy format (pre-1.5.0)").arg(points.getGuiName()));
 
     variantMapMustContain(variantMap, "DimensionNames");
     variantMapMustContain(variantMap, "Selection");
