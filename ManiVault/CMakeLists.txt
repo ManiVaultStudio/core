@@ -391,10 +391,6 @@ if(MV_PRECOMPILE_HEADERS)
 endif()
 
 if(APPLE)
-    # Find libraries relative to the executable in the macOS .app tree
-    set_target_properties(${MV_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
-    set_target_properties(${MV_EXE} PROPERTIES INSTALL_RPATH "@loader_path;@executable_path/../Frameworks")
-
 
     # Make required non-Qt dylibs available in the build-tree app bundle for debugger runs
     add_custom_command(TARGET ${MV_EXE} POST_BUILD
@@ -407,10 +403,15 @@ if(APPLE)
         COMMENT "Copying bundle framework dependencies for build-tree debugging"
 	)
 
-    # Debug ManiVault Studio from the install directory
-    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_WORKING_DIRECTORY "$<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>")   
-    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING NO)
-    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_EXECUTABLE "${MV_INSTALL_DIR}/Debug/ManiVault Studio.app")
+    set_target_properties(${MV_EXE} PROPERTIES
+        # Find libraries relative to the executable in the macOS .app tree
+        BUILD_WITH_INSTALL_RPATH True
+        INSTALL_RPATH "@loader_path;@executable_path/../Frameworks"
+        # Debug ManiVault Studio from the install directory
+        XCODE_SCHEME_WORKING_DIRECTORY "$<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>"
+        XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING NO
+        XCODE_SCHEME_EXECUTABLE "${MV_INSTALL_DIR}/Debug/ManiVault Studio.app"
+    )
 
 endif()
 
