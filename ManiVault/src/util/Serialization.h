@@ -91,9 +91,9 @@ CORE_EXPORT DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decode
  */
 CORE_EXPORT DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec);
 
-CORE_EXPORT workflow::UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, workflow::SharedWorkflowExecutionContext parentContext = nullptr);
-CORE_EXPORT void                         populateBytesFromBlobMap(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, workflow::SharedWorkflowExecutionContext parentContext = nullptr);
-CORE_EXPORT QByteArray                   bytesFromBlobVariantMap(const QVariantMap& variantMap, workflow::SharedWorkflowExecutionContext parentContext = nullptr);
+CORE_EXPORT workflow::UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, const workflow::SharedWorkflowExecutionContext& executionContext = nullptr);
+CORE_EXPORT void                         populateBytesFromBlobMap(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, const workflow::SharedWorkflowExecutionContext& executionContext = nullptr);
+CORE_EXPORT QByteArray                   bytesFromBlobVariantMap(const QVariantMap& variantMap, const workflow::SharedWorkflowExecutionContext& executionContext = nullptr);
 
 /**
  * Raises an exception if an item with key is not found in a variant map
