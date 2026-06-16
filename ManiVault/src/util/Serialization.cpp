@@ -646,22 +646,6 @@ UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMa
         ++jobIndex;
     }
 
-    const auto idealThreads = std::max(1u, std::thread::hardware_concurrency());
-
-    std::size_t decodeBlockBatchSize = 8;
-
-    if (idealThreads <= 64)
-        decodeBlockBatchSize = 8;
-
-    if (idealThreads <= 32)
-        decodeBlockBatchSize = 4;
-
-	if (idealThreads <= 16)
-        decodeBlockBatchSize = 2;
-
-    if (idealThreads <= 4)
-        decodeBlockBatchSize = 1;
-
     plan->addBatchedParallelStage("Decode Blocks", jobs, resolvedOptions._workflowBatchingOptions._dataBlockDecodingBatchSize);
 
     return plan;
