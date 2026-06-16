@@ -197,6 +197,7 @@ UniqueWorkflowPlan ClustersSerializer::toVariantMapWorkflow(const QVector<Cluste
         Indices allIndices;
         QVariantMap outputMap;
 
+        qDebug() << "-----------A-----------";
         headers.reserve(static_cast<std::size_t>(clusters.size()));
 
         allIndices = buildIndexBuffer(clusters, headers);
@@ -208,6 +209,8 @@ UniqueWorkflowPlan ClustersSerializer::toVariantMapWorkflow(const QVector<Cluste
         outputMap["ClustersIndicesRawDataSize"] = allIndices.size() * sizeof(unsigned int);
         outputMap["ClustersMetaData"]           = bytesToBlobVariantMap(headersRaw.constData(), headersRaw.size(), executionContext);
         outputMap["ClustersIndicesRawData"]     = bytesToBlobVariantMap(reinterpret_cast<const char*>(allIndices.data()), allIndices.size() * sizeof(unsigned int), executionContext);
+
+        qDebug() << "-----------B-----------";
 
         executionContext->setOutput(outputMap);
     });

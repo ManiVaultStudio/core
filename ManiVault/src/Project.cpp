@@ -240,7 +240,7 @@ UniqueWorkflowPlan Project::toVariantMapWorkflow() const
         outputMap[mv::actions().getSerializationName()]         = executionContext->takeOutput(saveActionsStage).toMap();
         outputMap[mv::dataHierarchy().getSerializationName()]   = executionContext->takeOutput(saveDataHierarchyStage).toMap();
         outputMap[mv::events().getSerializationName()]          = executionContext->takeOutput(saveEventsStage).toMap();
-        outputMap[mv::workspaces().getSerializationName()]      = executionContext->takeOutput(saveWorkspacesStage).toMap();
+        //outputMap[mv::workspaces().getSerializationName()]      = executionContext->takeOutput(saveWorkspacesStage).toMap();
 
     	executionContext->setOutput(outputMap);
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);

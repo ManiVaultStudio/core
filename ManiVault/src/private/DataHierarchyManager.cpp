@@ -443,6 +443,8 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
         saveDatasetsJobs.emplace_back(std::move(job));
     }
 
+    //plan->addSequentialStage("Save datasets", std::move(saveDatasetsJobs));
+
     plan->addBatchedParallelStage("Save datasets", std::move(saveDatasetsJobs), [](const SharedWorkflowExecutionContext& executionContext) {
         return executionContext->getState()
             ->getExecutionOptions()
