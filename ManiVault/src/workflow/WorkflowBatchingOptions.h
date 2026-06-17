@@ -5,9 +5,6 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
-#include "AbstractWorkflowTraceSink.h"
-
-#include <thread>
 
 namespace mv::workflow
 {

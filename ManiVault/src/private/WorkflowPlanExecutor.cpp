@@ -7,7 +7,6 @@
 
 #include <workflow/WorkflowResultRegistry.h>
 #include <workflow/WorkflowMetric.h>
-#include <workflow/WorkflowConsoleTraceSink.h>
 
 #include <CoreInterface.h>
 #include <Task.h>

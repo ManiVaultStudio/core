@@ -67,22 +67,6 @@ const WorkflowExecutionMetrics& WorkflowExecutionState::metrics() const
 	return _metrics;
 }
 
-std::shared_ptr<AbstractWorkflowTraceSink> WorkflowExecutionState::getTraceSink() const
-{
-	return _executionOptions._traceSink;
-}
-
-void WorkflowExecutionState::trace(WorkflowTraceEvent event) const
-{
-	if (!getTraceSink())
-		return;
-
-	event._threadId    = QThread::currentThreadId();
-	event._timestampNs = AbstractWorkflowTraceSink::currentTimestampNs();
-
-    getTraceSink()->trace(event);
-}
-
 void WorkflowExecutionState::publishResultValue(const QUuid& contextId, const QString& key, const QVariant& value)
 {
     QMutexLocker lock(&_resultValuesMutex);

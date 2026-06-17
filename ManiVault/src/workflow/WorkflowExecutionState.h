@@ -45,12 +45,6 @@ public: // Metrics
 
     [[nodiscard]] const WorkflowExecutionMetrics& metrics() const;
 
-public: // Tracing
-
-    [[nodiscard]] std::shared_ptr<AbstractWorkflowTraceSink> getTraceSink() const;
-
-    void trace(WorkflowTraceEvent event) const;
-
 public: // Result values
 
     void publishResultValue(

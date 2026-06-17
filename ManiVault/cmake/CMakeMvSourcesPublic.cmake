@@ -683,7 +683,6 @@ set(PUBLIC_UTIL_FILES
 
 set(PUBLIC_WORKFLOW_HEADERS
     src/workflow/AbstractWorkflowPlanExecutor.h
-    src/workflow/AbstractWorkflowTraceSink.h
     src/workflow/WorkflowExecutionContext.h
     src/workflow/WorkflowContextBase.h
     src/workflow/WorkflowResultBase.h
@@ -703,12 +702,9 @@ set(PUBLIC_WORKFLOW_HEADERS
     src/workflow/WorkflowExecutionMetrics.h
     src/workflow/WorkflowResultRegistry.h
     src/workflow/WorkflowResultDialog.h
-    src/workflow/WorkflowTraceEvent.h
     src/workflow/WorkflowConsoleFormatter.h
     src/workflow/WorkflowExecutionLifecycleScope.h
     src/workflow/WorkflowStageSummary.h
-    src/workflow/WorkflowConsoleTraceSink.h
-    src/workflow/WorkflowChromeTraceSink.h
     src/workflow/WorkflowExecutionNodeType.h
     src/workflow/WorkflowConsoleDashboard.h
     src/workflow/WorkflowConsoleDashboardScope.h
@@ -721,7 +717,6 @@ set(PUBLIC_WORKFLOW_HEADERS
 
 set(PUBLIC_WORKFLOW_SOURCES
     src/workflow/AbstractWorkflowPlanExecutor.cpp    
-    src/workflow/AbstractWorkflowTraceSink.cpp
     src/workflow/WorkflowContextBase.cpp
     src/workflow/WorkflowResultBase.cpp
     src/workflow/WorkflowJobResult.cpp
@@ -741,12 +736,9 @@ set(PUBLIC_WORKFLOW_SOURCES
     src/workflow/WorkflowExecutionMetrics.cpp
     src/workflow/WorkflowResultRegistry.cpp
     src/workflow/WorkflowResultDialog.cpp
-    src/workflow/WorkflowTraceEvent.cpp
     src/workflow/WorkflowConsoleFormatter.cpp
     src/workflow/WorkflowExecutionLifecycleScope.cpp
     src/workflow/WorkflowStageSummary.cpp
-    src/workflow/WorkflowConsoleTraceSink.cpp
-    src/workflow/WorkflowChromeTraceSink.cpp
     src/workflow/WorkflowExecutionNodeType.cpp
     src/workflow/WorkflowConsoleDashboard.cpp
     src/workflow/WorkflowConsoleDashboardScope.cpp

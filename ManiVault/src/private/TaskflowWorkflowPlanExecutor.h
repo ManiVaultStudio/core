@@ -257,7 +257,7 @@ private: // Helpers
     static std::string makeTraceName(const QString& kind, const QString& name);
 
 private:
-    tf::Executor                        _executor;
-    std::shared_ptr<tf::ChromeObserver> _observer;
+    tf::Executor                            _executor;
+    std::shared_ptr<tf::ChromeObserver>     _chromeObserver;
 };
 

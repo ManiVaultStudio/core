@@ -77,17 +77,5 @@ SharedWorkflowExecutionContext AbstractWorkflowPlanExecutor::requireContext(cons
 	return context;
 }
 
-void AbstractWorkflowPlanExecutor::trace(const SharedWorkflowExecutionContext& context, WorkflowTraceEvent event)
-{
-    if (auto state = context->getState()) {
-        if (auto traceSink = state->getTraceSink()) {
-            event._threadId     = QThread::currentThreadId();
-            event._timestampNs  = AbstractWorkflowTraceSink::currentTimestampNs();
-
-            traceSink->trace(event);
-        }
-    }
-}
-
 }
 

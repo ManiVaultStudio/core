@@ -8,7 +8,6 @@
 #include "WorkflowPlan.h"
 #include "WorkflowExecutionContext.h"
 #include "WorkflowResult.h"
-#include "AbstractWorkflowTraceSink.h"
 #include "WorkflowResultFuture.h"
 #include "Task.h"
 
@@ -45,14 +44,7 @@ private: // Execute individual jobs
     virtual void executeJobOnWorkerThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext) = 0;
     virtual void executeJob(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext) = 0;
 
-protected: // Tracing
-
-    /**
-     * Traces a workflow event by sending it to the trace sink associated with the current workflow execution context, if available. The event's thread ID and timestamp are automatically set before tracing.
-     * @param context The shared workflow execution context from which to obtain the trace sink and to which the event is related.
-     * @param event The WorkflowTraceEvent object containing details about the event to be traced.
-     */
-    static void trace(const SharedWorkflowExecutionContext& context, WorkflowTraceEvent event);
+protected:
 
     static SharedWorkflowExecutionContext requireContext(const SharedWorkflowExecutionContext& context, const char* where);
 

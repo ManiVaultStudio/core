@@ -37,7 +37,6 @@ using namespace mv::workflow;
 TaskflowWorkflowPlanExecutor::TaskflowWorkflowPlanExecutor(QObject* parent) :
     AbstractWorkflowPlanExecutor(parent)
 {
-    _observer = _executor.make_observer<tf::ChromeObserver>();
 }
 
 WorkflowResultFuture TaskflowWorkflowPlanExecutor::execute(
@@ -140,8 +139,8 @@ WorkflowResultFuture TaskflowWorkflowPlanExecutor::executeAsyncImpl(
 
 SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& workflowPlan, Task* task, const WorkflowExecutionOptions& executionOptions)
 {
-    //_observer.reset();
-    //_observer = _executor.make_observer<tf::ChromeObserver>();
+    //_chromeObserver.reset();
+    //_chromeObserver = _executor.make_observer<tf::ChromeObserver>();
 
     auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task, executionOptions);
 
@@ -151,6 +150,15 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
 SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext rootContext)
 {
     rootContext = requireContext(rootContext, __FUNCTION__);
+
+    if (rootContext->isRootExecution() && _chromeObserver) {
+
+        if (_chromeObserver) {
+            _chromeObserver.reset();
+        } else {
+            _chromeObserver = _executor.make_observer<tf::ChromeObserver>();
+        }
+    }
 
     const auto executionOptions = rootContext->getState() ? rootContext->getState()->getExecutionOptions() : WorkflowExecutionOptions{};
 
@@ -312,13 +320,13 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
             WorkflowResultRegistry::instance().add(result));
     }
 
-    if (rootContext->isRootExecution() && _observer) {
-        const auto fileName = QString("workflow_trace_%1.json").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"));
+    if (rootContext->isRootExecution() && rootContext->getExecutionOptions()._profilingSinkType == WorkflowExecutionOptions::ProfilingSinkType::ChromeTracing) {
+        const auto fileName = QString("profiling/workflow_trace_%1.json").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"));
 
         std::ofstream traceFile(fileName.toStdString());
 
         if (traceFile.is_open()) {
-            _observer->dump(traceFile);
+            _chromeObserver->dump(traceFile);
             qDebug() << "Chrome trace written to" << fileName;
         }
     }
