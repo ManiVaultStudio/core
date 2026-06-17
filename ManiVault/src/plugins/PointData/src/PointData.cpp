@@ -260,14 +260,7 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
     //});
 
     plan->addSequentialStage("Save raw data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-        QVariantMap outputMap;// = executionContext->takeOutput(baseSaveStage).toMap();
-
-        //const auto numberOfElements = getNumberOfElements();
-
-        //if (numberOfElements == 0) {
-        //    executionContext->setOutput(outputMap);
-        //    return;
-        //}
+        QVariantMap outputMap;
 
         if (_isDense) {
             const auto typeSpecifier        = getElementTypeSpecifier();
