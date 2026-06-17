@@ -631,10 +631,10 @@ UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMa
     WorkflowPlan::Jobs jobs;
 
     for (const auto& decodeBlockJob : decodeBlockJobs) {
-        jobs.emplace_back(QString("Decode Block %1").arg(jobIndex), [decodeBlockJob, destination, destinationSize, createCodec] (const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
-            if (decodeBlockJob._offset + decodeBlockJob._size > destinationSize)
-                throw std::runtime_error("Decode block range exceeds destination buffer");
+        if (decodeBlockJob._offset + decodeBlockJob._size > destinationSize)
+            throw std::runtime_error("Decode block range exceeds destination buffer");
 
+        jobs.emplace_back(QString("Decode Block %1").arg(jobIndex), [decodeBlockJob, destination, destinationSize, createCodec] (const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
             if (decodeBlockJob._uri.isEmpty()) {
                 decodeBlockFromBase64To(decodeBlockJob, destination, destinationSize);
             }

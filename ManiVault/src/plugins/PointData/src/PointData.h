@@ -75,6 +75,9 @@ public:
         uint8
     };
 
+    static ElementTypeSpecifier elementTypeSpecifier(const QString& typeName);
+    static QString elementTypeName(const ElementTypeSpecifier elementTypeSpecifier);
+
 private:
     using VariantOfVectors = std::variant <
         std::vector<float>,
