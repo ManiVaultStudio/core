@@ -493,15 +493,9 @@ UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(QVariantMap variantMap, char
         throw ManiVaultException(SeverityLevel::Warning, "Execution context is null", "Please provide a valid execution context to avoid detached parallel work", __FUNCTION__, variantMap);
 
     if (variantMap.isEmpty()) {
-	    throw ManiVaultException(
-			SeverityLevel::Error,
-			"Failed to populate data buffer from variant map",
-			"Variant map is empty",
-			__FUNCTION__,
-			{
-				{ "VariantMap", variantMap }
-			}
-		);
+        executionContext->warning("Failed to populate data buffer from variant map, variant map is empty");
+
+        return std::make_unique<WorkflowPlan>("Decode Blocks (Empty Variant Map)");
     }
 
     variantMapMustContain(variantMap, "BlockSize");

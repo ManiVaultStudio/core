@@ -237,14 +237,16 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
         resizeVector(numberOfElements);
     });
 
-    if (getNumberOfElements() > 0) {
-        plan->addNestedWorkflowStage("Populate data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
-            const auto dataMap = variantMap["Data"].toMap();
-            const auto rawDataMap = dataMap["Raw"].toMap();
+    plan->addNestedWorkflowStage("Populate data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        if (getNumberOfElements() == 0) {
+            return std::make_unique<WorkflowPlan>(QString("%1(%2) - no data to populate").arg(getSerializationName()).arg(__FUNCTION__));
+        }
 
-            return populateBytesFromBlobMapWorkflow(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), executionContext);
-        });
-    }
+    	const auto dataMap = variantMap["Data"].toMap();
+        const auto rawDataMap = dataMap["Raw"].toMap();
+
+        return populateBytesFromBlobMapWorkflow(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), executionContext);
+	});
 
     return plan;
 }
@@ -1085,11 +1087,11 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(QVariantMap variantMap)
         return plan;
     }
 
-    plan->addNestedWorkflowStage("Load raw data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
-        return getRawData<PointData>()->fromVariantMapWorkflow(variantMap);
-    });
-
     if (isFull()) {
+        plan->addNestedWorkflowStage("Load raw data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
+            return getRawData<PointData>()->fromVariantMapWorkflow(variantMap);
+        });
+
         plan->addSequentialStage("Load selection", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
             variantMapMustContain(variantMap, "Selection");
 
@@ -1146,10 +1148,7 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
     const auto storeRawDataStage = plan->addSequentialStage("Store raw data", [this, saveDatasetBaseStage, encodeRawDataStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> void {
         auto datasetMap = executionContext->takeOutput(saveDatasetBaseStage).toMap();
 
-        if (isFull()) {
-	        datasetMap["Data"] = executionContext->takeOutput(encodeRawDataStage).toMap();
-        }
-
+    	datasetMap["Data"]                      = isFull() ? executionContext->takeOutput(encodeRawDataStage).toMap() : QVariantMap();
         datasetMap["NumberOfPoints"]            = QVariant::fromValue<std::uint64_t>(getNumPoints());
         datasetMap["Dense"]                     = Experimental::isDense(this);
         datasetMap["NumberOfNonZeroElements"]   = QVariant::fromValue(Experimental::getNumNonZeroElements(this));
