@@ -10,7 +10,7 @@ using namespace mv::util;
 
 namespace mv {
 
-ManiVaultException::ManiVaultException(SeverityLevel severity, QString message, QString what, QString where, QVariantMap details) :
+ManiVaultException::ManiVaultException(SeverityLevel severity, QString message, QString what, QString where, QVariantMap details /*= {}*/, std::source_location location /*= std::source_location::current()*/) :
 	std::runtime_error(message.toStdString()),
 	_severity(severity),
 	_message(std::move(message)),
@@ -18,6 +18,11 @@ ManiVaultException::ManiVaultException(SeverityLevel severity, QString message, 
 	_where(std::move(where)),
 	_details(std::move(details))
 {
+    _details["SourceLocation"] = QVariantMap{
+        { "File", location.file_name() },
+        { "Line", static_cast<int>(location.line()) },
+        { "Function", location.function_name() }
+    };
 }
 
 ManiVaultException ManiVaultException::withAddedDetails(const QVariantMap& additionalDetails) const
@@ -27,7 +32,13 @@ ManiVaultException ManiVaultException::withAddedDetails(const QVariantMap& addit
 	for (auto it = additionalDetails.begin(); it != additionalDetails.end(); ++it)
 		newDetails[it.key()] = it.value();
 
-    return ManiVaultException(_severity, _message, _what, _where, newDetails);
+    return {
+        _severity,
+        _message,
+        _what,
+        _where,
+        newDetails
+    };
 }
 
 }

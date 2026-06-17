@@ -11,11 +11,13 @@
 #include <QObject>
 #include <QVariantMap>
 
+#include <source_location>
+
 namespace mv {
 
 class CORE_EXPORT ManiVaultException : public std::runtime_error {
 public:
-    ManiVaultException(util::SeverityLevel severity, QString message, QString what, QString where = {}, QVariantMap details = {});
+    ManiVaultException(util::SeverityLevel severity, QString message, QString what, QString where = {}, QVariantMap details = {}, std::source_location location = std::source_location::current());
 
     ManiVaultException withAddedDetails(const QVariantMap& additionalDetails) const;
 

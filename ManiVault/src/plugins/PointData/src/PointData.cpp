@@ -237,12 +237,14 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
         resizeVector(numberOfElements);
     });
 
-    plan->addNestedWorkflowStage("Populate data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
-        const auto dataMap      = variantMap["Data"].toMap();
-        const auto rawDataMap   = dataMap["Raw"].toMap();
+    if (getNumberOfElements() > 0) {
+        plan->addNestedWorkflowStage("Populate data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+            const auto dataMap = variantMap["Data"].toMap();
+            const auto rawDataMap = dataMap["Raw"].toMap();
 
-        return populateBytesFromBlobMapWorkflow(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), executionContext);
-    });
+            return populateBytesFromBlobMapWorkflow(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), executionContext);
+        });
+    }
 
     return plan;
 }
@@ -258,12 +260,12 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
     plan->addSequentialStage("Save raw data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         QVariantMap outputMap;// = executionContext->takeOutput(baseSaveStage).toMap();
 
-        const auto numberOfElements = getNumberOfElements();
+        //const auto numberOfElements = getNumberOfElements();
 
-        if (numberOfElements == 0) {
-            executionContext->setOutput(outputMap);
-            return;
-        }
+        //if (numberOfElements == 0) {
+        //    executionContext->setOutput(outputMap);
+        //    return;
+        //}
 
         if (_isDense) {
             const auto typeSpecifier        = getElementTypeSpecifier();
@@ -273,7 +275,7 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
             outputMap.insert("TypeIndex", QVariant::fromValue(typeIndex));
             outputMap.insert("TypeName", QVariant(typeSpecifierName));
             outputMap.insert("Raw", QVariant::fromValue(bytesToBlobVariantMap(static_cast<const char*>(getDataConstVoidPtr()), getRawDataSize(), executionContext)));
-            outputMap.insert("NumberOfElements", QVariant::fromValue(numberOfElements));
+            outputMap.insert("NumberOfElements", QVariant::fromValue(getNumberOfElements()));
 
             const auto expectedBytes =
                 std::uint64_t(getNumPoints()) *
@@ -1083,11 +1085,11 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(QVariantMap variantMap)
         return plan;
     }
 
-    if (isFull()) {
-        plan->addNestedWorkflowStage("Load raw data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
-            return getRawData<PointData>()->fromVariantMapWorkflow(variantMap);
-        });
+    plan->addNestedWorkflowStage("Load raw data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
+        return getRawData<PointData>()->fromVariantMapWorkflow(variantMap);
+    });
 
+    if (isFull()) {
         plan->addSequentialStage("Load selection", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
             variantMapMustContain(variantMap, "Selection");
 

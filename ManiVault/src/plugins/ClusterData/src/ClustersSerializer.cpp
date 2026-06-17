@@ -113,11 +113,15 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap&
         return populateBytesFromBlobMapWorkflow(metadataMap, context->metadataBytes.data(), context->metadataBytes.size(), executionContext);
     }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 
-    dataJobs.emplace_back("Read indices", WorkflowPlan::NestedWorkflowFunction([indicesMap, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
-        context->indicesBytes.resize(indicesMap["Size"].toULongLong());
+    const auto indicesSize = indicesMap["Size"].toULongLong();
 
-        return populateBytesFromBlobMapWorkflow(indicesMap, context->indicesBytes.data(), context->indicesBytes.size(), executionContext);
-    }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
+    if (indicesSize > 0) {
+	    dataJobs.emplace_back("Read indices", WorkflowPlan::NestedWorkflowFunction([indicesMap, indicesSize, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+	        context->indicesBytes.resize(indicesSize);
+
+	        return populateBytesFromBlobMapWorkflow(indicesMap, context->indicesBytes.data(), context->indicesBytes.size(), executionContext);
+	    }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
+    }
 
     plan->addParallelStage("Load data", std::move(dataJobs));
 

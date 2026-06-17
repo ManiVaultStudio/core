@@ -485,7 +485,7 @@ DecodeBlockResult decodeBlockFromBase64To(const DecodeBlockJob& decodeBlockJob, 
     return result;
 }
 
-UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, const SharedWorkflowExecutionContext& executionContext /*= nullptr*/)
+UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(QVariantMap variantMap, char* destination, std::uint64_t destinationSize, const SharedWorkflowExecutionContext& executionContext /*= nullptr*/)
 {
     WorkflowExecutionOptions resolvedOptions = executionContext ? executionContext->getExecutionOptions() : WorkflowExecutionOptions();
 
@@ -651,7 +651,7 @@ UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(const QVariantMap& variantMa
     return plan;
 }
 
-void populateBytesFromBlobMap(const QVariantMap& variantMap, char* destination, std::uint64_t destinationSize, const SharedWorkflowExecutionContext& executionContext)
+void populateBytesFromBlobMap(QVariantMap variantMap, char* destination, std::uint64_t destinationSize, const SharedWorkflowExecutionContext& executionContext)
 {
     if (!executionContext)
         throw ManiVaultException(SeverityLevel::Warning, "Parent context is null", "Please provide a valid parent context to avoid detached parallel work", __FUNCTION__, variantMap);
@@ -667,7 +667,7 @@ void populateBytesFromBlobMap(const QVariantMap& variantMap, char* destination, 
     WorkflowRuntimeScoped::executeBlocking(std::move(plan), std::move(executionContext));
 }
 
-QByteArray bytesFromBlobVariantMap(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& executionContext /*= nullptr*/)
+QByteArray bytesFromBlobVariantMap(QVariantMap variantMap, const SharedWorkflowExecutionContext& executionContext /*= nullptr*/)
 {
     if (!executionContext)
         throw ManiVaultException(SeverityLevel::Warning, "Parent context is null", "Please provide a valid parent context to avoid detached parallel work", __FUNCTION__, variantMap);
