@@ -188,7 +188,7 @@ mv::plugin::AnalysisPlugin* DatasetImpl::getAnalysis()
     return _analysis;
 }
 
-UniqueWorkflowPlan DatasetImpl::fromVariantMapWorkflow(const QVariantMap& variantMap)
+UniqueWorkflowPlan DatasetImpl::fromVariantMapWorkflow(QVariantMap variantMap)
 {
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 

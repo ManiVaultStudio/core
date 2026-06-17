@@ -149,7 +149,7 @@ bool Project::isStartupProject() const
     return _startupProject;
 }
 
-UniqueWorkflowPlan Project::fromVariantMapWorkflow(const QVariantMap& variantMap)
+UniqueWorkflowPlan Project::fromVariantMapWorkflow(QVariantMap variantMap)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1::fromVariantMap").arg(getSerializationName()));
 

@@ -316,7 +316,7 @@ void DataHierarchyManager::removeAllItems()
     _items.clear();
 }
 
-UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(const QVariantMap& variantMap)
+UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(QVariantMap variantMap)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 

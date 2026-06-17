@@ -145,7 +145,7 @@ void ProjectMetaAction::fromVariantMap(const QVariantMap& variantMap)
     _allowedPluginsAction.fromParentVariantMap(variantMap, true);
 }
 
-workflow::UniqueWorkflowPlan ProjectMetaAction::fromVariantMapWorkflow(const QVariantMap& variantMap)
+workflow::UniqueWorkflowPlan ProjectMetaAction::fromVariantMapWorkflow(QVariantMap variantMap)
 {
 	workflow::UniqueWorkflowPlan plan = std::make_unique<workflow::WorkflowPlan>(QString("%1::fromVariantMap").arg(getSerializationName()));
 

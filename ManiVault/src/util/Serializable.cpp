@@ -75,7 +75,7 @@ void Serializable::fromVariantMapScoped(const QVariantMap& variantMap, const Sha
     WorkflowRuntimeScoped::executeBlocking(std::move(plan), parentExecutionContext);
 }
 
-UniqueWorkflowPlan Serializable::fromVariantMapWorkflow(const QVariantMap& variantMap)
+UniqueWorkflowPlan Serializable::fromVariantMapWorkflow(QVariantMap variantMap)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1::fromVariantMap").arg(getSerializationName()));
 

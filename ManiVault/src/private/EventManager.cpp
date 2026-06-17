@@ -136,7 +136,7 @@ bool EventManager::areDatasetsPartOfSelectionGroup(Dataset<DatasetImpl> d1, Data
     return foundGroup;
 }
 
-UniqueWorkflowPlan EventManager::fromVariantMapWorkflow(const QVariantMap& variantMap)
+UniqueWorkflowPlan EventManager::fromVariantMapWorkflow(QVariantMap variantMap)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
 

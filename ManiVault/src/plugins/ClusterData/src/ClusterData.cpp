@@ -120,7 +120,7 @@ std::int32_t ClusterData::getClusterIndex(const QString& clusterName) const
     return -1;
 }
 
-UniqueWorkflowPlan ClusterData::fromVariantMapWorkflow(const QVariantMap& variantMap)
+UniqueWorkflowPlan ClusterData::fromVariantMapWorkflow(QVariantMap variantMap)
 {
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
@@ -246,7 +246,7 @@ std::vector<std::uint32_t> Clusters::getSelectedIndices() const
     return selectedIndices;
 }
 
-UniqueWorkflowPlan Clusters::fromVariantMapWorkflow(const QVariantMap& variantMap)
+UniqueWorkflowPlan Clusters::fromVariantMapWorkflow(QVariantMap variantMap)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 

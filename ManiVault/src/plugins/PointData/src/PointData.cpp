@@ -203,7 +203,7 @@ void PointData::setValueAt(const std::size_t index, const float newValue)
         _variantOfVectors);
 }
 
-UniqueWorkflowPlan PointData::fromVariantMapWorkflow(const QVariantMap& variantMap)
+UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
 {
     //Plugin::fromVariantMap(variantMap);
 
@@ -1065,7 +1065,7 @@ void Points::selectInvert()
     events().notifyDatasetDataSelectionChanged(this);
 }
 
-UniqueWorkflowPlan Points::fromVariantMapWorkflow(const QVariantMap& variantMap)
+UniqueWorkflowPlan Points::fromVariantMapWorkflow(QVariantMap variantMap)
 {
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 

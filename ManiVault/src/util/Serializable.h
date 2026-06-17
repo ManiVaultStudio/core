@@ -233,7 +233,7 @@ public: // Reading
 	 * @param variantMap Serialized object state.
 	 * @return Workflow plan that restores the object state.
 	 */
-    virtual workflow::UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap);
+    virtual workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap);
 
 public: // Reading helpers
 

@@ -116,7 +116,7 @@ public: // Serialization
      * @param variantMap Serialized object state.
      * @return Workflow plan that restores the object state when executed.
      */
-    workflow::UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap) override;
+    workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
 
     /**
      * Create a workflow that serializes this object's state to a variant map.
@@ -288,7 +288,7 @@ public: // Serialization
      * @param variantMap Serialized object state.
      * @return Workflow plan that restores the object state when executed.
      */
-    workflow::UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& variantMap) override;
+    workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
 
     /**
      * Create a workflow that serializes this object's state to a variant map.

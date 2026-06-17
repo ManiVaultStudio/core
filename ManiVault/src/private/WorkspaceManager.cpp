@@ -543,7 +543,7 @@ Workspace* WorkspaceManager::getCurrentWorkspace()
     return _workspace.get();
 }
 
-UniqueWorkflowPlan WorkspaceManager::fromVariantMapWorkflow(const QVariantMap& variantMap)
+UniqueWorkflowPlan WorkspaceManager::fromVariantMapWorkflow(QVariantMap variantMap)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
 
