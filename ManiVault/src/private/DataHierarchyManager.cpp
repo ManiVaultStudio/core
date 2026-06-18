@@ -346,7 +346,7 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(QVariantMap vari
             datasetConfigs.emplace_back(DatasetConfig{
                 .id=datasetMap["ID"].toString(),
             	.map=datasetMap,
-                .approximateSize=getRawBlockObjectSize(datasetMap),
+                .approximateSize= estimateRawBlockTotalSize(datasetMap),
             	.isDerived=datasetMap["IsDerived"].toBool()
             });
         }
