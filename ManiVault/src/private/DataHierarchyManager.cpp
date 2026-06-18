@@ -324,10 +324,18 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(QVariantMap vari
         populateDataHierarchy(variantMap);
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
-    std::vector<QVariantMap> datasetMaps;
-    std::map<QString, std::uint64_t> approximateDatasetSizes;
+    // Dataset info for loading datasets in parallel, sorted by approximate size (largest first) and whether the dataset is derived or not (non-derived datasets first)
+    struct DatasetConfig
+    {
+        QString         id;                 /** Dataset ID */
+        QVariantMap     map;                /** Dataset map */
+        size_t          approximateSize;    /** Approximate size of the dataset */
+        bool            isDerived;          /** Whether the dataset is derived */
+    };
 
-    const std::function<void(const QVariantMap&)> enumerateDatasetNames = [&enumerateDatasetNames, &datasetMaps, &approximateDatasetSizes](const QVariantMap& variantMap) -> void {
+    std::vector<DatasetConfig> datasetConfigs;
+
+    const std::function<void(const QVariantMap&)> enumerateDatasetNames = [&enumerateDatasetNames, &datasetConfigs](const QVariantMap& variantMap) -> void {
         for (const auto& variant : variantMap.values()) {
             enumerateDatasetNames(variant.toMap()["Children"].toMap());
 
@@ -335,51 +343,57 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(QVariantMap vari
 
             datasetMap.remove("Children");
 
-            datasetMaps.emplace_back(datasetMap);
-
-            approximateDatasetSizes[datasetMap["ID"].toString()] = getRawBlockObjectSize(datasetMap);
+            datasetConfigs.emplace_back(DatasetConfig{
+                .id=datasetMap["ID"].toString(),
+            	.map=datasetMap,
+                .approximateSize=getRawBlockObjectSize(datasetMap),
+            	.isDerived=datasetMap["IsDerived"].toBool()
+            });
         }
     };
 
     enumerateDatasetNames(variantMap);
 
-    std::sort(datasetMaps.begin(), datasetMaps.end(), [](const auto& a, const auto& b) {
-        const auto rawA = findRawBlockObject(a);
-        const auto rawB = findRawBlockObject(b);
-        const auto hasA = !rawA.isEmpty();
-        const auto hasB = !rawB.isEmpty();
+    const auto stageDatasetConfigs = [&datasetConfigs, &plan](bool isDerived) {
+        std::vector<DatasetConfig> datasetConfigsPartition;
 
-        if (hasA != hasB)
-            return hasA;
+        datasetConfigsPartition.reserve(datasetConfigs.size());
 
-        if (!hasA)
-            return false;
+        for (const auto& config : datasetConfigs) {
+            if (config.isDerived == isDerived)
+                datasetConfigsPartition.push_back(config);
+        }
 
-        return getRawBlockObjectSize(rawA) > getRawBlockObjectSize(rawB);
-    });
+        std::sort(datasetConfigsPartition.begin(), datasetConfigsPartition.end(), [](const DatasetConfig& a, const DatasetConfig& b) {
+            return a.approximateSize > b.approximateSize;
+        });
 
-    WorkflowPlan::Jobs datasetJobs;
-    datasetJobs.reserve(datasetMaps.size());
+        WorkflowPlan::Jobs datasetJobs;
 
-    for (const auto& dataVariantMap : datasetMaps) {
-        const auto datasetId = dataVariantMap["ID"].toString();
-        const auto datasetName = dataVariantMap["Name"].toString();
+        datasetJobs.reserve(datasetConfigsPartition.size());
 
-        datasetJobs.emplace_back(QString("Load %1").arg(datasetName), WorkflowPlan::NestedWorkflowFunction([datasetId, dataVariantMap, approximateDatasetSizes](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
-            auto dataset = mv::data().getDataset(datasetId);
+        for (const auto& datasetConfig : datasetConfigsPartition) {
+            const auto datasetId    = datasetConfig.id;
+            const auto datasetMap   = datasetConfig.map;
 
-            Q_ASSERT(dataset.isValid());
+            datasetJobs.emplace_back(QString("Load %1").arg(datasetMap["Name"].toString()), WorkflowPlan::NestedWorkflowFunction([datasetConfig](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+                auto dataset = mv::data().getDataset(datasetConfig.id);
 
-            return dataset->fromVariantMapWorkflow(dataVariantMap);
-        }), WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Automatic, approximateDatasetSizes[datasetId]);
-    }
+                Q_ASSERT(dataset.isValid());
 
-    plan->addBatchedParallelStage("Load datasets", std::move(datasetJobs), [](const SharedWorkflowExecutionContext& executionContext) {
-        return executionContext->getState()
-            ->getExecutionOptions()
-            ._workflowBatchingOptions
-            ._datasetLoadingBatchSize;
-    });
+                return dataset->fromVariantMapWorkflow(datasetConfig.map);
+            }), WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Automatic, datasetConfig.approximateSize);
+        }
+
+        if (!datasetJobs.empty()) {
+	        plan->addBatchedParallelStage(QString("Load %1 datasets").arg(isDerived ? "derived" : "non-derived"), std::move(datasetJobs), [](const SharedWorkflowExecutionContext& executionContext) {
+				return executionContext->getState()->getExecutionOptions()._workflowBatchingOptions._datasetLoadingBatchSize;
+	        });
+        }
+    };
+
+    stageDatasetConfigs(false); // Non-derived datasets first
+    stageDatasetConfigs(true);  // Then derived datasets
 
     plan->addSequentialStage("Notify datasets", [this](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext&) {
         for (const auto& item : _items) {
@@ -450,7 +464,6 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
             ._datasetLoadingBatchSize;
     });
 
-    qDebug() << datasetHandles.keys();
     const auto collectDatasetMapsStage = plan->addSequentialStage("Collect dataset maps", [saveItemMapsStage, datasetHandles](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         const auto itemMaps = executionContext->takeOutput(saveItemMapsStage).toMap();
 
