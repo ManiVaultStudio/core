@@ -182,6 +182,9 @@ void HelpManager::initialize()
 
                 // Avoid polluting the toaster with too many task-based notifications; only add task notifications for tasks that are running or running indeterminate after 500ms
                 QTimer::singleShot(500, this, [this, task, sourceModelIndex]() -> void {
+                    if (!task)
+                        return;
+
                     if (task->isRunning() || task->isRunningIndeterminate()) {
                         addNotification(_tasksModel.getTask(sourceModelIndex.row()));
                     }
