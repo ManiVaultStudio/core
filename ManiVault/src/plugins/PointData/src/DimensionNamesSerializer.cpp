@@ -48,7 +48,7 @@ UniqueWorkflowPlan DimensionNamesSerializer::fromVariantMapWorkflow(Points* poin
 
     plan->addNestedWorkflowStage("Load dimension data", [dimensionNamesMap, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
         context->bytes.resize(dimensionNamesMap["Size"].toUInt());
-        return populateBytesFromBlobMapWorkflow(dimensionNamesMap, context->bytes.data(), context->bytes.size(), executionContext);
+        return populateBytesFromBlobMapWorkflow(dimensionNamesMap, context->bytes.data(), context->bytes.size(), executionContext->getExecutionOptions());
     });
 
     plan->addSequentialStage("Read dimension names", [context, dimensionNamesMap, points](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> void {
@@ -96,7 +96,7 @@ UniqueWorkflowPlan DimensionNamesSerializer::toVariantMapWorkflow(const std::vec
 
         dimensionsDataStream << dimensionNameList;
 
-        auto outputMap = bytesToBlobVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), executionContext);
+        auto outputMap = bytesToBlobVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size());
 
         outputMap["FormatVersion"] = FormatVersion;
 

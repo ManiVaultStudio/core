@@ -110,7 +110,7 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap&
     dataJobs.emplace_back("Read metadata", WorkflowPlan::NestedWorkflowFunction([metadataMap, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
         context->metadataBytes.resize(metadataMap["Size"].toULongLong());
 
-        return populateBytesFromBlobMapWorkflow(metadataMap, context->metadataBytes.data(), context->metadataBytes.size(), executionContext);
+        return populateBytesFromBlobMapWorkflow(metadataMap, context->metadataBytes.data(), context->metadataBytes.size(), executionContext->getExecutionOptions());
     }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 
     const auto indicesSize = indicesMap["Size"].toULongLong();
@@ -119,7 +119,7 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap&
 	    dataJobs.emplace_back("Read indices", WorkflowPlan::NestedWorkflowFunction([indicesMap, indicesSize, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
 	        context->indicesBytes.resize(indicesSize);
 
-	        return populateBytesFromBlobMapWorkflow(indicesMap, context->indicesBytes.data(), context->indicesBytes.size(), executionContext);
+	        return populateBytesFromBlobMapWorkflow(indicesMap, context->indicesBytes.data(), context->indicesBytes.size(), executionContext->getExecutionOptions());
 	    }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
     }
 
@@ -210,8 +210,8 @@ UniqueWorkflowPlan ClustersSerializer::toVariantMapWorkflow(const QVector<Cluste
         outputMap["ClustersFormatVersion"]      = FormatVersion;
         outputMap["ClustersMetaDataSize"]       = headersRaw.size();
         outputMap["ClustersIndicesRawDataSize"] = allIndices.size() * sizeof(unsigned int);
-        outputMap["ClustersMetaData"]           = bytesToBlobVariantMap(headersRaw.constData(), headersRaw.size(), executionContext);
-        outputMap["ClustersIndicesRawData"]     = bytesToBlobVariantMap(reinterpret_cast<const char*>(allIndices.data()), allIndices.size() * sizeof(unsigned int), executionContext);
+        outputMap["ClustersMetaData"]           = bytesToBlobVariantMap(headersRaw.constData(), headersRaw.size());
+        outputMap["ClustersIndicesRawData"]     = bytesToBlobVariantMap(reinterpret_cast<const char*>(allIndices.data()), allIndices.size() * sizeof(unsigned int));
 
         executionContext->setOutput(outputMap);
     });

@@ -9,137 +9,193 @@
 
 #include "workflow/WorkflowPlan.h"
 
-#include <QFileInfo>
-#include <QFile>
-#include <QDir>
-#include <QVariantMap>
+#include <QByteArray>
+#include <QString>
 #include <QStringList>
+#include <QVariant>
+#include <QVariantMap>
 #include <QVector>
+
+#include <cstdint>
 
 namespace mv::util {
 
-class BlobCodec;
-
+/** Result produced by encoding a single data block. */
 struct EncodeBlockResult
 {
-    std::uint64_t       _offset = 0;            /** Offset of the block in the original data buffer */
-    std::uint64_t       _size = 0;              /** Size of the block in the original data buffer */
-    QByteArray          _encodedData;           /** Base64 encoded string containing the encoded data block (empty if encoding failed) */
-    QString             _error;                 /** Error message in case encoding the block failed (empty if encoding was successful) */
-    QVariantMap         _block;                 /** Variant map containing the block information to be included in the final variant map (e.g. file URI or base64 encoded data) */
+    std::uint64_t       _offset = 0;            /** Offset of the block in the original data buffer. */
+    std::uint64_t       _size = 0;              /** Size of the block in the original data buffer. */
+    QByteArray          _encodedData;           /** Encoded block payload when stored inline. */
+    QString             _error;                 /** Error message if encoding failed. */
+    QVariantMap         _block;                 /** Serialized block descriptor included in the final blob variant map. */
 };
 
 using EncodeBlockResults = QVector<EncodeBlockResult>;
 
+/** Description of a block that should be encoded. */
 struct EncodeBlockJob
 {
-    const char*         _data = nullptr;        /** Pointer to the start of the original raw data buffer */
-    std::uint64_t       _offset = 0;            /** Offset of the block in the original data buffer */
-    std::uint64_t       _size = 0;              /** Size of the block in the original data buffer */
-    EncodeBlockResult   _result;                /** Result of encoding the block, populated after the block is encoded */
-    SharedCodec         _codec;                 /** Codec to use for encoding the block (if applicable) */
+    const char* _data = nullptr;        /** Pointer to the source data buffer. */
+    std::uint64_t       _offset = 0;            /** Offset of the block in the source buffer. */
+    std::uint64_t       _size = 0;              /** Size of the block in bytes. */
+    EncodeBlockResult   _result;                /** Encoding result populated after execution. */
+    SharedCodec         _codec;                 /** Codec used to encode the block. */
 };
 
 using EncodeBlockJobs = QVector<EncodeBlockJob>;
 
-/** Result of decoding a block of data */
+/** Result produced by decoding a single data block. */
 struct DecodeBlockResult
 {
-    std::uint64_t       _offset = 0;            /** Offset of the block in the original data buffer */
-    std::uint64_t       _size = 0;              /** Size of the block in the original data buffer */
-    QByteArray          _decodedData;           /** Decoded data block */
+    std::uint64_t       _offset = 0;            /** Offset of the block in the destination buffer. */
+    std::uint64_t       _size = 0;              /** Size of the decoded block in bytes. */
+    QByteArray          _decodedData;           /** Decoded block data when stored in memory. */
 };
 
 using DecodeBlockResults = QVector<DecodeBlockResult>;
 
-/** Information about a block of data to decode */
+/** Description of a block that should be decoded. */
 struct DecodeBlockJob
 {
-    std::uint64_t       _offset = 0;            /** Offset of the block in the original data buffer */
-    std::uint64_t       _size = 0;              /** Size of the block in the original data buffer */
-    std::uint64_t       _compressedSize = 0;    /** Size of the compressed data block */
-    QString             _uri;                   /** URI of the file containing the compressed data block (if applicable) */
-    QString             _encodedData;           /** Base64 encoded string containing the compressed data block (if applicable) */
-    DecodeBlockResult   _result;                /** Result of decoding the block, populated after the block is decoded */
-    SharedCodec         _codec;                 /** Codec to use for encoding the block (if applicable) */
+    std::uint64_t       _offset = 0;            /** Offset of the block in the destination buffer. */
+    std::uint64_t       _size = 0;              /** Size of the decoded block in bytes. */
+    std::uint64_t       _compressedSize = 0;    /** Size of the encoded block payload. */
+    QString             _uri;                   /** Relative path to the encoded block file, if stored on disk. */
+    QString             _encodedData;           /** Inline encoded block payload, if stored in the variant map. */
+    DecodeBlockResult   _result;                /** Decoding result populated after execution. */
+    SharedCodec         _codec;                 /** Codec used to decode the block. */
 };
 
 using DecodeBlockJobs = QVector<DecodeBlockJob>;
 
-CORE_EXPORT QVariantMap bytesToBlobVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, const workflow::SharedWorkflowExecutionContext& executionContext = nullptr);
-
 /**
- * Decode a block of data from a file on disk and populate the provided output buffer with the decoded data
- * @param decodeBlockJob DecodeBlockJob containing the block information
- * @return DecodeBlockResult containing the decoded data or an error message
+ * Serialize a raw byte buffer into a blob variant map.
+ *
+ * The buffer is partitioned into blocks, encoded using the active project
+ * compression settings, and described by a variant map that can later be
+ * restored using populateBytesFromBlobMap() or bytesFromBlobVariantMap().
+ *
+ * @param bytes Source byte buffer.
+ * @param numberOfBytes Number of bytes in the source buffer.
+ * @return Serialized blob variant map.
  */
-CORE_EXPORT DecodeBlockResult decodeBlockFromFile(const DecodeBlockJob& decodeBlockJob);
+CORE_EXPORT QVariantMap bytesToBlobVariantMap(const char* bytes, std::uint64_t numberOfBytes);
 
 /**
-* Decode a block of data from a file on disk and populate the provided output buffer with the decoded data
-* @param decodeBlockJob DecodeBlockJob containing the block information
-* @param destination Output buffer to which the decoded data is copied 
-* @return DecodeBlockResult containing the decoded data or an error message
-*/
-CORE_EXPORT DecodeBlockResult decodeBlockFromFileTo(const DecodeBlockJob& decodeBlockJob, char* destination);
-
-/**
- * Decode a block of data from a base64 encoded string and populate the provided output buffer with the decoded data
- * @param decodeBlockJob DecodeBlockJob containing the block information
- * @param createCodec Function that creates a blob codec
- * @return DecodeBlockResult containing the decoded data or an error message
+ * Create a workflow that serializes a raw byte buffer into a blob variant map.
+ *
+ * The workflow performs block encoding in parallel and publishes the resulting
+ * blob variant map as its output.
+ *
+ * @param bytes Source byte buffer.
+ * @param numberOfBytes Number of bytes in the source buffer.
+ * @return Workflow that produces a blob variant map.
  */
-CORE_EXPORT DecodeBlockResult decodeBlockFromBase64(const DecodeBlockJob& decodeBlockJob, const std::function<std::shared_ptr<BlobCodec>()>& createCodec);
-
-CORE_EXPORT workflow::UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(QVariantMap variantMap, char* destination, std::uint64_t destinationSize, const workflow::SharedWorkflowExecutionContext& executionContext = nullptr);
-CORE_EXPORT void                         populateBytesFromBlobMap(QVariantMap variantMap, char* destination, std::uint64_t destinationSize, const workflow::SharedWorkflowExecutionContext& executionContext = nullptr);
-CORE_EXPORT QByteArray                   bytesFromBlobVariantMap(QVariantMap variantMap, const workflow::SharedWorkflowExecutionContext& executionContext = nullptr);
+CORE_EXPORT workflow::UniqueWorkflowPlan bytesToBlobVariantMapWorkflow(const char* bytes, std::uint64_t numberOfBytes);
 
 /**
- * Raises an exception if an item with key is not found in a variant map
- * @param variantMap Variant map that should contain the key
- * @param key Item name
+ * Populate a destination buffer from a serialized blob variant map.
+ *
+ * All encoded blocks described by the variant map are decoded and written into
+ * the destination buffer at their recorded offsets.
+ *
+ * @param variantMap Serialized blob variant map.
+ * @param destination Destination buffer.
+ * @param destinationSize Size of the destination buffer in bytes.
+ */
+CORE_EXPORT void populateBytesFromBlobMap(QVariantMap variantMap, char* destination, std::uint64_t destinationSize);
+
+/**
+ * Create a workflow that populates a destination buffer from a serialized blob
+ * variant map.
+ *
+ * The workflow decodes blocks in parallel according to the supplied workflow
+ * execution options.
+ *
+ * @param variantMap Serialized blob variant map.
+ * @param destination Destination buffer.
+ * @param destinationSize Size of the destination buffer in bytes.
+ * @param executionOptions Workflow execution options used to determine decode
+ *        batching behavior.
+ * @return Workflow that populates the destination buffer.
+ */
+CORE_EXPORT workflow::UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(QVariantMap variantMap, char* destination, std::uint64_t destinationSize, const workflow::WorkflowExecutionOptions& executionOptions = {});
+
+/**
+ * Deserialize a blob variant map into a byte array.
+ *
+ * The required storage is allocated automatically and all encoded blocks are
+ * decoded into the returned byte array.
+ *
+ * @param variantMap Serialized blob variant map.
+ * @return Decoded byte array.
+ */
+CORE_EXPORT QByteArray bytesFromBlobVariantMap(QVariantMap variantMap);
+
+/**
+ * Ensure that a variant map contains a required key.
+ *
+ * @param variantMap Variant map to inspect.
+ * @param key Required key.
+ *
+ * @throws ManiVaultException If the key is not present.
  */
 CORE_EXPORT void variantMapMustContain(const QVariantMap& variantMap, const QString& key);
 
 /**
-* Convenience function to store QStringList on disk
-*/
+ * Serialize a string list using the blob serialization format.
+ *
+ * @param list String list to serialize.
+ * @return Serialized representation.
+ */
 CORE_EXPORT QVariantMap storeOnDisk(const QStringList& list);
 
 /**
-* Convenience function to store QVector of uints on disk
-*/
+ * Serialize a vector using the blob serialization format.
+ *
+ * @param vector Vector to serialize.
+ * @return Serialized representation.
+ */
 CORE_EXPORT QVariantMap storeOnDisk(const QVector<uint32_t>& vector);
 
 /**
-* Convenience function to load QStringList from disk
-*/
+ * Restore a string list from a serialized blob representation.
+ *
+ * @param variantMap Serialized representation.
+ * @param list Destination string list.
+ */
 CORE_EXPORT void loadFromDisk(const QVariantMap& variantMap, QStringList& list);
 
 /**
-* Convenience function to store QVector of uints on disk
-*/
+ * Restore a vector from a serialized blob representation.
+ *
+ * @param variantMap Serialized representation.
+ * @param vec Destination vector.
+ */
 CORE_EXPORT void loadFromDisk(const QVariantMap& variantMap, QVector<uint32_t>& vec);
 
 /**
- * Recursively estimate the total size of all raw blocks contained in a QVariant (which can be a QVariantMap, QVariantList, or any other type). This function is useful to estimate the total size of the data that needs to be loaded from disk when decoding a variant map containing raw block objects.
- * @param value QVariant to search
- * @return Total size of all raw blocks contained in the input QVariant
+ * Estimate the total decoded size of all serialized blob objects contained
+ * within a variant hierarchy.
+ *
+ * @param value Variant value to inspect recursively.
+ * @return Estimated total decoded size in bytes.
  */
 CORE_EXPORT std::uint64_t estimateRawBlockTotalSize(const QVariant& value);
 
 /**
- * Serialize a QVariantMap to a QByteArray using QDataStream
- * @param map QVariantMap to serialize
- * @return QByteArray containing the serialized QVariantMap
+ * Serialize a variant map to a binary byte array.
+ *
+ * @param map Variant map to serialize.
+ * @return Serialized byte array.
  */
 CORE_EXPORT QByteArray serializeVariantMap(const QVariantMap& map);
 
 /**
- * Deserialize a QByteArray to a QVariantMap using QDataStream
- * @param bytes QByteArray containing the serialized QVariantMap
- * @return QVariantMap deserialized from the input QByteArray
+ * Deserialize a variant map from a binary byte array.
+ *
+ * @param bytes Serialized byte array.
+ * @return Deserialized variant map.
  */
 CORE_EXPORT QVariantMap deserializeVariantMap(const QByteArray& bytes);
 

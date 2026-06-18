@@ -44,7 +44,7 @@ void PointDataLegacySerializer::fromVariantMapPre150(PointData& pointData, const
         pointData.resizeVector(numberOfElements);
 
         if (numberOfPoints > 0 && numberOfDimensions > 0)
-    		populateBytesFromBlobMap(rawData, (char*)pointData.getDataVoidPtr(), pointData.getRawDataSize(), executionContext);
+    		populateBytesFromBlobMap(rawData, (char*)pointData.getDataVoidPtr(), pointData.getRawDataSize());
     }
     else
     {
@@ -54,7 +54,7 @@ void PointDataLegacySerializer::fromVariantMapPre150(PointData& pointData, const
 
         std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
 
-        populateBytesFromBlobMap(rawData, bytes.data(), bytes.size(), executionContext);
+        populateBytesFromBlobMap(rawData, bytes.data(), bytes.size());
 
         pointData._numRows = static_cast<std::uint64_t>(numberOfPoints); // FIXME should be redundant
 
@@ -105,7 +105,7 @@ void PointsLegacySerializer::fromVariantMapPre150(Points& points, const QVariant
 
         points.indices.resize(indicesMap["Count"].toUInt());
 
-        populateBytesFromBlobMap(indicesMap["Raw"].toMap(), (char*)points.indices.data(), points.indices.size() * sizeof(decltype(points.indices)::value_type), executionContext);
+        populateBytesFromBlobMap(indicesMap["Raw"].toMap(), (char*)points.indices.data(), points.indices.size() * sizeof(decltype(points.indices)::value_type));
     }
 
     // Load dimension names
@@ -117,7 +117,7 @@ void PointsLegacySerializer::fromVariantMapPre150(Points& points, const QVariant
         QStringList dimensionNames;
 
         // Dimension names in byte array format
-        QByteArray dimensionsByteArray = bytesFromBlobVariantMap(variantMap["DimensionNames"].toMap(), executionContext);
+        QByteArray dimensionsByteArray = bytesFromBlobVariantMap(variantMap["DimensionNames"].toMap());
 
         // Open input data stream
         QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::ReadOnly);
@@ -163,7 +163,7 @@ void PointsLegacySerializer::fromVariantMapPre150(Points& points, const QVariant
 
             selectionSet->indices.resize(count);
 
-            populateBytesFromBlobMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(decltype(selectionSet->indices)::value_type), executionContext);
+            populateBytesFromBlobMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(decltype(selectionSet->indices)::value_type));
 
             events().notifyDatasetDataSelectionChanged(points);
         }

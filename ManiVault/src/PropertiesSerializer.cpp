@@ -82,7 +82,7 @@ namespace
             static_cast<qsizetype>(block.value("Count").toULongLong());
 
         const QVariantMap dataMap = block.value("Data").toMap();
-        QByteArray bytes = bytesFromBlobVariantMap(dataMap, context);
+        QByteArray bytes = bytesFromBlobVariantMap(dataMap);
 
         QDataStream stream(bytes);
         stream.setVersion(QDataStream::Qt_6_8);
@@ -135,7 +135,7 @@ namespace
         raw["__OptimizedVariantList"]   = true;
         raw["Type"]                     = typeName;
         raw["Count"]                    = static_cast<qulonglong>(values.size());
-        raw["Data"]                     = bytesToBlobVariantMap(reinterpret_cast<const char*>(values.constData()), static_cast<std::uint64_t>(values.size() * sizeof(T)), executionContext);
+        raw["Data"]                     = bytesToBlobVariantMap(reinterpret_cast<const char*>(values.constData()), static_cast<std::uint64_t>(values.size() * sizeof(T)));
 
         return raw;
     }
@@ -154,7 +154,7 @@ namespace
         raw["__OptimizedVariantList"]   = true;
         raw["Type"]                     = "BoolArray";
         raw["Count"]                    = static_cast<qulonglong>(list.size());
-        raw["Data"]                     = bytesToBlobVariantMap(bytes.constData(), static_cast<std::uint64_t>(bytes.size()), executionContext);
+        raw["Data"]                     = bytesToBlobVariantMap(bytes.constData(), static_cast<std::uint64_t>(bytes.size()));
 
         return raw;
     }
@@ -179,7 +179,7 @@ namespace
         block["__OptimizedVariantList"]   = true;
         block["Type"]                     = "QStringList";
         block["Count"]                    = static_cast<qulonglong>(strings.size());
-        block["Data"]                     = bytesToBlobVariantMap(bytes.constData(), static_cast<std::uint64_t>(bytes.size()), executionContext);
+        block["Data"]                     = bytesToBlobVariantMap(bytes.constData(), static_cast<std::uint64_t>(bytes.size()));
 
         return block;
     }
@@ -316,7 +316,7 @@ QVariant PropertiesSerializer::loadOptimizedVariantList(const QVariantMap& map, 
 
     const QVariantMap dataMap = map.value("Data").toMap();
 
-    QByteArray bytes = bytesFromBlobVariantMap(dataMap, context);
+    QByteArray bytes = bytesFromBlobVariantMap(dataMap);
 
     if (type == "BoolArray")
         return loadBoolList(bytes, count);

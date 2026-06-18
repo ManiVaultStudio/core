@@ -245,7 +245,7 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
     	const auto dataMap = variantMap["Data"].toMap();
         const auto rawDataMap = dataMap["Raw"].toMap();
 
-        return populateBytesFromBlobMapWorkflow(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), executionContext);
+        return populateBytesFromBlobMapWorkflow(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), executionContext->getExecutionOptions());
 	});
 
     return plan;
@@ -269,7 +269,7 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 
             outputMap.insert("TypeIndex", QVariant::fromValue(typeIndex));
             outputMap.insert("TypeName", QVariant(typeSpecifierName));
-            outputMap.insert("Raw", QVariant::fromValue(bytesToBlobVariantMap(static_cast<const char*>(getDataConstVoidPtr()), getRawDataSize(), executionContext)));
+            outputMap.insert("Raw", QVariant::fromValue(bytesToBlobVariantMap(static_cast<const char*>(getDataConstVoidPtr()), getRawDataSize())));
             outputMap.insert("NumberOfElements", QVariant::fromValue(getNumberOfElements()));
 
             const auto expectedBytes =
@@ -1097,7 +1097,7 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(QVariantMap variantMap)
 
                 selectionSet->indices.resize(count);
 
-                populateBytesFromBlobMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), count * sizeof(uint32_t), executionContext);
+                populateBytesFromBlobMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), count * sizeof(uint32_t));
 
                 events().notifyDatasetDataSelectionChanged(this);
             }
@@ -1111,7 +1111,7 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(QVariantMap variantMap)
 
 	        indices.resize(indicesMap["Count"].toUInt());
 
-	        populateBytesFromBlobMap(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(uint32_t), executionContext);
+	        populateBytesFromBlobMap(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(uint32_t));
         }, WorkflowPlan::JobThreadAffinity::GuiThread);
     }
 
@@ -1155,7 +1155,7 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
         QVariantMap indicesMap;
 
         indicesMap["Count"] = QVariant::fromValue(this->indices.size());
-        indicesMap["Raw"]   = bytesToBlobVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t), executionContext);
+        indicesMap["Raw"]   = bytesToBlobVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t));
 
         datasetMap["Indices"] = indicesMap;
 
@@ -1170,8 +1170,8 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
         if (isFull()) {
             auto selectionSet = getSelection<Points>();
 
-            selection["Count"] = QVariant::fromValue(selectionSet->indices.size());
-            selection["Raw"] = bytesToBlobVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), executionContext);
+            selection["Count"]  = QVariant::fromValue(selectionSet->indices.size());
+            selection["Raw"]    = bytesToBlobVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t));
         }
 
         datasetMap["Selection"] = selection;

@@ -30,7 +30,7 @@ void ClusterDataLegacySerializer::fromVariantMapPre150(ClusterData& clusterData,
 
     // Convert raw data to indices
     if (!packedIndices.empty())
-		populateBytesFromBlobMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), packedIndices.size() * sizeof(std::uint32_t), executionContext);
+		populateBytesFromBlobMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data(), packedIndices.size() * sizeof(std::uint32_t));
 
     if (dataMap.contains("ClustersRawData")) {
         QByteArray clustersByteArray;
@@ -41,7 +41,7 @@ void ClusterDataLegacySerializer::fromVariantMapPre150(ClusterData& clusterData,
 
         clustersByteArray.resize(clustersRawDataSize);
 
-        populateBytesFromBlobMap(dataMap["ClustersRawData"].toMap(), (char*)clustersByteArray.data(), clustersByteArray.size(), executionContext);
+        populateBytesFromBlobMap(dataMap["ClustersRawData"].toMap(), (char*)clustersByteArray.data(), clustersByteArray.size());
 
         QVariantList clusters;
 
@@ -85,8 +85,8 @@ void ClusterDataLegacySerializer::fromVariantMapPre150(ClusterData& clusterData,
             cluster.setId(clusterMap["ID"].toString());
             cluster.setColor(clusterMap["Color"].toString());
 
-            const auto globalIndicesOffset = clusterMap["GlobalIndicesOffset"].toInt();
-            const auto numberOfIndices = clusterMap["NumberOfIndices"].toInt();
+            const auto globalIndicesOffset  = clusterMap["GlobalIndicesOffset"].toInt();
+            const auto numberOfIndices      = clusterMap["NumberOfIndices"].toInt();
 
             cluster.getIndices() = std::vector<std::uint32_t>(packedIndices.begin() + globalIndicesOffset, packedIndices.begin() + globalIndicesOffset + numberOfIndices);
         }
