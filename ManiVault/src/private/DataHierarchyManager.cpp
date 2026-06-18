@@ -306,7 +306,7 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(QVariantMap vari
                 Q_ASSERT(dataset.isValid());
 
                 return dataset->fromVariantMapWorkflow(datasetConfig.map);
-                }), WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Atomic, datasetConfig.approximateSize);
+                }), WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Nested, datasetConfig.approximateSize);
         }
 
         if (!datasetJobs.empty()) {
