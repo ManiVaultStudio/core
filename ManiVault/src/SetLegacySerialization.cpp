@@ -15,6 +15,50 @@ using namespace mv::util;
 namespace mv::legacy
 {
 
+namespace
+{
+    QVariant loadQVariant(const QVariant& variant)
+    {
+        // check if variant contains a non-empty QVariantMap
+        QVariantMap variantMap = variant.toMap();
+        if (variantMap.empty())
+            return variant;
+
+        // check if it was stored on disk, if not just return it
+        if (!variantMap.contains("QVariantOnDiskVersion"))
+        {
+            return variantMap;
+        }
+
+        // load the QVariant from disk
+        quint32 version = variantMap["QVariantOnDiskVersion"].toUInt();
+        Q_ASSERT(version == 1);
+
+
+        // First check the size we need for a temporary buffer
+        variantMapMustContain(variantMap, "Blocks");
+        const auto blocks = variantMap["Blocks"].toList();
+        uint64_t totalSize = 0;
+        for (const auto& block : blocks)
+        {
+            // Get block variant map
+            const auto map = block.toMap();
+            variantMapMustContain(map, "Size");
+            totalSize += map["Size"].value<uint64_t>();
+        }
+        // Next create a temporary buffer and load the data
+        //std::vector<char> bytes(totalSize);
+        //populateDataBufferFromVariantMap(variantMap, bytes.data());
+
+        // Finally convert the data to a QVariant.
+        QVariant result;;
+        //QByteArray byteArray(bytes.data(), bytes.size());
+        //QDataStream stream(&byteArray, QIODevice::ReadOnly);
+        //stream >> result;
+        return result;
+    }
+}
+
 void SetLegacySerializer::fromVariantMapPre150(DatasetImpl& dataset, const QVariantMap& variantMap)
 {
     // WidgetAction::fromVariantMap(variantMap);
@@ -63,9 +107,8 @@ void SetLegacySerializer::fromVariantMapPre150(DatasetImpl& dataset, const QVari
 
     if (variantMap.contains("Properties"))
     {
-        dataset._properties = mv::util::loadQVariant(variantMap["Properties"]).toMap();
+        dataset._properties = loadQVariant(variantMap["Properties"]).toMap();
     }
-
 
     if (dataset.getStorageType() == DatasetImpl::StorageType::Proxy && variantMap.contains("ProxyMembers")) {
         Datasets proxyMembers;
