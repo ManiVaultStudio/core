@@ -181,9 +181,9 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(QVariantMap variantMap)
     };
 
     addManagerLoadStage(mv::plugins(), 1.0);
-    addManagerLoadStage(mv::actions(), 2.0);
     addManagerLoadStage(mv::dataHierarchy(), 20.0);
     addManagerLoadStage(mv::events(), 1.0);
+    addManagerLoadStage(mv::actions(), 2.0);
 
     plan->addSequentialStage("Post-process", {
         WorkflowPlan::Job("Post-process", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
