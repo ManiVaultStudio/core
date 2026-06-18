@@ -23,82 +23,6 @@ using namespace mv::workflow;
 namespace mv
 {
 
-namespace 
-{
-    /** Thread-safe data hierarchy save context */
-    class ToVariantMapWorkflowContext : public WorkflowContextBase
-    {
-    public:
-        void setItemMap(const QString& datasetId, const QVariantMap& itemMap)
-        {
-            QMutexLocker lock(&_mutex);
-            _itemMaps[datasetId] = itemMap;
-        }
-
-        QVariantMap getItemMap(const QString& datasetId) const
-        {
-            QMutexLocker lock(&_mutex);
-
-            const auto it = _itemMaps.find(datasetId);
-
-            if (it != _itemMaps.end())
-                return it.value().toMap();
-
-            return {};
-        }
-
-        QStringList getItemIds() const
-        {
-            QMutexLocker lock(&_mutex);
-            return _itemMaps.keys();
-        }
-
-        void setDatasetMap(const QString& datasetId, const QVariantMap& datasetMap)
-        {
-            QMutexLocker lock(&_mutex);
-            _datasetMaps[datasetId] = datasetMap;
-        }
-
-        QVariantMap getDatasetMap(const QString& datasetId) const
-        {
-            QMutexLocker lock(&_mutex);
-
-            const auto it = _datasetMaps.find(datasetId);
-
-            if (it != _datasetMaps.end())
-                return it.value().toMap();
-
-            return {};
-        }
-
-        QStringList getDatasetIds() const
-        {
-            QMutexLocker lock(&_mutex);
-            return _datasetMaps.keys();
-        }
-
-        void setDataHierarchyMap(const QVariantMap& dataHierarchyMap)
-        {
-            QMutexLocker lock(&_mutex);
-            _dataHierarchyMap = dataHierarchyMap;
-        }
-
-        QVariantMap getDataHierarchyMap() const
-        {
-            QMutexLocker lock(&_mutex);
-            return _dataHierarchyMap;
-        }
-
-    private:
-        mutable QMutex _mutex;
-
-        QVariantMap _itemMaps;
-        QVariantMap _datasetMaps;
-        QVariantMap _dataHierarchyMap;
-    };
-
-}
-
 DataHierarchyManager::DataHierarchyManager(QObject* parent) :
     AbstractDataHierarchyManager(parent)
 {
@@ -382,7 +306,7 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(QVariantMap vari
                 Q_ASSERT(dataset.isValid());
 
                 return dataset->fromVariantMapWorkflow(datasetConfig.map);
-            }), WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Automatic, datasetConfig.approximateSize);
+                }), WorkflowPlan::JobThreadAffinity::GuiThread, WorkflowPlan::JobProgressMode::Atomic, datasetConfig.approximateSize);
         }
 
         if (!datasetJobs.empty()) {
@@ -406,8 +330,6 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(QVariantMap vari
 
 UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 {
-    auto context = std::make_shared<ToVariantMapWorkflowContext>();
-
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
     if (_items.empty())

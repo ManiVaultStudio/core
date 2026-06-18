@@ -155,7 +155,7 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(QVariantMap variantMap)
 
     plan->addNestedWorkflowStage("Load common", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
         return Serializable::fromVariantMapWorkflow(variantMap);
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     plan->addSequentialStage("Configure", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
 		    if (variantMap.contains(_selectionGroupingAction.getSerializationName())) {
@@ -181,18 +181,16 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(QVariantMap variantMap)
     };
 
     addManagerLoadStage(mv::plugins(), 1.0);
-    addManagerLoadStage(mv::dataHierarchy(), 20.0);
+    addManagerLoadStage(mv::dataHierarchy(), 100.0);
     addManagerLoadStage(mv::events(), 1.0);
-    addManagerLoadStage(mv::actions(), 2.0);
+    addManagerLoadStage(mv::actions(), 1.0);
 
-    plan->addSequentialStage("Post-process", {
-        WorkflowPlan::Job("Post-process", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
-	        if (getReadOnlyAction().isChecked() && getAllowedPluginsOnlyAction().isChecked()) {
-				for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
-					pluginFactory->setAllowPluginCreationFromStandardGui(_projectMetaAction.getAllowedPluginsAction().getStrings().contains(pluginFactory->getKind()));
-			}
-        })
-    });
+    plan->addSequentialStage("Post-process", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        if (getReadOnlyAction().isChecked() && getAllowedPluginsOnlyAction().isChecked()) {
+			for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
+				pluginFactory->setAllowPluginCreationFromStandardGui(_projectMetaAction.getAllowedPluginsAction().getStrings().contains(pluginFactory->getKind()));
+		}
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     return plan;
 }

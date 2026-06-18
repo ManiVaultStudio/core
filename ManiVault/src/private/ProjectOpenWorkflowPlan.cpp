@@ -127,11 +127,11 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 		else {
 			throw std::runtime_error("No current project found");
 		}
-    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
     plan->addNestedWorkflowStage("Open project JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
         return mv::projects().getCurrentProject()->fromVariantMapWorkflow(context->getProjectMap()["Project"].toMap());
-    }, WorkflowPlan::JobThreadAffinity::GuiThread, 20.0);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 10.0);
 
     plan->addSequentialStage("Open workspace JSON", [context]() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
@@ -141,7 +141,7 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
             throw std::runtime_error("Workspace JSON file does not exist");
     
         workspaces().loadWorkspace(context->getWorkspaceJsonPath());
-    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 50.0);
 
     plan->addOnSuccessStage("Success", []() -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
