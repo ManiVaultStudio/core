@@ -97,9 +97,7 @@ void ClustersLegacySerializer::fromVariantMapPre150(Clusters& clusters, const QV
 {
     executionContext->warning(QString("Deserializing %1 Clusters from legacy format (pre-1.5.0)").arg(clusters.getGuiName()));
 
-    auto plan = clusters.getRawData<ClusterData>()->fromVariantMapWorkflow(variantMap);
-
-    workflow::WorkflowRuntimeScoped::executeBlocking(std::move(plan), executionContext);
+    ClusterDataLegacySerializer::fromVariantMapPre150(*clusters.getRawData<ClusterData>(), variantMap, executionContext);
 
     events().notifyDatasetDataChanged(clusters);
 }
