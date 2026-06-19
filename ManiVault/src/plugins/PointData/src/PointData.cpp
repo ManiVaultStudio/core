@@ -272,11 +272,7 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
             outputMap.insert("Raw", QVariant::fromValue(bytesToBlobVariantMap(static_cast<const char*>(getDataConstVoidPtr()), getRawDataSize())));
             outputMap.insert("NumberOfElements", QVariant::fromValue(getNumberOfElements()));
 
-            const auto expectedBytes =
-                std::uint64_t(getNumPoints()) *
-                std::uint64_t(getNumDimensions()) *
-                sizeof(float);
-
+            const auto expectedBytes = getRawDataSize();
             const auto blobTotalSize = outputMap["Raw"].toMap()["Size"].toULongLong();
 
             if (blobTotalSize != expectedBytes) {
