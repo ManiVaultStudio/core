@@ -280,7 +280,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
 
     auto result = std::make_shared<WorkflowResult>(workflowPlan.getName());
 
-    const auto durationMs = lifecycle.elapsedMs();
+    const auto durationMs = lifecycle.elapsedMS();
 
     if (auto state = rootContext->getState()) {
         if (rootContext->isRootExecution()) {
@@ -300,7 +300,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
         result->setMetrics(state->metrics().snapshot());
     }
 
-    result->setDuration(durationMs);
+    result->setDurationMS(durationMs);
 
     lifecycle.finish(durationMs);
 
@@ -474,7 +474,7 @@ TaskflowWorkflowPlanExecutor::CompiledTasks TaskflowWorkflowPlanExecutor::compil
 void TaskflowWorkflowPlanExecutor::addWorkflowFinishedNotification(const QString& workflowName, const SharedWorkflowResult& result, const QUuid& resultId)
 {
     const auto url      = QString("app://workflow/results?workflowResultId=%1").arg(resultId.toString(QUuid::WithoutBraces));
-    const auto title    = QString("%1 finished in %2").arg(workflowName).arg(getElapsedTimeHumanReadable(result->getDuration(), true));
+    const auto title    = QString("%1 finished in %2").arg(workflowName).arg(getElapsedTimeHumanReadable(result->getDurationMS(), true));
 
     QMetaObject::invokeMethod(&help(), [result, url, title]() {
         QString message;

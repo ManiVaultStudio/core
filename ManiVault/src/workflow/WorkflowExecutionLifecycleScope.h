@@ -99,7 +99,7 @@ public:
 	 *
 	 * @return Elapsed wall-clock time in milliseconds.
 	 */
-    std::uint64_t elapsedMs() const;
+    std::uint64_t elapsedMS() const;
 
 private:
     SharedWorkflowExecutionContext  _context;           /** Context whose lifecycle is reported. */

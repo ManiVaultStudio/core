@@ -212,7 +212,7 @@ QVariantMap WorkflowExecutionContext::makeLifecycleDetails(const QString& event,
     details["threadId"] = QString::number(reinterpret_cast<quintptr>(QThread::currentThreadId()));
 
     if (durationMs > 0)
-        details["durationMs"] = QVariant::fromValue<qulonglong>(durationMs);
+        details["durationMs"] = QVariant::fromValue(static_cast<qulonglong>(durationMs));
 
     return details;
 }

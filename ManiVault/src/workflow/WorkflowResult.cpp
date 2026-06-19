@@ -19,12 +19,12 @@ WorkflowResult::WorkflowResult(const QString& workflowName) :
 {
 }
 
-std::uint64_t WorkflowResult::getDuration() const
+std::uint64_t WorkflowResult::getDurationMS() const
 {
     return _duration;
 }
 
-void WorkflowResult::setDuration(std::uint64_t duration)
+void WorkflowResult::setDurationMS(std::uint64_t duration)
 {
     _duration = duration;
 }

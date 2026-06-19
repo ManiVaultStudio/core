@@ -35,13 +35,13 @@ public: // General
      * @brief Retrieves the duration of the workflow execution in milliseconds.
      * @return The duration of the workflow execution in milliseconds.
      */
-    std::uint64_t getDuration() const;
+    std::uint64_t getDurationMS() const;
 
     /**
      * @brief Sets the duration of the workflow execution in milliseconds.
      * @param duration The duration to be set for the workflow execution in milliseconds.
      */
-    void setDuration(std::uint64_t duration);
+    void setDurationMS(std::uint64_t duration);
 
 public: // Messages
 

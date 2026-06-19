@@ -135,12 +135,14 @@ QString getElapsedTimeHumanReadable(std::uint64_t ms, bool compact)
         return QString("%1 ms").arg(ms);
 
     if (ms < 60'000) {
-        double seconds = ms / 1000.0;
+        const double seconds = ms / 1000.0;
 
         QString s = QString::number(seconds, 'f', seconds < 10.0 ? 1 : 0);
 
-        s.remove(QRegularExpression("0+$"));
-        s.remove(QRegularExpression("\\.$"));
+        if (s.contains(QLatin1Char('.'))) {
+            s.remove(QRegularExpression("0+$"));
+            s.remove(QRegularExpression("\\.$"));
+        }
 
         return s + "s";
     }

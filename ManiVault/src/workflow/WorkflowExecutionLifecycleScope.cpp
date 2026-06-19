@@ -44,10 +44,10 @@ void WorkflowExecutionLifecycleScope::finish(std::uint64_t durationMs)
 
 void WorkflowExecutionLifecycleScope::finish()
 {
-	finish(elapsedMs());
+	finish(elapsedMS());
 }
 
-std::uint64_t WorkflowExecutionLifecycleScope::elapsedMs() const
+std::uint64_t WorkflowExecutionLifecycleScope::elapsedMS() const
 {
 	return static_cast<std::uint64_t>(_timer.elapsed());
 }
