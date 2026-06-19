@@ -272,7 +272,7 @@ public: // Serialization
      * Save widget action to variant
      * @return Variant representation of the widget action
      */
-    QVariantMap toVariantMapScoped(const workflow::SharedWorkflowExecutionContext& parentExecutionContext) const override;
+    QVariantMap toVariantMap() const override;
 
 public: // Action getters
 

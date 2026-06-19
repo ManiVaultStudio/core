@@ -77,14 +77,31 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
         Archiver archiver;
 
+        archiver.extractSingleFile(context->getFilePath(), "meta.json", context->getMetaJsonPath());
 		archiver.extractSingleFile(context->getFilePath(), "project.json", context->getProjectJsonPath());
-		archiver.extractSingleFile(context->getFilePath(), "meta.json", context->getMetaJsonPath());
 		archiver.extractSingleFile(context->getFilePath(), "workspace.json", context->getWorkspaceJsonPath());
-
 
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
-    plan->addSequentialStage("Read project JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> void {
+    plan->addSequentialStage("Open meta JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext&) -> void {
+#ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
+        qDebug() << "Open meta JSON";
+#endif
+
+        if (!QFileInfo(context->getMetaJsonPath()).exists())
+            throw std::runtime_error("Meta JSON file does not exist");
+
+        if (auto currentProject = mv::projects().getCurrentProject()) {
+            currentProject->getProjectMetaAction().fromJsonFile(context->getMetaJsonPath());
+        }
+        else {
+            throw std::runtime_error("No current project found");
+        }
+        }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
+
+    WorkflowPlan::Jobs readJsonJobs;
+
+    readJsonJobs.emplace_back("Read project JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
         qDebug() << "Read project JSON";
 #endif
@@ -111,36 +128,44 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
         context->setProjectMap(jsonDocument.toVariant().toMap());
 
-    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
+    });
 
-    plan->addSequentialStage("Open meta JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> void {
+    readJsonJobs.emplace_back("Read workspace JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
-        qDebug() << "Open meta JSON";
+        qDebug() << "Read workspace JSON";
 #endif
 
-        if (!QFileInfo(context->getMetaJsonPath()).exists())
-	        throw std::runtime_error("Meta JSON file does not exist");
+        const auto filePath = context->getWorkspaceJsonPath();
 
-		if (auto currentProject = mv::projects().getCurrentProject()) {
-			currentProject->getProjectMetaAction().fromJsonFile(context->getMetaJsonPath());
-		}
-		else {
-			throw std::runtime_error("No current project found");
-		}
-    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
+        if (!QFileInfo(filePath).exists())
+            throw std::runtime_error("File does not exist");
 
-    plan->addNestedWorkflowStage("Open project JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
+        QFile jsonFile(filePath);
+
+        if (!jsonFile.open(QIODevice::ReadOnly))
+            throw std::runtime_error("Unable to open file for reading");
+
+        QByteArray data = jsonFile.readAll();
+
+        if (data.isEmpty())
+            throw std::runtime_error("No data read");
+
+        auto jsonDocument = QJsonDocument::fromJson(data);
+
+        if (jsonDocument.isNull() || jsonDocument.isEmpty())
+            throw std::runtime_error("JSON document is invalid");
+
+        context->setWorkspaceMap(jsonDocument.toVariant().toMap());
+    });
+
+    plan->addParallelStage("Read JSON files", std::move(readJsonJobs));
+
+    plan->addNestedWorkflowStage("Open project JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext&) mutable -> UniqueWorkflowPlan {
         return mv::projects().getCurrentProject()->fromVariantMapWorkflow(context->getProjectMap()["Project"].toMap());
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 100.0);
 
-    plan->addSequentialStage("Open workspace JSON", [context]() -> void {
-#ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
-        qDebug() << "Open workspace JSON";
-#endif
-        if (!QFileInfo(context->getWorkspaceJsonPath()).exists())
-            throw std::runtime_error("Workspace JSON file does not exist");
-    
-        workspaces().loadWorkspace(context->getWorkspaceJsonPath());
+    plan->addNestedWorkflowStage("Open workspace JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext&) mutable -> UniqueWorkflowPlan {
+        return workspaces().fromVariantMapWorkflow(context->getWorkspaceMap()["Workspace"].toMap());
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 10.0);
 
     plan->addOnSuccessStage("Success", []() -> void {

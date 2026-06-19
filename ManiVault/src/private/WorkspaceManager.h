@@ -136,11 +136,52 @@ public: // IO
     void newWorkspace() override;
 
     /**
-     * Load a workspace from disk
-     * @param filePath File path of the workspace (choose file path with dialog when empty)
-     * @param addToRecentWorkspaces Whether to add the workspace file path to the recent workspace file paths
-     */
+    * Load a workspace from disk.
+    *
+    * This function loads the workspace state from the specified file and
+    * restores the associated workspace configuration.
+    *
+    * If the file path is empty, implementations may prompt the user to
+    * select a workspace file.
+    *
+    * The loaded workspace may optionally be added to the recent workspace
+    * list.
+    *
+    * @param filePath Path of the workspace file to load. When empty,
+    * implementations may present a file selection dialog.
+    * @param addToRecentWorkspaces Whether the loaded workspace should be
+    * added to the recent workspace list.
+    */
     void loadWorkspace(QString filePath = "", bool addToRecentWorkspaces = true) override;
+
+    /**
+     * Create a workflow plan that loads a workspace from disk.
+     *
+     * This function constructs and returns a workflow plan but does not
+     * execute it.
+     *
+     * When executed, the workflow loads the workspace state from the
+     * specified file and restores the associated workspace configuration.
+     *
+     * Implementations may use sequential, parallel, nested, or batched
+     * workflow stages and may publish progress, warnings, messages, and
+     * outputs as appropriate.
+     *
+     * If the file path is empty, implementations may prompt the user to
+     * select a workspace file.
+     *
+     * Framework code may compose the returned workflow directly, for
+     * example as a nested workflow within a larger project or application
+     * loading workflow.
+     *
+     * @param filePath Path of the workspace file to load. When empty,
+     * implementations may present a file selection dialog.
+     * @param addToRecentWorkspaces Whether the loaded workspace should be
+     * added to the recent workspace list.
+     *
+     * @return Workflow plan that loads the workspace when executed.
+     */
+    workflow::UniqueWorkflowPlan loadWorkspaceWorkflowPlan(QString filePath = "", bool addToRecentWorkspaces = true) override;
 
     /**
      * Import a workspace from a project file

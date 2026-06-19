@@ -68,13 +68,6 @@ void Serializable::fromVariantMap(const QVariantMap& variantMap)
     _serializationCounter[static_cast<int>(Direction::From)]++;
 }
 
-void Serializable::fromVariantMapScoped(const QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext)
-{
-    auto plan = fromVariantMapWorkflow(variantMap);
-
-    WorkflowRuntimeScoped::executeBlocking(std::move(plan), parentExecutionContext);
-}
-
 UniqueWorkflowPlan Serializable::fromVariantMapWorkflow(QVariantMap variantMap)
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1::fromVariantMap").arg(getSerializationName()));
@@ -97,15 +90,6 @@ QVariantMap Serializable::toVariantMap() const
     };
 }
 
-QVariantMap Serializable::toVariantMapScoped(const SharedWorkflowExecutionContext& parentExecutionContext) const
-{
-    auto plan = toVariantMapWorkflow();
-
-    const auto result = WorkflowRuntimeScoped::executeBlocking(std::move(plan), parentExecutionContext);
-
-    return result->value<QVariantMap>();
-}
-
 UniqueWorkflowPlan Serializable::toVariantMapWorkflow() const
 {
     UniqueWorkflowPlan workflowPlan = std::make_unique<WorkflowPlan>(QString("%1::toVariantMap").arg(getSerializationName()));
@@ -121,18 +105,13 @@ UniqueWorkflowPlan Serializable::toVariantMapWorkflow() const
 
 void Serializable::fromJsonDocument(const QJsonDocument& jsonDocument)
 {
-    fromJsonDocumentScoped(jsonDocument);
-}
-
-void Serializable::fromJsonDocumentScoped(const QJsonDocument& jsonDocument, const SharedWorkflowExecutionContext& parentExecutionContext)
-{
     const auto rootMap = jsonDocument.toVariant().toMap();
 
     variantMapMustContain(rootMap, getSerializationName());
 
     const auto objectMap = rootMap[getSerializationName()].toMap();
 
-    fromVariantMapScoped(objectMap, parentExecutionContext);
+    fromVariantMap(objectMap);
 }
 
 void Serializable::fromJsonFile(const QString& filePath /*= ""*/)
@@ -156,29 +135,6 @@ void Serializable::fromJsonFile(const QString& filePath /*= ""*/)
         throw std::runtime_error("JSON document is invalid");
 
     fromJsonDocument(jsonDocument);
-}
-
-void Serializable::fromJsonFileScoped(const QString& filePath, const SharedWorkflowExecutionContext& parentExecutionContext)
-{
-    if (!QFileInfo(filePath).exists())
-        throw std::runtime_error("File does not exist");
-
-    QFile jsonFile(filePath);
-
-    if (!jsonFile.open(QIODevice::ReadOnly))
-        throw std::runtime_error("Unable to open file for reading");
-
-    const QByteArray data = jsonFile.readAll();
-
-    if (data.isEmpty())
-        throw std::runtime_error("No data read");
-
-    const auto jsonDocument = QJsonDocument::fromJson(data);
-
-    if (jsonDocument.isNull() || jsonDocument.isEmpty())
-        throw std::runtime_error("JSON document is invalid");
-
-    fromJsonDocumentScoped(jsonDocument, parentExecutionContext);
 }
 
 QJsonDocument Serializable::toJsonDocument() const
@@ -300,19 +256,6 @@ void Serializable::fromParentVariantMap(const QVariantMap& parentVariantMap, boo
     }
 }
 
-void Serializable::fromParentVariantMapScoped(const QVariantMap& parentVariantMap, const SharedWorkflowExecutionContext& parentExecutionContext)
-{
-    if (getSerializationName().isEmpty())
-        throw std::runtime_error("Serialization name may not be empty");
-
-    if (!parentVariantMap.contains(getSerializationName())) {
-        handleKeyNotFoundInVariantMap(*this, parentVariantMap, getSerializationName());
-        return;
-    }
-
-    fromVariantMapScoped(parentVariantMap[getSerializationName()].toMap(), parentExecutionContext);
-}
-
 QVariantMap Serializable::toVariantMap(const Serializable* serializable)
 {
 #ifdef SERIALIZABLE_VERBOSE
@@ -341,17 +284,6 @@ void Serializable::insertIntoVariantMap(QVariantMap& variantMap) const
         throw std::runtime_error(QString("%1 already exists in variant map (%2)").arg(getSerializationName()).toLatin1());
 
     variantMap.insert(getSerializationName(), toVariantMap());
-}
-
-void Serializable::insertIntoVariantMapScoped(QVariantMap& variantMap, const SharedWorkflowExecutionContext& parentExecutionContext) const
-{
-    if (getSerializationName().isEmpty())
-        throw std::runtime_error("Serialization name may not be empty");
-
-    if (variantMap.contains(getSerializationName()))
-        throw std::runtime_error(QString("%1 already exists in variant map (%2)").arg(getSerializationName()).toLatin1());
-
-    variantMap.insert(getSerializationName(), toVariantMapScoped(parentExecutionContext));
 }
 
 void Serializable::handleKeyNotFoundInVariantMap(const Serializable& serializable, const QVariantMap& map, const QString& key)

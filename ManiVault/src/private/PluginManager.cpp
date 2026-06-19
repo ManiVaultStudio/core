@@ -944,7 +944,7 @@ UniqueWorkflowPlan PluginManager::fromVariantMapWorkflow(QVariantMap variantMap)
         }
 
         executionContext->setOutput(QVariant());
-    });
+    }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     return plan;
 }

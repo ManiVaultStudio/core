@@ -18,6 +18,8 @@
 #include "util/Serialization.h"
 #include "util/Icon.h"
 
+#include "workflow/WorkflowRuntimeScoped.h"
+
 #include "widgets/FileDialog.h"
 
 #include <QMainWindow>
@@ -255,19 +257,27 @@ void WorkspaceManager::newWorkspace()
     }
 }
 
-void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecentWorkspaces /*= true*/)
+void WorkspaceManager::loadWorkspace(QString filePath, bool addToRecentWorkspaces)
+{
+    auto plan = loadWorkspaceWorkflowPlan(filePath, addToRecentWorkspaces);
+
+    WorkflowRuntimeScoped::executeBlocking(std::move(plan), nullptr);
+}
+
+workflow::UniqueWorkflowPlan WorkspaceManager::loadWorkspaceWorkflowPlan(QString filePath /*= ""*/, bool addToRecentWorkspaces /*= true*/)
 {
 #ifdef WORKSPACE_MANAGER_VERBOSE
         qDebug() << __FUNCTION__ << filePath;
 #endif
 
-    createWorkspace();
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    setWorkspaceFilePath(filePath);
+    plan->addSequentialStage("Read", [this, filePath, addToRecentWorkspaces](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> void {
+        createWorkspace();
 
-    beginLoadWorkspace();
-    {
-        if (filePath.isEmpty()) {
+        auto finalFilePath = filePath;
+
+        if (finalFilePath.isEmpty()) {
             FileOpenDialog fileOpenDialog;
 
             fileOpenDialog.setWindowTitle("Load ManiVault Workspace");
@@ -284,8 +294,8 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
             tagsAction.setEnabled(false);
             commentsAction.setEnabled(false);
 
-            auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileOpenDialog.layout());
-            auto rowCount           = fileDialogLayout->rowCount();
+            auto fileDialogLayout = dynamic_cast<QGridLayout*>(fileOpenDialog.layout());
+            auto rowCount = fileDialogLayout->rowCount();
 
             fileDialogLayout->addWidget(descriptionAction.createLabelWidget(&fileOpenDialog), rowCount, 0);
             fileDialogLayout->addWidget(descriptionAction.createWidget(&fileOpenDialog), rowCount, 1, 1, 2);
@@ -296,16 +306,16 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
             fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileOpenDialog), rowCount + 2, 0);
             fileDialogLayout->addWidget(commentsAction.createWidget(&fileOpenDialog), rowCount + 2, 1, 1, 2);
 
-            connect(&fileOpenDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
-                if (!QFileInfo(filePath).isFile())
+            connect(&fileOpenDialog, &QFileDialog::currentChanged, this, [&descriptionAction, &tagsAction, &commentsAction](const QString& candidateFilePath) -> void {
+                if (!QFileInfo(candidateFilePath).isFile())
                     return;
 
-                Workspace workspace(filePath);
+                Workspace workspace(candidateFilePath);
 
                 descriptionAction.setString(workspace.getDescriptionAction().getString());
                 tagsAction.setString(workspace.getTagsAction().getStrings().join(", "));
                 commentsAction.setString(workspace.getCommentsAction().getString());
-            });
+                });
 
             fileOpenDialog.open();
 
@@ -319,17 +329,25 @@ void WorkspaceManager::loadWorkspace(QString filePath /*= ""*/, bool addToRecent
             if (fileOpenDialog.selectedFiles().count() != 1)
                 throw std::runtime_error("Only one file may be selected");
 
-            filePath = fileOpenDialog.selectedFiles().first();
+            finalFilePath = fileOpenDialog.selectedFiles().first();
 
-            Application::current()->setSetting("Workspaces/WorkingDirectory", QFileInfo(filePath).absolutePath());
-        }           
+            Application::current()->setSetting("Workspaces/WorkingDirectory", QFileInfo(finalFilePath).absolutePath());
+        }
 
-        fromJsonFile(filePath);
+        setWorkspaceFilePath(finalFilePath);
+
+        beginLoadWorkspace();
+        {
+            fromJsonFile(finalFilePath);
+        }
+        endLoadWorkspace();
 
         if (addToRecentWorkspaces)
-            _recentWorkspacesAction.addRecentFilePath(filePath);
-    }
-    endLoadWorkspace();
+            _recentWorkspacesAction.addRecentFilePath(finalFilePath);
+
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
+
+    return plan;
 }
 
 void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*= ""*/, bool addToRecentWorkspaces /*= true*/)
