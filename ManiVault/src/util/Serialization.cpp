@@ -8,7 +8,7 @@
 
 #include "workflow/WorkflowRuntimeScoped.h"
 
-#include "Exception/SerializationException.h"
+#include "exception/ManiVaultException.h"
 
 #include <QUuid>
 #include <QFileInfo>

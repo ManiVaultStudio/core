@@ -14,7 +14,7 @@
 #include "util/Serialization.h"
 #include "util/Exception.h"
 
-#include "exception/SerializationException.h"
+#include "exception/ManiVaultException.h"
 
 #include <QDebug>
 #include <QUuid>
