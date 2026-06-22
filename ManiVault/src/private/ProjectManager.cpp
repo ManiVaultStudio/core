@@ -30,6 +30,7 @@
 
 #include <exception>
 
+#include "ProjectOpenContext.h"
 #include "ProjectSaveContext.h"
 #include "Task.h"
 
@@ -372,9 +373,11 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
 	    setState(State::OpeningProject);
 
-        auto projectOpenWorkflowPlan = createProjectOpenWorkflowPlan(filePath);
+        auto plan = createProjectOpenWorkflowPlan(filePath);
 
-        auto future = Application::getWorkflowPlanExecutor().execute(std::move(projectOpenWorkflowPlan), nullptr, WorkflowExecutionOptions({
+        setTemporaryDirPath(TemporaryDirType::Open, plan->getWorkflowContextAs<ProjectOpenContext>()->getTemporaryDirectoryPath());
+
+        auto future = Application::getWorkflowPlanExecutor().execute(std::move(plan), nullptr, WorkflowExecutionOptions({
             ._parallel = parameters._parallel,
         	._maxWorkerThreadCount = parameters._maxParallelThreads,
             ._reportProgress = true,
