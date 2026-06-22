@@ -864,27 +864,28 @@ std::uint64_t estimateRawBlockTotalSize(const QVariant& value)
 {
     std::uint64_t totalSize = 0;
 
-    if (value.canConvert<QVariantMap>()) {
+    if (value.metaType() == QMetaType::fromType<QVariantMap>()) {
         const QVariantMap map = value.toMap();
 
-        if (isVariantMapRawBlockObject(map)) {
-            totalSize += getRawBlockObjectSize(map);
-        }
+        if (isVariantMapRawBlockObject(map))
+            return getRawBlockObjectSize(map);
 
-        for (auto it = map.begin(); it != map.end(); ++it) {
+        for (auto it = map.cbegin(); it != map.cend(); ++it)
             totalSize += estimateRawBlockTotalSize(it.value());
-        }
+
+        return totalSize;
     }
 
-    if (value.canConvert<QVariantList>()) {
+    if (value.metaType() == QMetaType::fromType<QVariantList>()) {
         const QVariantList list = value.toList();
 
-        for (const QVariant& item : list) {
+        for (const QVariant& item : list)
             totalSize += estimateRawBlockTotalSize(item);
-        }
+
+        return totalSize;
     }
 
-    return totalSize;
+    return 0;
 }
 
 }

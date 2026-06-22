@@ -258,25 +258,29 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(QVariantMap vari
     };
 
     std::vector<DatasetConfig> datasetConfigs;
+    datasetConfigs.reserve(1024); // or a better estimate if available
 
-    const std::function<void(const QVariantMap&)> enumerateDatasetNames = [&enumerateDatasetNames, &datasetConfigs](const QVariantMap& variantMap) -> void {
-        for (const auto& variant : variantMap.values()) {
-            enumerateDatasetNames(variant.toMap()["Children"].toMap());
+    auto enumerateDatasetConfigs = [&](const auto& self, const QVariantMap& hierarchyMap) -> void {
+        for (auto it = hierarchyMap.cbegin(); it != hierarchyMap.cend(); ++it) {
+            const QVariantMap nodeMap = it.value().toMap();
 
-            auto datasetMap = variant.toMap()["Dataset"].toMap();
+            const QVariantMap datasetMap = nodeMap.value("Dataset").toMap();
 
-            datasetMap.remove("Children");
+            qDebug() << "Enumerating dataset"
+                << datasetMap.value("Name").toString();
 
             datasetConfigs.emplace_back(DatasetConfig{
-                .id=datasetMap["ID"].toString(),
-            	.map=datasetMap,
-                .approximateSize= estimateRawBlockTotalSize(datasetMap),
-            	.isDerived=datasetMap["IsDerived"].toBool()
-            });
+                .id = datasetMap.value("ID").toString(),
+                .map = datasetMap,
+                .approximateSize = estimateRawBlockTotalSize(datasetMap),
+                .isDerived = datasetMap.value("IsDerived").toBool()
+                });
+
+            self(self, nodeMap.value("Children").toMap());
         }
     };
 
-    enumerateDatasetNames(variantMap);
+    enumerateDatasetConfigs(enumerateDatasetConfigs, variantMap);
 
     const auto stageDatasetConfigs = [&datasetConfigs, &plan](bool isDerived) {
         std::vector<DatasetConfig> datasetConfigsPartition;

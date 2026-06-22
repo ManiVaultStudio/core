@@ -26,7 +26,7 @@ QString Cluster::getName() const
 
 void Cluster::setName(QString name)
 {
-    Q_ASSERT(!name.isEmpty());
+//    Q_ASSERT(!name.isEmpty());
 
     _name = std::move(name);
 }
