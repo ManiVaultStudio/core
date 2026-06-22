@@ -596,7 +596,6 @@ set(PUBLIC_UTIL_HEADERS
     src/util/BlobCodecFactory.h
     src/util/CodecRegistry.h
     src/util/CodecActionBinding.h
-    src/util/DecodeExecutor.h
     src/util/SeverityLevel.h
 )
 
@@ -665,7 +664,6 @@ set(PUBLIC_UTIL_SOURCES
     src/util/BlobCodecFactory.cpp
     src/util/CodecRegistry.cpp
     src/util/CodecActionBinding.cpp
-    src/util/DecodeExecutor.cpp
     src/util/SeverityLevel.cpp
 )
 
