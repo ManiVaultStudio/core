@@ -50,7 +50,7 @@ function(mv_project_defaults)
         set(CMAKE_XCODE_GENERATE_SCHEME ON CACHE BOOL "" FORCE)
 
         # macOS-specific RPATH
-        set(MV_INSTALL_RPATH "@loader_path")
+        set(MV_INSTALL_RPATH "@loader_path;@executable_path/../Frameworks")
     endif()
 
     # -----------------------------------------------------------------------------

@@ -9,6 +9,11 @@ project(${MV_CORE}
     DESCRIPTION "Core application and library of ManiVault Studio, a flexible and extensible visual analytics framework for high-dimensional data"
     LANGUAGES CXX C)
 
+if(APPLE)
+  enable_language(OBJC)
+  enable_language(OBJCXX)
+endif()
+
 # These three targets defined in this CMakeLists.txt
 set(MV_APPLICATION_NAME "ManiVault Studio")  # Name of the executable
 set(MV_EXE MV_Application)                   # The ManiVault executable target
@@ -386,16 +391,15 @@ if(MV_PRECOMPILE_HEADERS)
 endif()
 
 if(APPLE)
-
     set_target_properties(${MV_EXE} PROPERTIES
         # Find libraries relative to the executable in the macOS .app tree
         BUILD_WITH_INSTALL_RPATH True
+        INSTALL_RPATH "@loader_path;@executable_path/../Frameworks"
         # Debug ManiVault Studio from the install directory
         XCODE_SCHEME_WORKING_DIRECTORY "$<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>"
         XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING NO
         XCODE_SCHEME_EXECUTABLE "${MV_INSTALL_DIR}/Debug/ManiVault Studio.app"
     )
-
 endif()
 
 # -----------------------------------------------------------------------------
@@ -476,15 +480,6 @@ if(APPLE)
     # -always-overwrite
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
 
-    set(MACOSX_BUNDLE_ADDITIONAL_LIBS
-        \"$<TARGET_FILE:qtadvanceddocking-qt6>\"
-        \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\"
-    )
-
-    if(${MV_USE_ERROR_LOGGING})
-        list(APPEND MACOSX_BUNDLE_ADDITIONAL_LIBS \"$<TARGET_FILE:sentry>\" \"$<TARGET_FILE:crashpad_wer>\" \"$<TARGET_FILE:crashpad_handler}>\")
-    endif()
-
     install(CODE "
         message(\"**** MacOS bundle install ****\")
 
@@ -497,13 +492,8 @@ if(APPLE)
             if(NOT retval EQUAL 0)
                 message(FATAL_ERROR \"macdeployqt failed\")
             endif()
-
-
-            message(\"**** Copy additional libs: \${MACOSX_BUNDLE_ADDITIONAL_LIBS}\")
-            file(COPY \${MACOSX_BUNDLE_ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")
         endif()
     " COMPONENT MACOS_BUNDLE)
-
       
     install(CODE "execute_process(
             COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt6_DIR} \"${BUNDLE_DIR}\"
@@ -655,6 +645,27 @@ if(APPLE)
             --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
             --verbose
     )
+
+    # Make required non-Qt dylibs available in the build-tree app bundle for debugger runs
+    add_custom_command(TARGET ${MV_EXE} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:qtadvanceddocking-qt6>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
+        # Keep one real dylib and add a SONAME alias so dyld can resolve @rpath/libqtadvanceddocking*.4.dylib. Make sure to remove any existing SONAME (symlink) first.
+        COMMAND ${CMAKE_COMMAND} -E rm -f "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/$<TARGET_SONAME_FILE_NAME:qtadvanceddocking-qt6>"
+        COMMAND ${CMAKE_COMMAND} -E create_symlink "$<TARGET_FILE_NAME:qtadvanceddocking-qt6>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/$<TARGET_SONAME_FILE_NAME:qtadvanceddocking-qt6>"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:${MV_PUBLIC_LIB}>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
+        COMMENT "Copying bundle framework dependencies for build-tree debugging"
+	)
+
+    if(${MV_USE_ERROR_LOGGING})
+        add_custom_command(TARGET ${MV_EXE} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:sentry>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:crashpad_wer>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:crashpad_handler>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
+            COMMENT "Copying bundle framework dependencies for build-tree debugging (error logging)"
+        )
+    endif()
+
 endif()
 
 if(NOT APPLE)
