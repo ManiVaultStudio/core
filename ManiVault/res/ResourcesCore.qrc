@@ -26,6 +26,7 @@
         <file alias="AppIcon256">icons/AppIcon256.png</file>
         <file alias="AppIcon512">icons/AppIcon512.png</file>
         <file alias="AppIcon1024">icons/AppIcon1024.png</file>
+        <file alias="AppIconIcns">icons/AppIcon.icns</file>
     </qresource>
     <qresource prefix="/Images">
         <file alias="AppBackground256">images/AppBackground256.png</file>
