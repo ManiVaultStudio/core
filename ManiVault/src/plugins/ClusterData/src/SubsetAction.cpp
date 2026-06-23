@@ -33,7 +33,7 @@ SubsetAction::SubsetAction(ClustersActionWidget* clustersActionWidget) :
     };
 
     // Create the subset when the create subset action is triggered
-    connect(&_createSubsetAction, &TriggerAction::triggered, this, [this, getItemSelection]() {
+    connect(&_createSubsetAction, &mv::gui::TriggerAction::triggered, this, [this, getItemSelection]() {
         _clustersActionWidget->getClustersAction().createSubsetFromSelection(_subsetNameAction.getString());
         _subsetNameAction.setString("");
     });
@@ -55,7 +55,7 @@ SubsetAction::SubsetAction(ClustersActionWidget* clustersActionWidget) :
     connect(&_clustersActionWidget->getFilterModel(), &QAbstractItemModel::layoutChanged, this, updateReadOnly);
 
     // Update read only status when the subset name string changes
-    connect(&_subsetNameAction, &StringAction::stringChanged, this, updateReadOnly);
+    connect(&_subsetNameAction, &mv::gui::StringAction::stringChanged, this, updateReadOnly);
 
     // Do initial read only updates
     updateReadOnly();

@@ -9,6 +9,8 @@
 Q_PLUGIN_METADATA(IID "studio.manivault.SharedParametersPlugin")
 
 using namespace mv;
+using namespace mv::gui;
+using namespace mv::plugin;
 
 SharedParametersPlugin::SharedParametersPlugin(const PluginFactory* factory) :
     ViewPlugin(factory),

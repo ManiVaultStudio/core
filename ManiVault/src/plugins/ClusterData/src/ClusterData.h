@@ -16,11 +16,8 @@
 
 #include <QString>
 #include <QColor>
-#include <QUuid>
 
 #include <vector>
-
-using namespace mv;
 
 const mv::DataType ClusterType = mv::DataType(QString("Clusters"));
 
@@ -48,7 +45,7 @@ public:
      * @param guid Globally unique dataset identifier (use only for deserialization)
      * @return Smart pointer to dataset
      */
-    Dataset<DatasetImpl> createDataSet(const QString& guid = "") const override;
+    mv::Dataset<mv::DatasetImpl> createDataSet(const QString& guid = "") const override;
 
     /**
      * Get clusters
@@ -138,11 +135,11 @@ private:
 // Cluster Set
 // =============================================================================
 
-class CLUSTERDATA_EXPORT Clusters : public DatasetImpl
+class CLUSTERDATA_EXPORT Clusters : public mv::DatasetImpl
 {
 public:
     Clusters(QString dataName, bool mayUnderive = false, const QString& guid = "") :
-        DatasetImpl(dataName, mayUnderive, guid)
+        mv::DatasetImpl(dataName, mayUnderive, guid)
     {
     }
 
@@ -205,14 +202,14 @@ public:
      * Get a copy of the dataset
      * @return Smart pointer to copy of the dataset
      */
-    Dataset<DatasetImpl> copy() const override
+    mv::Dataset<DatasetImpl> copy() const override
     {
         auto clusters = new Clusters(getRawDataName());
 
         clusters->setText(text());
         clusters->indices = indices;
         
-        return Dataset<DatasetImpl>(clusters);
+        return mv::Dataset<DatasetImpl>(clusters);
     }
 
     /**
@@ -222,7 +219,7 @@ public:
      * @param visible Whether the subset will be visible in the UI
      * @return Smart pointer to the created subset
      */
-    Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const  override
+    mv::Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const mv::Dataset<DatasetImpl>& parentDataSet = mv::Dataset<DatasetImpl>(), const bool& visible = true) const  override
     {
         return mv::data().createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
@@ -316,7 +313,7 @@ class ClusterDataFactory : public mv::plugin::RawDataFactory
     Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID   "studio.manivault.ClusterData"
-                      FILE  "ClusterData.json")
+                      FILE  "PluginInfo.json")
     
 public:
     ClusterDataFactory();

@@ -10,8 +10,6 @@
     #define FILE_DIALOG_VERBOSE
 #endif
 
-#define FILE_DIALOG_VERBOSE
-
 using namespace mv::util;
 
 namespace mv::gui {

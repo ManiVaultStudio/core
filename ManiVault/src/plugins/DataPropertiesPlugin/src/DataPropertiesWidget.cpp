@@ -147,10 +147,10 @@ void DataPropertiesWidget::populate()
         }
         catch (std::exception& e)
         {
-            exceptionMessageBox("Cannot update data properties", e);
+            mv::util::exceptionMessageBox("Cannot update data properties", e);
         }
         catch (...) {
-            exceptionMessageBox("Cannot update data properties");
+            mv::util::exceptionMessageBox("Cannot update data properties");
         }
     }
     endPopulate();

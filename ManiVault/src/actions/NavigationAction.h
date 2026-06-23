@@ -11,7 +11,6 @@
 #include "actions/HorizontalGroupAction.h"
 #include "actions/DecimalRectangleAction.h"
 #include "actions/DecimalPointAction.h"
-#include "actions/VerticalGroupAction.h"
 #include "actions/ZoomMarginAction.h"
 
 #include <QObject>
@@ -77,6 +76,10 @@ public: // Serialization
      */
 
     QVariantMap toVariantMap() const override;
+
+public: // State getters
+    [[nodiscard]] bool isNavigationFrozen() const { return _freezeNavigation.isChecked(); }
+    [[nodiscard]] bool isNavigationActive() const { return !isNavigationFrozen(); }
 
 public: // Action getters
 

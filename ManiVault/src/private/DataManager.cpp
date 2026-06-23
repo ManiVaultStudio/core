@@ -25,6 +25,7 @@
     //#define DATA_MANAGER_VERBOSE
 #endif
 
+using namespace mv::gui;
 using namespace mv::util;
 
 namespace mv

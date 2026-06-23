@@ -10,6 +10,8 @@
 
 #include <QHBoxLayout>
 
+using namespace mv::gui;
+
 SelectClustersAction::SelectClustersAction(ClustersActionWidget* clustersActionWidget) :
     WidgetAction(clustersActionWidget, "Select Clusters"),
     _clustersActionWidget(clustersActionWidget),

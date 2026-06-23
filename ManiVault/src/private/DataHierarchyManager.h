@@ -12,8 +12,6 @@
 #include <QMap>
 #include <QString>
 
-using namespace mv::gui;
-
 namespace mv
 {
 

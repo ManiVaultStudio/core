@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.22)
 
 set(DATAPROPERTIESPLUGIN "DataPropertiesPlugin")
-PROJECT(${DATAPROPERTIESPLUGIN})
+PROJECT(${DATAPROPERTIESPLUGIN} LANGUAGES CXX)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(PLUGIN
     src/DataPropertiesPlugin.h
@@ -14,7 +16,7 @@ set(WIDGETS
 )
 
 set(AUX
-    src/DataPropertiesPlugin.json
+    PluginInfo.json
 )
 
 set(DATAPROPERTIES_SOURCES
@@ -42,11 +44,10 @@ target_link_libraries(${DATAPROPERTIESPLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${DATAPROPERTIESPLUGIN} ${MV_USE_AVX})
 
-set_target_properties(${DATAPROPERTIESPLUGIN} PROPERTIES AUTOMOC ON)
-
-if(MV_UNITY_BUILD)
-    set_target_properties(${DATAPROPERTIESPLUGIN} PROPERTIES UNITY_BUILD ON)
-endif()
+set_target_properties(${DATAPROPERTIESPLUGIN} PROPERTIES
+    AUTOMOC ON
+    UNITY_BUILD ${MV_UNITY_BUILD}
+)
 
 install(TARGETS ${DATAPROPERTIESPLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
@@ -60,8 +61,10 @@ add_custom_command(TARGET ${DATAPROPERTIESPLUGIN} POST_BUILD
     --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
 )
 
+mv_handle_plugin_config(${DATAPROPERTIESPLUGIN})
+
 # Automatically set the debug environment (command + working directory) for MSVC
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set_property(TARGET ${DATAPROPERTIESPLUGIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>)
     set_property(TARGET ${DATAPROPERTIESPLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,"${MV_INSTALL_DIR}/Debug/${MV_APPLICATION_NAME}.exe",$<IF:$<CONFIG:RELWITHDEBINFO>,"${MV_INSTALL_DIR}/RelWithDebInfo/${MV_APPLICATION_NAME}.exe","${MV_INSTALL_DIR}/Release/${MV_APPLICATION_NAME}.exe">>)
 endif()

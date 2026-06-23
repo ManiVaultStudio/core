@@ -22,6 +22,16 @@ function(mv_handle_plugin_config plugin_target)
     # Check if config file contains certain entries
     set(HAS_PLUGIN_TYPE 0)
 
+    # Get current ManiVault core version
+    if(DEFINED ManiVault_VERSION) # plugins (outside of core)
+        set(CORE_VERSION "${ManiVault_VERSION}")
+    elseif(DEFINED MV_VERSION) # core plugins
+        set(CORE_VERSION "${MV_VERSION}")
+    else()
+        message(WARNING "mv_handle_plugin_config: No ManiVault core version available - this is likely an error")
+        set(CORE_VERSION "0.0.0")
+    endif()
+
     # Get the number of top-level keys
     string(JSON TOP_LEVEL_COUNT LENGTH "${PLUGIN_INFO_JSON}")
 
@@ -40,7 +50,7 @@ function(mv_handle_plugin_config plugin_target)
     string(JSON PLUGIN_VERSION GET "${PLUGIN_INFO_JSON}" version plugin)
     message(STATUS "  version: ${PLUGIN_VERSION}")
     set_target_properties(${plugin_target} PROPERTIES
-        OUTPUT_NAME  "${plugin_target}_p${PLUGIN_VERSION}_c${ManiVault_VERSION}"
+        OUTPUT_NAME  "${plugin_target}_p${PLUGIN_VERSION}_c${CORE_VERSION}"
     )
 
     # Extract plugin type

@@ -32,6 +32,8 @@ Q_PLUGIN_METADATA(IID "studio.manivault.PointData")
 // PointData
 // =============================================================================
 
+using namespace mv;
+using namespace mv::plugin;
 using namespace mv::util;
 using namespace mv::workflow;
 
@@ -367,7 +369,7 @@ void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, 
 }
 
 
-void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices) const
+void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<std::uint32_t>& indices) const
 {
     CheckDimensionIndex(dimensionIndex1);
     CheckDimensionIndex(dimensionIndex2);
@@ -396,10 +398,6 @@ Points::Points(QString dataName, bool mayUnderive /*= true*/, const QString& gui
 {
 }
 
-Points::~Points()
-{
-}
-
 void Points::init()
 {
     DatasetImpl::init();
@@ -411,7 +409,7 @@ void Points::init()
     };
 
     //if (isFull()) {
-        _dimensionsPickerGroupAction = new GroupAction(this, "Dimensions Group");
+        _dimensionsPickerGroupAction = new gui::GroupAction(this, "Dimensions Group");
 
         _dimensionsPickerGroupAction->setText("Dimensions");
         _dimensionsPickerGroupAction->setShowLabels(false);
@@ -769,7 +767,7 @@ void Points::selectedLocalIndices(const std::vector<std::uint32_t>& selectionInd
     }
 }
 
-void Points::getLocalSelectionIndices(std::vector<unsigned int>& localSelectionIndices) const
+void Points::getLocalSelectionIndices(std::vector<std::uint32_t>& localSelectionIndices) const
 {
     if (isProxy())
     {
@@ -1006,7 +1004,7 @@ bool Points::canSelectInvert() const
 
 void Points::selectAll()
 {
-    std::vector<unsigned int> selectionIndices;
+    std::vector<std::uint32_t> selectionIndices;
 
     selectionIndices.resize(getNumPoints());
 
@@ -1030,7 +1028,7 @@ void Points::selectNone()
 void Points::selectInvert()
 {
     // Get the locally selected indices (the points in the subset that are selected)
-    std::vector<unsigned int> localSelectionIndices;
+    std::vector<std::uint32_t> localSelectionIndices;
     getLocalSelectionIndices(localSelectionIndices);
 
     // Compute the inverse of this

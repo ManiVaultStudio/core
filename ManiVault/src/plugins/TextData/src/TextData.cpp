@@ -14,6 +14,9 @@
 
 Q_PLUGIN_METADATA(IID "studio.manivault.TextData")
 
+using namespace mv;
+using namespace mv::plugin;
+
 TextData::~TextData(void)
 {
 }
@@ -29,7 +32,7 @@ Dataset<DatasetImpl> TextData::createDataSet(const QString& guid /*= ""*/) const
 
 void TextData::fromVariantMap(const QVariantMap& variantMap)
 {
-    variantMapMustContain(variantMap, "OrderedMap");
+    mv::util::variantMapMustContain(variantMap, "OrderedMap");
 
     _data.fromVariantMap(variantMap["OrderedMap"].toMap());
 }
@@ -164,7 +167,7 @@ void Text::fromVariantMap(const QVariantMap& variantMap)
 {
     DatasetImpl::fromVariantMap(variantMap);
 
-    variantMapMustContain(variantMap, "Data");
+    util::variantMapMustContain(variantMap, "Data");
 
     getRawData<TextData>()->fromVariantMap(variantMap["Data"].toMap());
 

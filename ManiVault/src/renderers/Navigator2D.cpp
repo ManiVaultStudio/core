@@ -202,7 +202,7 @@ bool Navigator2D::eventFilter(QObject* watched, QEvent* event)
     if (!_initialized || !_enabled)
         return false;
 
-    if (getNavigationAction().getFreezeNavigation().isChecked())
+    if (getNavigationAction().isNavigationFrozen())
         return QObject::eventFilter(watched, event);
 
     if (event->type() == QEvent::KeyPress) {
@@ -366,7 +366,7 @@ QRectF Navigator2D::getZoomRectangleWorld() const
 
 void Navigator2D::setZoomRectangleWorld(const QRectF& zoomRectangleWorld)
 {
-    if (getNavigationAction().getFreezeNavigation().isChecked())
+    if (getNavigationAction().isNavigationFrozen())
         return;
 
 #ifdef NAVIGATOR_2D_VERBOSE

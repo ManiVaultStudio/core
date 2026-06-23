@@ -10,10 +10,6 @@
 
 #include <ViewPlugin.h>
 
-using namespace mv;
-using namespace mv::plugin;
-using namespace mv::gui;
-
 /**
  * Shared parameters plugin
  *
@@ -21,7 +17,7 @@ using namespace mv::gui;
  *
  * @author Thomas Kroes
  */
-class SharedParametersPlugin : public ViewPlugin
+class SharedParametersPlugin : public mv::plugin::ViewPlugin
 {
     Q_OBJECT
     
@@ -31,22 +27,22 @@ public:
      * Construct with pointer to plugin \p factory
      * @param factory Pointer to plugin factory
      */
-    SharedParametersPlugin(const PluginFactory* factory);
+    SharedParametersPlugin(const mv::plugin::PluginFactory* factory);
 
     /** Perform plugin initialization */
     void init() override;
 
 private:
-    PublicActionsModel  _publicActionsModel;    /** Public actions model of the top-level public actions and their descendants */
-    ActionsWidget       _actionsWidget;         /** Widget for interaction with shared parameters */
+    mv::PublicActionsModel      _publicActionsModel;    /** Public actions model of the top-level public actions and their descendants */
+    mv::gui::ActionsWidget      _actionsWidget;         /** Widget for interaction with shared parameters */
 };
 
-class SharedParametersPluginFactory : public ViewPluginFactory
+class SharedParametersPluginFactory : public mv::plugin::ViewPluginFactory
 {
     Q_INTERFACES(mv::plugin::ViewPluginFactory mv::plugin::PluginFactory)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID   "studio.manivault.SharedParametersPlugin"
-                      FILE  "SharedParametersPlugin.json")
+                      FILE  "PluginInfo.json")
     
 public:
 
@@ -69,5 +65,5 @@ public:
      * Produces the plugin
      * @return Pointer to the produced plugin
      */
-    ViewPlugin* produce() override;
+    mv::plugin::ViewPlugin* produce() override;
 };

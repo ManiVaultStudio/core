@@ -5,15 +5,10 @@
 #include "NavigationAction.h"
 #include "CoreInterface.h"
 #include "GroupSectionTreeItem.h"
+#include "CoreInterface.h"
 
 #include "util/StyledIcon.h"
 #include "util/Icon.h"
-
-#ifdef _DEBUG
-    //#define NAVIGATION_ACTION_VERBOSE
-#endif
-
-//#define NAVIGATION_ACTION_VERBOSE
 
 using namespace mv::util;
 
@@ -54,10 +49,9 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomExtentsAction.setToolTip("Zoom to the boundaries of the scene (o)");
     _zoomSelectionAction.setToolTip("Zoom to the boundaries of the current selection (b)");
     _zoomRegionAction.setToolTip("Zoom to a picked region");
-    _freezeNavigation.setToolTip("Freeze the navigation");
+    _freezeNavigation.setToolTip("Toggle the navigation on/off");
 
-    _freezeNavigation.setIconByName("icicles");
-    _freezeNavigation.setDefaultWidgetFlags(ToggleAction::WidgetFlag::CheckBox);
+    _freezeNavigation.setIconByName("hand-pointer");
 
     _zoomPercentageAction.setOverrideSizeHint(QSize(300, 0));
 
@@ -90,6 +84,7 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomGroupAction.setShowLabels(false);
     _zoomGroupAction.setIconByName("magnifying-glass");
 
+    _zoomGroupAction.addAction(&_freezeNavigation, ToggleAction::PushButtonIcon);
     _zoomGroupAction.addAction(&_zoomOutAction, TriggerAction::Icon);
     _zoomGroupAction.addAction(&_zoomPercentageAction);
     _zoomGroupAction.addAction(&_zoomInAction, TriggerAction::Icon);
@@ -97,21 +92,23 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomGroupAction.addAction(&_zoomExtentsAction, TriggerAction::Icon);
     _zoomGroupAction.addAction(&_zoomSelectionAction, TriggerAction::Icon);
     _zoomGroupAction.addAction(&_zoomRegionAction, TriggerAction::Icon);
+    _zoomGroupAction.addAction(&_zoomMarginAction);
     
     addAction(&_zoomGroupAction, 1);
-    addAction(&_freezeNavigation, 50);
-    addAction(&_zoomMarginAction);
 
     const auto updateReadOnly = [this]() -> void {
-        const auto notFrozen = _freezeNavigation.isChecked();
+        const bool navigationIsActive = isNavigationActive();
 
-        _zoomOutAction.setEnabled(!notFrozen);
-        _zoomPercentageAction.setEnabled(!notFrozen);
-        _zoomInAction.setEnabled(!notFrozen);
-        _zoomExtentsAction.setEnabled(!notFrozen);
-        _zoomSelectionAction.setEnabled(!notFrozen);
-        _zoomRegionAction.setEnabled(!notFrozen);
-        _zoomCenterAction.setEnabled(!notFrozen);
+        _freezeNavigation.setIconByName(navigationIsActive ? "hand-pointer":  "hand-back-fist");
+
+        _zoomOutAction.setEnabled(navigationIsActive);
+        _zoomPercentageAction.setEnabled(navigationIsActive);
+        _zoomInAction.setEnabled(navigationIsActive);
+        _zoomExtentsAction.setEnabled(navigationIsActive);
+        _zoomSelectionAction.setEnabled(navigationIsActive);
+        _zoomRegionAction.setEnabled(navigationIsActive);
+        _zoomCenterAction.setEnabled(navigationIsActive);
+        _zoomMarginAction.setEnabled(navigationIsActive);
     };
 
     updateReadOnly();

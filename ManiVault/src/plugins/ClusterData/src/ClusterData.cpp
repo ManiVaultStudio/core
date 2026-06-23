@@ -22,9 +22,12 @@
 #include "ClusterDataLegacySerialization.h"
 #include "ClustersSerializer.h"
 
-Q_PLUGIN_METADATA(IID "studio.manivault.ClusterData")using namespace mv::util;
+
+Q_PLUGIN_METADATA(IID "studio.manivault.ClusterData")
 
 using namespace mv::workflow;
+using namespace mv;
+using namespace mv::util;
 
 ClusterData::ClusterData(const mv::plugin::PluginFactory* factory) :
     mv::plugin::RawData(factory, ClusterType)

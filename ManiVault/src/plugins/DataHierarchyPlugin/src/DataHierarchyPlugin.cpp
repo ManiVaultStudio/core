@@ -4,10 +4,13 @@
 
 #include "DataHierarchyPlugin.h"
 
+#include <ManiVaultVersion.h>
+
 Q_PLUGIN_METADATA(IID "studio.manivault.DataHierarchyPlugin")
 
 using namespace mv;
 using namespace mv::gui;
+using namespace mv::plugin;
 using namespace mv::util;
 
 DataHierarchyPlugin::DataHierarchyPlugin(const PluginFactory* factory) :
@@ -61,12 +64,26 @@ void DataHierarchyPluginFactory::initialize()
 
 QUrl DataHierarchyPluginFactory::getReadmeMarkdownUrl() const
 {
-    return { "https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/DataHierarchyPlugin/README.md" };
+    if constexpr (MV_IS_DEV())
+        return { "https://raw.githubusercontent.com/ManiVaultStudio/core/master/ManiVault/src/plugins/DataHierarchyPlugin/README.md" };
+    else
+        return QUrl{
+            QString("https://raw.githubusercontent.com/ManiVaultStudio/core/release/") +
+            QString::fromStdString(MV_VERSION_STRING()) +
+            "/ManiVault/src/plugins/DataHierarchyPlugin/README.md"
+    };
 }
 
 QUrl DataHierarchyPluginFactory::getRepositoryUrl() const
 {
-    return { "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/src/plugins/DataHierarchyPlugin" };
+    if constexpr (MV_IS_DEV())
+        return { "https://www.github.com/ManiVaultStudio/core/tree/master/ManiVault/src/plugins/DataHierarchyPlugin" };
+    else
+        return QUrl{
+            QString("https://www.github.com/ManiVaultStudio/core/tree/release/") +
+            QString::fromStdString(MV_VERSION_STRING()) +
+            "/ManiVault/src/plugins/DataHierarchyPlugin"
+    };
 }
 
 ViewPlugin* DataHierarchyPluginFactory::produce()

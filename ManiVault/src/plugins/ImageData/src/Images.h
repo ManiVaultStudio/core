@@ -18,8 +18,6 @@
 #include <tuple>
 #include <vector>
 
-using namespace mv::plugin;
-
 class InfoAction;
 
 /**
