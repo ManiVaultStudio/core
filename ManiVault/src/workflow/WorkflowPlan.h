@@ -16,7 +16,7 @@
 #include <QVariant>
 
 #include <optional>
-
+#include <concepts>
 namespace mv
 {
     class Task;

@@ -113,7 +113,7 @@ public: // Serialization
      * @param variantMap Serialized object state.
      * @return Workflow plan that restores the object state when executed.
      */
-    workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
+    mv::workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
 
     /**
      * Create a workflow that serializes this object's state to a variant map.
@@ -123,7 +123,7 @@ public: // Serialization
      *
      * @return Workflow plan that serializes the object state when executed.
      */
-    workflow::UniqueWorkflowPlan toVariantMapWorkflow() const override;
+    mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 private:
     QVector<Cluster>    _clusters;      /** Clusters data */
@@ -285,7 +285,7 @@ public: // Serialization
      * @param variantMap Serialized object state.
      * @return Workflow plan that restores the object state when executed.
      */
-    workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
+    mv::workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
 
     /**
      * Create a workflow that serializes this object's state to a variant map.
@@ -295,11 +295,11 @@ public: // Serialization
      *
      * @return Workflow plan that serializes the object state when executed.
      */
-    workflow::UniqueWorkflowPlan toVariantMapWorkflow() const override;
+    mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
-    std::vector<unsigned int>       indices;
-    QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */
-    EventListener                   _eventListener;     /** Listen to HDPS events */
+    std::vector<unsigned int>  indices;
+    QSharedPointer<InfoAction> _infoAction;    /** Shared pointer to info action */
+    mv::EventListener          _eventListener; /** Listen to HDPS events */
 
     friend class mv::legacy::ClustersLegacySerializer;
 };

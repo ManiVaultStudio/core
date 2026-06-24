@@ -32,10 +32,10 @@ public:
     static constexpr quint32 FormatVersion = 2;
 
    
-    static workflow::UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& map, QVector<Cluster>& clusters);
+    static mv::workflow::UniqueWorkflowPlan fromVariantMapWorkflow(const QVariantMap& map, QVector<Cluster>& clusters);
 
     
-    static workflow::UniqueWorkflowPlan toVariantMapWorkflow(const QVector<Cluster>& clusters);
+    static mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow(const QVector<Cluster>& clusters);
 
     
 

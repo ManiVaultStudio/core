@@ -10,7 +10,6 @@ set(POINTS_SOURCES
     src/PointData.cpp
     src/PointDataLegacySerialization.h
     src/PointDataLegacySerialization.cpp
-    src/PointData.json
     src/PointDataIterator.h
     src/PointDataRange.h
     src/PointView.h

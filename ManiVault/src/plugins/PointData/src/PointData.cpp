@@ -102,11 +102,6 @@ QString PointData::elementTypeName(const ElementTypeSpecifier elementTypeSpecifi
     return "unknown";
 }
 
-PointData::~PointData(void)
-{
-    
-}
-
 void PointData::init()
 {
 }
