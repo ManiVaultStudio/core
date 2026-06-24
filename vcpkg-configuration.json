@@ -6,7 +6,8 @@
   },
   "registries": [
     {
-      "kind": "https://github.com/ManiVaultStudio/vcpkg-registry",
+      "kind": "git",
+      "repository": "https://github.com/ManiVaultStudio/vcpkg-registry",
       "baseline": "default",
       "packages": [
         "qt", "biovault-bfloat16" 
