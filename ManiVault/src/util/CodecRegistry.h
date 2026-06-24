@@ -52,7 +52,7 @@ protected:
     std::unordered_map<BlobCodec::Type, BlobCodecFactory*>  _factoriesByType;
     QHash<QString, BlobCodecFactory*>                       _factoriesByKey;
 
-    friend class Application;
+    friend class mv::Application;
 };
 
 CORE_EXPORT CodecRegistry& codecRegistry();
