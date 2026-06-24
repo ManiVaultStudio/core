@@ -1308,11 +1308,11 @@ set(PUBLIC_TASK_FILES
 )
 
 set(PUBLIC_EXCEPTION_HEADERS
-    src/Exception/ManiVaultException.h
+    src/exception/ManiVaultException.h
 )
 
 set(PUBLIC_EXCEPTION_SOURCES
-    src/Exception/ManiVaultException.cpp
+    src/exception/ManiVaultException.cpp
 )
     
 set(PUBLIC_EXCEPTION_FILES
