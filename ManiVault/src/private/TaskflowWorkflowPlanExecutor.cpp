@@ -53,22 +53,17 @@ WorkflowResultFuture TaskflowWorkflowPlanExecutor::execute(
         return executeAsyncImpl(std::move(workflowPlan), resolvedOptions._reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, resolvedOptions, childContext);
     }
 
-    const auto resolvedOptions = executionOptions.value_or({});
+    const auto resolvedOptions = executionOptions.value_or(WorkflowExecutionOptions{});
 
     return executeAsyncImpl(std::move(workflowPlan), resolvedOptions._reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, resolvedOptions, nullptr);
 }
 
-SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(
-    UniqueWorkflowPlan workflowPlan,
-    mv::Task* task,
-    WorkflowExecutionOptions executionOptions)
+SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(UniqueWorkflowPlan workflowPlan, mv::Task* task, WorkflowExecutionOptions executionOptions)
 {
     return executeRoot(*workflowPlan, task, executionOptions);
 }
 
-SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(
-    UniqueWorkflowPlan workflowPlan,
-    SharedWorkflowExecutionContext parentContext)
+SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext)
 {
     static thread_local int depth = 0;
 
@@ -100,11 +95,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(
     return executeWithContext(*workflowPlan, context);
 }
 
-WorkflowResultFuture TaskflowWorkflowPlanExecutor::executeAsyncImpl(
-    UniqueWorkflowPlan workflowPlan,
-    Task::GuiScope guiScope,
-    const WorkflowExecutionOptions& executionOptions,
-    SharedWorkflowExecutionContext executionContext)
+WorkflowResultFuture TaskflowWorkflowPlanExecutor::executeAsyncImpl(UniqueWorkflowPlan workflowPlan, Task::GuiScope guiScope, const WorkflowExecutionOptions& executionOptions, SharedWorkflowExecutionContext executionContext)
 {
     auto state = std::make_shared<WorkflowResultFuture::State>();
 
@@ -334,14 +325,9 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
     return result;
 }
 
-SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeChild(
-    WorkflowPlan& workflowPlan,
-    SharedWorkflowExecutionContext parentContext)
+SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeChild(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext parentContext)
 {
-    auto childContext = parentContext->createNestedWorkflowChild(
-        workflowPlan.getName(),
-        workflowPlan.getWeight(),
-        WorkflowPlan::JobProgressMode::Automatic);
+    auto childContext = parentContext->createNestedWorkflowChild(workflowPlan.getName(), workflowPlan.getWeight(), WorkflowPlan::JobProgressMode::Automatic);
 
     Q_ASSERT(childContext);
     Q_ASSERT(childContext->getState() == parentContext->getState());
@@ -349,15 +335,12 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeChild(
     return executeWithContext(workflowPlan, childContext);
 }
 
-void TaskflowWorkflowPlanExecutor::executeJobOnGuiThread(
-    const WorkflowPlan::Job& job,
-    SharedWorkflowExecutionContext jobContext)
+void TaskflowWorkflowPlanExecutor::executeJobOnGuiThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
 {
     jobContext = requireContext(jobContext, __FUNCTION__);
 
-    auto& dispatcher = Application::workflowGuiThreadDispatcher();
-
-    auto exceptionPtr = std::make_shared<std::exception_ptr>();
+    auto& dispatcher    = Application::workflowGuiThreadDispatcher();
+    auto exceptionPtr   = std::make_shared<std::exception_ptr>();
 
     auto runOnGuiThread = [&job, jobContext, exceptionPtr]() mutable {
         try {
@@ -366,7 +349,7 @@ void TaskflowWorkflowPlanExecutor::executeJobOnGuiThread(
         catch (...) {
             *exceptionPtr = std::current_exception();
         }
-        };
+    };
 
     if (QThread::currentThread() == dispatcher.thread()) {
         runOnGuiThread();
@@ -375,14 +358,10 @@ void TaskflowWorkflowPlanExecutor::executeJobOnGuiThread(
         std::promise<void> promise;
         auto future = promise.get_future();
 
-        QMetaObject::invokeMethod(
-            qApp,
-            [runOnGuiThread = std::move(runOnGuiThread),
-            promise = std::move(promise)]() mutable {
-                runOnGuiThread();
-                promise.set_value();
-            },
-            Qt::QueuedConnection);
+        QMetaObject::invokeMethod(qApp, [runOnGuiThread = std::move(runOnGuiThread), promise = std::move(promise)]() mutable {
+            runOnGuiThread();
+            promise.set_value();
+        }, Qt::QueuedConnection);
 
         future.wait();
     }
@@ -412,20 +391,19 @@ void TaskflowWorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, Shar
 
     try {
         switch (job.getThreadAffinity()) {
-        case WorkflowPlan::JobThreadAffinity::CurrentWorkerThread:
-            executeJobOnWorkerThread(job, jobContext);
-            break;
+	        case WorkflowPlan::JobThreadAffinity::CurrentWorkerThread:
+	            executeJobOnWorkerThread(job, jobContext);
+	            break;
 
-        case WorkflowPlan::JobThreadAffinity::GuiThread:
-            executeJobOnGuiThread(job, jobContext);
-            break;
+	        case WorkflowPlan::JobThreadAffinity::GuiThread:
+	            executeJobOnGuiThread(job, jobContext);
+	            break;
         }
 
         if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Atomic) {
             jobContext->setProgress(1.0);
         }
-        else if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Automatic &&
-            !jobContext->hasProgressChildren()) {
+        else if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Automatic && !jobContext->hasProgressChildren()) {
             jobContext->setProgress(1.0);
         }
 

@@ -67,7 +67,7 @@ WorkflowResultFuture WorkflowPlanExecutor::execute(UniqueWorkflowPlan workflowPl
         return future;
     }
 
-    const auto resolvedOptions = executionOptions.value_or({});
+    const auto resolvedOptions = executionOptions.value_or(WorkflowExecutionOptions{});
 
     return executeAsyncImpl(
         std::move(workflowPlan),
