@@ -9,7 +9,7 @@
       "kind": "https://github.com/ManiVaultStudio/vcpkg-registry",
       "baseline": "default",
       "packages": [
-        "qt", "biovault_float16" 
+        "qt", "biovault-bfloat16" 
       ]
     }
   ]
