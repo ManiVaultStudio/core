@@ -38,23 +38,95 @@ namespace mv::util
     };
 
 #ifdef Q_OS_WIN
-	#include <windows.h>
-	#include <psapi.h>
+
+#include <windows.h>
+#include <psapi.h>
 
     MemoryStats getMemoryStats()
     {
         PROCESS_MEMORY_COUNTERS_EX pmc;
+
         GetProcessMemoryInfo(
             GetCurrentProcess(),
             reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&pmc),
-            sizeof(pmc)
-        );
+            sizeof(pmc));
 
         MemoryStats s;
         s.rssMB = pmc.WorkingSetSize / 1024.0 / 1024.0;
         s.privateMB = pmc.PrivateUsage / 1024.0 / 1024.0;
+
         return s;
     }
+
+#endif
+
+#ifdef Q_OS_LINUX
+
+#include <QFile>
+#include <QTextStream>
+
+    MemoryStats getMemoryStats()
+    {
+        MemoryStats stats;
+
+        QFile file("/proc/self/status");
+
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+            return stats;
+
+        QTextStream stream(&file);
+
+        while (!stream.atEnd()) {
+            const QString line = stream.readLine();
+
+            if (line.startsWith("VmRSS:")) {
+                const auto kb = line.section(':', 1).simplified().section(' ', 0, 0).toDouble();
+                stats.rssMB = kb / 1024.0;
+            }
+            else if (line.startsWith("VmSize:")) {
+                const auto kb = line.section(':', 1).simplified().section(' ', 0, 0).toDouble();
+                stats.privateMB = kb / 1024.0;
+            }
+        }
+
+        return stats;
+    }
+
+#endif
+
+#ifdef Q_OS_MACOS
+
+#include <mach/mach.h>
+
+    MemoryStats getMemoryStats()
+    {
+        MemoryStats stats;
+
+        mach_task_basic_info info;
+        mach_msg_type_number_t count = MACH_TASK_BASIC_INFO_COUNT;
+
+        if (task_info(
+            mach_task_self(),
+            MACH_TASK_BASIC_INFO,
+            reinterpret_cast<task_info_t>(&info),
+            &count) == KERN_SUCCESS)
+        {
+            stats.rssMB = info.resident_size / 1024.0 / 1024.0;
+            stats.privateMB = info.virtual_size / 1024.0 / 1024.0;
+        }
+
+        return stats;
+    }
+
+#endif
+
+#if !defined(Q_OS_WIN) && !defined(Q_OS_LINUX) && !defined(Q_OS_MACOS)
+
+    MemoryStats getMemoryStats()
+    {
+        return {};
+    }
+
 #endif
 
 QString getIntegerCountHumanReadable(const double& count)
