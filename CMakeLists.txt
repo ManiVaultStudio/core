@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.22)
 
+# Sentry in vcpkg is conditional
+option(MV_USE_ERROR_LOGGING "Use error logging with Sentry" OFF)
+if(MV_USE_ERROR_LOGGING)
+    list(APPEND VCPKG_MANIFEST_FEATURES "sentry")
+endif()
+
 set(MV_MAIN "mv-main")
 PROJECT(${MV_MAIN})
 
@@ -17,7 +23,6 @@ file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
 # Other user-facing options
 option(MV_USE_GTEST "Use GoogleTest" OFF)
 option(MV_USE_AVX "Use AVX if available - by default OFF" OFF)
-option(MV_USE_ERROR_LOGGING "Use error logging with Sentry" OFF)
 option(MV_PRECOMPILE_HEADERS "Precompile several headers for faster compilation" ON)
 option(MV_UNITY_BUILD "Combine target source files into batches for faster compilation" OFF)
 option(MV_WARNINGS_AS_ERRORS "Treat warnings as errors when using MSVC" ON)

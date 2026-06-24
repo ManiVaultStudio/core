@@ -135,17 +135,18 @@ add_definitions(-DQT_MESSAGELOGCONTEXT)
 message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 
 # File compression: zlib
-CPMAddPackage(
-  NAME              ZLIB
-  GITHUB_REPOSITORY madler/zlib
-  GIT_TAG           v1.3.2
-  OPTIONS 
-    "ZLIB_BUILD_EXAMPLES OFF" 
-    "ZLIB_BUILD_SHARED OFF" 
-    "ZLIB_BUILD_STATIC ON"
-    "ZLIB_BUILD_TESTING OFF"
-    "ZLIB_INSTALL OFF"
-)
+# From vcpkg
+# CPMAddPackage(
+#   NAME              ZLIB
+#   GITHUB_REPOSITORY madler/zlib
+#   GIT_TAG           v1.3.2
+#   OPTIONS 
+#     "ZLIB_BUILD_EXAMPLES OFF" 
+#     "ZLIB_BUILD_SHARED OFF" 
+#     "ZLIB_BUILD_STATIC ON"
+#     "ZLIB_BUILD_TESTING OFF"
+#     "ZLIB_INSTALL OFF"
+# )
 
 # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
 add_library(ZLIB::ZLIB ALIAS zlibstatic)
@@ -179,28 +180,30 @@ set_target_properties(QuaZip PROPERTIES
 )
 
 # Serialization: JSON
-CPMAddPackage(
-  NAME              nlohmann_json
-  GITHUB_REPOSITORY	nlohmann/json
-  GIT_TAG           v3.12.0
-  DOWNLOAD_ONLY     YES
-  OPTIONS
-    "JSON_BuildTests=OFF"            # skip upstream tests
-    "JSON_MultipleHeaders=ON"        # shave compile time (optional)
-)
+# From vcpkg
+# CPMAddPackage(
+#   NAME              nlohmann_json
+#   GITHUB_REPOSITORY	nlohmann/json
+#   GIT_TAG           v3.12.0
+#   DOWNLOAD_ONLY     YES
+#   OPTIONS
+#     "JSON_BuildTests=OFF"            # skip upstream tests
+#     "JSON_MultipleHeaders=ON"        # shave compile time (optional)
+# )
 
 # Serialization: Add valijson as a header-only library
-CPMAddPackage(
-  NAME              valijson
-  GITHUB_REPOSITORY tristanpenman/valijson
-  GIT_TAG           v1.1.0
-  #GIT_SUBMODULES   ""                  # Does not yet work with CPM, see workaround from https://github.com/cpm-cmake/CPM.cmake/pull/461#issuecomment-1665044141
-  GIT_SUBMODULES    "doc"               # list an existing subdir from the repo to not download any submodules
-  DOWNLOAD_ONLY     YES
-  OPTIONS 
-    "VALIJSON_BUILD_TESTS OFF" 
-    "VALIJSON_USE_EXCEPTIONS ON"
-)
+# from vcpkg
+# CPMAddPackage(
+#   NAME              valijson
+#   GITHUB_REPOSITORY tristanpenman/valijson
+#   GIT_TAG           v1.1.0
+#   #GIT_SUBMODULES   ""                  # Does not yet work with CPM, see workaround from https://github.com/cpm-cmake/CPM.cmake/pull/461#issuecomment-1665044141
+#   GIT_SUBMODULES    "doc"               # list an existing subdir from the repo to not download any submodules
+#   DOWNLOAD_ONLY     YES
+#   OPTIONS 
+#     "VALIJSON_BUILD_TESTS OFF" 
+#     "VALIJSON_USE_EXCEPTIONS ON"
+# )
 
 # Layout: Qt Advanced docking system
 CPMAddPackage(
@@ -223,14 +226,15 @@ set_target_properties(qtadvanceddocking-qt6 PROPERTIES
 )
 
 # bfloat16 implementation for pre c++23
-CPMAddPackage(
-  NAME              biovault_bfloat16
-  GITHUB_REPOSITORY biovault/biovault_bfloat16
-  GIT_TAG           v1.0.2
-  DOWNLOAD_ONLY     YES
-  EXCLUDE_FROM_ALL  YES
-  SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
-)
+# from vcpkg
+# CPMAddPackage(
+#   NAME              biovault_bfloat16
+#   GITHUB_REPOSITORY biovault/biovault_bfloat16
+#   GIT_TAG           v1.0.2
+#   DOWNLOAD_ONLY     YES
+#   EXCLUDE_FROM_ALL  YES
+#   SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
+# )
 
 # Use of Sentry on MacOS breaks the build so turn it off for now...
 if(${MV_USE_ERROR_LOGGING})
@@ -241,19 +245,19 @@ if(${MV_USE_ERROR_LOGGING})
     else()
         set(SENTRY_TRANSPORT "curl")        # Use the curl HTTP transport
     endif()
-
-    CPMAddPackage(
-        NAME                sentry-native
-        GITHUB_REPOSITORY   getsentry/sentry-native
-        GIT_TAG             0.13.1 											# Use the latest stable version
-        EXCLUDE_FROM_ALL    YES
-        OPTIONS
-            "SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
-            "SENTRY_TRANSPORT ${SENTRY_TRANSPORT}"
-            "SENTRY_BUILD_SHARED_LIBS OFF"
-            "CRASHPAD_ENABLE_INSTALL OFF"
-            "CRASHPAD_ENABLE_INSTALL_DEV OFF"
-    )
+    # Sentry from vcpkg 
+    # CPMAddPackage(
+    #     NAME                sentry-native
+    #     GITHUB_REPOSITORY   getsentry/sentry-native
+    #     GIT_TAG             0.13.1 											# Use the latest stable version
+    #     EXCLUDE_FROM_ALL    YES
+    #     OPTIONS
+    #         "SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
+    #         "SENTRY_TRANSPORT ${SENTRY_TRANSPORT}"
+    #         "SENTRY_BUILD_SHARED_LIBS OFF"
+    #         "CRASHPAD_ENABLE_INSTALL OFF"
+    #         "CRASHPAD_ENABLE_INSTALL_DEV OFF"
+    # )
 
     set_target_properties(sentry mini_chromium
         PROPERTIES
