@@ -209,7 +209,7 @@ UniqueWorkflowPlan ClustersSerializer::toVariantMapWorkflow(const QVector<Cluste
 
         outputMap["ClustersFormatVersion"]      = FormatVersion;
         outputMap["ClustersMetaDataSize"]       = headersRaw.size();
-        outputMap["ClustersIndicesRawDataSize"] = allIndices.size() * sizeof(unsigned int);
+        outputMap["ClustersIndicesRawDataSize"] = QVariant::fromValue(static_cast<qulonglong>(allIndices.size() * sizeof(unsigned int)));;
         outputMap["ClustersMetaData"]           = bytesToBlobVariantMap(headersRaw.constData(), headersRaw.size());
         outputMap["ClustersIndicesRawData"]     = bytesToBlobVariantMap(reinterpret_cast<const char*>(allIndices.data()), allIndices.size() * sizeof(unsigned int));
 
