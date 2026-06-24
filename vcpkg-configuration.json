@@ -9,7 +9,7 @@
       "kind": "git",
       "repository": "https://github.com/ManiVaultStudio/vcpkg-registry",
       "baseline": "1a9c9ad5259f597dfacce365e1087698a1d47800",
-      "reference": "feature/vcpkg_artifactory",
+      "reference": "main",
       "packages": [
         "qt", "biovault-bfloat16" 
       ]
