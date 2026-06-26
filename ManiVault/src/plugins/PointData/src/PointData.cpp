@@ -16,6 +16,7 @@
 #include <graphics/Vector2f.h>
 
 #include <util/Serialization.h>
+#include <util/JSON.h>
 
 #include <workflow/WorkflowContextVariantMap.h>
 
@@ -235,11 +236,23 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
     });
 
     plan->addNestedWorkflowStage("Populate data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
-    	const auto dataMap      = variantMap["Data"].toMap();
-        const auto rawDataMap   = dataMap["Raw"].toMap();
-        
-    	return populateBytesFromBlobMapWorkflow(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), executionContext->getExecutionOptions());
-	});
+        QVariant rawData;
+
+        if (variantMap.contains("Data") && variantMap["Data"].canConvert<QVariantMap>()) {
+            const auto dataMap = variantMap["Data"].toMap();
+
+            if (dataMap.contains("Raw") && dataMap["Raw"].canConvert<QVariantMap>()) {
+                rawData = dataMap["Raw"];
+            }
+        }
+
+        if (rawData.canConvert<QVariantMap>()) {
+            const auto rawDataMap = rawData.toMap();
+            return populateBytesFromBlobMapWorkflow(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), executionContext->getExecutionOptions());
+        }
+
+        return std::make_unique<WorkflowPlan>("Populate data (no raw data found in variant map)");
+    });
 
     return plan;
 }

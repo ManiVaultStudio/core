@@ -215,6 +215,10 @@ DecodeBlockJobs makeDecodeBlockJobs(const QVariantMap& variantMap)
     const auto codecName    = hasCodec ? variantMap.value("Codec").toString() : QStringLiteral("none");
     const auto totalSize    = variantMap.value("Size").toULongLong(&totalSizeOk);
 
+    if (blocks.isEmpty()) {
+        return {};  // No blocks to decode, return empty job list
+    }
+
     if (!totalSizeOk) {
         throw ManiVaultException(SeverityLevel::Error, "Failed to populate data buffer from variant map", "Decoded buffer size is invalid", __FUNCTION__, {
             { "VariantMap", variantMap }
