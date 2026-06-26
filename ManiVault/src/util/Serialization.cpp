@@ -795,7 +795,7 @@ QByteArray bytesFromBlobVariantMap(QVariantMap variantMap)
     return bytes;
 }
 
-void variantMapMustContain(const QVariantMap& variantMap, const QString& key)
+void variantMapMustContain(const QVariantMap& variantMap, const QString& key, std::source_location sourceLocation)
 {
     if (variantMap.contains(key))
         return;
@@ -804,7 +804,7 @@ void variantMapMustContain(const QVariantMap& variantMap, const QString& key)
         throw ManiVaultException(SeverityLevel::Warning, "Missing key in QVariantMap", QString("Variant map is missing key '%1', but loading errors are set to be ignored").arg(key), __FUNCTION__, {
             { "Key", key },
             { "VariantMap", describeVariantMapKeys(variantMap) }
-            });
+        }, sourceLocation);
     }
 
     throw ManiVaultException(SeverityLevel::Error, "Missing key in QVariantMap", QString("Variant map is missing required key '%1'").arg(key),
@@ -812,8 +812,7 @@ void variantMapMustContain(const QVariantMap& variantMap, const QString& key)
         {
             { "Key", key },
             { "VariantMap", describeVariantMapKeys(variantMap) }
-        }
-    );
+        }, sourceLocation);
 }
 
 QVariantMap storeOnDisk(const QStringList& list)

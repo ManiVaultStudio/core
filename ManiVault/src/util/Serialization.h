@@ -137,10 +137,11 @@ CORE_EXPORT QByteArray bytesFromBlobVariantMap(QVariantMap variantMap);
  *
  * @param variantMap Variant map to inspect.
  * @param key Required key.
+ * @param sourceLocation Source location used to report errors.
  *
  * @throws ManiVaultException If the key is not present.
  */
-CORE_EXPORT void variantMapMustContain(const QVariantMap& variantMap, const QString& key);
+CORE_EXPORT void variantMapMustContain(const QVariantMap& variantMap, const QString& key, std::source_location sourceLocation = std::source_location::current());
 
 /**
  * Serialize a string list using the blob serialization format.

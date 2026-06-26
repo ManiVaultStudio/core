@@ -286,7 +286,7 @@ void Serializable::insertIntoVariantMap(QVariantMap& variantMap) const
     variantMap.insert(getSerializationName(), toVariantMap());
 }
 
-void Serializable::handleKeyNotFoundInVariantMap(const Serializable& serializable, const QVariantMap& map, const QString& key)
+void Serializable::handleKeyNotFoundInVariantMap(const Serializable& serializable, const QVariantMap& map, const QString& key, std::source_location sourceLocation)
 {
     const auto errorMessage = QString(
         "Required key '%1' was not found in QVariantMap. "
@@ -302,14 +302,14 @@ void Serializable::handleKeyNotFoundInVariantMap(const Serializable& serializabl
             { "Key", key },
             { "SerializationName", serializable.getSerializationName() },
             { "VariantMap", describeVariantMapKeys(map) }
-        });
+        }, sourceLocation);
     }
 
 	throw ManiVaultException(SeverityLevel::Error, "Missing key in QVariantMap", errorMessage, __FUNCTION__, {
 		{ "Key", key },
         { "SerializationName", serializable.getSerializationName() },
         { "VariantMap", describeVariantMapKeys(map) }
-	});
+	}, sourceLocation);
 }
 
 }

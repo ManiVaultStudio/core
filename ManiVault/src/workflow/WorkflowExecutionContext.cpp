@@ -286,17 +286,40 @@ void WorkflowExecutionContext::warning(QString text, QString location, QVariantM
 void WorkflowExecutionContext::error(QString text, QString location, QVariantMap details) const
 {
     static QMutex mutex;
+    static QSet<QString> printedDiagnosticIds;
+
     QMutexLocker lock(&mutex);
 
-    const auto maxDepth = _state ? _state->getExecutionOptions()._maxConsoleLogDepth : std::numeric_limits<int>::max();
+    const auto maxDepth         = _state ? _state->getExecutionOptions()._maxConsoleLogDepth : std::numeric_limits<int>::max();
+    const auto diagnosticId     = details.value("DiagnosticId").toString();
+    const bool hasDiagnosticId  = !diagnosticId.isEmpty();
+    const bool alreadyPrinted   = hasDiagnosticId && printedDiagnosticIds.contains(diagnosticId);
 
-    const auto message = WorkflowConsoleFormatter::format(SeverityLevel::Error, text, location, details, maxDepth);
+    if (hasDiagnosticId && !alreadyPrinted)
+        printedDiagnosticIds.insert(diagnosticId);
+
+    QVariantMap consoleDetails = details;
+
+    if (alreadyPrinted) {
+        consoleDetails.remove("DiagnosticId");
+        consoleDetails.remove("Key");
+        consoleDetails.remove("SerializationName");
+        consoleDetails.remove("SourceLocation");
+        consoleDetails.remove("VariantMap");
+    }
+
+    const auto message = WorkflowConsoleFormatter::format(SeverityLevel::Error, text, location, consoleDetails, alreadyPrinted ? 0 : maxDepth);
 
     if (!message.isEmpty())
-		qDebug().noquote() << message;
+        qDebug().noquote() << message;
 
-	if (_reportNode)
-		_reportNode->addMessage(SeverityLevel::Error, getName(), std::move(text), std::move(location), std::move(details));
+    if (_reportNode)
+        _reportNode->addMessage(
+            SeverityLevel::Error,
+            getName(),
+            std::move(text),
+            std::move(location),
+            std::move(details));
 }
 
 void WorkflowExecutionContext::setProgress(double value) const

@@ -16,13 +16,15 @@ ManiVaultException::ManiVaultException(SeverityLevel severity, QString message, 
 	_message(std::move(message)),
 	_what(std::move(what)),
 	_where(std::move(where)),
-	_details(std::move(details))
+	_details(std::move(details)),
+    _diagnosticId(QUuid::createUuid())
 {
     _details["SourceLocation"] = QVariantMap{
         { "File", location.file_name() },
         { "Line", static_cast<int>(location.line()) },
         { "Function", location.function_name() }
     };
+    _details["DiagnosticId"] = _diagnosticId.toString(QUuid::WithoutBraces);
 }
 
 ManiVaultException ManiVaultException::withAddedDetails(const QVariantMap& additionalDetails) const

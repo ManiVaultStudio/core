@@ -10,6 +10,7 @@
 
 #include <QObject>
 #include <QVariantMap>
+#include <QUuid>
 
 #include <source_location>
 
@@ -21,11 +22,12 @@ public:
 
     ManiVaultException withAddedDetails(const QVariantMap& additionalDetails) const;
 
-    util::SeverityLevel     _severity;  /** The severity level of the exception */
-    QString                 _message;   /** The message describing the exception */
-    QString                 _what;      /** The specific cause or nature of the exception */
-    QString                 _where;     /** The location or context where the exception occurred */
-    QVariantMap             _details;   /** Additional details about the exception */
+    util::SeverityLevel     _severity;      /** The severity level of the exception */
+    QString                 _message;       /** The message describing the exception */
+    QString                 _what;          /** The specific cause or nature of the exception */
+    QString                 _where;         /** The location or context where the exception occurred */
+    QVariantMap             _details;       /** Additional details about the exception */
+    QUuid                   _diagnosticId;  /** The unique diagnostic identifier for the exception */
 };
 
 }

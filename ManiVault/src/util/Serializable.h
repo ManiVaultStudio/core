@@ -11,6 +11,7 @@
 #include <QString>
 #include <QJsonDocument>
 #include <QPointer>
+#include <source_location>
 
 namespace mv
 {
@@ -533,8 +534,9 @@ public: // Identity and diagnostics
      * failed.
      * @param map Variant map that was expected to contain the key.
      * @param key Required key that could not be found.
+     * @param sourceLocation Source location of the call site, used for diagnostics. Defaults to the current source location.
      */
-    static void handleKeyNotFoundInVariantMap(const Serializable& serializable, const QVariantMap& map, const QString& key);
+    static void handleKeyNotFoundInVariantMap(const Serializable& serializable, const QVariantMap& map, const QString& key, std::source_location sourceLocation = std::source_location::current());
 
 public: // Task related
 
