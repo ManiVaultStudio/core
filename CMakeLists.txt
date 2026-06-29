@@ -6,7 +6,7 @@ if(MV_USE_ERROR_LOGGING)
     list(APPEND VCPKG_MANIFEST_FEATURES "sentry")
 endif()
 
-set(VCPKG_INSTALL_OPTIONS "--debug" CACHE STRING "")
+# set(VCPKG_INSTALL_OPTIONS "--debug" CACHE STRING "")
 
 set(MV_MAIN "mv-main")
 PROJECT(${MV_MAIN})

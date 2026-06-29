@@ -2,7 +2,7 @@
   "dependencies": [
     { 
       "name": "qt",
-      "features": [ "target-desktop" ] 
+      "features": [ "target-desktop" ]
     },
     {
       "name": "biovault-bfloat16"
