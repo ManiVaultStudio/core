@@ -174,6 +174,8 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 #endif
 
         qDebug() << "Project opened successfully";
+
+
     });
 
     plan->addOnFailureStage("Failure", []() -> void {
@@ -201,6 +203,18 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
 		if (auto project = mv::projects().getCurrentProject()) {
 			project->updateContributors();
+
+            const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
+
+            if (appVersion < Version(1, 5, 0)) {
+                const auto messageTitle = QStringLiteral("Project can be optimized");
+                const auto messageText = QStringLiteral("<p>This project was saved with an earlier version of ManiVault Studio (before 1.5.0). It is fully supported, but does not benefit from the new high-performance project storage architecture.</p>"
+                    "<p>Save the project to convert it to the new format and take advantage of substantially faster loading and improved storage efficiency.</p>");
+
+                mv::help().addNotification(messageTitle, messageText, StyledIcon("info"));
+
+            	qDebug() << messageText;
+            }
 		}
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
