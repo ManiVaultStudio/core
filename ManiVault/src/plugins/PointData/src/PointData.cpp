@@ -263,23 +263,31 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 
     //const auto baseSaveStage = plan->addNestedWorkflowStage("Save raw data base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
     //    return this->Plugin::toVariantMapWorkflow();
-    //});
+    //})
+    //
+    //
+    //;
 
-    plan->addSequentialStage("Save raw data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-        QVariantMap outputMap;
+    if (_isDense) {
+        const auto storeRawStage = plan->addNestedWorkflowStage("Save raw", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            return bytesToBlobVariantMapWorkflow(static_cast<const char*>(getDataConstVoidPtr()), getRawDataSize());
+        });
 
-        if (_isDense) {
+        plan->addSequentialStage("Build map", [this, storeRawStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            QVariantMap outputMap;
+
             const auto typeSpecifier        = getElementTypeSpecifier();
             const auto typeSpecifierName    = getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
             const auto typeIndex            = static_cast<std::int32_t>(typeSpecifier);
+            const auto rawMap               = executionContext->takeOutput(storeRawStage).toMap();
 
             outputMap.insert("TypeIndex", QVariant::fromValue(typeIndex));
             outputMap.insert("TypeName", QVariant(typeSpecifierName));
-            outputMap.insert("Raw", QVariant::fromValue(bytesToBlobVariantMap(static_cast<const char*>(getDataConstVoidPtr()), getRawDataSize())));
+            outputMap.insert("Raw", QVariant::fromValue(storeRawStage));
             outputMap.insert("NumberOfElements", QVariant::fromValue(getNumberOfElements()));
 
             const auto expectedBytes = getRawDataSize();
-            const auto blobTotalSize = outputMap["Raw"].toMap()["Size"].toULongLong();
+            const auto blobTotalSize = rawMap["Size"].toULongLong();
 
             if (blobTotalSize != expectedBytes) {
                 throw ManiVaultException(
@@ -294,8 +302,13 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
                     __FUNCTION__
                 );
             }
-        }
-        else {
+
+            executionContext->setOutput(outputMap);
+        });
+    } else {
+        plan->addSequentialStage("Build map", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            QVariantMap outputMap;
+
             std::vector<char> bytes;
 
             const auto& indexPointers   = _sparseData.getIndexPointers();
@@ -311,10 +324,10 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
             bytes.insert(bytes.end(), valuesBytes, valuesBytes + values.size() * sizeof(float));
 
             outputMap.insert("Raw", bytesToBlobVariantMap(bytes.data(), bytes.size()));
-        }
 
-        executionContext->setOutput(outputMap);
-    });
+            executionContext->setOutput(outputMap);
+        });
+    }
 
     return plan;
 }
