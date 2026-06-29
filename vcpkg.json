@@ -2,7 +2,8 @@
   "dependencies": [
     { 
       "name": "qt",
-      "features": [ "target-desktop" ]
+      "default-features": true,
+      "version": "6.9.3"
     },
     {
       "name": "biovault-bfloat16"
@@ -29,7 +30,6 @@
     }
   },
   "overrides": [
-    {"name": "qt", "version": "6.9.3"},
     {"name": "biovault-bfloat16", "version": "1.0.2"},
     {"name": "hdilib", "version": "2.0.1"},
     {"name": "nlohmann-json", "version": "3.12.0"},
