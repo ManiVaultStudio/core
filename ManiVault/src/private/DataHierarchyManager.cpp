@@ -384,10 +384,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
     }
 
     plan->addBatchedParallelStage("Save datasets", std::move(saveDatasetsJobs), [](const SharedWorkflowExecutionContext& executionContext) {
-        return executionContext->getState()
-            ->getExecutionOptions()
-            ._workflowBatchingOptions
-            ._datasetLoadingBatchSize;
+        return executionContext->getState()->getExecutionOptions()._workflowBatchingOptions._datasetLoadingBatchSize;
     });
 
     const auto collectDatasetMapsStage = plan->addSequentialStage("Collect dataset maps", [saveItemMapsStage, datasetHandles](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
