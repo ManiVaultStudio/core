@@ -45,8 +45,7 @@ WorkflowResultFuture TaskflowWorkflowPlanExecutor::execute(
     OptionalWorkflowExecutionOptions executionOptions)
 {
     if (parentContext != nullptr) {
-        const auto resolvedOptions =
-            executionOptions.value_or(parentContext->getState()->getExecutionOptions());
+        const auto resolvedOptions = executionOptions.value_or(parentContext->getState()->getExecutionOptions());
 
         auto childContext = parentContext->createWorkflowChild(workflowPlan->getName(), workflowPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
 
@@ -142,16 +141,13 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
 {
     rootContext = requireContext(rootContext, __FUNCTION__);
 
-    if (rootContext->isRootExecution() && _chromeObserver) {
+    const auto executionOptions     = rootContext->getState() ? rootContext->getState()->getExecutionOptions() : WorkflowExecutionOptions{};
+    const bool chromeTracingEnabled = rootContext->isRootExecution() && executionOptions._profilingSinkType == WorkflowExecutionOptions::ProfilingSinkType::ChromeTracing;
 
-        if (_chromeObserver) {
-            _chromeObserver.reset();
-        } else {
-            _chromeObserver = _executor.make_observer<tf::ChromeObserver>();
-        }
-    }
+    std::shared_ptr<tf::ChromeObserver> chromeObserver;
 
-    const auto executionOptions = rootContext->getState() ? rootContext->getState()->getExecutionOptions() : WorkflowExecutionOptions{};
+    if (chromeTracingEnabled)
+        chromeObserver = _executor.make_observer<tf::ChromeObserver>();
 
     std::optional<WorkflowConsoleDashboardScope> dashboardScope;
 
@@ -305,21 +301,29 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
     }
 
     if (rootContext->isRootExecution() && rootContext->getState() && rootContext->getState()->getExecutionOptions()._addNotification) {
-        addWorkflowFinishedNotification(
-            workflowPlan.getName(),
-            result,
-            WorkflowResultRegistry::instance().add(result));
+        addWorkflowFinishedNotification(workflowPlan.getName(), result, WorkflowResultRegistry::instance().add(result));
     }
 
-    if (rootContext->isRootExecution() && rootContext->getExecutionOptions()._profilingSinkType == WorkflowExecutionOptions::ProfilingSinkType::ChromeTracing) {
-        const auto fileName = QString("profiling/workflow_trace_%1.json").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"));
+    if (chromeTracingEnabled && chromeObserver) {
+        const QString profilingDir = QDir(QCoreApplication::applicationDirPath()).filePath("profiling");
 
-        std::ofstream traceFile(fileName.toStdString());
-
-        if (traceFile.is_open()) {
-            _chromeObserver->dump(traceFile);
-            qDebug() << "Chrome trace written to" << fileName;
+        if (!QDir().mkpath(profilingDir)) {
+            qWarning() << "Failed to create profiling directory:" << profilingDir;
+            return result;
         }
+
+        const QString fileName = QDir(profilingDir).filePath(QString("workflow_trace_%1.json").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss")));
+
+        std::ofstream traceFile(QDir::toNativeSeparators(fileName).toStdString());
+
+        if (!traceFile.is_open()) {
+            qWarning() << "Failed to open Chrome trace file:" << fileName;
+            return result;
+        }
+
+        chromeObserver->dump(traceFile);
+
+        qDebug() << "Chrome trace written to" << fileName;
     }
 
     return result;

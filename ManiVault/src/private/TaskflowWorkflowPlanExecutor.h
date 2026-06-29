@@ -493,7 +493,6 @@ private: // Helpers
     static std::string makeTraceName(const QString& kind, const QString& name);
 
 private:
-    tf::Executor                            _executor;          /** Shared Taskflow executor for running workflow graphs */
-    std::shared_ptr<tf::ChromeObserver>     _chromeObserver;    /** Chrome trace observer for profiling workflow execution */
+    tf::Executor    _executor;          /** Shared Taskflow executor for running workflow graphs */
 };
 
