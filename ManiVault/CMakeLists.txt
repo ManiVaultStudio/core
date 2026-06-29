@@ -128,7 +128,7 @@ include(DownloadFontAwesome)
 # -----------------------------------------------------------------------------
 
 # Qt
-find_package(Qt6 6.8 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets Concurrent REQUIRED)
+find_package(Qt6 6.9 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets Concurrent REQUIRED)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
