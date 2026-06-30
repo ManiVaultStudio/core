@@ -11,10 +11,10 @@ namespace mv::workflow
 
 struct CORE_EXPORT WorkflowBatchingOptions
 {
-    std::size_t _datasetLoadingBatchSize    = conservativeDatasetsSerializationBatchSize();     /** Number of datasets to load in parallel when loading multiple datasets. */
-    std::size_t _datasetSavingBatchSize     = conservativeDatasetsSerializationBatchSize();     /** Number of datasets to save in parallel when saving multiple datasets. */
-    std::size_t _dataBlockEncodingBatchSize = conservativeBlockSerializationBatchSize();        /** Number of data blocks to encode in parallel when encoding multiple data blocks. */
-    std::size_t _dataBlockDecodingBatchSize = conservativeBlockSerializationBatchSize();        /** Number of data blocks to decode in parallel when decoding multiple data blocks. */
+    std::size_t datasetLoadingBatchSize     = conservativeDatasetsSerializationBatchSize();     /** Number of datasets to load in parallel when loading multiple datasets. */
+    std::size_t datasetSavingBatchSize      = conservativeDatasetsSerializationBatchSize();     /** Number of datasets to save in parallel when saving multiple datasets. */
+    std::size_t dataBlockEncodingBatchSize  = conservativeBlockSerializationBatchSize();        /** Number of data blocks to encode in parallel when encoding multiple data blocks. */
+    std::size_t dataBlockDecodingBatchSize  = conservativeBlockSerializationBatchSize();        /** Number of data blocks to decode in parallel when decoding multiple data blocks. */
 
     /** Returns a conservative batch size based on the number of hardware threads available. This is useful for determining how many tasks to run in parallel without overwhelming the system. */
     static std::size_t conservativeDatasetsSerializationBatchSize();
@@ -23,4 +23,4 @@ struct CORE_EXPORT WorkflowBatchingOptions
     static std::size_t conservativeBlockSerializationBatchSize();
 };
 
-} // namespace mv::util
+}
