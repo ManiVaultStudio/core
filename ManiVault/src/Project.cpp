@@ -102,33 +102,6 @@ Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
 {
     setFilePath(filePath);
     initialize();
-
-    try {
-        if (!QFileInfo(_filePath).exists())
-            throw std::runtime_error("File does not exist");
-
-        QFile projectJsonFile(_filePath);
-
-        if (!projectJsonFile.open(QIODevice::ReadOnly))
-            throw std::runtime_error("Unable to open file for reading");
-
-        QByteArray projectByteArray = projectJsonFile.readAll();
-
-        QJsonDocument jsonDocument = QJsonDocument::fromJson(projectByteArray);
-
-        if (jsonDocument.isNull() || jsonDocument.isEmpty())
-            throw std::runtime_error("JSON document is invalid");
-
-        fromVariantMap(jsonDocument.toVariant().toMap()["Project"].toMap());
-    }
-    catch (std::exception& e)
-    {
-        qDebug() << "Unable to load project from file:" << e.what();
-    }
-    catch (...)
-    {
-        qDebug() << "Unable to load project from file";
-    }
 }
 
 QString Project::getFilePath() const
