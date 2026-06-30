@@ -69,7 +69,9 @@ void WorkflowResultFuture::onFinished(QObject* receiver, std::function<void(Shar
 {
 	auto state = _state;
 
-	std::thread([state, receiver, callback = std::move(callback)]() mutable {
+    QPointer<QObject> safeReceiver(receiver);
+
+    std::thread([state, safeReceiver, callback = std::move(callback)]() mutable {
 		SharedWorkflowResult result;
 
 		try {
@@ -79,13 +81,14 @@ void WorkflowResultFuture::onFinished(QObject* receiver, std::function<void(Shar
 			state->setException(std::current_exception());
 		}
 
-		QMetaObject::invokeMethod(
-			receiver,
-			[state, callback = std::move(callback), result]() mutable {
+        if (!safeReceiver)
+            return;
+
+		QMetaObject::invokeMethod(safeReceiver, [state, callback = std::move(callback), result]() mutable {
 				state->rethrowExceptionIfAny();
 				callback(result);
-			},
-			Qt::QueuedConnection);
+		}, Qt::QueuedConnection);
 	}).detach();
 }
+
 }
