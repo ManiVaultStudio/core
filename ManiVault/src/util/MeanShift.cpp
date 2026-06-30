@@ -94,8 +94,8 @@ QRectF getDataBounds(const std::vector<Vector2f>& points)
     float maxDimension = -FLT_MAX;
     for (const Vector2f& point : points)
     {
-        maxDimension = std::max(std::fabs(point.x), maxDimension);
-        maxDimension = std::max(std::fabs(point.y), maxDimension);
+        maxDimension = (std::max)(std::fabs(point.x), maxDimension);
+        maxDimension = (std::max)(std::fabs(point.y), maxDimension);
     }
 
     // setting a square to make sure that the gaussian is not squished
