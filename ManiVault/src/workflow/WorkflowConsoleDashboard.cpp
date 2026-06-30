@@ -45,6 +45,8 @@ void WorkflowConsoleDashboard::stop()
     if (!_running.exchange(false))
         return;
 
+    _condition.notify_all();
+
     if (_thread.joinable())
         _thread.join();
 
@@ -56,12 +58,27 @@ void WorkflowConsoleDashboard::stop()
     }
 }
 
-void WorkflowConsoleDashboard::run() const
+void WorkflowConsoleDashboard::run()
 {
     using namespace std::chrono_literals;
 
+    _running = true;
+
+    std::unique_lock lock(_mutex);
+
     while (_running) {
-	    render();
+        lock.unlock();
+
+        render();
+
+        lock.lock();
+
+        _condition.wait_for(
+            lock,
+            std::chrono::milliseconds(100),
+            [this] {
+                return !_running;
+            });
     }
 }
 
