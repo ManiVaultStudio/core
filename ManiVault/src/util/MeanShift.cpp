@@ -14,6 +14,10 @@
 #include <float.h>
 //#define MEANSHIFT_IMAGE_DEBUG
 
+#ifdef _WIN32
+	#define NOMINMAX
+#endif
+
 namespace mv
 {
 

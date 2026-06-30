@@ -10,6 +10,10 @@
 #include <cmath>
 #include <limits>
 
+#ifdef _WIN32
+	#define NOMINMAX
+#endif
+
 namespace mv
 {
 
