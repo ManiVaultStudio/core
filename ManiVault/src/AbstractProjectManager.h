@@ -95,7 +95,7 @@ public:
     {
         bool            parallel = true;        /** Whether to parallelize the operation (currently only used for opening a project, but can be extended in the future if necessary) */
         std::uint32_t   maxParallelThreads;     /** Maximum number of threads to use when parallelizing the operation (currently only used for opening a project, but can be extended in the future if necessary) */
-        std::uint32_t   verbosity = 8;          /** Verbosity level for the operation */
+        std::uint32_t   maxLoggingDepth = 8;    /** Maximum depth of logging for the operation */
     };
 
     /** Parameters for opening a project */

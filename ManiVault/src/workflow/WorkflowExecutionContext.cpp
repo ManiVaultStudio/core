@@ -255,7 +255,7 @@ void WorkflowExecutionContext::info(QString text, QString location, QVariantMap 
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    const auto maxDepth = _state ? _state->getExecutionOptions().maxConsoleLogDepth : std::numeric_limits<int>::max();
+    const auto maxDepth = _state ? _state->getExecutionOptions().maxLoggingDepth : std::numeric_limits<int>::max();
 
     const auto message = WorkflowConsoleFormatter::format(SeverityLevel::Info, text, location, details, maxDepth);
 
@@ -272,7 +272,7 @@ void WorkflowExecutionContext::warning(QString text, QString location, QVariantM
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    const auto maxDepth = _state ? _state->getExecutionOptions().maxConsoleLogDepth : std::numeric_limits<int>::max();
+    const auto maxDepth = _state ? _state->getExecutionOptions().maxLoggingDepth : std::numeric_limits<int>::max();
 		
     const auto message = WorkflowConsoleFormatter::format(SeverityLevel::Warning, text, location, details, maxDepth);
 
@@ -290,7 +290,7 @@ void WorkflowExecutionContext::error(QString text, QString location, QVariantMap
 
     QMutexLocker lock(&mutex);
 
-    const auto maxDepth         = _state ? _state->getExecutionOptions().maxConsoleLogDepth : std::numeric_limits<int>::max();
+    const auto maxDepth         = _state ? _state->getExecutionOptions().maxLoggingDepth : std::numeric_limits<int>::max();
     const auto diagnosticId     = details.value("DiagnosticId").toString();
     const bool hasDiagnosticId  = !diagnosticId.isEmpty();
     const bool alreadyPrinted   = hasDiagnosticId && printedDiagnosticIds.contains(diagnosticId);

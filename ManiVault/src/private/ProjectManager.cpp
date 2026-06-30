@@ -382,7 +382,7 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         	.maxWorkerThreadCount = parameters.maxParallelThreads,
             .reportProgress = true,
             .addNotification = true,
-            .maxConsoleLogDepth = 8
+            .maxLoggingDepth = parameters.maxLoggingDepth
         }));
         
         future.onFinished(this, [this](SharedWorkflowResult result) {
@@ -747,7 +747,7 @@ void ProjectManager::saveProject(QString filePath)
 	        .maxWorkerThreadCount = parameters.maxParallelThreads,
 	        .reportProgress = true,
 	        .addNotification = true,
-	        .maxConsoleLogDepth = 10//,
+	        .maxLoggingDepth = parameters.maxLoggingDepth//,
             //.profilingSinkType = WorkflowExecutionOptions::ProfilingSinkType::ChromeTracing
         }));
 
@@ -1068,6 +1068,7 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
 	    HorizontalGroupAction parallelSettingsAction(&fileDialog, "Parallel settings");
 	    ToggleAction parallelToggleAction(&fileDialog, "Parallel", getSetting("Parallel", true).toBool());
 	    IntegralAction maximumNumberOfThreadsAction(&fileDialog, "Maximum number of threads", 1, QThread::idealThreadCount(), getSetting("MaxNumberOfThreads", QThread::idealThreadCount() - 1).toInt());
+	    IntegralAction maxLoggingDepthAction(&fileDialog, "Maximum logging depth", 1, 15, getSetting("MaxLogDepth", 8).toInt());
 
 	    settingsAction.setShowLabels(true);
 	    settingsAction.setLabelSizingType(VerticalGroupAction::LabelSizingType::Auto);
@@ -1099,6 +1100,7 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
 	    settingsAction.addAction(&projectSettingsAction);
 	    settingsAction.addAction(&disableReadOnlyAction);
 	    settingsAction.addAction(&parallelSettingsAction);
+	    settingsAction.addAction(&maxLoggingDepthAction);
 
 	    parallelSettingsAction.addAction(&parallelToggleAction);
 	    parallelSettingsAction.addAction(&maximumNumberOfThreadsAction);
@@ -1150,10 +1152,12 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
         parameters.filePath            = fileDialog.selectedFiles().first();
         parameters.parallel            = parallelToggleAction.isChecked();
         parameters.maxParallelThreads  = maximumNumberOfThreadsAction.getValue();
+        parameters.maxLoggingDepth      = maxLoggingDepthAction.getValue();
 
         setSetting("Directory", QFileInfo(parameters.filePath).absolutePath());
         setSetting("Parallel", parallelToggleAction.isChecked());
         setSetting("MaxNumberOfThreads", parameters.maxParallelThreads);
+        setSetting("MaxLogDepth", parameters.maxLoggingDepth);
     } else {
         parameters.filePath = filePath;
     }
@@ -1201,6 +1205,7 @@ AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSavePara
     	HorizontalGroupAction parallelSettingsAction(&fileDialog, "Parallel settings");
     	ToggleAction parallelToggleAction(&fileDialog, "Parallel", getSetting("Parallel", true).toBool());
     	IntegralAction maximumNumberOfThreadsAction(&fileDialog, "Maximum number of threads", 1, QThread::idealThreadCount(), getSetting("MaxNumberOfThreads", QThread::idealThreadCount() - 1).toInt());
+        IntegralAction maxLoggingDepthAction(&fileDialog, "Maximum logging depth", 1, 15, getSetting("MaxLogDepth", 8).toInt());
 
     	settingsAction.setIconByName("gear");
     	settingsAction.setToolTip("Edit project settings");
@@ -1223,6 +1228,7 @@ AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSavePara
     	settingsAction.addAction(&_project->getCompressionAction());
     	settingsAction.addAction(&projectSettingsAction);
     	settingsAction.addAction(&parallelSettingsAction);
+    	settingsAction.addAction(&maxLoggingDepthAction);
 
     	parallelSettingsAction.addAction(&parallelToggleAction);
     	parallelSettingsAction.addAction(&maximumNumberOfThreadsAction);
@@ -1257,8 +1263,10 @@ AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSavePara
     	parameters.filePath             = fileDialog.selectedFiles().first();
         parameters.parallel             = parallelToggleAction.isChecked();
         parameters.maxParallelThreads   = maximumNumberOfThreadsAction.getValue();
+        parameters.maxLoggingDepth      = maxLoggingDepthAction.getValue();
 
         setSetting("Parallel", parallelToggleAction.isChecked());
+        setSetting("MaxLogDepth", maxLoggingDepthAction.getValue());
     } else {
         parameters.filePath = filePath;
     }

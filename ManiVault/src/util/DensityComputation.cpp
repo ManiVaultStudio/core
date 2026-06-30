@@ -296,7 +296,7 @@ float DensityComputation::calculateMaxKDE()
     float maxKDE = std::numeric_limits<float>::lowest();
     for (size_t i = 0; i < kde.size(); i += 3) // only lookup red channel
     {
-        maxKDE = std::max(maxKDE, kde[i]);
+        maxKDE = std::max(maxKDE, static_cast<float>(kde[i]));
     }
 
     return maxKDE;
