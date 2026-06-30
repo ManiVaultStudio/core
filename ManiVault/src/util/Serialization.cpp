@@ -673,7 +673,7 @@ UniqueWorkflowPlan bytesToBlobVariantMapWorkflow(const char* bytes, std::uint64_
 
         if (!encodeJobs.empty()) {
             plan->addBatchedParallelStage("Encode blocks", std::move(encodeJobs), [](const SharedWorkflowExecutionContext& executionContext) {
-                return executionContext->getState()->getExecutionOptions()._workflowBatchingOptions._dataBlockEncodingBatchSize;
+                return executionContext->getState()->getExecutionOptions().workflowBatchingOptions.dataBlockEncodingBatchSize;
             });
         }
 
@@ -750,7 +750,7 @@ UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(QVariantMap variantMap, char
         });
     }
 
-    plan->addBatchedParallelStage("Decode Blocks", std::move(jobs), executionOptions._workflowBatchingOptions._dataBlockDecodingBatchSize);
+    plan->addBatchedParallelStage("Decode Blocks", std::move(jobs), executionOptions.workflowBatchingOptions.dataBlockDecodingBatchSize);
 
     return plan;
 }

@@ -315,7 +315,7 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(QVariantMap vari
 
         if (!datasetJobs.empty()) {
 	        plan->addBatchedParallelStage(QString("Load %1 datasets").arg(isDerived ? "derived" : "non-derived"), std::move(datasetJobs), [](const SharedWorkflowExecutionContext& executionContext) {
-				return executionContext->getState()->getExecutionOptions()._workflowBatchingOptions._datasetLoadingBatchSize;
+				return executionContext->getState()->getExecutionOptions().workflowBatchingOptions.datasetLoadingBatchSize;
 	        });
         }
     };
@@ -384,7 +384,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
     }
 
     plan->addBatchedParallelStage("Save datasets", std::move(saveDatasetsJobs), [](const SharedWorkflowExecutionContext& executionContext) {
-        return executionContext->getState()->getExecutionOptions()._workflowBatchingOptions._datasetLoadingBatchSize;
+        return executionContext->getState()->getExecutionOptions().workflowBatchingOptions.datasetLoadingBatchSize;
     });
 
     const auto collectDatasetMapsStage = plan->addSequentialStage("Collect dataset maps", [saveItemMapsStage, datasetHandles](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
