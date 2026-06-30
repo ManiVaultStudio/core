@@ -41,13 +41,13 @@ public:
          * Construct with reference to \p message
          * @param message The workflow message
          */
-        Item(workflow::WorkflowMessage message);
+        Item(workflow::SharedWorkflowMessage message);
 
         /**
          * Get workflow message
-         * @return Reference to workflow message
+         * @return Shared pointer to workflow message
          */
-        const workflow::WorkflowMessage& getWorkflowMessage() const;
+        workflow::SharedWorkflowMessage getWorkflowMessage() const;
 
         /**
          * Get tooltip for item
@@ -56,7 +56,7 @@ public:
         QString getTooltip() const;
 
     private:
-        workflow::WorkflowMessage   _workflowMessage;  /** Pointer to script */
+        workflow::SharedWorkflowMessage   _workflowMessage;  /** Pointer to script */
     };
 
     /** Item class for displaying the workflow message type */
@@ -270,12 +270,14 @@ protected:
          */
         Row(const workflow::WorkflowMessage& message) : QList<QStandardItem*>()
         {
-            append(new LevelItem(message));
-            append(new TextItem(message));
-        	append(new EmitterItem(message));
-            append(new LocationItem(message));
-            append(new DetailsItem(message));
-            append(new TimeStampItem(message));
+            auto sharedMessage = std::make_shared<workflow::WorkflowMessage>(message);
+
+            append(new LevelItem(sharedMessage));
+            append(new TextItem(sharedMessage));
+        	append(new EmitterItem(sharedMessage));
+            append(new LocationItem(sharedMessage));
+            append(new DetailsItem(sharedMessage));
+            append(new TimeStampItem(sharedMessage));
         }
     };
 

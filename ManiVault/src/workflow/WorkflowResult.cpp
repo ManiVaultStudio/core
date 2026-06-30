@@ -87,7 +87,7 @@ void WorkflowResult::setMessages(const WorkflowMessages& workflowMessages)
 WorkflowMessages WorkflowResult::getMessagesByLevels(const SeverityLevels& severityLevels) const
 {
     auto filteredView = _messages | std::views::filter([severityLevels](const WorkflowMessage& message) {
-        return severityLevels.contains(message._level);
+        return severityLevels.contains(message.level);
     });
 
     return { filteredView.begin(), filteredView.end() };
@@ -96,7 +96,7 @@ WorkflowMessages WorkflowResult::getMessagesByLevels(const SeverityLevels& sever
 int WorkflowResult::getMessageCountByLevels(const SeverityLevels& severityLevels) const
 {
     return std::ranges::count_if(_messages, [severityLevels](const WorkflowMessage& message) {
-        return severityLevels.contains(message._level);
+        return severityLevels.contains(message.level);
     });
 }
 

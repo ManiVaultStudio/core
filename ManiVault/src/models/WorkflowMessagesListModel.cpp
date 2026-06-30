@@ -21,9 +21,13 @@ WorkflowMessagesListModel::WorkflowMessagesListModel(QObject* parent /*= nullptr
 
 void WorkflowMessagesListModel::setWorkflowResult(const workflow::SharedWorkflowResult& workflowResult)
 {
-    for (const auto& message : workflowResult->getMessages()) {
-        appendRow(Row(message));
+    beginResetModel();
+    {
+        for (const auto& message : workflowResult->getMessages()) {
+            appendRow(Row(message));
+        }
     }
+    endResetModel();
 }
 
 }

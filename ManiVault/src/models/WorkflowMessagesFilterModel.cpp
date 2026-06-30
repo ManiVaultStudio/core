@@ -33,28 +33,44 @@ namespace mv {
 
 bool WorkflowMessagesFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
-    const auto index = sourceModel()->index(row, 0, parent);
+    const auto* source = sourceModel();
 
-    if (!index.isValid())
-        return true;
+    if (!source)
+        return false;
 
-    if (filterRegularExpression().isValid()) {
-        const auto key = sourceModel()->data(index.siblingAtColumn(filterKeyColumn()), filterRole()).toString();
+    const auto levelModelIndex = source->index(row, static_cast<int>(AbstractWorkflowMessagesModel::Column::Level), parent);
+
+    if (!levelModelIndex.isValid())
+        return false;
+
+    if (filterRegularExpression().isValid() && !filterRegularExpression().pattern().isEmpty()) {
+        const auto filterIndex = source->index(row, filterKeyColumn(), parent);
+
+        if (!filterIndex.isValid())
+            return false;
+
+        const auto key = source->data(filterIndex, filterRole()).toString();
 
         if (!key.contains(filterRegularExpression()))
             return false;
     }
 
-    const auto levelIndex   = index.siblingAtColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level)).data(Qt::EditRole).toInt();
-    const auto levelName    = getSeverityLevelName(static_cast<SeverityLevel>(levelIndex));
+    const auto* itemModel = qobject_cast<const QStandardItemModel*>(source);
+
+    if (!itemModel)
+        return false;
+
+    const auto* item = dynamic_cast<const AbstractWorkflowMessagesModel::Item*>(itemModel->itemFromIndex(levelModelIndex));
+
+    if (!item)
+        return false;
 
     if (!_filterLevelAction.hasSelectedOptions())
         return false;
 
-    if (!_filterLevelAction.isOptionSelected(levelName))
-        return false;
+    const auto levelName = getSeverityLevelName(item->getWorkflowMessage()->level);
 
-    return true;
+    return _filterLevelAction.isOptionSelected(levelName);
 }
 
 bool WorkflowMessagesFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const

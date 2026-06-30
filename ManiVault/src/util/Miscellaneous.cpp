@@ -900,37 +900,21 @@ QString variantMapToHtml(const QVariantMap& map, int depth /*= 0*/, int maxDepth
 {
     const auto pal = QToolTip::palette();
 
-    const QString bg = pal.color(QPalette::ToolTipBase).name();
-    const QString text = pal.color(QPalette::ToolTipText).name();
-
-    const QString altBg = QColor(bg).darker(108).name();
-    const QString key = QColor(text).lighter(115).name();
-
     if (depth >= maxDepth) {
-        return QString("<span style='color:%1; font-style:italic;'>{%2 keys}</span>")
-            .arg(text, QString::number(map.size()));
+        return QString("<span style='font-style:italic;'>{%2 keys}</span>").arg(QString::number(map.size()));
     }
 
-    auto html = QString("<table style='border-collapse:collapse; font-family:monospace; font-size:10px; color:%1; background:%2; border:none;'>")
-    	.arg(text, bg);
+    auto html = QString("<table style='border-collapse:collapse; font-family:monospace; font-size:10px; border:none;'>");
 
     int row = 0;
 
     for (auto it = map.begin(); it != map.end(); ++it, ++row) {
-        const QString rowBg = (row % 2 == 0) ? bg : altBg;
-
         html += QString(
-            "<tr style='background:%1;'>"
-	            "<td style='padding:2px 8px; font-weight:bold; color:%2; vertical-align:top; white-space:nowrap;'>%4</td>"
-	            "<td style='padding:2px 8px;color:%5; vertical-align:top;'>%6</td>"
+            "<tr>"
+	            "<td style='padding:2px 8px; font-weight:bold; vertical-align:top; white-space:nowrap;'>%1</td>"
+	            "<td style='padding:2px 8px; vertical-align:top;'>%2</td>"
             "</tr>"
-        ).arg(
-            rowBg,
-            key,
-            it.key().toHtmlEscaped(),
-            text,
-            variantToHtml(it.value(), depth + 1, maxDepth)
-        );
+        ).arg(it.key().toHtmlEscaped(),variantToHtml(it.value(), depth + 1, maxDepth));
     }
 
     html += "</table>";

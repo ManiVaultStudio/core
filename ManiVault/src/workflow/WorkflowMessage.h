@@ -21,14 +21,15 @@ namespace mv::workflow
  */
 struct CORE_EXPORT WorkflowMessage
 {
-	util::SeverityLevel _level = util::SeverityLevel::Info;        /** The severity level of the message (e.g., Info, Warning, Error, Fatal) */
-    QString             _emitter;                                  /** The name of the component or module that generated the message */
-    QString             _location;                                 /** The specific location in the code or workflow where the message was generated (e.g., function name, line number) */
-    QString             _text;                                     /** The main text or content of the message */
-    QVariantMap         _details;                                  /** Additional details or metadata associated with the message */
-    QDateTime           _timestamp = QDateTime::currentDateTime(); /** The timestamp when the message was generated */
+	util::SeverityLevel level = util::SeverityLevel::Info;          /** The severity level of the message (e.g., Info, Warning, Error, Fatal) */
+    QString             emitter;                                    /** The name of the component or module that generated the message */
+    QString             location;                                   /** The specific location in the code or workflow where the message was generated (e.g., function name, line number) */
+    QString             text;                                       /** The main text or content of the message */
+    QVariantMap         details;                                    /** Additional details or metadata associated with the message */
+    QDateTime           timestamp = QDateTime::currentDateTime();   /** The timestamp when the message was generated */
 };
 
+using SharedWorkflowMessage = std::shared_ptr<const workflow::WorkflowMessage>;
 using WorkflowMessages = QVector<WorkflowMessage>;
 
 }

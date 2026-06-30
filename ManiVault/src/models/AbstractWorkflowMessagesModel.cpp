@@ -20,23 +20,27 @@ using namespace mv::workflow;
 
 namespace mv {
 
-AbstractWorkflowMessagesModel::Item::Item(WorkflowMessage message) :
+AbstractWorkflowMessagesModel::Item::Item(SharedWorkflowMessage message) :
     _workflowMessage(std::move(message))
 {
     setEditable(false);
 }
 
-const WorkflowMessage& AbstractWorkflowMessagesModel::Item::getWorkflowMessage() const
+SharedWorkflowMessage AbstractWorkflowMessagesModel::Item::getWorkflowMessage() const
 {
     return _workflowMessage;
 }
 
 QString AbstractWorkflowMessagesModel::Item::getTooltip() const
 {
-    const auto map = _workflowMessage._details;
+    const auto map = _workflowMessage->details;
 
     if (map.isEmpty())
         return {};
+
+    return QString(
+        "<p><b>Event details</b></p><p>%1</p>"
+    ).arg(variantMapToHtml(map));
 
     return QString(
         "<div style='background:%1; color:%2; padding:6px; border: 1px solid %3;'>"
@@ -49,7 +53,7 @@ QVariant AbstractWorkflowMessagesModel::LevelItem::data(int role /*= Qt::UserRol
 {
     switch (role) {
         case Qt::EditRole:
-            return static_cast<std::int32_t>(getWorkflowMessage()._level);
+            return static_cast<std::int32_t>(getWorkflowMessage()->level);
 
         case Qt::DisplayRole:
             return {};
@@ -59,7 +63,7 @@ QVariant AbstractWorkflowMessagesModel::LevelItem::data(int role /*= Qt::UserRol
 
         case Qt::DecorationRole:
         {
-	        switch (getWorkflowMessage()._level)
+	        switch (getWorkflowMessage()->level)
 	        {
 		        case SeverityLevel::Info:
 			        return StyledIcon("circle-info").withColor(QColor(220, 235, 255));
@@ -89,7 +93,7 @@ QVariant AbstractWorkflowMessagesModel::TextItem::data(int role /*= Qt::UserRole
 {
     switch (role) {
         case Qt::EditRole:
-            return getWorkflowMessage()._text;
+            return getWorkflowMessage()->text;
 
         case Qt::DisplayRole:
             return data(Qt::EditRole).toString();
@@ -110,7 +114,7 @@ QVariant AbstractWorkflowMessagesModel::EmitterItem::data(int role /*= Qt::UserR
     switch (role) {
 	    case Qt::EditRole:
 	    case Qt::DisplayRole:
-	        return getWorkflowMessage()._emitter;
+	        return getWorkflowMessage()->emitter;
 
 	    case Qt::ToolTipRole:
 	        return QString("%1").arg(data(Qt::DisplayRole).toString());
@@ -124,7 +128,7 @@ QVariant AbstractWorkflowMessagesModel::LocationItem::data(int role /*= Qt::User
     switch (role) {
 	    case Qt::EditRole:
 	    case Qt::DisplayRole:
-	        return getWorkflowMessage()._location;
+	        return getWorkflowMessage()->location;
 
 	    case Qt::ToolTipRole:
 	        return QString("%1").arg(data(Qt::DisplayRole).toString());
@@ -135,9 +139,10 @@ QVariant AbstractWorkflowMessagesModel::LocationItem::data(int role /*= Qt::User
 
 QVariant AbstractWorkflowMessagesModel::DetailsItem::data(int role) const
 {
+    
     switch (role) {
 	    case Qt::EditRole:
-            return getWorkflowMessage()._details;
+            return getWorkflowMessage()->details;
 
 		case Qt::DisplayRole:
             return QString("%1").arg(data(Qt::EditRole).toMap().isEmpty() ? "Not available..." : data(Qt::EditRole).toMap().keys().join(", "));
@@ -145,16 +150,16 @@ QVariant AbstractWorkflowMessagesModel::DetailsItem::data(int role) const
         case Qt::ToolTipRole:
             return getTooltip();
 
-        //case Qt::FontRole: {
-        //    QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-        //    font.setItalic(true);
-        //    return font;
-        //}
+        case Qt::FontRole: {
+            QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+            font.setItalic(true);
+            return font;
+        }
 
 	    default:
 	        break;
     }
-
+    
 	return Item::data(role);
 }
 
@@ -162,10 +167,10 @@ QVariant AbstractWorkflowMessagesModel::TimeStampItem::data(int role /*= Qt::Use
 {
     switch (role) {
 	    case Qt::EditRole:
-	        return getWorkflowMessage()._timestamp;
+	        return getWorkflowMessage()->timestamp;
 
 	    case Qt::DisplayRole: {
-	        const auto dt = getWorkflowMessage()._timestamp;
+	        const auto dt = getWorkflowMessage()->timestamp;
 	        return QLocale().toString(dt.time(), "HH:mm:ss");
 	    }
 

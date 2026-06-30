@@ -14,8 +14,7 @@ namespace mv::workflow
 {
 
 WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowResult, SeverityLevels levels /*= allSeverityLevels*/, QWidget* parent) :
-	QDialog(parent),   
-	_hierarchyWidget(this, "Workflow message", _messagesListModel, &_messagesFilterModel)
+	QDialog(parent)
 {
     Q_ASSERT(workflowResult);
 
@@ -27,19 +26,23 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     setWindowTitle("Workflow result - " + workflowResult->getWorkflowName());
     setWindowIcon(StyledIcon("scroll"));
 
-    setStyleSheet(R"(
-		QToolTip {
-		    border: none;
-		    background-color: palette(ToolTipBase);
-		    color: palette(ToolTipText);
-		    padding: 6px;
-		}
-	)");
+ //   setStyleSheet(R"(
+	//	QToolTip {
+	//	    border: none;
+	//	    background-color: palette(ToolTipBase);
+	//	    color: palette(ToolTipText);
+	//	    padding: 6px;
+	//	}
+	//)");
 
     _messagesListModel.setWorkflowResult(workflowResult);
     _messagesFilterModel.setSourceModel(&_messagesListModel);
 
     auto& filterlevelAction = _messagesFilterModel.getFilterLevelAction();
+
+    auto toolbarAction = new gui::HorizontalGroupAction(this, "Options", true);
+
+    toolbarAction->addAction(&filterlevelAction);
 
     QStringList selectedOptions;
 
@@ -48,17 +51,14 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
 
     filterlevelAction.setSelectedOptions(selectedOptions);
 
-    _hierarchyWidget.getToolbarAction().addAction(&filterlevelAction);
-    _hierarchyWidget.getFilterGroupAction().addAction(&filterlevelAction);
+    auto treeView = new QTreeView();
 
-    auto& treeView = _hierarchyWidget.getTreeView();
-
-    treeView.setSortingEnabled(true);
-    treeView.sortByColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), Qt::AscendingOrder);
-    treeView.setRootIsDecorated(false);
+    treeView->setModel(&_messagesFilterModel);
+    treeView->setSortingEnabled(true);
+    treeView->sortByColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), Qt::AscendingOrder);
+    treeView->setRootIsDecorated(false);
     
-    auto header = treeView.header();
-
+    auto header = treeView->header();
     header->setStretchLastSection(false);
 
     header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level), QHeaderView::Fixed);
@@ -74,12 +74,12 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), 60);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), 100);
     
-    //header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::Emitter), true);
     header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), true);
 
     auto layout = new QVBoxLayout(this);
 
-    layout->addWidget(&_hierarchyWidget);
+    layout->addWidget(toolbarAction->createWidget(this));
+    layout->addWidget(treeView);
 
     setLayout(layout);
 }

@@ -75,7 +75,7 @@ bool WorkflowReportNode::hasErrorsRecursive() const
 		QMutexLocker lock(&_mutex);
 
 		for (const auto& message : _messages) {
-			if (message._level == SeverityLevel::Error)
+			if (message.level == SeverityLevel::Error)
 				return true;
 		}
 
@@ -100,7 +100,7 @@ std::int32_t WorkflowReportNode::getWarningCountRecursive() const
 		QMutexLocker lock(&_mutex);
 
 		for (const auto& message : _messages) {
-			if (message._level == SeverityLevel::Warning)
+			if (message.level == SeverityLevel::Warning)
 				++result;
 		}
 
@@ -123,7 +123,7 @@ std::int32_t WorkflowReportNode::getErrorCountRecursive() const
 		QMutexLocker lock(&_mutex);
 
 		for (const auto& message : _messages) {
-			if (message._level == SeverityLevel::Error)
+			if (message.level == SeverityLevel::Error)
 				++result;
 		}
 
