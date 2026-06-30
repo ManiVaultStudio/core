@@ -681,7 +681,6 @@ set(PUBLIC_WORKFLOW_HEADERS
     src/workflow/WorkflowMessage.h
     src/workflow/WorkflowReportNode.h
     src/workflow/WorkflowProgressNode.h
-    src/workflow/WorkflowExecutionNotifier.h
     src/workflow/WorkflowExecutionState.h
     src/workflow/WorkflowResultFuture.h
     src/workflow/WorkflowGuiThreadDispatcher.h
@@ -715,7 +714,6 @@ set(PUBLIC_WORKFLOW_SOURCES
     src/workflow/WorkflowMessage.cpp
     src/workflow/WorkflowReportNode.cpp
     src/workflow/WorkflowProgressNode.cpp
-    src/workflow/WorkflowExecutionNotifier.cpp
     src/workflow/WorkflowExecutionState.cpp
     src/workflow/WorkflowResultFuture.cpp
     src/workflow/WorkflowPlan.cpp
