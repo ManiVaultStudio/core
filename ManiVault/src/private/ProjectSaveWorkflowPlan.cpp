@@ -18,8 +18,6 @@ using namespace mv::workflow;
 	#define PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
 #endif
 
-#define PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE
-
 UniqueWorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 {
     auto context = std::make_shared<ProjectSaveContext>(filePath);
