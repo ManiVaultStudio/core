@@ -21,8 +21,6 @@ namespace mv
     class Task;
 }
 
-using namespace mv::workflow;
-
 /**
  * @brief Workflow executor implementation based on Taskflow.
  *
@@ -44,7 +42,7 @@ using namespace mv::workflow;
  *
  * @authors Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
-class TaskflowWorkflowPlanExecutor final : public AbstractWorkflowPlanExecutor
+class TaskflowWorkflowPlanExecutor final : public mv::workflow::AbstractWorkflowPlanExecutor
 {
 protected:
     using TaskList = std::vector<tf::Task>;
@@ -70,7 +68,7 @@ public:
      * @param executionOptions Optional workflow execution options.
      * @return Future representing the asynchronous workflow result.
      */
-    WorkflowResultFuture execute(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) override;
+    mv::workflow::WorkflowResultFuture execute(mv::workflow::UniqueWorkflowPlan workflowPlan, mv::workflow::SharedWorkflowExecutionContext parentContext = nullptr, mv::workflow::OptionalWorkflowExecutionOptions executionOptions = std::nullopt) override;
 
     /**
      * @brief Executes a workflow synchronously as a root workflow.
@@ -83,7 +81,7 @@ public:
      * @param executionOptions Workflow execution options.
      * @return Workflow result.
      */
-    SharedWorkflowResult executeBlocking(UniqueWorkflowPlan workflowPlan, mv::Task* task = nullptr, WorkflowExecutionOptions executionOptions = {}) override;
+    mv::workflow::SharedWorkflowResult executeBlocking(mv::workflow::UniqueWorkflowPlan workflowPlan, mv::Task* task = nullptr, mv::workflow::WorkflowExecutionOptions executionOptions = {}) override;
 
     /**
 	 * @brief Executes a workflow synchronously using an existing parent context.
@@ -94,7 +92,7 @@ public:
 	 * @param parentContext Parent execution context.
 	 * @return Workflow result.
 	 */
-    SharedWorkflowResult executeBlocking(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext) override;
+    mv::workflow::SharedWorkflowResult executeBlocking(mv::workflow::UniqueWorkflowPlan workflowPlan, mv::workflow::SharedWorkflowExecutionContext parentContext) override;
 
 protected:
 
@@ -110,7 +108,7 @@ protected:
 	 * @param executionContext Execution context for the workflow.
 	 * @return Future representing the asynchronous workflow result.
 	 */
-    WorkflowResultFuture executeAsyncImpl(UniqueWorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, const WorkflowExecutionOptions& executionOptions, SharedWorkflowExecutionContext executionContext) override;
+    mv::workflow::WorkflowResultFuture executeAsyncImpl(mv::workflow::UniqueWorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, const mv::workflow::WorkflowExecutionOptions& executionOptions, mv::workflow::SharedWorkflowExecutionContext executionContext) override;
 
     /**
 	 * @brief Executes a workflow as the root workflow.
@@ -123,7 +121,7 @@ protected:
 	 * @param executionOptions Workflow execution options.
 	 * @return Workflow result.
 	 */
-    SharedWorkflowResult executeRoot(WorkflowPlan& workflowPlan, mv::Task* task, const WorkflowExecutionOptions& executionOptions = {}) override;
+    mv::workflow::SharedWorkflowResult executeRoot(mv::workflow::WorkflowPlan& workflowPlan, mv::Task* task, const mv::workflow::WorkflowExecutionOptions& executionOptions = {}) override;
 
     /**
 	 * @brief Executes a workflow using an existing root context.
@@ -135,7 +133,7 @@ protected:
 	 * @param rootContext Root execution context.
 	 * @return Workflow result.
 	 */
-    SharedWorkflowResult executeWithContext(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext rootContext);
+    mv::workflow::SharedWorkflowResult executeWithContext(mv::workflow::WorkflowPlan& workflowPlan, mv::workflow::SharedWorkflowExecutionContext rootContext);
 
     /**
 	 * @brief Executes a workflow as a child workflow.
@@ -147,7 +145,7 @@ protected:
 	 * @param parentContext Parent execution context.
 	 * @return Workflow result.
 	 */
-    SharedWorkflowResult executeChild(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext parentContext) override;
+    mv::workflow::SharedWorkflowResult executeChild(mv::workflow::WorkflowPlan& workflowPlan, mv::workflow::SharedWorkflowExecutionContext parentContext) override;
 
 private: // Execute individual jobs
 
@@ -160,7 +158,7 @@ private: // Execute individual jobs
 	 * @param job Job to execute.
 	 * @param jobContext Execution context for the job.
 	 */
-	void executeJobOnGuiThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext) override;
+	void executeJobOnGuiThread(const mv::workflow::WorkflowPlan::Job& job, mv::workflow::SharedWorkflowExecutionContext jobContext) override;
 
     /**
 	 * @brief Executes a workflow job on a worker thread.
@@ -170,7 +168,7 @@ private: // Execute individual jobs
 	 * @param job Job to execute.
 	 * @param jobContext Execution context for the job.
 	 */
-	void executeJobOnWorkerThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext) override;
+	void executeJobOnWorkerThread(const mv::workflow::WorkflowPlan::Job& job, mv::workflow::SharedWorkflowExecutionContext jobContext) override;
 
     /**
 	 * @brief Executes a workflow job.
@@ -181,7 +179,7 @@ private: // Execute individual jobs
 	 * @param job Job to execute.
 	 * @param jobContext Execution context for the job.
 	 */
-	void executeJob(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext) override;
+	void executeJob(const mv::workflow::WorkflowPlan::Job& job, mv::workflow::SharedWorkflowExecutionContext jobContext) override;
 
 private: // Helpers
 
@@ -189,7 +187,7 @@ private: // Helpers
      * @brief Ensures that the Taskflow executor is initialized and has the correct number of workers.
      * @param options Workflow execution options that may specify the desired number of workers.
      */
-    void ensureExecutor(const WorkflowExecutionOptions& options);
+    void ensureExecutor(const mv::workflow::WorkflowExecutionOptions& options);
 
     /**
 	 * @brief Compiles a workflow into a Taskflow graph.
@@ -202,7 +200,7 @@ private: // Helpers
 	 * @param parentContext Parent execution context.
 	 * @return Start and end tasks of the compiled workflow.
 	 */
-    CompiledTasks compileWorkflow(const WorkflowPlan& workflowPlan, tf::Taskflow& taskflow, SharedWorkflowExecutionContext parentContext);
+    CompiledTasks compileWorkflow(const mv::workflow::WorkflowPlan& workflowPlan, tf::Taskflow& taskflow, mv::workflow::SharedWorkflowExecutionContext parentContext);
 
     /**
 	 * @brief Compiles a workflow into a Taskflow subflow.
@@ -214,7 +212,7 @@ private: // Helpers
 	 * @param parentContext Parent execution context.
 	 * @return Start and end tasks of the compiled workflow.
 	 */
-    CompiledTasks compileWorkflow(const WorkflowPlan& workflowPlan, tf::Subflow& subflow, SharedWorkflowExecutionContext parentContext);
+    CompiledTasks compileWorkflow(const mv::workflow::WorkflowPlan& workflowPlan, tf::Subflow& subflow, mv::workflow::SharedWorkflowExecutionContext parentContext);
 
     /**
 	 * @brief Adds a workflow completion notification.
@@ -226,7 +224,7 @@ private: // Helpers
 	 * @param result Workflow result.
 	 * @param resultId Unique identifier of the workflow result.
 	 */
-    void addWorkflowFinishedNotification(const QString& workflowName, const SharedWorkflowResult& result, const QUuid& resultId);
+    void addWorkflowFinishedNotification(const QString& workflowName, const mv::workflow::SharedWorkflowResult& result, const QUuid& resultId);
 
     /**
 	 * @brief Executes a compiled workflow job inside a Taskflow subflow.
@@ -238,7 +236,7 @@ private: // Helpers
 	 * @param subflow Taskflow subflow used for nested workflows.
 	 * @param jobContext Execution context for the job.
 	 */
-    void executeCompiledJob(const WorkflowPlan::Job& job, tf::Subflow& subflow, SharedWorkflowExecutionContext jobContext);
+    void executeCompiledJob(const mv::workflow::WorkflowPlan::Job& job, tf::Subflow& subflow, mv::workflow::SharedWorkflowExecutionContext jobContext);
 
     /**
 	 * @brief Compiles a sequence of workflow stages.
@@ -253,7 +251,7 @@ private: // Helpers
 	 * @return Start and end tasks of the compiled stage sequence.
 	 */
     template<typename Flow>
-    CompiledTasks compileStages(const WorkflowPlan::Stages& stages, Flow& flow, SharedWorkflowExecutionContext parentContext)
+    CompiledTasks compileStages(const mv::workflow::WorkflowPlan::Stages& stages, Flow& flow, mv::workflow::SharedWorkflowExecutionContext parentContext)
     {
         CompiledTasks previous;
 
@@ -283,7 +281,7 @@ private: // Helpers
 	 * @return Start and end tasks of the compiled stage.
 	 */
     template<typename Flow>
-    CompiledTasks compileSequentialStage(const WorkflowPlan::Stage& stage, Flow& flow, SharedWorkflowExecutionContext stageContext)
+    CompiledTasks compileSequentialStage(const mv::workflow::WorkflowPlan::Stage& stage, Flow& flow, mv::workflow::SharedWorkflowExecutionContext stageContext)
     {
         CompiledTasks result;
         tf::Task previous;
@@ -324,7 +322,7 @@ private: // Helpers
 	 * @return Start and end tasks of the compiled stage.
 	 */
     template<typename Flow>
-    CompiledTasks compileParallelStage(const WorkflowPlan::Stage& stage, Flow& flow, SharedWorkflowExecutionContext stageContext)
+    CompiledTasks compileParallelStage(const mv::workflow::WorkflowPlan::Stage& stage, Flow& flow, mv::workflow::SharedWorkflowExecutionContext stageContext)
     {
         CompiledTasks result;
 
@@ -359,11 +357,11 @@ private: // Helpers
 	 * @return Start and end tasks of the compiled stage.
 	 */
     template<typename Flow>
-    CompiledTasks compileStage(const WorkflowPlan::Stage& stage, Flow& flow, SharedWorkflowExecutionContext parentContext)
+    CompiledTasks compileStage(const mv::workflow::WorkflowPlan::Stage& stage, Flow& flow, mv::workflow::SharedWorkflowExecutionContext parentContext)
     {
-        const bool isSequential = stage.getConcurrencyMode() == WorkflowPlan::ConcurrencyMode::Sequential;
+        const bool isSequential = stage.getConcurrencyMode() == mv::workflow::WorkflowPlan::ConcurrencyMode::Sequential;
 
-        auto stageContext = isSequential ? parentContext->createSequentialStageChild(stage.getName(), stage.getWeight(), WorkflowPlan::JobProgressMode::Nested) : parentContext->createParallelStageChild(stage.getName(), stage.getWeight(), WorkflowPlan::JobProgressMode::Nested);
+        auto stageContext = isSequential ? parentContext->createSequentialStageChild(stage.getName(), stage.getWeight(), mv::workflow::WorkflowPlan::JobProgressMode::Nested) : parentContext->createParallelStageChild(stage.getName(), stage.getWeight(), mv::workflow::WorkflowPlan::JobProgressMode::Nested);
 
         stageContext->setOutputId(stage.getId());
 
@@ -402,7 +400,7 @@ private: // Helpers
 	 * @param workflowPlan Workflow plan to inspect.
 	 * @return Handle of the final output stage.
 	 */
-    static WorkflowHandle getFinalStageHandle(const WorkflowPlan& workflowPlan);
+    static mv::workflow::WorkflowHandle getFinalStageHandle(const mv::workflow::WorkflowPlan& workflowPlan);
 
     /**
 	 * @brief Compiles a complete workflow implementation.
@@ -417,7 +415,7 @@ private: // Helpers
 	 * @return Start and end tasks of the compiled workflow.
 	 */
     template<typename Graph>
-    CompiledTasks compileWorkflowImpl(const WorkflowPlan& workflowPlan, Graph& graph, SharedWorkflowExecutionContext parentContext)
+    CompiledTasks compileWorkflowImpl(const mv::workflow::WorkflowPlan& workflowPlan, Graph& graph, mv::workflow::SharedWorkflowExecutionContext parentContext)
     {
         auto mainTasks      = compileStages(workflowPlan.getStages(), graph, parentContext);
         auto successTasks   = compileStages(workflowPlan.getOnSuccessStages(), graph, parentContext);
@@ -465,7 +463,7 @@ private: // Helpers
 	 * @param taskflow Taskflow graph to execute.
 	 * @param executionOptions Workflow execution options that may specify the desired number of workers.
 	 */
-    void runTaskflowBlocking(tf::Taskflow& taskflow, const WorkflowExecutionOptions& executionOptions);
+    void runTaskflowBlocking(tf::Taskflow& taskflow, const mv::workflow::WorkflowExecutionOptions& executionOptions);
 
     /**
 	 * @brief Creates a trace name for workflow profiling.

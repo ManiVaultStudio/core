@@ -6,8 +6,8 @@
 
 #include "WorkflowResult.h"
 
-#include <QFuture>
 #include <QPointer>
+#include <QMutex>
 
 #include <exception>
 #include <future>

@@ -12,7 +12,6 @@
 #include <QMutex>
 #include <QVector>
 #include <QDebug>
-#include <QReadWriteLock>
 
 namespace mv::workflow
 {
