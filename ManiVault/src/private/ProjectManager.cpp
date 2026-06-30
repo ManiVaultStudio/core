@@ -1097,6 +1097,8 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
 	    projectSettingsAction.addAction(&titleAction);
 	    projectSettingsAction.addAction(&additionalProjectSettingsAction);
 
+        maxLoggingDepthAction.setDefaultWidgetFlags(IntegralAction::WidgetFlag::SpinBox);
+
 	    settingsAction.addAction(&projectSettingsAction);
 	    settingsAction.addAction(&disableReadOnlyAction);
 	    settingsAction.addAction(&parallelSettingsAction);
@@ -1224,6 +1226,8 @@ AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSavePara
 
     	projectSettingsAction.addAction(&_project->getTitleAction());
     	projectSettingsAction.addAction(&additionalProjectSettingsAction);
+
+        maxLoggingDepthAction.setDefaultWidgetFlags(IntegralAction::WidgetFlag::SpinBox);
 
     	settingsAction.addAction(&_project->getCompressionAction());
     	settingsAction.addAction(&projectSettingsAction);
