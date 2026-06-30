@@ -93,14 +93,15 @@ public:
     /** Parameters for project operations (opening, importing, saving, publishing) */
     struct ProjectOperationParameters
     {
-        bool            _parallel = true;       /** Whether to parallelize the operation (currently only used for opening a project, but can be extended in the future if necessary) */
-        std::uint32_t   _maxParallelThreads;    /** Maximum number of threads to use when parallelizing the operation (currently only used for opening a project, but can be extended in the future if necessary) */
+        bool            parallel = true;        /** Whether to parallelize the operation (currently only used for opening a project, but can be extended in the future if necessary) */
+        std::uint32_t   maxParallelThreads;     /** Maximum number of threads to use when parallelizing the operation (currently only used for opening a project, but can be extended in the future if necessary) */
+        std::uint32_t   verbosity = 8;          /** Verbosity level for the operation */
     };
 
     /** Parameters for opening a project */
     struct ProjectOpenParameters : ProjectOperationParameters
     {
-        QString _filePath = "";     /** File path of the project to open (choose file path when empty) */
+        QString filePath = "";  /** File path of the project to open (choose file path when empty) */
 
         /**
          * Determine whether the parameters are valid
@@ -108,14 +109,14 @@ public:
          */
         [[nodiscard]] bool isValid() const
         {
-            return !_filePath.isEmpty();
+            return !filePath.isEmpty();
         }
     };
 
     /** Parameters for importing a project */
     struct ProjectImportParameters : ProjectOperationParameters
     {
-        QString _filePath = "";     /** File path of the project to import (choose file path when empty) */
+        QString filePath = "";  /** File path of the project to import (choose file path when empty) */
 
     	/**
          * Determine whether the parameters are valid
@@ -123,14 +124,14 @@ public:
          */
         [[nodiscard]] bool isValid() const
         {
-            return !_filePath.isEmpty();
+            return !filePath.isEmpty();
         }
     };
 
     /** Parameters for downloading a project */
     struct ProjectSaveParameters : ProjectOperationParameters
     {
-        QString _filePath = "";     /** File path of the project to save (choose file path when empty) */
+        QString filePath = "";  /** File path of the project to save (choose file path when empty) */
 
         /**
          * Determine whether the parameters are valid
@@ -138,14 +139,14 @@ public:
          */
         [[nodiscard]] bool isValid() const
         {
-            return !_filePath.isEmpty();
+            return !filePath.isEmpty();
         }
     };
 
     /** Parameters for publishing a project */
     struct ProjectPublishParameters : ProjectOperationParameters
     {
-        QString _filePath = "";     /** File path of the project to publish (choose file path when empty) */
+        QString filePath = "";  /** File path of the project to publish (choose file path when empty) */
 
         /**
          * Determine whether the parameters are valid
@@ -153,7 +154,7 @@ public:
          */
         [[nodiscard]] bool isValid() const
         {
-            return !_filePath.isEmpty();
+            return !filePath.isEmpty();
         }
     };
 
