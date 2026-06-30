@@ -378,11 +378,11 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
         setTemporaryDirPath(TemporaryDirType::Open, plan->getWorkflowContextAs<ProjectOpenContext>()->getTemporaryDirectoryPath());
 
         auto future = Application::getWorkflowPlanExecutor().execute(std::move(plan), nullptr, WorkflowExecutionOptions({
-            ._parallel = parameters._parallel,
-        	._maxWorkerThreadCount = parameters._maxParallelThreads,
-            ._reportProgress = true,
-            ._addNotification = true,
-            ._maxConsoleLogDepth = 8
+            .parallel = parameters._parallel,
+        	.maxWorkerThreadCount = parameters._maxParallelThreads,
+            .reportProgress = true,
+            .addNotification = true,
+            .maxConsoleLogDepth = 8
         }));
         
         future.onFinished(this, [this](SharedWorkflowResult result) {
@@ -743,12 +743,12 @@ void ProjectManager::saveProject(QString filePath)
         setTemporaryDirPath(TemporaryDirType::Save, workflowPlan->getWorkflowContextAs<ProjectSaveContext>()->getTemporaryDirectoryPath());
 
         auto future = Application::getWorkflowPlanExecutor().execute(std::move(workflowPlan), nullptr, WorkflowExecutionOptions({
-            ._parallel = parameters._parallel,
-	        ._maxWorkerThreadCount = parameters._maxParallelThreads,
-	        ._reportProgress = true,
-	        ._addNotification = true,
-	        ._maxConsoleLogDepth = 10//,
-            //._profilingSinkType = WorkflowExecutionOptions::ProfilingSinkType::ChromeTracing
+            .parallel = parameters._parallel,
+	        .maxWorkerThreadCount = parameters._maxParallelThreads,
+	        .reportProgress = true,
+	        .addNotification = true,
+	        .maxConsoleLogDepth = 10//,
+            //.profilingSinkType = WorkflowExecutionOptions::ProfilingSinkType::ChromeTracing
         }));
 
         future.onFinished(this, [this](SharedWorkflowResult result) {

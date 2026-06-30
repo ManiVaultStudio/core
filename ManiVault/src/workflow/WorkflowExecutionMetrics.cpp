@@ -7,45 +7,27 @@
 namespace mv::workflow
 {
 
-void WorkflowExecutionMetrics::registerInteger(
-    const QString& name,
-    const QString& unit,
-    QVariantMap metadata)
+void WorkflowExecutionMetrics::registerInteger(const QString& name, const QString& unit, QVariantMap metadata)
 {
     std::scoped_lock lock(_mutex);
 
     if (_metrics.contains(name))
         return;
 
-    _metrics.try_emplace(
-        name,
-        name,
-        unit,
-        std::move(metadata),
-        WorkflowMetricValueType::Integer
-    );
+    _metrics.try_emplace(name, name, unit, std::move(metadata),WorkflowMetricValueType::Integer);
 }
 
-void WorkflowExecutionMetrics::registerDouble(
-    const QString& name,
-    const QString& unit,
-    QVariantMap metadata)
+void WorkflowExecutionMetrics::registerDouble(const QString& name, const QString& unit, QVariantMap metadata)
 {
     std::scoped_lock lock(_mutex);
 
     if (_metrics.contains(name))
         return;
 
-    _metrics.try_emplace(
-        name,
-        name,
-        unit,
-        std::move(metadata),
-        WorkflowMetricValueType::FloatingPoint
-    );
+    _metrics.try_emplace(name, name, unit, std::move(metadata), WorkflowMetricValueType::FloatingPoint);
 }
 
-void WorkflowExecutionMetrics::addInteger( const QString& name, std::uint64_t amount)
+void WorkflowExecutionMetrics::addInteger(const QString& name, std::uint64_t amount)
 {
     std::scoped_lock lock(_mutex);
 
@@ -54,33 +36,28 @@ void WorkflowExecutionMetrics::addInteger( const QString& name, std::uint64_t am
     if (it == _metrics.end())
         return;
 
-    const auto before = it->second._intValue.load(std::memory_order_relaxed);
+    const auto before = it->second.intValue.load(std::memory_order_relaxed);
 
-	it->second._intValue.fetch_add(amount, std::memory_order_relaxed);
+	it->second.intValue.fetch_add(amount, std::memory_order_relaxed);
 
-	const auto after = it->second._intValue.load(std::memory_order_relaxed);
+	const auto after = it->second.intValue.load(std::memory_order_relaxed);
 }
 
-void WorkflowExecutionMetrics::addDouble(
-    const QString& name,
-    double amount)
+void WorkflowExecutionMetrics::addDouble(const QString& name, double amount)
 {
     std::scoped_lock lock(_mutex);
 
     auto it = _metrics.find(name);
+
     if (it == _metrics.end())
         return;
 
-    if (it->second._valueType != WorkflowMetricValueType::FloatingPoint)
+    if (it->second.valueType != WorkflowMetricValueType::FloatingPoint)
         return;
 
-    double current = it->second._doubleValue.load(std::memory_order_relaxed);
+    double current = it->second.doubleValue.load(std::memory_order_relaxed);
 
-    while (!it->second._doubleValue.compare_exchange_weak(
-        current,
-        current + amount,
-        std::memory_order_relaxed))
-    {
+    while (!it->second.doubleValue.compare_exchange_weak(current, current + amount, std::memory_order_relaxed)) {
         // retry
     }
 }
@@ -90,25 +67,19 @@ QVector<WorkflowMetric> WorkflowExecutionMetrics::snapshot() const
     std::scoped_lock lock(_mutex);
 
     QVector<WorkflowMetric> result;
+
     result.reserve(static_cast<qsizetype>(_metrics.size()));
 
     for (const auto& [_, metric] : _metrics) {
 
         QVariant value;
 
-        if (metric._valueType == WorkflowMetricValueType::Integer)
-            value = static_cast<qulonglong>(
-                metric._intValue.load(std::memory_order_relaxed)
-                );
+        if (metric.valueType == WorkflowMetricValueType::Integer)
+            value = static_cast<qulonglong>(metric.intValue.load(std::memory_order_relaxed));
         else
-            value = metric._doubleValue.load(std::memory_order_relaxed);
+            value = metric.doubleValue.load(std::memory_order_relaxed);
 
-        result.append(WorkflowMetric{
-            metric._name,
-            metric._unit,
-            value,
-            metric._metadata
-            });
+        result.append(WorkflowMetric{ metric.name, metric.unit, value, metric.metadata });
     }
 
     return result;

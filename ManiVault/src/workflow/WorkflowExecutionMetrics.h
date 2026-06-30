@@ -28,18 +28,18 @@ public:
 private:
     struct AtomicMetric
     {
-        QString                     _name;
-        QString                     _unit;
-        QVariantMap                 _metadata;
-        WorkflowMetricValueType     _valueType;
-        std::atomic<std::uint64_t>  _intValue = 0;
-        std::atomic<double>         _doubleValue = 0.0;
+        QString                     name;
+        QString                     unit;
+        QVariantMap                 metadata;
+        WorkflowMetricValueType     valueType;
+        std::atomic<std::uint64_t>  intValue = 0;
+        std::atomic<double>         doubleValue = 0.0;
 
         AtomicMetric(QString name, QString unit, QVariantMap metadata, WorkflowMetricValueType type) :
-    		_name(std::move(name)),
-            _unit(std::move(unit)),
-            _metadata(std::move(metadata)),
-            _valueType(type)
+    		name(std::move(name)),
+            unit(std::move(unit)),
+            metadata(std::move(metadata)),
+            valueType(type)
         {
         }
 

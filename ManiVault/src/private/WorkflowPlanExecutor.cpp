@@ -62,7 +62,7 @@ WorkflowResultFuture WorkflowPlanExecutor::execute(UniqueWorkflowPlan workflowPl
         const auto resolvedOptions  = executionOptions.value_or(parentContext->getState()->getExecutionOptions());
 
         auto childContext   = parentContext->createNestedWorkflowChild(workflowPlan->getName(), workflowPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
-        auto future         = executeAsyncImpl(std::move(workflowPlan), resolvedOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, resolvedOptions, childContext);
+        auto future         = executeAsyncImpl(std::move(workflowPlan), resolvedOptions.reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, resolvedOptions, childContext);
 
         return future;
     }
@@ -71,7 +71,7 @@ WorkflowResultFuture WorkflowPlanExecutor::execute(UniqueWorkflowPlan workflowPl
 
     return executeAsyncImpl(
         std::move(workflowPlan),
-        resolvedOptions._reportProgress ? Task::GuiScope::Background : Task::GuiScope::None,
+        resolvedOptions.reportProgress ? Task::GuiScope::Background : Task::GuiScope::None,
         resolvedOptions,
         nullptr
     );

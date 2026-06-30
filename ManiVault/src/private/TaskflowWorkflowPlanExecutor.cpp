@@ -39,15 +39,15 @@ namespace
 
 std::size_t resolveWorkerCount(const mv::workflow::WorkflowExecutionOptions& options)
 {
-    if (!options._parallel)
+    if (!options.parallel)
         return 1;
 
     const auto hardwareThreadCount = std::max(1u, std::thread::hardware_concurrency());
 
-    if (options._maxWorkerThreadCount == 0)
+    if (options.maxWorkerThreadCount == 0)
         return hardwareThreadCount;
 
-    return std::max<std::size_t>(1, std::min<std::size_t>(options._maxWorkerThreadCount, hardwareThreadCount));
+    return std::max<std::size_t>(1, std::min<std::size_t>(options.maxWorkerThreadCount, hardwareThreadCount));
 }
 
 }
@@ -67,12 +67,12 @@ WorkflowResultFuture TaskflowWorkflowPlanExecutor::execute(UniqueWorkflowPlan wo
 
         auto childContext = parentContext->createWorkflowChild(workflowPlan->getName(), workflowPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
 
-        return executeAsyncImpl(std::move(workflowPlan), resolvedOptions._reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, resolvedOptions, childContext);
+        return executeAsyncImpl(std::move(workflowPlan), resolvedOptions.reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, resolvedOptions, childContext);
     }
 
     const auto resolvedOptions = executionOptions.value_or(WorkflowExecutionOptions{});
 
-    return executeAsyncImpl(std::move(workflowPlan), resolvedOptions._reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, resolvedOptions, nullptr);
+    return executeAsyncImpl(std::move(workflowPlan), resolvedOptions.reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, resolvedOptions, nullptr);
 }
 
 SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(UniqueWorkflowPlan workflowPlan, mv::Task* task, WorkflowExecutionOptions executionOptions)
@@ -156,7 +156,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
     rootContext = requireContext(rootContext, __FUNCTION__);
 
     const auto executionOptions     = rootContext->getState() ? rootContext->getState()->getExecutionOptions() : WorkflowExecutionOptions{};
-    const bool chromeTracingEnabled = rootContext->isRootExecution() && executionOptions._profilingSinkType == WorkflowExecutionOptions::ProfilingSinkType::ChromeTracing;
+    const bool chromeTracingEnabled = rootContext->isRootExecution() && executionOptions.profilingSinkType == WorkflowExecutionOptions::ProfilingSinkType::ChromeTracing;
 
     std::shared_ptr<tf::ChromeObserver> chromeObserver;
 
@@ -169,7 +169,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
 
     std::optional<WorkflowConsoleDashboardScope> dashboardScope;
 
-    if (rootContext->isRootExecution() && executionOptions._enableConsoleDashboard)
+    if (rootContext->isRootExecution() && executionOptions.enableConsoleDashboard)
         dashboardScope.emplace(rootContext->getState());
 
     WorkflowExecutionLifecycleScope lifecycle(rootContext);
@@ -318,7 +318,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
         }
     }
 
-    if (rootContext->isRootExecution() && rootContext->getState() && rootContext->getState()->getExecutionOptions()._addNotification) {
+    if (rootContext->isRootExecution() && rootContext->getState() && rootContext->getState()->getExecutionOptions().addNotification) {
         addWorkflowFinishedNotification(workflowPlan.getName(), result, WorkflowResultRegistry::instance().add(result));
     }
 
