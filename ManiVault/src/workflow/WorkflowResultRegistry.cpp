@@ -15,6 +15,8 @@ WorkflowResultRegistry& WorkflowResultRegistry::instance()
 
 QUuid WorkflowResultRegistry::add(SharedWorkflowResult result)
 {
+    QMutexLocker lock(&_mutex);
+
 	const auto id = QUuid::createUuid();
 
 	_results.insert(id, std::move(result));
@@ -24,11 +26,15 @@ QUuid WorkflowResultRegistry::add(SharedWorkflowResult result)
 
 SharedWorkflowResult WorkflowResultRegistry::get(const QUuid& id) const
 {
+    QMutexLocker lock(&_mutex);
+
 	return _results.value(id);
 }
 
 void WorkflowResultRegistry::remove(const QUuid& id)
 {
+    QMutexLocker lock(&_mutex);
+
 	_results.remove(id);
 }
 
