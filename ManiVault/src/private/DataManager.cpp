@@ -17,8 +17,6 @@
 #include <DataHierarchyItem.h>
 #include <AnalysisPlugin.h>
 
-#include <QtConcurrent>
-
 #include <stdexcept>
 
 #ifdef _DEBUG
@@ -764,18 +762,6 @@ void DataManager::linkFilterModelToDatasetsListModel(QSortFilterProxyModel* filt
 void DataManager::fromVariantMap(const QVariantMap& variantMap)
 {
     AbstractDataManager::fromVariantMap(variantMap);
-}
-
-QFuture<QVariantMap> toVariantMapAsync(WidgetAction* action)
-{
-    Q_ASSERT(action);
-
-    if (!action)
-        return {};
-
-    return QtConcurrent::run([action]() -> QVariantMap {
-        return action->toVariantMap();
-    });
 }
 
 QVariantMap DataManager::toVariantMap() const
