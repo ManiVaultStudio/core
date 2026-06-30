@@ -39,7 +39,7 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString&
 	auto context        = std::make_shared<WorkflowExecutionContext>(name, reportRoot, progressRoot, state, task);
 
     context->_type          = Type::Workflow;
-    context->_id            = QUuid::createUuid();
+    //context->_id            = QUuid::createUuid();
     context->_executionPath = { name };
 
     return context;
@@ -47,7 +47,7 @@ SharedWorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString&
 
 SharedWorkflowExecutionContext WorkflowExecutionContext::createChild(Type type, const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode)
 {
-    if (!_reportNode && !_progressNode && !_state)
+    if (!_reportNode || !_progressNode || !_state)
         return {};
 
     const auto effectiveWeight  = std::max(1.0, weight);
