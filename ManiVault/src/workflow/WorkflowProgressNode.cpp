@@ -148,7 +148,7 @@ WorkflowProgressNode::Status WorkflowProgressNode::getStatus() const
 WorkflowProgressNode::Ptr WorkflowProgressNode::getParent() const
 {
     QMutexLocker locker(&_mutex);
-    return _parent;
+    return _parent.lock();
 }
 
 QVector<WorkflowProgressNode::Ptr> WorkflowProgressNode::getChildren() const
@@ -223,7 +223,7 @@ bool WorkflowProgressNode::isRoot() const
 {
     QMutexLocker lock(&_mutex);
 
-    return _parent == nullptr;
+    return _parent.expired();
 }
 
 void WorkflowProgressNode::setStatus(Status status)

@@ -91,16 +91,16 @@ private:
     bool isFinishedUnlocked() const;
 
 private:
-    mutable QMutex  _mutex;
-    Type            _type = Type::Undefined;
-    QString         _name;
-    Ptr             _parent;
-    double          _weight = 1.0;
-    Status          _status = Status::Pending;
-    double          _selfProgress = 0.0;
-    QElapsedTimer   _timer;
-    qint64          _finishedElapsedMs = 0;
-    QVector<Ptr>    _children;
+    mutable QMutex                          _mutex;
+    Type                                    _type = Type::Undefined;
+    QString                                 _name;
+    std::weak_ptr<WorkflowProgressNode>     _parent;
+    double                                  _weight = 1.0;
+    Status                                  _status = Status::Pending;
+    double                                  _selfProgress = 0.0;
+    QElapsedTimer                           _timer;
+    qint64                                  _finishedElapsedMs = 0;
+    QVector<Ptr>                            _children;
 };
 
 } // namespace mv::util
