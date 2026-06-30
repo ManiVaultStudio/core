@@ -62,22 +62,13 @@ void WorkflowConsoleDashboard::run()
 {
     using namespace std::chrono_literals;
 
-    _running = true;
-
-    std::unique_lock lock(_mutex);
-
     while (_running) {
-        lock.unlock();
-
         render();
 
-        lock.lock();
+        std::unique_lock lock(_conditionMutex);
 
-        _condition.wait_for(
-            lock,
-            std::chrono::milliseconds(100),
-            [this] {
-                return !_running;
+        _condition.wait_for(lock, 100ms, [this] {
+            return !_running.load();
             });
     }
 }
