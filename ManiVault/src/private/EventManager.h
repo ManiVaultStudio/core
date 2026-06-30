@@ -10,8 +10,6 @@
 
 #include "SelectionGroup.h"
 
-#include <QTimer>
-
 namespace mv
 {
     
@@ -102,19 +100,30 @@ public:
      */
     void unregisterEventListener(EventListener* eventListener) override;
 
+    bool areDatasetsPartOfSelectionGroup(Dataset<DatasetImpl> d1, Dataset<DatasetImpl> d2);
+
 public: // Serialization
 
     /**
-     * Load event manager from variant
-     * @param Variant representation of the event manager
+     * Create a workflow that restores this object's state from a variant map.
+     *
+     * See Serializable::fromVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @param variantMap Serialized object state.
+     * @return Workflow plan that restores the object state when executed.
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
 
     /**
-     * Save event manager to variant
-     * @return Variant representation of the event manager
+     * Create a workflow that serializes this object's state to a variant map.
+     *
+     * See Serializable::toVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @return Workflow plan that serializes the object state when executed.
      */
-    QVariantMap toVariantMap() const override;
+    workflow::  UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 private:
     std::vector<EventListener*>         _eventListeners;    /** List of classes listening for core events */

@@ -11,6 +11,50 @@
 
 using namespace mv::gui;
 using namespace mv::util;
+using namespace mv::workflow;
+
+namespace 
+{
+    /** Thread-safe context for constructing the variant map */
+    class ToVariantMapWorkflowContext {
+    public:
+
+        /**
+         * Thread-safe getter for the variant map being constructed
+         * @return Variant map being constructed
+         */
+        QVariantMap getMap() const
+        {
+            QMutexLocker locker(&_mutex);
+            return _map;
+        }
+
+        /**
+         * Thread-safe inserter for the variant map being constructed
+         * @param key Key to insert into the variant map
+         * @param value Value to insert into the variant map
+         */
+        void insertInto(const QString& key, const QVariant& value)
+        {
+            QMutexLocker locker(&_mutex);
+            _map.insert(key, value);
+        }
+
+        /**
+         * Thread-safe setter for the variant map being constructed
+         * @param map Variant map to set
+         */
+        void setMap(const QVariantMap& map)
+        {
+            QMutexLocker locker(&_mutex);
+            _map = map;
+        }
+
+    private:
+        mutable QMutex  _mutex;     /** Mutex for thread-safe access to the variant map */
+        QVariantMap     _map;       /** Variant map being constructed */
+    };
+}
 
 namespace mv {
 
@@ -58,33 +102,6 @@ Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
 {
     setFilePath(filePath);
     initialize();
-
-    try {
-        if (!QFileInfo(_filePath).exists())
-            throw std::runtime_error("File does not exist");
-
-        QFile projectJsonFile(_filePath);
-
-        if (!projectJsonFile.open(QIODevice::ReadOnly))
-            throw std::runtime_error("Unable to open file for reading");
-
-        QByteArray projectByteArray = projectJsonFile.readAll();
-
-        QJsonDocument jsonDocument = QJsonDocument::fromJson(projectByteArray);
-
-        if (jsonDocument.isNull() || jsonDocument.isEmpty())
-            throw std::runtime_error("JSON document is invalid");
-
-        fromVariantMap(jsonDocument.toVariant().toMap()["Project"].toMap());
-    }
-    catch (std::exception& e)
-    {
-        qDebug() << "Unable to load project from file:" << e.what();
-    }
-    catch (...)
-    {
-        qDebug() << "Unable to load project from file";
-    }
 }
 
 QString Project::getFilePath() const
@@ -105,59 +122,104 @@ bool Project::isStartupProject() const
     return _startupProject;
 }
 
-void Project::fromVariantMap(const QVariantMap& variantMap)
+UniqueWorkflowPlan Project::fromVariantMapWorkflow(QVariantMap variantMap)
 {
-    Serializable::fromVariantMap(variantMap);
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1::fromVariantMap").arg(getSerializationName()));
 
-    projects().getProjectSerializationTask().setName("Load project");
+    plan->addNestedWorkflowStage("Load common", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        return Serializable::fromVariantMapWorkflow(variantMap);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
-    _projectMetaAction.fromParentVariantMap(variantMap);
+    plan->addSequentialStage("Configure", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+		    if (variantMap.contains(_selectionGroupingAction.getSerializationName())) {
+		        _selectionGroupingAction.fromParentVariantMap(variantMap);
+		    }
+		    else {
+		        _selectionGroupingAction.setChecked(true);
+		    }
 
-    if (variantMap.contains(_selectionGroupingAction.getSerializationName()))
-        _selectionGroupingAction.fromParentVariantMap(variantMap);
-    else
-        _selectionGroupingAction.setChecked(true);
+		    _overrideApplicationStatusBarAction.fromParentVariantMap(variantMap);
+		    _statusBarVisibleAction.fromParentVariantMap(variantMap);
+		    _statusBarOptionsAction.fromParentVariantMap(variantMap);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
-    _overrideApplicationStatusBarAction.fromParentVariantMap(variantMap);
-    _statusBarVisibleAction.fromParentVariantMap(variantMap);
-    _statusBarOptionsAction.fromParentVariantMap(variantMap);
+    WorkflowPlan::Jobs loadManagerJobs;
 
-    dataHierarchy().fromParentVariantMap(variantMap);
-    actions().fromParentVariantMap(variantMap);
-    plugins().fromParentVariantMap(variantMap);
-    events().fromParentVariantMap(variantMap, true);
+    const auto addManagerLoadStage = [&plan, &loadManagerJobs, variantMap](AbstractManager& manager, double weight) {
+        const auto managerMap = variantMap[manager.getSerializationName()].toMap();
 
-    if (getReadOnlyAction().isChecked() && getAllowedPluginsOnlyAction().isChecked()) {
-        for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
-            pluginFactory->setAllowPluginCreationFromStandardGui(_projectMetaAction.getAllowedPluginsAction().getStrings().contains(pluginFactory->getKind()));
+        plan->addNestedWorkflowStage(QString("Load %1").arg(manager.getSerializationName()), [managerMap, &manager](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+            return manager.fromVariantMapWorkflow(managerMap);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread, weight);
+    };
 
-        qDebug() << _projectMetaAction.getAllowedPluginsAction().getStrings();
-    }
+    addManagerLoadStage(mv::dataHierarchy(), 100.0);
+    addManagerLoadStage(mv::plugins(), 1.0);
+	addManagerLoadStage(mv::events(), 1.0);
+    addManagerLoadStage(mv::actions(), 1.0);
+
+    plan->addSequentialStage("Post-process", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        if (getReadOnlyAction().isChecked() && getAllowedPluginsOnlyAction().isChecked()) {
+			for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
+				pluginFactory->setAllowPluginCreationFromStandardGui(_projectMetaAction.getAllowedPluginsAction().getStrings().contains(pluginFactory->getKind()));
+		}
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
+
+    return plan;
 }
 
-QVariantMap Project::toVariantMap() const
+UniqueWorkflowPlan Project::toVariantMapWorkflow() const
 {
-    projects().getProjectSerializationTask().setName("Save project");
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
 
-    auto variantMap = Serializable::toVariantMap();
-    
-    _projectMetaAction.insertIntoVariantMap(variantMap);
+    const auto saveCommonStage = plan->addSequentialStage("Save common", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        auto outputMap = Serializable::toVariantMap();
 
-    _selectionGroupingAction.insertIntoVariantMap(variantMap);
+        _projectMetaAction.insertIntoVariantMap(outputMap);
+        _selectionGroupingAction.insertIntoVariantMap(outputMap);
+        _overrideApplicationStatusBarAction.insertIntoVariantMap(outputMap);
+        _statusBarVisibleAction.insertIntoVariantMap(outputMap);
+        _statusBarOptionsAction.insertIntoVariantMap(outputMap);
 
-    _overrideApplicationStatusBarAction.insertIntoVariantMap(variantMap);
-    _statusBarVisibleAction.insertIntoVariantMap(variantMap);
-    _statusBarOptionsAction.insertIntoVariantMap(variantMap);
+        executionContext->setOutput(outputMap);
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);
 
-    plugins().insertIntoVariantMap(variantMap);
-    dataHierarchy().insertIntoVariantMap(variantMap);
-    actions().insertIntoVariantMap(variantMap);
-    events().insertIntoVariantMap(variantMap);
+    const auto savePluginsStage = plan->addNestedWorkflowStage(QString("Save %1").arg(mv::plugins().getSerializationName()), [](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        return mv::plugins().toVariantMapWorkflow();
+	}, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);
 
-    return variantMap;
+    const auto saveActionsStage = plan->addNestedWorkflowStage(QString("Save %1").arg(mv::actions().getSerializationName()), [](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        return mv::actions().toVariantMapWorkflow();
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);
+
+    const auto saveDataHierarchyStage = plan->addNestedWorkflowStage(QString("Save %1").arg(mv::dataHierarchy().getSerializationName()), [](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        return mv::dataHierarchy().toVariantMapWorkflow();
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 80.0);
+
+    const auto saveEventsStage = plan->addNestedWorkflowStage(QString("Save %1").arg(mv::events().getSerializationName()), [](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        return mv::events().toVariantMapWorkflow();
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);
+
+    const auto saveWorkspacesStage = plan->addNestedWorkflowStage(QString("Save %1").arg(mv::workspaces().getSerializationName()), [](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        return mv::workspaces().toVariantMapWorkflow();
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);
+
+    plan->addSequentialStage("Publish result", [this, saveCommonStage, savePluginsStage, saveActionsStage, saveDataHierarchyStage, saveEventsStage, saveWorkspacesStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        auto outputMap = executionContext->takeOutput(saveCommonStage).toMap();
+
+        outputMap[mv::plugins().getSerializationName()]         = executionContext->takeOutput(savePluginsStage).toMap();
+        outputMap[mv::actions().getSerializationName()]         = executionContext->takeOutput(saveActionsStage).toMap();
+        outputMap[mv::dataHierarchy().getSerializationName()]   = executionContext->takeOutput(saveDataHierarchyStage).toMap();
+        outputMap[mv::events().getSerializationName()]          = executionContext->takeOutput(saveEventsStage).toMap();
+        //outputMap[mv::workspaces().getSerializationName()]      = executionContext->takeOutput(saveWorkspacesStage).toMap();
+
+    	executionContext->setOutput(outputMap);
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);
+
+	return plan;
 }
 
-util::Version Project::getVersion() const
+Version Project::getVersion() const
 {
     return _applicationVersion;
 }

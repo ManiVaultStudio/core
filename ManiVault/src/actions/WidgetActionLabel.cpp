@@ -65,8 +65,9 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
             if (dynamic_cast<QWidget*>(target) != &_nameLabel)
                 break;
             
-            if (auto project = mv::projects().getCurrentProject(); !project->getStudioModeAction().isChecked())
-                break;
+            if (auto project = mv::projects().getCurrentProject())
+                if (!project->getStudioModeAction().isChecked())
+					break;
             
             auto mouseEvent = dynamic_cast<QMouseEvent*>(event);
 

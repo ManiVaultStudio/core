@@ -23,6 +23,15 @@ const mv::DataType ClusterType = mv::DataType(QString("Clusters"));
 
 class InfoAction;
 
+namespace mv
+{
+    namespace legacy
+    {
+        class ClusterDataLegacySerializer;
+        class ClustersLegacySerializer;
+    }
+}
+
 class CLUSTERDATA_EXPORT ClusterData : public mv::plugin::RawData
 {
 public:
@@ -96,19 +105,30 @@ public:
 public: // Serialization
 
     /**
-     * Load widget action from variant
-     * @param Variant representation of the widget action
+     * Create a workflow that restores this object's state from a variant map.
+     *
+     * See Serializable::fromVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @param variantMap Serialized object state.
+     * @return Workflow plan that restores the object state when executed.
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    mv::workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
 
     /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
+     * Create a workflow that serializes this object's state to a variant map.
+     *
+     * See Serializable::toVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @return Workflow plan that serializes the object state when executed.
      */
-    QVariantMap toVariantMap() const override;
+    mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 private:
     QVector<Cluster>    _clusters;      /** Clusters data */
+
+    friend class mv::legacy::ClusterDataLegacySerializer;
 };
 
 // =============================================================================
@@ -257,21 +277,31 @@ public: // Selection
 public: // Serialization
 
     /**
-     * Load widget action from variant
-     * @param Variant representation of the widget action
+     * Create a workflow that restores this object's state from a variant map.
+     *
+     * See Serializable::fromVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @param variantMap Serialized object state.
+     * @return Workflow plan that restores the object state when executed.
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    mv::workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
 
     /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
+     * Create a workflow that serializes this object's state to a variant map.
+     *
+     * See Serializable::toVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @return Workflow plan that serializes the object state when executed.
      */
-    QVariantMap toVariantMap() const override;
+    mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
+    std::vector<unsigned int>  indices;
+    QSharedPointer<InfoAction> _infoAction;    /** Shared pointer to info action */
+    mv::EventListener          _eventListener; /** Listen to HDPS events */
 
-    std::vector<unsigned int>       indices;
-    QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */
-    mv::EventListener               _eventListener;     /** Listen to ManiVault events */
+    friend class mv::legacy::ClustersLegacySerializer;
 };
 
 // =============================================================================

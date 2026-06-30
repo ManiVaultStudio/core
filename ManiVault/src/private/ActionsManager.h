@@ -56,16 +56,25 @@ public: // Models
 public: // Serialization
 
     /**
-     * Load manager from variant map
-     * @param Variant map representation of the manager
+     * Create a workflow that restores this object's state from a variant map.
+     *
+     * See Serializable::fromVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @param variantMap Serialized object state.
+     * @return Workflow plan that restores the object state when executed.
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
 
     /**
-     * Save manager to variant map
-     * @return Variant map representation of the manager
+     * Create a workflow that serializes this object's state to a variant map.
+     *
+     * See Serializable::toVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @return Workflow plan that serializes the object state when executed.
      */
-    QVariantMap toVariantMap() const override;
+    workflow::UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 private:
     ActionsListModel*    _actionsListModel;

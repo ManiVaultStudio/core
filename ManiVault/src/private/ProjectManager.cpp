@@ -3,37 +3,35 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ProjectManager.h"
-#include "Archiver.h"
 #include "PluginManagerDialog.h"
 #include "ProjectSettingsDialog.h"
 #include "NewProjectDialog.h"
+#include "Archiver.h"
+#include "ProjectOpenWorkflowPlan.h"
+#include "ProjectSaveWorkflowPlan.h"
 
 #include <CoreInterface.h>
 #include <ProjectMetaAction.h>
 
-#include <ModalTask.h>
 #include <ModalTaskHandler.h>
 
 #include <models/HardwareSpecTreeModel.h>
 
 #include <util/Exception.h>
-#include <util/Serialization.h>
-#include <util/Timer.h>
 #include <util/StandardPaths.h>
 
 #include <widgets/FileDialog.h>
 
-#include <QStandardPaths>
 #include <QGridLayout>
-#include <QEventLoop>
 #include <QHeaderView>
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QMetaObject>
-#include <QtConcurrent>
 
 #include <exception>
 
+#include "ProjectOpenContext.h"
+#include "ProjectSaveContext.h"
 #include "Task.h"
 
 #ifdef _DEBUG
@@ -42,6 +40,7 @@
 
 using namespace mv::util;
 using namespace mv::gui;
+using namespace mv::workflow;
 
 namespace mv
 {
@@ -354,225 +353,50 @@ void ProjectManager::newBlankProject()
 
 void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly /*= false*/, bool loadWorkspace /*= true*/)
 {
-    try
-        {
-    #ifdef PROJECT_MANAGER_VERBOSE
-            qDebug() << __FUNCTION__ << filePath;
-    #endif
-
-            if (hasProject() && getCurrentProject()->getFilePath() == filePath)
-                throw std::runtime_error("Project is already open");
-
-            if (isOpeningProject())
-                throw std::runtime_error("Cannot open project while another project is being opened");
-
-            if (hasProject() && getCurrentProject()->getFilePath() == filePath) {
-                qCritical() << "Project is already open";
-                return;
-            }
-
-            if (isOpeningProject()) {
-                qCritical() << "Cannot open project while another project is being opened";
-                return;
-            }
-
-            // State is already set by ProjectManager::importProject(...)
-            if (!isImportingProject())
-                setState(State::OpeningProject);
-
-            if (QFileInfo(filePath).isDir())
-                throw std::runtime_error("Project file path may not be a directory");
-
-            QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "OpenProject"));
-
-            setTemporaryDirPath(TemporaryDirType::Open, temporaryDirectory.path());
-
-            const auto temporaryDirectoryPath = temporaryDirectory.path();
-
-            Application::setSerializationAborted(false);
-
-            ToggleAction disableReadOnlyAction(this, "Allow edit of published project");
-
-            if (filePath.isEmpty()) {
-                FileOpenDialog fileOpenDialog;
-
-                fileOpenDialog.setWindowTitle("Open ManiVault Project");
-                fileOpenDialog.setNameFilters({ "ManiVault project files (*.mv)" });
-                fileOpenDialog.setDefaultSuffix(".mv");
-                fileOpenDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", StandardPaths::getProjectsDirectory()).toString());
-                fileOpenDialog.setOption(QFileDialog::DontUseNativeDialog, true);
-
-                StringAction    titleAction(this, "Title");
-                StringAction    descriptionAction(this, "Description");
-                StringAction    tagsAction(this, "Tags");
-                StringAction    commentsAction(this, "Comments");
-                StringAction    contributorsAction(this, "Contributors");
-
-                titleAction.setEnabled(false);
-                descriptionAction.setEnabled(false);
-                tagsAction.setEnabled(false);
-                commentsAction.setEnabled(false);
-                contributorsAction.setEnabled(false);
-                disableReadOnlyAction.setEnabled(false);
-
-                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(fileOpenDialog.layout());
-                auto rowCount           = fileDialogLayout->rowCount();
-
-                fileDialogLayout->addWidget(titleAction.createLabelWidget(&fileOpenDialog), rowCount, 0);
-                fileDialogLayout->addWidget(titleAction.createWidget(&fileOpenDialog), rowCount, 1, 1, 2);
-
-                fileDialogLayout->addWidget(descriptionAction.createLabelWidget(&fileOpenDialog), rowCount + 1, 0);
-                fileDialogLayout->addWidget(descriptionAction.createWidget(&fileOpenDialog), rowCount + 1, 1, 1, 2);
-
-                fileDialogLayout->addWidget(tagsAction.createLabelWidget(&fileOpenDialog), rowCount + 2, 0);
-                fileDialogLayout->addWidget(tagsAction.createWidget(&fileOpenDialog), rowCount + 2, 1, 1, 2);
-
-                fileDialogLayout->addWidget(commentsAction.createLabelWidget(&fileOpenDialog), rowCount + 3, 0);
-                fileDialogLayout->addWidget(commentsAction.createWidget(&fileOpenDialog), rowCount + 3, 1, 1, 2);
-
-                fileDialogLayout->addWidget(contributorsAction.createLabelWidget(&fileOpenDialog), rowCount + 4, 0);
-                fileDialogLayout->addWidget(contributorsAction.createWidget(&fileOpenDialog), rowCount + 4, 1, 1, 2);
-
-                fileDialogLayout->addWidget(disableReadOnlyAction.createWidget(&fileOpenDialog), rowCount + 5, 1, 1, 2);
-
-                connect(&fileOpenDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) -> void {
-                    if (!QFileInfo(filePath).isFile())
-                        return;
-
-                    const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(filePath);
-
-                    if (projectMetaAction.isNull())
-                        return;
-
-                    titleAction.setString(projectMetaAction->getTitleAction().getString());
-                    descriptionAction.setString(projectMetaAction->getDescriptionAction().getString());
-                    tagsAction.setString(projectMetaAction->getTagsAction().getStrings().join(", "));
-                    commentsAction.setString(projectMetaAction->getCommentsAction().getString());
-                    contributorsAction.setString(projectMetaAction->getContributorsAction().getStrings().join(","));
-                    disableReadOnlyAction.setEnabled(projectMetaAction->getReadOnlyAction().isChecked());
-                });
-
-                fileOpenDialog.open();
-
-                QEventLoop eventLoop;
-
-                connect(&fileOpenDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
-
-                eventLoop.exec();
-
-                if (fileOpenDialog.result() != QDialog::Accepted)
-                    return;
-
-                if (fileOpenDialog.selectedFiles().count() != 1)
-                    throw std::runtime_error("Only one file may be selected");
-
-                filePath = fileOpenDialog.selectedFiles().first();
-
-                Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(filePath).absolutePath());
-            }
-
-            qDebug().noquote() << "Open ManiVault project from" << filePath;
-
-            workspaces().reset();
-
-            if (!importDataOnly)
-                newProject();
-
-            emit projectAboutToBeOpened(*_project);
-            {
-                Application::requestOverrideCursor(Qt::WaitCursor);
-
-                Timer openProjectTimer("Open project");
-
-                _project->setFilePath(filePath);
-
-                auto& projectSerializationTask      = projects().getProjectSerializationTask();
-                auto& compressionTask               = projectSerializationTask.getCompressionTask();
-
-                projectSerializationTask.startLoad(filePath);
-
-                Archiver archiver;
-
-                const QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
-
-                archiver.extractSingleFile(filePath, "workspace.json", QFileInfo(temporaryDirectoryPath, "workspace.json").absoluteFilePath());
-
-                compressionTask.setSubtasks(archiver.getTaskNamesForDecompression(filePath));
-                compressionTask.setRunning();
-
-                connect(&archiver, &Archiver::taskStarted, this, [this, &compressionTask](const QString& taskName) -> void {
-                    compressionTask.setSubtaskStarted(taskName, QString("Extracting: %1").arg(taskName));
-
-                    QCoreApplication::processEvents();
-                });
-
-                connect(&archiver, &Archiver::taskFinished, this, [this, &compressionTask](const QString& taskName) -> void {
-                    compressionTask.setSubtaskFinished(taskName, QString("Extracting: %1").arg(taskName));
-
-                    QCoreApplication::processEvents();
-                });
-
-                connect(&projectSerializationTask, &Task::requestAbort, this, [this]() -> void {
-                    Application::setSerializationAborted(true);
-
-                    throw std::runtime_error("Canceled before project was loaded");
-                });
-
-                archiver.decompress(filePath, temporaryDirectoryPath);
-
-                compressionTask.setFinished();
-
-                projects().fromJsonFile(QFileInfo(temporaryDirectoryPath, "project.json").absoluteFilePath());
-
-                if (loadWorkspace) {
-                    if (workspaceFileInfo.exists())
-                        workspaces().loadWorkspace(workspaceFileInfo.absoluteFilePath(), false);
-
-                    workspaces().setWorkspaceFilePath("");
-                }
-
-                _recentProjectsAction.addRecentFilePath(filePath);
-
-                _project->updateContributors();
-
-                if (disableReadOnlyAction.isEnabled() && disableReadOnlyAction.isChecked())
-                    _project->getReadOnlyAction().setChecked(false);
-
-                if (_project->isStartupProject())
-                    ModalTask::getGlobalHandler()->setEnabled(true);
-
-                if (_project->getOverrideApplicationStatusBarAction().isChecked() && _project->getStatusBarVisibleAction().isChecked())
-                {
-                    auto& miscellaneousSettings = mv::settings().getMiscellaneousSettings();
-
-                    miscellaneousSettings.getStatusBarVisibleAction().setChecked(_project->getStatusBarVisibleAction().isChecked());
-
-                    /* TODO: Fix plugin status bar action visibility
-                    miscellaneousSettings.getStatusBarOptionsAction().setSelectedOptions(_project->getStatusBarOptionsAction().getSelectedOptions());
-                    */
-                }
-
-                unsetTemporaryDirPath(TemporaryDirType::Open);
-
-                Application::requestRemoveOverrideCursor(Qt::WaitCursor, true);
-
-                qDebug().noquote() << filePath << "loaded successfully";
-
-                setState(State::Idle);
-            }
-            emit projectOpened(*_project);
+    try {
+        if (hasProject() && getCurrentProject()->getFilePath() == filePath) {
+	        throw std::runtime_error("Project is already open");
         }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to load ManiVault project", e);
 
-        projects().getProjectSerializationTask().setFinished();
+        if (isOpeningProject()) {
+	        throw std::runtime_error("Cannot open project while another project is being opened");
+        }
+
+        const auto parameters = getProjectOpenParameters(filePath);
+
+        if (parameters.isValid())
+            filePath = parameters.filePath;
+        else
+            return;
+
+        emit projectAboutToBeOpened(filePath);
+
+	    setState(State::OpeningProject);
+
+        auto plan = createProjectOpenWorkflowPlan(filePath);
+
+        setTemporaryDirPath(TemporaryDirType::Open, plan->getWorkflowContextAs<ProjectOpenContext>()->getTemporaryDirectoryPath());
+
+        auto future = Application::getWorkflowPlanExecutor().execute(std::move(plan), nullptr, WorkflowExecutionOptions({
+            .parallel = parameters.parallel,
+        	.maxWorkerThreadCount = parameters.maxParallelThreads,
+            .reportProgress = true,
+            .addNotification = true,
+            .maxLoggingDepth = parameters.maxLoggingDepth
+        }));
+        
+        future.onFinished(this, [this](SharedWorkflowResult result) {
+            setState(State::Idle);
+            emit projectOpened(*_project);
+        });
     }
-    catch (...)
-    {
+    catch (const std::exception& exception) {
+        setState(State::Idle);
+        exceptionMessageBox("Unable to load ManiVault project", exception);
+    }
+    catch (...) {
+        setState(State::Idle);
         exceptionMessageBox("Unable to load ManiVault project");
-
-        projects().getProjectSerializationTask().setFinished();
     }
 }
 
@@ -729,12 +553,29 @@ QFuture<QString> ProjectManager::resolveProjectFileNameAsync(const QUrl& url)
 
 	// Otherwise use robust resolver (Content Disposition / OSF metadata / etc.)
 	return FileDownloader::getFinalFileNameAsync(url);
+}
+
+void ProjectManager::addActionToFileDialog(gui::WidgetAction* action, QFileDialog* fileDialog)
+{
+    Q_ASSERT(action && fileDialog);
+
+    if (!action || !fileDialog)
+        return;
+
+    if (auto fileDialogLayout = dynamic_cast<QGridLayout*>(fileDialog->layout())) {
+        const auto rowIndex = fileDialogLayout->rowCount();
+
+        if (!action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoLabelInGroup))
+            fileDialogLayout->addWidget(action->createLabelWidget(fileDialog), rowIndex, 0);
+
+        fileDialogLayout->addWidget(action->createWidget(fileDialog), rowIndex, 1, 1, 2);
+    }
 };
 
 void ProjectManager::openProject(util::ProjectsModelProjectSharedPtr project, const QString& targetDirectory, bool importDataOnly, bool loadWorkspace)
 {
 #ifdef PROJECT_MANAGER_VERBOSE
-    qDebug() << __FUNCTION__ << project->getTitle() << targetDirectory << importDataOnly << loadWorkspace;
+    qDebug() << __FUNCTION__ << targetDirectory << importDataOnly << loadWorkspace;
 #endif
 
     Application::requestOverrideCursor(Qt::WaitCursor);
@@ -873,7 +714,7 @@ void ProjectManager::importProject(QString filePath /*= ""*/)
     }
 }
 
-void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& password /*= ""*/)
+void ProjectManager::saveProject(QString filePath)
 {
     try
     {
@@ -881,189 +722,50 @@ void ProjectManager::saveProject(QString filePath /*= ""*/, const QString& passw
         qDebug() << __FUNCTION__ << filePath;
 #endif
 
-        // State is already set in projectManager::publishProject(...)
-        if (!isPublishingProject())
-            setState(State::SavingProject);
-
         emit projectAboutToBeSaved(*_project);
-        {
-            if (QFileInfo(filePath).isDir())
-                throw std::runtime_error("Project file path may not be a directory");
 
-            QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "SaveProject"));
-
-            const auto temporaryDirectoryPath = temporaryDirectory.path();
-
-            setTemporaryDirPath(TemporaryDirType::Save, temporaryDirectory.path());
-
-            if (filePath.isEmpty()) {
-
-                FileSaveDialog saveFileDialog;
-
-                saveFileDialog.setWindowTitle("Save ManiVault Project");
-                saveFileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
-                saveFileDialog.setDefaultSuffix(".mv");
-                saveFileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", StandardPaths::getProjectsDirectory()).toString());
-
-                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(saveFileDialog.layout());
-                auto rowCount           = fileDialogLayout->rowCount();
-
-                QCheckBox   passwordProtectedCheckBox("Password protected");
-                QLineEdit   passwordLineEdit;
-
-                passwordProtectedCheckBox.setChecked(false);
-                passwordLineEdit.setPlaceholderText("Enter encryption password...");
-
-                auto compressionLayout = new QHBoxLayout();
-
-                compressionLayout->addWidget(_project->getCompressionAction().getEnabledAction().createWidget(&saveFileDialog));
-                compressionLayout->addWidget(_project->getCompressionAction().getLevelAction().createWidget(&saveFileDialog), 1);
-                
-                fileDialogLayout->addLayout(compressionLayout, rowCount, 1, 1, 2);
-                
-                //fileDialogLayout->addWidget(&passwordProtectedCheckBox, ++rowCount, 0);
-                //fileDialogLayout->addWidget(&passwordLineEdit, rowCount, 1);
-
-                auto& titleAction = _project->getTitleAction();
-
-                fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount + 2, 0);
-
-                GroupAction settingsGroupAction(this, "Settings");
-
-                settingsGroupAction.setIconByName("gear");
-                settingsGroupAction.setToolTip("Edit project settings");
-                settingsGroupAction.setPopupSizeHint(QSize(420, 320));
-                settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
-
-                settingsGroupAction.addAction(&_project->getTitleAction());
-                settingsGroupAction.addAction(&_project->getDescriptionAction());
-                settingsGroupAction.addAction(&_project->getTagsAction());
-                settingsGroupAction.addAction(&_project->getCommentsAction());
-
-                auto titleLayout = new QHBoxLayout();
-
-                titleLayout->addWidget(titleAction.createWidget(&saveFileDialog));
-                titleLayout->addWidget(settingsGroupAction.createCollapsedWidget(&saveFileDialog));
-
-                fileDialogLayout->addLayout(titleLayout, rowCount + 2, 1, 1, 2);
-
-                //const auto updatePassword = [&]() -> void {
-                //    passwordLineEdit.setEnabled(passwordProtectedCheckBox.isChecked());
-                //};
-
-                //connect(&passwordProtectedCheckBox, &QCheckBox::toggled, this, updatePassword);
-
-                //updatePassword();
-
-                connect(&saveFileDialog, &QFileDialog::currentChanged, this, [this](const QString& filePath) -> void {
-                    if (!QFileInfo(filePath).isFile())
-                        return;
-
-                    const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(filePath);
-
-                    if (projectMetaAction.isNull())
-                        return;
-
-                    _project->getCompressionAction().getEnabledAction().setChecked(projectMetaAction->getCompressionAction().getEnabledAction().isChecked());
-                    _project->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
-                });
-
-                saveFileDialog.open();
-
-                QEventLoop eventLoop;
-                QObject::connect(&saveFileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
-                eventLoop.exec();
-
-                if (saveFileDialog.result() != QDialog::Accepted)
-                    return;
-
-                if (saveFileDialog.selectedFiles().count() != 1)
-                    throw std::runtime_error("Only one file may be selected");
-
-                filePath = saveFileDialog.selectedFiles().first();
-
-                Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(filePath).absolutePath());
-            }
-            
-            if (filePath.isEmpty() || QFileInfo(filePath).isDir())
-                return;
-
-            Application::requestOverrideCursor(Qt::WaitCursor);
-
-            if (_project->getCompressionAction().getEnabledAction().isChecked())
-                qDebug().noquote() << "Saving ManiVault project to" << filePath << "with compression level" << _project->getCompressionAction().getLevelAction().getValue();
-            else
-                qDebug().noquote() << "Saving ManiVault project to" << filePath << "without compression";
-
-            auto& projectSerializationTask  = projects().getProjectSerializationTask();
-            auto& compressionTask           = projectSerializationTask.getCompressionTask();
-
-            projectSerializationTask.startSave(filePath);
-            projectSerializationTask.setRunning();
-
-            QCoreApplication::processEvents();
-
-            Archiver archiver;
-
-            connect(&projectSerializationTask, &Task::requestAbort, this, [this]() -> void {
-                Application::setSerializationAborted(true);
-
-                throw std::runtime_error("Canceled before project was saved");
-            });
-
-            QFileInfo projectJsonFileInfo(temporaryDirectoryPath, "project.json"), projectMetaJsonFileInfo(temporaryDirectoryPath, "meta.json");
-
-            Application::setSerializationAborted(false);
-
-            projects().toJsonFile(projectJsonFileInfo.absoluteFilePath());
-
-            _project->getProjectMetaAction().toJsonFile(projectMetaJsonFileInfo.absoluteFilePath());
-            
-            QFileInfo workspaceFileInfo(temporaryDirectoryPath, "workspace.json");
-
-            workspaces().saveWorkspace(workspaceFileInfo.absoluteFilePath(), false);
-
-            compressionTask.setSubtasks(archiver.getTaskNamesForDirectoryCompression(temporaryDirectoryPath));
-            compressionTask.setRunning();
-
-            connect(&archiver, &Archiver::taskStarted, this, [&compressionTask](const QString& taskName) -> void {
-                compressionTask.setSubtaskStarted(taskName, QString("Compressing %1").arg(taskName));
-            });
-
-            connect(&archiver, &Archiver::taskFinished, this, [&compressionTask](const QString& taskName) -> void {
-                compressionTask.setSubtaskFinished(taskName, QString("Compressing %1").arg(taskName));
-            });
-
-            archiver.compressDirectory(temporaryDirectoryPath, filePath, true, _project->getCompressionAction().getEnabledAction().isChecked() ? _project->getCompressionAction().getLevelAction().getValue() : 0, password);
-
-            compressionTask.setFinished();
-
-            _recentProjectsAction.addRecentFilePath(filePath);
-
-            _project->setFilePath(filePath);
-
-            unsetTemporaryDirPath(TemporaryDirType::Save);
-
-            setState(State::Idle);
-
-            qDebug().noquote() << filePath << "saved successfully";
+        if (QFileInfo(filePath).isDir()) {
+            throw std::runtime_error("Project file path may not be a directory");
         }
-        emit projectSaved(*_project);
+
+        setState(State::SavingProject);
+
+        const auto stateGuard = qScopeGuard([this]() { setState(State::Idle); });
+        const auto parameters = getProjectSaveParameters(filePath);
+
+        if (parameters.isValid())
+            filePath = parameters.filePath;
+        else
+            return;
+
+        auto workflowPlan = createProjectSaveWorkflowPlan(filePath);
+
+        setTemporaryDirPath(TemporaryDirType::Save, workflowPlan->getWorkflowContextAs<ProjectSaveContext>()->getTemporaryDirectoryPath());
+
+        auto future = Application::getWorkflowPlanExecutor().execute(std::move(workflowPlan), nullptr, WorkflowExecutionOptions({
+            .parallel = parameters.parallel,
+	        .maxWorkerThreadCount = parameters.maxParallelThreads,
+	        .reportProgress = true,
+	        .addNotification = true,
+	        .maxLoggingDepth = parameters.maxLoggingDepth//,
+            //.profilingSinkType = WorkflowExecutionOptions::ProfilingSinkType::ChromeTracing
+        }));
+
+        future.onFinished(this, [this](SharedWorkflowResult result) {
+            setState(State::Idle);
+            emit projectSaved(*_project);
+        });
     }
     catch (std::exception& e)
     {
         exceptionMessageBox("Unable to save project", e);
-
-        projects().getProjectSerializationTask().setFinished();
     }
     catch (...)
     {
         exceptionMessageBox("Unable to save project");
-
-        projects().getProjectSerializationTask().setFinished();
     }
 
-    Application::current()->restoreOverrideCursor();
+    Application::restoreOverrideCursor();
 }
 
 void ProjectManager::saveProjectAs()
@@ -1078,27 +780,17 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 #ifdef PROJECT_MANAGER_VERBOSE
         qDebug() << __FUNCTION__ << filePath;
 #endif
-
         if (!hasProject())
             return;
-
-        setState(State::PublishingProject);
-
-        /*
-        auto& readOnlyAction        = getCurrentProject()->getReadOnlyAction();
-        auto& splashScreenAction    = getCurrentProject()->getSplashScreenAction();
-
-        readOnlyAction.cacheState();
-        splashScreenAction.cacheState();
-        
-        readOnlyAction.setChecked(true);
-        splashScreenAction.getEnabledAction().setChecked(true);
-        */
 
         emit projectAboutToBePublished(*_project);
         {
             if (QFileInfo(filePath).isDir())
                 throw std::runtime_error("Project file path may not be a directory");
+
+            setState(State::PublishingProject);
+
+            const auto stateGuard = qScopeGuard([this]() { setState(State::Idle); });
 
             QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "PublishProject"));
 
@@ -1106,142 +798,15 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
 
             const auto temporaryDirectoryPath = temporaryDirectory.path();
 
-            auto currentProject = getCurrentProject();
+            _project->getAllowedPluginsAction().addStrings(mv::plugins().getUsedPluginKinds());
+            _project->getOverrideApplicationStatusBarAction().cacheState();
+            _project->getOverrideApplicationStatusBarAction().setChecked(true);
 
-            currentProject->getAllowedPluginsAction().addStrings(mv::plugins().getUsedPluginKinds());
-            //currentProject->getAllowedPluginsAction().setLockedStrings(mv::plugins().getUsedPluginKinds());
+            const auto parameters = getProjectPublishParameters(filePath);
 
-            currentProject->getOverrideApplicationStatusBarAction().cacheState();
-
-            /* TODO: Fix plugin status bar action visibility
-            currentProject->getStatusBarVisibleAction().cacheState();
-            currentProject->getStatusBarOptionsAction().cacheState();
-            */
-
-            currentProject->getOverrideApplicationStatusBarAction().setChecked(true);
-
-            /* TODO: Fix plugin status bar action visibility
-            currentProject->getStatusBarVisibleAction().setChecked(true);
-            currentProject->getStatusBarOptionsAction().setSelectedOptions({ "Logging", "Background Tasks", "Foreground Tasks" });
-            */
-
-            ToggleAction    passwordProtectedAction(this, "Password Protected");
-            StringAction    passwordAction(this, "Password");
-
-            if (filePath.isEmpty()) {
-
-                FileSaveDialog saveFileDialog;
-
-                saveFileDialog.setWindowIcon(StyledIcon("cloud-arrow-up"));
-                saveFileDialog.setWindowTitle("Publish ManiVault Project");
-                saveFileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
-                saveFileDialog.setDefaultSuffix(".mv");
-                saveFileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory", StandardPaths::getProjectsDirectory()).toString());
-
-                auto fileDialogLayout   = dynamic_cast<QGridLayout*>(saveFileDialog.layout());
-                auto rowCount           = fileDialogLayout->rowCount();
-
-                QStringList options{ "Compression", "Title" };
-
-                if (options.contains("Password")) {
-                    passwordProtectedAction.setToolTip("Whether to password-protect the project");
-
-                    passwordAction.setToolTip("Project password");
-                    passwordAction.setPlaceHolderString("Enter encryption password...");
-                    passwordAction.setClearable(true);
-
-                    auto passwordLayout = new QHBoxLayout();
-
-                    passwordLayout->addWidget(passwordProtectedAction.createWidget(&saveFileDialog));
-                    passwordLayout->addWidget(passwordAction.createWidget(&saveFileDialog), 1);
-
-                    const auto updatePasswordActionReadOnly = [&]() -> void {
-                        passwordAction.setEnabled(passwordProtectedAction.isChecked());
-                    };
-
-                    connect(&passwordProtectedAction, &ToggleAction::toggled, this, updatePasswordActionReadOnly);
-
-                    updatePasswordActionReadOnly();
-
-                    fileDialogLayout->addLayout(passwordLayout, rowCount + 3, 1, 1, 2);
-                }
-
-                if (options.contains("Compression")) {
-                    auto compressionLayout = new QHBoxLayout();
-
-                    compressionLayout->addWidget(currentProject->getCompressionAction().getEnabledAction().createWidget(&saveFileDialog));
-                    compressionLayout->addWidget(currentProject->getCompressionAction().getLevelAction().createWidget(&saveFileDialog), 1);
-
-                    fileDialogLayout->addLayout(compressionLayout, rowCount, 1, 1, 2);
-                }
-                    
-                GroupAction settingsGroupAction(this, "Settings");
-
-                if (options.contains("Title")) {
-                    auto& titleAction = currentProject->getTitleAction();
-
-                    fileDialogLayout->addWidget(titleAction.createLabelWidget(nullptr), rowCount + 2, 0);
-
-                    settingsGroupAction.setIconByName("gear");
-                    settingsGroupAction.setToolTip("Edit project settings");
-                    settingsGroupAction.setPopupSizeHint(QSize(420, 0));
-                    settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
-
-                    settingsGroupAction.addAction(&currentProject->getTitleAction());
-                    settingsGroupAction.addAction(&currentProject->getDescriptionAction());
-                    settingsGroupAction.addAction(&currentProject->getTagsAction());
-                    settingsGroupAction.addAction(&currentProject->getCommentsAction());
-                    settingsGroupAction.addAction(&currentProject->getProjectVersionAction());
-                    //settingsGroupAction.addAction(&currentProject->getSplashScreenAction());
-                    //settingsGroupAction.addAction(&currentProject->getOverrideApplicationStatusBarAction());
-                    //settingsGroupAction.addAction(&currentProject->getStatusBarVisibleAction());
-                    settingsGroupAction.addAction(&currentProject->getAllowedPluginsOnlyAction());
-                    settingsGroupAction.addAction(&currentProject->getAllowedPluginsAction());
-                    settingsGroupAction.addAction(&currentProject->getAllowProjectSwitchingAction());
-
-                    /* TODO: Fix plugin status bar action visibility
-                    settingsGroupAction.addAction(&currentProject->getStatusBarOptionsAction());
-                    */
-
-                    auto titleLayout = new QHBoxLayout();
-
-                    titleLayout->addWidget(titleAction.createWidget(&saveFileDialog));
-                    titleLayout->addWidget(settingsGroupAction.createCollapsedWidget(&saveFileDialog));
-
-                    fileDialogLayout->addLayout(titleLayout, rowCount + 2, 1, 1, 2);
-                }
-                    
-                connect(&saveFileDialog, &QFileDialog::currentChanged, this, [this, currentProject](const QString& filePath) -> void {
-                    if (!QFileInfo(filePath).isFile())
-                        return;
-
-                    const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(filePath);
-
-                    if (projectMetaAction.isNull())
-                        return;
-
-                    currentProject->getCompressionAction().getEnabledAction().setChecked(projectMetaAction->getCompressionAction().getEnabledAction().isChecked());
-                    currentProject->getCompressionAction().getLevelAction().setValue(projectMetaAction->getCompressionAction().getLevelAction().getValue());
-                });
-
-                saveFileDialog.open();
-
-                QEventLoop eventLoop;
-                QObject::connect(&saveFileDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
-                eventLoop.exec();
-
-                if (saveFileDialog.result() != QDialog::Accepted)
-                    return;
-
-                if (saveFileDialog.selectedFiles().count() != 1)
-                    throw std::runtime_error("Only one file may be selected");
-
-                filePath = saveFileDialog.selectedFiles().first();
-
-                Application::current()->setSetting("Projects/WorkingDirectory", QFileInfo(filePath).absolutePath());
-            }
-
-            if (filePath.isEmpty() || QFileInfo(filePath).isDir())
+            if (parameters.isValid())
+                filePath = parameters.filePath;
+            else
                 return;
 
             Application::requestOverrideCursor(Qt::WaitCursor);
@@ -1259,22 +824,17 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
                 readOnlyAction.cacheState();
                 readOnlyAction.setChecked(true);
 
-                saveProject(filePath, passwordAction.getString());
+                saveProject(filePath);
 
                 readOnlyAction.restoreState();
             }
             workspaceLockingAction.setLocked(cacheWorkspaceLocked);
 
-            currentProject->getOverrideApplicationStatusBarAction().restoreState();
-            currentProject->getProjectMetaAction().getApplicationVersionAction().setVersion(Application::current()->getVersion());
+            _project->getProjectMetaAction().getApplicationVersionAction().setVersion(Application::current()->getVersion());
 
-            /* TODO: Fix plugin status bar action visibility
-            currentProject->getStatusBarVisibleAction().restoreState();
-            currentProject->getStatusBarOptionsAction().restoreState();
-            */
             unsetTemporaryDirPath(TemporaryDirType::Publish);
 
-            Application::current()->restoreOverrideCursor();
+            Application::restoreOverrideCursor();
         }
         emit projectPublished(*_project);
     }
@@ -1282,15 +842,11 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
     {
         exceptionMessageBox("Unable to publish ManiVault project", e);
 
-        projects().getProjectSerializationTask().setFinished();
-
         Application::current()->restoreOverrideCursor();
     }
     catch (...)
     {
         exceptionMessageBox("Unable to publish ManiVault project");
-
-        projects().getProjectSerializationTask().setFinished();
 
         Application::current()->restoreOverrideCursor();
     }
@@ -1425,20 +981,20 @@ QFuture<bool> ProjectManager::isDownloadedProjectStaleAsync(QUrl url) const
                 }
                 else {
                     if (modifiedFuture.resultCount() == 0)
-                        throw BaseException("Failed to get last modified date and time headers from server");
+                        throw std::runtime_error("Failed to get last modified date and time headers from server");
 
                     if (sizeFuture.resultCount() == 0)
-                        throw BaseException("Failed to get size headers from server");
+                        throw std::runtime_error("Failed to get size headers from server");
 
                     if (finalNameFuture.resultCount() == 0)
-                        throw BaseException("Failed to get file name info from server");
+                        throw std::runtime_error("Failed to get file name info from server");
                 }
             }
             catch (const QException& e) {
-                promise->setException(std::make_exception_ptr(BaseException(QString("Failed to compare download state: %1").arg(e.what()))));
+                promise->setException(std::make_exception_ptr(std::runtime_error(QString("Failed to compare download state: %1").arg(e.what()).toStdString())));
             }
             catch (...) {
-                promise->setException(std::make_exception_ptr(BaseException("Unknown failure in stale check")));
+                promise->setException(std::make_exception_ptr(std::runtime_error("Unknown failure in stale check")));
             }
 
             promise->finish();
@@ -1469,6 +1025,333 @@ QDir ProjectManager::getDownloadedProjectsDir() const
     }
 
     return resultDir;
+}
+
+AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenParameters(const QString& filePath) const
+{
+    const auto getSettingsPrefix = [](const QString& setting) -> QString {
+        return "ProjectOpenParameters/Default/" + setting;
+    };
+
+    const auto getSetting = [getSettingsPrefix](const QString& setting, const QVariant& defaultValue = QVariant()) -> QVariant {
+        return Application::current()->getSetting(getSettingsPrefix(setting), defaultValue);
+    };
+
+    const auto setSetting = [getSettingsPrefix](const QString& setting, const QVariant& value) {
+        Application::current()->setSetting(getSettingsPrefix(setting), value);
+    };
+
+    ProjectOpenParameters parameters {
+        getSetting("Parallel", true).toBool(),
+        getSetting("MaxNumberOfThreads", QThread::idealThreadCount() - 1).toUInt()
+    };
+
+    if (filePath.isEmpty()) {
+	    FileOpenDialog fileDialog;
+
+	    fileDialog.setWindowTitle("Open ManiVault Project");
+	    fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+	    fileDialog.setDefaultSuffix(".mv");
+	    fileDialog.setDirectory(getSetting("Directory", StandardPaths::getProjectsDirectory()).toString());
+	    fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+
+	    VerticalGroupAction settingsAction(&fileDialog, "Settings");
+	    ToggleAction disableReadOnlyAction(&fileDialog, "Allow edit of published project");
+	    HorizontalGroupAction projectSettingsAction(&fileDialog, "Project settings");
+	    VerticalGroupAction additionalProjectSettingsAction(&fileDialog, "Additional settings");
+	    StringAction titleAction(&fileDialog, "Title");
+	    StringAction descriptionAction(&fileDialog, "Description");
+	    StringAction tagsAction(&fileDialog, "Tags");
+	    StringAction commentsAction(&fileDialog, "Comments");
+	    StringAction contributorsAction(&fileDialog, "Contributors");
+
+	    HorizontalGroupAction parallelSettingsAction(&fileDialog, "Parallel settings");
+	    ToggleAction parallelToggleAction(&fileDialog, "Parallel", getSetting("Parallel", true).toBool());
+	    IntegralAction maximumNumberOfThreadsAction(&fileDialog, "Maximum number of threads", 1, QThread::idealThreadCount(), getSetting("MaxNumberOfThreads", QThread::idealThreadCount() - 1).toInt());
+	    IntegralAction maxLoggingDepthAction(&fileDialog, "Maximum logging depth", 1, 15, getSetting("MaxLogDepth", 8).toInt());
+
+	    settingsAction.setShowLabels(true);
+	    settingsAction.setLabelSizingType(VerticalGroupAction::LabelSizingType::Auto);
+
+	    projectSettingsAction.setShowLabels(false);
+	    parallelSettingsAction.setShowLabels(false);
+
+	    additionalProjectSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+	    additionalProjectSettingsAction.setIconByName("ellipsis");
+	    additionalProjectSettingsAction.setPopupSizeHint(QSize(400, 0));
+
+		titleAction.setEnabled(false);
+	    descriptionAction.setEnabled(false);
+	    tagsAction.setEnabled(false);
+	    commentsAction.setEnabled(false);
+	    contributorsAction.setEnabled(false);
+	    disableReadOnlyAction.setEnabled(false);
+	    parallelToggleAction.setEnabled(true);
+	    maximumNumberOfThreadsAction.setEnabled(true);
+
+	    additionalProjectSettingsAction.addAction(&descriptionAction);
+	    additionalProjectSettingsAction.addAction(&tagsAction);
+	    additionalProjectSettingsAction.addAction(&commentsAction);
+	    additionalProjectSettingsAction.addAction(&contributorsAction);
+
+	    projectSettingsAction.addAction(&titleAction);
+	    projectSettingsAction.addAction(&additionalProjectSettingsAction);
+
+        maxLoggingDepthAction.setDefaultWidgetFlags(IntegralAction::WidgetFlag::SpinBox);
+
+	    settingsAction.addAction(&projectSettingsAction);
+	    settingsAction.addAction(&disableReadOnlyAction);
+	    settingsAction.addAction(&parallelSettingsAction);
+	    settingsAction.addAction(&maxLoggingDepthAction);
+
+	    parallelSettingsAction.addAction(&parallelToggleAction);
+	    parallelSettingsAction.addAction(&maximumNumberOfThreadsAction);
+
+	    for (auto action : settingsAction.getActions())
+	        addActionToFileDialog(action, &fileDialog);
+
+	    connect(&fileDialog, &QFileDialog::currentChanged, this, [&](const QString& filePath) {
+	        if (!QFileInfo(filePath).isFile())
+	            return;
+
+	        const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(filePath);
+
+	        if (projectMetaAction.isNull())
+	            return;
+
+	        titleAction.setString(projectMetaAction->getTitleAction().getString());
+	        descriptionAction.setString(projectMetaAction->getDescriptionAction().getString());
+	        tagsAction.setString(projectMetaAction->getTagsAction().getStrings().join(", "));
+	        commentsAction.setString(projectMetaAction->getCommentsAction().getString());
+	        contributorsAction.setString(projectMetaAction->getContributorsAction().getStrings().join(","));
+	        disableReadOnlyAction.setEnabled(projectMetaAction->getReadOnlyAction().isChecked());
+	    });
+
+	    const auto parallelToggled = [&]() {
+	        maximumNumberOfThreadsAction.setEnabled(parallelToggleAction.isChecked());
+	    };
+
+	    parallelToggled();
+
+	    connect(&parallelToggleAction, &ToggleAction::toggled, this, parallelToggled);
+
+        const auto updateSuffix = [&maximumNumberOfThreadsAction]() {
+            maximumNumberOfThreadsAction.setSuffix(QString(" thread%1").arg((maximumNumberOfThreadsAction.getValue() == 1 ? "" : "s")));
+        };
+
+        updateSuffix();
+
+        connect(&maximumNumberOfThreadsAction, &IntegralAction::valueChanged, this, updateSuffix);
+
+	    fileDialog.exec();
+
+	    if (fileDialog.result() != QDialog::Accepted)
+	        return {};
+
+	    if (fileDialog.selectedFiles().count() != 1)
+	        throw std::runtime_error("Only one file may be selected");
+
+        parameters.filePath            = fileDialog.selectedFiles().first();
+        parameters.parallel            = parallelToggleAction.isChecked();
+        parameters.maxParallelThreads  = maximumNumberOfThreadsAction.getValue();
+        parameters.maxLoggingDepth      = maxLoggingDepthAction.getValue();
+
+        setSetting("Directory", QFileInfo(parameters.filePath).absolutePath());
+        setSetting("Parallel", parallelToggleAction.isChecked());
+        setSetting("MaxNumberOfThreads", parameters.maxParallelThreads);
+        setSetting("MaxLogDepth", parameters.maxLoggingDepth);
+    } else {
+        parameters.filePath = filePath;
+    }
+
+    return parameters;
+}
+
+AbstractProjectManager::ProjectImportParameters ProjectManager::getProjectImportParameters(const QString& filePath) const
+{
+    // TODO: Implement import parameters dialog (if needed, otherwise remove this function)
+    return {};
+}
+
+AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSaveParameters(const QString& filePath) const
+{
+    const auto getSettingsPrefix = [](const QString& setting) -> QString {
+        return "ProjectSaveParameters/Default/" + setting;
+    };
+
+    const auto getSetting = [getSettingsPrefix](const QString& setting, const QVariant& defaultValue = QVariant()) -> QVariant {
+        return Application::current()->getSetting(getSettingsPrefix(setting), defaultValue);
+    };
+
+    const auto setSetting = [getSettingsPrefix](const QString& setting, const QVariant& value) {
+        Application::current()->setSetting(getSettingsPrefix(setting), value);
+    };
+
+    ProjectSaveParameters parameters {
+        getSetting("Parallel", true).toBool(),
+        getSetting("MaxNumberOfThreads", QThread::idealThreadCount() - 1).toUInt()
+    };
+
+    if (filePath.isEmpty()) {
+	    FileSaveDialog fileDialog;
+
+    	fileDialog.setWindowTitle("Save ManiVault Project");
+    	fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+    	fileDialog.setDefaultSuffix(".mv");
+    	fileDialog.setDirectory(getSetting("Directory", StandardPaths::getProjectsDirectory()).toString());
+
+    	GroupAction settingsAction(&fileDialog, "Settings");
+    	HorizontalGroupAction projectSettingsAction(&fileDialog, "Project settings");
+    	VerticalGroupAction additionalProjectSettingsAction(&fileDialog, "Additional settings");
+
+    	HorizontalGroupAction parallelSettingsAction(&fileDialog, "Parallel settings");
+    	ToggleAction parallelToggleAction(&fileDialog, "Parallel", getSetting("Parallel", true).toBool());
+    	IntegralAction maximumNumberOfThreadsAction(&fileDialog, "Maximum number of threads", 1, QThread::idealThreadCount(), getSetting("MaxNumberOfThreads", QThread::idealThreadCount() - 1).toInt());
+        IntegralAction maxLoggingDepthAction(&fileDialog, "Maximum logging depth", 1, 15, getSetting("MaxLogDepth", 8).toInt());
+
+    	settingsAction.setIconByName("gear");
+    	settingsAction.setToolTip("Edit project settings");
+    	settingsAction.setPopupSizeHint(QSize(420, 320));
+    	settingsAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
+
+    	projectSettingsAction.setShowLabels(false);
+
+    	additionalProjectSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    	additionalProjectSettingsAction.setIconByName("ellipsis");
+    	additionalProjectSettingsAction.setPopupSizeHint(QSize(400, 0));
+
+    	additionalProjectSettingsAction.addAction(&_project->getDescriptionAction());
+    	additionalProjectSettingsAction.addAction(&_project->getTagsAction());
+    	additionalProjectSettingsAction.addAction(&_project->getCommentsAction());
+
+    	projectSettingsAction.addAction(&_project->getTitleAction());
+    	projectSettingsAction.addAction(&additionalProjectSettingsAction);
+
+        maxLoggingDepthAction.setDefaultWidgetFlags(IntegralAction::WidgetFlag::SpinBox);
+
+    	settingsAction.addAction(&_project->getCompressionAction());
+    	settingsAction.addAction(&projectSettingsAction);
+    	settingsAction.addAction(&parallelSettingsAction);
+    	settingsAction.addAction(&maxLoggingDepthAction);
+
+    	parallelSettingsAction.addAction(&parallelToggleAction);
+    	parallelSettingsAction.addAction(&maximumNumberOfThreadsAction);
+
+    	for (auto action : settingsAction.getActions())
+    		addActionToFileDialog(action, &fileDialog);
+
+    	const auto parallelToggled = [&]() {
+    		maximumNumberOfThreadsAction.setEnabled(parallelToggleAction.isChecked());
+    	};
+
+    	parallelToggled();
+
+    	connect(&parallelToggleAction, &ToggleAction::toggled, this, parallelToggled);
+
+    	const auto updateSuffix = [&maximumNumberOfThreadsAction]() {
+    		maximumNumberOfThreadsAction.setSuffix(QString(" thread%1").arg((maximumNumberOfThreadsAction.getValue() == 1 ? "" : "s")));
+    	};
+
+    	updateSuffix();
+
+    	connect(&maximumNumberOfThreadsAction, &IntegralAction::valueChanged, this, updateSuffix);
+
+    	fileDialog.exec();
+
+    	if (fileDialog.result() != QDialog::Accepted)
+    		return parameters;
+
+    	if (fileDialog.selectedFiles().count() != 1)
+    		throw std::runtime_error("Only one file may be selected");
+
+    	parameters.filePath             = fileDialog.selectedFiles().first();
+        parameters.parallel             = parallelToggleAction.isChecked();
+        parameters.maxParallelThreads   = maximumNumberOfThreadsAction.getValue();
+        parameters.maxLoggingDepth      = maxLoggingDepthAction.getValue();
+
+        setSetting("Parallel", parallelToggleAction.isChecked());
+        setSetting("MaxLogDepth", maxLoggingDepthAction.getValue());
+    } else {
+        parameters.filePath = filePath;
+    }
+
+    setSetting("Directory", QFileInfo(parameters.filePath).absolutePath());
+    setSetting("MaxNumberOfThreads", parameters.maxParallelThreads);
+    return parameters;
+}
+
+AbstractProjectManager::ProjectPublishParameters ProjectManager::getProjectPublishParameters(const QString& filePath) const
+{
+    ProjectPublishParameters parameters;
+
+    FileSaveDialog fileDialog;
+
+    fileDialog.setWindowIcon(StyledIcon("cloud-arrow-up"));
+    fileDialog.setWindowTitle("Publish ManiVault Project");
+    fileDialog.setNameFilters({ "ManiVault project files (*.mv)" });
+    fileDialog.setDefaultSuffix(".mv");
+    fileDialog.setDirectory(Application::current()->getSetting("Projects/WorkingDirectory/Publish", StandardPaths::getProjectsDirectory()).toString());
+
+    GroupAction settingsAction(&fileDialog, "Settings");
+    HorizontalGroupAction projectSettingsAction(&fileDialog, "Project settings");
+    VerticalGroupAction additionalProjectSettingsAction(&fileDialog, "Additional settings");
+    ToggleAction multiThreadingAction(&fileDialog, "Multi-threading", true);
+
+    settingsAction.setIconByName("gear");
+    settingsAction.setToolTip("Edit project settings");
+    settingsAction.setPopupSizeHint(QSize(420, 0));
+    settingsAction.setLabelSizingType(GroupAction::LabelSizingType::Auto);
+
+    projectSettingsAction.setShowLabels(false);
+
+    additionalProjectSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    additionalProjectSettingsAction.setIconByName("ellipsis");
+    additionalProjectSettingsAction.setPopupSizeHint(QSize(400, 0));
+
+    additionalProjectSettingsAction.addAction(&_project->getDescriptionAction());
+    additionalProjectSettingsAction.addAction(&_project->getTagsAction());
+    additionalProjectSettingsAction.addAction(&_project->getCommentsAction());
+    additionalProjectSettingsAction.addAction(&_project->getProjectVersionAction());
+    additionalProjectSettingsAction.addAction(&_project->getAllowedPluginsOnlyAction());
+    additionalProjectSettingsAction.addAction(&_project->getAllowedPluginsAction());
+    additionalProjectSettingsAction.addAction(&_project->getAllowProjectSwitchingAction());
+
+    projectSettingsAction.addAction(&_project->getTitleAction());
+    projectSettingsAction.addAction(&additionalProjectSettingsAction);
+
+    settingsAction.addAction(&_project->getCompressionAction());
+    settingsAction.addAction(&projectSettingsAction);
+    settingsAction.addAction(&multiThreadingAction);
+
+    for (auto action : settingsAction.getActions())
+        addActionToFileDialog(action, &fileDialog);
+
+    connect(&fileDialog, &QFileDialog::currentChanged, this, [this](const QString& filePath) -> void {
+        if (!QFileInfo(filePath).isFile())
+            return;
+
+        const auto projectMetaAction = Project::getProjectMetaActionFromProjectFilePath(filePath);
+
+        if (projectMetaAction.isNull())
+            return;
+
+        _project->getCompressionAction().getEnabledAction().setChecked(projectMetaAction->getCompressionAction().getEnabledAction().isChecked());
+    });
+
+    fileDialog.exec();
+
+    if (fileDialog.result() != QDialog::Accepted)
+        return parameters;
+
+    if (fileDialog.selectedFiles().count() != 1)
+        throw std::runtime_error("Only one file may be selected");
+
+    parameters.filePath = fileDialog.selectedFiles().first();
+    parameters.parallel = multiThreadingAction.isChecked();
+
+    Application::current()->setSetting("Projects/WorkingDirectory/Publish", QFileInfo(parameters.filePath).absolutePath());
+
+    return parameters;
 }
 
 QMenu& ProjectManager::getNewProjectMenu()
@@ -1533,7 +1416,6 @@ void ProjectManager::createProject()
     mv::help().getShowLearningCenterPageAction().setChecked(false);
 
     _showStartPageAction.setChecked(false);
-    
 }
 
 void ProjectManager::fromVariantMap(const QVariantMap& variantMap)

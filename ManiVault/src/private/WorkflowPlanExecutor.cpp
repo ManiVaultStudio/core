@@ -1,0 +1,219 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later 
+// A corresponding LICENSE file is located in the root directory of this source tree 
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
+
+#include "WorkflowPlanExecutor.h"
+#include "Taskflow.h"
+
+#include <workflow/WorkflowResultRegistry.h>
+#include <workflow/WorkflowMetric.h>
+
+#include <CoreInterface.h>
+#include <Task.h>
+
+#include <QtConcurrent>
+#include <QElapsedTimer>
+
+#ifdef _DEBUG
+	//#define WORKFLOW_PLAN_EXECUTOR_VERBOSE
+#endif
+
+//#define WORKFLOW_PLAN_EXECUTOR_VERBOSE
+
+//#define USE_WORKFLOW_CONSOLE_TRACE_SINK
+
+using namespace mv;
+using namespace mv::util;
+using namespace mv::workflow;
+
+void testTaskflow()
+{
+    tf::Executor executor;
+    tf::Taskflow taskflow;
+
+    auto A = taskflow.emplace([] {
+        qDebug() << "A" << QThread::currentThread();
+        });
+
+    auto B = taskflow.emplace([] {
+        qDebug() << "B" << QThread::currentThread();
+        });
+
+    auto C = taskflow.emplace([] {
+        qDebug() << "C" << QThread::currentThread();
+        });
+
+    A.precede(C);
+    B.precede(C);
+
+    executor.run(taskflow).wait();
+}
+
+WorkflowPlanExecutor::WorkflowPlanExecutor(QObject* parent) :
+	AbstractWorkflowPlanExecutor(parent)
+{
+    testTaskflow();
+}
+
+WorkflowResultFuture WorkflowPlanExecutor::execute(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext /*= nullptr*/, OptionalWorkflowExecutionOptions executionOptions /*= std::nullopt*/)
+{
+    if (parentContext != nullptr) {
+        const auto pendingWorkLabel = QString("Async workflow: %1").arg(workflowPlan->getName());
+        const auto resolvedOptions  = executionOptions.value_or(parentContext->getState()->getExecutionOptions());
+
+        auto childContext   = parentContext->createNestedWorkflowChild(workflowPlan->getName(), workflowPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
+        auto future         = executeAsyncImpl(std::move(workflowPlan), resolvedOptions.reportProgress ? Task::GuiScope::Background : Task::GuiScope::None, resolvedOptions, childContext);
+
+        return future;
+    }
+
+    const auto resolvedOptions = executionOptions.value_or(WorkflowExecutionOptions{});
+
+    return executeAsyncImpl(
+        std::move(workflowPlan),
+        resolvedOptions.reportProgress ? Task::GuiScope::Background : Task::GuiScope::None,
+        resolvedOptions,
+        nullptr
+    );
+}
+
+WorkflowResultFuture WorkflowPlanExecutor::executeAsyncImpl(UniqueWorkflowPlan workflowPlan, Task::GuiScope guiScope, const WorkflowExecutionOptions& executionOptions, SharedWorkflowExecutionContext executionContext)
+{
+    return {};
+}
+
+//SharedWorkflowResult WorkflowPlanExecutor::executeOnCurrentThread(WorkflowPlan& workflowPlan, Task* task, const WorkflowExecutionOptions& executionOptions /*= {}*/)
+//{
+//    return executeRoot(workflowPlan, task, executionOptions);
+//}
+//
+//SharedWorkflowResult WorkflowPlanExecutor::executeOnCurrentThread(WorkflowPlan& workflowPlan, mv::Task* task, SharedWorkflowExecutionContext parentContext, OptionalWorkflowExecutionOptions executionOptions /*= std::nullopt*/)
+//{
+//    Q_UNUSED(task)
+//
+//    return executeRoot(workflowPlan, task, executionOptions.value_or(WorkflowExecutionOptions{}));
+//}
+
+SharedWorkflowResult WorkflowPlanExecutor::executeRoot(WorkflowPlan& workflowPlan, Task* task, const WorkflowExecutionOptions& executionOptions /*= {}*/)
+{
+    return {};
+}
+
+SharedWorkflowResult WorkflowPlanExecutor::executeChild(WorkflowPlan& workflowPlan, SharedWorkflowExecutionContext parentContext)
+{
+    return {};
+}
+
+void WorkflowPlanExecutor::executeJobOnGuiThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
+{
+    jobContext = requireContext(jobContext, __FUNCTION__);
+
+    auto& dispatcher = Application::workflowGuiThreadDispatcher();
+
+    auto exceptionPtr = std::make_shared<std::exception_ptr>();
+    auto futurePtr = std::make_shared<std::optional<WorkflowResultFuture>>();
+
+    auto runOnGuiThread = [&job, jobContext, exceptionPtr, futurePtr]() mutable {
+        try {
+            job.run(jobContext);
+        }
+        catch (...) {
+            *exceptionPtr = std::current_exception();
+        }
+        };
+
+    if (QThread::currentThread() == dispatcher.thread()) {
+        runOnGuiThread();
+    }
+    else {
+        QMetaObject::invokeMethod(
+            &dispatcher,
+            std::move(runOnGuiThread),
+            Qt::BlockingQueuedConnection
+        );
+    }
+
+    if (*exceptionPtr)
+        std::rethrow_exception(*exceptionPtr);
+}
+
+void WorkflowPlanExecutor::executeJobOnWorkerThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
+{
+#ifdef WORKFLOW_PLAN_EXECUTOR_VERBOSE
+    qDebug() << "Executing job on worker thread:" << job.getName() << "in thread" << QThread::currentThread();
+#endif
+
+    jobContext = requireContext(jobContext, __FUNCTION__);
+
+    job.run(jobContext);
+}
+
+void WorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
+{
+    jobContext->info(QString("Job started: %1").arg(job.getName()));
+
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
+    trace({
+	    ._type = WorkflowTraceEventType::JobStarted,
+	    ._name = job.getName(),
+	    ._contextId = jobContext->getId(),
+	    ._parentContextId = jobContext->getParentId()
+    });
+#endif
+
+    jobContext = requireContext(jobContext, __FUNCTION__);
+
+    try {
+        switch (job.getThreadAffinity()) {
+	        case WorkflowPlan::JobThreadAffinity::CurrentWorkerThread:
+	            executeJobOnWorkerThread(job, jobContext);
+	            break;
+
+	        case WorkflowPlan::JobThreadAffinity::GuiThread:
+	            executeJobOnGuiThread(job, jobContext);
+	            break;
+        }
+
+        if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Atomic) {
+            jobContext->setProgress(1.0);
+        }
+        else if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Automatic && !jobContext->hasProgressChildren()) {
+            jobContext->setProgress(1.0);
+        }
+
+        jobContext->info(QString("Job finished: %1").arg(job.getName()));
+
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
+        trace({
+		    ._type = WorkflowTraceEventType::JobFinished,
+		    ._name = job.getName(),
+		    ._contextId = jobContext->getId(),
+		    ._parentContextId = jobContext->getParentId()
+        });
+#endif
+    }
+    catch (...) {
+        if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Atomic || (job.getProgressMode() == WorkflowPlan::JobProgressMode::Automatic && !jobContext->hasProgressChildren())) {
+            jobContext->setProgress(1.0);
+        }
+
+#ifdef USE_WORKFLOW_CONSOLE_TRACE_SINK
+        trace({
+		    ._type = WorkflowTraceEventType::JobFinished,
+		    ._name = job.getName(),
+		    ._contextId = jobContext->getId(),
+		    ._parentContextId = jobContext->getParentId()
+        });
+#endif
+        throw;
+    }
+}
+
+void WorkflowPlanExecutor::handleStageException(const WorkflowPlan::Stage& stage, const ManiVaultException& exception, SharedWorkflowExecutionContext stageContext)
+{
+    stageContext->message(exception._severity, exception._message, stage.getName(), exception._details);
+
+    if (exception._severity == SeverityLevel::Error || exception._severity == SeverityLevel::Fatal)
+        throw;
+}
+

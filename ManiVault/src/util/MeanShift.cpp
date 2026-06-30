@@ -2,6 +2,10 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
+#ifdef _WIN32
+	#define NOMINMAX
+#endif
+
 #include "MeanShift.h"
 
 #include "graphics/Matrix3f.h"
@@ -13,6 +17,8 @@
 #include <math.h>
 #include <float.h>
 //#define MEANSHIFT_IMAGE_DEBUG
+
+
 
 namespace mv
 {
@@ -88,8 +94,8 @@ QRectF getDataBounds(const std::vector<Vector2f>& points)
     float maxDimension = -FLT_MAX;
     for (const Vector2f& point : points)
     {
-        maxDimension = std::max(std::abs(point.x), maxDimension);
-        maxDimension = std::max(std::abs(point.y), maxDimension);
+        maxDimension = (std::max)(std::fabs(point.x), maxDimension);
+        maxDimension = (std::max)(std::fabs(point.y), maxDimension);
     }
 
     // setting a square to make sure that the gaussian is not squished

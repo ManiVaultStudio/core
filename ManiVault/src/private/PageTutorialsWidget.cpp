@@ -94,8 +94,6 @@ void PageTutorialsWidget::updateActions()
             catch (std::exception& e)
             {
                 exceptionMessageBox("Unable to load tutorial", e);
-
-                projects().getProjectSerializationTask().setFinished();
             }
             catch (...)
             {

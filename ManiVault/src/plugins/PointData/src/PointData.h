@@ -36,6 +36,12 @@ namespace mv
     namespace gui {
         class GroupAction;
     }
+
+    namespace legacy
+    {
+        class PointDataLegacySerializer;
+        class PointsLegacySerializer;
+    }
 }
 
 // =============================================================================
@@ -66,6 +72,9 @@ public:
         int8,
         uint8
     };
+
+    static ElementTypeSpecifier elementTypeSpecifier(const QString& typeName);
+    static QString elementTypeName(const ElementTypeSpecifier elementTypeSpecifier);
 
 private:
     using VariantOfVectors = std::variant <
@@ -466,17 +475,27 @@ public: // Sparse data, test implementation
     };
 
 public: // Serialization
-    /**
-     * Load point data from variant map
-     * @param Variant map representation of the point data
-     */
-    void fromVariantMap(const QVariantMap& variantMap) final;
 
     /**
-     * Save point data to variant map
-     * @return Variant map representation of the point data
+     * Create a workflow that restores this object's state from a variant map.
+     *
+     * See Serializable::fromVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @param variantMap Serialized object state.
+     * @return Workflow plan that restores the object state when executed.
      */
-    QVariantMap toVariantMap() const final;
+    mv::workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
+
+    /**
+     * Create a workflow that serializes this object's state to a variant map.
+     *
+     * See Serializable::toVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @return Workflow plan that serializes the object state when executed.
+     */
+    mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const final;
 
 private:
     VariantOfVectors _variantOfVectors;
@@ -491,6 +510,8 @@ private: // Sparse data, experimental
     SparseMatrix<size_t, size_t, float> _sparseData = {};
 
     bool _isDense = true;
+
+    friend class mv::legacy::PointDataLegacySerializer;
 };
 
 // =============================================================================
@@ -984,16 +1005,25 @@ public: // Selection
 public: // Serialization
 
     /**
-     * Load widget action from variant
-     * @param Variant representation of the widget action
+     * Create a workflow that restores this object's state from a variant map.
+     *
+     * See Serializable::fromVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @param variantMap Serialized object state.
+     * @return Workflow plan that restores the object state when executed.
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    mv::workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
 
     /**
-        * Save widget action to variant
-        * @return Variant representation of the widget action
-        */
-    QVariantMap toVariantMap() const override;
+     * Create a workflow that serializes this object's state to a variant map.
+     *
+     * See Serializable::toVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @return Workflow plan that serializes the object state when executed.
+     */
+    mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 public: // Linked data
 
@@ -1011,6 +1041,8 @@ public:
     mv::gui::GroupAction*       _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
     DimensionsPickerAction*     _dimensionsPickerAction;        /** Non-owning pointer to dimensions picker action */
     mv::EventListener           _eventListener;                 /** Listen to HDPS events */
+
+    friend class mv::legacy::PointsLegacySerializer;
 };
 
 // =============================================================================

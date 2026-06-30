@@ -766,11 +766,34 @@ void DataManager::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap DataManager::toVariantMap() const
 {
-    QVariantMap variantMap = AbstractDataManager::toVariantMap();
+    auto variantMap = AbstractDataManager::toVariantMap();
 
-    for (auto& dataset : _datasets)
-        variantMap[dataset->getId()] = dataset->toVariantMap();
+	/*
+    QVariantList savedDataList;
 
+    struct DataSaveJob
+    {
+        DatasetImpl* dataset = nullptr;
+        QFuture<QVariantMap> future;
+    };
+
+    QVector<DataSaveJob> dataSaveJobs;
+
+    for (auto& dataset : _datasets) {
+        dataSaveJobs.push_back({
+            dataset.get(),
+            toVariantMapAsync(dataset.get())
+        });
+
+	    //variantMap[dataset->getId()] = dataset->toVariantMap();
+    }
+
+    for (auto& dataSaveJob : dataSaveJobs) {
+        auto dataSaveResult = dataSaveJob.future.result();
+
+        variantMap[dataSaveJob.dataset->getId()] = dataSaveResult;
+    }
+    */
     return variantMap;
 }
 

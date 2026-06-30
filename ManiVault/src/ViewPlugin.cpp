@@ -253,7 +253,7 @@ void ViewPlugin::fromVariantMap(const QVariantMap& variantMap)
     _lockingAction.fromParentVariantMap(variantMap);
     _visibleAction.fromParentVariantMap(variantMap);
     _samplerAction.fromParentVariantMap(variantMap);
-    _headsUpDisplayAction.fromParentVariantMap(variantMap);
+    _headsUpDisplayAction.fromParentVariantMap(variantMap, true);
 }
 
 QVariantMap ViewPlugin::toVariantMap() const

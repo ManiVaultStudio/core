@@ -28,6 +28,8 @@ set(PRIVATE_ACTIONS_HEADERS
     src/private/FrontPagesStatusBarAction.h
     src/private/SettingsStatusBarAction.h
     src/private/WorkspaceStatusBarAction.h
+    src/private/ZstdCodecSettingsAction.h
+    src/private/PassthroughCodecSettingsAction.h
 )
 
 set(PRIVATE_ACTIONS_SOURCES
@@ -38,6 +40,8 @@ set(PRIVATE_ACTIONS_SOURCES
     src/private/FrontPagesStatusBarAction.cpp
     src/private/SettingsStatusBarAction.cpp
     src/private/WorkspaceStatusBarAction.cpp
+    src/private/ZstdCodecSettingsAction.cpp
+    src/private/PassthroughCodecSettingsAction.cpp
 )
 
 set(PRIVATE_ACTIONS_FILES
@@ -122,6 +126,29 @@ set(PRIVATE_DATA_HIERARCHY_MANAGER_FILES
     ${PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS}
     ${PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES}
 )
+
+# set(PRIVATE_SERIALIZATION_HEADERS
+#     src/private/ProjectSaveWorkflow.h
+#     src/private/ProjectSaveContext.h
+#     src/private/ProjectSaveResult.h
+#     src/private/ProjectOpenWorkflow.h
+#     src/private/ProjectOpenContext.h
+#     src/private/ProjectOpenResult.h
+# )
+
+# set(PRIVATE_SERIALIZATION_SOURCES
+#     src/private/ProjectSaveWorkflow.cpp
+#     src/private/ProjectSaveContext.cpp
+#     src/private/ProjectSaveResult.cpp
+#     src/private/ProjectOpenWorkflow.cpp
+#     src/private/ProjectOpenContext.cpp
+#     src/private/ProjectOpenResult.cpp
+# )
+
+# set(PRIVATE_SERIALIZATION_FILES
+#     ${PRIVATE_SERIALIZATION_HEADERS}
+#     ${PRIVATE_SERIALIZATION_SOURCES}
+# )
 
 set(PRIVATE_EVENT_MANAGER_HEADERS
     src/private/EventManager.h
@@ -262,6 +289,7 @@ set(PRIVATE_MANAGER_HEADERS
     ${PRIVATE_ERROR_MANAGER_HEADERS}
     ${PRIVATE_THEME_MANAGER_HEADERS}
     ${PRIVATE_SCRIPTING_MANAGER_HEADERS}
+    ${PRIVATE_SERIALIZATION_HEADERS}
 )
 
 set(PRIVATE_MANAGER_SOURCES
@@ -279,6 +307,7 @@ set(PRIVATE_MANAGER_SOURCES
     ${PRIVATE_ERROR_MANAGER_SOURCES}
     ${PRIVATE_THEME_MANAGER_SOURCES}
     ${PRIVATE_SCRIPTING_MANAGER_SOURCES}
+    ${PRIVATE_SERIALIZATION_SOURCES}
 )
 
 set(PRIVATE_MANAGER_FILES
@@ -295,6 +324,17 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/ProjectsMenu.h
     src/private/HelpMenu.h
     src/private/NoProxyRectanglesFusionStyle.h
+    src/private/PassthroughBlobCodec.h
+    src/private/PassthroughBlobCodecFactory.h
+    src/private/ZstdBlobCodec.h
+    src/private/ZstdBlobCodecFactory.h
+    src/private/WorkflowPlanExecutor.h
+    src/private/Taskflow.h
+    src/private/TaskflowWorkflowPlanExecutor.h
+    src/private/ProjectOpenWorkflowPlan.h
+    src/private/ProjectSaveWorkflowPlan.h
+    src/private/ProjectPublishWorkflowPlan.h
+    src/private/ProjectPublishContext.h
 )
 
 if(MV_USE_ERROR_LOGGING)
@@ -314,6 +354,16 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/ProjectsMenu.cpp
     src/private/HelpMenu.cpp
     src/private/NoProxyRectanglesFusionStyle.cpp
+    src/private/PassthroughBlobCodec.cpp
+    src/private/PassthroughBlobCodecFactory.cpp
+    src/private/ZstdBlobCodec.cpp
+    src/private/ZstdBlobCodecFactory.cpp
+    src/private/WorkflowPlanExecutor.cpp
+    src/private/ProjectOpenWorkflowPlan.cpp
+    src/private/ProjectSaveWorkflowPlan.cpp
+    src/private/ProjectPublishWorkflowPlan.cpp
+    src/private/ProjectPublishContext.cpp
+    src/private/TaskflowWorkflowPlanExecutor.cpp
 )
 
 if(MV_USE_ERROR_LOGGING)
@@ -473,3 +523,4 @@ source_group(Pages\\StartPage FILES ${PRIVATE_START_PAGE_FILES})
 source_group(Pages\\Learning FILES ${PRIVATE_LEARNING_PAGE_FILES})
 source_group(Miscellaneous FILES ${PRIVATE_MISCELLANEOUS_FILES})
 source_group(Actions FILES ${PRIVATE_ACTIONS_FILES})
+# source_group(Serialization FILES ${PRIVATE_SERIALIZATION_FILES})

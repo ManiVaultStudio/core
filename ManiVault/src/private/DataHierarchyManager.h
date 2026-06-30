@@ -111,19 +111,36 @@ protected:
 public: // Serialization
 
     /**
-     * Load widget action from variant
-     * @param Variant representation of the widget action
+     * Create a workflow that restores this object's state from a variant map.
+     *
+     * See Serializable::fromVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @param variantMap Serialized object state.
+     * @return Workflow plan that restores the object state when executed.
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
 
     /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
+     * Create a workflow that serializes this object's state to a variant map.
+     *
+     * See Serializable::toVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @return Workflow plan that serializes the object state when executed.
      */
-    QVariantMap toVariantMap() const override;
+    workflow::UniqueWorkflowPlan toVariantMapWorkflow() const override;
+
+private: // Serialization helpers
+
+    static QVector<QVariantMap> sortedDataHierarchyItems(const QVariantMap& itemsMap);
+
+    static void populateDataHierarchy(const QVariantMap& itemsMap, const Dataset<DatasetImpl>& parent = {});
+
+    static Dataset<DatasetImpl> createDatasetFromItem(const QVariantMap& itemMap, const Dataset<DatasetImpl>& parent);
 
 private:
-    std::vector<std::unique_ptr<DataHierarchyItem>>     _items;      /** Unique pointers to data hierarchy items */
+    std::vector<std::unique_ptr<DataHierarchyItem>>     _items;                 /** Unique pointers to data hierarchy items */
 };
 
 }

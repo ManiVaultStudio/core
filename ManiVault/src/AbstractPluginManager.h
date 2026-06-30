@@ -13,6 +13,7 @@
 #include <QObject>
 #include <QString>
 #include <QStringList>
+#include <QDir>
 
 namespace mv
 {

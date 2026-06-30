@@ -180,6 +180,33 @@ CPMAddPackage(
   SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
 )
 
+CPMAddPackage(
+    NAME zstd
+    GITHUB_REPOSITORY facebook/zstd
+    GIT_TAG v1.5.7
+    SOURCE_SUBDIR build/cmake
+    OPTIONS
+        "ZSTD_BUILD_PROGRAMS OFF"
+        "ZSTD_BUILD_TESTS OFF"
+        "ZSTD_BUILD_CONTRIB OFF"
+        "ZSTD_BUILD_SHARED OFF"
+        "ZSTD_BUILD_STATIC ON"
+)
+
+# Disable Taskflow features
+set(TF_BUILD_BENCHMARKS OFF CACHE BOOL "" FORCE)
+set(TF_BUILD_CUDA OFF CACHE BOOL "" FORCE)
+set(TF_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(TF_BUILD_PROFILER OFF CACHE BOOL "" FORCE)
+set(TF_BUILD_SYCL OFF CACHE BOOL "" FORCE)
+set(TF_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+
+CPMAddPackage(
+    NAME Taskflow
+    GITHUB_REPOSITORY taskflow/taskflow
+    VERSION 3.8.0
+)
+
 # Use of Sentry on MacOS breaks the build so turn it off for now...
 if(${MV_USE_ERROR_LOGGING})
 
@@ -342,6 +369,7 @@ target_include_directories(${MV_EXE} PRIVATE
 
 target_include_directories(${MV_EXE} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
 target_include_directories(${MV_EXE} PRIVATE "${valijson_SOURCE_DIR}/include")
+target_include_directories(${MV_EXE} SYSTEM PRIVATE "${taskflow_SOURCE_DIR}")
 
 target_compile_features(${MV_EXE} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
@@ -367,6 +395,13 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
+target_link_libraries(${MV_EXE} PRIVATE Taskflow)
+
+if(TARGET libzstd_static)
+    target_link_libraries(MV_Application PRIVATE libzstd_static)
+else()
+    message(FATAL_ERROR "libzstd_static target was not created")
+endif()
 
 if(${MV_USE_ERROR_LOGGING})
     target_compile_definitions(${MV_EXE} PRIVATE MV_USE_ERROR_LOGGING=1)

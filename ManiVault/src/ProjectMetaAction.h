@@ -61,6 +61,8 @@ public: // Serialization
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
+    workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
+
     /**
      * Save project to variant
      * @return Variant representation of the project
@@ -124,6 +126,7 @@ private:
     gui::ToggleAction               _allowProjectSwitchingAction;       /** Allow project switching action (only used in application mode) */
     gui::ToggleAction               _allowedPluginsOnlyAction;          /** Restrict to allowed plugins only action (only used in application mode) */
     gui::StringsAction              _allowedPluginsAction;              /** Allowed plugins action (only used in application mode) */
+    
     QCompleter                      _allowedPluginsCompleter;           /** Completer for allowed plugins action */
     QStringListModel                _allowedPluginsModel;               /** Model for allowed plugins action */
 };

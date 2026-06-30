@@ -6,6 +6,8 @@
 #include "Application.h"
 #include "CoreInterface.h"
 
+#include "util/Serialization.h"
+
 #include <QHBoxLayout>
 #include <QPaintEvent>
 #include <QPainter>
@@ -220,7 +222,7 @@ QString ColorMapAction::getColorMap() const
 QImage ColorMapAction::getColorMapImage() const
 {
     if (getCurrentColorMapAction().getModel() == nullptr)
-        return QImage();
+        return {};
 
     const auto filteredModelIndex = getCurrentColorMapAction().getModel()->index(getCurrentColorMapAction().getCurrentIndex(), 0);
 

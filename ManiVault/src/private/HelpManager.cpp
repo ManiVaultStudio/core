@@ -151,8 +151,8 @@ void HelpManager::initialize()
                     emit videosModelPopulatedFromWebsite();
                 });
             }
-            catch (const BaseException& exception) {
-                qCritical() << "Unable to download videos JSON file" << ":" << exception.what();
+            catch (const ManiVaultException& maniVaultException) {
+                qCritical() << "Unable to download videos JSON file" << ":" << maniVaultException.what();
             }
             catch (const std::exception& exception) {
                 qCritical() << "Unable to download videos JSON file" << ":" << exception.what();
@@ -182,12 +182,17 @@ void HelpManager::initialize()
 
                 // Avoid polluting the toaster with too many task-based notifications; only add task notifications for tasks that are running or running indeterminate after 500ms
                 QTimer::singleShot(500, this, [this, task, sourceModelIndex]() -> void {
+                    if (!task)
+                        return;
+
                     if (task->isRunning() || task->isRunningIndeterminate()) {
                         addNotification(_tasksModel.getTask(sourceModelIndex.row()));
                     }
                 });
             }
         });
+
+        connect(&_notifications, &Notifications::notificationLinkActivated, this, &HelpManager::handleNotificationLink);
     }
     endInitialization();
 }
@@ -233,6 +238,28 @@ LearningCenterVideos HelpManager::getVideos(const QStringList& tags) const
 void HelpManager::addNotification(const QString& title, const QString& description, const QIcon& icon /*= QIcon()*/, const util::Notification::DurationType& durationType /*= util::Notification::DurationType::Calculated*/, std::int32_t delayMs /*= 0*/)
 {
     _notifications.showMessage(title, description, icon, durationType, delayMs);
+}
+
+void HelpManager::addNotificationLinkHandler(const QString& route, const NotificationLinkHandler& handler)
+{
+    _linkHandlers.insert(route, handler);
+}
+
+void HelpManager::handleNotificationLink(const QUrl& url)
+{
+    qDebug() << "Handling notification link with URL:" << url;
+    if (url.scheme() != "app")
+        return;
+
+    const QString route = url.host() + url.path();
+    // app://open/reporting -> "open/reporting"
+
+    qDebug() << "Extracted route from URL:" << route << _linkHandlers.keys();
+
+    const auto it = _linkHandlers.find(route);
+
+    if (it != _linkHandlers.end())
+        it.value()(url);
 }
 
 void HelpManager::addNotification(QPointer<Task> task)

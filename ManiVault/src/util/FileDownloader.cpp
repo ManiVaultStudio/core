@@ -206,11 +206,6 @@ QByteArray FileDownloader::ByteArraySink::result() const
     return _data;
 }
 
-FileDownloader::Exception::Exception(const QString& message) :
-    BaseException(message, StyledIcon("download"))
-{
-}
-
 SecureNetworkAccessManager& FileDownloader::sharedManager()
 {
     static SecureNetworkAccessManager* instance;
@@ -294,7 +289,7 @@ QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url)
             if (reply->error() != QNetworkReply::NoError) {
                 qCritical() << QString("Get last modified HEAD request failed: %1").arg(reply->errorString());
 
-                promise.setException(std::make_exception_ptr(Exception(QString("HEAD request failed: %1").arg(reply->errorString()))));
+                promise.setException(std::make_exception_ptr(ManiVaultException(SeverityLevel::Error, QString("HEAD request failed: %1").arg(reply->errorString()), "FileDownloader", "FileDownloader", { {"icon", util::StyledIcon("download")} })));
             }
             else {
                 const auto lastModified = reply->header(QNetworkRequest::LastModifiedHeader);

@@ -5,7 +5,7 @@
 #include "FilePickerAction.h"
 #include "Application.h"
 
-#include "actions/HorizontalGroupAction.h"
+#include "util/Serialization.h"
 
 #include "widgets/FileDialog.h"
 

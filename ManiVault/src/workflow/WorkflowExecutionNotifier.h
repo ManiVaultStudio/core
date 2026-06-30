@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// A corresponding LICENSE file is located in the root directory of this source tree
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
+
+#pragma once
+
+#include "ManiVaultGlobals.h"
+#include "Task.h"
+
+namespace mv::workflow
+{
+
+class CORE_EXPORT WorkflowExecutionNotifier : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit WorkflowExecutionNotifier(QObject* parent = nullptr);
+
+    void setTask(Task* task);
+
+signals:
+    void progressChanged(double overallProgress);
+    void messagesChanged();
+    void statusChanged();
+};
+
+}

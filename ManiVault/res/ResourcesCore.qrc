@@ -89,5 +89,6 @@
         <file alias="TutorialsSchema">json/tutorials.schema.json</file>
 		<file alias="ProjectsSchema">json/projects.schema.json</file>
 		<file alias="VideosSchema">json/videos.schema.json</file>
+		<file alias="ProjectBlobMap">json/project.blob.map.schema.json</file>
     </qresource>
 </RCC>

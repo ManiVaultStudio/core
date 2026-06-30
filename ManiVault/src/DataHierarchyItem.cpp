@@ -5,13 +5,10 @@
 #include "DataHierarchyItem.h"
 #include "Set.h"
 #include "Dataset.h"
-#include "Application.h"
 
 #include "util/Serialization.h"
 
 #include <QMenu>
-
-#include <stdexcept>
 
 #ifdef _DEBUG
     #define DATA_HIERARCHY_ITEM_VERBOSE
@@ -22,6 +19,48 @@ using namespace mv::util;
 
 namespace mv
 {
+
+namespace 
+{
+    /** Utility class for managing workflow context in a thread-safe manner */
+    class ToVariantMapWorkflowContext final : public workflow::WorkflowContextBase
+    {
+    public:
+
+        /**
+         * @brief Gets the indices from the context.
+         * @return The indices stored in the context
+         */
+        QVariantMap getResult() const {
+            QMutexLocker locker(&_mutex);
+            return _result;
+        }
+
+        /**
+         * @brief Gets a specific value from the result map of the context using the provided key.
+         * @param key The key to look up in the result map
+         * @return The value associated with the provided key in the result map, or an invalid QVariant if the key does not exist
+         */
+        QVariant getResultValue(const QString& key) const {
+            QMutexLocker locker(&_mutex);
+            return _result.value(key);
+        }
+
+        /**
+         * @brief Sets a key-value pair in the result map of the context.
+         * @param key The key to be set in the result map
+         * @param value The value to be associated with the key in the result map
+         */
+        void setResultValue(const QString& key, const QVariant& value) {
+            QMutexLocker locker(&_mutex);
+            _result.insert(key, value);
+        }
+
+    private:
+        mutable QMutex      _mutex;     /** Mutex for synchronizing access to the context */
+        QVariantMap         _result;    /** The QVariantMap that will hold the final result of the workflow execution, containing the serialized headers and indices data. This map will be returned at the end of the workflow execution and can be used for further processing or storage. */
+    };
+}
 
 DataHierarchyItem::DataHierarchyItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, bool visible /*= true*/, bool selected /*= false*/) :
     WidgetAction(nullptr, "Data Hierarchy Item"),
@@ -225,24 +264,11 @@ QVariantMap DataHierarchyItem::toVariantMap() const
     {
     }
 
-    std::uint32_t childSortIndex = 0;
-
-    for (auto child : getChildren()) {
-        auto dataHierarchyItemMap = child->toVariantMap();
-
-        dataHierarchyItemMap["SortIndex"] = childSortIndex;
-
-        children[child->getDataset()->getId()] = dataHierarchyItemMap;
-
-        childSortIndex++;
-    }
-
     variantMap["Name"]      = _dataset->text();
     variantMap["Expanded"]  = QVariant::fromValue(_expanded);
     variantMap["Visible"]   = QVariant::fromValue(isVisible());
     variantMap["Selected"]  = QVariant::fromValue(isSelected());
-    variantMap["Dataset"]   = _dataset->toVariantMap();
-    variantMap["Children"]  = children;
+    variantMap["Children"]  = QVariant::fromValue(children);
 
     return variantMap;
 }
