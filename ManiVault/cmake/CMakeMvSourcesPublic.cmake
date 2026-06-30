@@ -264,7 +264,6 @@ set(PUBLIC_TOOLBAR_ACTIONS_FILES
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/Actions.h
-    src/actions/ActionOperation.h
     src/actions/DatasetPickerAction.h
     src/actions/PluginPickerAction.h
     src/actions/ImageAction.h
@@ -362,10 +361,6 @@ set(PUBLIC_ACTIONS_INTERNAL_HEADERS
     src/actions/StartPageConfigurationAction.h
     src/actions/BrandingConfigurationAction.h
     src/actions/ProjectsConfigurationAction.h
-    src/actions/ActionHooks.h
-    src/actions/ActionRecipeProvider.h
-    src/actions/ActionRecipeComposer.h
-    src/actions/ActionRecipeContext.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
@@ -412,10 +407,6 @@ set(PUBLIC_ACTIONS_INTERNAL_SOURCES
     src/actions/StartPageConfigurationAction.cpp
     src/actions/BrandingConfigurationAction.cpp
     src/actions/ProjectsConfigurationAction.cpp
-    src/actions/ActionHooks.cpp
-    src/actions/ActionRecipeProvider.cpp
-    src/actions/ActionRecipeComposer.cpp
-    src/actions/ActionRecipeContext.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
