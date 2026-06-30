@@ -705,20 +705,16 @@ set(PUBLIC_WORKFLOW_HEADERS
 
 set(PUBLIC_WORKFLOW_SOURCES
     src/workflow/AbstractWorkflowPlanExecutor.cpp    
-    src/workflow/WorkflowContextBase.cpp
-    src/workflow/WorkflowResultBase.cpp
     src/workflow/WorkflowJobResult.cpp
     src/workflow/WorkflowStageResult.cpp
     src/workflow/WorkflowResult.cpp
     src/workflow/WorkflowExecutionContext.cpp
-    src/workflow/WorkflowMessage.cpp
     src/workflow/WorkflowReportNode.cpp
     src/workflow/WorkflowProgressNode.cpp
     src/workflow/WorkflowExecutionState.cpp
     src/workflow/WorkflowResultFuture.cpp
     src/workflow/WorkflowPlan.cpp
     src/workflow/WorkflowGuiThreadDispatcher.cpp
-    src/workflow/WorkflowExecutionOptions.cpp
     src/workflow/WorkflowMetric.cpp
     src/workflow/WorkflowExecutionMetrics.cpp
     src/workflow/WorkflowResultRegistry.cpp
@@ -734,6 +730,7 @@ set(PUBLIC_WORKFLOW_SOURCES
     src/workflow/WorkflowHandle.cpp
     src/workflow/WorkflowContextVariantMap.cpp
     src/workflow/WorkflowBatchingOptions.cpp
+    src/workflow/WorkflowResultBase.cpp
 )
 
 set(PUBLIC_WORKFLOW_FILES
