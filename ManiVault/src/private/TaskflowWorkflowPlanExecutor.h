@@ -184,6 +184,12 @@ private: // Execute individual jobs
 private: // Helpers
 
     /**
+     * @brief Ensures that the Taskflow executor is initialized and has the correct number of workers.
+     * @param options Workflow execution options that may specify the desired number of workers.
+     */
+    void ensureExecutor(const WorkflowExecutionOptions& options);
+
+    /**
 	 * @brief Handles an exception thrown while executing a stage.
 	 *
 	 * Reports the failure to the stage context and records the exception in the
@@ -477,8 +483,9 @@ private: // Helpers
 	 * to finish.
 	 *
 	 * @param taskflow Taskflow graph to execute.
+	 * @param executionOptions Workflow execution options that may specify the desired number of workers.
 	 */
-    void runTaskflowBlocking(tf::Taskflow& taskflow);
+    void runTaskflowBlocking(tf::Taskflow& taskflow, const WorkflowExecutionOptions& executionOptions);
 
     /**
 	 * @brief Creates a trace name for workflow profiling.
@@ -493,6 +500,7 @@ private: // Helpers
     static std::string makeTraceName(const QString& kind, const QString& name);
 
 private:
-    tf::Executor    _executor;          /** Shared Taskflow executor for running workflow graphs */
+    std::unique_ptr<tf::Executor>   _executor;                      /** Shared Taskflow executor for running workflow graphs */
+    std::size_t                     _executorWorkerCount = 0;       /** Number of worker threads in the Taskflow executor */
 };
 

@@ -34,6 +34,24 @@ using namespace mv;
 using namespace mv::util;
 using namespace mv::workflow;
 
+namespace
+{
+
+std::size_t resolveWorkerCount(const mv::workflow::WorkflowExecutionOptions& options)
+{
+    if (!options._parallel)
+        return 1;
+
+    const auto hardwareThreadCount = std::max(1u, std::thread::hardware_concurrency());
+
+    if (options._maxWorkerThreadCount == 0)
+        return hardwareThreadCount;
+
+    return std::max<std::size_t>(1, std::min<std::size_t>(options._maxWorkerThreadCount, hardwareThreadCount));
+}
+
+}
+
 TaskflowWorkflowPlanExecutor::TaskflowWorkflowPlanExecutor(QObject* parent) :
     AbstractWorkflowPlanExecutor(parent)
 {
@@ -147,7 +165,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
     std::shared_ptr<tf::ChromeObserver> chromeObserver;
 
     if (chromeTracingEnabled)
-        chromeObserver = _executor.make_observer<tf::ChromeObserver>();
+        chromeObserver = _executor->make_observer<tf::ChromeObserver>();
 
     std::optional<WorkflowConsoleDashboardScope> dashboardScope;
 
@@ -165,7 +183,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
         compileStages(stages, taskflow, rootContext);
 
         if (taskflow.num_tasks() > 0)
-            runTaskflowBlocking(taskflow);
+            runTaskflowBlocking(taskflow, rootContext->getExecutionOptions());
         };
 
     std::exception_ptr primaryException;
@@ -176,7 +194,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
         compileWorkflow(workflowPlan, taskflow, rootContext);
 
         if (taskflow.num_tasks() > 0)
-            runTaskflowBlocking(taskflow);
+            runTaskflowBlocking(taskflow, rootContext->getExecutionOptions());
     }
     catch (...) {
         primaryException = std::current_exception();
@@ -423,6 +441,16 @@ void TaskflowWorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, Shar
     }
 }
 
+void TaskflowWorkflowPlanExecutor::ensureExecutor(const WorkflowExecutionOptions& options)
+{
+	const auto workerCount = resolveWorkerCount(options);
+
+	if (!_executor || _executorWorkerCount != workerCount) {
+		_executor            = std::make_unique<tf::Executor>(workerCount);
+		_executorWorkerCount = workerCount;
+	}
+}
+
 void TaskflowWorkflowPlanExecutor::handleStageException(const WorkflowPlan::Stage& stage, const ManiVaultException& exception, SharedWorkflowExecutionContext stageContext)
 {
     stageContext->message(
@@ -541,19 +569,19 @@ void TaskflowWorkflowPlanExecutor::executeCompiledJob(const WorkflowPlan::Job& j
 WorkflowHandle TaskflowWorkflowPlanExecutor::getFinalStageHandle(const WorkflowPlan& workflowPlan)
 {
 	const auto& successStages = workflowPlan.getOnSuccessStages();
+
 	if (!successStages.empty())
 		return successStages.back().getHandle();
 
 	const auto& stages = workflowPlan.getStages();
+
 	if (!stages.empty())
 		return stages.back().getHandle();
 
 	return {};
 }
 
-void TaskflowWorkflowPlanExecutor::runStagesRoot(
-    const WorkflowPlan::Stages& stages,
-    SharedWorkflowExecutionContext rootContext)
+void TaskflowWorkflowPlanExecutor::runStagesRoot(const WorkflowPlan::Stages& stages, SharedWorkflowExecutionContext rootContext)
 {
     if (stages.empty())
         return;
@@ -563,15 +591,17 @@ void TaskflowWorkflowPlanExecutor::runStagesRoot(
     compileStages(stages, taskflow, rootContext);
 
     if (taskflow.num_tasks() > 0)
-        runTaskflowBlocking(taskflow);
+        runTaskflowBlocking(taskflow, rootContext->getExecutionOptions());
 }
 
-void TaskflowWorkflowPlanExecutor::runTaskflowBlocking(tf::Taskflow& taskflow)
+void TaskflowWorkflowPlanExecutor::runTaskflowBlocking(tf::Taskflow& taskflow, const WorkflowExecutionOptions& executionOptions)
 {
     if (taskflow.num_tasks() == 0)
         return;
 
-    auto future = _executor.run(taskflow);
+    ensureExecutor(executionOptions);
+
+    auto future = _executor->run(taskflow);
 
     if (QThread::currentThread() != qApp->thread()) {
         future.get();
