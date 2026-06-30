@@ -14,6 +14,8 @@
 
 #include <QString>
 
+#include <mutex>
+
 namespace mv
 {
     class Task;
@@ -188,18 +190,6 @@ private: // Helpers
      * @param options Workflow execution options that may specify the desired number of workers.
      */
     void ensureExecutor(const WorkflowExecutionOptions& options);
-
-    /**
-	 * @brief Handles an exception thrown while executing a stage.
-	 *
-	 * Reports the failure to the stage context and records the exception in the
-	 * workflow result state.
-	 *
-	 * @param stage Stage that failed.
-	 * @param exception Exception that was thrown.
-	 * @param stageContext Execution context for the stage.
-	 */
-    static void handleStageException(const WorkflowPlan::Stage& stage, const mv::ManiVaultException& exception, SharedWorkflowExecutionContext stageContext);
 
     /**
 	 * @brief Compiles a workflow into a Taskflow graph.
@@ -501,6 +491,7 @@ private: // Helpers
 
 private:
     std::unique_ptr<tf::Executor>   _executor;                      /** Shared Taskflow executor for running workflow graphs */
+    mutable std::mutex              _executorMutex;                 /** Mutex to protect access to the Taskflow executor */
     std::size_t                     _executorWorkerCount = 0;       /** Number of worker threads in the Taskflow executor */
 };
 

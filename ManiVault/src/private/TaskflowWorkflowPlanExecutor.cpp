@@ -57,11 +57,11 @@ TaskflowWorkflowPlanExecutor::TaskflowWorkflowPlanExecutor(QObject* parent) :
 {
 }
 
-WorkflowResultFuture TaskflowWorkflowPlanExecutor::execute(
-    UniqueWorkflowPlan workflowPlan,
-    SharedWorkflowExecutionContext parentContext,
-    OptionalWorkflowExecutionOptions executionOptions)
+WorkflowResultFuture TaskflowWorkflowPlanExecutor::execute(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext, OptionalWorkflowExecutionOptions executionOptions)
 {
+    if (!workflowPlan)
+        throw std::runtime_error("Workflow plan is null");
+
     if (parentContext != nullptr) {
         const auto resolvedOptions = executionOptions.value_or(parentContext->getState()->getExecutionOptions());
 
@@ -82,31 +82,27 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(UniqueWorkflo
 
 SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext)
 {
+    if (!workflowPlan)
+        throw std::runtime_error("Workflow plan is null");
+
     static thread_local int depth = 0;
+
+    struct DepthGuard { int& d; ~DepthGuard() { --d; } } depthGuard{ depth };
 
     ++depth;
 
     Q_ASSERT(depth < 50);
 
-    if (!workflowPlan)
-        throw std::runtime_error("Workflow plan is null");
-
     SharedWorkflowExecutionContext context;
 
     if (parentContext) {
-        context = parentContext->createNestedWorkflowChild(
-            workflowPlan->getName(),
-            workflowPlan->getWeight(),
-            WorkflowPlan::JobProgressMode::Automatic);
+        context = parentContext->createNestedWorkflowChild(workflowPlan->getName(), workflowPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
 
         Q_ASSERT(context);
         Q_ASSERT(context->getState() == parentContext->getState());
     }
     else {
-        context = WorkflowExecutionContext::makeRoot(
-            workflowPlan->getName(),
-            nullptr,
-            {});
+        context = WorkflowExecutionContext::makeRoot(workflowPlan->getName(), nullptr, {});
     }
 
     return executeWithContext(*workflowPlan, context);
@@ -164,8 +160,12 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
 
     std::shared_ptr<tf::ChromeObserver> chromeObserver;
 
-    if (chromeTracingEnabled)
+    if (chromeTracingEnabled) {
+        std::scoped_lock lock(_executorMutex);
+        ensureExecutor(executionOptions);
+
         chromeObserver = _executor->make_observer<tf::ChromeObserver>();
+    }
 
     std::optional<WorkflowConsoleDashboardScope> dashboardScope;
 
@@ -451,20 +451,6 @@ void TaskflowWorkflowPlanExecutor::ensureExecutor(const WorkflowExecutionOptions
 	}
 }
 
-void TaskflowWorkflowPlanExecutor::handleStageException(const WorkflowPlan::Stage& stage, const ManiVaultException& exception, SharedWorkflowExecutionContext stageContext)
-{
-    stageContext->message(
-        exception._severity,
-        exception._message,
-        stage.getName(),
-        exception._details);
-
-    if (exception._severity == SeverityLevel::Error ||
-        exception._severity == SeverityLevel::Fatal) {
-        throw;
-    }
-}
-
 TaskflowWorkflowPlanExecutor::CompiledTasks TaskflowWorkflowPlanExecutor::compileWorkflow(
     const WorkflowPlan& workflowPlan,
     tf::Taskflow& taskflow,
@@ -599,9 +585,13 @@ void TaskflowWorkflowPlanExecutor::runTaskflowBlocking(tf::Taskflow& taskflow, c
     if (taskflow.num_tasks() == 0)
         return;
 
-    ensureExecutor(executionOptions);
+    auto future = [&]() {
+        std::scoped_lock lock(_executorMutex);
 
-    auto future = _executor->run(taskflow);
+        ensureExecutor(executionOptions);
+
+        return _executor->run(taskflow);
+    }();
 
     if (QThread::currentThread() != qApp->thread()) {
         future.get();
