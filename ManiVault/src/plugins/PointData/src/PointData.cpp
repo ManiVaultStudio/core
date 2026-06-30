@@ -283,7 +283,7 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 
             outputMap.insert("TypeIndex", QVariant::fromValue(typeIndex));
             outputMap.insert("TypeName", QVariant(typeSpecifierName));
-            outputMap.insert("Raw", QVariant::fromValue(storeRawStage));
+            outputMap.insert("Raw", rawMap);
             outputMap.insert("NumberOfElements", QVariant::fromValue(getNumberOfElements()));
 
             const auto expectedBytes = getRawDataSize();
