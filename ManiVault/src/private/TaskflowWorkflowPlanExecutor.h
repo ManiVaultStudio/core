@@ -457,16 +457,6 @@ private: // Helpers
     }
 
     /**
-	 * @brief Executes root workflow stages directly.
-	 *
-	 * Runs the supplied stages in the root execution context.
-	 *
-	 * @param stages Stages to execute.
-	 * @param rootContext Root execution context.
-	 */
-    void runStagesRoot(const WorkflowPlan::Stages& stages, SharedWorkflowExecutionContext rootContext);
-
-    /**
 	 * @brief Runs a Taskflow graph and blocks until completion.
 	 *
 	 * Executes the graph on the internal Taskflow executor and waits for all tasks

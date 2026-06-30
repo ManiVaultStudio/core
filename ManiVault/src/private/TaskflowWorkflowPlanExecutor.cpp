@@ -567,19 +567,6 @@ WorkflowHandle TaskflowWorkflowPlanExecutor::getFinalStageHandle(const WorkflowP
 	return {};
 }
 
-void TaskflowWorkflowPlanExecutor::runStagesRoot(const WorkflowPlan::Stages& stages, SharedWorkflowExecutionContext rootContext)
-{
-    if (stages.empty())
-        return;
-
-    tf::Taskflow taskflow;
-
-    compileStages(stages, taskflow, rootContext);
-
-    if (taskflow.num_tasks() > 0)
-        runTaskflowBlocking(taskflow, rootContext->getExecutionOptions());
-}
-
 void TaskflowWorkflowPlanExecutor::runTaskflowBlocking(tf::Taskflow& taskflow, const WorkflowExecutionOptions& executionOptions)
 {
     if (taskflow.num_tasks() == 0)
