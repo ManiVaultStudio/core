@@ -38,4 +38,4 @@ private:
 
 };
 
-} // namespace mv::util
+}

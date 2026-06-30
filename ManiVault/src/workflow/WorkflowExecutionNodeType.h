@@ -43,4 +43,4 @@ CORE_EXPORT WorkflowExecutionNodeType getWorkflowExecutionNodeType(const QString
  */
 CORE_EXPORT QString getWorkflowExecutionNodeTypeName(WorkflowExecutionNodeType type);
 
-} // namespace mv::util
+}

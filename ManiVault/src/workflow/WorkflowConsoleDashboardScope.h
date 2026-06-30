@@ -21,4 +21,4 @@ private:
     std::unique_ptr<WorkflowConsoleDashboard> _dashboard;
 };
 
-} // namespace mv::util
+}

@@ -36,4 +36,4 @@ public:
     explicit WorkflowGuiThreadDispatcher(QObject* parent = nullptr);
 };
 
-} // namespace mv::util
+}

@@ -133,4 +133,4 @@ private:
     QVariant    _value;                         /** The value produced by the workflow execution. This can be any type of data that can be stored in a QVariant, such as a result object, a data structure, or any other relevant output from the workflow. */
 };
 
-} // namespace mv::util
+}

@@ -75,4 +75,4 @@ private:
     QHash<QUuid, SharedWorkflowResult>  _results;   /** Registered workflow results indexed by identifier. */
 };
 
-} // namespace mv::util
+}

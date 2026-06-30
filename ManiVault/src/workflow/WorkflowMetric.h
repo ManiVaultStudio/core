@@ -38,4 +38,4 @@ struct CORE_EXPORT WorkflowMetric
     QVariantMap _metadata;
 };
 
-} // namespace mv::util
+}

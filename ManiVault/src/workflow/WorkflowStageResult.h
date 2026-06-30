@@ -33,4 +33,4 @@ using UniqueWorkflowStageResult = std::unique_ptr<WorkflowStageResult>;
 using SharedWorkflowStageResult = std::shared_ptr<WorkflowStageResult>;
 using WorkflowStageFuture       = QFuture<WorkflowStageResult>;
 
-} // namespace mv::util
+}

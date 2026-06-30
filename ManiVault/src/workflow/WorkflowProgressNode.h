@@ -102,4 +102,4 @@ private:
     QVector<Ptr>                            _children;
 };
 
-} // namespace mv::util
+}

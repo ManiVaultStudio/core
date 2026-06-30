@@ -33,4 +33,4 @@ using UniqueWorkflowJobResult   = std::unique_ptr<WorkflowJobResult>;
 using SharedWorkflowJobResult   = std::shared_ptr<WorkflowJobResult>;
 using WorkflowJobResultFuture   = QFuture<WorkflowJobResult>;
 
-} // namespace mv::util
+}

@@ -33,4 +33,4 @@ struct CORE_EXPORT WorkflowExecutionOptions
 /** Optional WorkflowExecutionOptions for configuring workflow execution behavior */
 using OptionalWorkflowExecutionOptions = std::optional<WorkflowExecutionOptions>;
 
-} // namespace mv::util
+}

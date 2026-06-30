@@ -9,7 +9,7 @@
 namespace mv::workflow
 {
 
-    /**
+/**
  * @brief Summary statistics for the execution of a workflow stage.
  *
  * WorkflowStageSummary aggregates high-level execution metrics for a stage, such as the

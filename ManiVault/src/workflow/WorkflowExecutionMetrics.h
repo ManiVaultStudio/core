@@ -54,4 +54,4 @@ private:
     std::unordered_map<QString, AtomicMetric>   _metrics;
 };
 
-} // namespace mv::util
+}
