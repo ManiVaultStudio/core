@@ -2,6 +2,10 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
+#ifdef _WIN32
+	#define NOMINMAX
+#endif
+
 #include "MeanShift.h"
 
 #include "graphics/Matrix3f.h"
@@ -14,9 +18,7 @@
 #include <float.h>
 //#define MEANSHIFT_IMAGE_DEBUG
 
-#ifdef _WIN32
-	#define NOMINMAX
-#endif
+
 
 namespace mv
 {

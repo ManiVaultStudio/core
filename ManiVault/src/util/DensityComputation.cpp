@@ -2,6 +2,10 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
+#ifdef _WIN32
+	#define NOMINMAX
+#endif
+
 #include "DensityComputation.h"
 
 #include "graphics/Bounds.h"
@@ -9,10 +13,6 @@
 
 #include <cmath>
 #include <limits>
-
-#ifdef _WIN32
-	#define NOMINMAX
-#endif
 
 namespace mv
 {
