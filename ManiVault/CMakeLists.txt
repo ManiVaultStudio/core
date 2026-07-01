@@ -148,6 +148,7 @@ message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 #     "ZLIB_INSTALL OFF"
 # )
 
+find_package(ZLIB REQUIRED)
 # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
 add_library(ZLIB::ZLIB ALIAS zlibstatic)
 set(ZLIB_LIBRARIES zlibstatic)
