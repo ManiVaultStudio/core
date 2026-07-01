@@ -5,6 +5,8 @@
 #include "Version.h"
 #include "util/Serialization.h"
 
+#include <QRegularExpression>
+
 namespace mv::util {
 
 const QString Version::semanticVersioningRegex = QString(R"((0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-([\da-zA-Z-]+(?:\.[\da-zA-Z-]+)*))?(?:\+([\da-zA-Z-]+(?:\.[\da-zA-Z-]+)*))?)");
