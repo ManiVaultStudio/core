@@ -150,15 +150,15 @@ message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 
 find_package(ZLIB REQUIRED)
 # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
-add_library(ZLIB::ZLIB ALIAS zlibstatic)
-set(ZLIB_LIBRARIES zlibstatic)
-set_target_properties(zlibstatic PROPERTIES 
-    POSITION_INDEPENDENT_CODE ON
-    FOLDER CoreDependencies
-    C_STANDARD ${CMAKE_C_STANDARD}
-    C_STANDARD_REQUIRED ${CMAKE_C_STANDARD_REQUIRED}
-    C_EXTENSIONS ${CMAKE_C_EXTENSIONS}
-)
+# add_library(ZLIB::ZLIB ALIAS zlibstatic)
+set(ZLIB_LIBRARIES ZLIB::ZLIB)
+# set_target_properties(zlibstatic PROPERTIES 
+#     POSITION_INDEPENDENT_CODE ON
+#     FOLDER CoreDependencies
+#     C_STANDARD ${CMAKE_C_STANDARD}
+#     C_STANDARD_REQUIRED ${CMAKE_C_STANDARD_REQUIRED}
+#     C_EXTENSIONS ${CMAKE_C_EXTENSIONS}
+# )
 
 # File compression: QuaZip
 CPMAddPackage(
