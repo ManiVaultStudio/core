@@ -142,7 +142,7 @@ void Plugin::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    if (variantMap.contains(_guiNameAction.getSerializationName())) {
+    if (variantMap.contains("GuiName")) {
         Serializable::fromVariantMap(_guiNameAction, variantMap, "GuiName");
     }
 
