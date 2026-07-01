@@ -191,6 +191,8 @@ set_target_properties(QuaZip PROPERTIES
 #     "JSON_BuildTests=OFF"            # skip upstream tests
 #     "JSON_MultipleHeaders=ON"        # shave compile time (optional)
 # )
+    find_package(nlohmann_json CONFIG REQUIRED)
+    
 
 # Serialization: Add valijson as a header-only library
 # from vcpkg
@@ -225,6 +227,8 @@ set_target_properties(qtadvanceddocking-qt6 PROPERTIES
     CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED}
     CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS}
 )
+
+target_link_libraries(qtadvanceddocking-qt6 PRIVATE nlohmann_json::nlohmann_json)
 
 # bfloat16 implementation for pre c++23
 # from vcpkg
