@@ -142,8 +142,10 @@ void Plugin::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    if (variantMap.contains(_guiNameAction.getSerializationName())) {
+    if (variantMap.contains("GuiName")) {
         Serializable::fromVariantMap(_guiNameAction, variantMap, "GuiName");
+
+        qDebug() << "Plugin::fromVariantMap: Set GUI name to" << _guiNameAction.getString();
     }
 
     if (variantMap.contains(_learningCenterAction.getSerializationName())) {
