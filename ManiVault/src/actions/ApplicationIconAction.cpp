@@ -5,6 +5,7 @@
 #include "ApplicationIconAction.h"
 
 #include <QMainWindow>
+#include <QOperatingSystemVersion>
 
 #include "Application.h"
 #include "util/Icon.h"
@@ -97,7 +98,12 @@ void ApplicationIconAction::overrideMainWindowIcon() const
 
 void ApplicationIconAction::resetApplicationIcon()
 {
-    Application::getMainWindow()->setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
+    if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS)
+    {
+        Application::getMainWindow()->setWindowIcon(QIcon(":/Icons/AppIcon.icns"));
+    } else {
+        Application::getMainWindow()->setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
+    }
 }
 
 void ApplicationIconAction::fromVariantMap(const QVariantMap& variantMap)
