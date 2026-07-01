@@ -234,7 +234,8 @@ QImage ColorMapAction::getColorMapImage() const
     const auto mirrorHorizontally   = getMirrorAction(Axis::X).isChecked();
     const auto mirrorVertically     = getMirrorAction(Axis::Y).isChecked();
 
-    colorMapImage = colorMapImage.mirrored(mirrorHorizontally, mirrorVertically);
+    colorMapImage = colorMapImage.flipped((mirrorHorizontally ? Qt::Horizontal : Qt::Orientations()) |
+                                          (mirrorVertically   ? Qt::Vertical   : Qt::Orientations()));
 
     if (getDiscretizeAction().isChecked()) {
 
