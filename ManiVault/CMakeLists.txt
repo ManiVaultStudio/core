@@ -110,7 +110,7 @@ set_target_properties(zlibstatic PROPERTIES
 CPMAddPackage(
   NAME              quazip
   GITHUB_REPOSITORY stachenov/quazip
-  GIT_TAG           v1.7.0
+  GIT_TAG           v1.7.2
   OPTIONS 
     "QUAZIP_QT_MAJOR_VERSION 6" 
     "QUAZIP_BZIP2 OFF" 
