@@ -18,15 +18,16 @@ namespace mv::workflow
 /**
  * @brief Thread-safe registry for workflow results.
  *
- * The WorkflowResultRegistry provides a central repository for storing and
- * retrieving workflow results by their unique identifier. It is primarily used
- * to temporarily share workflow results between components without requiring
- * direct ownership or lifetime management.
+ * WorkflowResultRegistry provides a central repository for storing and
+ * retrieving workflow results by unique identifier. It is primarily used to
+ * temporarily share workflow results between components without requiring direct
+ * ownership or lifetime management.
  *
  * Results are stored as shared pointers and remain available until explicitly
- * removed from the registry.
+ * removed from the registry. The registry is exposed as a process-local
+ * singleton.
  *
- * The registry is implemented as a thread-safe singleton.
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowResultRegistry : public QObject
 {
@@ -35,44 +36,34 @@ class CORE_EXPORT WorkflowResultRegistry : public QObject
 public:
 
     /**
-	 * @brief Thread-safe registry for workflow results.
-	 *
-	 * The WorkflowResultRegistry provides a central repository for storing and
-	 * retrieving workflow results by their unique identifier. It is primarily used
-	 * to temporarily share workflow results between components without requiring
-	 * direct ownership or lifetime management.
-	 *
-	 * Results are stored as shared pointers and remain available until explicitly
-	 * removed from the registry.
-	 *
-	 * The registry is implemented as a thread-safe singleton.
-	 */
-    static WorkflowResultRegistry& instance();
+     * @brief Returns the global workflow result registry.
+     * @return Singleton registry instance.
+     */
+    [[nodiscard]] static WorkflowResultRegistry& instance();
 
     /**
-     * @brief Add a workflow result to the registry.
-     * @param result Shared pointer to the workflow result.
+     * @brief Adds a workflow result to the registry.
+     * @param result Shared workflow result to store.
      * @return Unique identifier assigned to the stored result.
      */
-    QUuid add(SharedWorkflowResult result);
+    [[nodiscard]] QUuid add(SharedWorkflowResult result);
 
     /**
-     * @brief Retrieve a workflow result from the registry.
+     * @brief Retrieves a workflow result from the registry.
      * @param id Identifier returned by add().
-     * @return The associated workflow result, or nullptr if no result with the
-     * specified identifier exists.
+     * @return Associated workflow result, or nullptr if no result exists for id.
      */
-    SharedWorkflowResult get(const QUuid& id) const;
+    [[nodiscard]] SharedWorkflowResult get(const QUuid& id) const;
 
     /**
-     * @brief Remove a workflow result from the registry.
+     * @brief Removes a workflow result from the registry.
      * @param id Identifier of the workflow result to remove.
      */
     void remove(const QUuid& id);
 
 private:
-    mutable QMutex                      _mutex;     /** Protects concurrent access to the registry. */
-    QHash<QUuid, SharedWorkflowResult>  _results;   /** Registered workflow results indexed by identifier. */
+    mutable QMutex                      _mutex;     /**< Protects concurrent access to the registry */
+    QHash<QUuid, SharedWorkflowResult>  _results;   /**< Registered workflow results indexed by identifier */
 };
 
 }
