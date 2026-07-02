@@ -46,11 +46,11 @@ public:
      * completion from a helper thread.
      */
     struct CORE_EXPORT State {
-        std::future<SharedWorkflowResult> future;      /**< Future that produces the shared workflow result */
-        QPointer<Task> task;                           /**< Optional task associated with the workflow execution */
+        std::future<SharedWorkflowResult>  future;     /**< Future that produces the shared workflow result */
+        QPointer<Task>                     task;       /**< Optional task associated with the workflow execution */
 
-        mutable QMutex mutex;                          /**< Protects access to the captured exception */
-        std::exception_ptr exception;                  /**< Exception captured while waiting for workflow completion */
+        mutable QMutex                     mutex;      /**< Protects access to the captured exception */
+        std::exception_ptr                 exception;  /**< Exception captured while waiting for workflow completion */
 
         /**
          * @brief Stores an exception captured during asynchronous completion.
