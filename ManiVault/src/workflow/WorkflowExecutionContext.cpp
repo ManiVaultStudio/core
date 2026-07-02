@@ -31,6 +31,16 @@ WorkflowExecutionContext::WorkflowExecutionContext(QString name, ReportNodePtr r
 {
 }
 
+WorkflowExecutionContext::Type WorkflowExecutionContext::getType() const
+{
+	return _type;
+}
+
+void WorkflowExecutionContext::setType(Type type)
+{
+	_type = type;
+}
+
 SharedWorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString& name, Task* task /*= nullptr*/, WorkflowExecutionOptions executionOptions /*= {}*/)
 {
 	auto reportRoot     = std::make_shared<WorkflowReportNode>(name);

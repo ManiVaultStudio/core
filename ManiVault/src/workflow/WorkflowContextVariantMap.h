@@ -42,7 +42,7 @@ public:
      * @brief Gets the complete map.
      * @return A copy of the stored QVariantMap.
      */
-    QVariantMap getMap() const;
+    [[nodiscard]] QVariantMap getMap() const;
 
     /**
      * @brief Replaces the complete map with the provided one.
@@ -63,7 +63,7 @@ public:
      * @param defaultValue Value returned when the key is not present.
      * @return The stored value or the provided default value.
      */
-    QVariant value(const QString& key, const QVariant& defaultValue = {}) const;
+    [[nodiscard]] QVariant value(const QString& key, const QVariant& defaultValue = {}) const;
 
     /**
      * @brief Gets a QVariantMap value from the map.
@@ -71,7 +71,7 @@ public:
      * @return The stored value converted to QVariantMap, or an empty map if the
      * key does not exist or cannot be converted.
      */
-    QVariantMap mapValue(const QString& key) const;
+    [[nodiscard]] QVariantMap mapValue(const QString& key) const;
 
     /**
      * @brief Stores a value in the map.
@@ -87,7 +87,7 @@ public:
      * @param key Key to remove.
      * @return The removed value or an invalid QVariant if the key was not found.
      */
-    QVariant takeValue(const QString& key);
+    [[nodiscard]] QVariant takeValue(const QString& key);
 
     /**
 	 * @brief Merges all key/value pairs from another QVariantMap into the result map.

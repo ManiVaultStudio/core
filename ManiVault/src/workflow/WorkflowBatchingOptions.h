@@ -9,6 +9,14 @@
 namespace mv::workflow
 {
 
+/**
+ * @brief Options for controlling the batching of workflow tasks.
+ *
+ * This struct defines options for controlling how many datasets or data blocks
+ * are processed in parallel during workflow execution. It provides conservative
+ * defaults based on the number of hardware threads available, but can be
+ * customized to optimize performance for specific workloads.
+ */
 struct CORE_EXPORT WorkflowBatchingOptions
 {
     std::size_t datasetLoadingBatchSize     = conservativeDatasetsSerializationBatchSize();     /** Number of datasets to load in parallel when loading multiple datasets. */
