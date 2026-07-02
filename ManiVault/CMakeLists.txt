@@ -221,7 +221,7 @@ if(${MV_USE_ERROR_LOGGING})
     CPMAddPackage(
         NAME                sentry-native
         GITHUB_REPOSITORY   getsentry/sentry-native
-        GIT_TAG             0.13.1 											# Use the latest stable version
+        GIT_TAG             0.15.2
         EXCLUDE_FROM_ALL    YES
         OPTIONS
             "SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
