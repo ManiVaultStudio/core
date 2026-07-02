@@ -52,6 +52,8 @@ using UniqueWorkflowPlan = std::unique_ptr<WorkflowPlan>;
  *
  * Workflow plans may also carry a shared workflow context. This context allows
  * jobs and stages to share state without explicit parameter passing.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowPlan
 {

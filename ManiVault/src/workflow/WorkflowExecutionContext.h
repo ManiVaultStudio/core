@@ -49,6 +49,8 @@ namespace mv::workflow
  * The execution context is intentionally lightweight and shared using
  * std::shared_ptr. Parent references are stored as std::weak_ptr to avoid
  * ownership cycles while allowing traversal of the execution tree.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowExecutionContext : public std::enable_shared_from_this<WorkflowExecutionContext>
 {

@@ -24,18 +24,23 @@ namespace mv::workflow
  *
  * Workflow messages are attached to WorkflowReportNode instances and are used
  * for logging, reporting, diagnostics, and user-facing workflow output.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 struct CORE_EXPORT WorkflowMessage
 {
-	util::SeverityLevel level = util::SeverityLevel::Info;          /** The severity level of the message (e.g., Info, Warning, Error, Fatal) */
-    QString             emitter;                                    /** The name of the component or module that generated the message */
-    QString             location;                                   /** The specific location in the code or workflow where the message was generated (e.g., function name, line number) */
-    QString             text;                                       /** The main text or content of the message */
-    QVariantMap         details;                                    /** Additional details or metadata associated with the message */
-    QDateTime           timestamp = QDateTime::currentDateTime();   /** The timestamp when the message was generated */
+    util::SeverityLevel level = util::SeverityLevel::Info;          /**< Message severity */
+    QString             emitter;                                    /**< Component, workflow, or subsystem that emitted the message */
+    QString             location;                                   /**< Source or workflow location associated with the message */
+    QString             text;                                       /**< Human-readable message text */
+    QVariantMap         details;                                    /**< Optional structured message metadata */
+    QDateTime           timestamp = QDateTime::currentDateTime();   /**< Timestamp when the message was created */
 };
 
+/** Shared pointer type for immutable workflow messages. */
 using SharedWorkflowMessage = std::shared_ptr<const workflow::WorkflowMessage>;
+
+/** Ordered collection of workflow messages. */
 using WorkflowMessages = QVector<WorkflowMessage>;
 
 }

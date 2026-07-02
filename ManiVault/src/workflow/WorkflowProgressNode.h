@@ -27,6 +27,8 @@ namespace mv::workflow
  * The class is designed for concurrent workflow execution: public accessors and
  * mutators synchronize access internally, and createSnapshot() returns a value
  * tree suitable for dashboards, console formatting, and diagnostics.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class WorkflowProgressNode : public std::enable_shared_from_this<WorkflowProgressNode>
 {

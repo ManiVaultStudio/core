@@ -13,30 +13,79 @@
 namespace mv::workflow
 {
 
+/** Execution status shared across a workflow run. */
 enum class WorkflowExecutionStatus {
-    Idle,
-    Running,
-    Finished,
-    Failed
+    Idle,       /**< Workflow execution has not started */
+    Running,    /**< Workflow execution is currently running */
+    Finished,   /**< Workflow execution completed successfully */
+    Failed      /**< Workflow execution failed */
 };
 
+/**
+ * @brief Shared state for one workflow execution.
+ *
+ * WorkflowExecutionState owns the report and progress roots, immutable
+ * execution options, lifecycle status, execution metrics, intermediate result
+ * values, and published workflow outputs. It is shared by execution contexts so
+ * related workflow, stage, and job scopes can coordinate through one state
+ * object.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
+ */
 class CORE_EXPORT WorkflowExecutionState
 {
 public:
+    /** Shared ownership pointer type for workflow execution state. */
     using Ptr = std::shared_ptr<WorkflowExecutionState>;
 
+    /**
+     * @brief Constructs workflow execution state.
+     * @param reportRoot Root report node.
+     * @param progressRoot Root progress node.
+     * @param executionOptions Options used for this workflow execution.
+     */
     WorkflowExecutionState(const WorkflowReportNode::SharedWorkflowReportNode& reportRoot, const WorkflowProgressNode::Ptr& progressRoot, WorkflowExecutionOptions executionOptions = {});
 
+    /**
+     * @brief Returns the root report node.
+     * @return Root report node.
+     */
     [[nodiscard]] WorkflowReportNode::SharedWorkflowReportNode getReportRoot() const;
 
+    /**
+     * @brief Returns the root progress node.
+     * @return Root progress node.
+     */
     [[nodiscard]] WorkflowProgressNode::Ptr getProgressRoot() const;
 
+    /**
+     * @brief Returns the workflow execution options.
+     * @return Execution options.
+     */
     [[nodiscard]] WorkflowExecutionOptions getExecutionOptions() const;
+
+    /**
+     * @brief Returns the current workflow execution status.
+     * @return Execution status.
+     */
     [[nodiscard]] WorkflowExecutionStatus getStatus() const;
 
+    /**
+     * @brief Sets the current workflow execution status.
+     * @param status New execution status.
+     */
     void setStatus(WorkflowExecutionStatus status);
 
+    /**
+     * @brief Returns the current root progress value.
+     * @return Normalized workflow progress in the range [0.0, 1.0].
+     */
     [[nodiscard]] double getOverallProgress() const;
+
+    /**
+     * @brief Collects messages from the report tree.
+     * @return Messages from the root report node and all descendants.
+     */
     [[nodiscard]] WorkflowMessages collectMessages() const;
 
 public: // Metrics
@@ -81,16 +130,16 @@ private:
     static void collectMessagesRecursive(const WorkflowReportNode::SharedWorkflowReportNode& node, QVector<WorkflowMessage>& out);
 
 private:
-    WorkflowReportNode::SharedWorkflowReportNode    _reportRoot;                                /** Report nodes are stored in the execution state since they need to be accessible from the context and may be updated from multiple threads during execution. The execution context provides thread-safe access to these nodes, and they are designed to handle concurrent updates internally (e.g., by using mutexes). */
-    WorkflowProgressNode::Ptr                       _progressRoot;                              /** Progress and report nodes are stored in the execution state since they need to be accessible from the context and may be updated from multiple threads during execution. The execution context provides thread-safe access to these nodes, and they are designed to handle concurrent updates internally (e.g., by using mutexes). */
-    WorkflowExecutionOptions                        _executionOptions;                          /** Execution options are stored in the execution state since they may need to be accessed from multiple threads during execution and should be immutable after initialization. */
-    mutable QMutex                                  _mutex;                                     /** Mutex to protect access to mutable members that may be updated from multiple threads during execution. */
-    WorkflowExecutionStatus                         _status = WorkflowExecutionStatus::Idle;    /** The execution status is protected by a mutex since it may be updated from multiple threads during execution and needs to be read and updated atomically. */
-    WorkflowExecutionMetrics                        _metrics;                                   /** Metrics are stored in the execution state since they may be updated from multiple threads during execution and need to be accessible from the context. */
-    mutable QMutex                                  _resultValuesMutex;                         // TODO
-    QHash<QUuid, QVariantMap>                       _resultValuesByContext;                     // TODO
-    mutable QMutex                                  _outputsMutex;                              // TODO
-    QHash<QUuid, QVariant>                          _outputs;                                   // TODO
+    WorkflowReportNode::SharedWorkflowReportNode    _reportRoot;                                /**< Root report node for this workflow execution */
+    WorkflowProgressNode::Ptr                       _progressRoot;                              /**< Root progress node for this workflow execution */
+    WorkflowExecutionOptions                        _executionOptions;                          /**< Options used for this workflow execution */
+    mutable QMutex                                  _mutex;                                     /**< Protects mutable execution state */
+    WorkflowExecutionStatus                         _status = WorkflowExecutionStatus::Idle;    /**< Current workflow execution status */
+    WorkflowExecutionMetrics                        _metrics;                                   /**< Metrics collected during workflow execution */
+    mutable QMutex                                  _resultValuesMutex;                         /**< Protects result values indexed by context */
+    QHash<QUuid, QVariantMap>                       _resultValuesByContext;                     /**< Result values published by execution context id */
+    mutable QMutex                                  _outputsMutex;                              /**< Protects published workflow outputs */
+    QHash<QUuid, QVariant>                          _outputs;                                   /**< Published workflow outputs indexed by output id */
 };
 
 }

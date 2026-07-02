@@ -14,11 +14,13 @@ namespace mv::workflow
 
 /**
  * @brief Describes the numeric value type of a workflow metric.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 enum class WorkflowMetricValueType
 {
-    Integer,
-    FloatingPoint
+    Integer,        /**< Integral metric value */
+    FloatingPoint   /**< Floating-point metric value */
 };
 
 /**
@@ -31,6 +33,8 @@ enum class WorkflowMetricValueType
  *
  * Metrics can be formatted for plain-text and HTML notifications using the
  * provided helper functions.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 struct CORE_EXPORT WorkflowMetric
 {
@@ -75,10 +79,10 @@ struct CORE_EXPORT WorkflowMetric
      */
     [[nodiscard]] static QString getWorkflowMetricsHtmlNotificationSummary(const QList<WorkflowMetric>& metrics);
 
-    QString     name;       /** Human-readable metric name. */
-    QString     unit;       /** Optional unit associated with the metric value. */
-    QVariant    value;      /** Metric value. */
-    QVariantMap metadata;   /** Optional structured metadata associated with the metric. */
+    QString     name;       /**< Human-readable metric name */
+    QString     unit;       /**< Optional unit associated with the metric value */
+    QVariant    value;      /**< Metric value */
+    QVariantMap metadata;   /**< Optional structured metadata associated with the metric */
 };
 
 }
