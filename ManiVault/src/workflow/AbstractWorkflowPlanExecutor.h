@@ -36,21 +36,21 @@ namespace mv::workflow
  * @see WorkflowExecutionContext
  * @see WorkflowResult
  *
- * @author T. Kroes
+ * @maintainer T. Kroes
  */
 class CORE_EXPORT AbstractWorkflowPlanExecutor : public QObject
 {
 public:
 
     /**
-     * Construct a workflow plan executor.
+     * @brief Constructs a workflow plan executor.
      *
      * @param parent Optional QObject parent.
      */
     AbstractWorkflowPlanExecutor(QObject* parent = nullptr);
 
     /**
-     * Execute a workflow asynchronously.
+     * @brief Executes a workflow asynchronously.
      *
      * If no parent execution context is supplied, the workflow is executed as
      * a root workflow. Otherwise it is executed as a child workflow within the
@@ -67,7 +67,7 @@ public:
     [[nodiscard]] virtual WorkflowResultFuture execute(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) = 0;
 
     /**
-     * Execute a workflow synchronously as a root workflow.
+     * @brief Executes a workflow synchronously as a root workflow.
      *
      * The calling thread is blocked until execution completes.
      *
@@ -82,7 +82,7 @@ public:
     [[nodiscard]] virtual SharedWorkflowResult executeBlocking(UniqueWorkflowPlan workflowPlan, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {}) = 0;
 
     /**
-     * Execute a workflow synchronously as a child workflow.
+     * @brief Executes a workflow synchronously as a child workflow.
      *
      * The workflow executes within the supplied parent execution context and
      * contributes its progress, outputs, and lifecycle events to the parent.
@@ -94,7 +94,7 @@ public:
     [[nodiscard]] virtual SharedWorkflowResult executeBlocking(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext) = 0;
 
     /**
-     * Wait for completion of an asynchronous workflow execution.
+     * @brief Waits for completion of an asynchronous workflow execution.
      *
      * This helper blocks until the supplied asynchronous execution state has
      * completed and then returns the resulting workflow result.
@@ -105,7 +105,7 @@ public:
     static SharedWorkflowResult waitForAsync(WorkflowResultFuture::State& state);
 
     /**
-     * Install the notification link handler used by workflow notifications.
+     * @brief Installs the notification link handler used by workflow notifications.
      *
      * Implementations use this to register handlers that allow users to open
      * workflow results, logs, traces, or other workflow-related resources from
@@ -116,7 +116,7 @@ public:
 protected:
 
     /**
-     * Execute a workflow asynchronously using an existing execution context.
+     * @brief Executes a workflow asynchronously using an existing execution context.
      *
      * This method contains the implementation-specific asynchronous execution
      * logic and is typically used after the appropriate root or child context
@@ -131,7 +131,7 @@ protected:
     [[nodiscard]] virtual WorkflowResultFuture executeAsyncImpl(UniqueWorkflowPlan workflowPlan, Task::GuiScope guiScope, const WorkflowExecutionOptions& executionOptions, SharedWorkflowExecutionContext executionContext) = 0;
 
     /**
-     * Execute a workflow as a root workflow.
+     * @brief Executes a workflow as a root workflow.
      *
      * Root workflows own their execution lifecycle and are responsible for
      * creating the root workflow execution context.
@@ -144,7 +144,7 @@ protected:
     [[nodiscard]] virtual SharedWorkflowResult executeRoot(WorkflowPlan& workflowPlan, Task* task, const WorkflowExecutionOptions& executionOptions = {}) = 0;
 
     /**
-     * Execute a workflow as a nested child workflow.
+     * @brief Executes a workflow as a nested child workflow.
      *
      * Child workflows execute within an existing workflow execution context
      * created by a parent workflow.
@@ -158,7 +158,7 @@ protected:
 private: // Execute individual jobs
 
     /**
-     * Execute a workflow job on the GUI thread.
+     * @brief Executes a workflow job on the GUI thread.
      *
      * This method is used for jobs that require GUI thread affinity.
      *
@@ -168,7 +168,7 @@ private: // Execute individual jobs
     virtual void executeJobOnGuiThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext) = 0;
 
     /**
-     * Execute a workflow job on a worker thread.
+     * @brief Executes a workflow job on a worker thread.
      *
      * This method is used for jobs that can safely execute outside the GUI
      * thread.
@@ -179,7 +179,7 @@ private: // Execute individual jobs
     virtual void executeJobOnWorkerThread(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext) = 0;
 
     /**
-     * Execute a workflow job using the appropriate execution thread.
+     * @brief Executes a workflow job using the appropriate execution thread.
      *
      * Implementations typically dispatch to either executeJobOnGuiThread()
      * or executeJobOnWorkerThread() depending on the job requirements.
@@ -192,7 +192,7 @@ private: // Execute individual jobs
 protected:
 
     /**
-     * Validate that a workflow execution context exists.
+     * @brief Validates that a workflow execution context exists.
      *
      * Throws if the supplied context is null.
      *
@@ -206,7 +206,10 @@ private:
     friend class WorkflowPlan;
 };
 
+/** Shared ownership pointer type for workflow plan executors. */
 using SharedWorkflowPlanExecutor = std::shared_ptr<AbstractWorkflowPlanExecutor>;
+
+/** Unique ownership pointer type for workflow plan executors. */
 using UniqueWorkflowPlanExecutor = std::unique_ptr<AbstractWorkflowPlanExecutor>;
 
 } 

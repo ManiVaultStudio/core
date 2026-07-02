@@ -18,28 +18,30 @@ namespace mv::workflow
  * within a workflow plan, such as entire workflows, nested workflows, stages, and jobs.
  * The node type determines how the node should be interpreted, visualized, reported,
  * and aggregated for progress reporting.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 enum class WorkflowExecutionNodeType
 {
-    Workflow,          /** Top-level workflow execution context */
-    NestedWorkflow,    /** Workflow executed as part of another workflow */
-    SequentialStage,   /** Sequential execution stage */
-    ParallelStage,     /** Parallel execution stage */
-    Job,               /** Individual executable job */
-    Undefined          /** Undefined or unknown context type */
+    Workflow,          /**< Top-level workflow execution context */
+    NestedWorkflow,    /**< Workflow executed as part of another workflow */
+    SequentialStage,   /**< Sequential execution stage */
+    ParallelStage,     /**< Parallel execution stage */
+    Job,               /**< Individual executable job */
+    Undefined          /**< Undefined or unknown context type */
 };
 
 /**
- * @brief Converts a string representation of a workflow execution node type to its corresponding WorkflowExecutionNodeType enum value.
- * @param typeName The string representation of the workflow execution node type to convert. This should be one of the defined type names, such as "Workflow", "NestedWorkflow", "SequentialStage", "ParallelStage", or "Job". The comparison is case-sensitive.
- * @return The corresponding WorkflowExecutionNodeType enum value for the provided string. For example, if the input is "Workflow", the output would be WorkflowExecutionNodeType::Workflow. If the input string does not match any known workflow execution context type, the function returns WorkflowExecutionNodeType::Undefined.
+ * @brief Converts a node type name to a workflow execution node type.
+ * @param typeName Case-sensitive node type name.
+ * @return Matching node type, or WorkflowExecutionNodeType::Undefined for unknown names.
  */
 CORE_EXPORT WorkflowExecutionNodeType getWorkflowExecutionNodeType(const QString& typeName);
 
 /**
- * @brief Converts a WorkflowExecutionNodeType enum value to its corresponding string representation.
- * @param type The WorkflowExecutionNodeType enum value to convert.
- * @return The string representation of the provided node type. Returns "Undefined" for unknown values.
+ * @brief Converts a workflow execution node type to its name.
+ * @param type Node type to convert.
+ * @return Node type name, or "Undefined" for unknown values.
  */
 CORE_EXPORT QString getWorkflowExecutionNodeTypeName(WorkflowExecutionNodeType type);
 

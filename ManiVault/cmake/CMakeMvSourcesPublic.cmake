@@ -675,8 +675,6 @@ set(PUBLIC_WORKFLOW_HEADERS
     src/workflow/WorkflowExecutionContext.h
     src/workflow/WorkflowContextBase.h
     src/workflow/WorkflowResultBase.h
-    src/workflow/WorkflowJobResult.h
-    src/workflow/WorkflowStageResult.h
     src/workflow/WorkflowResult.h
     src/workflow/WorkflowMessage.h
     src/workflow/WorkflowReportNode.h
@@ -705,8 +703,6 @@ set(PUBLIC_WORKFLOW_HEADERS
 
 set(PUBLIC_WORKFLOW_SOURCES
     src/workflow/AbstractWorkflowPlanExecutor.cpp    
-    src/workflow/WorkflowJobResult.cpp
-    src/workflow/WorkflowStageResult.cpp
     src/workflow/WorkflowResult.cpp
     src/workflow/WorkflowExecutionContext.cpp
     src/workflow/WorkflowReportNode.cpp

@@ -13,14 +13,14 @@ namespace mv::workflow
 
 QString WorkflowMetric::formatMetricValue(const WorkflowMetric& metric)
 {
-	const auto unit = metric._unit.trimmed().toLower();
+	const auto unit = metric.unit.trimmed().toLower();
 
 	bool ok = false;
 
-	const auto numericValue = metric._value.toDouble(&ok);
+	const auto numericValue = metric.value.toDouble(&ok);
 
 	if (!ok)
-		return metric._value.toString();
+		return metric.value.toString();
 
 	if (unit == "b" || unit == "bytes") {
 		return getNoBytesHumanReadable(static_cast<std::uint64_t>(numericValue));
@@ -43,32 +43,30 @@ QString WorkflowMetric::formatMetricValue(const WorkflowMetric& metric)
 	}
 
 	if (std::floor(numericValue) == numericValue) {
-		if (metric._unit.isEmpty()) {
+		if (metric.unit.isEmpty()) {
 			return getIntegerCountHumanReadable(numericValue);
 		}
 
-		return QString("%1 %2").arg(getIntegerCountHumanReadable(numericValue), metric._unit);
+		return QString("%1 %2").arg(getIntegerCountHumanReadable(numericValue), metric.unit);
 	}
 
 	const int precision = std::abs(numericValue) >= 1000.0 ? 0 : std::abs(numericValue) >= 100.0 ? 1 : std::abs(numericValue) >= 10.0 ? 2 : 3;
 
-	if (metric._unit.isEmpty()) {
+	if (metric.unit.isEmpty()) {
 		return QString::number(numericValue, 'f', precision);
 	}
 
-	return QString("%1 %2")
-	       .arg(QString::number(numericValue, 'f', precision))
-	       .arg(metric._unit);
+	return QString("%1 %2").arg(QString::number(numericValue, 'f', precision)).arg(metric.unit);
 }
 
 QString WorkflowMetric::toNotificationString(const WorkflowMetric& metric)
 {
-	return QString("%1: %2").arg(metric._name, formatMetricValue(metric));
+	return QString("%1: %2").arg(metric.name, formatMetricValue(metric));
 }
 
 QString WorkflowMetric::toHtmlNotificationString(const WorkflowMetric& metric)
 {
-	return QString("<b>%1</b>: %2").arg(metric._name.toHtmlEscaped(), formatMetricValue(metric).toHtmlEscaped());
+	return QString("<b>%1</b>: %2").arg(metric.name.toHtmlEscaped(), formatMetricValue(metric).toHtmlEscaped());
 }
 
 QString WorkflowMetric::toNotificationSummary(const QList<WorkflowMetric>& metrics, const QString& separator)

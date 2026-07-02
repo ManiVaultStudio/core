@@ -33,16 +33,18 @@ namespace mv::workflow
  *
  * const auto datasetMap = context->value("Dataset").toMap();
  * @endcode
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowContextVariantMap final : public WorkflowContextBase
 {
 public:
 
     /**
-     * @brief Gets the complete map.
+     * @brief Returns the complete map.
      * @return A copy of the stored QVariantMap.
      */
-    QVariantMap getMap() const;
+    [[nodiscard]] QVariantMap getMap() const;
 
     /**
      * @brief Replaces the complete map with the provided one.
@@ -51,27 +53,27 @@ public:
     void setMap(const QVariantMap& map);
 
     /**
-     * @brief Checks whether a value exists for the specified key.
+     * @brief Returns whether a value exists for the specified key.
      * @param key Key to test for existence.
      * @return True if the key exists, otherwise false.
      */
-    bool contains(const QString& key) const;
+    [[nodiscard]] bool contains(const QString& key) const;
 
     /**
-     * @brief Gets a value from the map.
+     * @brief Returns a value from the map.
      * @param key Key to retrieve.
      * @param defaultValue Value returned when the key is not present.
      * @return The stored value or the provided default value.
      */
-    QVariant value(const QString& key, const QVariant& defaultValue = {}) const;
+    [[nodiscard]] QVariant value(const QString& key, const QVariant& defaultValue = {}) const;
 
     /**
-     * @brief Gets a QVariantMap value from the map.
+     * @brief Returns a QVariantMap value from the map.
      * @param key Key to retrieve.
      * @return The stored value converted to QVariantMap, or an empty map if the
      * key does not exist or cannot be converted.
      */
-    QVariantMap mapValue(const QString& key) const;
+    [[nodiscard]] QVariantMap mapValue(const QString& key) const;
 
     /**
      * @brief Stores a value in the map.
@@ -87,7 +89,7 @@ public:
      * @param key Key to remove.
      * @return The removed value or an invalid QVariant if the key was not found.
      */
-    QVariant takeValue(const QString& key);
+    [[nodiscard]] QVariant takeValue(const QString& key);
 
     /**
 	 * @brief Merges all key/value pairs from another QVariantMap into the result map.
@@ -103,11 +105,14 @@ public:
     void clear();
 
 private:
-    mutable QMutex  _mutex;     /** Synchronizes access to the map. */
-    QVariantMap     _map;       /** Shared workflow data. */
+    mutable QMutex  _mutex;     /**< Synchronizes access to the map */
+    QVariantMap     _map;       /**< Shared workflow data */
 };
 
+/** Unique ownership pointer type for QVariantMap workflow contexts. */
 using UniqueVariantMapWorkflowContext = std::unique_ptr<WorkflowContextVariantMap>;
+
+/** Shared ownership pointer type for QVariantMap workflow contexts. */
 using SharedVariantMapWorkflowContext = std::shared_ptr<WorkflowContextVariantMap>;
 
 }
