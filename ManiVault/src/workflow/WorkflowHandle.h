@@ -27,7 +27,7 @@ namespace mv::workflow
  * Handles do not own or store the output value itself; they merely identify
  * where that output can be obtained.
  *
- * @authors BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
+ * @maintainer BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowHandle
 {
@@ -68,8 +68,8 @@ public:
     [[nodiscard]] QString getName() const;
 
 private:
-    QUuid   _id;    /** Unique identifier of the referenced workflow output */
-    QString _name;  /** Human-readable name of the referenced workflow node */
+    QUuid   _id;    /**< Unique identifier of the referenced workflow output */
+    QString _name;  /**< Human-readable name of the referenced workflow node */
 };
 
 }
