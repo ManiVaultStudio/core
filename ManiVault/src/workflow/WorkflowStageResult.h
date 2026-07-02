@@ -14,23 +14,32 @@ namespace mv::workflow
 {
 
 /**
- * @brief The WorkflowStageResult class represents the result of a workflow stage execution, including its status and any value produced by the stage. It extends the WorkflowResultBase class to provide additional functionality specific to workflow stage results.
+ * @brief Stores the outcome of a workflow stage execution.
  *
- * @author Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
+ * WorkflowStageResult specializes WorkflowResultBase for stage-level execution
+ * results. It uses the common result status and optional QVariant output value
+ * provided by the base class without adding extra stage-specific state.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowStageResult final : public WorkflowResultBase
 {
 public:
 
     /**
-     * @brief Constructs a WorkflowStageResult object with the specified workflow name.
-     * @param workflowName The name of the workflow that produced this result. This can be used for identification and logging purposes, allowing you to associate the result with a specific workflow execution.
+     * @brief Constructs a workflow stage result.
+     * @param workflowName Name of the workflow that produced this stage result.
      */
     WorkflowStageResult(const QString& workflowName);
 };
 
+/** Unique ownership pointer type for workflow stage results. */
 using UniqueWorkflowStageResult = std::unique_ptr<WorkflowStageResult>;
+
+/** Shared ownership pointer type for workflow stage results. */
 using SharedWorkflowStageResult = std::shared_ptr<WorkflowStageResult>;
+
+/** Qt future type for asynchronous workflow stage results. */
 using WorkflowStageFuture       = QFuture<WorkflowStageResult>;
 
 }
