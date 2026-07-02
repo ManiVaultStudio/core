@@ -12,7 +12,16 @@ namespace mv::workflow
 
 using MaxWorkerThreadCount = std::uint32_t;
 
-/** Options controlling workflow execution behavior. */
+/**
+ * @brief Options controlling workflow execution behavior.
+ *
+ * WorkflowExecutionOptions configures scheduling, progress reporting,
+ * notifications, logging depth, batching, and profiling for workflow execution.
+ * Options are supplied to executors for root workflows and inherited by child
+ * contexts through WorkflowExecutionState.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
+ */
 struct CORE_EXPORT WorkflowExecutionOptions
 {
     /** Profiling output sink used during workflow execution. */

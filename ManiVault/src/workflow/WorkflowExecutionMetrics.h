@@ -62,8 +62,7 @@ public:
      * @brief Returns a snapshot of all registered metrics.
      * @return Current metric values as workflow metrics.
      */
-    [[nodiscard]]
-    QVector<WorkflowMetric> snapshot() const;
+    [[nodiscard]] QVector<WorkflowMetric> snapshot() const;
 
 private:
     /**

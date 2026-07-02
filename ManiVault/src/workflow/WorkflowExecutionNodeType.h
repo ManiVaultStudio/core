@@ -36,13 +36,13 @@ enum class WorkflowExecutionNodeType
  * @param typeName Case-sensitive node type name.
  * @return Matching node type, or WorkflowExecutionNodeType::Undefined for unknown names.
  */
-[[nodiscard]] CORE_EXPORT WorkflowExecutionNodeType getWorkflowExecutionNodeType(const QString& typeName);
+CORE_EXPORT WorkflowExecutionNodeType getWorkflowExecutionNodeType(const QString& typeName);
 
 /**
  * @brief Converts a workflow execution node type to its name.
  * @param type Node type to convert.
  * @return Node type name, or "Undefined" for unknown values.
  */
-[[nodiscard]] CORE_EXPORT QString getWorkflowExecutionNodeTypeName(WorkflowExecutionNodeType type);
+CORE_EXPORT QString getWorkflowExecutionNodeTypeName(WorkflowExecutionNodeType type);
 
 }
