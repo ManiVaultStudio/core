@@ -41,7 +41,7 @@ public:
      * @param parentContext Optional parent execution context.
      * @return Workflow result produced by the execution, or nullptr for a null plan.
      */
-    [[nodiscard]] static SharedWorkflowResult executeBlocking(UniqueWorkflowPlan plan, const SharedWorkflowExecutionContext& parentContext);
+    static SharedWorkflowResult executeBlocking(UniqueWorkflowPlan plan, const SharedWorkflowExecutionContext& parentContext);
 };
 
 }
