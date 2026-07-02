@@ -218,6 +218,7 @@ public:
      * @return True if this node is a root progress node.
      */
     bool isRoot() const;
+
 private:
     /** Updates lifecycle state and timer bookkeeping. */
     void setStatus(Status status);

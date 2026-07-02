@@ -15,11 +15,19 @@ namespace mv::workflow
 {
 
 /**
- * @brief The WorkflowReportNode class represents a node in a hierarchical workflow report structure.
+ * @brief Stores messages for one node in a hierarchical workflow report.
  *
- * Each node can contain messages and child nodes, allowing for a structured representation of workflow execution results, warnings, and errors.
+ * WorkflowReportNode mirrors the logical workflow execution hierarchy. Each
+ * node owns the messages emitted for one workflow, stage, job, or nested
+ * execution scope, and can contain child report nodes for subordinate scopes.
+ * This allows callers to inspect messages locally or aggregate diagnostics
+ * recursively across the whole report tree.
  *
- * @author T. Kroes BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
+ * The node protects access to its name, messages, and children internally so
+ * workflow execution code can append messages and create child report nodes from
+ * multiple execution paths.
+ *
+ * @maintainer T. Kroes BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowReportNode
 {
@@ -27,76 +35,80 @@ public:
 
     Q_DISABLE_COPY_MOVE(WorkflowReportNode)
 
-    /** A shared pointer type for WorkflowReportNode, allowing for easy management of node lifetimes and shared ownership across different parts of the workflow reporting system. */
+    /** Shared ownership pointer type used for report nodes. */
     using SharedWorkflowReportNode = std::shared_ptr<WorkflowReportNode>;
 
-    /** A vector of shared pointers to WorkflowReportNode, representing the children of a report node in the hierarchical structure. */
+    /** Ordered collection of child report nodes. */
     using SharedWorkflowReportNodes = std::vector<SharedWorkflowReportNode>;
 
     /**
-     * @brief Constructs a WorkflowReportNode with the given name.
-     * @param name The name of the report node, typically representing a specific step or component in the workflow.
+     * @brief Constructs a report node.
+     * @param name Human-readable report node name.
      */
     explicit WorkflowReportNode(QString name);
 
     /**
-     * @brief Creates a child report node with the specified name and adds it to this node's children.
-     * @param name The name of the child report node.
-     * @return A shared pointer to the newly created child report node.
+     * @brief Creates and registers a child report node.
+     * @param name Human-readable child report node name.
+     * @return Shared pointer to the newly created child report node.
      */
     SharedWorkflowReportNode createChild(const QString& name);
 
     /**
-     * Adds a message to this report node.
-     * @param level The severity level of the message (e.g., Info, Warning, Error, Fatal).
-     * @param emitter The name of the component or module that generated the message.
-     * @param text The main text or content of the message.
-     * @param location The specific location in the code or workflow where the message was generated (e.g., function name, line number).
-     * @param details Additional details or metadata associated with the message (optional).
+     * @brief Adds a timestamped message to this report node.
+     *
+     * Messages are stored in insertion order. The timestamp is captured in UTC
+     * when the message is added.
+     *
+     * @param level Severity level of the message.
+     * @param emitter Component, workflow, or subsystem that emitted the message.
+     * @param text Human-readable message text.
+     * @param location Optional source or workflow location associated with the message.
+     * @param details Optional structured metadata associated with the message.
      */
     void addMessage(util::SeverityLevel level, const QString& emitter, const QString& text, const QString& location, const QVariantMap& details = {});
 
     /**
-     * @brief Retrieves the name of this report node.
-     * @return The name of the report node.
+     * @brief Returns the human-readable report node name.
+     * @return Report node name.
      */
     QString getName() const;
 
     /**
-     * @brief Retrieves the messages associated with this report node.
-     * @return A vector of WorkflowMessage objects representing the messages for this node.
+     * @brief Returns the messages stored directly on this node.
+     * @return Copy of this node's messages.
      */
     WorkflowMessages getMessages() const;
 
     /**
-     * @brief Retrieves the child report nodes of this report node.
-     * @return A vector of shared pointers to WorkflowReportNode representing the children of this node.
+     * @brief Returns direct child report nodes.
+     * @return Copy of this node's child pointer list.
      */
     SharedWorkflowReportNodes getChildren() const;
 
     /**
-     * @brief Checks if this report node or any of its descendants contain any error messages.
-     * @return True if there are error messages in this node or any of its descendants, false otherwise.
+     * @brief Returns whether this node or any descendant contains an error.
+     * @return True if at least one recursive message has Error severity.
      */
     bool hasErrorsRecursive() const;
 
     /**
-     * @brief Gets the total count of warning messages in this report node and all of its descendants.
-     * @return The total number of warning messages found in this node and its descendants.
+     * @brief Counts warning messages on this node and all descendants.
+     * @return Recursive warning message count.
      */
     std::int32_t getWarningCountRecursive() const;
-    
+
     /**
-     * @brief Get the total count of error messages in this report node and all of its descendants.
-     * @return The total number of error messages found in this node and its descendants.
+     * @brief Counts error messages on this node and all descendants.
+     * @return Recursive error message count.
      */
     std::int32_t getErrorCountRecursive() const;
 
 private:
-    QString                     _name;          /** The name of the report node, typically representing a specific step or component in the workflow */
-    mutable QMutex              _mutex;         /** Mutex to protect access to the messages and children vectors for thread safety */
-    WorkflowMessages            _messages;      /** A list of messages associated with this report node, including informational messages, warnings, and errors */
-    SharedWorkflowReportNodes   _children;      /** A list of child report nodes, allowing for a hierarchical structure to represent sub-steps or components within the workflow */
+    QString                     _name;          /**< Human-readable report node name */
+    mutable QMutex              _mutex;         /**< Protects access to the node name, messages, and children */
+    WorkflowMessages            _messages;      /**< Messages emitted directly for this report node */
+    SharedWorkflowReportNodes   _children;      /**< Direct child nodes for nested workflow report scopes */
 };
 
 }
