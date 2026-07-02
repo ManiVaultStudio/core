@@ -212,8 +212,6 @@ CPMAddPackage(
     NAME Taskflow
     GITHUB_REPOSITORY taskflow/taskflow
     GIT_TAG v4.1.0
-    DOWNLOAD_ONLY     YES
-    EXCLUDE_FROM_ALL  YES
     OPTIONS
         "TF_BUILD_BENCHMARKS OFF"
         "TF_BUILD_CUDA OFF"
@@ -385,7 +383,6 @@ target_include_directories(${MV_EXE} PRIVATE
 
 target_include_directories(${MV_EXE} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
 target_include_directories(${MV_EXE} PRIVATE "${valijson_SOURCE_DIR}/include")
-target_include_directories(${MV_EXE} PRIVATE "${taskflow_SOURCE_DIR}")
 
 target_compile_features(${MV_EXE} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
