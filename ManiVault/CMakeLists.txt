@@ -184,6 +184,7 @@ CPMAddPackage(
     GITHUB_REPOSITORY facebook/zstd
     GIT_TAG v1.5.7
     SOURCE_SUBDIR build/cmake
+    EXCLUDE_FROM_ALL                # exlcude the clean-all & uninstall targets, libzstd_static will still be built as it is linked to
     OPTIONS
         "ZSTD_BUILD_PROGRAMS OFF"
         "ZSTD_BUILD_TESTS OFF"
@@ -192,6 +193,20 @@ CPMAddPackage(
         "ZSTD_BUILD_STATIC ON"
 )
 
+set_target_properties(libzstd_static PROPERTIES 
+    POSITION_INDEPENDENT_CODE ON
+    FOLDER CoreDependencies
+    C_STANDARD ${CMAKE_C_STANDARD}
+    C_STANDARD_REQUIRED ${CMAKE_C_STANDARD_REQUIRED}
+    C_EXTENSIONS ${CMAKE_C_EXTENSIONS}
+)
+
+set_target_properties(clean-all PROPERTIES 
+    FOLDER CoreDependencies
+)
+set_target_properties(uninstall PROPERTIES 
+    FOLDER CoreDependencies
+)
 
 CPMAddPackage(
     NAME Taskflow
@@ -397,12 +412,7 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 target_link_libraries(${MV_EXE} PRIVATE Taskflow)
-
-if(TARGET libzstd_static)
-    target_link_libraries(MV_Application PRIVATE libzstd_static)
-else()
-    message(FATAL_ERROR "libzstd_static target was not created")
-endif()
+target_link_libraries(${MV_EXE} PRIVATE libzstd_static)
 
 if(${MV_USE_ERROR_LOGGING})
     target_compile_definitions(${MV_EXE} PRIVATE MV_USE_ERROR_LOGGING=1)
