@@ -9,7 +9,6 @@
 #include "WorkflowResult.h"
 #include "WorkflowResultFuture.h"
 #include "WorkflowExecutionOptions.h"
-#include "WorkflowJobResult.h"
 #include "WorkflowHandle.h"
 
 #include <QString>
@@ -17,6 +16,7 @@
 
 #include <optional>
 #include <concepts>
+
 namespace mv
 {
     class Task;
@@ -35,37 +35,111 @@ using SharedWorkflowPlanExecutor        = std::shared_ptr<AbstractWorkflowPlanEx
 using SharedWorkflowExecutionContexts   = std::vector<SharedWorkflowExecutionContext>;
 using UniqueWorkflowPlan                = std::unique_ptr<WorkflowPlan>;
 
+/**
+ * @brief Represents an executable workflow consisting of one or more stages.
+ *
+ * A workflow plan describes a directed execution pipeline composed of sequential,
+ * parallel, batched, and nested workflow stages. It is a declarative description
+ * of work and does not perform any execution itself. Execution is delegated to an
+ * AbstractWorkflowPlanExecutor, which schedules the stages according to their
+ * execution policy and concurrency characteristics.
+ *
+ * A workflow is divided into four execution phases:
+ *
+ * - The main execution phase, containing the primary workflow stages.
+ * - The success phase, executed only if the main execution phase completes
+ *   successfully.
+ * - The failure phase, executed only if execution terminates because of an
+ *   exception or unrecoverable failure.
+ * - The finalization phase, which is always executed regardless of whether the
+ *   workflow succeeds or fails.
+ *
+ * Each stage contains one or more jobs. Depending on the stage configuration,
+ * jobs execute sequentially, in parallel, or in configurable batches. Jobs may
+ * either execute a callable directly or dynamically construct and execute a
+ * nested workflow, allowing complex workflows to be composed hierarchically.
+ *
+ * Workflow plans may optionally own a shared workflow context derived from
+ * WorkflowContextBase. This context provides a mechanism for sharing mutable
+ * state between jobs and stages without requiring explicit parameter passing.
+ *
+ * Every workflow, stage, and job has an associated relative weight that is used
+ * for hierarchical progress reporting. Nested workflows contribute to overall
+ * progress according to their configured weight and selected progress mode.
+ *
+ * Workflow plans are intended to be lightweight objects that are constructed on
+ * demand and executed exactly once. They own only the workflow definition; all
+ * execution state, intermediate results, progress information, and scheduling
+ * state are maintained by the associated WorkflowExecutionContext during
+ * execution.
+ */
 class CORE_EXPORT WorkflowPlan
 {
 public:
 
+    /**
+	 * @brief Determines how the jobs within a stage are executed.
+	 */
     enum class ConcurrencyMode
     {
-        Sequential,
-        Parallel
+        Sequential,   /** Execute jobs one after another. */
+        Parallel      /** Execute jobs concurrently. */
     };
 
-    enum class StageExecutionPolicy {
-        Main,
-        OnSuccess,
-        OnFailure,
-        Finally
+    /**
+	 * @brief Specifies when a stage is executed relative to the main workflow.
+	 */
+    enum class StageExecutionPolicy
+    {
+        Main,         /** Execute as part of the primary workflow. */
+        OnSuccess,    /** Execute only if the main workflow succeeds. */
+        OnFailure,    /** Execute only if the main workflow fails. */
+        Finally       /** Always execute after the workflow completes. */
     };
 
-    enum class JobThreadAffinity {
-        CurrentWorkerThread,
-        GuiThread
+    /**
+	 * @brief Specifies the preferred thread on which a job executes.
+	 */
+    enum class JobThreadAffinity
+    {
+        CurrentWorkerThread,   /** Execute on a worker thread. */
+        GuiThread              /** Execute on the application's GUI thread. */
     };
 
-    enum class JobCompletionPolicy {
-        Auto,
-        ManualOrNested
+    /**
+	 * @brief Determines how completion of a job is reported.
+	 *
+	 * Most jobs complete automatically when their callable returns. Nested
+	 * workflows and manually managed jobs signal completion explicitly.
+	 */
+    enum class JobCompletionPolicy
+    {
+        Auto,               /** Job completes automatically when its callable returns. */
+        ManualOrNested      /** Job completion is signaled manually or by a nested workflow. */
     };
 
-    enum class JobProgressMode {
-        Automatic,  /** Default: leaf job auto-completes if no children */
-        Atomic,     /** Ignore nested workflow progress; job is one unit */
-        Nested      /** Nested workflows contribute fine-grained progress */
+    /**
+	 * @brief Controls how a job contributes to workflow progress.
+	 */
+    enum class JobProgressMode
+    {
+        /**
+         * The job automatically completes when its work finishes.
+         * Nested workflows contribute their own progress.
+         */
+        Automatic,
+
+        /**
+         * Treat the job as a single unit of work regardless of any nested
+         * workflow that it executes.
+         */
+        Atomic,
+
+        /**
+         * Forward progress reporting from nested workflows so that child
+         * progress contributes to the overall workflow progress.
+         */
+        Nested
     };
 
     using SharedState = std::shared_ptr<QVariantMap>;
@@ -84,6 +158,16 @@ public:
         NestedWorkflowFunction function;
     };
 
+    /**
+	 * @brief Represents the smallest executable unit within a workflow stage.
+	 *
+	 * A job encapsulates either a callable or a nested workflow factory.
+	 * Jobs may execute on a worker thread or on the GUI thread, produce an
+	 * optional result, report errors, and contribute to workflow progress.
+	 *
+	 * Jobs are executed by the workflow executor and are not intended to be
+	 * run directly by client code.
+	 */
     class CORE_EXPORT Job
     {
     public:
@@ -198,6 +282,14 @@ public:
 
     using Jobs = std::vector<Job>;
 
+    /**
+	 * @brief Groups one or more jobs that share the same execution strategy.
+	 *
+	 * A stage represents a synchronization boundary within a workflow.
+	 * Depending on its concurrency mode, jobs execute either sequentially,
+	 * in parallel, or in configurable batches. The next stage is not started
+	 * until the current stage has completed.
+	 */
     class CORE_EXPORT Stage
     {
     public:

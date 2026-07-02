@@ -15,9 +15,15 @@ namespace mv::workflow
 {
 
 /**
- * Represents a message generated during workflow execution, containing information about the severity, emitter, location, text, details, and timestamp of the message.
+ * @brief Represents a message generated during workflow execution.
  *
- * @authors BioVault Thomas Kroes (Biomedical Visual Analytics Unit LUMC - TU Delft)
+ * WorkflowMessage is the fundamental diagnostic record used throughout the
+ * workflow system. It captures informational messages, warnings, errors, and
+ * fatal failures together with optional structured metadata describing the
+ * execution context in which the message was generated.
+ *
+ * Workflow messages are attached to WorkflowReportNode instances and are used
+ * for logging, reporting, diagnostics, and user-facing workflow output.
  */
 struct CORE_EXPORT WorkflowMessage
 {

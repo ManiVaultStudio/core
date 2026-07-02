@@ -264,9 +264,6 @@ public:
     /**
      * @brief Checks if this execution context is valid and properly initialized.
      *
-     * This function verifies that the execution context has been correctly set up, including having a valid name, report node, progress node, and execution state.
-     * It can be used to ensure that the context is ready for execution and reporting.
-     *
      * @return True if the execution context is valid; false otherwise.
      */
     [[nodiscard]] bool isValid() const;
@@ -395,7 +392,7 @@ public:
 public: // ID
 
     /**
-     * Get the unique identifier of this workflow execution context. This ID is used for tracing and logging purposes, and can be used to correlate log messages and trace events with specific workflow executions.
+     * @brief Get the unique identifier of this workflow execution context. This ID is used for tracing and logging purposes, and can be used to correlate log messages and trace events with specific workflow executions.
      * @return The unique identifier of this workflow execution context.
      */
     [[nodiscard]] QUuid getId() const;

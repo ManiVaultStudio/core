@@ -12,30 +12,73 @@
 namespace mv::workflow
 {
 
+/**
+ * @brief Describes the numeric value type of a workflow metric.
+ */
 enum class WorkflowMetricValueType
 {
     Integer,
     FloatingPoint
 };
 
+/**
+ * @brief Represents a metric produced during workflow execution.
+ *
+ * WorkflowMetric stores a named measurement together with its value, unit, and
+ * optional structured metadata. Metrics are typically used to summarize workflow
+ * execution characteristics such as duration, counts, throughput, processed data
+ * size, or other diagnostic values.
+ *
+ * Metrics can be formatted for plain-text and HTML notifications using the
+ * provided helper functions.
+ */
 struct CORE_EXPORT WorkflowMetric
 {
-    static QString formatMetricValue(const WorkflowMetric& metric);
+    /**
+     * @brief Formats the value of a workflow metric.
+     *
+     * @param metric Metric whose value should be formatted.
+     * @return Human-readable metric value.
+     */
+    [[nodiscard]] static QString formatMetricValue(const WorkflowMetric& metric);
 
-    static QString toNotificationString(const WorkflowMetric& metric);
+    /**
+     * @brief Converts a workflow metric to a plain-text notification string.
+     *
+     * @param metric Metric to format.
+     * @return Plain-text notification representation.
+     */
+    [[nodiscard]] static QString toNotificationString(const WorkflowMetric& metric);
 
-    static QString toHtmlNotificationString(const WorkflowMetric& metric);
-    static QString toNotificationSummary(
-        const QList<WorkflowMetric>& metrics,
-        const QString& separator = "\n");
+    /**
+     * @brief Converts a workflow metric to an HTML notification string.
+     *
+     * @param metric Metric to format.
+     * @return HTML notification representation.
+     */
+    [[nodiscard]] static QString toHtmlNotificationString(const WorkflowMetric& metric);
 
-    static QString getWorkflowMetricsHtmlNotificationSummary(
-        const QList<WorkflowMetric>& metrics);
+    /**
+     * @brief Creates a plain-text notification summary for multiple metrics.
+     *
+     * @param metrics Metrics to include in the summary.
+     * @param separator Separator inserted between formatted metrics.
+     * @return Plain-text notification summary.
+     */
+    [[nodiscard]] static QString toNotificationSummary(const QList<WorkflowMetric>& metrics, const QString& separator = "\n");
 
-    QString     _name;
-    QString     _unit;
-    QVariant    _value;
-    QVariantMap _metadata;
+    /**
+     * @brief Creates an HTML notification summary for multiple workflow metrics.
+     *
+     * @param metrics Metrics to include in the summary.
+     * @return HTML notification summary.
+     */
+    [[nodiscard]] static QString getWorkflowMetricsHtmlNotificationSummary(const QList<WorkflowMetric>& metrics);
+
+    QString     name;       /** Human-readable metric name. */
+    QString     unit;       /** Optional unit associated with the metric value. */
+    QVariant    value;      /** Metric value. */
+    QVariantMap metadata;   /** Optional structured metadata associated with the metric. */
 };
 
 }
