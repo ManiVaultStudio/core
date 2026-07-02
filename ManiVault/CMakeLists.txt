@@ -192,18 +192,20 @@ CPMAddPackage(
         "ZSTD_BUILD_STATIC ON"
 )
 
-# Disable Taskflow features
-set(TF_BUILD_BENCHMARKS OFF CACHE BOOL "" FORCE)
-set(TF_BUILD_CUDA OFF CACHE BOOL "" FORCE)
-set(TF_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(TF_BUILD_PROFILER OFF CACHE BOOL "" FORCE)
-set(TF_BUILD_SYCL OFF CACHE BOOL "" FORCE)
-set(TF_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
 CPMAddPackage(
     NAME Taskflow
     GITHUB_REPOSITORY taskflow/taskflow
-    VERSION 3.8.0
+    GIT_TAG v4.1.0
+    DOWNLOAD_ONLY     YES
+    EXCLUDE_FROM_ALL  YES
+    OPTIONS
+        "TF_BUILD_BENCHMARKS OFF"
+        "TF_BUILD_CUDA OFF"
+        "TF_BUILD_EXAMPLES OFF"
+        "TF_BUILD_PROFILER OFF"
+        "TF_BUILD_TESTS OFF"
+        "TF_BUILD_MODULES OFF"
 )
 
 # Use of Sentry on MacOS breaks the build so turn it off for now...
@@ -368,7 +370,7 @@ target_include_directories(${MV_EXE} PRIVATE
 
 target_include_directories(${MV_EXE} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
 target_include_directories(${MV_EXE} PRIVATE "${valijson_SOURCE_DIR}/include")
-target_include_directories(${MV_EXE} SYSTEM PRIVATE "${taskflow_SOURCE_DIR}")
+target_include_directories(${MV_EXE} PRIVATE "${taskflow_SOURCE_DIR}")
 
 target_compile_features(${MV_EXE} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
