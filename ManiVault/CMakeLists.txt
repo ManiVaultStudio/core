@@ -155,7 +155,12 @@ foreach(item ${items})
   message(STATUS "Found: ${item}")
 endforeach()
 
-file(GLOB items "${_ZLIB_LOC}/../../*")
+file(GLOB items "${_ZLIB_LOC}/../../share/*")
+foreach(item ${items})
+  message(STATUS "Found: ${item}")
+endforeach()
+
+file(GLOB items "${_ZLIB_LOC}/../../doc/*")
 foreach(item ${items})
   message(STATUS "Found: ${item}")
 endforeach()
