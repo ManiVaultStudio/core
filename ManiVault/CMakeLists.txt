@@ -150,6 +150,11 @@ message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 
 find_package(ZLIB REQUIRED)
 get_target_property(_ZLIB_LOC ZLIB::ZLIB IMPORTED_LOCATION_RELEASE)
+file(GLOB items "${_ZLIB_LOC}/*")
+foreach(item ${items})
+  message(STATUS "Found: ${item}")
+endforeach()
+
 set(ZLIB_DIR "${_ZLIB_LOC}")
 message(STATUS "zlib dir ${ZLIB_DIR}")
 
