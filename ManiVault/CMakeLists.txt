@@ -150,7 +150,7 @@ message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 
 find_package(ZLIB REQUIRED)
 get_target_property(_ZLIB_LOC ZLIB::ZLIB IMPORTED_LOCATION_RELEASE)
-set(ZLIB_DIR "${_ZLIB_LOC}/../")
+set(ZLIB_DIR "${_ZLIB_LOC}")
 message(STATUS "zlib dir ${ZLIB_DIR}")
 
 message(status "zlib dir ${ZLIB_DIR}")
