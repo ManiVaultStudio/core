@@ -133,7 +133,7 @@ install(TARGETS ${POINTDATA}
 )
 
 # Copy the external biovault_bfloat16 header into its own subfolder - cmake's install PUBLIC_HEADER flattens all subdirs
-install(FILES "${BFLOAT_HEADER}" DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/biovault_bfloat16/")
+# install(FILES "${BFLOAT_HEADER}" DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/biovault_bfloat16/")
 
 # PointData is needed to build other plugins - install it now.
 add_custom_command(TARGET ${POINTDATA} POST_BUILD
