@@ -40,9 +40,9 @@ set(POINTS_HEADERS
 )
 
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects
-set(BFLOAT_HEADER
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/biovault_bfloat16/biovault_bfloat16.h
-)
+#set(BFLOAT_HEADER
+#    ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/biovault_bfloat16/biovault_bfloat16.h
+#)
 
 set(ACTIONS_SOURCES
     src/InfoAction.h
@@ -108,6 +108,7 @@ list(APPEND POINTS_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAME
 target_link_libraries(${POINTDATA} PRIVATE Qt6::Widgets)
 target_link_libraries(${POINTDATA} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${POINTDATA} PRIVATE ${MV_PUBLIC_LIB})
+target_link_libraries(${POINTDATA} PRIVATE biovault-bfloat16::biovault-bfloat16)
 
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${POINTDATA} ${MV_USE_AVX})

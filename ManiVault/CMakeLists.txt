@@ -241,6 +241,8 @@ target_link_libraries(qtadvanceddocking-qt6 PRIVATE nlohmann_json::nlohmann_json
 #   SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
 # )
 
+find_package(biovault-bfloat16 CONFIG REQUIRED)
+
 # Use of Sentry on MacOS breaks the build so turn it off for now...
 if(${MV_USE_ERROR_LOGGING})
 
