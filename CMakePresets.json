@@ -15,7 +15,7 @@
       "inherits": "vcpkg-base",
 			"cacheVariables": {
 				"VCPKG_TARGET_TRIPLET": "x64-windows-release",
-				"CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded"
+				"CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL"
 			}
     },
     {
