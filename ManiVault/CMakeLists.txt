@@ -155,6 +155,11 @@ foreach(item ${items})
   message(STATUS "Found: ${item}")
 endforeach()
 
+file(GLOB items "${_ZLIB_LOC}/../*")
+foreach(item ${items})
+  message(STATUS "Found: ${item}")
+endforeach()
+
 set(ZLIB_DIR "${_ZLIB_LOC}")
 message(STATUS "zlib dir ${ZLIB_DIR}")
 
