@@ -6,13 +6,18 @@
 
 #include <QHBoxLayout>
 
+#include <algorithm>
+#include <cmath>
+
 using namespace mv::util;
 
 namespace mv::gui {
 
-DecimalAction::DecimalAction(QObject * parent, const QString& title, float minimum /*= INIT_MIN*/, float maximum /*= INIT_MAX*/, float value /*= INIT_VALUE*/, std::uint32_t numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/) :
+DecimalAction::DecimalAction(QObject * parent, const QString& title, float minimum /*= INIT_MIN*/, float maximum /*= INIT_MAX*/, float value /*= INIT_VALUE*/, std::uint32_t numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/, bool logarithmic /*= INIT_LOGARITHMIC*/, float logarithmicGamma /*= INIT_LOGARITHMIC_GAMMA*/) :
     NumericalAction<float>(parent, title, minimum, maximum, value, numberOfDecimals),
-    _singleStep(0.1f)
+    _singleStep(0.1f),
+    _logarithmic(logarithmic),
+    _logarithmicGamma(logarithmicGamma > 0.0f ? logarithmicGamma : INIT_LOGARITHMIC_GAMMA)
 {
     _valueChanged               = [this]() -> void { emit valueChanged(_value); };
     _minimumChanged             = [this]() -> void { emit minimumChanged(_minimum); };
@@ -52,6 +57,56 @@ void DecimalAction::setSingleStep(float singleStep)
     _singleStep = std::max(0.0f, singleStep);
 
     emit singleStepChanged(_singleStep);
+}
+
+bool DecimalAction::isLogarithmic() const
+{
+    return _logarithmic;
+}
+
+void DecimalAction::setLogarithmic(bool logarithmic)
+{
+    if (logarithmic == _logarithmic)
+        return;
+
+    _logarithmic = logarithmic;
+
+    emit logarithmicScaleChanged();
+}
+
+float DecimalAction::getLogarithmicGamma() const
+{
+    return _logarithmicGamma;
+}
+
+void DecimalAction::setLogarithmicGamma(float logarithmicGamma)
+{
+    if (logarithmicGamma <= 0.0f || logarithmicGamma == _logarithmicGamma)
+        return;
+
+    _logarithmicGamma = logarithmicGamma;
+
+    emit logarithmicScaleChanged();
+}
+
+double DecimalAction::valueToSliderPosition(double normalizedValue) const
+{
+    normalizedValue = std::clamp(normalizedValue, 0.0, 1.0);
+
+    if (!_logarithmic)
+        return normalizedValue;
+
+    return std::pow(normalizedValue, 1.0 / static_cast<double>(_logarithmicGamma));
+}
+
+double DecimalAction::sliderPositionToValue(double normalizedSliderPosition) const
+{
+    normalizedSliderPosition = std::clamp(normalizedSliderPosition, 0.0, 1.0);
+
+    if (!_logarithmic)
+        return normalizedSliderPosition;
+
+    return std::pow(normalizedSliderPosition, static_cast<double>(_logarithmicGamma));
 }
 
 WidgetAction* DecimalAction::getPublicCopy() const
@@ -230,7 +285,8 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
 
     const auto onUpdateAction = [this, decimalAction, sliderIntervalLength]() -> void {
         const auto sliderValueNormalized    = static_cast<float>(value() - minimum()) / sliderIntervalLength;
-        decimalAction->setValue(decimalAction->getMinimum() + (sliderValueNormalized * decimalAction->getIntervalLength()));
+        const auto valueNormalized          = decimalAction->sliderPositionToValue(sliderValueNormalized);
+        decimalAction->setValue(decimalAction->getMinimum() + (valueNormalized * decimalAction->getIntervalLength()));
     };
 
     connect(this, &QSlider::valueChanged, this, [this, decimalAction, onUpdateAction](int value) {
@@ -258,7 +314,8 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
     };
 
     const auto onUpdateValue = [this, decimalAction, sliderIntervalLength, setToolTips]() {
-        const auto sliderValue = minimum() + (decimalAction->getNormalized() * sliderIntervalLength);
+        const auto sliderPositionNormalized = decimalAction->valueToSliderPosition(decimalAction->getNormalized());
+        const auto sliderValue              = minimum() + (sliderPositionNormalized * sliderIntervalLength);
 
         QSignalBlocker blocker(this);
 
@@ -270,6 +327,9 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
     connect(decimalAction, &DecimalAction::valueChanged, this, [this, decimalAction, onUpdateValue](float value) {
         onUpdateValue();
     });
+
+    // the position mapping changed, so re-place the handle for the current value
+    connect(decimalAction, &DecimalAction::logarithmicScaleChanged, this, onUpdateValue);
 
     onUpdateValue();
     setToolTips();

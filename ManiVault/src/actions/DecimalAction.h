@@ -95,8 +95,10 @@ public:
      * @param maximum Maximum value
      * @param value Value
      * @param numberOfDecimals Number of decimals
+     * @param logarithmic When true, the slider position is mapped to the value through a power curve so the low end of the range gets more slider travel (the value itself is unchanged)
+     * @param logarithmicGamma Skew exponent for the logarithmic mapping; > 1 expands the low end of the range
      */
-    Q_INVOKABLE explicit DecimalAction(QObject * parent, const QString& title, float minimum = INIT_MIN, float maximum = INIT_MAX, float value = INIT_VALUE, std::uint32_t numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
+    Q_INVOKABLE explicit DecimalAction(QObject * parent, const QString& title, float minimum = INIT_MIN, float maximum = INIT_MAX, float value = INIT_VALUE, std::uint32_t numberOfDecimals = INIT_NUMBER_OF_DECIMALS, bool logarithmic = INIT_LOGARITHMIC, float logarithmicGamma = INIT_LOGARITHMIC_GAMMA);
 
     /**
      * Initialize the decimal action
@@ -115,6 +117,40 @@ public:
      * @param singleStep Single step
      */
     void setSingleStep(float singleStep);
+
+    /** Gets whether the slider uses a logarithmic (power-curve) position mapping */
+    bool isLogarithmic() const;
+
+    /**
+     * Sets whether the slider uses a logarithmic (power-curve) position mapping
+     * @param logarithmic Whether to use the logarithmic mapping
+     */
+    void setLogarithmic(bool logarithmic);
+
+    /** Gets the logarithmic skew exponent (gamma) */
+    float getLogarithmicGamma() const;
+
+    /**
+     * Sets the logarithmic skew exponent (gamma); > 1 expands the low end of the range
+     * @param logarithmicGamma Skew exponent
+     */
+    void setLogarithmicGamma(float logarithmicGamma);
+
+    /**
+     * Maps a normalized value in [0, 1] to a normalized slider position in [0, 1].
+     * Identity when the scale is linear.
+     * @param normalizedValue Normalized value
+     * @return Normalized slider position
+     */
+    double valueToSliderPosition(double normalizedValue) const;
+
+    /**
+     * Maps a normalized slider position in [0, 1] to a normalized value in [0, 1].
+     * Identity when the scale is linear.
+     * @param normalizedSliderPosition Normalized slider position
+     * @return Normalized value
+     */
+    double sliderPositionToValue(double normalizedSliderPosition) const;
 
     /**
      * Get public copy of the action (other compatible actions can connect to it)
@@ -195,14 +231,21 @@ signals:
      */
     void singleStepChanged(float singleStep);
 
-protected:
-    float   _singleStep;    /** Single step size for spin box */
+    /** Signals that the logarithmic scale (enabled state or gamma) changed */
+    void logarithmicScaleChanged();
 
 protected:
-    static constexpr float  INIT_MIN        = 0.0f;         /** Initialization minimum value */
-    static constexpr float  INIT_MAX        = 100.0f;       /** Initialization maximum value */
-    static constexpr float  INIT_VALUE      = 0.0;          /** Initialization value */
-    static constexpr int    INIT_DECIMALS   = 1;            /** Initialization number of decimals */
+    float   _singleStep;            /** Single step size for spin box */
+    bool    _logarithmic;           /** Whether the slider maps its position through a power curve */
+    float   _logarithmicGamma;      /** Skew exponent for the logarithmic mapping */
+
+protected:
+    static constexpr float  INIT_MIN                 = 0.0f;         /** Initialization minimum value */
+    static constexpr float  INIT_MAX                 = 100.0f;       /** Initialization maximum value */
+    static constexpr float  INIT_VALUE               = 0.0;          /** Initialization value */
+    static constexpr int    INIT_DECIMALS            = 1;            /** Initialization number of decimals */
+    static constexpr bool   INIT_LOGARITHMIC         = false;        /** Linear slider mapping by default */
+    static constexpr float  INIT_LOGARITHMIC_GAMMA   = 3.0f;         /** Default logarithmic skew exponent */
 
     friend class AbstractActionsManager;
 };
