@@ -150,20 +150,9 @@ message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 
 find_package(ZLIB REQUIRED)
 get_target_property(_ZLIB_LOC ZLIB::ZLIB IMPORTED_LOCATION_RELEASE)
-file(GLOB items "${_ZLIB_LOC}/*")
-foreach(item ${items})
-  message(STATUS "Found: ${item}")
-endforeach()
-
-file(GLOB items "${_ZLIB_LOC}/../../share/doc/zlib/zlib/*")
-foreach(item ${items})
-  message(STATUS "Found: ${item}")
-endforeach()
-
 set(ZLIB_DIR "${_ZLIB_LOC}")
 message(STATUS "zlib dir ${ZLIB_DIR}")
 
-message(status "zlib dir ${ZLIB_DIR}")
 # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
 # add_library(ZLIB::ZLIB ALIAS zlibstatic)
 set(ZLIB_LIBRARIES ZLIB::ZLIB)
@@ -779,7 +768,7 @@ list(APPEND INSTALL_LICENSE_COMMANDS
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${quazip_SOURCE_DIR}/COPYING ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ZLIB_DIR}/share/doc/zlib/zlib/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ZLIB_DIR}/../../share/doc/zlib/zlib/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/nlohmann_json
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${nlohmann_json_SOURCE_DIR}/LICENSE.MIT ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/nlohmann_json/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/valijson
