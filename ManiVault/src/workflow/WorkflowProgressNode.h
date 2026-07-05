@@ -9,6 +9,7 @@
 
 #include <QString>
 #include <QDateTime>
+#include <QElapsedTimer>
 #include <QMutex>
 #include <QVector>
 #include <QDebug>

@@ -10,6 +10,10 @@
 #include "WorkflowReportNode.h"
 #include "WorkflowProgressNode.h"
 
+#include <QHash>
+#include <QUuid>
+#include <QVariant>
+
 namespace mv::workflow
 {
 

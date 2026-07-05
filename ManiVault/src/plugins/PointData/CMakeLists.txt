@@ -42,7 +42,7 @@ set(POINTS_HEADERS
     src/ModelResetter.h
     src/CreateSetFromSelectionAction.h
     src/SparseMatrix.h
-	src/DimensionNamesSerializer.cpp
+	src/DimensionNamesSerializer.h
 )
 
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects
