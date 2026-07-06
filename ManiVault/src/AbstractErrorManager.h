@@ -45,6 +45,24 @@ public:
     /** Show the error logging consent dialog */
     virtual void showErrorLoggingConsentDialog() = 0;
 
+    /**
+	 * @brief Gets a formatted stack trace for debugging purposes.
+	 *
+	 * Returns a human-readable stack trace of the current execution point. The
+	 * default implementation returns an empty string, indicating that stack trace
+	 * generation is not supported or has not been implemented.
+	 *
+	 * Derived classes may override this function to provide platform- or
+	 * application-specific stack trace generation using the available debugging
+	 * facilities.
+	 *
+	 * @return A formatted stack trace, or an empty string if unavailable.
+	 */
+    virtual QString getDebugStackTrace() const
+    {
+        return {};
+    }
+
 protected:
 
     /**
