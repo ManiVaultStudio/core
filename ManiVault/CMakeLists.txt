@@ -126,10 +126,20 @@ include(DownloadFontAwesome)
 # -----------------------------------------------------------------------------
 # Dependencies
 # -----------------------------------------------------------------------------
+function(get_vcpkg_copyright PKG_NAME OUT_VAR)
+    set(_path "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/share/${PKG_NAME}/copyright")
+    if(EXISTS "${_path}")
+        set(${OUT_VAR} "${_path}" PARENT_SCOPE)
+    else()
+        message(WARNING "No copyright file for vcpkg port '${PKG_NAME}'")
+        set(${OUT_VAR} "" PARENT_SCOPE)
+    endif()
+endfunction()
 
 # Qt
 find_package(Qt6 6.9 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets Concurrent REQUIRED)
 
+get_vcpkg_copyright(Qt6 Qt6_COPYRIGHT)
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
 message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
@@ -149,8 +159,7 @@ message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 # )
 
 find_package(ZLIB REQUIRED)
-get_target_property(_ZLIB_LOC ZLIB::ZLIB IMPORTED_LOCATION_RELEASE)
-set(ZLIB_DIR "${_ZLIB_LOC}")
+get_vcpkg_copyright(ZLIB ZLIB_COPYRIGHT)
 message(STATUS "zlib dir ${ZLIB_DIR}")
 
 # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
@@ -768,7 +777,7 @@ list(APPEND INSTALL_LICENSE_COMMANDS
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${quazip_SOURCE_DIR}/COPYING ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ZLIB_DIR}/../../share/doc/zlib/zlib/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ZLIB_COPYRIGHT} ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/nlohmann_json
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${nlohmann_json_SOURCE_DIR}/LICENSE.MIT ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/nlohmann_json/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/valijson
