@@ -898,8 +898,6 @@ static QString cssColor(QPalette::ColorRole role)
 
 QString variantMapToHtml(const QVariantMap& map, int depth /*= 0*/, int maxDepth /*= 2*/)
 {
-    const auto pal = QToolTip::palette();
-
     if (depth >= maxDepth) {
         return QString("<span style='font-style:italic;'>{%2 keys}</span>").arg(QString::number(map.size()));
     }

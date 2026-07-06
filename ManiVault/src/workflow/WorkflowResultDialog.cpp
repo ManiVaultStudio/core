@@ -57,7 +57,12 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     treeView->setSortingEnabled(true);
     treeView->sortByColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), Qt::AscendingOrder);
     treeView->setRootIsDecorated(false);
-    
+
+    treeView->setItemDelegateForColumn(
+        static_cast<int>(AbstractWorkflowMessagesModel::Column::Details),
+        new WorkflowMessageDetailsDelegate(view)
+    );
+
     auto header = treeView->header();
     header->setStretchLastSection(false);
 

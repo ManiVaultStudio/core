@@ -701,6 +701,7 @@ set(PUBLIC_WORKFLOW_HEADERS
     src/workflow/WorkflowHandle.h
     src/workflow/WorkflowContextVariantMap.h
     src/workflow/WorkflowBatchingOptions.h
+    src/workflow/WorkflowMessageDetailsDelegate.h
 )
 
 set(PUBLIC_WORKFLOW_SOURCES
@@ -731,6 +732,7 @@ set(PUBLIC_WORKFLOW_SOURCES
     src/workflow/WorkflowContextVariantMap.cpp
     src/workflow/WorkflowBatchingOptions.cpp
     src/workflow/WorkflowResultBase.cpp
+    src/workflow/WorkflowMessageDetailsDelegate.cpp
 )
 
 set(PUBLIC_WORKFLOW_FILES
