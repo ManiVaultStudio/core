@@ -22,7 +22,7 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 {
     auto context = std::make_shared<ProjectOpenContext>(filePath);
 
-    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("Open project %1").arg(filePath), context);
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("Open project %1").arg(QFileInfo(filePath).fileName()), context);
 
     plan->addSequentialStage("Setup", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> void {
 #ifdef PROJECT_OPEN_WORKFLOW_PLAN_VERBOSE
