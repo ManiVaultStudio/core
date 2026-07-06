@@ -139,7 +139,7 @@ endfunction()
 # Qt
 find_package(Qt6 6.9 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets Concurrent REQUIRED)
 
-get_vcpkg_copyright(Qt6 Qt6_COPYRIGHT)
+get_vcpkg_copyright(qt Qt6_COPYRIGHT)
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
 message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
@@ -205,7 +205,7 @@ set_target_properties(QuaZip PROPERTIES
 #     "JSON_MultipleHeaders=ON"        # shave compile time (optional)
 # )
     find_package(nlohmann_json CONFIG REQUIRED)
-    get_vcpkg_copyright(nlohmann_json nlohmann_json_COPYRIGHT)
+    get_vcpkg_copyright(nlohmann-json nlohmann_json_COPYRIGHT) # vcpkg uses `-` not `_`
 
 # Serialization: Add valijson as a header-only library
 # from vcpkg
@@ -223,6 +223,7 @@ set_target_properties(QuaZip PROPERTIES
 
     find_package(valijson CONFIG REQUIRED)
     get_vcpkg_copyright(valijson valijson_COPYRIGHT)
+
 
 # Layout: Qt Advanced docking system
 CPMAddPackage(
