@@ -5,6 +5,8 @@
 #include "ErrorManager.h"
 #include "ErrorLoggingConsentDialog.h"
 
+#include <cpptrace/cpptrace.hpp>
+
 using namespace mv::gui;
 using namespace mv::util;
 
@@ -122,7 +124,7 @@ void ErrorManager::showErrorLoggingConsentDialog()
 
 QString ErrorManager::getDebugStackTrace() const
 {
-	return {};
+	return QString::fromStdString(cpptrace::generate_trace().to_string());
 }
 
 }
