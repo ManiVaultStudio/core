@@ -139,28 +139,29 @@ QVariant AbstractWorkflowMessagesModel::LocationItem::data(int role /*= Qt::User
 
 QVariant AbstractWorkflowMessagesModel::DetailsItem::data(int role) const
 {
-    
+    const auto details = getWorkflowMessage()->details;
+
     switch (role) {
 	    case Qt::EditRole:
-            return getWorkflowMessage()->details;
+	        return details;
 
-		case Qt::DisplayRole:
-            return QString("%1").arg(data(Qt::EditRole).toMap().isEmpty() ? "Not available..." : data(Qt::EditRole).toMap().keys().join(", "));
+	    case Qt::DisplayRole:
+	        return details.isEmpty() ? QString{} : QStringLiteral("View...");
 
-        case Qt::ToolTipRole:
-            return getTooltip();
+	    case Qt::ToolTipRole:
+	        return details.isEmpty() ? QString{} : getTooltip();
 
-        case Qt::FontRole: {
-            QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-            font.setItalic(true);
-            return font;
-        }
-
-	    default:
-	        break;
+	    case Qt::FontRole: {
+	        QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+	        font.setItalic(true);
+	        return font;
     }
-    
-	return Item::data(role);
+
+    default:
+        break;
+    }
+
+    return Item::data(role);
 }
 
 QVariant AbstractWorkflowMessagesModel::TimeStampItem::data(int role /*= Qt::UserRole + 1*/) const

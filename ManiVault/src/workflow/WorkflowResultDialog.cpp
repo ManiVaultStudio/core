@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "WorkflowResultDialog.h"
+#include "WorkflowMessageDetailsDelegate.h"
 
 #include "util/SeverityLevel.h"
 
@@ -57,11 +58,7 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     treeView->setSortingEnabled(true);
     treeView->sortByColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), Qt::AscendingOrder);
     treeView->setRootIsDecorated(false);
-
-    treeView->setItemDelegateForColumn(
-        static_cast<int>(AbstractWorkflowMessagesModel::Column::Details),
-        new WorkflowMessageDetailsDelegate(view)
-    );
+    treeView->setItemDelegateForColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), new WorkflowMessageDetailsDelegate(treeView));
 
     auto header = treeView->header();
     header->setStretchLastSection(false);
