@@ -362,7 +362,7 @@ target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}
 
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(${MV_PUBLIC_LIB} PRIVATE valijson::valijson)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE valijson)
 
 target_compile_features(${MV_PUBLIC_LIB} PUBLIC cxx_std_${MV_CXX_STANDARD})
 
@@ -424,7 +424,7 @@ target_include_directories(${MV_EXE} PRIVATE
 )
 
 target_link_libraries(${MV_EXE} PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(${MV_EXE} PRIVATE valijson::valijson)
+target_link_libraries(${MV_EXE} PRIVATE valijson)
 
 target_compile_features(${MV_EXE} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
