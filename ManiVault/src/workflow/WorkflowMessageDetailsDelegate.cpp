@@ -20,25 +20,35 @@ using namespace mv::util;
 namespace mv::workflow
 {
 
-void WorkflowMessageDetailsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
-{
-	const auto details = index.data(Qt::EditRole).toMap();
-
-	if (details.isEmpty()) {
-		QStyledItemDelegate::paint(painter, option, index);
-		return;
-	}
-
-	QStyleOptionButton button;
-	button.rect  = option.rect.adjusted(4, 3, -4, -3);
-	button.text  = QStringLiteral("Details");
-	button.state = QStyle::State_Enabled;
-
-	if (option.state & QStyle::State_MouseOver)
-		button.state |= QStyle::State_MouseOver;
-
-	QApplication::style()->drawControl(QStyle::CE_PushButton, &button, painter);
-}
+//void WorkflowMessageDetailsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+//{
+//    const auto details = index.data(Qt::EditRole).toMap();
+//
+//    if (details.isEmpty()) {
+//        QStyledItemDelegate::paint(painter, option, index);
+//        return;
+//    }
+//
+//    QStyledItemDelegate::paint(painter, option, index);
+//
+//    constexpr int margin = 0;
+//    const int size = option.rect.height() - 2 * margin;
+//
+//    const QRect iconRect(
+//        option.rect.left(),
+//        option.rect.top() + margin,
+//        size,
+//        size
+//    );
+//
+//    const bool hovered = option.state & QStyle::State_MouseOver;
+//
+//    const QColor color = hovered
+//        ? QColor(80, 170, 255)
+//        : option.palette.color(QPalette::Text);
+//
+//    QIcon(StyledIcon("circle-info").withColor(color)).paint(painter, iconRect);
+//}
 
 bool WorkflowMessageDetailsDelegate::editorEvent(QEvent* event, QAbstractItemModel* abstractItemModel, const QStyleOptionViewItem& styleOptionViewItem, const QModelIndex& index)
 {
@@ -58,63 +68,99 @@ bool WorkflowMessageDetailsDelegate::editorEvent(QEvent* event, QAbstractItemMod
 void WorkflowMessageDetailsDelegate::showDetailsBrowser(const QVariantMap& details)
 {
     auto* parentWindow = qobject_cast<QWidget*>(parent());
-    auto dialog = new QDialog(parentWindow);
+    auto* dialog = new QDialog(parentWindow);
 
-	dialog->setWindowTitle(QStringLiteral("Workflow message details"));
-	dialog->resize(800, 600);
+    dialog->setWindowTitle(QStringLiteral("Workflow message details"));
+    dialog->resize(900, 650);
 
-	auto* layout = new QVBoxLayout(dialog);
+    auto* layout = new QVBoxLayout(dialog);
 
-	auto* tree = new QTreeWidget(dialog);
-	tree->setColumnCount(2);
-	tree->setHeaderLabels({ QStringLiteral("Key"), QStringLiteral("Value") });
+    auto* model = new QStandardItemModel(dialog);
+    model->setHorizontalHeaderLabels({
+        QStringLiteral("Key"),
+        QStringLiteral("Value")
+        });
 
-	populateTree(tree->invisibleRootItem(), details);
+    for (auto it = details.begin(); it != details.end(); ++it)
+        populateModel(model->invisibleRootItem(), it.key(), it.value());
 
-	tree->expandAll();
-	tree->resizeColumnToContents(0);
+    auto* treeView = new QTreeView(dialog);
+    treeView->setModel(model);
+    treeView->setAlternatingRowColors(true);
+    treeView->setUniformRowHeights(false);
+    treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    treeView->expandAll();
+    treeView->resizeColumnToContents(0);
 
-	layout->addWidget(tree);
+    layout->addWidget(treeView);
 
-	dialog->setAttribute(Qt::WA_DeleteOnClose);
-	dialog->show();
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->show();
+    dialog->raise();
+    dialog->activateWindow();
 }
 
-void WorkflowMessageDetailsDelegate::populateTree(QTreeWidgetItem* parent, const QVariant& value)
+QList<QStandardItem*> WorkflowMessageDetailsDelegate::makeRow(const QString& key, const QString& value)
 {
-	if (value.metaType().id() == QMetaType::QVariantMap) {
-		const auto map = value.toMap();
+    auto* keyItem = new QStandardItem(key);
+    auto* valueItem = new QStandardItem(value);
 
-		for (auto it = map.begin(); it != map.end(); ++it) {
-			auto* item = new QTreeWidgetItem(parent);
-			item->setText(0, it.key());
+    keyItem->setEditable(false);
+    valueItem->setEditable(false);
 
-			if (it.value().canConvert<QVariantMap>() || it.value().canConvert<QVariantList>())
-				populateTree(item, it.value());
-			else
-				item->setText(1, it.value().toString());
-		}
+    return { keyItem, valueItem };
+}
 
-		return;
-	}
+void WorkflowMessageDetailsDelegate::populateModel(QStandardItem* parent, const QString& key, const QVariant& value)
+{
+    const auto type = value.metaType().id();
 
-	if (value.metaType().id() == QMetaType::QVariantList) {
-		const auto list = value.toList();
+    if (type == QMetaType::QString) {
+        parent->appendRow(makeRow(key, value.toString()));
+        return;
+    }
 
-		for (int i = 0; i < list.size(); ++i) {
-			auto* item = new QTreeWidgetItem(parent);
-			item->setText(0, QStringLiteral("[%1]").arg(i));
+    if (type == QMetaType::QVariantMap) {
+        auto row = makeRow(key);
+        auto* keyItem = row.first();
+        parent->appendRow(row);
 
-			if (list[i].canConvert<QVariantMap>() || list[i].canConvert<QVariantList>())
-				populateTree(item, list[i]);
-			else
-				item->setText(1, list[i].toString());
-		}
+        const auto map = value.toMap();
 
-		return;
-	}
+        for (auto it = map.begin(); it != map.end(); ++it)
+            populateModel(keyItem, it.key(), it.value());
 
-	parent->setText(1, value.toString());
+        return;
+    }
+
+    if (type == QMetaType::QStringList) {
+        auto row = makeRow(key);
+        auto* keyItem = row.first();
+        parent->appendRow(row);
+
+        const auto list = value.toStringList();
+
+        for (int i = 0; i < list.size(); ++i)
+            keyItem->appendRow(makeRow(QStringLiteral("[%1]").arg(i), list[i]));
+
+        return;
+    }
+
+    if (type == QMetaType::QVariantList) {
+        auto row = makeRow(key);
+        auto* keyItem = row.first();
+        parent->appendRow(row);
+
+        const auto list = value.toList();
+
+        for (int i = 0; i < list.size(); ++i)
+            populateModel(keyItem, QStringLiteral("[%1]").arg(i), list[i]);
+
+        return;
+    }
+
+    parent->appendRow(makeRow(key, value.toString()));
 }
 
 }

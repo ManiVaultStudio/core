@@ -59,6 +59,7 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     treeView->sortByColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), Qt::AscendingOrder);
     treeView->setRootIsDecorated(false);
     treeView->setItemDelegateForColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), new WorkflowMessageDetailsDelegate(treeView));
+    treeView->setMouseTracking(true);
 
     auto header = treeView->header();
     header->setStretchLastSection(false);
@@ -67,14 +68,14 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Emitter), QHeaderView::Interactive);
     header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Location), QHeaderView::Interactive);
     header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Text), QHeaderView::Stretch);
-    header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), QHeaderView::Interactive);
+    header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), QHeaderView::Fixed);
 
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level), 35);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Emitter), 150);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Location), 150);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Text), 300);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), 60);
-    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), 100);
+    header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), 60);
     
     header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), true);
 

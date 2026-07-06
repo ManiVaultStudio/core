@@ -146,10 +146,15 @@ QVariant AbstractWorkflowMessagesModel::DetailsItem::data(int role) const
 	        return details;
 
 	    case Qt::DisplayRole:
-	        return details.isEmpty() ? QString{} : QStringLiteral("View...");
+	        return "";
 
-	    case Qt::ToolTipRole:
-	        return details.isEmpty() ? QString{} : getTooltip();
+        case Qt::DecorationRole:
+        {
+            return details.isEmpty() ? StyledIcon() : StyledIcon("file-lines");
+        }
+
+        case Qt::ToolTipRole:
+            return "View diagnostic details";
 
 	    case Qt::FontRole: {
 	        QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);

@@ -41,7 +41,7 @@ public:
      * @param option Style options describing the item.
      * @param index Model index identifying the item to paint.
      */
-    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+	//void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
     /**
      * @brief Handles user interaction with the details cell.
@@ -59,27 +59,16 @@ public:
     bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index) override;
 
 private:
-
-    /**
-	 * @brief Opens a browser for inspecting workflow message details.
-	 *
-	 * Presents the supplied diagnostic details in a hierarchical view, allowing
-	 * nested QVariantMap and QVariantList values to be explored interactively.
-	 *
-	 * @param details Diagnostic details to display.
-	 */
     void showDetailsBrowser(const QVariantMap& details);
 
-    /**
-     * @brief Populates a tree widget with QVariant data.
-     *
-     * Recursively converts QVariantMap and QVariantList values into a tree
-     * representation. Primitive values are displayed as leaf nodes.
-     *
-     * @param parent Parent tree item to populate.
-     * @param value QVariant value to add to the tree.
-     */
-    static void populateTree(QTreeWidgetItem* parent, const QVariant& value);
+    static void populateModel(
+        QStandardItem* parent,
+        const QString& key,
+        const QVariant& value);
+
+    static QList<QStandardItem*> makeRow(
+        const QString& key,
+        const QString& value = {});
 };
 
 } // namespace mv::workflow

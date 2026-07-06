@@ -5,6 +5,8 @@
 #include "ErrorManager.h"
 #include "ErrorLoggingConsentDialog.h"
 
+#include <QRegularExpression>
+
 #include <cpptrace/cpptrace.hpp>
 
 using namespace mv::gui;
@@ -124,7 +126,19 @@ void ErrorManager::showErrorLoggingConsentDialog()
 
 QString ErrorManager::getDebugStackTrace() const
 {
-	return QString::fromStdString(cpptrace::generate_trace().to_string());
+    QStringList lines = QString::fromStdString(cpptrace::generate_trace().to_string()).split('\n', Qt::SkipEmptyParts);
+
+    // Remove the header.
+    if (!lines.isEmpty() && lines.first().startsWith("Stack trace"))
+        lines.removeFirst();
+
+    // Remove frame numbers (#0, #1, ...).
+    static const QRegularExpression frameNumberRegex(R"(^\s*#\d+\s+)");
+
+    for (QString& line : lines)
+        line.remove(frameNumberRegex);
+
+    return lines.join('\n');
 }
 
 }
