@@ -277,6 +277,18 @@ if(${MV_USE_ERROR_LOGGING})
 
 endif()
 
+option(MV_ENABLE_CPPTRACE "Enable cpptrace stack traces" ON)
+
+if(MV_ENABLE_CPPTRACE)
+    CPMAddPackage(
+        NAME cpptrace
+        GITHUB_REPOSITORY jeremy-rifkin/cpptrace
+        GIT_TAG v1.0.4
+        OPTIONS
+            "CPPTRACE_BUILD_TESTING OFF"
+    )
+endif()
+
 # -----------------------------------------------------------------------------
 # Source files
 # -----------------------------------------------------------------------------
@@ -413,6 +425,12 @@ if(${MV_USE_ERROR_LOGGING})
         add_dependencies(${MV_EXE} crashpad_handler)
     endif()
 endif()
+
+if(MV_ENABLE_CPPTRACE)
+    target_link_libraries(${MV_EXE} PRIVATE cpptrace::cpptrace)
+    target_compile_definitions(${MV_EXE} PRIVATE MV_ENABLE_CPPTRACE)
+endif()
+
 
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
 
