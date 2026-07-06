@@ -1016,4 +1016,19 @@ QString dumpHex(const QByteArray& bytes, qsizetype count)
 	return hex.join(' ');
 }
 
+void addDebugStackTrace(QVariantMap& details)
+{
+	const auto stackTraceString = mv::errors().getDebugStackTrace();
+
+	if (stackTraceString.isEmpty())
+		return;
+
+	QStringList lines = stackTraceString.split('\n', Qt::SkipEmptyParts);
+
+	for (QString& line : lines)
+		line = line.trimmed();
+
+	details["StackTrace"] = QVariant::fromValue(lines);
+}
+
 }

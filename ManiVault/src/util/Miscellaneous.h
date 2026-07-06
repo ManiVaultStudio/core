@@ -387,4 +387,9 @@ CORE_EXPORT QString describeVariantMapKeys(const QVariantMap& map, qsizetype max
  */
 CORE_EXPORT QString dumpHex(const QByteArray& bytes, qsizetype count = 100);;
 
+/**
+ * Add the current debug stack trace to the provided QVariantMap under the key "StackTrace"
+ * @param details Map to which the stack trace will be added
+ */
+CORE_EXPORT void addDebugStackTrace(QVariantMap& details);
 }
