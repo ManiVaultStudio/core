@@ -205,7 +205,7 @@ set_target_properties(QuaZip PROPERTIES
 #     "JSON_MultipleHeaders=ON"        # shave compile time (optional)
 # )
     find_package(nlohmann_json CONFIG REQUIRED)
-    
+    get_vcpkg_copyright(nlohmann_json nlohmann_json_COPYRIGHT)
 
 # Serialization: Add valijson as a header-only library
 # from vcpkg
@@ -220,6 +220,9 @@ set_target_properties(QuaZip PROPERTIES
 #     "VALIJSON_BUILD_TESTS OFF" 
 #     "VALIJSON_USE_EXCEPTIONS ON"
 # )
+
+    find_package(valijson CONFIG REQUIRED)
+    get_vcpkg_copyright(valijson valijson_COPYRIGHT)
 
 # Layout: Qt Advanced docking system
 CPMAddPackage(
@@ -255,6 +258,7 @@ target_link_libraries(qtadvanceddocking-qt6 PRIVATE nlohmann_json::nlohmann_json
 # )
 
 find_package(biovault-bfloat16 CONFIG REQUIRED)
+get_vcpkg_copyright(biovault-bfloat16 biovault-bfloat16_COPYRIGHT)
 
 # Use of Sentry on MacOS breaks the build so turn it off for now...
 if(${MV_USE_ERROR_LOGGING})
@@ -357,7 +361,8 @@ target_sources(${MV_PUBLIC_LIB}
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
-target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${valijson_SOURCE_DIR}/include")
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE valijson::valijson)
 
 target_compile_features(${MV_PUBLIC_LIB} PUBLIC cxx_std_${MV_CXX_STANDARD})
 
@@ -418,8 +423,8 @@ target_include_directories(${MV_EXE} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}         # for resources in /res
 )
 
-target_include_directories(${MV_EXE} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
-target_include_directories(${MV_EXE} PRIVATE "${valijson_SOURCE_DIR}/include")
+target_link_libraries(${MV_EXE} PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(${MV_EXE} PRIVATE valijson::valijson)
 
 target_compile_features(${MV_EXE} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
@@ -779,11 +784,11 @@ list(APPEND INSTALL_LICENSE_COMMANDS
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ZLIB_COPYRIGHT} ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/nlohmann_json
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${nlohmann_json_SOURCE_DIR}/LICENSE.MIT ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/nlohmann_json/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${nlohmann_json_COPYRIGHT} ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/nlohmann_json/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/valijson
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${valijson_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/valijson/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${valijson_COPYRIGHT} ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/valijson/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${biovault_bfloat16_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${biovault-bfloat16_COPYRIGHT} ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16/LICENSE
 )
 
 if(${MV_USE_ERROR_LOGGING})
