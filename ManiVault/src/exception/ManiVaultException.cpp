@@ -25,6 +25,8 @@ ManiVaultException::ManiVaultException(SeverityLevel severity, QString message, 
         { "Function", location.function_name() }
     };
     _details["DiagnosticId"] = _diagnosticId.toString(QUuid::WithoutBraces);
+
+    addDebugStackTrace(_details);
 }
 
 ManiVaultException ManiVaultException::withAddedDetails(const QVariantMap& additionalDetails) const
