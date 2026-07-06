@@ -68,7 +68,7 @@ private:
 	 *
 	 * @param details Diagnostic details to display.
 	 */
-    static void showDetailsBrowser(const QVariantMap& details);
+    void showDetailsBrowser(const QVariantMap& details);
 
     /**
      * @brief Populates a tree widget with QVariant data.

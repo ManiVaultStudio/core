@@ -57,7 +57,9 @@ bool WorkflowMessageDetailsDelegate::editorEvent(QEvent* event, QAbstractItemMod
 
 void WorkflowMessageDetailsDelegate::showDetailsBrowser(const QVariantMap& details)
 {
-	auto* dialog = new QDialog;
+    auto* parentWindow = qobject_cast<QWidget*>(parent());
+    auto dialog = new QDialog(parentWindow);
+
 	dialog->setWindowTitle(QStringLiteral("Workflow message details"));
 	dialog->resize(800, 600);
 
