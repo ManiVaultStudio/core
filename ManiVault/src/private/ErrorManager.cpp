@@ -120,4 +120,9 @@ void ErrorManager::showErrorLoggingConsentDialog()
 #endif
 }
 
+QString ErrorManager::getDebugStackTrace() const
+{
+	return {};
+}
+
 }
