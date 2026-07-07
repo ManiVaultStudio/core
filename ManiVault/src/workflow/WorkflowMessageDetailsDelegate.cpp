@@ -7,9 +7,13 @@
 #include "util/Serialization.h"
 #include "util/Miscellaneous.h"
 
+#include <QAbstractItemView>
+#include <QDialog>
 #include <QFontDatabase>
+#include <QStandardItemModel>
 #include <QToolTip>
-
+#include <QTreeView>
+#include <QVBoxLayout>
 #ifdef _DEBUG
 	#define WORKFLOW_MESSAGE_DETAILS_DELEGATE_VERBOSE
 #endif
