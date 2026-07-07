@@ -7,8 +7,9 @@
 
 #include <QRegularExpression>
 
+#ifdef MV_ENABLE_CPPTRACE
 #include <cpptrace/cpptrace.hpp>
-
+#endif
 using namespace mv::gui;
 using namespace mv::util;
 
