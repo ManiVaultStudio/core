@@ -8,6 +8,11 @@
 #include "WorkflowExecutionContext.h"
 
 #include "util/SeverityLevel.h"
+#include <QUuid>
+#include <QMutex>
+#include <QMutexLocker>
+#include <QTreeView>
+
 
 namespace mv::workflow
 {

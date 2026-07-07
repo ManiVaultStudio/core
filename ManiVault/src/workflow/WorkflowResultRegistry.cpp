@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "WorkflowResultRegistry.h"
+#include <QMutexLocker>
 
 namespace mv::workflow
 {

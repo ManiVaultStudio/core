@@ -4,6 +4,7 @@
 
 #include "Plugin.h"
 #include "CoreInterface.h"
+#include <QUuid>
 
 #ifdef _DEBUG
     #define PLUGIN_VERBOSE

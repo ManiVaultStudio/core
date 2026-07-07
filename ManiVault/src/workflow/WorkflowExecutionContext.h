@@ -15,6 +15,10 @@
 
 #include <QString>
 #include <QUuid>
+#include <QMutex>
+#include <QMutexLocker>
+#include <QTreeView>
+
 
 namespace mv::workflow
 {
