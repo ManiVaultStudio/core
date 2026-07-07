@@ -7,6 +7,7 @@
 #include "util/SeverityLevel.h"
 
 #include <QHeaderView>
+#include <QTreeView>
 
 using namespace mv::util;
 

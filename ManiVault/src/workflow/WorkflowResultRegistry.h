@@ -11,6 +11,10 @@
 #include <QObject>
 #include <QHash>
 #include <QUuid>
+#include <QMutex>
+#include <QMutexLocker>
+#include <QTreeView>
+
 
 namespace mv::workflow
 {
