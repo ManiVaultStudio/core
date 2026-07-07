@@ -52,6 +52,9 @@ namespace mv::workflow
 
 bool WorkflowMessageDetailsDelegate::editorEvent(QEvent* event, QAbstractItemModel* abstractItemModel, const QStyleOptionViewItem& styleOptionViewItem, const QModelIndex& index)
 {
+    Q_UNUSED(abstractItemModel);
+    Q_UNUSED(styleOptionViewItem);
+
 	if (event->type() != QEvent::MouseButtonRelease)
 		return false;
 
