@@ -127,6 +127,9 @@ void ErrorManager::showErrorLoggingConsentDialog()
 
 QString ErrorManager::getDebugStackTrace() const
 {
+#ifndef MV_ENABLE_CPPTRACE
+    return {};
+#else
     QStringList lines = QString::fromStdString(cpptrace::generate_trace().to_string()).split('\n', Qt::SkipEmptyParts);
 
     // Remove the header.
@@ -140,6 +143,7 @@ QString ErrorManager::getDebugStackTrace() const
         line.remove(frameNumberRegex);
 
     return lines.join('\n');
+#endif
 }
 
 }
