@@ -154,7 +154,7 @@ QVariant AbstractWorkflowMessagesModel::DetailsItem::data(int role) const
         }
 
         case Qt::ToolTipRole:
-            return "View diagnostic details";
+            return details.isEmpty() ? "No details" : "View diagnostic details";
 
 	    case Qt::FontRole: {
 	        QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
