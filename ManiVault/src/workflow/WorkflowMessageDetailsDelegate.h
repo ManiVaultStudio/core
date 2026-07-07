@@ -8,7 +8,8 @@
 
 #include <QList>
 #include <QStandardItem>
-
+#include <QStyledItemDelegate>
+#include <QVariant>
 namespace mv::workflow
 {
 
