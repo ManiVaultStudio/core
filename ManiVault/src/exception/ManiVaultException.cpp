@@ -26,25 +26,19 @@ ManiVaultException::ManiVaultException(SeverityLevel severity, QString message, 
         { "Line", static_cast<int>(location.line()) },
         { "Function", location.function_name() }
     };
-    _details["DiagnosticId"] = _diagnosticId.toString(QUuid::WithoutBraces);
 
-    addDebugStackTrace(_details);
+    _details["DiagnosticId"]    = _diagnosticId.toString(QUuid::WithoutBraces);
+    _details["StackTrace"]      = stackTraceToVariantList(mv::errors().getDebugStackTrace());
 }
 
 ManiVaultException ManiVaultException::withAddedDetails(const QVariantMap& additionalDetails) const
 {
-	QVariantMap newDetails = _details;
+    ManiVaultException copy = *this;
 
-	for (auto it = additionalDetails.begin(); it != additionalDetails.end(); ++it)
-		newDetails[it.key()] = it.value();
+    for (auto it = additionalDetails.begin(); it != additionalDetails.end(); ++it)
+        copy._details[it.key()] = it.value();
 
-    return {
-        _severity,
-        _message,
-        _what,
-        _where,
-        newDetails
-    };
+    return copy;
 }
 
 SeverityLevel ManiVaultException::getSeverity() const
@@ -77,9 +71,9 @@ QUuid ManiVaultException::getDiagnosticId() const
     return _diagnosticId;
 }
 
-QStringList ManiVaultException::getStackTrace() const
+StackTrace ManiVaultException::getStackTrace() const
 {
-    return _details.value("StackTrace").toStringList();
+    return stackTraceFromVariantList(_details.value("StackTrace").toList());
 }
 
 }

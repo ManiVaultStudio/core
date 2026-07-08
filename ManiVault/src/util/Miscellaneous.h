@@ -21,6 +21,8 @@
 
 #include <algorithm>
 
+#include "StackFrame.h"
+
 class QAction;
 
 namespace mv::util
@@ -388,8 +390,24 @@ CORE_EXPORT QString describeVariantMapKeys(const QVariantMap& map, qsizetype max
 CORE_EXPORT QString dumpHex(const QByteArray& bytes, qsizetype count = 100);;
 
 /**
- * Add the current debug stack trace to the provided QVariantMap under the key "StackTrace"
- * @param details Map to which the stack trace will be added
+ * @brief Converts stack trace frames to a QVariantList.
+ *
+ * Each frame is represented as a QVariantMap containing the available symbolic
+ * stack-frame fields.
+ *
+ * @param stackTrace Stack trace frames to convert.
+ * @return QVariantList representation of the stack trace.
  */
-CORE_EXPORT void addDebugStackTrace(QVariantMap& details);
+CORE_EXPORT QVariantList stackTraceToVariantList(const StackTrace& stackTrace);
+
+/**
+ * @brief Converts a QVariantList to stack trace frames.
+ *
+ * Each list entry is expected to contain a QVariantMap with stack-frame fields.
+ * Missing fields are left at their default StackFrame values.
+ *
+ * @param frames QVariantList representation of stack frames.
+ * @return Stack trace frames reconstructed from the list.
+ */
+CORE_EXPORT StackTrace stackTraceFromVariantList(const QVariantList& frames);
 }

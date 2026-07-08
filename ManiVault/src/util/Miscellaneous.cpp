@@ -1014,19 +1014,47 @@ QString dumpHex(const QByteArray& bytes, qsizetype count)
 	return hex.join(' ');
 }
 
-void addDebugStackTrace(QVariantMap& details)
+QVariantList stackTraceToVariantList(const StackTrace& stackTrace)
 {
-	const auto stackTraceString = mv::errors().getDebugStackTrace();
+	QVariantList variantList;
 
-	if (stackTraceString.isEmpty())
-		return;
+	variantList.reserve(stackTrace.size());
 
-	QStringList lines = stackTraceString.split('\n', Qt::SkipEmptyParts);
+	for (const auto& frame : stackTrace) {
+		variantList.append(QVariantMap{
+			{ "Function", frame.function },
+			{ "File",     frame.file },
+			{ "Line",     frame.line },
+			{ "Module",   frame.module },
+			{ "Address",  frame.address },
+			{ "Raw",      frame.raw }
+		});
+	}
 
-	for (QString& line : lines)
-		line = line.trimmed();
-
-	details["StackTrace"] = QVariant::fromValue(lines);
+	return variantList;
 }
 
+StackTrace stackTraceFromVariantList(const QVariantList& frames)
+{
+	StackTrace stackTrace;
+
+	stackTrace.reserve(frames.size());
+
+	for (const auto& value : frames) {
+		const auto map = value.toMap();
+
+		StackFrame frame;
+
+		frame.function = map.value("Function").toString();
+		frame.file     = map.value("File").toString();
+		frame.line     = map.value("Line", -1).toInt();
+		frame.module   = map.value("Module").toString();
+		frame.address  = map.value("Address").toString();
+		frame.raw      = map.value("Raw").toString();
+
+		stackTrace.push_back(std::move(frame));
+	}
+
+	return stackTrace;
+}
 }

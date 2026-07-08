@@ -6,6 +6,8 @@
 
 #include "AbstractManager.h"
 
+#include "util/StackFrame.h"
+
 #include "actions/ToggleAction.h"
 #include "actions/StringAction.h"
 #include "actions/TriggerAction.h"
@@ -58,7 +60,25 @@ public:
 	 *
 	 * @return A formatted stack trace, or an empty string if unavailable.
 	 */
-    virtual QString getDebugStackTrace() const
+    virtual QString getFormattedDebugStackTrace() const
+    {
+        return {};
+    }
+
+    /**
+     * @brief Gets a structured stack trace for debugging purposes.
+     *
+     * Returns stack frames describing the current execution point. The default
+     * implementation returns an empty stack trace, indicating that stack trace
+     * capture is not supported or has not been implemented by the active error
+     * manager.
+     *
+     * Derived classes may override this function to provide platform- or
+     * application-specific stack trace collection.
+     *
+     * @return Stack trace frames, or an empty stack trace if unavailable.
+     */
+    virtual util::StackTrace getDebugStackTrace() const
     {
         return {};
     }

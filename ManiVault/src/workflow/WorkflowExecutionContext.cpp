@@ -167,7 +167,7 @@ void WorkflowExecutionContext::reportFailed(SeverityLevel severity, const QStrin
         details[it.key()] = it.value();
 
     if (!details.contains("StackTrace"))
-        addDebugStackTrace(details);
+        details["StackTrace"] = stackTraceToVariantList(mv::errors().getDebugStackTrace());
 
     message(severity, _name, {}, details);
 

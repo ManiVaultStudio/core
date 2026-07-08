@@ -10,6 +10,7 @@
 #include "util/Exception.h"
 
 #include <QString>
+#include <QObject>
 
 namespace mv
 {

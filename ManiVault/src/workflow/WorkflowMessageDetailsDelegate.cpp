@@ -24,36 +24,6 @@ using namespace mv::util;
 namespace mv::workflow
 {
 
-//void WorkflowMessageDetailsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
-//{
-//    const auto details = index.data(Qt::EditRole).toMap();
-//
-//    if (details.isEmpty()) {
-//        QStyledItemDelegate::paint(painter, option, index);
-//        return;
-//    }
-//
-//    QStyledItemDelegate::paint(painter, option, index);
-//
-//    constexpr int margin = 0;
-//    const int size = option.rect.height() - 2 * margin;
-//
-//    const QRect iconRect(
-//        option.rect.left(),
-//        option.rect.top() + margin,
-//        size,
-//        size
-//    );
-//
-//    const bool hovered = option.state & QStyle::State_MouseOver;
-//
-//    const QColor color = hovered
-//        ? QColor(80, 170, 255)
-//        : option.palette.color(QPalette::Text);
-//
-//    QIcon(StyledIcon("circle-info").withColor(color)).paint(painter, iconRect);
-//}
-
 bool WorkflowMessageDetailsDelegate::editorEvent(QEvent* event, QAbstractItemModel* abstractItemModel, const QStyleOptionViewItem& styleOptionViewItem, const QModelIndex& index)
 {
     Q_UNUSED(abstractItemModel);

@@ -588,6 +588,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/CodecRegistry.h
     src/util/CodecActionBinding.h
     src/util/SeverityLevel.h
+    src/util/StackFrame.h
 )
 
 if(APPLE)
