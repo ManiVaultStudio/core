@@ -14,6 +14,11 @@
 #include <QToolTip>
 #include <QTreeView>
 #include <QVBoxLayout>
+#include <QApplication>
+#include <QClipboard>
+#include <QFileDialog>
+#include <QMessageBox>
+
 #ifdef _DEBUG
 	#define WORKFLOW_MESSAGE_DETAILS_DELEGATE_VERBOSE
 #endif
@@ -23,6 +28,39 @@ using namespace mv::util;
 
 namespace mv::workflow
 {
+
+namespace
+{
+
+    void copyDetailsToClipboard(const QVariantMap& details)
+    {
+        const auto json = QJsonDocument::fromVariant(details).toJson(QJsonDocument::Indented);
+        QApplication::clipboard()->setText(QString::fromUtf8(json));
+
+        mv::help().addNotification("Copied to clipboard", "The workflow message details have been copied to the clipboard.", StyledIcon("clipboard"));
+    }
+
+    void saveDetailsToJsonFile(const QVariantMap& details, QWidget* parent)
+    {
+        const auto fileName = QFileDialog::getSaveFileName(parent, QStringLiteral("Save workflow message details"), QStringLiteral("workflow-message-details.json"), QStringLiteral("JSON files (*.json);;All files (*)"));
+
+        if (fileName.isEmpty())
+            return;
+
+        QFile file(fileName);
+
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
+            QMessageBox::warning(parent, QStringLiteral("Save failed"), QStringLiteral("Could not write to:\n%1").arg(fileName));
+            return;
+        }
+
+        const auto json = QJsonDocument::fromVariant(details).toJson(QJsonDocument::Indented);
+        file.write(json);
+
+        mv::help().addNotification("Saved to file", QString("The workflow message details have been saved to %1.").arg(fileName), StyledIcon("save"));
+    }
+
+} // namespace
 
 bool WorkflowMessageDetailsDelegate::editorEvent(QEvent* event, QAbstractItemModel* abstractItemModel, const QStyleOptionViewItem& styleOptionViewItem, const QModelIndex& index)
 {
@@ -53,6 +91,7 @@ void WorkflowMessageDetailsDelegate::showDetailsBrowser(const QVariantMap& detai
     auto* layout = new QVBoxLayout(dialog);
 
     auto* model = new QStandardItemModel(dialog);
+
     model->setHorizontalHeaderLabels({
         QStringLiteral("Key"),
         QStringLiteral("Value")
@@ -61,7 +100,7 @@ void WorkflowMessageDetailsDelegate::showDetailsBrowser(const QVariantMap& detai
     for (auto it = details.begin(); it != details.end(); ++it)
         populateModel(model->invisibleRootItem(), it.key(), it.value());
 
-    auto treeView = new QTreeView(dialog);
+    auto* treeView = new QTreeView(dialog);
 
     treeView->setModel(model);
     treeView->setAlternatingRowColors(true);
@@ -72,6 +111,25 @@ void WorkflowMessageDetailsDelegate::showDetailsBrowser(const QVariantMap& detai
     treeView->resizeColumnToContents(0);
 
     layout->addWidget(treeView);
+
+    auto* buttons = new QDialogButtonBox(dialog);
+
+    auto* copyButton = buttons->addButton(QStringLiteral("Copy JSON"), QDialogButtonBox::ActionRole);
+    auto* saveButton = buttons->addButton(QStringLiteral("Save JSON..."), QDialogButtonBox::ActionRole);
+
+    buttons->addButton(QDialogButtonBox::Close);
+
+    connect(copyButton, &QPushButton::clicked, dialog, [details] {
+        copyDetailsToClipboard(details);
+    });
+
+    connect(saveButton, &QPushButton::clicked, dialog, [details, dialog] {
+        saveDetailsToJsonFile(details, dialog);
+    });
+
+    connect(buttons, &QDialogButtonBox::rejected, dialog, &QDialog::close);
+
+    layout->addWidget(buttons);
 
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->show();
