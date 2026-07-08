@@ -61,13 +61,14 @@ void WorkflowMessageDetailsDelegate::showDetailsBrowser(const QVariantMap& detai
     for (auto it = details.begin(); it != details.end(); ++it)
         populateModel(model->invisibleRootItem(), it.key(), it.value());
 
-    auto* treeView = new QTreeView(dialog);
+    auto treeView = new QTreeView(dialog);
+
     treeView->setModel(model);
     treeView->setAlternatingRowColors(true);
     treeView->setUniformRowHeights(false);
     treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    treeView->expandAll();
+    treeView->collapseAll();
     treeView->resizeColumnToContents(0);
 
     layout->addWidget(treeView);

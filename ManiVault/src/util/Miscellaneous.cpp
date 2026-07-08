@@ -1057,4 +1057,17 @@ StackTrace stackTraceFromVariantList(const QVariantList& frames)
 
 	return stackTrace;
 }
+
+QVariantList stackTraceFunctionList(const StackTrace& stackTrace)
+{
+	QVariantList overview;
+
+	overview.reserve(stackTrace.size());
+
+	for (const auto& frame : stackTrace)
+		overview.append(frame.function);
+
+	return overview;
+}
+
 }

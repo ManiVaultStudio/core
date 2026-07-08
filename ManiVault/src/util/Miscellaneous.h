@@ -410,4 +410,6 @@ CORE_EXPORT QVariantList stackTraceToVariantList(const StackTrace& stackTrace);
  * @return Stack trace frames reconstructed from the list.
  */
 CORE_EXPORT StackTrace stackTraceFromVariantList(const QVariantList& frames);
+
+CORE_EXPORT QVariantList stackTraceFunctionList(const StackTrace& stackTrace);
 }
