@@ -196,88 +196,93 @@ CORE_EXPORT void waitForDuration(int milliSeconds);
 CORE_EXPORT void disconnectRecursively(const QObject* object);
 
 /**
- * Replace all occurrences of \p from with \p to in \p inputString and return the result
- * @param inputString Input string
- * @param from String to replace
- * @param to Replace from with this
- * @return Replaced string
+ * @brief Replaces all occurrences of a substring.
+ * @param inputString Input string.
+ * @param from Substring to replace.
+ * @param to Replacement substring.
+ * @return String with replacements applied.
  */
 CORE_EXPORT std::string replaceAll(std::string inputString, const std::string& from, const std::string& to);
 
 /**
- * Remove CR/LF from a base64 string (some encoders insert line breaks)
- * @param inputString Input string
- * @return Curated resulting string
+ * @brief Removes CR/LF characters from a string.
+ * @param inputString Input string.
+ * @return String without newline characters.
  */
 CORE_EXPORT std::string stripNewLines(std::string inputString);
 
 /**
- * Escape for a CSS double-quoted string (inside url("..."))
- * @param inputString Input string
- * @return Curated resulting string
+ * @brief Escapes text for use inside a CSS double-quoted string.
+ * @param inputString Input string.
+ * @return CSS-escaped string.
  */
 CORE_EXPORT std::string escapeCssDq(std::string inputString);
 
 /**
- * Convert the contents of \p pixmap to base46 encoded string and form a CSS src string
- * @param pixmap Input pixmap
- * @return String ('')
+ * @brief Converts a pixmap to a CSS data source string.
+ * @param pixmap Pixmap to encode.
+ * @return CSS url(...) data source string.
  */
 CORE_EXPORT std::string pixmapToCssSrc(const QPixmap& pixmap);
 
 /**
- * Determine the MIME format based on \p byteArray
- * @param byteArray Input byte array
- * @return MIME type
+ * @brief Detects an image MIME type from encoded bytes.
+ * @param byteArray Encoded image bytes.
+ * @return MIME type, when detected.
  */
 CORE_EXPORT QString mimeForFormat(const QByteArray& byteArray);
 
 /**
- * Normalize image format from file \p path suffix (e.g. jpg -> JPEG)
- * @param path Input file path
- * @return Normalized format (PNG, JPEG, etc.)
+ * @brief Normalizes an image format from a file suffix.
+ * @param path File path whose suffix should be inspected.
+ * @return Normalized image format such as PNG or JPEG.
  */
 CORE_EXPORT QByteArray normalizeFormatFromSuffix(const QString& path);
 
 /**
- * Choose encoding format for \p img, optionally using \p hinted format (if the source format is unknown, pick PNG when alpha is present, else JPEG)
- * @param img Input image
- * @param hinted Hinted format (may be empty)
- * @return Chosen format (PNG, JPEG, etc.)
+ * @brief Chooses an encoding format for an image.
+ *
+ * If the hinted format is empty, PNG is preferred for images with alpha and
+ * JPEG otherwise.
+ *
+ * @param img Image to encode.
+ * @param hinted Optional hinted format.
+ * @return Chosen image format.
  */
 CORE_EXPORT QByteArray chooseFormatForImage(const QImage& img, const QByteArray& hinted);
 
 /**
- * Convert the contents of \p pixmap to base64 encoded data URL
- * @param pixmap Input pixmap
- * @param fmt Encoding format (PNG, JPEG, etc.)
- * @param quality Encoding quality (-1 is default)
- * @return Data URL string
+ * @brief Converts a pixmap to a base64 data URL.
+ * @param pixmap Pixmap to encode.
+ * @param fmt Encoding format.
+ * @param quality Encoding quality, or -1 for the Qt default.
+ * @return Data URL string.
  */
 CORE_EXPORT QString pixmapToDataUrl(const QPixmap& pixmap, const QByteArray& fmt = "PNG", int quality = -1);
 
 /**
- * Replace \p token in \p css with a CSS data URL formed from \p pixmap encoded as \p fmt with \p quality
- * @param css Input CSS
- * @param pixmap Input pixmap
- * @param format Encoding format (PNG, JPEG, etc.)
- * @param quality Encoding quality (-1 is default)
- * @param token Token to replace in the CSS (default {{BACKGROUND_IMAGE}})
- * @return CSS with token replaced by data URL
+ * @brief Replaces a CSS token with an encoded pixmap data URL.
+ * @param css CSS text to update.
+ * @param pixmap Pixmap to encode.
+ * @param format Encoding format.
+ * @param quality Encoding quality, or -1 for the Qt default.
+ * @param token Token to replace in the CSS.
+ * @return CSS with the token replaced by a data URL.
  */
 CORE_EXPORT QString applyPixmapToCss(QString css, const QPixmap& pixmap, const QByteArray& format = "PNG", int quality = -1, const QString& token = QStringLiteral("{{BACKGROUND_IMAGE}}"));
 
 /**
- * Replace \p token in \p css with a CSS data URL formed from image at \p pathOrResource encoded as \p quality
- * @param css Input CSS
- * @param pathOrResource Path to image file or resource path (e.g. ":/images/background.png")
- * @param token Token to replace in the CSS (default {{BACKGROUND_IMAGE}})
- * @param scaleFactor Scale factor (0 is default, i.e. no scaling)
- * @param quality Encoding quality (-1 is default)
- * @return CSS with token replaced by data URL
+ * @brief Replaces a CSS token with an encoded image data URL.
+ * @param css CSS text to update.
+ * @param pathOrResource Image file path or Qt resource path.
+ * @param token Token to replace in the CSS.
+ * @param scaleFactor Optional image scale factor, or 0 to keep the original size.
+ * @param quality Encoding quality, or -1 for the Qt default.
+ * @return CSS with the token replaced by a data URL.
  */
 CORE_EXPORT QString applyResourceImageToCss(QString css, const QString& pathOrResource, const QString& token, float scaleFactor = 0, int quality = 90);
 
+/** Predicate that detects common UTF-16 byte-order markers and JSON-like UTF-16 prefixes. */
 inline auto isLikelyUtf16 = [](const QByteArray& byteArray) {
     if (byteArray.size() < 2)
         return false;
@@ -288,132 +293,134 @@ inline auto isLikelyUtf16 = [](const QByteArray& byteArray) {
 };
 
 /**
- * Ensure that \p byteArray is UTF-8 encoded, converting from UTF-16 if necessary
- * @param byteArray Input byte array
+ * @brief Ensures that a byte array is UTF-8 encoded.
+ * @param byteArray Input byte array.
+ * @return UTF-8 byte array, converting from UTF-16 when detected.
  */
 CORE_EXPORT QByteArray ensureUtf8(QByteArray byteArray);
 
 /**
- * Sanitize JSON by removing all whitespace outside of strings
- * @param utf8 Input JSON as UTF-8 byte array
- * @return Sanitized JSON as UTF-8 byte array
+ * @brief Removes whitespace outside JSON strings.
+ * @param utf8 JSON text encoded as UTF-8.
+ * @return Sanitized UTF-8 JSON text.
  */
 CORE_EXPORT QByteArray sanitizeJsonWhitespaceOutsideStrings(const QByteArray& utf8);
 
 /**
- * Minimal, practical parser for Content-Disposition filenames (prefers RFC 5987 filename* with UTF-8 when present,
- * but also accepts other charsets as provided in the header without strict validation).
- * @param contentDispositionRaw Raw Content-Disposition header value
- * @return Filename if found, otherwise an empty string
+ * @brief Extracts a filename from a Content-Disposition header.
+ *
+ * RFC 5987 filename* values are preferred when present.
+ *
+ * @param contentDispositionRaw Raw Content-Disposition header value.
+ * @return Filename when found, otherwise an empty string.
  */
 CORE_EXPORT QString getFilenameFromContentDisposition(const QByteArray& contentDispositionRaw);
 
 /**
- * Extract filename from \p effectiveUrl
- * @param effectiveUrl Input URL
- * @return Filename from URL path
+ * @brief Extracts a filename from a URL path.
+ * @param effectiveUrl URL to inspect.
+ * @return Filename from the URL path.
  */
 CORE_EXPORT QString getFilenameFromUrlPath(const QUrl& effectiveUrl);
 
 /**
- * Extract filename from OSF Waterbutler metadata JSON \p raw
- * This is used to determine the filename of files downloaded from OSF storage providers.
- * @param raw Raw Waterbutler metadata JSON
- * @return Filename if found, otherwise an empty string
+ * @brief Extracts a filename from OSF Waterbutler metadata JSON.
+ * @param raw Raw Waterbutler metadata JSON.
+ * @return Filename when found, otherwise an empty string.
  */
 CORE_EXPORT QString getFilenameFromWaterButlerMetadata(const QByteArray& raw);
 
 /**
- * Print a key-value pair with optional indentation and aligned colons
- * @param key Key to print
- * @param value Value to print (default is an invalid QVariant, which will be printed as "null")
- * @param indent Number of spaces to indent (default is 0)
- * @param colonColumn Column at which to align the colon (default is 24)
+ * @brief Prints a key-value pair with optional indentation.
+ * @param key Key to print.
+ * @param value Value to print.
+ * @param indent Number of spaces to indent.
+ * @param colonColumn Column at which to align the colon.
  */
 CORE_EXPORT void printLine(const QString& key, const QVariant& value = {}, int indent = 0, int colonColumn = 24);
 
 /**
- *  Pretty print a QVariantMap
- *  @param variantMap Map to print
+ * @brief Prints a QVariantMap in a readable format.
+ * @param variantMap Map to print.
  */
 CORE_EXPORT void prettyPrintVariantMap(const QVariantMap& variantMap);
 
 /**
- * Convert a QVariantMap to a pretty-printed string with aligned colons
- * @param variantMap Map to convert
- * @return Pretty-printed string representation of the map
+ * @brief Converts a QVariantMap to a pretty-printed string with aligned colons.
+ * @param variantMap Map to convert.
+ * @return Pretty-printed string representation of the map.
  */
 CORE_EXPORT QString prettyVariantMapString(const QVariantMap& variantMap);
 
 /**
- * Convert a QVariantMap to a pretty-printed string with indentation
- * @param variantMap Map to convert
- * @param indent Number of spaces to indent (default is 0)
- * @return Pretty-printed string representation of the map
+ * @brief Converts a QVariantMap to an indented pretty-printed string.
+ * @param variantMap Map to convert.
+ * @param indent Number of spaces to indent.
+ * @return Pretty-printed string representation of the map.
  */
 CORE_EXPORT QString variantMapToPrettyString(const QVariantMap& variantMap, int indent = 0);
 
 /**
- * Convert a QVariant to an HTML string representation, handling maps and lists recursively
- * @param value QVariant to convert
- * @return HTML string representation of the QVariant
+ * @brief Converts a QVariant to HTML.
+ * @param value QVariant to convert.
+ * @return HTML representation of the QVariant.
  */
 CORE_EXPORT QString variantToHtml(const QVariant& value);
 
 /**
- * Convert a QVariantMap to an HTML string representation, showing key-value pairs in a table
- * @param map Map to convert
- * @param depth Current recursion depth (default is 0)
- * @param maxDepth Maximum depth to recurse into nested maps/lists (default is 2)
- * @return HTML string representation of the map
+ * @brief Converts a QVariantMap to HTML.
+ * @param map Map to convert.
+ * @param depth Current recursion depth.
+ * @param maxDepth Maximum recursion depth for nested maps and lists.
+ * @return HTML representation of the map.
  */
 CORE_EXPORT QString variantMapToHtml(const QVariantMap& map, int depth = 0, int maxDepth = 2);
 
 /**
- * Convert a QVariantList to an HTML string representation, showing items in an ordered list
- * @param list List to convert
- * @param depth Current recursion depth (default is 0)
- * @param maxDepth Maximum depth to recurse into nested maps/lists (default is 2)
- * @return HTML string representation of the list
+ * @brief Converts a QVariantList to HTML.
+ * @param list List to convert.
+ * @param depth Current recursion depth.
+ * @param maxDepth Maximum recursion depth for nested maps and lists.
+ * @return HTML representation of the list.
  */
 CORE_EXPORT QString variantListToHtml(const QVariantList& list, int depth, int maxDepth);
 
 /**
- * Convert a QVariant to an HTML string representation, handling maps and lists recursively
- * @param value QVariant to convert
- * @param depth Current recursion depth (default is 0)
- * @param maxDepth Maximum depth to recurse into nested maps/lists (default is 2)
- * @return HTML string representation of the QVariant
+ * @brief Converts a QVariant to HTML with explicit recursion controls.
+ * @param value QVariant to convert.
+ * @param depth Current recursion depth.
+ * @param maxDepth Maximum recursion depth for nested maps and lists.
+ * @return HTML representation of the QVariant.
  */
 CORE_EXPORT QString variantToHtml(const QVariant& value, int depth, int maxDepth);
 
 /**
- * Log memory usage of the current process with an optional label
- * @param label Label to prefix the log message with (default is an empty string)
+ * @brief Logs memory usage of the current process.
+ * @param label Optional label to include in the log message.
  */
 CORE_EXPORT void logMemory(const QString& label);
 
 /**
- * Find a nested value in a QVariantMap by a dot-separated path (e.g. "a.b.c" to find root["a"]["b"]["c"])
- * @param root Root map to search within
- * @param path Dot-separated path to the value to find
- * @return Value at the specified path, or an invalid QVariant if not found
+ * @brief Finds a nested value in a QVariantMap by path.
+ * @param root Root map to search.
+ * @param path Path elements to follow.
+ * @return Value at the path, or an invalid QVariant if not found.
  */
 CORE_EXPORT QVariant findNested(const QVariantMap& root, const QStringList& path);
 
 /**
- * Describe the keys of a QVariantMap in a human-readable string, showing up to \p maxKeys keys and indicating if there are more
- * @param map Map whose keys to describe
- * @param maxKeys Maximum number of keys to show (default is 20)
- * @return String describing the keys of the map
+ * @brief Describes the keys of a QVariantMap.
+ * @param map Map whose keys should be described.
+ * @param maxKeys Maximum number of keys to show.
+ * @return Human-readable key summary.
  */
 CORE_EXPORT QString describeVariantMapKeys(const QVariantMap& map, qsizetype maxKeys = 20);
 
 /**
- * Dump a byte array as a hex string, showing up to \p count bytes
- * @param bytes Byte array to dump
- * @param count Maximum number of bytes to show (default is 100)
- * @return Hex string representation of the byte array
+ * @brief Dumps bytes as a hexadecimal string.
+ * @param bytes Byte array to dump.
+ * @param count Maximum number of bytes to include.
+ * @return Hexadecimal byte string.
  */
 CORE_EXPORT QString dumpHex(const QByteArray& bytes, qsizetype count = 100);;
 
@@ -439,5 +446,10 @@ CORE_EXPORT QVariantList stackTraceToVariantList(const StackTrace& stackTrace);
  */
 CORE_EXPORT StackTrace stackTraceFromVariantList(const QVariantList& frames);
 
+/**
+ * @brief Extracts function names from a stack trace.
+ * @param stackTrace Stack trace frames to inspect.
+ * @return QVariantList containing the function name from each frame.
+ */
 CORE_EXPORT QVariantList stackTraceFunctionList(const StackTrace& stackTrace);
 }

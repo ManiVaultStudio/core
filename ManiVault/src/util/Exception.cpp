@@ -85,13 +85,14 @@ namespace
     {
         QDialog dialog(parent);
 
+        dialog.setWindowIcon(StyledIcon("bug"));
         dialog.setWindowTitle(title);
         dialog.setModal(true);
         dialog.setMinimumWidth(700);
 
         auto* layout = new QVBoxLayout(&dialog);
         layout->setContentsMargins(20, 18, 20, 16);
-        layout->setSpacing(16);
+        layout->setSpacing(4);
 
         auto* reasonLabel = new QLabel(reason, &dialog);
         reasonLabel->setWordWrap(true);
