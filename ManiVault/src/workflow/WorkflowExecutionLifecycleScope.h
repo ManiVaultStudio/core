@@ -50,6 +50,8 @@ namespace mv::workflow
  *     throw;
  * }
  * @endcode
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowExecutionLifecycleScope
 {
@@ -93,6 +95,9 @@ public:
      */
     void finish(std::uint64_t durationMs);
 
+    /**
+     * @brief Reports the context as successfully finished using the measured duration.
+     */
     void finish();
 
     /**
@@ -104,12 +109,12 @@ public:
 	 *
 	 * @return Elapsed wall-clock time in milliseconds.
 	 */
-    std::uint64_t elapsedMS() const;
+    [[nodiscard]] std::uint64_t elapsedMS() const;
 
 private:
-    SharedWorkflowExecutionContext  _context;           /** Context whose lifecycle is reported. */
-    QElapsedTimer                   _timer;             /** Timer used to measure elapsed execution time. */
-    bool                            _finished = false;  /** Whether the lifecycle has already been completed. */
+    SharedWorkflowExecutionContext  _context;           /**< Context whose lifecycle is reported */
+    QElapsedTimer                   _timer;             /**< Timer used to measure elapsed execution time */
+    bool                            _finished = false;  /**< Whether the lifecycle has already been completed */
 };
 
 }

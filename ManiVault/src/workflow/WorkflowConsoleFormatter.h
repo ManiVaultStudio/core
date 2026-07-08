@@ -25,7 +25,7 @@ namespace mv::workflow
  * depth-limited to reduce verbosity. Log messages can include contextual
  * information such as severity, source location, and additional details.
  *
- * @authors Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowConsoleFormatter
 {

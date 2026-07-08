@@ -113,7 +113,7 @@ QVector<WorkflowMetric> WorkflowResult::getMetrics() const
 std::optional<WorkflowMetric> WorkflowResult::getMetric(const QString& name) const
 {
     for (const auto& metric : _metrics) {
-        if (metric._name == name)
+        if (metric.name == name)
             return metric;
     }
 
