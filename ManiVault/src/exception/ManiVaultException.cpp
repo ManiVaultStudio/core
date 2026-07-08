@@ -4,6 +4,8 @@
 
 #include "ManiVaultException.h"
 
+#include "util/Miscellaneous.h"
+
 #include <QDebug>
 
 using namespace mv::util;
@@ -43,6 +45,41 @@ ManiVaultException ManiVaultException::withAddedDetails(const QVariantMap& addit
         _where,
         newDetails
     };
+}
+
+SeverityLevel ManiVaultException::getSeverity() const
+{
+    return _severity;
+}
+
+QString ManiVaultException::getMessage() const
+{
+    return _message;
+}
+
+QString ManiVaultException::getWhat() const
+{
+    return _what;
+}
+
+QString ManiVaultException::getWhere() const
+{
+    return _where;
+}
+
+QVariantMap ManiVaultException::getDetails() const
+{
+    return _details;
+}
+
+QUuid ManiVaultException::getDiagnosticId() const
+{
+    return _diagnosticId;
+}
+
+QStringList ManiVaultException::getStackTrace() const
+{
+    return _details.value("StackTrace").toStringList();
 }
 
 }

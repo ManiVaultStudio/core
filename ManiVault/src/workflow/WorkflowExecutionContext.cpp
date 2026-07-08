@@ -6,6 +6,7 @@
 #include "WorkflowConsoleFormatter.h"
 
 #include "util/SeverityLevel.h"
+#include "util/Miscellaneous.h"
 
 using namespace mv::util;
 

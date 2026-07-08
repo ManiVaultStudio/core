@@ -27,6 +27,7 @@
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QMetaObject>
+#include <QMessageBox>
 
 #include <exception>
 

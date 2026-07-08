@@ -1,50 +1,24 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
-// A corresponding LICENSE file is located in the root directory of this source tree 
-// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
-
 #pragma once
 
 #include "ManiVaultGlobals.h"
 
-#include <QMessageBox>
-#include <QDebug>
-#include <QException>
-#include <QIcon>
+#include <QString>
 
-namespace mv::util {
+#include <exception>
 
-/**
- * Create an exception message box using a title and reason
- * @param title Message box title
- * @param reason Reason for the exception
- * @param parent Pointer to parent widget
- */
-CORE_EXPORT inline void exceptionMessageBox(const QString& title, const QString& reason, QWidget* parent = nullptr)
-{
-    QMessageBox::critical(parent, title, reason);
+class QWidget;
 
-    qDebug() << title << reason;
-}
+namespace mv {
 
-/**
- * Create an exception message box for unhandled exceptions
- * @param title Message box title
- * @param parent Pointer to parent widget
- */
-CORE_EXPORT inline void exceptionMessageBox(const QString& title, QWidget* parent = nullptr)
-{
-    exceptionMessageBox(title, "An unhandled error occurred.", parent);
-}
+class ManiVaultException;
 
-/**
- * Create an exception message box using title and exception
- * @param title Message box title
- * @param exception Reference to exception
- * @param parent Pointer to parent widget
- */
-CORE_EXPORT inline void exceptionMessageBox(const QString& title, const std::exception& exception, QWidget* parent = nullptr)
-{
-    exceptionMessageBox(title, exception.what(), parent);
-}
+namespace util {
 
-}
+CORE_EXPORT void exceptionMessageBox(const QString& title, const QString& reason, QWidget* parent = nullptr);
+CORE_EXPORT void exceptionMessageBox(const QString& title, QWidget* parent = nullptr);
+CORE_EXPORT void exceptionMessageBox(const QString& title, const std::exception& exception, QWidget* parent = nullptr);
+CORE_EXPORT void exceptionMessageBox(const QString& title, const ManiVaultException& exception, QWidget* parent = nullptr);
+
+} // namespace util
+
+} // namespace mv

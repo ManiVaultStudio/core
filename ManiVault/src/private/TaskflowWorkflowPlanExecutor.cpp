@@ -205,8 +205,8 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
             std::rethrow_exception(primaryException);
         }
         catch (const ManiVaultException& exception) {
-            rootContext->error(exception._message, exception._where, exception._details);
-            lifecycle.fail(exception._severity, exception._message, exception._details);
+            rootContext->error(exception.getMessage(), exception.getWhere(), exception.getDetails());
+            lifecycle.fail(exception.getSeverity(), exception.getMessage(), exception.getDetails());
 
             try {
                 runStages(workflowPlan.getOnFailureStages());
@@ -220,7 +220,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
                 rootContext->error("Failure stages failed with unknown error", workflowPlan.getName());
             }
 
-            if (exception._severity == SeverityLevel::Fatal)
+            if (exception.getSeverity() == SeverityLevel::Fatal)
                 std::rethrow_exception(primaryException);
         }
         catch (const std::exception& exception) {
@@ -535,7 +535,7 @@ void TaskflowWorkflowPlanExecutor::executeCompiledJob(const WorkflowPlan::Job& j
         lifecycle.finish();
     }
     catch (const ManiVaultException& maniVaultException) {
-        childContext->reportFailed(maniVaultException._severity, maniVaultException._message, maniVaultException._details);
+        childContext->reportFailed(maniVaultException.getSeverity(), maniVaultException.getMessage(), maniVaultException.getDetails());
         throw;
     }
     catch (const std::exception& exception) {

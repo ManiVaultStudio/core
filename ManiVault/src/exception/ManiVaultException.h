@@ -22,6 +22,17 @@ public:
 
     ManiVaultException withAddedDetails(const QVariantMap& additionalDetails) const;
 
+public: // Getters
+
+    [[nodiscard]] util::SeverityLevel getSeverity() const;
+    [[nodiscard]] QString getMessage() const;
+    [[nodiscard]] QString getWhat() const;
+    [[nodiscard]] QString getWhere() const;
+    [[nodiscard]] QVariantMap getDetails() const;
+    [[nodiscard]] QUuid getDiagnosticId() const;
+    [[nodiscard]] QStringList getStackTrace() const;
+
+private:
     util::SeverityLevel     _severity;      /** The severity level of the exception */
     QString                 _message;       /** The message describing the exception */
     QString                 _what;          /** The specific cause or nature of the exception */

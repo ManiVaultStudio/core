@@ -211,9 +211,9 @@ void WorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, SharedWorkfl
 
 void WorkflowPlanExecutor::handleStageException(const WorkflowPlan::Stage& stage, const ManiVaultException& exception, SharedWorkflowExecutionContext stageContext)
 {
-    stageContext->message(exception._severity, exception._message, stage.getName(), exception._details);
+    stageContext->message(exception.getSeverity(), exception.getMessage(), stage.getName(), exception.getDetails());
 
-    if (exception._severity == SeverityLevel::Error || exception._severity == SeverityLevel::Fatal)
+    if (exception.getSeverity() == SeverityLevel::Error || exception.getSeverity() == SeverityLevel::Fatal)
         throw;
 }
 

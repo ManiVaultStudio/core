@@ -7,12 +7,13 @@
 #include <Dataset.h>
 #include <PluginType.h>
 
-#include <QMenu>
-
 #include <actions/IntegralAction.h>
 #include <actions/OptionAction.h>
 #include <actions/StringAction.h>
 #include <actions/TriggerAction.h>
+
+#include <QMenu>
+#include <QDialog>
 
 class QAction;
 
