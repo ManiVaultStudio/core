@@ -28,8 +28,8 @@ ManiVaultException::ManiVaultException(SeverityLevel severity, QString message, 
     };
 
     _details["DiagnosticId"]        = _diagnosticId.toString(QUuid::WithoutBraces);
-    _details["StackTraceOverview"]  = stackTraceFunctionList(mv::errors().getDebugStackTrace());
     _details["StackTrace"]          = stackTraceToVariantList(mv::errors().getDebugStackTrace());
+    _details["StackTraceSummary"]   = stackTraceFunctionList(mv::errors().getDebugStackTrace());
 }
 
 ManiVaultException ManiVaultException::withAddedDetails(const QVariantMap& additionalDetails) const

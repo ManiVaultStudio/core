@@ -29,37 +29,39 @@ namespace mv::util
 {
 
 /**
- * Returns a human readable string of an integer count
- * @param count Integer count
- * @return Human readable string of an integer count
+ * @brief Formats an integer-like count for display.
+ * @param count Count to format.
+ * @return Human-readable count string.
  */
 CORE_EXPORT QString getIntegerCountHumanReadable(const double& count);
 
 /**
- * Convert a byte size string to a number of bytes
- * @return Number of bytes
+ * @brief Parses a human-readable byte-size string.
+ * @param input Byte-size string to parse.
+ * @return Number of bytes represented by the input.
  */
 CORE_EXPORT std::uint64_t parseByteSize(const QString& input);
 
 /**
- * Returns a human-readable string of a byte count
- * @param noBytes Number of bytes
- * @param useIEC Whether to use IEC (base 1024) or SI (base 1000) units
- * @return Human-readable string of a byte count
+ * @brief Formats a byte count for display.
+ * @param noBytes Number of bytes.
+ * @param useIEC Whether to use IEC base-1024 units instead of SI base-1000 units.
+ * @return Human-readable byte count.
  */
 CORE_EXPORT QString getNoBytesHumanReadable(std::uint64_t noBytes, bool useIEC = true);
 
 /**
-* Returns a human-readable string of an elapsed time duration
-* @param ms Duration in milliseconds
-* @param compact Whether to use compact formatting (e.g. "1h 2m") or verbose ("1h 2m 3s")
-* @return Human-readable elapsed time string
-*/
+ * @brief Formats an elapsed duration for display.
+ * @param ms Duration in milliseconds.
+ * @param compact Whether to use compact formatting.
+ * @return Human-readable elapsed time string.
+ */
 CORE_EXPORT QString getElapsedTimeHumanReadable(std::uint64_t ms, bool compact = true);
 
 /**
- * Sort action based on their text
- * @param actions Actions to sort
+ * @brief Sorts actions by their display text.
+ * @tparam ActionType Action pointer type stored in the vector.
+ * @param actions Actions to sort in place.
  */
 template<typename ActionType>
 void sortActions(QVector<QPointer<ActionType>>& actions)
@@ -70,9 +72,10 @@ void sortActions(QVector<QPointer<ActionType>>& actions)
 }
 
 /**
- * Find parent of type \p WidgetClass
- * @param widget Pointer to widget to search for
- * @return Pointer to parent widget of type \p WidgetClass, otherwise a nullptr
+ * @brief Finds the first parent widget of the requested type.
+ * @tparam WidgetClass Widget type to find.
+ * @param widget Widget whose parents should be searched.
+ * @return Matching parent widget, or nullptr when no parent matches.
  */
 template <class WidgetClass>
 WidgetClass* findParent(const QWidget* widget)
@@ -90,80 +93,105 @@ WidgetClass* findParent(const QWidget* widget)
 }
 
 /**
- * Get tabbed (indented) message
- * @param message Message to prefix with tab indentation
- * @param tabIndex Number of tabs to prefix with
- * @return Message indented with tabs
+ * @brief Adds tab indentation to a message.
+ * @param message Message to indent.
+ * @param tabIndex Number of tab characters to prefix.
+ * @return Indented message.
  */
 CORE_EXPORT inline QString getTabIndentedMessage(QString message, const std::uint32_t& tabIndex);
 
 /**
- * Get \p color as CSS string, either with or without \p alpha
- * @param color Input color
- * @param alpha Whether to use the alpha
- * @return Color as rgb(...) or rgba(...)
+ * @brief Converts a QColor to a CSS color string.
+ * @param color Color to convert.
+ * @param alpha Whether to include the alpha channel.
+ * @return CSS rgb(...) or rgba(...) color string.
  */
 CORE_EXPORT QString getColorAsCssString(const QColor& color, bool alpha = true);
 
 /**
- * Get whether \p URL is valid
- * @param urlString Url string 
- * @return Boolean determining whether the URL is valid
+ * @brief Returns whether a URL exists.
+ * @param urlString URL string to test.
+ * @return True when the URL can be reached.
  */
 CORE_EXPORT bool urlExists(const QString& urlString);
 
+/**
+ * @brief Replaces a widget layout.
+ * @param widget Widget whose layout should be replaced.
+ * @param newLayout New layout to install.
+ * @param removeWidgets Whether to remove widgets from the previous layout.
+ */
 CORE_EXPORT void replaceLayout(QWidget* widget, QLayout* newLayout, bool removeWidgets = false);
+
+/**
+ * @brief Clears a layout.
+ * @param layout Layout to clear.
+ * @param removeWidgets Whether to delete contained widgets.
+ */
 CORE_EXPORT void clearLayout(QLayout* layout, bool removeWidgets = false);
+
+/**
+ * @brief Sets equal contents margins on a layout.
+ * @param layout Layout to update.
+ * @param margin Margin applied to all sides.
+ */
 CORE_EXPORT void setLayoutContentsMargins(QLayout* layout, std::int32_t margin);
+
+/**
+ * @brief Returns an icon representing a Qt alignment.
+ * @param alignment Alignment to represent.
+ * @return Alignment icon.
+ */
 CORE_EXPORT QIcon getAlignmentIcon(const Qt::Alignment& alignment);
 
 /**
- * Set child \p value of \root by \p path
- * @param root Root element
- * @param path Path to the value
- * @param value Value to set
+ * @brief Sets a nested value in a QVariant tree by path.
+ * @param root Root value to update.
+ * @param path Path to the nested value.
+ * @param value Value to set.
+ * @return Updated root value.
  */
 CORE_EXPORT QVariant setValueByPath(QVariant root, const QString& path, const QVariant& value);
     
 /**
- * Get child value of \root by \p path
- * @param root Root element
- * @param path Path to the value
- * @param valueIfNotFound Value if not found
- * @return Value, invalid when no value was found
+ * @brief Returns a nested value from a QVariant tree by path.
+ * @param root Root value to inspect.
+ * @param path Path to the nested value.
+ * @param valueIfNotFound Value returned when the path is not found.
+ * @return Nested value, or valueIfNotFound when unavailable.
  */
 CORE_EXPORT QVariant getValueByPath(const QVariant& root, const QString& path, const QVariant& valueIfNotFound = QVariant());
 
 /**
- * Convert \p gifByteArray to base64 encoded string
- * @param gifByteArray GIF image raw bytes
- * @return Base64-encoded GIF string
+ * @brief Converts GIF bytes to a base64 string.
+ * @param gifByteArray GIF image bytes.
+ * @return Base64-encoded GIF data.
  */
 CORE_EXPORT QString gifToBase64(const QByteArray& gifByteArray);
 
 /**
- * Embed \p gifBase64-encoded GIF in an HTML <img> tag
- * @param gifBase64 GIF image as base64-encoded string
- * @return GIF image embedded in HTML <img> tag
+ * @brief Embeds a base64 GIF in an HTML image tag.
+ * @param gifBase64 Base64-encoded GIF data.
+ * @return HTML image tag containing the GIF.
  */
 CORE_EXPORT QString embedGifFromBase64(const QString& gifBase64);
 
 /**
- * Embed GIF image from \p resourcePath into an HTML <img> tag
- * @param resourcePath Path of the GIF image in the resources
- * @return GIF image embedded in HTML <img> tag
+ * @brief Embeds a GIF resource in an HTML image tag.
+ * @param resourcePath Resource path of the GIF image.
+ * @return HTML image tag containing the GIF.
  */
 CORE_EXPORT QString embedGifFromResource(const QString& resourcePath);
 
 /**
- * This method keeps the application event loop responsive while halting the current execution for n \p milliseconds
- * @param milliSeconds Milliseconds to wait
+ * @brief Waits while keeping the application event loop responsive.
+ * @param milliSeconds Duration to wait in milliseconds.
  */
 CORE_EXPORT void waitForDuration(int milliSeconds);
 
 /**
- * Remove all connections (to and from) from \p object and its descendants
- * @param object Pointer to root object
+ * @brief Disconnects an object and all descendants.
+ * @param object Root object whose signal connections should be removed.
  */
 CORE_EXPORT void disconnectRecursively(const QObject* object);
 

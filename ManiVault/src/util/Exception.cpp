@@ -77,6 +77,8 @@ namespace
 	    }
 
 	    QApplication::clipboard()->setText(report);
+
+        mv::help().addNotification("Copied to clipboard", "The exception report has been copied to the clipboard.", StyledIcon("clipboard"));
     }
 
     void exceptionDialog(const QString& title, const QString& reason, const StackTrace& stackTrace, QWidget* parent)
@@ -190,8 +192,7 @@ namespace
 
         auto* buttons = new QDialogButtonBox(&dialog);
 
-        auto* copyReportButton =
-            buttons->addButton("Copy report", QDialogButtonBox::ActionRole);
+        auto* copyReportButton = buttons->addButton("Copy report", QDialogButtonBox::ActionRole);
 
         buttons->addButton(QDialogButtonBox::Ok);
 
