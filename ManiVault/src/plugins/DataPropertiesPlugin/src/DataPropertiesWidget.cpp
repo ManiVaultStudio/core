@@ -86,65 +86,66 @@ void DataPropertiesWidget::populate()
                 _groupsAction.setGroupActions({});
             }
             else {
-                connect(&_currentItems.first()->getDatasetReference(), &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this]() -> void {
-                    _groupsAction.setGroupActions({});
-                });
+	            connect(&_currentItems.first()->getDatasetReference(), &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this]() -> void {
+					_groupsAction.setGroupActions({});
+					});
 
-                GroupsAction::GroupActions groupActions;
+            	GroupsAction::GroupActions groupActions;
 
-                _groupsActionWidget->setEnabled(_currentItems.count() == 1);
+            	_groupsActionWidget->setEnabled(_currentItems.count() == 1);
 
-                if (_currentItems.count() == 1) {
-                    auto dataset = _currentItems.first()->getDataset();
+            	if (_currentItems.count() == 1) {
+            		auto dataset = _currentItems.first()->getDataset();
 
-                    if (dataset.isValid())
-                        disconnect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);
+            		if (dataset.isValid())
+            			disconnect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);
 
-                    if (dataset.isValid())
-                    {
-                        connect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this](WidgetAction& widgetAction) {
-                            auto groupAction = dynamic_cast<GroupAction*>(&widgetAction);
+            		if (dataset.isValid())
+            		{
+            			connect(&dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this](WidgetAction& widgetAction) {
+							auto groupAction = dynamic_cast<GroupAction*>(&widgetAction);
 
-                            if (!groupAction)
-                                return;
+							if (!groupAction)
+								return;
 
-                            _currentItems.first()->lock();
-                            {
-                                _groupsAction.addGroupAction(groupAction);
-                            }
-                            _currentItems.first()->restoreLockedFromCache();
-                        });
-                    }
+							_currentItems.first()->lock();
+							{
+								_groupsAction.addGroupAction(groupAction);
+							}
+							_currentItems.first()->restoreLockedFromCache();
+							});
+            		}
 
-                    if (!dataset.isValid())
-                        return;
+            		if (!dataset.isValid())
+            			return;
 
 #ifdef _DEBUG
-                    qDebug().noquote() << QString("Loading %1 into data properties").arg(dataset->text());
+            		qDebug().noquote() << QString("Loading %1 into data properties").arg(dataset->text());
 #endif
 
-                    const auto childGroupActions = static_cast<WidgetAction*>(dataset.get())->getChildren<mv::gui::GroupAction>();
+            		const auto childGroupActions = static_cast<WidgetAction*>(dataset.get())->getChildren<mv::gui::GroupAction>();
 
-                    _currentItems.first()->lock(true);
-                    {
-                        QCoreApplication::processEvents();
+            		_currentItems.first()->lock(true);
+            		{
+            			QCoreApplication::processEvents();
 
-                        for (auto childGroupAction : childGroupActions) {
-                            if (_abortPopulate)
-                                break;
+            			for (auto childGroupAction : childGroupActions) {
+            				if (_abortPopulate)
+            					break;
 
-                            groupActions << childGroupAction;
-                        }
-                    }
-                    _currentItems.first()->restoreLockedFromCache();
-                }
+            				groupActions << childGroupAction;
+            			}
+            		}
+            		_currentItems.first()->restoreLockedFromCache();
+            	}
 
-                _groupsAction.setGroupActions(groupActions);
+            	_groupsAction.setGroupActions(groupActions);
 
-                // TODO: implement remaining data properties population behavior.
+            	// TODO: implement remaining data properties population behavior.
 
-            if (_abortPopulate)
-                populate();
+            	if (_abortPopulate)
+            		populate();
+            }
         }
         catch (std::exception& e)
         {
