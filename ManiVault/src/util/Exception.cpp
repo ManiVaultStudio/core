@@ -221,7 +221,6 @@ namespace
 
         layout.addWidget(&buttons);
 
-        dialog.setLayout(&layout);
         dialog.adjustSize();
         dialog.exec();
     }
