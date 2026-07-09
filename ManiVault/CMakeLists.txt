@@ -280,13 +280,23 @@ endif()
 option(MV_ENABLE_CPPTRACE "Enable cpptrace stack traces" ON)
 
 if(MV_ENABLE_CPPTRACE)
+
+    set(CPPTRACE_OPTIONS
+        "CPPTRACE_BUILD_BENCHMARKING OFF"
+        "CPPTRACE_BUILD_TOOLS OFF"
+        "CPPTRACE_PROVIDE_EXPORT_SET OFF"
+    )
+
+    # do not use the default backend libdwarf
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        list(APPEND CPPTRACE_OPTIONS "CPPTRACE_GET_SYMBOLS_WITH_LIBBACKTRACE ON")
+    endif()
+
     CPMAddPackage(
         NAME cpptrace
         GITHUB_REPOSITORY jeremy-rifkin/cpptrace
         GIT_TAG v1.0.4
-        OPTIONS
-            "CPPTRACE_BUILD_TESTING OFF"
-            "CPPTRACE_GET_SYMBOLS_WITH_LIBDWARF OFF"
+        OPTIONS ${CPPTRACE_OPTIONS}
     )
 endif()
 
