@@ -91,59 +91,57 @@ bool WorkflowMessageDetailsDelegate::editorEvent(QEvent* event, QAbstractItemMod
 
 void WorkflowMessageDetailsDelegate::showDetailsBrowser(const QVariantMap& details)
 {
-    auto* parentWindow = qobject_cast<QWidget*>(parent());
-    auto* dialog = new QDialog(parentWindow);
+	auto parentWindow   = qobject_cast<QWidget*>(parent());
+	auto dialog         = new QDialog(parentWindow);
 
-    dialog->setWindowModality(Qt::NonModal);
-    dialog->setAttribute(Qt::WA_DeleteOnClose);
-    dialog->setWindowTitle(QStringLiteral("Workflow message details"));
-    dialog->resize(900, 650);
-    
+	dialog->setWindowModality(Qt::NonModal);
+	dialog->setAttribute(Qt::WA_DeleteOnClose);
+	dialog->setWindowTitle(QStringLiteral("Workflow message details"));
+	dialog->resize(900, 650);
 
-    auto* layout = new QVBoxLayout(dialog);
+	auto layout = new QVBoxLayout(dialog);
+	auto model  = new QStandardItemModel(dialog);
 
-    auto* model = new QStandardItemModel(dialog);
+	model->setHorizontalHeaderLabels({
+		QStringLiteral("Key"),
+		QStringLiteral("Value")
+	});
 
-    model->setHorizontalHeaderLabels({
-        QStringLiteral("Key"),
-        QStringLiteral("Value")
-        });
+	for (auto it = details.begin(); it != details.end(); ++it)
+		populateModel(model->invisibleRootItem(), it.key(), it.value());
 
-    for (auto it = details.begin(); it != details.end(); ++it)
-        populateModel(model->invisibleRootItem(), it.key(), it.value());
+	auto treeView = new QTreeView(dialog);
 
-    auto* treeView = new QTreeView(dialog);
+	treeView->setModel(model);
+	treeView->setAlternatingRowColors(true);
+	treeView->setUniformRowHeights(false);
+	treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	treeView->collapseAll();
+	treeView->resizeColumnToContents(0);
 
-    treeView->setModel(model);
-    treeView->setAlternatingRowColors(true);
-    treeView->setUniformRowHeights(false);
-    treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    treeView->collapseAll();
-    treeView->resizeColumnToContents(0);
+	layout->addWidget(treeView);
 
-    layout->addWidget(treeView);
+	auto buttons    = new QDialogButtonBox(dialog);
+	auto copyButton = buttons->addButton(QStringLiteral("Copy JSON"), QDialogButtonBox::ActionRole);
+	auto saveButton = buttons->addButton(QStringLiteral("Save JSON..."), QDialogButtonBox::ActionRole);
 
-    auto* buttons = new QDialogButtonBox(dialog);
+	buttons->addButton(QDialogButtonBox::Close);
 
-    auto* copyButton = buttons->addButton(QStringLiteral("Copy JSON"), QDialogButtonBox::ActionRole);
-    auto* saveButton = buttons->addButton(QStringLiteral("Save JSON..."), QDialogButtonBox::ActionRole);
+	connect(copyButton, &QPushButton::clicked, dialog, [details] {
+		copyDetailsToClipboard(details);
+	});
 
-    buttons->addButton(QDialogButtonBox::Close);
+	connect(saveButton, &QPushButton::clicked, dialog, [details, dialog] {
+		saveDetailsToJsonFile(details, dialog);
+	});
 
-    connect(copyButton, &QPushButton::clicked, dialog, [details] {
-        copyDetailsToClipboard(details);
-    });
+	connect(buttons, &QDialogButtonBox::rejected, dialog, &QDialog::close);
 
-    connect(saveButton, &QPushButton::clicked, dialog, [details, dialog] {
-        saveDetailsToJsonFile(details, dialog);
-    });
-
-    connect(buttons, &QDialogButtonBox::rejected, dialog, &QDialog::close);
-
-    // WA_DeleteOnClose already set above.
-    dialog->show();
-    dialog->raise();
+	// WA_DeleteOnClose already set above.
+	dialog->show();
+	dialog->raise();
+}
 
 QList<QStandardItem*> WorkflowMessageDetailsDelegate::makeRow(const QString& key, const QString& value)
 {
