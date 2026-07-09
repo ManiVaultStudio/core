@@ -20,23 +20,27 @@ Notifications::Notifications(QWidget* parent) :
 
 void Notifications::showMessage(const QString& title, const QString& description, const QIcon& icon, const util::Notification::DurationType& durationType, std::int32_t delayMs)
 {
-    const auto createNotification = [this, title, description, icon, durationType]() -> Notification* {
-        return new Notification(title, description, icon, _notifications.isEmpty() ? nullptr : _notifications.last(), durationType, Application::getMainWindow());
-    };
+    if (auto mainWindow = Application::getMainWindow()) {
+	    const auto createNotification = [this, title, description, icon, durationType, mainWindow]() -> Notification* {
+	    	return new Notification(title, description, icon, _notifications.isEmpty() ? nullptr : _notifications.last(), durationType, mainWindow);
+	    };
 
-    if (delayMs > 0) {
-	    QTimer::singleShot(delayMs, this, [this, createNotification]() {
-			addNotification(createNotification());
-		});
-    }
-    else {
-	    addNotification(createNotification());
+    	if (delayMs > 0) {
+    		QTimer::singleShot(delayMs, this, [this, createNotification]() {
+				addNotification(createNotification());
+				});
+    	}
+    	else {
+    		addNotification(createNotification());
+    	}
     }
 }
 
 void Notifications::showTask(QPointer<Task> task)
 {
-    addNotification(new Notification(task, _notifications.isEmpty() ? nullptr : _notifications.last(), Application::getMainWindow()));
+    if (auto mainWindow = Application::getMainWindow()) {
+		addNotification(new Notification(task, _notifications.isEmpty() ? nullptr : _notifications.last(), mainWindow));
+    }
 }
 
 void Notifications::setupMainWindowSynchronization()
