@@ -40,11 +40,12 @@ namespace mv
  * AbstractWorkflowPlanExecutor and is responsible for transforming declarative
  * workflow plans into executable Taskflow graphs.
  *
- * @authors Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class TaskflowWorkflowPlanExecutor final : public mv::workflow::AbstractWorkflowPlanExecutor
 {
 protected:
+
     using TaskList = std::vector<tf::Task>;
 
     struct CompiledTasks
@@ -478,8 +479,9 @@ private: // Helpers
     static std::string makeTraceName(const QString& kind, const QString& name);
 
 private:
-    std::unique_ptr<tf::Executor>   _executor;                      /** Shared Taskflow executor for running workflow graphs */
-    mutable std::mutex              _executorMutex;                 /** Mutex to protect access to the Taskflow executor */
-    std::size_t                     _executorWorkerCount = 0;       /** Number of worker threads in the Taskflow executor */
+
+    std::unique_ptr<tf::Executor>   _executor;                      /**< Shared Taskflow executor for running workflow graphs */
+    mutable std::mutex              _executorMutex;                 /**< Protects access to the Taskflow executor */
+    std::size_t                     _executorWorkerCount = 0;       /**< Number of worker threads in the Taskflow executor */
 };
 

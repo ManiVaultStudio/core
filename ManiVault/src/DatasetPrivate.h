@@ -22,14 +22,14 @@ class CoreInterface;
 template<typename> class Dataset;
 
 /**
- * Smart dataset pointer private base class
+ * @brief Private shared state for Dataset smart references.
  *
- * The primary aim of this class is to:
- * - Save the globally unique identifier of the dataset
- * - Save a pointer to a dataset (if initialized properly)
- * - Intercept events related to the dataset and rebroadcast them using Qt signals
+ * DatasetPrivate stores the dataset identifier and optional DatasetImpl pointer
+ * shared by Dataset reference wrappers. It listens for core dataset events and
+ * re-emits them as Qt signals so Dataset users can observe changes without
+ * owning the dataset implementation.
  *
- * @author T. Kroes
+ * @maintainer T. Kroes
  */
 class CORE_EXPORT DatasetPrivate : public QObject
 {
@@ -40,7 +40,7 @@ class CORE_EXPORT DatasetPrivate : public QObject
 
 protected: // Construction/destruction
 
-    /** Default constructor */
+    /** Constructs an empty dataset private state object. */
     DatasetPrivate();
 
     DatasetPrivate(const DatasetPrivate& other) = delete;
@@ -48,118 +48,120 @@ protected: // Construction/destruction
 	DatasetPrivate(DatasetPrivate&& other) = delete;
 	DatasetPrivate& operator=(DatasetPrivate&& other) = delete;
 
-    /** Remove the destructor */
+    /** Destroys the dataset private state object. */
     ~DatasetPrivate() override = default;
 
 public: // Member access and reset
 
-    /** Get the globally unique identifier of the dataset */
+    /** Returns the globally unique identifier of the dataset. */
     QString getDatasetId() const;
 
-    /** Set the globally unique identifier of the dataset
-     * @param datasetId Globally unique identifier of the dataset
+    /**
+     * @brief Sets the globally unique identifier of the dataset.
+     * @param datasetId Globally unique identifier of the dataset.
      */
     void setDatasetId(const QString& datasetId);
 
     /**
-     * Get pointer to the dataset
-     * @return Pointer to the dataset
+     * @brief Returns the dataset implementation pointer.
+     * @return Dataset implementation pointer, or nullptr.
      */
     DatasetImpl* getDataset();
 
     /**
-     * Get pointer to the dataset
-     * @return Const pointer to the dataset
+     * @brief Returns the dataset implementation pointer.
+     * @return Dataset implementation pointer, or nullptr.
      */
     const DatasetImpl* getDataset() const;
 
     /**
-     * Set pointer to the dataset
-     * @param dataset Pointer to the dataset
+     * @brief Sets the dataset implementation pointer.
+     * @param dataset Dataset implementation pointer, or nullptr.
      */
     void setDataset(DatasetImpl* dataset);
 
     /**
-     * Reset the dataset pointer and disconnect from the dataset
-     * @param notify Whether to notify listeners about the reset
+     * @brief Resets the dataset pointer and disconnects from dataset events.
+     * @param notify Whether to notify listeners about the reset.
      */
     void reset(bool notify = true);
 
 public: // Keep track of when someone connects/disconnects from our signal(s)
 
     /**
-     * This function is called when something has been connected to \p signal
-     * @param signal The signal to which a connection has been made
+     * @brief Registers event listening when a signal gains a connection.
+     * @param signal Signal that received a connection.
      */
     void connectNotify(const QMetaMethod& signal) override;
 
     /**
-     * This function is called when something has been disconnected from signal
-     * @param signal The signal of which a connection has been broken
+     * @brief Updates event listening when a signal loses a connection.
+     * @param signal Signal that lost a connection.
      */
     void disconnectNotify(const QMetaMethod& signal) override;
 
 protected:
 
-    /** Register for data events from the core */
+    /** Registers for dataset events from the core. */
     void registerDatasetEvents();
 
 signals:
 
     /**
-     * Signals that the pointer to the dataset changed
-     * @param dataset Pointer to current dataset
+     * @brief Emitted when the dataset pointer changes.
+     * @param dataset Current dataset pointer, or nullptr.
      */
     void changed(DatasetImpl* dataset);
 
-    /** Signals that the dataset is about to be removed */
+    /** Emitted before the dataset is removed. */
     void aboutToBeRemoved();
 
     /**
-     * Signals that the dataset has been removed
-     * @param datasetId Globally unique identifier of the dataset that is removed
+     * @brief Emitted after the dataset has been removed.
+     * @param datasetId Globally unique identifier of the removed dataset.
      */
     void removed(const QString& datasetId);
 
-    /** Signals that the dataset data changed */
+    /** Emitted when dataset data changes. */
     void dataChanged();
 
-    /** Signals that the dataset dimensions changed */
+    /** Emitted when dataset dimensions change. */
     void dataDimensionsChanged();
 
-    /** Signals that the dataset selection changed */
+    /** Emitted when dataset selection changes. */
     void dataSelectionChanged();
 
-    /** Signals that the dataset GUI name changed */
+    /** Emitted when the dataset GUI name changes. */
     void guiNameChanged();
 
     /**
-     * Signals that a dataset child is added
-     * @param childDataset Smart pointer to added child dataset
+     * @brief Emitted when a child dataset is added.
+     * @param childDataset Added child dataset.
      */
     void childAdded(const Dataset<DatasetImpl>& childDataset);
 
     /**
-     * Signals that a dataset child was removed
-     * @param childDatasetGuid GUID of the dataset child that is removed
+     * @brief Emitted when a child dataset is removed.
+     * @param childDatasetGuid GUID of the removed child dataset.
      */
     void childRemoved(const QString& childDatasetGuid);
 
 private:
-    QString                         _datasetId;                     /** Globally unique identifier of the dataset */
-    DatasetImpl*                    _dataset;                       /** Pointer to the dataset (if any) */
-    std::unique_ptr<EventListener>  _eventListener;                 /** Listen to ManiVault events */
-    bool                            _eventsRegistered = false;      /** Whether events have been registered */
-    QSet<std::uint32_t>             _pendingSupportedEventTypes;    /** Pending supported event types (to be registered when the dataset is set) */
+
+    QString                         _datasetId;                     /**< Globally unique identifier of the dataset */
+    DatasetImpl*                    _dataset;                       /**< Dataset implementation pointer, if available */
+    std::unique_ptr<EventListener>  _eventListener;                 /**< Event listener for core dataset events */
+    bool                            _eventsRegistered = false;      /**< Whether dataset events have been registered */
+    QSet<std::uint32_t>             _pendingSupportedEventTypes;    /**< Event types to register once the dataset is available */
 
     friend class DatasetImpl;
 };
 
 /**
- * Compares two dataset smart pointers for equality
- * @param lhs Left hand side dataset smart pointer
- * @param rhs Right hand side dataset smart pointer
- * @return Whether lhs and rhs are equal
+ * @brief Compares dataset private states for equality.
+ * @param lhs Left-hand dataset private state.
+ * @param rhs Right-hand dataset private state.
+ * @return True if both states refer to the same dataset id.
  */
 CORE_EXPORT inline bool operator == (const DatasetPrivate& lhs, const DatasetPrivate& rhs)
 {
@@ -167,10 +169,10 @@ CORE_EXPORT inline bool operator == (const DatasetPrivate& lhs, const DatasetPri
 }
 
 /**
- * Compares two dataset smart pointers for inequality
- * @param lhs Left hand side dataset smart pointer
- * @param rhs Right hand side dataset smart pointer
- * @return Whether lhs and rhs are not equal
+ * @brief Compares dataset private states for inequality.
+ * @param lhs Left-hand dataset private state.
+ * @param rhs Right-hand dataset private state.
+ * @return True if the states refer to different dataset ids.
  */
 CORE_EXPORT inline bool operator != (const DatasetPrivate& lhs, const DatasetPrivate& rhs)
 {

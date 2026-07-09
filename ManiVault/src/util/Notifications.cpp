@@ -15,7 +15,6 @@ namespace mv::util
 Notifications::Notifications(QWidget* parent) :
     QObject(parent)
 {
-    Q_ASSERT(parent);
 }
 
 void Notifications::showMessage(const QString& title, const QString& description, const QIcon& icon, const util::Notification::DurationType& durationType, std::int32_t delayMs)
@@ -39,11 +38,18 @@ void Notifications::showTask(QPointer<Task> task)
     addNotification(new Notification(task, _notifications.isEmpty() ? nullptr : _notifications.last(), Application::getMainWindow()));
 }
 
+void Notifications::setupMainWindowSynchronization()
+{
+    if (auto mainWindow = Application::getMainWindow()) {
+        mainWindow->removeEventFilter(this);
+        mainWindow->installEventFilter(this);
+    }
+}
+
 bool Notifications::eventFilter(QObject* watched, QEvent* event)
 {
     if (event->type() == QEvent::Resize) {
-        for (auto notification : _notifications)
-            QTimer::singleShot(10, notification, &Notification::updatePosition);
+        QTimer::singleShot(10, this, &Notifications::updateAllPositions);
     }
 
     return QObject::eventFilter(watched, event);
@@ -61,14 +67,19 @@ void Notifications::addNotification(Notification* notification)
         _notifications.removeOne(notification);
         notification->deleteLater();
 
-        for (auto repositionNotification : _notifications)
-            repositionNotification->updatePosition();
+        updateAllPositions();
     });
 
     notification->updatePosition();
     notification->show();
 
     _notifications.append(notification);
+}
+
+void Notifications::updateAllPositions()
+{
+    for (auto repositionNotification : _notifications)
+        repositionNotification->updatePosition();
 }
 
 }

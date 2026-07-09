@@ -52,6 +52,11 @@ public:
      */
     void showTask(QPointer<Task> task);
 
+    /**
+     * @brief Sets up synchronization with the main window.
+     */
+    void setupMainWindowSynchronization();
+
 protected:
 
     /**
@@ -69,6 +74,11 @@ private:
      * @param notification Notification to add.
      */
     void addNotification(Notification* notification);
+
+    /**
+     * @brief Updates the positions of all visible notifications.
+     */
+    void updateAllPositions();
 
 signals:
 

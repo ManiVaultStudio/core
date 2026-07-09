@@ -23,105 +23,105 @@ class HelpManager : public mv::AbstractHelpManager
 public:
 
     /**
-     * Construct manager with pointer to \p parent object
-     * @param parent Pointer to parent object
+     * @brief Constructs the application help manager.
+     * @param parent Optional parent object.
      */
     HelpManager(QObject* parent);
 
-    /** Reset when destructed */
+    /** Resets the manager when destructed. */
     ~HelpManager() override;
 
-    /** Perform event manager startup initialization */
+    /** Performs help manager startup initialization. */
     void initialize() override;
 
-    /** Resets the contents of the event manager */
+    /** Resets the contents of the help manager. */
     void reset() override;
 
     /**
-     * Add \p video
-     * @param video Pointer to video to add
+     * @brief Adds a learning center video.
+     * @param video Video to add.
      */
     void addVideo(const util::LearningCenterVideo* video) override;
 
     /**
-     * Get videos for \p tags
-     * @param tags Filter tags (returns all videos if empty)
-     * @return Vector of videos
+     * @brief Returns videos matching the requested tags.
+     * @param tags Filter tags. Empty returns all videos.
+     * @return Matching videos.
      */
     util::LearningCenterVideos getVideos(const QStringList& tags) const override;
 
     /**
-     * Get videos menu (e.g. for use in the main menu)
-     * @return Pointer to videos menu
+     * @brief Returns the videos menu.
+     * @return Videos menu.
      */
     QMenu* getVideosMenu() const override;
 
     /**
-     * Get videos model
-     * @return Const reference to videos model
+     * @brief Returns the videos model.
+     * @return Videos model.
      */
     const LearningCenterVideosModel& getVideosModel() const override;
 
     /**
-     * Add \p tutorial
-     * @param tutorial Pointer to tutorial to add
+     * @brief Adds a learning center tutorial.
+     * @param tutorial Tutorial to add.
      */
     void addTutorial(const util::LearningCenterTutorial* tutorial) override;
 
     /**
-     * Get tutorials for \p tags
-     * @param includeTags Filter tags (returns all tutorials if empty)
-     * @param excludeTags Filter exclude tags
-     * @return Vector of tutorials
+     * @brief Returns tutorials matching the requested tags.
+     * @param includeTags Required tags. Empty returns all tutorials.
+     * @param excludeTags Tags to exclude.
+     * @return Matching tutorials.
      */
     util::LearningCenterTutorials getTutorials(const QStringList& includeTags, const QStringList& excludeTags = QStringList()) const override;
 
     /**
-     * Get tutorials model
-     * @return Const reference to tutorials model
+     * @brief Returns the tutorials model.
+     * @return Tutorials model.
      */
     const LearningCenterTutorialsModel& getTutorialsModel() const override;
 
     /**
-     * Get tutorials menu (e.g. for use in the main menu)
-     * @return Pointer to tutorials menu
+     * @brief Returns the tutorials menu.
+     * @return Tutorials menu.
      */
     QMenu* getTutorialsMenu() const override;
 
     /**
-     * Add toaster notification in the main window
-     * @param title Message title (maybe HTML)
-     * @param description Message description (maybe HTML)
-     * @param icon Icon to display in the notification
-     * @param durationType Duration type of the notification
-     * @param delayMs Delay in milliseconds before the notification is shown
+     * @brief Adds a toast notification to the main window.
+     * @param title Notification title, optionally rich text.
+     * @param description Notification description, optionally rich text.
+     * @param icon Notification icon.
+     * @param durationType Notification duration policy.
+     * @param delayMs Delay in milliseconds before showing the notification.
      */
     void addNotification(const QString& title, const QString& description, const QIcon& icon = QIcon(), const util::Notification::DurationType& durationType = util::Notification::DurationType::Calculated, std::int32_t delayMs = 0) override;
 
     /**
-     * Add notification link handler for \p route
-     * @param route Route to handle (e.g. "app://open/errors")
-     * @param handler Handler function to invoke when a link with the specified route is clicked
+     * @brief Registers a notification link handler.
+     * @param route Route to handle, for example "app://open/errors".
+     * @param handler Handler invoked when a matching notification link is clicked.
      */
     void addNotificationLinkHandler(const QString& route, const NotificationLinkHandler& handler) override;
 
     /**
-     * Handle notification link for \p url
-     * @param url URL of the clicked link
+     * @brief Handles a clicked notification link.
+     * @param url Activated link URL.
      */
     void handleNotificationLink(const QUrl& url) override;
 
     /**
-     * Initialize notifications manager with \p parentWidget widget
-     * @param parentWidget Pointer to parent widget
+     * @brief Initializes the notifications manager.
+     * @param parentWidget Parent widget used as the notification anchor.
      */
     void initializeNotifications(QWidget* parentWidget) override;
 
 protected:
 
     /**
-     * Add toaster notification for \p task in the main window
-     * @param task Task containing the notification details
+     * @brief Adds a task notification to the main window.
+     * @param task Task whose state is displayed by the notification.
      */
     void addNotification(QPointer<Task> task) override;
 
@@ -135,18 +135,19 @@ public: // Action getters
     gui::TriggerAction& getToLearningCenterAction() override { return _toLearningCenterAction; }
 
 private:
-    gui::ToggleAction                       _showLearningCenterPageAction;  /** Toggle action for toggling the learning center */
-    gui::TriggerAction                      _toDiscordAction;               /** External link to discord */
-    gui::TriggerAction                      _toWebsiteAction;               /** External link to website */
-    gui::TriggerAction                      _toWikiAction;                  /** External link to wiki */
-    gui::TriggerAction                      _toRepositoryAction;            /** External link to repository */
-    gui::TriggerAction                      _toLearningCenterAction;        /** Trigger action to go the learning center */
-    LearningCenterVideosModel               _videosModel;                   /** Videos model */
-    LearningCenterTutorialsModel            _tutorialsModel;                /** Tutorials model */
-    util::Notifications                     _notifications;                 /** Notifications manager */
-    mv::TasksListModel                      _tasksModel;                    /** Tasks list model */
-    mv::TasksFilterModel                    _tasksFilterModel;              /** Filter model for the tasks model */
-    QHash<QString, NotificationLinkHandler> _linkHandlers;                  /** Notification link handlers */
+
+    gui::ToggleAction                       _showLearningCenterPageAction;  /**< Toggles the learning center page */
+    gui::TriggerAction                      _toDiscordAction;               /**< Opens the Discord link */
+    gui::TriggerAction                      _toWebsiteAction;               /**< Opens the website link */
+    gui::TriggerAction                      _toWikiAction;                  /**< Opens the wiki link */
+    gui::TriggerAction                      _toRepositoryAction;            /**< Opens the repository link */
+    gui::TriggerAction                      _toLearningCenterAction;        /**< Opens the learning center */
+    LearningCenterVideosModel               _videosModel;                   /**< Videos model */
+    LearningCenterTutorialsModel            _tutorialsModel;                /**< Tutorials model */
+    util::Notifications                     _notifications;                 /**< Notifications manager */
+    mv::TasksListModel                      _tasksModel;                    /**< Tasks list model */
+    mv::TasksFilterModel                    _tasksFilterModel;              /**< Filter model for tasks */
+    QHash<QString, NotificationLinkHandler> _linkHandlers;                  /**< Notification link handlers indexed by route */
 };
 
 }

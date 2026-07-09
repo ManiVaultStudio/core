@@ -18,86 +18,92 @@
 class QAction;
 
 /**
- * Data hierarchy widget context menu
+ * @brief Context menu for selected data hierarchy datasets.
  * 
- * Constructs a data hierarchy widget context menu based on the current dataset selection
+ * DataHierarchyWidgetContextMenu builds the actions available for the current
+ * dataset selection, including plugin launch menus, script menus, grouping,
+ * locking, visibility, and selection-based grouping helpers.
  * 
- * @author Thomas Kroes, Alexander Vieth
+ * @maintainer Thomas Kroes, Alexander Vieth
  */
 class DataHierarchyWidgetContextMenu final : public QMenu
 {
 public:
 
     /**
-     * Construct with \p parent widget and \p selectedDatasets
-     * @param parent Parent widget
-     * @param selectedDatasets Selected datasets in the data hierarchy widget
+     * @brief Constructs a context menu for the selected datasets.
+     * @param parent Parent widget.
+     * @param selectedDatasets Selected datasets in the data hierarchy widget.
      */
     DataHierarchyWidgetContextMenu(QWidget* parent, mv::Datasets selectedDatasets);
 
 private:
 
     /**
-     * Add menus for \p pluginType
-     * Goes over all loaded plugins of \p pluginType and builds a hierarchical menu structure (based on plugin title)
-     * @param type PluginType
+     * @brief Adds plugin menus for a plugin type.
+     *
+     * Loaded plugins are grouped into a hierarchical menu structure based on
+     * plugin title.
+     *
+     * @param pluginType Plugin type to add menus for.
      */
     void addMenusForPluginType(mv::plugin::Type pluginType);
 
-    /** Add menus for scripts  */
+    /** Adds menus for available scripts. */
     void addMenusForScripts();
 
     /**
-     * Get action for item grouping
-     * @return Pointer to action for item grouping
+     * @brief Creates the item grouping action.
+     * @return Action for grouping selected items.
      */
     QAction* getGroupAction();
 
     /**
-     * Get action for selection grouping
-     * @return Pointer to action for selection grouping
+     * @brief Creates the selection grouping action.
+     * @return Action for grouping by selection index.
      */
     QAction* getSelectionGroupAction();
 
     /**
-     * Get action for selection-pattern grouping
-     * @return Pointer to action for selection-pattern grouping
+     * @brief Creates the selection-pattern grouping action.
+     * @return Action for grouping by selection pattern.
      */
     QAction* getSelectionGroupPatternAction();
 
     /**
-     * Get menu for item locking
-     * @return Pointer to menu for item locking
+     * @brief Creates the item locking menu.
+     * @return Menu for locking selected items.
      */
     QMenu* getLockMenu();
 
     /**
-     * Get menu for item unlocking
-     * @return Pointer to menu for item unlocking
+     * @brief Creates the item unlocking menu.
+     * @return Menu for unlocking selected items.
      */
     QMenu* getUnlockMenu();
 
     /**
-     * Get menu for item hiding
-     * @return Pointer to menu for item hiding
+     * @brief Creates the item hiding menu.
+     * @return Menu for hiding selected items.
      */
     QMenu* getHideMenu();
 
     /**
-     * Get menu for item unhiding
-     * @return Pointer to menu for item unhiding
+     * @brief Creates the item unhiding menu.
+     * @return Menu for unhiding selected items.
      */
     QMenu* getUnhideMenu();
 
 private:
-    mv::Datasets    _allDatasets;           /** All datasets in the data hierarchy */
-    mv::Datasets    _selectedDatasets;      /** Selected datasets in the data hierarchy widget */
+
+    mv::Datasets    _allDatasets;           /**< All datasets in the data hierarchy */
+    mv::Datasets    _selectedDatasets;      /**< Selected datasets in the data hierarchy widget */
 };
 
 /**
- * Helper dialog for selection index selection
+ * @brief Dialog for choosing a selection group index.
  *
- * @author Alexander Vieth
+ * @maintainer Alexander Vieth
  */
 class SelectionGroupIndexDialog : public QDialog
 {
@@ -106,36 +112,37 @@ class SelectionGroupIndexDialog : public QDialog
 public:
 
     /**
-     * Construct with \p parent widget
-     * @param parent Parent widget
+     * @brief Constructs a selection group index dialog.
+     * @param parent Parent widget.
      */
     SelectionGroupIndexDialog(QWidget* parent);
 
     /**
-     * Convenience function to get the selection group index from the corresponding action
-     * @return The selection group index
+     * @brief Returns the selected group index.
+     * @return Selection group index.
      */
-    std::int32_t getSelectionGroupIndex() const {
+    [[nodiscard]] std::int32_t getSelectionGroupIndex() const {
         return _selectionIndexAction.getValue();
     }
 
 signals:
 
     /**
-     * Invoked when the dialog needs to be closed
-     * @param onlyIndices Whether the selection index is valid or not
+     * @brief Emitted when the dialog should close.
+     * @param onlyIndices Whether only selection indices should be used.
      */
     void closeDialog(bool onlyIndices);
 
 private:
-    mv::gui::IntegralAction      _selectionIndexAction;      /** For setting the selection group index */
-    mv::gui::TriggerAction       _confirmAction;             /** Triggers the grouping */
+
+    mv::gui::IntegralAction      _selectionIndexAction;      /**< Action for setting the selection group index */
+    mv::gui::TriggerAction       _confirmAction;             /**< Action that confirms grouping */
 };
 
 /**
- * Helper dialog for selection pattern selection
+ * @brief Dialog for choosing a selection group index and pattern.
  *
- * @author Alexander Vieth
+ * @maintainer Alexander Vieth
  */
 class SelectionPatternGroupIndexDialog : public QDialog
 {
@@ -144,47 +151,48 @@ class SelectionPatternGroupIndexDialog : public QDialog
 public:
 
     /**
-     * Construct with \p parent widget
-     * @param parent Parent widget
+     * @brief Constructs a selection pattern group dialog.
+     * @param parent Parent widget.
      */
     SelectionPatternGroupIndexDialog(QWidget* parent);
 
     /**
-     * Convenience function to get the selection group index from the corresponding action
-     * @return The selection group index
+     * @brief Returns the selected group index.
+     * @return Selection group index.
      */
-    std::int32_t getSelectionGroupIndex() const {
+    [[nodiscard]] std::int32_t getSelectionGroupIndex() const {
         return _selectionIndexAction.getValue();
     }
 
     /**
-     * Convenience function to get the selection group pattern from the corresponding action
-     * @return The selection group index
+     * @brief Returns the selected grouping pattern.
+     * @return Selection group pattern.
      */
-    QString getSelectionGroupPattern() const {
+    [[nodiscard]] QString getSelectionGroupPattern() const {
         return _selectionPatternAction.getString();
     }
 
     /**
-     * Convenience function to get the selection group option from the corresponding action
-     * @return The selection group option
+     * @brief Returns the selected pattern matching option.
+     * @return Selection group option index.
      */
-    std::int32_t getSelectionGroupOption() const {
+    [[nodiscard]] std::int32_t getSelectionGroupOption() const {
         return _selectionOptionAction.getCurrentIndex();
     }
 
 signals:
 
     /**
-     * Invoked when the dialog needs to be closed
-     * @param onlyIndices Whether the selection index is valid or not
+     * @brief Emitted when the dialog should close.
+     * @param onlyIndices Whether only selection indices should be used.
      */
     void closeDialog(bool onlyIndices);
 
 private:
-    mv::gui::IntegralAction     _selectionIndexAction;      /** For setting the selection group index */
-    mv::gui::StringAction       _selectionPatternAction;    /** For setting the selection group pattern */
-    mv::gui::OptionAction       _selectionOptionAction;     /** Action for choosing whether to use prefix or suffix */
-    mv::gui::StringAction       _infoTextAction;            /** For displaying some information */
-    mv::gui::TriggerAction      _confirmAction;             /** Triggers the grouping */
+
+    mv::gui::IntegralAction     _selectionIndexAction;      /**< Action for setting the selection group index */
+    mv::gui::StringAction       _selectionPatternAction;    /**< Action for setting the selection group pattern */
+    mv::gui::OptionAction       _selectionOptionAction;     /**< Action for choosing prefix or suffix matching */
+    mv::gui::StringAction       _infoTextAction;            /**< Action for displaying explanatory text */
+    mv::gui::TriggerAction      _confirmAction;             /**< Action that confirms grouping */
 };

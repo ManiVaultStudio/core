@@ -16,11 +16,13 @@ namespace mv
 {
 
 /**
- * Project manager class
+ * @brief Application project manager.
  *
- * Class for managing the creation/loading/saving of projects and contains a single project instance.
+ * ProjectManager owns the current project and coordinates project creation,
+ * opening, importing, saving, publishing, recent projects, project models, and
+ * related menus/actions.
  *
- * @author Thomas Kroes
+ * @maintainer Thomas Kroes
  */
 class ProjectManager final : public mv::AbstractProjectManager
 {
@@ -107,20 +109,20 @@ public:
     void publishProject(QString filePath = "") override;
 
     /**
-     * Get whether a project exists
-     * @return Boolean determining whether a project exists
+     * @brief Returns whether a project is currently loaded.
+     * @return True if a project exists.
      */
     bool hasProject() const override;
 
     /**
-     * Get current project
-     * @return Pointer to current project (nullptr if no project is loaded)
+     * @brief Returns the current project.
+     * @return Current project, or nullptr if no project is loaded.
      */
     const mv::Project* getCurrentProject() const override;
 
     /**
-     * Get current project
-     * @return Pointer to current project (nullptr if no project is loaded)
+     * @brief Returns the current project.
+     * @return Current project, or nullptr if no project is loaded.
      */
     mv::Project* getCurrentProject() override;
 
@@ -142,14 +144,14 @@ public:
     QImage getWorkspacePreview(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const override;
 
     /**
-     * Get projects list model
-     * @return Reference to the projects list model
+     * @brief Returns the projects list model.
+     * @return Projects list model.
      */
     const ProjectsListModel& getProjectsListModel() const override;
 
     /**
-     * Get projects tree model
-     * @return Reference to the projects tree model
+     * @brief Returns the projects tree model.
+     * @return Projects tree model.
      */
     const ProjectsTreeModel& getProjectsTreeModel() const override;
 
@@ -169,8 +171,8 @@ public:
     QFuture<bool> isDownloadedProjectStaleAsync(QUrl url) const override;
 
     /**
-     * Get the directory where downloaded projects are stored
-     * @return Directory where downloaded projects are stored
+     * @brief Returns the directory where downloaded projects are stored.
+     * @return Downloaded projects directory.
      */
     QDir getDownloadedProjectsDir() const override;
 
@@ -290,23 +292,24 @@ public: // Action getters
     mv::gui::TriggerAction& getBackToProjectAction() override { return _backToProjectAction; }
 
 private:
-    QScopedPointer<mv::Project>         _project;                       /** Current project */
-    gui::TriggerAction                  _newBlankProjectAction;         /** Action for creating a blank project (without view plugins and data) */
-    gui::TriggerAction                  _newProjectFromWorkspaceAction; /** Action for creating a new project from a workspace */
-    gui::TriggerAction                  _openProjectAction;             /** Action for opening a project */
-    gui::TriggerAction                  _importProjectAction;           /** Action for importing a project */
-    gui::TriggerAction                  _saveProjectAction;             /** Action for saving a project */
-    gui::TriggerAction                  _saveProjectAsAction;           /** Action for saving a project under a new name */
-    gui::TriggerAction                  _editProjectSettingsAction;     /** Action for triggering the project settings dialog */
-    gui::RecentFilesAction              _recentProjectsAction;          /** Menu for loading recent projects */
-    QMenu                               _newProjectMenu;                /** Menu for creating a new project */
-    QMenu                               _importDataMenu;                /** Menu for importing data */
-    gui::TriggerAction                  _publishAction;                 /** Action for publishing the project to an end-user */
-    gui::TriggerAction                  _pluginManagerAction;           /** Action for showing the loaded plugins dialog */
-    gui::ToggleAction                   _showStartPageAction;           /** Action for toggling the start page */
-    gui::TriggerAction                  _backToProjectAction;           /** Action for going back to the project */
-    ProjectsListModel                   _projectsListModel;             /** Projects list model */
-    ProjectsTreeModel                   _projectsTreeModel;             /** Projects tree model */
+
+    QScopedPointer<mv::Project>         _project;                       /**< Current project */
+    gui::TriggerAction                  _newBlankProjectAction;         /**< Creates a blank project without view plugins or data */
+    gui::TriggerAction                  _newProjectFromWorkspaceAction; /**< Creates a new project from a workspace */
+    gui::TriggerAction                  _openProjectAction;             /**< Opens a project */
+    gui::TriggerAction                  _importProjectAction;           /**< Imports project data */
+    gui::TriggerAction                  _saveProjectAction;             /**< Saves the current project */
+    gui::TriggerAction                  _saveProjectAsAction;           /**< Saves the current project under a new name */
+    gui::TriggerAction                  _editProjectSettingsAction;     /**< Opens the project settings dialog */
+    gui::RecentFilesAction              _recentProjectsAction;          /**< Recent projects action */
+    QMenu                               _newProjectMenu;                /**< Menu for creating a new project */
+    QMenu                               _importDataMenu;                /**< Menu for importing data */
+    gui::TriggerAction                  _publishAction;                 /**< Publishes the project for end users */
+    gui::TriggerAction                  _pluginManagerAction;           /**< Opens the loaded plugins dialog */
+    gui::ToggleAction                   _showStartPageAction;           /**< Toggles the start page */
+    gui::TriggerAction                  _backToProjectAction;           /**< Returns from the start page to the project */
+    ProjectsListModel                   _projectsListModel;             /**< Projects list model */
+    ProjectsTreeModel                   _projectsTreeModel;             /**< Projects tree model */
 };
 
 }

@@ -190,6 +190,7 @@ namespace
                     current->data(0, Qt::UserRole).toString());
             });
 
+            detailsWidget.setLayout(&detailsLayout);
             detailsWidget.setVisible(false);
             layout->addWidget(&detailsWidget, 1);
 

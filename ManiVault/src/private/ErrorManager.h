@@ -16,21 +16,21 @@ class ErrorManager : public mv::AbstractErrorManager
 public:
 
     /**
-     * Construct manager with pointer to \p parent object
-     * @param parent Pointer to parent object
+     * @brief Constructs the application error manager.
+     * @param parent Optional parent object.
      */
     ErrorManager(QObject* parent);
 
-    /** Reset when destructed */
+    /** Resets the manager when destructed. */
     ~ErrorManager() override;
 
-    /** Perform event manager startup initialization */
+    /** Performs error manager startup initialization. */
     void initialize() override;
 
-    /** Resets the contents of the event manager */
+    /** Resets the contents of the error manager. */
     void reset() override;
 
-    /** Show the error logging consent dialog */
+    /** Shows the error logging consent dialog. */
     void showErrorLoggingConsentDialog() override;
 
     /**
@@ -66,18 +66,19 @@ public:
 
 public: // Action getters
 
-    gui::TriggerAction& getLoggingAskConsentDialogAction() override { return _loggingAskConsentDialogAction; }              /** Get action for asking the user for consent to log errors */
-    gui::ToggleAction& getLoggingUserHasOptedAction() override  { return _loggingUserHasOptedAction; }                      /** Get action for user has opted */
-    gui::ToggleAction& getLoggingEnabledAction() override { return _loggingEnabledAction; }                                 /** Get action for logging enabled */
-    gui::StringAction& getLoggingDsnAction() override { return _loggingDsnAction; }                                         /** Get action for logging data source name (DSN) */
-    gui::ToggleAction& getLoggingShowCrashReportDialogAction() override { return _loggingShowCrashReportDialogAction; }     /** Get action for showing a crash report dialog when the application fails */
+    gui::TriggerAction& getLoggingAskConsentDialogAction() override { return _loggingAskConsentDialogAction; }              /**< Returns the action for asking error logging consent */
+    gui::ToggleAction& getLoggingUserHasOptedAction() override  { return _loggingUserHasOptedAction; }                      /**< Returns the action tracking whether the user has opted in */
+    gui::ToggleAction& getLoggingEnabledAction() override { return _loggingEnabledAction; }                                 /**< Returns the action for enabling error logging */
+    gui::StringAction& getLoggingDsnAction() override { return _loggingDsnAction; }                                         /**< Returns the error logging data source name action */
+    gui::ToggleAction& getLoggingShowCrashReportDialogAction() override { return _loggingShowCrashReportDialogAction; }     /**< Returns the crash report dialog toggle action */
 
 private:
-    gui::TriggerAction  _loggingAskConsentDialogAction;         /** Show the consent dialog */
-    gui::ToggleAction   _loggingUserHasOptedAction;             /** Whether the user has opted in or out */
-    gui::ToggleAction   _loggingEnabledAction;                  /** Toggle error logging on/off */
-    gui::StringAction   _loggingDsnAction;                      /** Error logging data source name action */
-    gui::ToggleAction   _loggingShowCrashReportDialogAction;    /** Toggle crash dialog on/off */
+
+    gui::TriggerAction  _loggingAskConsentDialogAction;         /**< Shows the consent dialog */
+    gui::ToggleAction   _loggingUserHasOptedAction;             /**< Tracks whether the user has opted in or out */
+    gui::ToggleAction   _loggingEnabledAction;                  /**< Toggles error logging on or off */
+    gui::StringAction   _loggingDsnAction;                      /**< Error logging data source name action */
+    gui::ToggleAction   _loggingShowCrashReportDialogAction;    /**< Toggles crash report dialog visibility */
 };
 
 }
