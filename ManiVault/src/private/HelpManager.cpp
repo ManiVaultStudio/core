@@ -269,6 +269,8 @@ void HelpManager::addNotification(QPointer<Task> task)
 
 void HelpManager::initializeNotifications(QWidget* parentWidget)
 {
+    Q_UNUSED(parentWidget);
+
     _notifications.setupMainWindowSynchronization();
 }
 
