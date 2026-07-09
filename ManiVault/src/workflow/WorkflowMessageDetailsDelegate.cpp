@@ -4,9 +4,8 @@
 
 #include "WorkflowMessageDetailsDelegate.h"
 
-#include "util/Serialization.h"
-#include "util/Miscellaneous.h"
-
+#include "CoreInterface.h"
+#include "util/StyledIcon.h"
 #include <QAbstractItemView>
 #include <QDialog>
 #include <QFontDatabase>
