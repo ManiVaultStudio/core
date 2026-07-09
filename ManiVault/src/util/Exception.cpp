@@ -26,6 +26,11 @@ namespace mv::util {
 
 namespace
 {
+    /**
+     * @brief Converts a StackFrame to a human-readable string.
+     * @param frame StackFrame to convert.
+     * @return Human-readable string representation of the stack frame.
+     */
     QString stackFrameToString(const StackFrame& frame)
     {
 	    if (!frame.raw.isEmpty())
@@ -49,6 +54,11 @@ namespace
 	    return line;
     }
 
+    /**
+     * @brief Converts a StackTrace to a list of human-readable strings.
+     * @param stackTrace StackTrace to convert.
+     * @return List of human-readable strings representing the stack trace.
+     */
     QStringList stackTraceToStringList(const StackTrace& stackTrace)
     {
 	    QStringList lines;
@@ -59,10 +69,13 @@ namespace
 	    return lines;
     }
 
-    void copyExceptionReportToClipboard(
-		const QString& title,
-		const QString& reason,
-		const StackTrace& stackTrace)
+    /**
+     * @brief Copies an exception report to the clipboard.
+     * @param title Title of the exception.
+     * @param reason Reason for the exception.
+     * @param stackTrace Stack trace associated with the exception.
+     */
+    void copyExceptionReportToClipboard(const QString& title, const QString& reason, const StackTrace& stackTrace)
     {
 	    QString report;
 
@@ -81,6 +94,13 @@ namespace
         mv::help().addNotification("Copied to clipboard", "The exception report has been copied to the clipboard.", StyledIcon("clipboard"));
     }
 
+    /**
+     * @brief Displays an exception dialog with details and stack trace.
+     * @param title Title of the exception dialog.
+     * @param reason Reason for the exception.
+     * @param stackTrace Stack trace associated with the exception.
+     * @param parent Parent widget for the dialog.
+     */
     void exceptionDialog(const QString& title, const QString& reason, const StackTrace& stackTrace, QWidget* parent)
     {
         QDialog dialog(parent);
@@ -90,55 +110,54 @@ namespace
         dialog.setModal(true);
         dialog.setMinimumWidth(700);
 
-        auto* layout = new QVBoxLayout(&dialog);
+        auto layout = new QVBoxLayout(&dialog);
+
         layout->setContentsMargins(20, 18, 20, 16);
         layout->setSpacing(4);
 
-        auto* reasonLabel = new QLabel(reason, &dialog);
+        auto reasonLabel = new QLabel(reason, &dialog);
+
         reasonLabel->setWordWrap(true);
         reasonLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
         reasonLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
         layout->addWidget(reasonLabel);
 
-        QWidget* detailsWidget = nullptr;
-        QToolButton* toggleButton = nullptr;
-        QTreeWidget* stackTraceTree = nullptr;
-
         if (!stackTrace.isEmpty()) {
-            toggleButton = new QToolButton(&dialog);
-            toggleButton->setText("Technical details");
-            toggleButton->setCheckable(true);
-            toggleButton->setChecked(false);
-            toggleButton->setArrowType(Qt::RightArrow);
-            toggleButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+            QWidget         detailsWidget;
+            QToolButton     toggleButton;
+            QTreeWidget     stackTraceTree;
 
-            layout->addWidget(toggleButton, 0, Qt::AlignLeft);
+            toggleButton.setText("Technical details");
+            toggleButton.setCheckable(true);
+            toggleButton.setChecked(false);
+            toggleButton.setArrowType(Qt::RightArrow);
+            toggleButton.setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
-            detailsWidget = new QWidget(&dialog);
+            layout->addWidget(&toggleButton, 0, Qt::AlignLeft);
 
-            auto* detailsLayout = new QVBoxLayout(detailsWidget);
-            detailsLayout->setContentsMargins(0, 0, 0, 0);
-            detailsLayout->setSpacing(8);
+            QVBoxLayout detailsLayout;
+            
+            detailsLayout.setContentsMargins(0, 0, 0, 0);
+            detailsLayout.setSpacing(8);
 
-            stackTraceTree = new QTreeWidget(detailsWidget);
-            stackTraceTree->setColumnCount(3);
-            stackTraceTree->setHeaderLabels({ "Function", "File", "Line" });
-            stackTraceTree->setRootIsDecorated(false);
-            stackTraceTree->setAlternatingRowColors(true);
-            stackTraceTree->setUniformRowHeights(true);
-            stackTraceTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
-            stackTraceTree->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
-            stackTraceTree->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-            stackTraceTree->setMinimumHeight(300);
+            stackTraceTree.setColumnCount(3);
+            stackTraceTree.setHeaderLabels({ "Function", "File", "Line" });
+            stackTraceTree.setRootIsDecorated(false);
+            stackTraceTree.setAlternatingRowColors(true);
+            stackTraceTree.setUniformRowHeights(true);
+            stackTraceTree.setSelectionMode(QAbstractItemView::ExtendedSelection);
+            stackTraceTree.setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+            stackTraceTree.setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+            stackTraceTree.setMinimumHeight(300);
 
-            stackTraceTree->header()->setStretchLastSection(false);
-            stackTraceTree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
-            stackTraceTree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-            stackTraceTree->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+            stackTraceTree.header()->setStretchLastSection(false);
+            stackTraceTree.header()->setSectionResizeMode(0, QHeaderView::Stretch);
+            stackTraceTree.header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+            stackTraceTree.header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
 
             for (const auto& frame : stackTrace) {
-                auto* item = new QTreeWidgetItem(stackTraceTree);
+                auto item = new QTreeWidgetItem(&stackTraceTree);
 
                 item->setText(0, frame.function);
                 item->setText(1, QFileInfo(frame.file).fileName());
@@ -150,66 +169,54 @@ namespace
                 item->setData(0, Qt::UserRole, stackFrameToString(frame));
             }
 
-            detailsLayout->addWidget(stackTraceTree);
+            detailsLayout.addWidget(&stackTraceTree);
 
-            auto* frameDetails = new QPlainTextEdit(detailsWidget);
-            frameDetails->setReadOnly(true);
-            frameDetails->setMaximumHeight(90);
-            frameDetails->setLineWrapMode(QPlainTextEdit::NoWrap);
-            frameDetails->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+            QPlainTextEdit frameDetails(&detailsWidget);
 
-            detailsLayout->addWidget(frameDetails);
+            frameDetails.setReadOnly(true);
+            frameDetails.setMaximumHeight(90);
+            frameDetails.setLineWrapMode(QPlainTextEdit::NoWrap);
+            frameDetails.setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
 
-            QObject::connect(
-                stackTraceTree,
-                &QTreeWidget::currentItemChanged,
-                &dialog,
-                [frameDetails](QTreeWidgetItem* current, QTreeWidgetItem*)
-                {
-                    if (!current) {
-                        frameDetails->clear();
-                        return;
-                    }
+        	detailsLayout.addWidget(&frameDetails);
 
-                    frameDetails->setPlainText(
-                        current->data(0, Qt::UserRole).toString());
-                });
+            QObject::connect(&stackTraceTree, &QTreeWidget::currentItemChanged, &dialog, [&frameDetails](QTreeWidgetItem* current, QTreeWidgetItem*) {
+                if (!current) {
+                    frameDetails.clear();
+                    return;
+                }
 
-            detailsWidget->setVisible(false);
-            layout->addWidget(detailsWidget, 1);
-
-            QObject::connect(toggleButton, &QToolButton::toggled, &dialog,
-                [&](bool expanded)
-                {
-                    detailsWidget->setVisible(expanded);
-                    toggleButton->setArrowType(expanded ? Qt::DownArrow : Qt::RightArrow);
-
-                    if (expanded)
-                        dialog.resize(900, 560);
-                    else
-                        dialog.adjustSize();
-                });
-        }
-
-        auto* buttons = new QDialogButtonBox(&dialog);
-
-        auto* copyReportButton = buttons->addButton("Copy report", QDialogButtonBox::ActionRole);
-
-        buttons->addButton(QDialogButtonBox::Ok);
-
-        QObject::connect(copyReportButton, &QPushButton::clicked, &dialog,
-            [&]
-            {
-                copyExceptionReportToClipboard(title, reason, stackTrace);
+                frameDetails.setPlainText(
+                    current->data(0, Qt::UserRole).toString());
             });
 
-        QObject::connect(
-            buttons,
-            &QDialogButtonBox::accepted,
-            &dialog,
-            &QDialog::accept);
+            detailsWidget.setVisible(false);
+            layout->addWidget(&detailsWidget, 1);
 
-        layout->addWidget(buttons);
+            QObject::connect(&toggleButton, &QToolButton::toggled, &dialog, [&](bool expanded) {
+                detailsWidget.setVisible(expanded);
+                toggleButton.setArrowType(expanded ? Qt::DownArrow : Qt::RightArrow);
+
+                if (expanded)
+                    dialog.resize(900, 560);
+                else
+                    dialog.adjustSize();
+            });
+        }
+
+        QDialogButtonBox buttons(&dialog);
+
+        auto copyReportButton = buttons.addButton("Copy report", QDialogButtonBox::ActionRole);
+
+        buttons.addButton(QDialogButtonBox::Ok);
+
+        QObject::connect(copyReportButton, &QPushButton::clicked, &dialog, [&] {
+            copyExceptionReportToClipboard(title, reason, stackTrace);
+        });
+
+        QObject::connect(&buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+
+        layout->addWidget(&buttons);
 
         dialog.adjustSize();
         dialog.exec();
