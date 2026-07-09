@@ -13,62 +13,30 @@ namespace mv::util
 {
 
 Notifications::Notifications(QWidget* parent) :
-    QObject(parent),
-    _parentWidget(parent)
+    QObject(parent)
 {
+    Q_ASSERT(parent);
 }
 
 void Notifications::showMessage(const QString& title, const QString& description, const QIcon& icon, const util::Notification::DurationType& durationType, std::int32_t delayMs)
 {
-    //Q_ASSERT(_parentWidget);
-
-    if (!_parentWidget)
-        return;
-
-    const auto addNotification = [this, title, description, icon, durationType]() -> void {
-        auto notification = new Notification(title, description, icon, _notifications.isEmpty() ? nullptr : _notifications.last(), durationType, _parentWidget);
-
-        connect(notification, &Notification::linkActivated, this, &Notifications::notificationLinkActivated);
-
-        notification->updatePosition();
-        notification->show();
-
-        _notifications.append(notification);
-
-        connect(notification, &Notification::finished, this, [this, notification]() {
-            _notifications.removeOne(notification);
-            notification->deleteLater();
-        });
+    const auto createNotification = [&]() -> Notification* {
+	    return new Notification(title, description, icon, _notifications.isEmpty() ? nullptr : _notifications.last(), durationType, Application::getMainWindow());
     };
 
-    if (delayMs > 0)
-        QTimer::singleShot(delayMs, addNotification);
-    else
-        addNotification();
+    if (delayMs > 0) {
+	    QTimer::singleShot(delayMs, [this, createNotification]() {
+			addNotification(createNotification());
+		});
+    }
+    else {
+	    addNotification(createNotification());
+    }
 }
 
 void Notifications::showTask(QPointer<Task> task)
 {
-    if (!_parentWidget)
-        return;
-
-    auto notification = new Notification(task, _notifications.isEmpty() ? nullptr : _notifications.last(), _parentWidget);
-
-    notification->show();
-
-    _notifications.append(notification);
-
-    connect(notification, &Notification::finished, this, [this, notification]() {
-        _notifications.removeOne(notification);
-        notification->deleteLater();
-    });
-}
-
-void Notifications::setParentWidget(QWidget* parentWidget)
-{
-    _parentWidget = parentWidget;
-
-    Application::getMainWindow()->installEventFilter(this);
+    addNotification(new Notification(task, _notifications.isEmpty() ? nullptr : _notifications.last(), Application::getMainWindow()));
 }
 
 bool Notifications::eventFilter(QObject* watched, QEvent* event)
@@ -79,6 +47,28 @@ bool Notifications::eventFilter(QObject* watched, QEvent* event)
     }
 
     return QObject::eventFilter(watched, event);
+}
+
+void Notifications::addNotification(Notification* notification)
+{
+    Q_ASSERT(notification);
+
+    if (!notification)
+        return;
+
+    connect(notification, &Notification::linkActivated, this, &Notifications::notificationLinkActivated);
+    connect(notification, &Notification::finished, this, [this, notification]() {
+        _notifications.removeOne(notification);
+        notification->deleteLater();
+
+        for (auto repositionNotification : _notifications)
+            repositionNotification->updatePosition();
+    });
+
+    notification->updatePosition();
+    notification->show();
+
+    _notifications.append(notification);
 }
 
 }

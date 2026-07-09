@@ -50,12 +50,6 @@ public:
      */
     void showTask(QPointer<Task> task);
 
-    /**
-     * Set parent widget to \p parentWidget (notification widgets will anchor to this widget)
-     * @param parentWidget Pointer to parent widget
-     */
-    void setParentWidget(QWidget* parentWidget);
-
 protected:
 
     /**
@@ -66,6 +60,14 @@ protected:
      */
     bool eventFilter(QObject* watched, QEvent* event) override;
 
+private:
+
+    /**
+     * Add \p notification to the list of notifications
+     * @param notification Pointer to notification to add
+     */
+    void addNotification(Notification* notification);
+
 signals:
 
     /**
@@ -75,7 +77,6 @@ signals:
     void notificationLinkActivated(const QUrl& url);
 
 private:
-    QWidget*                _parentWidget;      /** Pointer to parent widget */
     QVector<Notification*>  _notifications;     /** Vector of notifications */
 };
 

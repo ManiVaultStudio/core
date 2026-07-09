@@ -269,7 +269,6 @@ void HelpManager::addNotification(QPointer<Task> task)
 
 void HelpManager::initializeNotifications(QWidget* parentWidget)
 {
-    _notifications.setParentWidget(parentWidget);
 }
 
 QMenu* HelpManager::getVideosMenu() const
