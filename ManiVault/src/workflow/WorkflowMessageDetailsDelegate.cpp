@@ -16,9 +16,14 @@
 #include <QVBoxLayout>
 #include <QApplication>
 #include <QClipboard>
+#include <QDialogButtonBox>
+#include <QFile>
 #include <QFileDialog>
+#include <QJsonDocument>
 #include <QMessageBox>
+#include <QMouseEvent>
 #include <QMainWindow>
+#include <QPushButton>
 
 #ifdef _DEBUG
 	#define WORKFLOW_MESSAGE_DETAILS_DELEGATE_VERBOSE
@@ -71,6 +76,9 @@ bool WorkflowMessageDetailsDelegate::editorEvent(QEvent* event, QAbstractItemMod
 	if (event->type() != QEvent::MouseButtonRelease)
 		return false;
 
+	const auto* mouseEvent = static_cast<QMouseEvent*>(event);
+	if (mouseEvent->button() != Qt::LeftButton)
+		return false;
 	const auto details = index.data(Qt::EditRole).toMap();
 
 	if (details.isEmpty())
