@@ -32,18 +32,7 @@ class WorkflowMessageDetailsDelegate final : public QStyledItemDelegate
 public:
     using QStyledItemDelegate::QStyledItemDelegate;
 
-    /**
-     * @brief Paints the details cell.
-     *
-     * Renders the default cell appearance for messages without details and a
-     * button-like control for messages containing diagnostic information.
-     *
-     * @param painter Painter used to render the item.
-     * @param option Style options describing the item.
-     * @param index Model index identifying the item to paint.
-     */
-	//void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
-
+    // paint() is intentionally not overridden; the model provides the icon via Qt::DecorationRole.
     /**
      * @brief Handles user interaction with the details cell.
      *
