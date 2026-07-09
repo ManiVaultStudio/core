@@ -286,7 +286,7 @@ if(MV_ENABLE_CPPTRACE)
     )
 
     # do not use the default backend libdwarf
-    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    if(UNIX)
         list(APPEND CPPTRACE_OPTIONS "CPPTRACE_GET_SYMBOLS_WITH_LIBBACKTRACE ON")
     endif()
 
