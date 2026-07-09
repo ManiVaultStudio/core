@@ -86,9 +86,9 @@ void DataPropertiesWidget::populate()
                 _groupsAction.setGroupActions({});
             }
             else {
-	            connect(&_currentItems.first()->getDatasetReference(), &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this]() -> void {
-					_groupsAction.setGroupActions({});
-					});
+                connect(&_currentItems.first()->getDatasetReference(), &Dataset<DatasetImpl>::aboutToBeRemoved, this, [this]() -> void {
+                    _groupsAction.setGroupActions({});
+                });
 
             	GroupsAction::GroupActions groupActions;
 
