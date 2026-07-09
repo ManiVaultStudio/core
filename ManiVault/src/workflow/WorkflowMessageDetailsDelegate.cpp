@@ -141,12 +141,9 @@ void WorkflowMessageDetailsDelegate::showDetailsBrowser(const QVariantMap& detai
 
     connect(buttons, &QDialogButtonBox::rejected, dialog, &QDialog::close);
 
-    layout->addWidget(buttons);
-
-    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    // WA_DeleteOnClose already set above.
     dialog->show();
     dialog->raise();
-}
 
 QList<QStandardItem*> WorkflowMessageDetailsDelegate::makeRow(const QString& key, const QString& value)
 {

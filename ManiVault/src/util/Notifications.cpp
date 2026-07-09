@@ -20,8 +20,8 @@ Notifications::Notifications(QWidget* parent) :
 
 void Notifications::showMessage(const QString& title, const QString& description, const QIcon& icon, const util::Notification::DurationType& durationType, std::int32_t delayMs)
 {
-    const auto createNotification = [&]() -> Notification* {
-	    return new Notification(title, description, icon, _notifications.isEmpty() ? nullptr : _notifications.last(), durationType, Application::getMainWindow());
+    const auto createNotification = [this, title, description, icon, durationType]() -> Notification* {
+        return new Notification(title, description, icon, _notifications.isEmpty() ? nullptr : _notifications.last(), durationType, Application::getMainWindow());
     };
 
     if (delayMs > 0) {
