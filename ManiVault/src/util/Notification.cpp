@@ -382,22 +382,22 @@ void Notification::showEvent(QShowEvent* event)
 
 void Notification::updatePosition()
 {
-    if (!parentWidget())
-        return;
+    if (auto mainWindow = Application::getMainWindow()) {
+        if (_previousNotification) {
+            _previousNotification->updateGeometry();
+            _previousNotification->adjustSize();
 
-    if (_previousNotification) {
-        _previousNotification->updateGeometry();
-        _previousNotification->adjustSize();
+            move(QPoint(parentWidget()->mapToGlobal(QPoint(spacing, 0)).x(), _previousNotification->pos().y() - height() - spacing));
+        }
+        else {
+            const auto statusBarHeight = mainWindow->statusBar()->isVisible() ? mainWindow->statusBar()->height() : 0;
 
-        move(QPoint(parentWidget()->mapToGlobal(QPoint(spacing, 0)).x(), _previousNotification->pos().y() - height() - spacing));
-    } else {
-        const auto statusBarHeight = Application::getMainWindow()->statusBar()->isVisible() ? Application::getMainWindow()->statusBar()->height() : 0;
+            move(parentWidget()->mapToGlobal(QPoint(spacing, mainWindow->height() - statusBarHeight - height() - spacing)));
+        }
 
-        move(parentWidget()->mapToGlobal(QPoint(spacing, Application::getMainWindow()->height() - statusBarHeight - height() - spacing)));
+        if (_nextNotification)
+            QTimer::singleShot(25, _nextNotification, &Notification::updatePosition);
     }
-        
-    if (_nextNotification)
-        QTimer::singleShot(25, _nextNotification, &Notification::updatePosition);
 }
 
 }
