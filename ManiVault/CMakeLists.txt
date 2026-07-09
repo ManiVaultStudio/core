@@ -277,8 +277,6 @@ if(${MV_USE_ERROR_LOGGING})
 
 endif()
 
-option(MV_ENABLE_CPPTRACE "Enable cpptrace stack traces" ON)
-
 if(MV_ENABLE_CPPTRACE)
 
     set(CPPTRACE_OPTIONS
