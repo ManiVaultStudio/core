@@ -111,54 +111,54 @@ namespace
         dialog.setModal(true);
         dialog.setMinimumWidth(700);
 
-        auto layout = new QVBoxLayout(&dialog);
+        QVBoxLayout layout(&dialog);
 
-        layout->setContentsMargins(20, 18, 20, 16);
-        layout->setSpacing(4);
+        layout.setContentsMargins(20, 18, 20, 16);
+        layout.setSpacing(4);
 
-        auto reasonLabel = new QLabel(reason, &dialog);
+        QLabel reasonLabel(reason, &dialog);
 
-        reasonLabel->setWordWrap(true);
-        reasonLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-        reasonLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        reasonLabel.setWordWrap(true);
+        reasonLabel.setTextInteractionFlags(Qt::TextSelectableByMouse);
+        reasonLabel.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-        layout->addWidget(reasonLabel);
+        layout.addWidget(&reasonLabel);
 
         if (!stackTrace.isEmpty()) {
-            QWidget         detailsWidget;
-            QToolButton     toggleButton;
-            QTreeWidget     stackTraceTree;
+            auto detailsWidget  = new QWidget(&dialog);
+            auto toggleButton   = new QToolButton(&dialog);
+            auto stackTraceTree = new QTreeWidget(detailsWidget);
 
-            toggleButton.setText("Technical details");
-            toggleButton.setCheckable(true);
-            toggleButton.setChecked(false);
-            toggleButton.setArrowType(Qt::RightArrow);
-            toggleButton.setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+            toggleButton->setText("Technical details");
+            toggleButton->setCheckable(true);
+            toggleButton->setChecked(false);
+            toggleButton->setArrowType(Qt::RightArrow);
+            toggleButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
-            layout->addWidget(&toggleButton, 0, Qt::AlignLeft);
+            layout.addWidget(toggleButton, 0, Qt::AlignLeft);
 
-            QVBoxLayout detailsLayout;
+            auto detailsLayout = new QVBoxLayout(detailsWidget);
             
-            detailsLayout.setContentsMargins(0, 0, 0, 0);
-            detailsLayout.setSpacing(8);
+            detailsLayout->setContentsMargins(0, 0, 0, 0);
+            detailsLayout->setSpacing(8);
 
-            stackTraceTree.setColumnCount(3);
-            stackTraceTree.setHeaderLabels({ "Function", "File", "Line" });
-            stackTraceTree.setRootIsDecorated(false);
-            stackTraceTree.setAlternatingRowColors(true);
-            stackTraceTree.setUniformRowHeights(true);
-            stackTraceTree.setSelectionMode(QAbstractItemView::ExtendedSelection);
-            stackTraceTree.setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
-            stackTraceTree.setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-            stackTraceTree.setMinimumHeight(300);
+            stackTraceTree->setColumnCount(3);
+            stackTraceTree->setHeaderLabels({ "Function", "File", "Line" });
+            stackTraceTree->setRootIsDecorated(false);
+            stackTraceTree->setAlternatingRowColors(true);
+            stackTraceTree->setUniformRowHeights(true);
+            stackTraceTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
+            stackTraceTree->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+            stackTraceTree->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+            stackTraceTree->setMinimumHeight(300);
 
-            stackTraceTree.header()->setStretchLastSection(false);
-            stackTraceTree.header()->setSectionResizeMode(0, QHeaderView::Stretch);
-            stackTraceTree.header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-            stackTraceTree.header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+            stackTraceTree->header()->setStretchLastSection(false);
+            stackTraceTree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+            stackTraceTree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+            stackTraceTree->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
 
             for (const auto& frame : stackTrace) {
-                auto item = new QTreeWidgetItem(&stackTraceTree);
+                auto item = new QTreeWidgetItem(stackTraceTree);
 
                 item->setText(0, frame.function);
                 item->setText(1, QFileInfo(frame.file).fileName());
@@ -170,34 +170,34 @@ namespace
                 item->setData(0, Qt::UserRole, stackFrameToString(frame));
             }
 
-            detailsLayout.addWidget(&stackTraceTree);
+            detailsLayout->addWidget(stackTraceTree);
 
-            QPlainTextEdit frameDetails(&detailsWidget);
+            auto frameDetails = new QPlainTextEdit(detailsWidget);
 
-            frameDetails.setReadOnly(true);
-            frameDetails.setMaximumHeight(90);
-            frameDetails.setLineWrapMode(QPlainTextEdit::NoWrap);
-            frameDetails.setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+            frameDetails->setReadOnly(true);
+            frameDetails->setMaximumHeight(90);
+            frameDetails->setLineWrapMode(QPlainTextEdit::NoWrap);
+            frameDetails->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
 
-        	detailsLayout.addWidget(&frameDetails);
+        	detailsLayout->addWidget(frameDetails);
 
-            QObject::connect(&stackTraceTree, &QTreeWidget::currentItemChanged, &dialog, [&frameDetails](QTreeWidgetItem* current, QTreeWidgetItem*) {
+            QObject::connect(stackTraceTree, &QTreeWidget::currentItemChanged, &dialog, [frameDetails](QTreeWidgetItem* current, QTreeWidgetItem*) {
                 if (!current) {
-                    frameDetails.clear();
+                    frameDetails->clear();
                     return;
                 }
 
-                frameDetails.setPlainText(
+                frameDetails->setPlainText(
                     current->data(0, Qt::UserRole).toString());
             });
 
-            detailsWidget.setLayout(&detailsLayout);
-            detailsWidget.setVisible(false);
-            layout->addWidget(&detailsWidget, 1);
+            detailsWidget->setVisible(false);
 
-            QObject::connect(&toggleButton, &QToolButton::toggled, &dialog, [&](bool expanded) {
-                detailsWidget.setVisible(expanded);
-                toggleButton.setArrowType(expanded ? Qt::DownArrow : Qt::RightArrow);
+        	layout.addWidget(detailsWidget, 1);
+
+            QObject::connect(toggleButton, &QToolButton::toggled, &dialog, [detailsWidget, toggleButton, &dialog](bool expanded) {
+                detailsWidget->setVisible(expanded);
+                toggleButton->setArrowType(expanded ? Qt::DownArrow : Qt::RightArrow);
 
                 if (expanded)
                     dialog.resize(900, 560);
@@ -218,8 +218,9 @@ namespace
 
         QObject::connect(&buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
 
-        layout->addWidget(&buttons);
+        layout.addWidget(&buttons);
 
+        dialog.setLayout(&layout);
         dialog.adjustSize();
         dialog.exec();
     }
