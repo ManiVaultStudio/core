@@ -16,9 +16,14 @@
 #include <QVBoxLayout>
 #include <QApplication>
 #include <QClipboard>
+#include <QDialogButtonBox>
+#include <QFile>
 #include <QFileDialog>
+#include <QJsonDocument>
 #include <QMessageBox>
+#include <QMouseEvent>
 #include <QMainWindow>
+#include <QPushButton>
 
 #ifdef _DEBUG
 	#define WORKFLOW_MESSAGE_DETAILS_DELEGATE_VERBOSE
