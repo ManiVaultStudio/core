@@ -139,8 +139,7 @@ QVariant AbstractWorkflowMessagesModel::LocationItem::data(int role /*= Qt::User
 
 QVariant AbstractWorkflowMessagesModel::DetailsItem::data(int role) const
 {
-    const auto details = getWorkflowMessage()->details;
-
+    const auto& details = getWorkflowMessage()->details;
     switch (role) {
 	    case Qt::EditRole:
 	        return details;
