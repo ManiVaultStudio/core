@@ -18,6 +18,7 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QMainWindow>
 
 #ifdef _DEBUG
 	#define WORKFLOW_MESSAGE_DETAILS_DELEGATE_VERBOSE
@@ -85,8 +86,11 @@ void WorkflowMessageDetailsDelegate::showDetailsBrowser(const QVariantMap& detai
     auto* parentWindow = qobject_cast<QWidget*>(parent());
     auto* dialog = new QDialog(parentWindow);
 
+    dialog->setWindowModality(Qt::NonModal);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->setWindowTitle(QStringLiteral("Workflow message details"));
     dialog->resize(900, 650);
+    
 
     auto* layout = new QVBoxLayout(dialog);
 
@@ -134,7 +138,6 @@ void WorkflowMessageDetailsDelegate::showDetailsBrowser(const QVariantMap& detai
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->show();
     dialog->raise();
-    dialog->activateWindow();
 }
 
 QList<QStandardItem*> WorkflowMessageDetailsDelegate::makeRow(const QString& key, const QString& value)
