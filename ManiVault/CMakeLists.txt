@@ -279,6 +279,9 @@ endif()
 
 option(MV_ENABLE_CPPTRACE "Enable cpptrace stack traces" ON)
 
+# Turn off libdwarf symbol resolution for cpptrace, as it is not needed and can cause (CI) build issues
+set(CPPTRACE_GET_SYMBOLS_WITH_LIBDWARF OFF CACHE BOOL "" FORCE)
+
 if(MV_ENABLE_CPPTRACE)
     CPMAddPackage(
         NAME cpptrace
