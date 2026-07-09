@@ -286,8 +286,10 @@ if(MV_ENABLE_CPPTRACE)
     )
 
     # do not use the default backend libdwarf
-    if(UNIX)
+    if(UNIX AND NOT APPLE)
         list(APPEND CPPTRACE_OPTIONS "CPPTRACE_GET_SYMBOLS_WITH_LIBBACKTRACE ON")
+    elseif(APPLE)
+        list(APPEND CPPTRACE_OPTIONS "CPPTRACE_GET_SYMBOLS_WITH_ADDR2LINE ON")
     endif()
 
     CPMAddPackage(
