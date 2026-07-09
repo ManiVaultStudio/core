@@ -141,8 +141,7 @@ void DataPropertiesWidget::populate()
 
                 _groupsAction.setGroupActions(groupActions);
 
-                throw std::runtime_error("Data properties population is not implemented yet");
-            }
+                // TODO: implement remaining data properties population behavior.
 
             if (_abortPopulate)
                 populate();
