@@ -8,6 +8,7 @@
 
 #include <QMainWindow>
 #include <QEvent>
+#include <QTimer>
 
 namespace mv::util
 {
@@ -24,7 +25,7 @@ void Notifications::showMessage(const QString& title, const QString& description
     };
 
     if (delayMs > 0) {
-	    QTimer::singleShot(delayMs, [this, createNotification]() {
+	    QTimer::singleShot(delayMs, this, [this, createNotification]() {
 			addNotification(createNotification());
 		});
     }
