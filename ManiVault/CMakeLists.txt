@@ -289,6 +289,7 @@ if(MV_ENABLE_CPPTRACE)
         GIT_TAG v1.0.4
         OPTIONS
             "CPPTRACE_BUILD_TESTING OFF"
+            "CPPTRACE_GET_SYMBOLS_WITH_LIBDWARF OFF"
     )
 endif()
 
