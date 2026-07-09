@@ -6,7 +6,7 @@
 
 #include "CoreInterface.h"
 #include "exception/ManiVaultException.h"
-
+#include "util/StyledIcon.h"
 #include <QApplication>
 #include <QClipboard>
 #include <QDebug>
