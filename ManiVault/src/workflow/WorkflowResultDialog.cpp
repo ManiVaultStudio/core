@@ -8,6 +8,10 @@
 #include "util/SeverityLevel.h"
 
 #include <QHeaderView>
+#include <QLabel>
+#include <QToolButton>
+#include <QTreeView>
+#include <QVBoxLayout>
 
 using namespace mv::util;
 
@@ -15,7 +19,7 @@ namespace mv::workflow
 {
 
 WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowResult, SeverityLevels levels /*= allSeverityLevels*/, QWidget* parent) :
-	QDialog(parent)
+    QDialog(parent)
 {
     Q_ASSERT(workflowResult);
 
@@ -30,31 +34,43 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     const auto message  = resultDetails.makeMessage(workflowResult->getWorkflowName());
 
     setWindowTitle(title);
-    setWindowIcon(workflowResult->getStatusIcon());
+    setWindowIcon(StyledIcon("scroll"));
 
     auto layout = new QVBoxLayout(this);
 
-    auto summaryLabel = new QLabel(workflowResult->getSummaryText(), this);
+    layout->setContentsMargins(12, 12, 12, 12);
+    layout->setSpacing(8);
 
-	summaryLabel->setWordWrap(true);
+    auto summaryLayout  = new QHBoxLayout();
+    auto summaryIcon    = new QLabel(this);
+    auto summaryLabel   = new QLabel(workflowResult->getSummaryText(), this);
+
+    summaryIcon->setPixmap(workflowResult->getStatusIcon().pixmap(24, 24));
+
+    summaryLabel->setWordWrap(true);
+    summaryLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
     summaryLabel->setStyleSheet(QStringLiteral("font-weight: bold;"));
-    summaryLabel->setContentsMargins(0, 0, 0, 6);
 
-    auto messageLabel = new QLabel(message, this);
+    summaryLayout->addWidget(summaryIcon);
+    summaryLayout->addWidget(summaryLabel, 1);
 
-	messageLabel->setWordWrap(true);
+    layout->addLayout(summaryLayout);
 
-    layout->addWidget(summaryLabel);
+    if (!message.isEmpty()) {
+        auto messageLabel = new QLabel(message, this);
 
-    if (!message.isEmpty())
+        messageLabel->setWordWrap(true);
+        messageLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+
         layout->addWidget(messageLabel);
+    }
 
     _messagesListModel.setWorkflowResult(workflowResult);
     _messagesFilterModel.setSourceModel(&_messagesListModel);
 
     auto& filterlevelAction = _messagesFilterModel.getFilterLevelAction();
 
-    filterlevelAction.setText("Severity");
+    filterlevelAction.setText(QStringLiteral("Severity"));
 
     auto toolbarAction = new gui::HorizontalGroupAction(this, "Messages", true);
 
@@ -77,6 +93,7 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     treeView->setMouseTracking(true);
 
     auto header = treeView->header();
+
     header->setStretchLastSection(false);
 
     header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level), QHeaderView::Fixed);
@@ -91,21 +108,56 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Text), 300);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), 60);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), 60);
-    
+
     header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::Emitter), true);
     header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::Location), true);
     header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), true);
 
-    layout->addWidget(toolbarAction->createWidget(this));
-    layout->addWidget(treeView);
+    auto toggleButton = new QToolButton(this);
+
+    toggleButton->setText(QStringLiteral("Messages"));
+    toggleButton->setCheckable(true);
+    toggleButton->setChecked(workflowResult->hasWarnings() || workflowResult->hasErrors() || workflowResult->hasCriticalErrors());
+    toggleButton->setArrowType(Qt::DownArrow);
+    toggleButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    toggleButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    toggleButton->setAutoRaise(false);
+    toggleButton->setStyleSheet(QStringLiteral(
+        "QToolButton {"
+        "    text-align: left;"
+        "    padding: 3px 3px;"
+        "    border: 1px solid palette(mid);"
+        "    border-radius: 3px;"
+        "}"
+    ));
+
+    auto detailsWidget = new QWidget(this);
+    auto detailsLayout = new QVBoxLayout(detailsWidget);
+
+    detailsLayout->setContentsMargins(0, 0, 0, 0);
+    detailsLayout->setSpacing(6);
+
+    detailsLayout->addWidget(toolbarAction->createWidget(detailsWidget));
+    detailsLayout->addWidget(treeView);
+
+    layout->addWidget(toggleButton);
+    layout->addWidget(detailsWidget);
+
+    detailsWidget->setVisible(toggleButton->isChecked());
+
+    connect(toggleButton, &QToolButton::toggled, this, [this, detailsWidget, toggleButton](bool expanded) {
+        detailsWidget->setVisible(expanded);
+        toggleButton->setArrowType(expanded ? Qt::DownArrow : Qt::RightArrow);
+        adjustSize();
+    });
 }
 
 QSize WorkflowResultDialog::sizeHint() const
 {
-	return {
+    return {
         800,
         600
-	};
+    };
 }
 
 }

@@ -91,14 +91,14 @@ QString WorkflowResult::getSummaryText() const
 		       .arg(errorCount == 1 ? "" : "s")
 		       .arg(warningCount)
 		       .arg(warningCount == 1 ? "" : "s");
-	}
+		}
 
-	case Status::Canceled:
-		return QStringLiteral("Canceled.");
+		case Status::Canceled:
+			return QStringLiteral("Canceled.");
 
-	case Status::Undefined:
-	default:
-		return QStringLiteral("Status unknown.");
+		case Status::Undefined:
+		default:
+			return QStringLiteral("Status unknown.");
 	}
 }
 

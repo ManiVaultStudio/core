@@ -471,33 +471,29 @@ TaskflowWorkflowPlanExecutor::CompiledTasks TaskflowWorkflowPlanExecutor::compil
 
 void TaskflowWorkflowPlanExecutor::addWorkflowFinishedNotification(const QString& workflowName, const SharedWorkflowResult& result, const QUuid& resultId)
 {
-    const auto url      = QString("app://workflow/results?workflowResultId=%1").arg(resultId.toString(QUuid::WithoutBraces));
-    const auto title    = QString("%1 finished in %2").arg(workflowName).arg(getElapsedTimeHumanReadable(result->getDurationMS(), true));
+    const auto url          = QStringLiteral("app://workflow/results?workflowResultId=%1").arg(resultId.toString(QUuid::WithoutBraces));
+    const auto warningUrl   = QStringLiteral("%1&levels=warning").arg(url);
+    const auto errorUrl     = QStringLiteral("%1&levels=error").arg(url);
+    const auto title        = QStringLiteral("%1 finished in %2").arg(workflowName).arg(getElapsedTimeHumanReadable(result->getDurationMS(), true));
 
-    QMetaObject::invokeMethod(&help(), [result, url, title]() {
+    QMetaObject::invokeMethod(&help(), [result, title, warningUrl, errorUrl]() {
         QString message;
 
-        if (!result->hasWarnings() && !result->hasErrors()) {
-            message = QStringLiteral("Completed successfully");
+        if (result->hasErrors() && result->hasWarnings()) {
+            message = QStringLiteral("Failed with <a href=\"%1\">errors</a> and <a href=\"%2\">warnings</a>. Review the report.").arg(errorUrl, warningUrl);
+        }
+        else if (result->hasErrors()) {
+            message = QStringLiteral("Failed with <a href=\"%1\">errors</a>. Review the report.").arg(errorUrl);
+        }
+        else if (result->hasWarnings()) {
+            message = QStringLiteral("Completed with <a href=\"%1\">warnings</a>. Review the report.").arg(warningUrl);
+        }
+        else {
+            message = QStringLiteral("Completed successfully.");
         }
 
-        if (result->hasWarnings() && !result->hasErrors()) {
-            message = QString("Completed with <a href=\"%1\">warnings</a>. Review the report.").arg(QString("%1&levels=warning").arg(url));
-        }
-
-        if (!result->hasWarnings() && result->hasErrors()) {
-            message = QString("Completed with <a href=\"%1\">errors</a>. Review the report.").arg(QString("%1&levels=error").arg(url));
-        }
-
-        if (result->hasWarnings() && result->hasErrors()) {
-            message = QString("Completed with <a href=\"%1\">warnings</a> and <a href=\"%2\">errors</a>. Review the report.").arg(QString("%1&levels=warning").arg(url), QString("%1&levels=error").arg(url));
-        }
-
-        if (!message.isEmpty()) {
-            help().addNotification(title, message);
-            qDebug() << title;
-        }
-        }, Qt::QueuedConnection);
+        help().addNotification(title, message, result->getStatusIcon());
+    }, Qt::QueuedConnection);
 }
 
 void TaskflowWorkflowPlanExecutor::executeCompiledJob(const WorkflowPlan::Job& job, tf::Subflow& subflow, SharedWorkflowExecutionContext jobContext)
