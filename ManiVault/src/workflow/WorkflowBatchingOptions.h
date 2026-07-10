@@ -9,6 +9,7 @@
 namespace mv::workflow
 {
 
+/** Options for controlling the batching behavior of workflow execution. These options determine how many datasets or data blocks are processed in parallel during various stages of workflow execution, such as loading, saving, encoding, and decoding. Adjust these options based on the expected workload and system capabilities to achieve optimal performance without overwhelming system resources. */
 struct CORE_EXPORT WorkflowBatchingOptions
 {
     std::size_t datasetLoadingBatchSize     = conservativeDatasetsSerializationBatchSize();     /** Number of datasets to load in parallel when loading multiple datasets. */
