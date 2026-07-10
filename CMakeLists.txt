@@ -21,6 +21,7 @@ option(MV_USE_ERROR_LOGGING "Use error logging with Sentry" OFF)
 option(MV_PRECOMPILE_HEADERS "Precompile several headers for faster compilation" ON)
 option(MV_UNITY_BUILD "Combine target source files into batches for faster compilation" OFF)
 option(MV_WARNINGS_AS_ERRORS "Treat warnings as errors when using MSVC" ON)
+option(MV_ENABLE_CPPTRACE "Enable cpptrace stack traces" ON)
 
 # defines MV_VERSION
 include(ManiVault/cmake/Utils.cmake)
