@@ -789,6 +789,9 @@ void Images::updateVisibleRectangle()
     _visibleRectangle.setLeft(std::numeric_limits<int>::max());
     _visibleRectangle.setRight(std::numeric_limits<int>::lowest());
 
+    const int32_t imageWidth = getImageSize().width();
+    const float imageWidthF = static_cast<float>(imageWidth);
+
     // Loop over mask elements and compute the visible rectangle
     for (std::int32_t maskIndex = 0; maskIndex < _maskData.size(); maskIndex++) {
 
@@ -797,13 +800,14 @@ void Images::updateVisibleRectangle()
             continue;
 
         // Compute pixel coordinate from mask index
-        const auto pixelCoordinate = QPoint(maskIndex % getImageSize().width(), static_cast<std::int32_t>(floorf(maskIndex / static_cast<float>(getImageSize().width()))));
-
+        const auto pixelCoordinateY = static_cast<std::int32_t>(std::floor(static_cast<float>(maskIndex) / imageWidthF));
+        const auto pixelCoordinateX = maskIndex % imageWidth;
+    
         // Add pixel coordinate and possibly inflate the visible rectangle
-        _visibleRectangle.setLeft(std::min(_visibleRectangle.left(), pixelCoordinate.x()));
-        _visibleRectangle.setRight(std::max(_visibleRectangle.right(), pixelCoordinate.x()));
-        _visibleRectangle.setTop(std::min(_visibleRectangle.top(), pixelCoordinate.y()));
-        _visibleRectangle.setBottom(std::max(_visibleRectangle.bottom(), pixelCoordinate.y()));
+        _visibleRectangle.setTop(std::min(_visibleRectangle.top(), pixelCoordinateY));
+        _visibleRectangle.setBottom(std::max(_visibleRectangle.bottom(), pixelCoordinateY));
+        _visibleRectangle.setLeft(std::min(_visibleRectangle.left(), pixelCoordinateX));
+        _visibleRectangle.setRight(std::max(_visibleRectangle.right(), pixelCoordinateX));
     }
 }
 
