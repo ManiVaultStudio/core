@@ -24,20 +24,25 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
         return;
     }
 
-    const auto resolvedOptions      = options.value_or(WorkflowOptions{});
-    const auto resultDetailsTitle   = resolvedOptions.reporting.resultDetailsTitle;
+    const auto resolvedOptions = options.value_or(WorkflowOptions{});
+    const auto& resultDetails = resolvedOptions.reporting.resultDetails;
 
-    setWindowTitle(resultDetailsTitle.isEmpty() ? "Workflow result - " + workflowResult->getWorkflowName() : resultDetailsTitle);
-    setWindowIcon(StyledIcon("scroll"));
+    const auto title    = WorkflowResultDetailsOptions::makeWorkflowResultDetailsTitle(resultDetails, workflowResult->getWorkflowName());
+    const auto message  = WorkflowResultDetailsOptions::makeWorkflowResultDetailsMessage(resultDetails, workflowResult->getWorkflowName());
 
- //   setStyleSheet(R"(
-	//	QToolTip {
-	//	    border: none;
-	//	    background-color: palette(ToolTipBase);
-	//	    color: palette(ToolTipText);
-	//	    padding: 6px;
-	//	}
-	//)");
+    setWindowTitle(title);
+
+    if (workflowResult->getFatalErrorCount() >= 1) {
+        setWindowIcon(StyledIcon("error"));
+    } else {
+	    if (workflowResult->getErrorCount() >= 1) {
+            setWindowIcon(StyledIcon("error"));
+        } else if (workflowResult->getWarningCount() >= 1) {
+            setWindowIcon(StyledIcon("warning"));
+        } else {
+            setWindowIcon(StyledIcon("check"));
+        }
+    }
 
     _messagesListModel.setWorkflowResult(workflowResult);
     _messagesFilterModel.setSourceModel(&_messagesListModel);
@@ -84,9 +89,7 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
 
     auto layout = new QVBoxLayout(this);
 
-    if (const auto& resultDetailsMessage = resolvedOptions.reporting.resultDetailsMessage; !resultDetailsMessage.isEmpty())
-        layout->addWidget(new QLabel(resultDetailsMessage, this));
-
+	layout->addWidget(new QLabel(message, this));
     layout->addWidget(toolbarAction->createWidget(this));
     layout->addWidget(treeView);
 

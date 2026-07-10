@@ -387,8 +387,10 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
                 .progress               = true,
                 .finishedNotification   = true,
                 .maxLoggingDepth        = parameters.maxLoggingDepth,
-                .resultDetailsTitle     = "Open project",
-				.resultDetailsMessage   = QString("The following messages were generated while opening '%1'.").arg(QFileInfo(filePath).fileName())
+                .resultDetails = {
+                    .operationName = "Open project",
+                    .subjectName = QFileInfo(filePath).fileName()
+                }
             }
         }));
         
@@ -758,8 +760,10 @@ void ProjectManager::saveProject(QString filePath)
                 .progress               = true,
                 .finishedNotification   = true,
                 .maxLoggingDepth        = parameters.maxLoggingDepth,
-                .resultDetailsTitle     = "Save project",
-				.resultDetailsMessage   = QString("The following messages were generated while saving '%1'.").arg(QFileInfo(filePath).fileName())
+                .resultDetails = {
+                    .operationName  = "Save project",
+                    .subjectName    = QFileInfo(filePath).fileName()
+                }
             }
             //.profilingSinkType = WorkflowExecutionOptions::ProfilingSinkType::ChromeTracing
         }));
