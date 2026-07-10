@@ -90,6 +90,12 @@ public: // Messages
     /** @return Number of fatal error messages. */
     int getFatalErrorCount() const;
 
+    /** @return True when this result contains messages of the specified severity level. */
+    Status deriveStatus() const;
+
+	/** @return A summary text describing the workflow result, including status and message counts. */
+    QString getSummaryText() const;
+
 public: // Metrics
 
     /**

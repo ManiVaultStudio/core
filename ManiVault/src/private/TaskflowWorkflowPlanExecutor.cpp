@@ -305,6 +305,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
         result->setMetrics(state->metrics().snapshot());
     }
 
+    result->setStatus(result->deriveStatus());
     result->setDurationMS(durationMs);
     result->setOptions(rootContext->getState()->getOptions());
 

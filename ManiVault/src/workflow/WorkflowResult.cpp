@@ -59,6 +59,49 @@ int WorkflowResult::getFatalErrorCount() const
 	return getMessageCountByLevels({ SeverityLevel::Fatal });
 }
 
+WorkflowResultBase::Status WorkflowResult::deriveStatus() const
+{
+	if (hasCriticalErrors() || hasErrors()) {
+		return Status::Failed;
+	}
+
+	return Status::Success;
+}
+
+QString WorkflowResult::getSummaryText() const
+{
+	const auto warningCount  = getWarningCount();
+	const auto errorCount    = getErrorCount();
+	const auto operationName = getOptions().reporting.resultDetails.operationName.isEmpty() ? getWorkflowName() : getOptions().reporting.resultDetails.operationName;
+
+	switch (getStatus()) {
+		case Status::Success:{
+			if (warningCount > 0)
+				return QStringLiteral("Completed with %1 warning%2.")
+				       .arg(warningCount)
+				       .arg(warningCount == 1 ? "" : "s");
+
+			return QStringLiteral("Completed successfully.");
+		}
+
+		case Status::Failed: {
+			return QStringLiteral("%1 failed with %2 error%3 and %4 warning%5.")
+		       .arg(operationName)
+		       .arg(errorCount)
+		       .arg(errorCount == 1 ? "" : "s")
+		       .arg(warningCount)
+		       .arg(warningCount == 1 ? "" : "s");
+	}
+
+	case Status::Canceled:
+		return QStringLiteral("Canceled.");
+
+	case Status::Undefined:
+	default:
+		return QStringLiteral("Status unknown.");
+	}
+}
+
 WorkflowMessages WorkflowResult::getMessages() const
 {
     return _messages;

@@ -32,12 +32,31 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     setWindowTitle(title);
     setWindowIcon(workflowResult->getStatusIcon());
 
+    auto layout = new QVBoxLayout(this);
+
+    auto summaryLabel = new QLabel(workflowResult->getSummaryText(), this);
+
+	summaryLabel->setWordWrap(true);
+    summaryLabel->setStyleSheet(QStringLiteral("font-weight: bold;"));
+    summaryLabel->setContentsMargins(0, 0, 0, 6);
+
+    auto messageLabel = new QLabel(message, this);
+
+	messageLabel->setWordWrap(true);
+
+    layout->addWidget(summaryLabel);
+
+    if (!message.isEmpty())
+        layout->addWidget(messageLabel);
+
     _messagesListModel.setWorkflowResult(workflowResult);
     _messagesFilterModel.setSourceModel(&_messagesListModel);
 
     auto& filterlevelAction = _messagesFilterModel.getFilterLevelAction();
 
-    auto toolbarAction = new gui::HorizontalGroupAction(this, "Options", true);
+    filterlevelAction.setText("Severity");
+
+    auto toolbarAction = new gui::HorizontalGroupAction(this, "Messages", true);
 
     toolbarAction->addAction(&filterlevelAction);
 
@@ -48,7 +67,7 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
 
     filterlevelAction.setSelectedOptions(selectedOptions);
 
-    auto treeView = new QTreeView();
+    auto treeView = new QTreeView(this);
 
     treeView->setModel(&_messagesFilterModel);
     treeView->setSortingEnabled(true);
@@ -73,15 +92,12 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), 60);
     header->resizeSection(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), 60);
     
+    header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::Emitter), true);
+    header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::Location), true);
     header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), true);
 
-    auto layout = new QVBoxLayout(this);
-
-	layout->addWidget(new QLabel(message, this));
     layout->addWidget(toolbarAction->createWidget(this));
     layout->addWidget(treeView);
-
-    setLayout(layout);
 }
 
 QSize WorkflowResultDialog::sizeHint() const

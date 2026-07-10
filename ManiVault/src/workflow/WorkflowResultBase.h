@@ -132,7 +132,7 @@ public: // Value
     }
 
     /**
-     * @brief Checks whether the value can convert to a type.
+     * @brief Checks whether the value can convert to a type.   
      *
      * @tparam T The type to which the value is being checked for conversion.
      * @return True if the value can be converted to the specified type T, false otherwise.
