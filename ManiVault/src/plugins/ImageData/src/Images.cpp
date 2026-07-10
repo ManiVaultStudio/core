@@ -813,7 +813,7 @@ void Images::updateVisibleRectangle()
 
 QPoint Images::getPixelCoordinateFromPixelIndex(const std::int32_t& pixelIndex) const
 {
-    return QPoint(pixelIndex % getImageSize().width(), static_cast<std::int32_t>(pixelIndex / static_cast<float>(getImageSize().width())));
+    return {pixelIndex % getImageSize().width(), static_cast<std::int32_t>(pixelIndex / static_cast<float>(getImageSize().width()))};
 }
 
 std::int32_t Images::getPixelIndexFromPixelCoordinate(const QPoint& pixelCoordinate) const
@@ -847,7 +847,7 @@ void Images::fromVariantMap(const QVariantMap& variantMap)
 
     if (variantMap.contains("MaskData"))
     {
-        auto size = _imageData->getImageSize();
+        const auto size = _imageData->getImageSize();
         _maskData.resize(static_cast<size_t>(size.width()) * size.height());
         populateBytesFromBlobMap(variantMap["MaskData"].toMap(), (char*)_maskData.data(), _maskData.size() * sizeof(std::uint8_t));
     }
