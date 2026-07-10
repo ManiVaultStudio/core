@@ -306,6 +306,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
     }
 
     result->setDurationMS(durationMs);
+    result->setOptions(rootContext->getState()->getOptions());
 
     lifecycle.finish(durationMs);
 

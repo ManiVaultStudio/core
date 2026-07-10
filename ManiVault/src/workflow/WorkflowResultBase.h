@@ -9,6 +9,8 @@
 #include <QString>
 #include <QVariant>
 
+#include "WorkflowOptions.h"
+
 namespace mv::workflow
 {
 
@@ -52,10 +54,28 @@ public: // General
     Status getStatus() const;
 
     /**
+     * @brief Retrieves the icon representing the status of the workflow result. This can be used for visual representation in user interfaces, allowing users to quickly identify the status of the workflow execution.
+     * @return The icon representing the status of the workflow result. This can be used for visual representation in user interfaces, allowing users to quickly identify the status of the workflow execution.
+     */
+    QIcon getStatusIcon() const;
+
+    /**
      * @brief Sets the status of the workflow result.
      * @param status The status to be set for the workflow result, which can be Undefined, Success, Failed, or Canceled.
      */
     void setStatus(Status status);
+
+    /**
+     * @brief Sets the workflow options associated with this result.
+     * @param options The workflow options to be set for this result.
+     */
+    void setOptions(const WorkflowOptions& options);
+
+    /**
+     * @brief Retrieves the workflow options associated with this result.
+     * @return The workflow options associated with this result.
+     */
+    const WorkflowOptions& getOptions() const;
 
 public: // Value
 
@@ -128,9 +148,10 @@ public: // Value
     }
 
 private:
-    QString     _workflowName;                  /** The name of the workflow that produced this result. This can be used for identification and logging purposes. */
-    Status      _status = Status::Undefined;    /** The status of the workflow execution, indicating whether it was successful, failed, or canceled. This can be used to determine the overall outcome of the workflow execution. */
-    QVariant    _value;                         /** The value produced by the workflow execution. This can be any type of data that can be stored in a QVariant, such as a result object, a data structure, or any other relevant output from the workflow. */
+    QString             _workflowName;                  /** The name of the workflow that produced this result. This can be used for identification and logging purposes. */
+    Status              _status = Status::Undefined;    /** The status of the workflow execution, indicating whether it was successful, failed, or canceled. This can be used to determine the overall outcome of the workflow execution. */
+    QVariant            _value;                         /** The value produced by the workflow execution. This can be any type of data that can be stored in a QVariant, such as a result object, a data structure, or any other relevant output from the workflow. */
+    WorkflowOptions     _options;                       /** The options used for the workflow execution. This can be used to customize the behavior of the workflow execution, such as parallelization, batching, reporting, and profiling options. */
 };
 
 }

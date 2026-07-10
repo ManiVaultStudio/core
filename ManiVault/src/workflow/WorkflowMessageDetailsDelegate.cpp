@@ -121,6 +121,8 @@ void WorkflowMessageDetailsDelegate::showDetailsBrowser(const QVariantMap& detai
 
 	layout->addWidget(treeView);
 
+    dialog->setLayout(layout);
+
 	auto buttons    = new QDialogButtonBox(dialog);
 	auto copyButton = buttons->addButton(QStringLiteral("Copy JSON"), QDialogButtonBox::ActionRole);
 	auto saveButton = buttons->addButton(QStringLiteral("Save JSON..."), QDialogButtonBox::ActionRole);

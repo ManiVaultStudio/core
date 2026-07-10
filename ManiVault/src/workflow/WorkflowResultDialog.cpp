@@ -14,7 +14,7 @@ using namespace mv::util;
 namespace mv::workflow
 {
 
-WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowResult, SeverityLevels levels /*= allSeverityLevels*/, OptionalWorkflowOptions options /*= {}*/, QWidget* parent) :
+WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowResult, SeverityLevels levels /*= allSeverityLevels*/, QWidget* parent) :
 	QDialog(parent)
 {
     Q_ASSERT(workflowResult);
@@ -24,25 +24,13 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
         return;
     }
 
-    const auto resolvedOptions = options.value_or(WorkflowOptions{});
-    const auto& resultDetails = resolvedOptions.reporting.resultDetails;
+    const auto& resultDetails = workflowResult->getOptions().reporting.resultDetails;
 
-    const auto title    = WorkflowResultDetailsOptions::makeWorkflowResultDetailsTitle(resultDetails, workflowResult->getWorkflowName());
-    const auto message  = WorkflowResultDetailsOptions::makeWorkflowResultDetailsMessage(resultDetails, workflowResult->getWorkflowName());
+    const auto title    = resultDetails.makeTitle(workflowResult->getWorkflowName());
+    const auto message  = resultDetails.makeMessage(workflowResult->getWorkflowName());
 
     setWindowTitle(title);
-
-    if (workflowResult->getFatalErrorCount() >= 1) {
-        setWindowIcon(StyledIcon("error"));
-    } else {
-	    if (workflowResult->getErrorCount() >= 1) {
-            setWindowIcon(StyledIcon("error"));
-        } else if (workflowResult->getWarningCount() >= 1) {
-            setWindowIcon(StyledIcon("warning"));
-        } else {
-            setWindowIcon(StyledIcon("check"));
-        }
-    }
+    setWindowIcon(workflowResult->getStatusIcon());
 
     _messagesListModel.setWorkflowResult(workflowResult);
     _messagesFilterModel.setSourceModel(&_messagesListModel);
