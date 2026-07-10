@@ -45,7 +45,7 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     auto summaryIcon    = new QLabel(this);
     auto summaryLabel   = new QLabel(workflowResult->getSummaryText(), this);
 
-    summaryIcon->setPixmap(workflowResult->getStatusIcon().pixmap(24, 24));
+    summaryIcon->setPixmap(workflowResult->getStatusIcon().pixmap(20, 20));
 
     summaryLabel->setWordWrap(true);
     summaryLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
@@ -115,7 +115,7 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
 
     auto toggleButton = new QToolButton(this);
 
-    toggleButton->setText(QStringLiteral("Messages"));
+    toggleButton->setText(QStringLiteral("Diagnostics"));
     toggleButton->setCheckable(true);
     toggleButton->setChecked(workflowResult->hasWarnings() || workflowResult->hasErrors() || workflowResult->hasCriticalErrors());
     toggleButton->setArrowType(Qt::DownArrow);
