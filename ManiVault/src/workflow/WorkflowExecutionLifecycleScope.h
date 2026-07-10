@@ -49,6 +49,7 @@ namespace mv::workflow
 class CORE_EXPORT WorkflowExecutionLifecycleScope
 {
 public:
+
     /**
      * @brief Creates a lifecycle scope for the given workflow execution context.
      *

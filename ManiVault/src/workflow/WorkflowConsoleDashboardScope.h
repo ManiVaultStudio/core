@@ -10,15 +10,25 @@
 namespace mv::workflow
 {
 
+/**
+ * @brief RAII scope that starts and stops a workflow console dashboard.
+ */
 class CORE_EXPORT WorkflowConsoleDashboardScope
 {
 public:
+
+    /**
+     * @brief Starts a console dashboard for the supplied execution state.
+     * @param state Execution state observed by the dashboard.
+     */
     explicit WorkflowConsoleDashboardScope(WorkflowExecutionState::Ptr state);
 
+    /** Stops the dashboard. */
     ~WorkflowConsoleDashboardScope();
 
 private:
-    std::unique_ptr<WorkflowConsoleDashboard> _dashboard;
+
+    std::unique_ptr<WorkflowConsoleDashboard> _dashboard;  /**< Owned console dashboard */
 };
 
 }

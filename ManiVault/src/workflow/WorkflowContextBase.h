@@ -27,6 +27,7 @@ namespace mv::workflow
 class CORE_EXPORT WorkflowContextBase
 {
 public:
+
     virtual ~WorkflowContextBase() = default;
 };
 

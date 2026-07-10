@@ -30,6 +30,7 @@ class WorkflowMessageDetailsDelegate final : public QStyledItemDelegate
     Q_OBJECT
 
 public:
+
     using QStyledItemDelegate::QStyledItemDelegate;
 
     // paint() is intentionally not overridden; the model provides the icon via Qt::DecorationRole.
@@ -49,13 +50,17 @@ public:
     bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index) override;
 
 private:
+
+    /** Opens a dialog for browsing structured workflow message details. */
     void showDetailsBrowser(const QVariantMap& details);
 
+    /** Populates a tree model from a QVariant value. */
     static void populateModel(
         QStandardItem* parent,
         const QString& key,
         const QVariant& value);
 
+    /** Creates a key/value row for the details model. */
     static QList<QStandardItem*> makeRow(
         const QString& key,
         const QString& value = {});

@@ -203,6 +203,7 @@ protected:
     static SharedWorkflowExecutionContext requireContext(const SharedWorkflowExecutionContext& context, const char* where);
 
 private:
+
     friend class WorkflowPlan;
 };
 

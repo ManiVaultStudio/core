@@ -317,6 +317,7 @@ private:
     void syncTaskProgress() const;
 
 private:
+
     friend class WorkflowExecutionScope;
 
 private:

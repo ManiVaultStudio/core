@@ -10,11 +10,22 @@
 namespace mv::workflow
 {
 
+/**
+ * @brief Access point for executing workflow plans in the current runtime scope.
+ */
 class CORE_EXPORT WorkflowRuntimeScoped
 {
 public:
+
+    /** @return Singleton workflow runtime scope. */
     static WorkflowRuntimeScoped& instance();
 
+    /**
+     * @brief Executes a workflow plan synchronously under a parent context.
+     * @param plan Workflow plan to execute.
+     * @param parentContext Parent workflow execution context.
+     * @return Final workflow result.
+     */
     static SharedWorkflowResult executeBlocking(UniqueWorkflowPlan plan, const SharedWorkflowExecutionContext& parentContext);
 };
 
