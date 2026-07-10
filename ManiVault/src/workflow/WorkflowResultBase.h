@@ -15,20 +15,23 @@ namespace mv::workflow
 {
 
 /**
- * @brief The WorkflowResultBase class represents the base structure for storing the results of a workflow execution, or a part of it (stage or job).
+ * @brief Base result shared by workflows, stages, and jobs.
  *
- * @author Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
+ * WorkflowResultBase stores the workflow entity name, status, optional QVariant
+ * output value, and execution options associated with a result.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowResultBase
 {
 public:
 
-    /** Represents the status of a workflow result. This can be used to indicate whether the workflow execution was successful, failed, or canceled. */
+    /** Status of a workflow result. */
     enum class Status {
-        Undefined,      /** The status of the workflow result is undefined. This can be used as a default value when the status has not been set or determined yet. */
-        Success,        /** The workflow execution completed successfully. */
-        Failed,         /** The workflow execution encountered an error and failed. */
-        Canceled        /** The workflow execution was canceled before completion. */
+        Undefined,      /**< Result status has not been set */
+        Success,        /**< Execution completed successfully */
+        Failed,         /**< Execution failed */
+        Canceled        /**< Execution was canceled */
     };
 
 public:
@@ -148,10 +151,11 @@ public: // Value
     }
 
 private:
-    QString             _workflowName;                  /** The name of the workflow that produced this result. This can be used for identification and logging purposes. */
-    Status              _status = Status::Undefined;    /** The status of the workflow execution, indicating whether it was successful, failed, or canceled. This can be used to determine the overall outcome of the workflow execution. */
-    QVariant            _value;                         /** The value produced by the workflow execution. This can be any type of data that can be stored in a QVariant, such as a result object, a data structure, or any other relevant output from the workflow. */
-    WorkflowOptions     _options;                       /** The options used for the workflow execution. This can be used to customize the behavior of the workflow execution, such as parallelization, batching, reporting, and profiling options. */
+
+    QString             _workflowName;                  /**< Name of the workflow entity that produced this result */
+    Status              _status = Status::Undefined;    /**< Result status */
+    QVariant            _value;                         /**< Optional value produced by execution */
+    WorkflowOptions     _options;                       /**< Workflow options used for execution */
 };
 
 }

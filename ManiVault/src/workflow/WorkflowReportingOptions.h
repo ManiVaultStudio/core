@@ -12,14 +12,14 @@
 namespace mv::workflow
 {
 
-/** Options for configuring the reporting behavior of a workflow. */
+/** Options that configure workflow progress, notifications, and result reporting. */
 struct CORE_EXPORT WorkflowReportingOptions
 {
-    bool                            progress = false;                                               /** Whether to report progress during workflow execution. (with a modal task) */
-    bool                            finishedNotification = false;                                   /** Whether to add a notification when the workflow execution finishes. */
-    bool                            enableConsoleDashboard = false;                                 /** Whether to enable the console dashboard for this workflow execution. This will be ignored if a trace sink is provided, as the trace sink is responsible for managing its own dashboard if needed. */
-    std::uint32_t                   maxLoggingDepth = std::numeric_limits<std::uint32_t>::max();    /** The maximum depth of logging for this workflow execution. This controls how many levels of nested operations will be logged. Adjust this value based on the expected complexity of the workflow and the desired level of detail in the logs. */
-    WorkflowResultDetailsOptions    resultDetails;                                                  /** Options for customizing the details of the result dialog when the workflow execution finishes. */
+    bool                            progress = false;                                               /**< Whether to show progress with a task */
+    bool                            finishedNotification = false;                                   /**< Whether to add a notification when execution finishes */
+    bool                            enableConsoleDashboard = false;                                 /**< Whether to enable live console dashboard output */
+    std::uint32_t                   maxLoggingDepth = std::numeric_limits<std::uint32_t>::max();    /**< Maximum nested detail depth for workflow logging */
+    WorkflowResultDetailsOptions    resultDetails;                                                  /**< Result dialog title and message options */
 };
 
 }

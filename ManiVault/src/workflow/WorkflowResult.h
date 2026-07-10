@@ -15,9 +15,12 @@ namespace mv::workflow
 {
 
 /**
- * @brief The WorkflowResult class represents the result of a workflow execution, including its status, duration, messages, and any value produced by the workflow. It extends the WorkflowResultBase class to provide additional functionality specific to workflow results.
+ * @brief Result of a complete workflow execution.
  *
- * @author Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
+ * WorkflowResult extends WorkflowResultBase with execution duration, collected
+ * workflow messages, and metrics captured during the run.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowResult final : public WorkflowResultBase
 {
@@ -45,18 +48,43 @@ public: // General
 
 public: // Messages
 
+    /** @return All messages collected during workflow execution. */
     WorkflowMessages getMessages() const;
+
+    /** @return Messages with warning severity. */
     WorkflowMessages getWarningMessages() const;
+
+    /** @return Messages with error severity. */
     WorkflowMessages getErrorMessages() const;
+
+    /** @return Messages with fatal severity. */
     WorkflowMessages getFatalErrorMessages() const;
+
+    /** Sets the messages collected during workflow execution. */
     void             setMessages(const WorkflowMessages& workflowMessages);
+
+    /** Returns messages whose severity is contained in the supplied set. */
     WorkflowMessages getMessagesByLevels(const util::SeverityLevels& severityLevels) const;
+
+    /** Returns the number of messages whose severity is contained in the supplied set. */
     int              getMessageCountByLevels(const util::SeverityLevels& severityLevels) const;
+
+    /** @return True when this result contains warning messages. */
     bool             hasWarnings() const;
+
+    /** @return True when this result contains error messages. */
     bool             hasErrors() const;
+
+    /** @return True when this result contains fatal error messages. */
     bool             hasCriticalErrors() const;
+
+    /** @return Number of warning messages. */
     int              getWarningCount() const;
+
+    /** @return Number of error messages. */
     int              getErrorCount() const;
+
+    /** @return Number of fatal error messages. */
     int              getFatalErrorCount() const;
 
 public: // Metrics
@@ -81,9 +109,10 @@ public: // Metrics
     std::optional<WorkflowMetric> getMetric(const QString& name) const;
 
 private:
-    std::uint64_t               _duration = 0;      /** The duration of the workflow execution in milliseconds. This can be used for performance monitoring and analysis. */
-    WorkflowMessages            _messages;          /** The messages generated during the workflow execution. This can include informational messages, warnings, errors, and critical errors that occurred during the execution. These messages can be used for debugging, logging, and providing feedback to users about the workflow execution. */
-    QVector<WorkflowMetric>     _metrics;           /** The metrics associated with this workflow result. Metrics are quantitative measurements that can be used to evaluate the performance, efficiency, or other relevant aspects of the workflow execution. */
+
+    std::uint64_t               _duration = 0;      /**< Workflow execution duration in milliseconds */
+    WorkflowMessages            _messages;          /**< Messages collected during workflow execution */
+    QVector<WorkflowMetric>     _metrics;           /**< Metrics captured during workflow execution */
 };
 
 using UniqueWorkflowResult = std::unique_ptr<WorkflowResult>;

@@ -16,7 +16,7 @@ namespace mv::workflow
 /**
  * @brief The WorkflowStageResult class represents the result of a workflow stage execution, including its status and any value produced by the stage. It extends the WorkflowResultBase class to provide additional functionality specific to workflow stage results.
  *
- * @author Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowJobResult final : public WorkflowResultBase
 {

@@ -16,12 +16,17 @@ namespace mv::workflow
  */
 struct CORE_EXPORT WorkflowResultDetailsOptions
 {
-    QString operationName;      /** "Save project", "Open project" */
-    QString subjectName;        /** "Example.mv" */
+    QString operationName;      /**< Operation label, such as "Save project" or "Open project" */
+    QString subjectName;        /**< Subject label, such as a project filename */
 
-    QString overrideTitle;      /** Full title override. */
-    QString overrideMessage;    /** Full intro message override. */
+    QString overrideTitle;      /**< Full result-dialog title override */
+    QString overrideMessage;    /**< Full result-dialog intro message override */
 
+    /**
+     * @brief Creates the result-dialog title.
+     * @param workflowName Fallback workflow name.
+     * @return Dialog title.
+     */
     QString makeTitle(const QString& workflowName) const
     {
         if (!overrideTitle.isEmpty())
@@ -33,6 +38,11 @@ struct CORE_EXPORT WorkflowResultDetailsOptions
         return QStringLiteral("Workflow result - %1").arg(workflowName);
     }
 
+    /**
+     * @brief Creates the result-dialog intro message.
+     * @param workflowName Fallback workflow name.
+     * @return Dialog message.
+     */
     QString makeMessage(const QString& workflowName) const
     {
         if (!overrideMessage.isEmpty())

@@ -103,8 +103,9 @@ public:
     void clear();
 
 private:
-    mutable QMutex  _mutex;     /** Synchronizes access to the map. */
-    QVariantMap     _map;       /** Shared workflow data. */
+
+    mutable QMutex  _mutex;     /**< Synchronizes access to the map */
+    QVariantMap     _map;       /**< Shared workflow data */
 };
 
 using UniqueVariantMapWorkflowContext = std::unique_ptr<WorkflowContextVariantMap>;

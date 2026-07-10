@@ -21,12 +21,12 @@ namespace mv::workflow
  */
 enum class WorkflowExecutionNodeType
 {
-    Workflow,          /** Top-level workflow execution context */
-    NestedWorkflow,    /** Workflow executed as part of another workflow */
-    SequentialStage,   /** Sequential execution stage */
-    ParallelStage,     /** Parallel execution stage */
-    Job,               /** Individual executable job */
-    Undefined          /** Undefined or unknown context type */
+    Workflow,          /**< Top-level workflow execution context */
+    NestedWorkflow,    /**< Workflow executed as part of another workflow */
+    SequentialStage,   /**< Sequential execution stage */
+    ParallelStage,     /**< Parallel execution stage */
+    Job,               /**< Individual executable job */
+    Undefined          /**< Undefined or unknown context type */
 };
 
 /**

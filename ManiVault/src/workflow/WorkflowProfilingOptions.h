@@ -9,17 +9,17 @@
 namespace mv::workflow
 {
 
-/** Options for configuring the profiling behavior of a workflow. */
+/** Options that configure workflow profiling and tracing. */
 struct CORE_EXPORT WorkflowProfilingOptions
 {
-    /** The type of profiling sink to use for this workflow execution. */
+    /** Profiling sink used for workflow execution. */
     enum class SinkType
     {
-        None,               /** No profiling or tracing will be performed. */
-        ChromeTracing       /** Profiling data will be collected and output in a format compatible with Chrome's tracing tools. */
+        None,               /**< No profiling or tracing */
+        ChromeTracing       /**< Chrome tracing compatible output */
     };
 
-    SinkType   sinkType = SinkType::None;     /** The type of profiling sink to use for this workflow execution. */
+    SinkType   sinkType = SinkType::None;     /**< Profiling sink used for execution */
 };
 
 }

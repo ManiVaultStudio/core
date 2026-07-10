@@ -36,7 +36,7 @@ namespace mv::workflow
  * @see WorkflowExecutionContext
  * @see WorkflowResult
  *
- * @author T. Kroes
+ * @maintainer T. Kroes
  */
 class CORE_EXPORT AbstractWorkflowPlanExecutor : public QObject
 {

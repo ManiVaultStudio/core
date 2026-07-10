@@ -13,16 +13,16 @@
 namespace mv::workflow
 {
 
-/** Options for configuring the execution behavior of a workflow. */
+/** Options that configure workflow execution behavior. */
 struct CORE_EXPORT WorkflowOptions
 {
-    WorkflowParallelizationOptions  execution;      /** Parallelization options for workflow execution. These options control whether parallel execution is enabled, and if so, the maximum number of worker threads to use for executing workflow jobs. */
-	WorkflowBatchingOptions         batching;       /** Batching options for workflow execution. These options control the degree of parallelism for various operations during workflow execution, such as loading and saving datasets, and encoding and decoding data blocks. */
-    WorkflowReportingOptions        reporting;      /** Reporting options for workflow execution. These options control whether progress is reported, notifications are added, and the console dashboard is enabled during workflow execution. */
-    WorkflowProfilingOptions        profiling;      /** Profiling options for workflow execution. These options control whether profiling is enabled, and if so, the type of profiling sink to use for collecting and outputting profiling data.  */
+    WorkflowParallelizationOptions  execution;      /**< Parallelization options for workflow jobs */
+	WorkflowBatchingOptions         batching;       /**< Batch-size options for serialization work */
+    WorkflowReportingOptions        reporting;      /**< Reporting, notification, and result-dialog options */
+    WorkflowProfilingOptions        profiling;      /**< Profiling and trace sink options */
 };
 
-/** Optional WorkflowOptions for configuring workflow execution behavior */
+/** Optional workflow execution options. */
 using OptionalWorkflowOptions = std::optional<WorkflowOptions>;
 
 }

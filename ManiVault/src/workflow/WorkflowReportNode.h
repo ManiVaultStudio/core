@@ -15,11 +15,13 @@ namespace mv::workflow
 {
 
 /**
- * @brief The WorkflowReportNode class represents a node in a hierarchical workflow report structure.
+ * @brief Node in a hierarchical workflow execution report.
  *
- * Each node can contain messages and child nodes, allowing for a structured representation of workflow execution results, warnings, and errors.
+ * Each report node stores messages for one workflow entity and owns child nodes
+ * for nested workflows, stages, or jobs. Access is synchronized because report
+ * nodes may be updated from multiple workflow worker threads.
  *
- * @author T. Kroes BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
+ * @maintainer T. Kroes BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowReportNode
 {
@@ -27,10 +29,10 @@ public:
 
     Q_DISABLE_COPY_MOVE(WorkflowReportNode)
 
-    /** A shared pointer type for WorkflowReportNode, allowing for easy management of node lifetimes and shared ownership across different parts of the workflow reporting system. */
+    /** Shared pointer type for workflow report nodes. */
     using SharedWorkflowReportNode = std::shared_ptr<WorkflowReportNode>;
 
-    /** A vector of shared pointers to WorkflowReportNode, representing the children of a report node in the hierarchical structure. */
+    /** Collection of child workflow report nodes. */
     using SharedWorkflowReportNodes = std::vector<SharedWorkflowReportNode>;
 
     /**
@@ -93,10 +95,11 @@ public:
     std::int32_t getErrorCountRecursive() const;
 
 private:
-    QString                     _name;          /** The name of the report node, typically representing a specific step or component in the workflow */
-    mutable QMutex              _mutex;         /** Mutex to protect access to the messages and children vectors for thread safety */
-    WorkflowMessages            _messages;      /** A list of messages associated with this report node, including informational messages, warnings, and errors */
-    SharedWorkflowReportNodes   _children;      /** A list of child report nodes, allowing for a hierarchical structure to represent sub-steps or components within the workflow */
+
+    QString                     _name;          /**< Human-readable report node name */
+    mutable QMutex              _mutex;         /**< Protects messages and child nodes */
+    WorkflowMessages            _messages;      /**< Messages emitted for this report node */
+    SharedWorkflowReportNodes   _children;      /**< Child report nodes */
 };
 
 }

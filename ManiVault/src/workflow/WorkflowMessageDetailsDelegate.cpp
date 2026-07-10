@@ -119,10 +119,6 @@ void WorkflowMessageDetailsDelegate::showDetailsBrowser(const QVariantMap& detai
 	treeView->collapseAll();
 	treeView->resizeColumnToContents(0);
 
-	layout->addWidget(treeView);
-
-    dialog->setLayout(layout);
-
 	auto buttons    = new QDialogButtonBox(dialog);
 	auto copyButton = buttons->addButton(QStringLiteral("Copy JSON"), QDialogButtonBox::ActionRole);
 	auto saveButton = buttons->addButton(QStringLiteral("Save JSON..."), QDialogButtonBox::ActionRole);
@@ -138,6 +134,9 @@ void WorkflowMessageDetailsDelegate::showDetailsBrowser(const QVariantMap& detai
 	});
 
 	connect(buttons, &QDialogButtonBox::rejected, dialog, &QDialog::close);
+
+    layout->addWidget(treeView);
+    layout->addWidget(buttons);
 
 	// WA_DeleteOnClose already set above.
 	dialog->show();

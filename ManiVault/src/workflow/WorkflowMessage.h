@@ -15,21 +15,27 @@ namespace mv::workflow
 {
 
 /**
- * Represents a message generated during workflow execution, containing information about the severity, emitter, location, text, details, and timestamp of the message.
+ * @brief Message generated during workflow execution.
  *
- * @authors BioVault Thomas Kroes (Biomedical Visual Analytics Unit LUMC - TU Delft)
+ * Workflow messages are stored in report nodes and may also be formatted for
+ * console output or result dialogs.
+ *
+ * @maintainer BioVault Thomas Kroes (Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 struct CORE_EXPORT WorkflowMessage
 {
-	util::SeverityLevel level = util::SeverityLevel::Info;          /** The severity level of the message (e.g., Info, Warning, Error, Fatal) */
-    QString             emitter;                                    /** The name of the component or module that generated the message */
-    QString             location;                                   /** The specific location in the code or workflow where the message was generated (e.g., function name, line number) */
-    QString             text;                                       /** The main text or content of the message */
-    QVariantMap         details;                                    /** Additional details or metadata associated with the message */
-    QDateTime           timestamp = QDateTime::currentDateTime();   /** The timestamp when the message was generated */
+	util::SeverityLevel level = util::SeverityLevel::Info;          /**< Message severity */
+    QString             emitter;                                    /**< Component or workflow entity that emitted the message */
+    QString             location;                                   /**< Optional source or workflow location */
+    QString             text;                                       /**< Human-readable message text */
+    QVariantMap         details;                                    /**< Structured message details */
+    QDateTime           timestamp = QDateTime::currentDateTime();   /**< Time when the message was created */
 };
 
+/** Shared immutable workflow message reference. */
 using SharedWorkflowMessage = std::shared_ptr<const workflow::WorkflowMessage>;
+
+/** Collection of workflow messages. */
 using WorkflowMessages = QVector<WorkflowMessage>;
 
 }

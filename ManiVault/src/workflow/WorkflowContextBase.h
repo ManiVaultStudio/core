@@ -22,7 +22,7 @@ namespace mv::workflow
  * parallel stages, prefer per-job output storage followed by a sequential
  * merge stage, or protect shared mutable state with appropriate locking.
  *
- * @author Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowContextBase
 {

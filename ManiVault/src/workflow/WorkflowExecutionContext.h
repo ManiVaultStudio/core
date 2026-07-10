@@ -22,27 +22,65 @@ namespace mv::workflow
 class CORE_EXPORT WorkflowExecutionContext : public std::enable_shared_from_this<WorkflowExecutionContext>
 {
 public:
+
+    /** Shared report node pointer type used by execution contexts. */
     using ReportNodePtr = WorkflowReportNode::SharedWorkflowReportNode;
+
+    /** Shared progress node pointer type used by execution contexts. */
     using ProgressNodePtr = WorkflowProgressNode::Ptr;
+
+    /** Shared execution state pointer type used by execution contexts. */
     using StatePtr = WorkflowExecutionState::Ptr;
+
+    /** Semantic execution node type. */
     using Type = WorkflowExecutionNodeType;
 
+    /** Constructs an empty workflow execution context. */
     WorkflowExecutionContext();
 
+    /**
+     * @brief Constructs a workflow execution context.
+     * @param name Human-readable context name.
+     * @param reportNode Report node associated with this context.
+     * @param progressNode Progress node associated with this context.
+     * @param state Shared execution state.
+     * @param task Optional task used for GUI progress reporting.
+     * @param progressMode Progress aggregation mode for this context.
+     */
     WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, Task* task = nullptr, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
 
+    /** @return Semantic execution node type for this context. */
     Type getType() const
     {
         return _type;
     }
 
+    /**
+     * @brief Sets the semantic execution node type.
+     * @param type New semantic execution node type.
+     */
     void setType(Type type)
     {
         _type = type;
     }
 
+    /**
+     * @brief Creates a root workflow execution context.
+     * @param name Root workflow name.
+     * @param task Optional task used for progress reporting.
+     * @param options Workflow execution options.
+     * @return Root execution context.
+     */
     static SharedWorkflowExecutionContext makeRoot(const QString& name, Task* task, WorkflowOptions options = {});
 
+    /**
+     * @brief Creates a child context of the requested semantic type.
+     * @param type Semantic type of the child context.
+     * @param name Child context name.
+     * @param weight Relative progress contribution of the child.
+     * @param progressMode Progress aggregation mode for the child.
+     * @return Child execution context, or nullptr if this context is invalid.
+     */
     SharedWorkflowExecutionContext createChild(Type type, const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
 
     /**
@@ -73,32 +111,62 @@ public:
      * @return Shared pointer to the newly created workflow execution context.
      */
     SharedWorkflowExecutionContext createWorkflowChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
+
+    /** Creates a nested workflow child context. */
     SharedWorkflowExecutionContext createNestedWorkflowChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
+
+    /** Creates a sequential stage child context. */
     SharedWorkflowExecutionContext createSequentialStageChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
+
+    /** Creates a parallel stage child context. */
     SharedWorkflowExecutionContext createParallelStageChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
+
+    /** Creates a job child context. */
     SharedWorkflowExecutionContext createJobChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
+
+    /** Creates a typed child context with an explicit progress weight and mode. */
     SharedWorkflowExecutionContext createTypedChild(Type type, const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode);
 
+    /** @return True when this context has no parent context. */
     bool isRootExecution() const;
 
 public:
 
+    /** Reports this context as started. */
     void reportStarted() const;
+
+    /** Reports this context as finished. */
     void reportFinished(std::uint64_t durationMs = 0);
+
+    /** Reports this context as failed. */
     void reportFailed(util::SeverityLevel severity, const QString& errorMessage, QVariantMap extraDetails = {});
+
+    /** Reports this context as skipped. */
     void reportSkipped(const QString& reason);
+
+    /** Reports a stage summary on this context. */
     void reportStageSummary(const WorkflowStageSummary& summary) const;
 
+    /**
+     * @brief Builds standard lifecycle details for report messages.
+     * @param event Lifecycle event name.
+     * @param durationMs Optional event duration in milliseconds.
+     * @return Variant map with context identity, hierarchy, and timing details.
+     */
     QVariantMap makeLifecycleDetails(const QString& event, std::uint64_t durationMs = 0) const;
 
 public:
 
+    /** @return True when the progress node has child progress nodes. */
     bool hasProgressChildren() const;
 
+    /** @return True when this context has report, progress, and state objects. */
     bool isValid() const;
 
+    /** @return Human-readable context name. */
     QString getName() const;
 
+    /** Adds a message with an explicit severity to the report node and console output. */
     void message(util::SeverityLevel severity, QString text, QString location, QVariantMap details) const;
 
     /**
@@ -125,16 +193,22 @@ public:
      */
     void error(QString text, QString location = {}, QVariantMap details = {}) const;
 
+    /** Sets this context progress and synchronizes task progress. */
     void setProgress(double value) const;
 
+    /** @return Current progress value for this context. */
     double getProgress() const;
 
+    /** @return Report node associated with this context. */
     ReportNodePtr getReportNode() const;
 
+    /** @return Progress node associated with this context. */
     ProgressNodePtr getProgressNode() const;
 
+    /** @return Shared execution state associated with this context. */
     StatePtr getState() const;
 
+    /** @return Progress aggregation mode for this context. */
     WorkflowPlan::JobProgressMode getProgressMode() const;
 
     /**
@@ -165,6 +239,7 @@ public:
      */
     std::int32_t getDepth() const;
 
+    /** @return Workflow options from the shared execution state, or defaults if unavailable. */
     WorkflowOptions getOptions() const;
 
 public: // ID
@@ -175,8 +250,13 @@ public: // ID
      */
     QUuid getId() const;
 
+    /**
+     * @brief Sets the output identifier used by setOutput() and takeOutput().
+     * @param outputId Output identifier to route values through shared state.
+     */
     void setOutputId(const QUuid& outputId);
 
+    /** @return Output identifier used by this context. */
     QUuid getOutputId() const;
 
     /**
@@ -187,51 +267,77 @@ public: // ID
 
 public: // Result values
 
+    /** @return Task associated with this context, or nullptr. */
     Task* getTask() const;
 
 public: // Child context and output  management
 
+    /**
+     * @brief Registers a named child context.
+     * @param name Child context lookup name.
+     * @param child Child context to register.
+     */
     void registerChildContext(const QString& name, const SharedWorkflowExecutionContext& child);
 
+    /**
+     * @brief Retrieves a named child context.
+     * @param name Child context lookup name.
+     * @return Registered child context, or nullptr.
+     */
     [[nodiscard]] SharedWorkflowExecutionContext getChildContext(const QString& name) const;
 
+    /**
+     * @brief Stores an output value for this context output id.
+     * @param value Output value to publish through the shared execution state.
+     */
     void setOutput(const QVariant& value);
 
+    /** @return Output value for this context output id, removed from shared state. */
     [[nodiscard]] QVariant takeOutput();
 
+    /**
+     * @brief Takes an output produced for a workflow handle.
+     * @param handle Workflow handle whose id identifies the output.
+     * @return Output value, or an invalid QVariant when unavailable.
+     */
     QVariant takeOutput(const WorkflowHandle& handle);
 
+    /** @return Parent execution context, or nullptr for root contexts. */
     [[nodiscard]] SharedWorkflowExecutionContext getParent() const;
 
+    /** @return Names of registered child contexts. */
     [[nodiscard]] QStringList getChildNames() const;
 
+    /** @return True when the output id differs from this context id. */
     bool hasExplicitOutputId() const;
 
 private:
 
+    /** Synchronizes the GUI task progress from the shared execution state. */
     void syncTaskProgress() const;
 
 private:
     friend class WorkflowExecutionScope;
 
 private:
-    QString                                         _name;                                                      /** Name of the workflow execution context, typically derived from the name of the workflow plan or job it represents */
-    QUuid                                           _id;                                                        /** Unique identifier for this workflow execution context */
-    QUuid                                           _outputId;                                                  /** Unique identifier for the output of this workflow execution context */  
-    QUuid                                           _parentId;                                                  /** Unique identifier of the parent workflow execution context, if any */
-    QStringList                                     _executionPath;                                             /** Execution path of this workflow execution context */
-    ReportNodePtr                                   _reportNode;                                                /** Report node associated with this workflow execution context */
-    ProgressNodePtr                                 _progressNode;                                              /** Progress node associated with this workflow execution context */
-    StatePtr                                        _state;                                                     /** Execution state associated with this workflow execution context */
-    QPointer<Task>                                  _task;                                                      /** Task associated with this workflow execution context */
-    WorkflowPlan::JobProgressMode                   _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /** Progress mode for this workflow execution context */
-    Type                                            _type = Type::Workflow;                                     /** Semantic type of this workflow execution context, used for rendering, reporting, and diagnostics */
-    std::weak_ptr<WorkflowExecutionContext>         _parent;                                                    /** Weak pointer to the parent workflow execution context, if any */
-    mutable QMutex                                  _childrenMutex;
-    QHash<QString, SharedWorkflowExecutionContext>  _childrenByName;
+
+    QString                                         _name;                                                      /**< Human-readable execution context name */
+    QUuid                                           _id;                                                        /**< Unique execution context identifier */
+    QUuid                                           _outputId;                                                  /**< Identifier used to route output values */
+    QUuid                                           _parentId;                                                  /**< Unique identifier of the parent context, if any */
+    QStringList                                     _executionPath;                                             /**< Hierarchical execution path from the root context */
+    ReportNodePtr                                   _reportNode;                                                /**< Report node associated with this context */
+    ProgressNodePtr                                 _progressNode;                                              /**< Progress node associated with this context */
+    StatePtr                                        _state;                                                     /**< Shared execution state for the root workflow */
+    QPointer<Task>                                  _task;                                                      /**< Task used for GUI progress reporting */
+    WorkflowPlan::JobProgressMode                   _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /**< Progress aggregation mode */
+    Type                                            _type = Type::Workflow;                                     /**< Semantic execution node type */
+    std::weak_ptr<WorkflowExecutionContext>         _parent;                                                    /**< Parent execution context */
+    mutable QMutex                                  _childrenMutex;                                             /**< Protects child context lookup */
+    QHash<QString, SharedWorkflowExecutionContext>  _childrenByName;                                            /**< Child contexts indexed by name */
 };
 
-/** Optional reference to a WorkflowExecutionContext */
+/** Shared reference to a WorkflowExecutionContext. */
 using SharedWorkflowExecutionContext = std::shared_ptr<WorkflowExecutionContext>;
 
 }
