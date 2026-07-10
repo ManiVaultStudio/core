@@ -579,26 +579,31 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
             points->visitData([this, &points, dimensionIndex, &globalIndices, &scalarData](auto pointData) {
                 for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++) {
                     const auto targetPixelIndex = globalIndices[localPointIndex];
-
-                    // If the data has any linked data
-                    for (LinkedData& linkedData : points->getLinkedData())
-                    {
-                        // Check if the linked data has the same original full data, because we don't want to
-                        // add data here that belongs to a different dataset
-                        if (linkedData.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
-                        {
-                            SelectionMap::Indices linkedIndices;
-                    
-                            linkedData.getMapping().populateMappingIndices(targetPixelIndex, linkedIndices);
-                            
-                            // Fill in the data for all the linked data indices based on the location of the original id
-                            for (unsigned int linkedIndex : linkedIndices)
-                                scalarData[linkedIndex] = pointData[localPointIndex][dimensionIndex];
-                        }
-                    }
-
                     scalarData[targetPixelIndex] = pointData[localPointIndex][dimensionIndex];
                 }
+
+                // If the data has any linked data
+                for (LinkedData &linkedData : points->getLinkedData()) {
+                    // Check if the linked data has the same original full data,
+                    // because we don't want to add data here that belongs to a
+                    // different dataset
+                    if (linkedData.getTargetDataset()->getFullDataset<Points>() != points->getSourceDataset<Points>()->getFullDataset<Points>()) {
+                        continue;
+                    }
+                    for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++) {
+                        const auto targetPixelIndex = globalIndices[localPointIndex];
+
+                        SelectionMap::Indices linkedIndices;
+
+                        linkedData.getMapping().populateMappingIndices(targetPixelIndex, linkedIndices);
+
+                        // Fill in the data for all the linked data indices based on
+                        // the location of the original id
+                        for (unsigned int linkedIndex : linkedIndices)
+                          scalarData[linkedIndex] = pointData[localPointIndex][dimensionIndex];
+                    }
+                }
+
             });
         }
         else {
