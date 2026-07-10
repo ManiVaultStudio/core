@@ -181,13 +181,13 @@ public:
         void setError(QString error);
 
         /** @return True when the job has an error message. */
-        bool           hasError() const;
+        bool hasError() const;
 
         /** @return Stored error message. */
         const QString& getError() const;
 
         /** Clears the stored error message. */
-        void           clearError();
+        void clearError();
 
         /** Stores an exception message on the job. */
         void setException(const std::exception& e);
@@ -233,7 +233,8 @@ public:
         SharedWorkflowContext getWorkflowContext() const;
 
         /**
-         * @brief Gets the shared workflow context associated with this job, cast to the specified type.
+         * @brief Gets the typed shared workflow context.
+         *
          * @tparam WorkflowContextType The specific derived type of WorkflowContextBase that you want to access the workflow context as.
          * @return A std::shared_ptr<WorkflowContextType> that points to the workflow context cast to the specified type if the cast is successful, or nullptr if the cast fails.
          */
@@ -444,13 +445,21 @@ public:
     const Stages& getFinallyStages() const;
 
     /**
-     * @brief Gets the shared workflow context associated with this workflow plan. The workflow context is a shared data structure that can be used to store and share data across stages and jobs within this workflow plan.
+     * @brief Gets the shared workflow context.
+     *
+     * The workflow context can store data shared across stages and jobs in
+     * this plan.
+     *
      * @return A SharedWorkflowContext object that provides access to the shared workflow context for this workflow plan.
      */
     SharedWorkflowContext getWorkflowContext() const;
 
     /**
-     * @brief Gets the shared workflow context associated with this workflow plan, cast to the specified type. This is a convenience method that allows you to access the workflow context as a specific derived type without having to manually perform the dynamic pointer cast each time. The template parameter WorkflowContextType must be a type that derives from WorkflowContextBase, and the method will return a shared pointer to the workflow context cast to that type if the cast is successful, or nullptr if the cast fails (e.g., if the actual type of the workflow context is not compatible with WorkflowContextType).
+     * @brief Gets the typed shared workflow context.
+     *
+     * WorkflowContextType must derive from WorkflowContextBase. The method
+     * returns nullptr when the stored context has a different type.
+     *
      * @tparam WorkflowContextType The specific derived type of WorkflowContextBase that you want to access the workflow context as.
      * @return A std::shared_ptr<WorkflowContextType> that points to the workflow context cast to the specified type, or nullptr if the cast fails.
      */

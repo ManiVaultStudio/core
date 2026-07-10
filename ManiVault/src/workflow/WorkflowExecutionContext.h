@@ -84,7 +84,7 @@ public:
     SharedWorkflowExecutionContext createChild(Type type, const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
 
     /**
-     * @brief Creates a child workflow execution context representing a top-level workflow scope.
+     * @brief Creates a workflow child context.
      *
      * This function creates a new workflow execution context that inherits execution state,
      * reporting infrastructure, progress tracking infrastructure, and task association from
@@ -170,7 +170,8 @@ public:
     void message(util::SeverityLevel severity, QString text, QString location, QVariantMap details) const;
 
     /**
-     * @brief Adds an informational message to the report node associated with this workflow execution context.
+     * @brief Adds an informational message.
+     *
      * @param text The main text or content of the informational message to be added to the report node.
      * @param location The specific location in the code or workflow where the informational message was generated (e.g., function name, line number). This can be used to provide additional context for the message and help with debugging and tracing.
      * @param details Additional details or metadata associated with the informational message (optional). This can be used to provide further context or structured information related to the message, such as variable values, execution state, or other relevant data that may assist in understanding the message and its implications within the workflow execution.
@@ -178,7 +179,8 @@ public:
     void info(QString text, QString location = {}, QVariantMap details = {}) const;
 
     /**
-     * @brief Adds a warning message to the report node associated with this workflow execution context.
+     * @brief Adds a warning message.
+     *
      * @param text The main text or content of the warning message to be added to the report node.
      * @param location The specific location in the code or workflow where the warning message was generated (e.g., function name, line number). This can be used to provide additional context for the message and help with debugging and tracing.
      * @param details Additional details or metadata associated with the warning message (optional). This can be used to provide further context or structured information related to the message, such as variable values, execution state, or other relevant data that may assist in understanding the message and its implications within the workflow execution.
@@ -186,7 +188,8 @@ public:
     void warning(QString text, QString location = {}, QVariantMap details = {}) const;
 
     /**
-     * @brief Adds an error message to the report node associated with this workflow execution context.
+     * @brief Adds an error message.
+     *
      * @param text The main text or content of the error message to be added to the report node.
      * @param location The specific location in the code or workflow where the error message was generated (e.g., function name, line number). This can be used to provide additional context for the message and help with debugging and tracing.
      * @param details Additional details or metadata associated with the error message (optional). This can be used to provide further context or structured information related to the message, such as variable values, execution state, or other relevant data that may assist in understanding the message and its implications within the workflow execution.
@@ -212,14 +215,18 @@ public:
     WorkflowPlan::JobProgressMode getProgressMode() const;
 
     /**
-     * @brief Gets the execution path of this workflow execution context as a string, with each level of the hierarchy separated by the specified separator. The execution path is constructed by concatenating the names of this context and all of its ancestor contexts, starting from the root context down to this context. This can be useful for logging and tracing purposes to provide a clear and human-readable representation of where in the workflow hierarchy a particular event or message is occurring.
+     * @brief Gets the execution path.
+     *
+     * The path is built from this context and its ancestors, starting at the
+     * root context.
+     *
      * @param separator The string to use as a separator between levels of the execution path. The default value is " / ", but it can be customized to use any other separator as needed (e.g., " > ", " -> ", etc.).
      * @return The execution path of this workflow execution context as a string, with each level of the hierarchy separated by the specified separator.
      */
     QString getExecutionPath(const QString& separator = "/") const;
 
     /**
-     * @brief Gets the hierarchical depth of this workflow execution context within the workflow execution tree.
+     * @brief Gets the hierarchical depth.
      *
      * The depth represents how deeply nested this context is relative to the root workflow execution context.
      * A root workflow execution context has a depth of 0, its direct children have a depth of 1, and so on.

@@ -82,7 +82,7 @@ public:
     void fail(util::SeverityLevel severity, const QString& message, QVariantMap details = {});
 
     /**
-     * @brief Reports the context as successfully finished and completes the lifecycle scope.
+     * @brief Reports successful completion.
      *
      * The reported duration is the elapsed time measured since construction. Calling this
      * function prevents the destructor from reporting completion a second time.

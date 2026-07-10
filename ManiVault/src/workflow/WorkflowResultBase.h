@@ -37,7 +37,10 @@ public:
 public:
 
     /**
-     * @brief Constructs a WorkflowResultBase object with the specified workflow name. The workflow name is used for identification and logging purposes, allowing you to associate the result with a specific workflow execution.
+     * @brief Constructs a workflow result base.
+     *
+     * The workflow name is used for identification and logging.
+     *
      * @param workflowName The name of the workflow that produced this result. This can be used for identification and logging purposes, allowing you to associate the result with a specific workflow execution.
      */
     WorkflowResultBase(const QString& workflowName);
@@ -45,7 +48,8 @@ public:
 public: // General
 
     /**
-     * @brief Retrieves the name of the workflow that produced this result. This can be used for identification and logging purposes, allowing you to associate the result with a specific workflow execution.
+     * @brief Retrieves the workflow name.
+     *
      * @return The name of the workflow that produced this result. This can be used for identification and logging purposes, allowing you to associate the result with a specific workflow execution.
      */
     QString getWorkflowName() const;
@@ -57,7 +61,8 @@ public: // General
     Status getStatus() const;
 
     /**
-     * @brief Retrieves the icon representing the status of the workflow result. This can be used for visual representation in user interfaces, allowing users to quickly identify the status of the workflow execution.
+     * @brief Retrieves the status icon.
+     *
      * @return The icon representing the status of the workflow result. This can be used for visual representation in user interfaces, allowing users to quickly identify the status of the workflow execution.
      */
     QIcon getStatusIcon() const;
@@ -83,31 +88,41 @@ public: // General
 public: // Value
 
     /**
-     * @brief Checks if the workflow result contains a valid value. This can be used to determine whether the workflow execution produced a meaningful output that can be further processed or utilized. If this method returns false, it indicates that the workflow did not produce a valid result, and any attempt to access the value may result in an error or undefined behavior.
+     * @brief Checks whether a value is available.
+     *
+     * Use this before reading the QVariant output when the producing workflow
+     * may not have emitted a value.
+     *
      * @return True if the workflow result contains a valid value, false otherwise.
      */
     bool hasValue() const;
 
     /**
-     * @brief Retrieves the value produced by the workflow execution. This can be any type of data that can be stored in a QVariant, such as a result object, a data structure, or any other relevant output from the workflow. The caller can use this value to further process or utilize the results of the workflow execution. It is important to check if the value is valid using the hasValue() method before attempting to access it, to avoid potential errors or undefined behavior.
+     * @brief Retrieves the produced value.
+     *
+     * The value can contain any type supported by QVariant.
+     *
      * @return The value produced by the workflow execution.
      */
     const QVariant& getValue() const;
 
     /**
-     * @brief Sets the value produced by the workflow execution. This can be any type of data that can be stored in a QVariant, such as a result object, a data structure, or any other relevant output from the workflow. The caller can use this method to store the results of the workflow execution, which can then be accessed by parent contexts or other parts of the workflow as needed. It is important to ensure that the value being set is valid and meaningful for the context of the workflow execution.
+     * @brief Sets the produced value.
+     *
      * @param value The value to be set for the workflow result.
      */
     void setValue(const QVariant& value);
 
     /**
-     * @brief Sets the value produced by the workflow execution using move semantics. This can be any type of data that can be stored in a QVariant, such as a result object, a data structure, or any other relevant output from the workflow. The caller can use this method to store the results of the workflow execution, which can then be accessed by parent contexts or other parts of the workflow as needed. It is important to ensure that the value being set is valid and meaningful for the context of the workflow execution.
+     * @brief Moves the produced value into the result.
+     *
      * @param value The value to be set for the workflow result.
      */
     void setValue(QVariant&& value);
 
     /**
-     * @brief Sets the value produced by the workflow execution using perfect forwarding. This can be any type of data that can be stored in a QVariant, such as a result object, a data structure, or any other relevant output from the workflow. The caller can use this method to store the results of the workflow execution, which can then be accessed by parent contexts or other parts of the workflow as needed. It is important to ensure that the value being set is valid and meaningful for the context of the workflow execution.
+     * @brief Converts and stores the produced value.
+     *
      * @tparam T The type of the value being set.
      * @param value The value to be set for the workflow result.
      */
@@ -117,7 +132,8 @@ public: // Value
     }
 
     /**
-     * @brief Checks if the value produced by the workflow execution can be converted to a specified type T. This can be used to determine if the value can be safely accessed and utilized as a specific type without causing errors or undefined behavior. If this method returns true, it indicates that the value can be converted to the specified type T, and the caller can proceed to access the value using the value<T>() method. If it returns false, it indicates that the value cannot be converted to the specified type T, and any attempt to access it as that type may result in an error or undefined behavior.
+     * @brief Checks whether the value can convert to a type.
+     *
      * @tparam T The type to which the value is being checked for conversion.
      * @return True if the value can be converted to the specified type T, false otherwise.
      */
@@ -127,7 +143,10 @@ public: // Value
     }
 
     /**
-     * @brief Retrieves the value produced by the workflow execution as a specified type T. This can be used to access the value in a specific type that is relevant for further processing or utilization. It is important to check if the value can be converted to the specified type T using the canConvert<T>() method before attempting to access it, to avoid potential errors or undefined behavior. If the value cannot be converted to the specified type T, this method may throw an exception or result in an error.
+     * @brief Retrieves the value as a type.
+     *
+     * Check canConvert<T>() first when conversion is uncertain.
+     *
      * @tparam T The type to which the value is being accessed.
      * @return The value produced by the workflow execution as a specified type T.
      */
@@ -137,7 +156,8 @@ public: // Value
     }
 
     /**
-     * @brief Attempts to retrieve the value produced by the workflow execution as a specified type T. This can be used to safely access the value in a specific type that is relevant for further processing or utilization, while avoiding potential errors or undefined behavior. If the value can be converted to the specified type T, this method returns an optional containing the value as that type. If the value cannot be converted to the specified type T, this method returns an empty optional, indicating that the value cannot be accessed as that type.
+     * @brief Tries to retrieve the value as a type.
+     *
      * @tparam T The type to which the value is being accessed.
      * @return An optional containing the value produced by the workflow execution as a specified type T if it can be converted, or an empty optional if it cannot be converted.
      */

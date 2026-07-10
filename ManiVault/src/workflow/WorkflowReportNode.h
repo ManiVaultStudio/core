@@ -42,7 +42,8 @@ public:
     explicit WorkflowReportNode(QString name);
 
     /**
-     * @brief Creates a child report node with the specified name and adds it to this node's children.
+     * @brief Creates a child report node.
+     *
      * @param name The name of the child report node.
      * @return A shared pointer to the newly created child report node.
      */
@@ -77,19 +78,22 @@ public:
     SharedWorkflowReportNodes getChildren() const;
 
     /**
-     * @brief Checks if this report node or any of its descendants contain any error messages.
+     * @brief Checks for recursive errors.
+     *
      * @return True if there are error messages in this node or any of its descendants, false otherwise.
      */
     bool hasErrorsRecursive() const;
 
     /**
-     * @brief Gets the total count of warning messages in this report node and all of its descendants.
+     * @brief Gets the recursive warning count.
+     *
      * @return The total number of warning messages found in this node and its descendants.
      */
     std::int32_t getWarningCountRecursive() const;
     
     /**
-     * @brief Get the total count of error messages in this report node and all of its descendants.
+     * @brief Gets the recursive error count.
+     *
      * @return The total number of error messages found in this node and its descendants.
      */
     std::int32_t getErrorCountRecursive() const;

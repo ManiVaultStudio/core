@@ -12,7 +12,7 @@ namespace mv::workflow
 {
 
 /**
- * @brief Describes the semantic role of a workflow execution node within the workflow execution hierarchy.
+ * @brief Semantic workflow execution node role.
  *
  * Workflow execution nodes represent different levels and types of execution entities
  * within a workflow plan, such as entire workflows, nested workflows, stages, and jobs.
@@ -30,14 +30,16 @@ enum class WorkflowExecutionNodeType
 };
 
 /**
- * @brief Converts a string representation of a workflow execution node type to its corresponding WorkflowExecutionNodeType enum value.
+ * @brief Converts a node type name to an enum value.
+ *
  * @param typeName The string representation of the workflow execution node type to convert. This should be one of the defined type names, such as "Workflow", "NestedWorkflow", "SequentialStage", "ParallelStage", or "Job". The comparison is case-sensitive.
  * @return The corresponding WorkflowExecutionNodeType enum value for the provided string. For example, if the input is "Workflow", the output would be WorkflowExecutionNodeType::Workflow. If the input string does not match any known workflow execution context type, the function returns WorkflowExecutionNodeType::Undefined.
  */
 CORE_EXPORT WorkflowExecutionNodeType getWorkflowExecutionNodeType(const QString& typeName);
 
 /**
- * @brief Converts a WorkflowExecutionNodeType enum value to its corresponding string representation.
+ * @brief Converts a node type enum value to a name.
+ *
  * @param type The WorkflowExecutionNodeType enum value to convert.
  * @return The string representation of the provided node type. Returns "Undefined" for unknown values.
  */
