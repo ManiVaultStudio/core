@@ -378,12 +378,18 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
 
         setTemporaryDirPath(TemporaryDirType::Open, plan->getWorkflowContextAs<ProjectOpenContext>()->getTemporaryDirectoryPath());
 
-        auto future = Application::getWorkflowPlanExecutor().execute(std::move(plan), nullptr, WorkflowExecutionOptions({
-            .parallel = parameters.parallel,
-        	.maxWorkerThreadCount = parameters.maxParallelThreads,
-            .reportProgress = true,
-            .addNotification = true,
-            .maxLoggingDepth = parameters.maxLoggingDepth
+        auto future = Application::getWorkflowPlanExecutor().execute(std::move(plan), nullptr, WorkflowOptions({
+            .execution = {
+                .parallel = parameters.parallel,
+                .maxWorkerThreadCount = parameters.maxParallelThreads
+            },
+            .reporting = {
+                .progress               = true,
+                .finishedNotification   = true,
+                .maxLoggingDepth        = parameters.maxLoggingDepth,
+                .resultDetailsTitle     = "Open project",
+				.resultDetailsMessage   = QString("The following messages were generated while opening '%1'.").arg(QFileInfo(filePath).fileName())
+            }
         }));
         
         future.onFinished(this, [this](SharedWorkflowResult result) {
@@ -743,12 +749,18 @@ void ProjectManager::saveProject(QString filePath)
 
         setTemporaryDirPath(TemporaryDirType::Save, workflowPlan->getWorkflowContextAs<ProjectSaveContext>()->getTemporaryDirectoryPath());
 
-        auto future = Application::getWorkflowPlanExecutor().execute(std::move(workflowPlan), nullptr, WorkflowExecutionOptions({
-            .parallel = parameters.parallel,
-	        .maxWorkerThreadCount = parameters.maxParallelThreads,
-	        .reportProgress = true,
-	        .addNotification = true,
-	        .maxLoggingDepth = parameters.maxLoggingDepth//,
+        auto future = Application::getWorkflowPlanExecutor().execute(std::move(workflowPlan), nullptr, WorkflowOptions({
+            .execution = {
+                .parallel = parameters.parallel,
+                .maxWorkerThreadCount = parameters.maxParallelThreads
+            },
+            .reporting = {
+                .progress               = true,
+                .finishedNotification   = true,
+                .maxLoggingDepth        = parameters.maxLoggingDepth,
+                .resultDetailsTitle     = "Save project",
+				.resultDetailsMessage   = QString("The following messages were generated while saving '%1'.").arg(QFileInfo(filePath).fileName())
+            }
             //.profilingSinkType = WorkflowExecutionOptions::ProfilingSinkType::ChromeTracing
         }));
 

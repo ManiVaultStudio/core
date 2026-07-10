@@ -9,10 +9,10 @@
 
 namespace mv::workflow
 {
-WorkflowExecutionState::WorkflowExecutionState(const WorkflowReportNode::SharedWorkflowReportNode& reportRoot, const WorkflowProgressNode::Ptr& progressRoot, WorkflowExecutionOptions executionOptions /*= {}*/) :
+WorkflowExecutionState::WorkflowExecutionState(const WorkflowReportNode::SharedWorkflowReportNode& reportRoot, const WorkflowProgressNode::Ptr& progressRoot, WorkflowOptions options /*= {}*/) :
 	_reportRoot(reportRoot),
 	_progressRoot(progressRoot),
-    _executionOptions(executionOptions)
+    _options(options)
 {
 }
 
@@ -26,9 +26,9 @@ WorkflowProgressNode::Ptr WorkflowExecutionState::getProgressRoot() const
 	return _progressRoot;
 }
 
-WorkflowExecutionOptions WorkflowExecutionState::getExecutionOptions() const
+WorkflowOptions WorkflowExecutionState::getOptions() const
 {
-    return _executionOptions;
+    return _options;
 }
 
 WorkflowExecutionStatus WorkflowExecutionState::getStatus() const

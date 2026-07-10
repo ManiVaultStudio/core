@@ -66,10 +66,10 @@ public:
      *
      * @param workflowPlan Workflow plan to execute.
      * @param parentContext Optional parent execution context for nested execution.
-     * @param executionOptions Optional workflow execution options.
+     * @param options Optional workflow execution options.
      * @return Future representing the asynchronous workflow result.
      */
-    mv::workflow::WorkflowResultFuture execute(mv::workflow::UniqueWorkflowPlan workflowPlan, mv::workflow::SharedWorkflowExecutionContext parentContext = nullptr, mv::workflow::OptionalWorkflowExecutionOptions executionOptions = std::nullopt) override;
+    mv::workflow::WorkflowResultFuture execute(mv::workflow::UniqueWorkflowPlan workflowPlan, mv::workflow::SharedWorkflowExecutionContext parentContext = nullptr, mv::workflow::OptionalWorkflowOptions options = std::nullopt) override;
 
     /**
      * @brief Executes a workflow synchronously as a root workflow.
@@ -79,10 +79,10 @@ public:
      *
      * @param workflowPlan Workflow plan to execute.
      * @param task Optional task used for progress reporting.
-     * @param executionOptions Workflow execution options.
+     * @param options Workflow execution options.
      * @return Workflow result.
      */
-    mv::workflow::SharedWorkflowResult executeBlocking(mv::workflow::UniqueWorkflowPlan workflowPlan, mv::Task* task = nullptr, mv::workflow::WorkflowExecutionOptions executionOptions = {}) override;
+    mv::workflow::SharedWorkflowResult executeBlocking(mv::workflow::UniqueWorkflowPlan workflowPlan, mv::Task* task = nullptr, mv::workflow::WorkflowOptions options = {}) override;
 
     /**
 	 * @brief Executes a workflow synchronously using an existing parent context.
@@ -105,11 +105,11 @@ protected:
 	 *
 	 * @param workflowPlan Workflow plan to execute.
 	 * @param guiScope GUI scope associated with the backing task.
-	 * @param executionOptions Workflow execution options.
+	 * @param options Workflow execution options.
 	 * @param executionContext Execution context for the workflow.
 	 * @return Future representing the asynchronous workflow result.
 	 */
-    mv::workflow::WorkflowResultFuture executeAsyncImpl(mv::workflow::UniqueWorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, const mv::workflow::WorkflowExecutionOptions& executionOptions, mv::workflow::SharedWorkflowExecutionContext executionContext) override;
+    mv::workflow::WorkflowResultFuture executeAsyncImpl(mv::workflow::UniqueWorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, const mv::workflow::WorkflowOptions& options, mv::workflow::SharedWorkflowExecutionContext executionContext) override;
 
     /**
 	 * @brief Executes a workflow as the root workflow.
@@ -122,7 +122,7 @@ protected:
 	 * @param executionOptions Workflow execution options.
 	 * @return Workflow result.
 	 */
-    mv::workflow::SharedWorkflowResult executeRoot(mv::workflow::WorkflowPlan& workflowPlan, mv::Task* task, const mv::workflow::WorkflowExecutionOptions& executionOptions = {}) override;
+    mv::workflow::SharedWorkflowResult executeRoot(mv::workflow::WorkflowPlan& workflowPlan, mv::Task* task, const mv::workflow::WorkflowOptions& options = {}) override;
 
     /**
 	 * @brief Executes a workflow using an existing root context.
@@ -188,7 +188,7 @@ private: // Helpers
      * @brief Ensures that the Taskflow executor is initialized and has the correct number of workers.
      * @param options Workflow execution options that may specify the desired number of workers.
      */
-    void ensureExecutor(const mv::workflow::WorkflowExecutionOptions& options);
+    void ensureExecutor(const mv::workflow::WorkflowOptions& options);
 
     /**
 	 * @brief Compiles a workflow into a Taskflow graph.
@@ -462,9 +462,9 @@ private: // Helpers
 	 * to finish.
 	 *
 	 * @param taskflow Taskflow graph to execute.
-	 * @param executionOptions Workflow execution options that may specify the desired number of workers.
+	 * @param options Workflow execution options that may specify the desired number of workers.
 	 */
-    void runTaskflowBlocking(tf::Taskflow& taskflow, const mv::workflow::WorkflowExecutionOptions& executionOptions);
+    void runTaskflowBlocking(tf::Taskflow& taskflow, const mv::workflow::WorkflowOptions& options);
 
     /**
 	 * @brief Creates a trace name for workflow profiling.

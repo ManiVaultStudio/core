@@ -9,12 +9,17 @@
 namespace mv::workflow
 {
 
-struct WorkflowReportingOptions
+/** Options for configuring the profiling behavior of a workflow. */
+struct CORE_EXPORT WorkflowProfilingOptions
 {
-    bool reportProgress = true;
-    bool showNotification = true;
+    /** The type of profiling sink to use for this workflow execution. */
+    enum class SinkType
+    {
+        None,               /** No profiling or tracing will be performed. */
+        ChromeTracing       /** Profiling data will be collected and output in a format compatible with Chrome's tracing tools. */
+    };
 
-    QString resultDetailsTitle;
+    SinkType   sinkType = SinkType::None;     /** The type of profiling sink to use for this workflow execution. */
 };
 
 }

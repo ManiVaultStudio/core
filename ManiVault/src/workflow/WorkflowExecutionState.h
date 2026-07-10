@@ -6,7 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 #include "WorkflowExecutionMetrics.h"
-#include "WorkflowExecutionOptions.h"
+#include "WorkflowOptions.h"
 #include "WorkflowReportNode.h"
 #include "WorkflowProgressNode.h"
 
@@ -25,13 +25,13 @@ class CORE_EXPORT WorkflowExecutionState
 public:
     using Ptr = std::shared_ptr<WorkflowExecutionState>;
 
-    WorkflowExecutionState(const WorkflowReportNode::SharedWorkflowReportNode& reportRoot, const WorkflowProgressNode::Ptr& progressRoot, WorkflowExecutionOptions executionOptions = {});
+    WorkflowExecutionState(const WorkflowReportNode::SharedWorkflowReportNode& reportRoot, const WorkflowProgressNode::Ptr& progressRoot, WorkflowOptions options = {});
 
     [[nodiscard]] WorkflowReportNode::SharedWorkflowReportNode getReportRoot() const;
 
     [[nodiscard]] WorkflowProgressNode::Ptr getProgressRoot() const;
 
-    [[nodiscard]] WorkflowExecutionOptions getExecutionOptions() const;
+    [[nodiscard]] WorkflowOptions getOptions() const;
     [[nodiscard]] WorkflowExecutionStatus getStatus() const;
 
     void setStatus(WorkflowExecutionStatus status);
@@ -83,7 +83,7 @@ private:
 private:
     WorkflowReportNode::SharedWorkflowReportNode    _reportRoot;                                /** Report nodes are stored in the execution state since they need to be accessible from the context and may be updated from multiple threads during execution. The execution context provides thread-safe access to these nodes, and they are designed to handle concurrent updates internally (e.g., by using mutexes). */
     WorkflowProgressNode::Ptr                       _progressRoot;                              /** Progress and report nodes are stored in the execution state since they need to be accessible from the context and may be updated from multiple threads during execution. The execution context provides thread-safe access to these nodes, and they are designed to handle concurrent updates internally (e.g., by using mutexes). */
-    WorkflowExecutionOptions                        _executionOptions;                          /** Execution options are stored in the execution state since they may need to be accessed from multiple threads during execution and should be immutable after initialization. */
+    WorkflowOptions                                 _options;                                   /** Options are stored in the execution state since they need to be accessible from the context and may be updated from multiple threads during execution. The execution context provides thread-safe access to these options, and they are designed to handle concurrent updates internally (e.g., by using mutexes). */
     mutable QMutex                                  _mutex;                                     /** Mutex to protect access to mutable members that may be updated from multiple threads during execution. */
     WorkflowExecutionStatus                         _status = WorkflowExecutionStatus::Idle;    /** The execution status is protected by a mutex since it may be updated from multiple threads during execution and needs to be read and updated atomically. */
     WorkflowExecutionMetrics                        _metrics;                                   /** Metrics are stored in the execution state since they may be updated from multiple threads during execution and need to be accessible from the context. */

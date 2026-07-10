@@ -14,7 +14,7 @@ using namespace mv::util;
 namespace mv::workflow
 {
 
-WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowResult, SeverityLevels levels /*= allSeverityLevels*/, QWidget* parent) :
+WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowResult, SeverityLevels levels /*= allSeverityLevels*/, OptionalWorkflowOptions options /*= {}*/, QWidget* parent) :
 	QDialog(parent)
 {
     Q_ASSERT(workflowResult);
@@ -24,7 +24,10 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
         return;
     }
 
-    setWindowTitle("Workflow result - " + workflowResult->getWorkflowName());
+    const auto resolvedOptions      = options.value_or(WorkflowOptions{});
+    const auto resultDetailsTitle   = resolvedOptions.reporting.resultDetailsTitle;
+
+    setWindowTitle(resultDetailsTitle.isEmpty() ? "Workflow result - " + workflowResult->getWorkflowName() : resultDetailsTitle);
     setWindowIcon(StyledIcon("scroll"));
 
  //   setStyleSheet(R"(
@@ -80,6 +83,9 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), true);
 
     auto layout = new QVBoxLayout(this);
+
+    if (const auto& resultDetailsMessage = resolvedOptions.reporting.resultDetailsMessage; !resultDetailsMessage.isEmpty())
+        layout->addWidget(new QLabel(resultDetailsMessage, this));
 
     layout->addWidget(toolbarAction->createWidget(this));
     layout->addWidget(treeView);

@@ -61,10 +61,10 @@ public:
      *
      * @param workflowPlan Workflow plan to execute.
      * @param parentContext Optional parent workflow execution context.
-     * @param executionOptions Optional execution configuration.
+     * @param options Optional execution configuration.
      * @return Future representing the workflow execution.
      */
-    [[nodiscard]] virtual WorkflowResultFuture execute(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) = 0;
+    [[nodiscard]] virtual WorkflowResultFuture execute(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowOptions options = std::nullopt) = 0;
 
     /**
      * Execute a workflow synchronously as a root workflow.
@@ -79,7 +79,7 @@ public:
      * @param executionOptions Workflow execution options.
      * @return Final workflow result.
      */
-    [[nodiscard]] virtual SharedWorkflowResult executeBlocking(UniqueWorkflowPlan workflowPlan, Task* task = nullptr, WorkflowExecutionOptions executionOptions = {}) = 0;
+    [[nodiscard]] virtual SharedWorkflowResult executeBlocking(UniqueWorkflowPlan workflowPlan, Task* task = nullptr, WorkflowOptions options = {}) = 0;
 
     /**
      * Execute a workflow synchronously as a child workflow.
@@ -128,7 +128,7 @@ protected:
      * @param executionContext Execution context for the workflow.
      * @return Future representing workflow execution.
      */
-    [[nodiscard]] virtual WorkflowResultFuture executeAsyncImpl(UniqueWorkflowPlan workflowPlan, Task::GuiScope guiScope, const WorkflowExecutionOptions& executionOptions, SharedWorkflowExecutionContext executionContext) = 0;
+    [[nodiscard]] virtual WorkflowResultFuture executeAsyncImpl(UniqueWorkflowPlan workflowPlan, Task::GuiScope guiScope, const WorkflowOptions& options, SharedWorkflowExecutionContext executionContext) = 0;
 
     /**
      * Execute a workflow as a root workflow.
@@ -141,7 +141,7 @@ protected:
      * @param executionOptions Workflow execution options.
      * @return Final workflow result.
      */
-    [[nodiscard]] virtual SharedWorkflowResult executeRoot(WorkflowPlan& workflowPlan, Task* task, const WorkflowExecutionOptions& executionOptions = {}) = 0;
+    [[nodiscard]] virtual SharedWorkflowResult executeRoot(WorkflowPlan& workflowPlan, Task* task, const WorkflowOptions& options = {}) = 0;
 
     /**
      * Execute a workflow as a nested child workflow.

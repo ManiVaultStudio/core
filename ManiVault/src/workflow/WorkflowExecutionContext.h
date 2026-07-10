@@ -41,7 +41,7 @@ public:
         _type = type;
     }
 
-    static SharedWorkflowExecutionContext makeRoot(const QString& name, Task* task, WorkflowExecutionOptions executionOptions = {});
+    static SharedWorkflowExecutionContext makeRoot(const QString& name, Task* task, WorkflowOptions options = {});
 
     SharedWorkflowExecutionContext createChild(Type type, const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
 
@@ -165,7 +165,7 @@ public:
      */
     std::int32_t getDepth() const;
 
-    WorkflowExecutionOptions getExecutionOptions() const;
+    WorkflowOptions getOptions() const;
 
 public: // ID
 

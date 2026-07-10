@@ -6,15 +6,20 @@
 
 #include "ManiVaultGlobals.h"
 
+#include <QString>
+
 namespace mv::workflow
 {
 
+/** Options for configuring the reporting behavior of a workflow. */
 struct CORE_EXPORT WorkflowReportingOptions
 {
-    bool            reportProgress = false;                                         /** Whether to report progress during workflow execution. (with a modal task) */
-    bool            addNotification = false;                                        /** Whether to add notifications during workflow execution. */
+    bool            progress = false;                                               /** Whether to report progress during workflow execution. (with a modal task) */
+    bool            finishedNotification = false;                                   /** Whether to add a notification when the workflow execution finishes. */
     bool            enableConsoleDashboard = false;                                 /** Whether to enable the console dashboard for this workflow execution. This will be ignored if a trace sink is provided, as the trace sink is responsible for managing its own dashboard if needed. */
     std::uint32_t   maxLoggingDepth = std::numeric_limits<std::uint32_t>::max();    /** The maximum depth of logging for this workflow execution. This controls how many levels of nested operations will be logged. Adjust this value based on the expected complexity of the workflow and the desired level of detail in the logs. */
+    QString         resultDetailsTitle;                                             /** The title to use for the result details dialog when the workflow execution finishes. If empty, the dialog title will use the workflow. */
+    QString         resultDetailsMessage;                                           /** The message to use for the result details dialog when the workflow execution finishes. */
 };
 
 }

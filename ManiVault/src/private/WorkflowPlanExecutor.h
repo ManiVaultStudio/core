@@ -39,10 +39,10 @@ public:
      * @brief Executes a workflow asynchronously.
      * @param workflowPlan Workflow plan to execute.
      * @param parentContext Optional parent execution context.
-     * @param executionOptions Optional workflow execution options.
+     * @param options Optional workflow execution options.
      * @return Future representing the asynchronous workflow result.
      */
-    mv::workflow::WorkflowResultFuture execute(mv::workflow::UniqueWorkflowPlan workflowPlan, mv::workflow::SharedWorkflowExecutionContext parentContext = nullptr, mv::workflow::OptionalWorkflowExecutionOptions executionOptions = std::nullopt) override;
+    mv::workflow::WorkflowResultFuture execute(mv::workflow::UniqueWorkflowPlan workflowPlan, mv::workflow::SharedWorkflowExecutionContext parentContext = nullptr, mv::workflow::OptionalWorkflowOptions options = std::nullopt) override;
 
 protected:
 
@@ -50,13 +50,11 @@ protected:
      * @brief Implements asynchronous workflow execution.
      * @param workflowPlan Workflow plan to execute.
      * @param guiScope GUI scope associated with the backing task.
-     * @param executionOptions Workflow execution options.
+     * @param options Workflow execution options.
      * @param executionContext Execution context for the workflow.
      * @return Future representing the asynchronous workflow result.
      */
-    mv::workflow::WorkflowResultFuture executeAsyncImpl(mv::workflow::UniqueWorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, const mv::workflow::WorkflowExecutionOptions& executionOptions, mv::workflow::SharedWorkflowExecutionContext executionContext) override;
-	//SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, mv::Task* task, const WorkflowExecutionOptions& executionOptions = {}) override;
- //   SharedWorkflowResult executeOnCurrentThread(WorkflowPlan& workflowPlan, mv::Task* task, SharedWorkflowExecutionContext parentContext = nullptr, OptionalWorkflowExecutionOptions executionOptions = std::nullopt) override;
+    mv::workflow::WorkflowResultFuture executeAsyncImpl(mv::workflow::UniqueWorkflowPlan workflowPlan, mv::Task::GuiScope guiScope, const mv::workflow::WorkflowOptions& options, mv::workflow::SharedWorkflowExecutionContext executionContext) override;
 
 private:
 
@@ -67,7 +65,7 @@ private:
      * @param executionOptions Workflow execution options.
      * @return Workflow result.
      */
-    mv::workflow::SharedWorkflowResult executeRoot(mv::workflow::WorkflowPlan& workflowPlan, mv::Task* task, const mv::workflow::WorkflowExecutionOptions& executionOptions = {}) override;
+    mv::workflow::SharedWorkflowResult executeRoot(mv::workflow::WorkflowPlan& workflowPlan, mv::Task* task, const mv::workflow::WorkflowOptions& options = {}) override;
 
     /**
      * @brief Executes a workflow as a child workflow.

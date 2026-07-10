@@ -6,6 +6,7 @@
 
 #include "ManiVaultGlobals.h"
 #include "WorkflowResult.h"
+#include "WorkflowOptions.h"
 
 #include "util/SeverityLevel.h"
 
@@ -25,7 +26,7 @@ class CORE_EXPORT WorkflowResultDialog : public QDialog
 
 public:
 
-    WorkflowResultDialog(const SharedWorkflowResult& workflowResult, util::SeverityLevels levels = util::allSeverityLevels, QWidget* parent = nullptr);
+    WorkflowResultDialog(const SharedWorkflowResult& workflowResult, util::SeverityLevels levels = util::allSeverityLevels, OptionalWorkflowOptions options = {}, QWidget* parent = nullptr);
 
     QSize sizeHint() const override;
 
