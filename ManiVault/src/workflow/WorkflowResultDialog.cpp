@@ -118,7 +118,7 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     toggleButton->setText(QStringLiteral("Diagnostics"));
     toggleButton->setCheckable(true);
     toggleButton->setChecked(workflowResult->hasWarnings() || workflowResult->hasErrors() || workflowResult->hasCriticalErrors());
-    toggleButton->setArrowType(Qt::DownArrow);
+    toggleButton->setArrowType(toggleButton->isChecked() ? Qt::DownArrow : Qt::RightArrow);
     toggleButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     toggleButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     toggleButton->setAutoRaise(false);
