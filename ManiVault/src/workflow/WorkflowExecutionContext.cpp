@@ -172,7 +172,7 @@ void WorkflowExecutionContext::reportFailed(SeverityLevel severity, const QStrin
             details["StackTrace"] = stackTraceToVariantList(stackTrace);
     }
 
-    message(severity, _name, {}, details);
+    message(severity, errorMessage, {}, details);
 
     if (_progressNode)
         _progressNode->markFailed();

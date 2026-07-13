@@ -8,7 +8,6 @@
 #include "WorkflowContextBase.h"
 #include "WorkflowResult.h"
 #include "WorkflowResultFuture.h"
-#include "WorkflowExecutionOptions.h"
 #include "WorkflowJobResult.h"
 #include "WorkflowHandle.h"
 
