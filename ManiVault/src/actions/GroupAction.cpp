@@ -9,6 +9,7 @@
 
 #include <QDebug>
 #include <QHBoxLayout>
+#include <QUuid>
 
 #ifdef _DEBUG
     //#define GROUP_ACTION_VERBOSE

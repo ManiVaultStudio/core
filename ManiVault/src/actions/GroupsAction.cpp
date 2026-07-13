@@ -6,6 +6,7 @@
 #include "GroupSectionTreeItem.h"
 
 #include <QDebug>
+#include <QUuid>
 
 //#define GROUPS_ACTION_VERBOSE
 
