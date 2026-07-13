@@ -24,23 +24,21 @@ WorkflowResultBase::Status WorkflowResultBase::getStatus() const
     return _status;
 }
 
-QIcon WorkflowResultBase::getStatusIcon() const
-{
 	switch (_status) {
 		case Status::Undefined:
-            return util::StyledIcon("question");
+			return mv::util::StyledIcon("question");
 
-        case Status::Success:
-            return util::StyledIcon("square-check");
+		case Status::Success:
+			return mv::util::StyledIcon("square-check");
 
-        case Status::Failed:
-            return util::StyledIcon("triangle-exclamation");
+		case Status::Failed:
+			return mv::util::StyledIcon("triangle-exclamation");
 
-        case Status::Canceled:
-            return util::StyledIcon("square-xmark");
+		case Status::Canceled:
+			return mv::util::StyledIcon("square-xmark");
 
-        default:
-            return util::StyledIcon("question");
+		default:
+			return mv::util::StyledIcon("question");
 	}
 }
 
