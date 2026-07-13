@@ -66,7 +66,7 @@ WorkflowResultFuture TaskflowWorkflowPlanExecutor::execute(UniqueWorkflowPlan wo
     if (parentContext != nullptr) {
         const auto resolvedOptions = options.value_or(parentContext->getState()->getOptions());
 
-        auto childContext = parentContext->createWorkflowChild(workflowPlan->getName(), workflowPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
+        auto childContext = parentContext->createNestedWorkflowChild(workflowPlan->getName(), workflowPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
 
         return executeAsyncImpl(std::move(workflowPlan), resolvedOptions.reporting.progress ? Task::GuiScope::Modal : Task::GuiScope::None, resolvedOptions, childContext);
     }
