@@ -81,7 +81,7 @@ Application::Application(int& argc, char** argv) :
 
         _configurationAction.getStartPageConfigurationAction().getToggleCustomizationAction().setChecked(true);
 
-        if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS)
+        if constexpr (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS)
         {
             Application::setWindowIcon(QIcon(":/Icons/AppIcon.icns"));
         } else {

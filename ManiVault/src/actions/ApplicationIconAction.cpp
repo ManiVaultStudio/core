@@ -98,7 +98,7 @@ void ApplicationIconAction::overrideMainWindowIcon() const
 
 void ApplicationIconAction::resetApplicationIcon()
 {
-    if(QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS)
+    if constexpr (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS)
     {
         Application::getMainWindow()->setWindowIcon(QIcon(":/Icons/AppIcon.icns"));
     } else {
