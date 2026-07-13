@@ -474,16 +474,16 @@ void TaskflowWorkflowPlanExecutor::addWorkflowFinishedNotification(const QString
 {
     const auto url          = QStringLiteral("app://workflow/results?workflowResultId=%1").arg(resultId.toString(QUuid::WithoutBraces));
     const auto warningUrl   = QStringLiteral("%1&levels=warning").arg(url);
-    const auto errorUrl     = QStringLiteral("%1&levels=error").arg(url);
+    const auto errorUrl     = QStringLiteral("%1&levels=error,fatal").arg(url);
     const auto title        = QStringLiteral("%1 finished in %2").arg(workflowName).arg(getElapsedTimeHumanReadable(result->getDurationMS(), true));
 
     QMetaObject::invokeMethod(&help(), [result, title, warningUrl, errorUrl]() {
         QString message;
 
-        if (result->hasErrors() && result->hasWarnings()) {
+        if ((result->hasErrors() || result->hasCriticalErrors()) && result->hasWarnings()) {
             message = QStringLiteral("Failed with <a href=\"%1\">errors</a> and <a href=\"%2\">warnings</a>. Review the report.").arg(errorUrl, warningUrl);
         }
-        else if (result->hasErrors()) {
+        else if (result->hasErrors() || result->hasCriticalErrors()) {
             message = QStringLiteral("Failed with <a href=\"%1\">errors</a>. Review the report.").arg(errorUrl);
         }
         else if (result->hasWarnings()) {
