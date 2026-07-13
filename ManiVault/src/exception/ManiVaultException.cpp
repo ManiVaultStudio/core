@@ -4,6 +4,7 @@
 
 #include "ManiVaultException.h"
 
+#include "CoreInterface.h"
 #include "util/Miscellaneous.h"
 
 #include <QDebug>
