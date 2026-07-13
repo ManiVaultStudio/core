@@ -14,6 +14,8 @@
 
 #include <QString>
 
+#include <QUuid>
+
 #include <mutex>
 
 namespace mv

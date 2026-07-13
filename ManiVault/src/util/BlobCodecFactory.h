@@ -19,6 +19,8 @@ namespace mv::util {
 
 class BlobCodecSettings;
 
+class CodecRegistry;
+
 /**
  * @brief Factory interface for creating codec instances.
  * 

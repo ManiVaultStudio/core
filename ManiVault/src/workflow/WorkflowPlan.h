@@ -14,7 +14,7 @@
 
 #include <QString>
 #include <QVariant>
-
+#include <QUuid>
 #include <optional>
 #include <concepts>
 namespace mv

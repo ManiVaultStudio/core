@@ -9,6 +9,10 @@
 #include "WorkflowOptions.h"
 #include "WorkflowReportNode.h"
 #include "WorkflowProgressNode.h"
+#include <QUuid>
+#include <QMutex>
+#include <QMutexLocker>
+#include <QTreeView>
 
 namespace mv::workflow
 {

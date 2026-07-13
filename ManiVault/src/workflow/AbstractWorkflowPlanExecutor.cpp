@@ -6,6 +6,7 @@
 #include "CoreInterface.h"
 #include "WorkflowResultDialog.h"
 #include "WorkflowResultRegistry.h"
+#include <QUuid>
 
 #include <QUrlQuery>
 

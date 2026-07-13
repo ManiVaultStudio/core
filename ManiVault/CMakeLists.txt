@@ -110,7 +110,7 @@ set_target_properties(zlibstatic PROPERTIES
 CPMAddPackage(
   NAME              quazip
   GITHUB_REPOSITORY stachenov/quazip
-  GIT_TAG           v1.7.0
+  GIT_TAG           v1.7.2
   OPTIONS 
     "QUAZIP_QT_MAJOR_VERSION 6" 
     "QUAZIP_BZIP2 OFF" 
@@ -154,8 +154,7 @@ CPMAddPackage(
 CPMAddPackage(
   NAME              advanced_docking
   GITHUB_REPOSITORY githubuser0xFFFF/Qt-Advanced-Docking-System
-  GIT_TAG           e2c960238d64982a4ac93c2c006155e86f23bb5f
-  VERSION           "4.5.0-260308"
+  GIT_TAG           5.0.0
   OPTIONS 
     "BUILD_EXAMPLES OFF"
 )
@@ -185,6 +184,7 @@ CPMAddPackage(
     GITHUB_REPOSITORY facebook/zstd
     GIT_TAG v1.5.7
     SOURCE_SUBDIR build/cmake
+    EXCLUDE_FROM_ALL                # exlcude the clean-all & uninstall targets, libzstd_static will still be built as it is linked to
     OPTIONS
         "ZSTD_BUILD_PROGRAMS OFF"
         "ZSTD_BUILD_TESTS OFF"
@@ -193,18 +193,32 @@ CPMAddPackage(
         "ZSTD_BUILD_STATIC ON"
 )
 
-# Disable Taskflow features
-set(TF_BUILD_BENCHMARKS OFF CACHE BOOL "" FORCE)
-set(TF_BUILD_CUDA OFF CACHE BOOL "" FORCE)
-set(TF_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(TF_BUILD_PROFILER OFF CACHE BOOL "" FORCE)
-set(TF_BUILD_SYCL OFF CACHE BOOL "" FORCE)
-set(TF_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set_target_properties(libzstd_static PROPERTIES 
+    POSITION_INDEPENDENT_CODE ON
+    FOLDER CoreDependencies
+    C_STANDARD ${CMAKE_C_STANDARD}
+    C_STANDARD_REQUIRED ${CMAKE_C_STANDARD_REQUIRED}
+    C_EXTENSIONS ${CMAKE_C_EXTENSIONS}
+)
+
+set_target_properties(clean-all PROPERTIES 
+    FOLDER CoreDependencies
+)
+set_target_properties(uninstall PROPERTIES 
+    FOLDER CoreDependencies
+)
 
 CPMAddPackage(
     NAME Taskflow
     GITHUB_REPOSITORY taskflow/taskflow
-    VERSION 3.8.0
+    GIT_TAG v4.1.0
+    OPTIONS
+        "TF_BUILD_BENCHMARKS OFF"
+        "TF_BUILD_CUDA OFF"
+        "TF_BUILD_EXAMPLES OFF"
+        "TF_BUILD_PROFILER OFF"
+        "TF_BUILD_TESTS OFF"
+        "TF_BUILD_MODULES OFF"
 )
 
 # Use of Sentry on MacOS breaks the build so turn it off for now...
@@ -220,7 +234,7 @@ if(${MV_USE_ERROR_LOGGING})
     CPMAddPackage(
         NAME                sentry-native
         GITHUB_REPOSITORY   getsentry/sentry-native
-        GIT_TAG             0.13.1 											# Use the latest stable version
+        GIT_TAG             0.15.2
         EXCLUDE_FROM_ALL    YES
         OPTIONS
             "SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
@@ -392,7 +406,6 @@ target_include_directories(${MV_EXE} PRIVATE
 
 target_include_directories(${MV_EXE} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
 target_include_directories(${MV_EXE} PRIVATE "${valijson_SOURCE_DIR}/include")
-target_include_directories(${MV_EXE} SYSTEM PRIVATE "${taskflow_SOURCE_DIR}")
 
 target_compile_features(${MV_EXE} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
@@ -419,12 +432,7 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
 target_link_libraries(${MV_EXE} PRIVATE Taskflow)
-
-if(TARGET libzstd_static)
-    target_link_libraries(MV_Application PRIVATE libzstd_static)
-else()
-    message(FATAL_ERROR "libzstd_static target was not created")
-endif()
+target_link_libraries(${MV_EXE} PRIVATE libzstd_static)
 
 if(${MV_USE_ERROR_LOGGING})
     target_compile_definitions(${MV_EXE} PRIVATE MV_USE_ERROR_LOGGING=1)

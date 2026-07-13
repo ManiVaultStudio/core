@@ -4,6 +4,7 @@
 
 #include "TaskflowWorkflowPlanExecutor.h"
 #include "Taskflow.h"
+#include <taskflow/observer/chrome.hpp>
 
 #include <CoreInterface.h>
 #include <Application.h>
