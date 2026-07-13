@@ -4,6 +4,7 @@
 
 #include "WorkflowExecutionContext.h"
 #include "WorkflowConsoleFormatter.h"
+#include "CoreInterface.h"
 
 #include "util/SeverityLevel.h"
 #include "util/Miscellaneous.h"
