@@ -70,9 +70,9 @@ WorkflowResultBase::Status WorkflowResult::deriveStatus() const
 
 QString WorkflowResult::getSummaryText() const
 {
-	const auto warningCount  = getWarningCount();
-	const auto errorCount    = getErrorCount();
-	const auto operationName = getOptions().reporting.resultDetails.operationName.isEmpty() ? getWorkflowName() : getOptions().reporting.resultDetails.operationName;
+	const auto warningCount     = getWarningCount();
+	const auto totalErrorCount  = getErrorCount() + getFatalErrorCount();
+	const auto operationName    = getOptions().reporting.resultDetails.operationName.isEmpty() ? getWorkflowName() : getOptions().reporting.resultDetails.operationName;
 
 	switch (getStatus()) {
 		case Status::Success:{
@@ -87,8 +87,8 @@ QString WorkflowResult::getSummaryText() const
 		case Status::Failed: {
 			return QStringLiteral("%1 failed with %2 error%3 and %4 warning%5.")
 		       .arg(operationName)
-		       .arg(errorCount)
-		       .arg(errorCount == 1 ? "" : "s")
+		       .arg(totalErrorCount)
+		       .arg(totalErrorCount == 1 ? "" : "s")
 		       .arg(warningCount)
 		       .arg(warningCount == 1 ? "" : "s");
 		}
