@@ -32,7 +32,8 @@ public:
 
     /**
      * @brief Constructs a notifications manager.
-     * @param parent Parent widget used as the notification anchor.
+     * @note Notifications are positioned relative to the main window, above its status bar (the main window must be set up before creating a Notifications instance).
+     * @param parent Pointer to parent widget (if any).
      */
     explicit Notifications(QWidget* parent = nullptr);
 
