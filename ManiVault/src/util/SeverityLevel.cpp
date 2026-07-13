@@ -4,6 +4,10 @@
 
 #include "SeverityLevel.h"
 
+#include "StyledIcon.h"
+
+#include <QColor>
+
 namespace mv::util
 {
 

@@ -686,7 +686,6 @@ set(PUBLIC_WORKFLOW_HEADERS
     src/workflow/WorkflowResultFuture.h
     src/workflow/WorkflowGuiThreadDispatcher.h
     src/workflow/WorkflowPlan.h
-    src/workflow/WorkflowExecutionOptions.h
     src/workflow/WorkflowMetric.h
     src/workflow/WorkflowExecutionMetrics.h
     src/workflow/WorkflowResultRegistry.h
