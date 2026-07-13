@@ -14,6 +14,10 @@
 #include <QMutexLocker>
 #include <QTreeView>
 
+#include <QHash>
+#include <QUuid>
+#include <QVariant>
+
 namespace mv::workflow
 {
 
