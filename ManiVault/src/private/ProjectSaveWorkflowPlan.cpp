@@ -9,6 +9,8 @@
 
 #include <CoreInterface.h>
 
+#include <QFileInfo>
+
 using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
