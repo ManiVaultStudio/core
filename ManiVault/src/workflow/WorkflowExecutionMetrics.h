@@ -8,8 +8,13 @@
 #include "WorkflowMetric.h"
 
 #include <QString>
+#include <QVariantMap>
+#include <QVector>
 
+#include <atomic>
+#include <cstdint>
 #include <mutex>
+#include <unordered_map>
 
 namespace mv::workflow
 {

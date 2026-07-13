@@ -6,11 +6,15 @@
 
 #include "WorkflowResult.h"
 
+#include <QObject>
 #include <QPointer>
 #include <QMutex>
 
 #include <exception>
+#include <functional>
 #include <future>
+#include <memory>
+#include <vector>
 
 namespace mv
 {
