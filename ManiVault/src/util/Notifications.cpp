@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
-// A corresponding LICENSE file is located in the root directory of this source tree 
-// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// A corresponding LICENSE file is located in the root directory of this source tree
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #include "Notifications.h"
 
@@ -21,25 +21,25 @@ Notifications::Notifications(QWidget* parent) :
 void Notifications::showMessage(const QString& title, const QString& description, const QIcon& icon, const util::Notification::DurationType& durationType, std::int32_t delayMs)
 {
     if (Application::getMainWindow()) {
-	    const auto createNotification = [this, title, description, icon, durationType]() -> Notification* {
-	    	return new Notification(title, description, icon, _notifications.isEmpty() ? nullptr : _notifications.last(), durationType, Application::getMainWindow());
-	    };
+        const auto createNotification = [this, title, description, icon, durationType]() -> Notification* {
+            return new Notification(title, description, icon, _notifications.isEmpty() ? nullptr : _notifications.last(), durationType, Application::getMainWindow());
+        };
 
-    	if (delayMs > 0) {
-    		QTimer::singleShot(delayMs, this, [this, createNotification]() {
-				addNotification(createNotification());
-				});
-    	}
-    	else {
-    		addNotification(createNotification());
-    	}
+        if (delayMs > 0) {
+            QTimer::singleShot(delayMs, this, [this, createNotification]() {
+                addNotification(createNotification());
+            });
+        }
+        else {
+            addNotification(createNotification());
+        }
     }
 }
 
 void Notifications::showTask(QPointer<Task> task)
 {
     if (auto mainWindow = Application::getMainWindow()) {
-		addNotification(new Notification(task, _notifications.isEmpty() ? nullptr : _notifications.last(), mainWindow));
+        addNotification(new Notification(task, _notifications.isEmpty() ? nullptr : _notifications.last(), mainWindow));
     }
 }
 

@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
-// A corresponding LICENSE file is located in the root directory of this source tree 
-// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// A corresponding LICENSE file is located in the root directory of this source tree
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #include "Exception.h"
 
@@ -35,25 +35,25 @@ namespace
      */
     QString stackFrameToString(const StackFrame& frame)
     {
-	    if (!frame.raw.isEmpty())
-	    	return frame.raw;
+        if (!frame.raw.isEmpty())
+            return frame.raw;
 
-	    QString line;
+        QString line;
 
-	    if (!frame.address.isEmpty())
-	    	line += frame.address + " ";
+        if (!frame.address.isEmpty())
+            line += frame.address + " ";
 
-	    if (!frame.function.isEmpty())
-	    	line += "in " + frame.function;
+        if (!frame.function.isEmpty())
+            line += "in " + frame.function;
 
-	    if (!frame.file.isEmpty()) {
-	    	line += " at " + frame.file;
+        if (!frame.file.isEmpty()) {
+            line += " at " + frame.file;
 
-	    	if (frame.line >= 0)
-	    		line += ":" + QString::number(frame.line);
-	    }
+            if (frame.line >= 0)
+                line += ":" + QString::number(frame.line);
+        }
 
-	    return line;
+        return line;
     }
 
     /**
@@ -63,12 +63,12 @@ namespace
      */
     QStringList stackTraceToStringList(const StackTrace& stackTrace)
     {
-	    QStringList lines;
+        QStringList lines;
 
-	    for (const auto& frame : stackTrace)
-	    	lines << stackFrameToString(frame);
+        for (const auto& frame : stackTrace)
+            lines << stackFrameToString(frame);
 
-	    return lines;
+        return lines;
     }
 
     /**
@@ -79,19 +79,19 @@ namespace
      */
     void copyExceptionReportToClipboard(const QString& title, const QString& reason, const StackTrace& stackTrace)
     {
-	    QString report;
+        QString report;
 
-	    report += title + "\n\n";
-	    report += reason + "\n\n";
+        report += title + "\n\n";
+        report += reason + "\n\n";
 
-	    const auto stackTraceLines = stackTraceToStringList(stackTrace);
+        const auto stackTraceLines = stackTraceToStringList(stackTrace);
 
-	    if (!stackTraceLines.isEmpty()) {
-	    	report += "Stack trace:\n";
-	    	report += stackTraceLines.join('\n');
-	    }
+        if (!stackTraceLines.isEmpty()) {
+            report += "Stack trace:\n";
+            report += stackTraceLines.join('\n');
+        }
 
-	    QApplication::clipboard()->setText(report);
+        QApplication::clipboard()->setText(report);
 
         mv::help().addNotification("Copied to clipboard", "The exception report has been copied to the clipboard.", StyledIcon("clipboard"));
     }
@@ -139,7 +139,7 @@ namespace
             layout.addWidget(toggleButton, 0, Qt::AlignLeft);
 
             auto detailsLayout = new QVBoxLayout(detailsWidget);
-            
+
             detailsLayout->setContentsMargins(0, 0, 0, 0);
             detailsLayout->setSpacing(8);
 
@@ -180,7 +180,7 @@ namespace
             frameDetails->setLineWrapMode(QPlainTextEdit::NoWrap);
             frameDetails->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
 
-        	detailsLayout->addWidget(frameDetails);
+            detailsLayout->addWidget(frameDetails);
 
             QObject::connect(stackTraceTree, &QTreeWidget::currentItemChanged, &dialog, [frameDetails](QTreeWidgetItem* current, QTreeWidgetItem*) {
                 if (!current) {
@@ -194,7 +194,7 @@ namespace
 
             detailsWidget->setVisible(false);
 
-        	layout.addWidget(detailsWidget, 1);
+            layout.addWidget(detailsWidget, 1);
 
             QObject::connect(toggleButton, &QToolButton::toggled, &dialog, [detailsWidget, toggleButton, &dialog](bool expanded) {
                 detailsWidget->setVisible(expanded);
@@ -240,12 +240,12 @@ void exceptionMessageBox(const QString& title, const QString& reason, QWidget* p
 
 void exceptionMessageBox(const QString& title, QWidget* parent)
 {
-	exceptionMessageBox(title, "An unhandled error occurred.", parent);
+    exceptionMessageBox(title, "An unhandled error occurred.", parent);
 }
 
 void exceptionMessageBox(const QString& title, const std::exception& exception, QWidget* parent)
 {
-	exceptionMessageBox(title, exception.what(), parent);
+    exceptionMessageBox(title, exception.what(), parent);
 }
 
 void exceptionMessageBox(const QString& title, const ManiVaultException& exception, QWidget* parent)

@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
-// A corresponding LICENSE file is located in the root directory of this source tree 
-// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// A corresponding LICENSE file is located in the root directory of this source tree
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #include "WorkflowMessageDetailsDelegate.h"
 
@@ -25,7 +25,7 @@
 #include <QPushButton>
 
 #ifdef _DEBUG
-	#define WORKFLOW_MESSAGE_DETAILS_DELEGATE_VERBOSE
+    #define WORKFLOW_MESSAGE_DETAILS_DELEGATE_VERBOSE
 #endif
 
 using namespace mv;
@@ -72,75 +72,75 @@ bool WorkflowMessageDetailsDelegate::editorEvent(QEvent* event, QAbstractItemMod
     Q_UNUSED(abstractItemModel);
     Q_UNUSED(styleOptionViewItem);
 
-	if (event->type() != QEvent::MouseButtonRelease)
-		return false;
+    if (event->type() != QEvent::MouseButtonRelease)
+        return false;
 
-	const auto* mouseEvent = static_cast<QMouseEvent*>(event);
-	if (mouseEvent->button() != Qt::LeftButton)
-		return false;
-	const auto details = index.data(Qt::EditRole).toMap();
+    const auto* mouseEvent = static_cast<QMouseEvent*>(event);
+    if (mouseEvent->button() != Qt::LeftButton)
+        return false;
+    const auto details = index.data(Qt::EditRole).toMap();
 
-	if (details.isEmpty())
-		return false;
+    if (details.isEmpty())
+        return false;
 
-	showDetailsBrowser(details);
+    showDetailsBrowser(details);
 
-	return true;
+    return true;
 }
 
 void WorkflowMessageDetailsDelegate::showDetailsBrowser(const QVariantMap& details)
 {
-	auto parentWindow   = qobject_cast<QWidget*>(parent());
-	auto dialog         = new QDialog(parentWindow);
+    auto parentWindow   = qobject_cast<QWidget*>(parent());
+    auto dialog         = new QDialog(parentWindow);
 
-	dialog->setWindowModality(Qt::NonModal);
-	dialog->setAttribute(Qt::WA_DeleteOnClose);
-	dialog->setWindowTitle(QStringLiteral("Workflow message details"));
-	dialog->resize(900, 650);
+    dialog->setWindowModality(Qt::NonModal);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setWindowTitle(QStringLiteral("Workflow message details"));
+    dialog->resize(900, 650);
 
-	auto layout = new QVBoxLayout(dialog);
-	auto model  = new QStandardItemModel(dialog);
+    auto layout = new QVBoxLayout(dialog);
+    auto model  = new QStandardItemModel(dialog);
 
-	model->setHorizontalHeaderLabels({
-		QStringLiteral("Key"),
-		QStringLiteral("Value")
-	});
+    model->setHorizontalHeaderLabels({
+        QStringLiteral("Key"),
+        QStringLiteral("Value")
+    });
 
-	for (auto it = details.begin(); it != details.end(); ++it)
-		populateModel(model->invisibleRootItem(), it.key(), it.value());
+    for (auto it = details.begin(); it != details.end(); ++it)
+        populateModel(model->invisibleRootItem(), it.key(), it.value());
 
-	auto treeView = new QTreeView(dialog);
+    auto treeView = new QTreeView(dialog);
 
-	treeView->setModel(model);
-	treeView->setAlternatingRowColors(true);
-	treeView->setUniformRowHeights(false);
-	treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-	treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
-	treeView->collapseAll();
-	treeView->resizeColumnToContents(0);
+    treeView->setModel(model);
+    treeView->setAlternatingRowColors(true);
+    treeView->setUniformRowHeights(false);
+    treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    treeView->collapseAll();
+    treeView->resizeColumnToContents(0);
 
-	auto buttons    = new QDialogButtonBox(dialog);
-	auto copyButton = buttons->addButton(QStringLiteral("Copy JSON"), QDialogButtonBox::ActionRole);
-	auto saveButton = buttons->addButton(QStringLiteral("Save JSON..."), QDialogButtonBox::ActionRole);
+    auto buttons    = new QDialogButtonBox(dialog);
+    auto copyButton = buttons->addButton(QStringLiteral("Copy JSON"), QDialogButtonBox::ActionRole);
+    auto saveButton = buttons->addButton(QStringLiteral("Save JSON..."), QDialogButtonBox::ActionRole);
 
-	buttons->addButton(QDialogButtonBox::Close);
+    buttons->addButton(QDialogButtonBox::Close);
 
-	connect(copyButton, &QPushButton::clicked, dialog, [details] {
-		copyDetailsToClipboard(details);
-	});
+    connect(copyButton, &QPushButton::clicked, dialog, [details] {
+        copyDetailsToClipboard(details);
+    });
 
-	connect(saveButton, &QPushButton::clicked, dialog, [details, dialog] {
-		saveDetailsToJsonFile(details, dialog);
-	});
+    connect(saveButton, &QPushButton::clicked, dialog, [details, dialog] {
+        saveDetailsToJsonFile(details, dialog);
+    });
 
-	connect(buttons, &QDialogButtonBox::rejected, dialog, &QDialog::close);
+    connect(buttons, &QDialogButtonBox::rejected, dialog, &QDialog::close);
 
     layout->addWidget(treeView);
     layout->addWidget(buttons);
 
-	// WA_DeleteOnClose already set above.
-	dialog->show();
-	dialog->raise();
+    // WA_DeleteOnClose already set above.
+    dialog->show();
+    dialog->raise();
 }
 
 QList<QStandardItem*> WorkflowMessageDetailsDelegate::makeRow(const QString& key, const QString& value)
