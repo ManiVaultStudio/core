@@ -33,11 +33,10 @@ public:
 
     /** Shared asynchronous workflow execution state. */
     struct CORE_EXPORT State {
-        std::future<SharedWorkflowResult> future;   /**< Future that produces the workflow result */
-        QPointer<Task> task;                         /**< Optional task associated with execution */
-
-        mutable QMutex mutex;                        /**< Protects stored exception state */
-        std::exception_ptr exception;                /**< Exception captured from asynchronous execution */
+        std::shared_future<SharedWorkflowResult>    future;         /**< Future that produces the workflow result */
+        QPointer<Task>                              task;           /**< Optional task associated with execution */
+        mutable QMutex                              mutex;          /**< Protects stored exception state */
+        std::exception_ptr                          exception;      /**< Exception captured from asynchronous execution */
 
         /** Stores an asynchronous execution exception. */
         void setException(std::exception_ptr e);
