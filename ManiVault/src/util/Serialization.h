@@ -116,7 +116,7 @@ CORE_EXPORT void populateBytesFromBlobMap(QVariantMap variantMap, char* destinat
  * @param variantMap Serialized blob variant map.
  * @param destination Destination buffer.
  * @param destinationSize Size of the destination buffer in bytes.
- * @param executionOptions Workflow execution options used to determine decode batching behavior.
+ * @param options Workflow options used to determine decode batching behavior.
  * @return Workflow that populates the destination buffer.
  */
 CORE_EXPORT workflow::UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(QVariantMap variantMap, char* destination, std::uint64_t destinationSize, const workflow::WorkflowOptions& options = {});
