@@ -4,6 +4,10 @@
 
 #include "SeverityLevel.h"
 
+#include "StyledIcon.h"
+
+#include <QColor>
+
 namespace mv::util
 {
 
@@ -27,6 +31,27 @@ SeverityLevel getSeverityLevel(const QString& levelName)
     }
 
     return SeverityLevel::Info;
+}
+
+QIcon getSeverityLevelIcon(SeverityLevel level)
+{
+    switch (level)
+    {
+	    case SeverityLevel::Info:
+	        return StyledIcon("circle-info").withColor(QColor(220, 235, 255));
+
+	    case SeverityLevel::Warning:
+	        return StyledIcon("circle-exclamation").withColor(QColor(196, 162, 26));
+
+	    case SeverityLevel::Error:
+	        return StyledIcon("triangle-exclamation").withColor(QColor(196, 98, 30));
+
+	    case SeverityLevel::Fatal:
+	        return StyledIcon("triangle-exclamation").withColor(QColor(196, 32, 32));
+
+        default:
+            return StyledIcon("scroll");
+    }
 }
 
 }

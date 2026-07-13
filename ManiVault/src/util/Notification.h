@@ -16,13 +16,19 @@ namespace mv::util
 {
 
 /**
- * Notification widget class
+ * @brief Toast-style notification widget.
  *
- * For showing stacked notifications in a toaster-like way (see the notifications class).
+ * Notification renders one transient message in a stacked notification area.
+ * Notifications can either show a title, description, and icon for a fixed or
+ * calculated duration, or stay visible while an associated Task is running.
  *
- * Note: This class is developed for internal use only
+ * Instances are linked to previous and next notifications so stacked widgets can
+ * reposition when one is shown or dismissed. Notifications owns the lifecycle of
+ * these widgets.
  *
- * @author Thomas Kroes
+ * @note This class is intended for internal use by Notifications.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT Notification : public QWidget
 {
@@ -30,201 +36,207 @@ class CORE_EXPORT Notification : public QWidget
 
 protected:
 
-    /** For custom drawing of the notification widget background */
+    /**
+     * @brief Inner widget used to paint the notification background.
+     */
     class NotificationWidget : public QWidget
     {
     public:
 
-        /** No need for custom constructor*/
+        /** Inherit QWidget constructors. */
         using QWidget::QWidget;
 
         /**
-         * Override the default paint behavior
-         * @param event Pointer to paint event that occurred
+         * @brief Paints the rounded notification background.
+         * @param event Paint event.
          */
         void paintEvent(QPaintEvent* event) override;
 
-        QSize sizeHint() const override;
+        /**
+         * @brief Returns the preferred inner notification size.
+         * @return Size hint for the notification background widget.
+         */
+        [[nodiscard]] QSize sizeHint() const override;
     };
 
 public:
 
-    /** Duration types */
+    /** Duration policy for a notification. */
     enum class DurationType {
-        Fixed,          /** Standard 5000 ms */
-        Calculated,     /** Calculated based on the number of characters */
-        Task            /** Notification is visible as long as the task is running */
+        Fixed,       /**< Uses the standard fixed display duration */
+        Calculated,  /**< Estimates display duration from message length */
+        Task         /**< Stays visible while the associated task is running */
     };
 
 public:
 
     /**
-     * Construct a notification with \p title, \p description, \p icon, \p previousNotification and pointer to \p parent widget
-     * @param title Notification title
-     * @param description Notification description
-     * @param icon Notification icon
-     * @param previousNotification Pointer to previous notification (maybe nullptr)
-     * @param durationType Duration type of the notification
-     * @param parent Pointer to parent widget
+     * @brief Constructs a message notification.
+     * @param title Notification title.
+     * @param description Notification description, optionally rich text.
+     * @param icon Notification icon.
+     * @param previousNotification Previous notification in the stack, or nullptr.
+     * @param durationType Display duration policy.
+     * @param parent Optional parent widget.
      */
     explicit Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent = nullptr);
 
     /**
-     * Construct a notification with \p task, \p previousNotification and pointer to \p parent widget
-     * @param task Task containing the notification details
-     * @param previousNotification Pointer to previous notification (maybe nullptr)
-     * @param parent Pointer to parent widget
+     * @brief Constructs a task notification.
+     * @param task Task whose state is displayed by the notification.
+     * @param previousNotification Previous notification in the stack, or nullptr.
+     * @param parent Optional parent widget.
      */
     explicit Notification(QPointer<Task> task, Notification* previousNotification, QWidget* parent = nullptr);
 
     /**
-     * Get whether the notification is closing
-     * @return Boolean determining Whether the notification is closing or not
+     * @brief Returns whether the notification is closing.
+     * @return True if the notification is currently closing.
      */
-    bool isClosing() const;
+    [[nodiscard]] bool isClosing() const;
 
     /**
-     * Get previous notification
-     * @return Pointer to previous notification (maybe nullptr)
+     * @brief Returns the previous notification in the stack.
+     * @return Previous notification, or nullptr.
      */
-    Notification* getPreviousNotification() const;
+    [[nodiscard]] Notification* getPreviousNotification() const;
 
     /**
-     * Set previous notification to \p previousNotification
-     * @param previousNotification Pointer to previous notification (maybe nullptr)
+     * @brief Sets the previous notification in the stack.
+     * @param previousNotification Previous notification, or nullptr.
      */
     void setPreviousNotification(Notification* previousNotification);
 
     /**
-     * Get next notification
-     * @return Pointer to next notification (maybe nullptr)
+     * @brief Returns the next notification in the stack.
+     * @return Next notification, or nullptr.
      */
-    Notification* getNextNotification() const;
+    [[nodiscard]] Notification* getNextNotification() const;
 
     /**
-     * Set next notification to \p nextNotification
-     * @param nextNotification Pointer to next notification (maybe nullptr)
+     * @brief Sets the next notification in the stack.
+     * @param nextNotification Next notification, or nullptr.
      */
     void setNextNotification(Notification* nextNotification);
 
     /**
-     * Get the notification icon
-     * @return Notification icon
+     * @brief Returns the notification icon.
+     * @return Notification icon.
      */
-    QIcon getIcon() const;
+    [[nodiscard]] QIcon getIcon() const;
 
     /**
-     * Set the notification icon to \p icon and update the icon label
-     * @param icon Notification icon
+     * @brief Sets the notification icon.
+     * @param icon Notification icon.
      */
     void setIcon(const QIcon& icon);
 
     /**
-     * Get the notification title
-     * @return Notification title
+     * @brief Returns the notification title.
+     * @return Notification title.
      */
-    QString getTitle() const;
+    [[nodiscard]] QString getTitle() const;
 
     /**
-     * Set the notification title to \p title and update the message text label
-     * @param title Notification title
+     * @brief Sets the notification title.
+     * @param title Notification title.
      */
     void setTitle(const QString& title);
 
     /**
-     * Get the notification description
-     * @return Notification description
+     * @brief Returns the notification description.
+     * @return Notification description.
      */
-    QString getDescription() const;
+    [[nodiscard]] QString getDescription() const;
 
     /**
-     * Set the notification description to \p description and update the message text label
-     * @param description Notification description
+     * @brief Sets the notification description.
+     * @param description Notification description.
      */
     void setDescription(const QString& description);
 
     /**
-     * Returns the preferred minimum size (overriden to allow for less tall notification widget)
-     * @return Minimum size hint
+     * @brief Returns the preferred minimum notification size.
+     * @return Minimum size hint.
      */
-    QSize minimumSizeHint() const override;
+    [[nodiscard]] QSize minimumSizeHint() const override;
 
     /**
-     * Returns the preferred minimum size (overriden to allow for less tall notification widget)
-     * @return Minimum size hint
+     * @brief Returns the preferred notification size.
+     * @return Size hint.
      */
-    QSize sizeHint() const override;
+    [[nodiscard]] QSize sizeHint() const override;
 
 protected:
     
     /**
-     * Invoked when the widget is shown (used to update the position at the correct time)
-     * @param event Pointer to show event
+     * @brief Handles initial positioning and slide-in animation when shown.
+     * @param event Show event.
      */
     void showEvent(QShowEvent* event) override;
 
-    /** Update the position of the notification and other notifications after it */
+    /** Updates this notification and following notifications in the stack. */
     void updatePosition();
 
 private:
 
-    /** Request the notification to finish */
+    /** Requests the notification to close. */
     void requestFinish();
 
-    /** Perform final operations after fade-out animation and before being deleted */
+    /** Performs final operations after fade-out animation and before deletion. */
     void finish();
 
-    /** Slide the notification in */
+    /** Starts the slide-in animation. */
     void slideIn();
 
-    /** Slide the notification out */
+    /** Starts the slide-out animation. */
     void slideOut();
 
-    /** Update the icon label with the latest Notification#_icon */
+    /** Updates the icon label from the current icon. */
     void updateIconLabel();
 
-    /** Update the message label with the latest Notification#_title and Notification#_description */
+    /** Updates title and message labels from the current notification text. */
     void updateMessageLabel();
 
     /**
-     * Estimate the reading time of \p text
-     * @param text Input text
-     * @return Estimated reading time in milliseconds
+     * @brief Estimates reading time for notification text.
+     * @param text Text to estimate.
+     * @return Estimated reading time in milliseconds.
      */
-    static double getEstimatedReadingTime(const QString& text);
+    [[nodiscard]] static double getEstimatedReadingTime(const QString& text);
 
 signals:
 
-    /** Signal emitted when the toaster finishes displaying */
+    /** Emitted when this notification has finished displaying. */
     void finished();
 
     /**
-     * Emitted when a hyperlink in the notification was clicked
-     * @param url URL of the hyperlink that was clicked
+     * @brief Emitted when a hyperlink in the notification is clicked.
+     * @param url Activated hyperlink URL.
      */
     void linkActivated(const QUrl& url);
 
 private:
-    QIcon                   _icon;                          /** Notification icon (maybe empty) */
-    QString                 _title;                         /** Notification title (maybe HTML) */
-    QString                 _description;                   /** Notification description (maybe HTML) */
-    QPointer<Task>          _task;                          /** Task associated with this notification (maybe nullptr) */
-    QPointer<Notification>  _previousNotification;          /** Pointer to previous notification (maybe nullptr) */
-    QPointer<Notification>  _nextNotification;              /** Pointer to next notification (maybe nullptr) */
-    bool                    _closing;                       /** Whether this notification is being closed */
-    QHBoxLayout             _notificationWidgetLayout;      /** Layout of the notification widget */
-    QVBoxLayout             _messageLayout;                 /** Message layout of the notification */
-    QLabel                  _iconLabel;                     /** Label for the icon (maybe empty) */
-    QLabel                  _titleLabel;                    /** Label for the title text */
-    QLabel                  _messageLabel;                  /** Label for the message text */
-    gui::TaskAction         _taskAction;                    /** Task action for the task associated with this notification */
+    QIcon                   _icon;                          /**< Notification icon, may be empty */
+    QString                 _title;                         /**< Notification title, may contain rich text */
+    QString                 _description;                   /**< Notification description, may contain rich text */
+    QPointer<Task>          _task;                          /**< Task associated with this notification, or nullptr */
+    QPointer<Notification>  _previousNotification;          /**< Previous notification in the stack, or nullptr */
+    QPointer<Notification>  _nextNotification;              /**< Next notification in the stack, or nullptr */
+    bool                    _closing;                       /**< Whether this notification is closing */
+    QHBoxLayout             _notificationWidgetLayout;      /**< Layout of the notification widget */
+    QVBoxLayout             _messageLayout;                 /**< Layout containing title, message, and task content */
+    QLabel                  _iconLabel;                     /**< Label showing the notification icon */
+    QLabel                  _titleLabel;                    /**< Label showing the notification title */
+    QLabel                  _messageLabel;                  /**< Label showing the notification message */
+    gui::TaskAction         _taskAction;                    /**< Task action shown for task notifications */
 
-    static const int    margin                  = 9;        /** Margin around the notification widget */
-    static const int    fixedWidth              = 500;      /** Width of the notification */
-    static const int    spacing                 = 5;        /** Spacing between notifications */
-    static const int    fixedDuration           = 5000;     /** Duration of notification display */
-    static const int    animationDuration       = 300;      /** Duration of notification animation */
-    static const int    averageReadingSpeedWPM  = 200;      /** Average reading speed in words per minute */
+    static const int    margin                  = 9;        /**< Margin around the notification widget */
+    static const int    fixedWidth              = 500;      /**< Fixed notification width in pixels */
+    static const int    spacing                 = 5;        /**< Spacing between stacked notifications */
+    static const int    fixedDuration           = 5000;     /**< Fixed display duration in milliseconds */
+    static const int    animationDuration       = 300;      /**< Animation duration in milliseconds */
+    static const int    averageReadingSpeedWPM  = 200;      /**< Average reading speed used for calculated duration */
 
     friend class Notifications;
 };

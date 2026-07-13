@@ -110,7 +110,7 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap&
     dataJobs.emplace_back("Read metadata", WorkflowPlan::NestedWorkflowFunction([metadataMap, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
         context->metadataBytes.resize(metadataMap["Size"].toULongLong());
 
-        return populateBytesFromBlobMapWorkflow(metadataMap, context->metadataBytes.data(), context->metadataBytes.size(), executionContext->getExecutionOptions());
+        return populateBytesFromBlobMapWorkflow(metadataMap, context->metadataBytes.data(), context->metadataBytes.size(), executionContext->getOptions());
     }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 
     const auto indicesSize = indicesMap["Size"].toULongLong();
@@ -119,7 +119,7 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap&
 	    dataJobs.emplace_back("Read indices", WorkflowPlan::NestedWorkflowFunction([indicesMap, indicesSize, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
 	        context->indicesBytes.resize(indicesSize);
 
-	        return populateBytesFromBlobMapWorkflow(indicesMap, context->indicesBytes.data(), context->indicesBytes.size(), executionContext->getExecutionOptions());
+	        return populateBytesFromBlobMapWorkflow(indicesMap, context->indicesBytes.data(), context->indicesBytes.size(), executionContext->getOptions());
 	    }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
     }
 

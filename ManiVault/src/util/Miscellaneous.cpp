@@ -898,8 +898,6 @@ static QString cssColor(QPalette::ColorRole role)
 
 QString variantMapToHtml(const QVariantMap& map, int depth /*= 0*/, int maxDepth /*= 2*/)
 {
-    const auto pal = QToolTip::palette();
-
     if (depth >= maxDepth) {
         return QString("<span style='font-style:italic;'>{%2 keys}</span>").arg(QString::number(map.size()));
     }
@@ -1014,6 +1012,62 @@ QString dumpHex(const QByteArray& bytes, qsizetype count)
 	}
 
 	return hex.join(' ');
+}
+
+QVariantList stackTraceToVariantList(const StackTrace& stackTrace)
+{
+	QVariantList variantList;
+
+	variantList.reserve(stackTrace.size());
+
+	for (const auto& frame : stackTrace) {
+		variantList.append(QVariantMap{
+			{ "Function", frame.function },
+			{ "File",     frame.file },
+			{ "Line",     frame.line },
+			{ "Module",   frame.module },
+			{ "Address",  frame.address },
+			{ "Raw",      frame.raw }
+		});
+	}
+
+	return variantList;
+}
+
+StackTrace stackTraceFromVariantList(const QVariantList& frames)
+{
+	StackTrace stackTrace;
+
+	stackTrace.reserve(frames.size());
+
+	for (const auto& value : frames) {
+		const auto map = value.toMap();
+
+		StackFrame frame;
+
+		frame.function = map.value("Function").toString();
+		frame.file     = map.value("File").toString();
+		frame.line     = map.value("Line", -1).toInt();
+		frame.module   = map.value("Module").toString();
+		frame.address  = map.value("Address").toString();
+		frame.raw      = map.value("Raw").toString();
+
+		stackTrace.push_back(std::move(frame));
+	}
+
+	return stackTrace;
+}
+
+QVariantList stackTraceFunctionList(const StackTrace& stackTrace)
+{
+	QVariantList overview;
+
+	overview.reserve(stackTrace.size());
+
+	for (const auto& frame : stackTrace)
+		overview.append(frame.function);
+
+	return overview;
 }
 
 }

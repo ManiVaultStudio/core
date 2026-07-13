@@ -37,7 +37,7 @@ public:
      */
     explicit WorkflowConsoleDashboard(WorkflowExecutionState::Ptr state);
 
-    /** Stop the dashboard thread. */
+    /** Stops the dashboard thread. */
     ~WorkflowConsoleDashboard();
 
     /**
@@ -54,7 +54,7 @@ public:
     */
     void stop();
 
-    /** Render the current workflow progress tree to the console. */
+    /** Renders the current workflow progress tree to the console. */
     void render() const;
 
 private:
@@ -68,11 +68,12 @@ private:
     void run();
 
 private:
-    WorkflowExecutionState::Ptr     _state;             /** Shared workflow execution state being observed. */
-    std::atomic_bool                _running = false;   /** Whether the dashboard thread should continue running. */
-    std::thread                     _thread;            /** Background thread used for periodic rendering. */
-    std::condition_variable         _condition;         /** Wakes the render loop when the dashboard is stopped. */
-    std::mutex                      _conditionMutex;    /** Mutex used with `_condition`. */
+
+    WorkflowExecutionState::Ptr     _state;             /**< Shared workflow execution state being observed */
+    std::atomic_bool                _running = false;   /**< Whether the dashboard thread should continue running */
+    std::thread                     _thread;            /**< Background thread used for periodic rendering */
+    std::condition_variable         _condition;         /**< Wakes the render loop when the dashboard is stopped */
+    std::mutex                      _conditionMutex;    /**< Mutex used with `_condition` */
 };
 
 

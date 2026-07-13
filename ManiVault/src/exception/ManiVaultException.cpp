@@ -4,6 +4,9 @@
 
 #include "ManiVaultException.h"
 
+#include "CoreInterface.h"
+#include "util/Miscellaneous.h"
+
 #include <QDebug>
 
 using namespace mv::util;
@@ -24,23 +27,57 @@ ManiVaultException::ManiVaultException(SeverityLevel severity, QString message, 
         { "Line", static_cast<int>(location.line()) },
         { "Function", location.function_name() }
     };
+
     _details["DiagnosticId"] = _diagnosticId.toString(QUuid::WithoutBraces);
+
+    const auto stackTrace = mv::errors().getDebugStackTrace();
+    _details["StackTrace"] = stackTraceToVariantList(stackTrace);
+    _details["StackTraceSummary"] = stackTraceFunctionList(stackTrace);
 }
 
 ManiVaultException ManiVaultException::withAddedDetails(const QVariantMap& additionalDetails) const
 {
-	QVariantMap newDetails = _details;
+    ManiVaultException copy = *this;
 
-	for (auto it = additionalDetails.begin(); it != additionalDetails.end(); ++it)
-		newDetails[it.key()] = it.value();
+    for (auto it = additionalDetails.begin(); it != additionalDetails.end(); ++it)
+        copy._details[it.key()] = it.value();
 
-    return {
-        _severity,
-        _message,
-        _what,
-        _where,
-        newDetails
-    };
+    return copy;
+}
+
+SeverityLevel ManiVaultException::getSeverity() const
+{
+    return _severity;
+}
+
+QString ManiVaultException::getMessage() const
+{
+    return _message;
+}
+
+QString ManiVaultException::getWhat() const
+{
+    return _what;
+}
+
+QString ManiVaultException::getWhere() const
+{
+    return _where;
+}
+
+QVariantMap ManiVaultException::getDetails() const
+{
+    return _details;
+}
+
+QUuid ManiVaultException::getDiagnosticId() const
+{
+    return _diagnosticId;
+}
+
+StackTrace ManiVaultException::getStackTrace() const
+{
+    return stackTraceFromVariantList(_details.value("StackTrace").toList());
 }
 
 }

@@ -5,6 +5,11 @@
 #include "ErrorManager.h"
 #include "ErrorLoggingConsentDialog.h"
 
+#include <QRegularExpression>
+
+#ifdef MV_ENABLE_CPPTRACE
+#include <cpptrace/cpptrace.hpp>
+#endif
 using namespace mv::gui;
 using namespace mv::util;
 
@@ -118,6 +123,53 @@ void ErrorManager::showErrorLoggingConsentDialog()
     ErrorLoggingConsentDialog errorLoggingConsentDialog;
     errorLoggingConsentDialog.exec();
 #endif
+}
+
+QString ErrorManager::getFormattedDebugStackTrace() const
+{
+#ifndef MV_ENABLE_CPPTRACE
+    return {};
+#else
+    QStringList lines = QString::fromStdString(cpptrace::generate_trace().to_string()).split('\n', Qt::SkipEmptyParts);
+
+    // Remove the header.
+    if (!lines.isEmpty() && lines.first().startsWith("Stack trace"))
+        lines.removeFirst();
+
+    // Remove frame numbers (#0, #1, ...).
+    static const QRegularExpression frameNumberRegex(R"(^\s*#\d+\s+)");
+
+    for (QString& line : lines)
+        line.remove(frameNumberRegex);
+
+    return lines.join('\n');
+#endif
+}
+
+util::StackTrace ErrorManager::getDebugStackTrace() const
+{
+    util::StackTrace stackTrace;
+
+#ifdef MV_ENABLE_CPPTRACE
+    const auto trace = cpptrace::generate_trace();
+
+    stackTrace.reserve(static_cast<qsizetype>(trace.frames.size()));
+
+    for (const auto& frame : trace.frames) {
+        StackFrame stackFrame;
+
+        stackFrame.function = QString::fromStdString(frame.symbol);
+        stackFrame.file     = QString::fromStdString(frame.filename);
+        stackFrame.module   = {};
+        stackFrame.raw      = QString::fromStdString(frame.to_string());
+        stackFrame.line     = frame.line.has_value()? static_cast<int>(frame.line.value()) : -1;
+        stackFrame.address  = QString("0x%1").arg(static_cast<quintptr>(frame.raw_address), QT_POINTER_SIZE * 2, 16, QLatin1Char('0'));
+
+        stackTrace.push_back(std::move(stackFrame));
+    }
+#endif
+
+    return stackTrace;
 }
 
 }

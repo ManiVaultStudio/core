@@ -4,8 +4,10 @@
 
 #include "WorkflowExecutionContext.h"
 #include "WorkflowConsoleFormatter.h"
+#include "CoreInterface.h"
 
 #include "util/SeverityLevel.h"
+#include "util/Miscellaneous.h"
 
 using namespace mv::util;
 
@@ -31,11 +33,11 @@ WorkflowExecutionContext::WorkflowExecutionContext(QString name, ReportNodePtr r
 {
 }
 
-SharedWorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString& name, Task* task /*= nullptr*/, WorkflowExecutionOptions executionOptions /*= {}*/)
+SharedWorkflowExecutionContext WorkflowExecutionContext::makeRoot(const QString& name, Task* task /*= nullptr*/, WorkflowOptions options /*= {}*/)
 {
 	auto reportRoot     = std::make_shared<WorkflowReportNode>(name);
 	auto progressRoot   = WorkflowProgressNode::createRoot(Type::Workflow, name);
-	auto state          = std::make_shared<WorkflowExecutionState>(reportRoot, progressRoot, std::move(executionOptions));
+	auto state          = std::make_shared<WorkflowExecutionState>(reportRoot, progressRoot, std::move(options));
 	auto context        = std::make_shared<WorkflowExecutionContext>(name, reportRoot, progressRoot, state, task);
 
     context->_type          = Type::Workflow;
@@ -165,7 +167,13 @@ void WorkflowExecutionContext::reportFailed(SeverityLevel severity, const QStrin
     for (auto it = extraDetails.begin(); it != extraDetails.end(); ++it)
         details[it.key()] = it.value();
 
-    message(severity, _name, {}, details);
+    if (!details.contains("StackTrace")) {
+        const auto stackTrace = mv::errors().getDebugStackTrace();
+        if (!stackTrace.isEmpty())
+            details["StackTrace"] = stackTraceToVariantList(stackTrace);
+    }
+
+    message(severity, errorMessage, {}, details);
 
     if (_progressNode)
         _progressNode->markFailed();
@@ -255,7 +263,7 @@ void WorkflowExecutionContext::info(QString text, QString location, QVariantMap 
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    const auto maxDepth = _state ? _state->getExecutionOptions().maxLoggingDepth : std::numeric_limits<int>::max();
+    const auto maxDepth = _state ? _state->getOptions().reporting.maxLoggingDepth : std::numeric_limits<int>::max();
 
     const auto message = WorkflowConsoleFormatter::format(SeverityLevel::Info, text, location, details, maxDepth);
 
@@ -272,7 +280,7 @@ void WorkflowExecutionContext::warning(QString text, QString location, QVariantM
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    const auto maxDepth = _state ? _state->getExecutionOptions().maxLoggingDepth : std::numeric_limits<int>::max();
+    const auto maxDepth = _state ? _state->getOptions().reporting.maxLoggingDepth : std::numeric_limits<int>::max();
 		
     const auto message = WorkflowConsoleFormatter::format(SeverityLevel::Warning, text, location, details, maxDepth);
 
@@ -290,7 +298,7 @@ void WorkflowExecutionContext::error(QString text, QString location, QVariantMap
 
     QMutexLocker lock(&mutex);
 
-    const auto maxDepth         = _state ? _state->getExecutionOptions().maxLoggingDepth : std::numeric_limits<int>::max();
+    const auto maxDepth         = _state ? _state->getOptions().reporting.maxLoggingDepth : std::numeric_limits<int>::max();
     const auto diagnosticId     = details.value("DiagnosticId").toString();
     const bool hasDiagnosticId  = !diagnosticId.isEmpty();
     const bool alreadyPrinted   = hasDiagnosticId && printedDiagnosticIds.contains(diagnosticId);
@@ -366,12 +374,12 @@ std::int32_t WorkflowExecutionContext::getDepth() const
 	return _executionPath.isEmpty() ? 0 : static_cast<std::int32_t>(_executionPath.size()) - 1;
 }
 
-WorkflowExecutionOptions WorkflowExecutionContext::getExecutionOptions() const
+WorkflowOptions WorkflowExecutionContext::getOptions() const
 {
     if (!_state)
         return {};
 
-    return _state->getExecutionOptions();
+    return _state->getOptions();
 }
 
 QUuid WorkflowExecutionContext::getId() const

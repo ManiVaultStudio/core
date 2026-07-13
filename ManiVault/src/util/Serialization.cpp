@@ -673,7 +673,7 @@ UniqueWorkflowPlan bytesToBlobVariantMapWorkflow(const char* bytes, std::uint64_
 
         if (!encodeJobs.empty()) {
             plan->addBatchedParallelStage("Encode blocks", std::move(encodeJobs), [](const SharedWorkflowExecutionContext& executionContext) {
-                return executionContext->getState()->getExecutionOptions().workflowBatchingOptions.dataBlockEncodingBatchSize;
+                return executionContext->getState()->getOptions().batching.dataBlockEncodingBatchSize;
             });
         }
 
@@ -726,7 +726,7 @@ void populateBytesFromBlobMap(QVariantMap variantMap, char* destination, std::ui
     }
 }
 
-UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(QVariantMap variantMap, char* destination, std::uint64_t destinationSize, const workflow::WorkflowExecutionOptions& executionOptions /*= {}*/)
+UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(QVariantMap variantMap, char* destination, std::uint64_t destinationSize, const workflow::WorkflowOptions& options /*= {}*/)
 {
     if (variantMap.isEmpty()) {
         qWarning("Failed to populate data buffer from variant map, variant map is empty");
@@ -750,7 +750,7 @@ UniqueWorkflowPlan populateBytesFromBlobMapWorkflow(QVariantMap variantMap, char
         });
     }
 
-    plan->addBatchedParallelStage("Decode Blocks", std::move(jobs), executionOptions.workflowBatchingOptions.dataBlockDecodingBatchSize);
+    plan->addBatchedParallelStage("Decode Blocks", std::move(jobs), options.batching.dataBlockDecodingBatchSize);
 
     return plan;
 }

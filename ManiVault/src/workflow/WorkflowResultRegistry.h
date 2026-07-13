@@ -38,19 +38,7 @@ class CORE_EXPORT WorkflowResultRegistry : public QObject
 
 public:
 
-    /**
-	 * @brief Thread-safe registry for workflow results.
-	 *
-	 * The WorkflowResultRegistry provides a central repository for storing and
-	 * retrieving workflow results by their unique identifier. It is primarily used
-	 * to temporarily share workflow results between components without requiring
-	 * direct ownership or lifetime management.
-	 *
-	 * Results are stored as shared pointers and remain available until explicitly
-	 * removed from the registry.
-	 *
-	 * The registry is implemented as a thread-safe singleton.
-	 */
+    /** @return Thread-safe singleton workflow result registry. */
     static WorkflowResultRegistry& instance();
 
     /**
@@ -75,8 +63,9 @@ public:
     void remove(const QUuid& id);
 
 private:
-    mutable QMutex                      _mutex;     /** Protects concurrent access to the registry. */
-    QHash<QUuid, SharedWorkflowResult>  _results;   /** Registered workflow results indexed by identifier. */
+
+    mutable QMutex                      _mutex;     /**< Protects concurrent access to the registry */
+    QHash<QUuid, SharedWorkflowResult>  _results;   /**< Registered workflow results indexed by identifier */
 };
 
 }

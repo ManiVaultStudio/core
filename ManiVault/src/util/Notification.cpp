@@ -62,9 +62,11 @@ Notification::Notification(const QString& title, const QString& description, con
     _closing(false),
     _taskAction(nullptr, "Task")
 {
-    setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
+    setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus);
+    setWindowModality(Qt::NonModal);
     setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_ShowWithoutActivating);
+
     hide();
 
     if (_previousNotification)
@@ -380,19 +382,22 @@ void Notification::showEvent(QShowEvent* event)
 
 void Notification::updatePosition()
 {
-    if (_previousNotification) {
-        _previousNotification->updateGeometry();
-        _previousNotification->adjustSize();
+    if (auto mainWindow = Application::getMainWindow()) {
+        if (_previousNotification) {
+            _previousNotification->updateGeometry();
+            _previousNotification->adjustSize();
 
-        move(QPoint(parentWidget()->mapToGlobal(QPoint(spacing, 0)).x(), _previousNotification->pos().y() - height() - spacing));
-    } else {
-        const auto statusBarHeight = Application::getMainWindow()->statusBar()->isVisible() ? Application::getMainWindow()->statusBar()->height() : 0;
+            move(QPoint(parentWidget()->mapToGlobal(QPoint(spacing, 0)).x(), _previousNotification->pos().y() - height() - spacing));
+        }
+        else {
+            const auto statusBarHeight = mainWindow->statusBar()->isVisible() ? mainWindow->statusBar()->height() : 0;
 
-        move(parentWidget()->mapToGlobal(QPoint(spacing, Application::getMainWindow()->height() - statusBarHeight - height() - spacing)));
+            move(parentWidget()->mapToGlobal(QPoint(spacing, mainWindow->height() - statusBarHeight - height() - spacing)));
+        }
+
+        if (_nextNotification)
+            QTimer::singleShot(25, _nextNotification, &Notification::updatePosition);
     }
-        
-    if (_nextNotification)
-        QTimer::singleShot(25, _nextNotification, &Notification::updatePosition);
 }
 
 }

@@ -9,6 +9,8 @@
 
 #include <CoreInterface.h>
 
+#include <QFileInfo>
+
 using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
@@ -22,7 +24,7 @@ UniqueWorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 {
     auto context = std::make_shared<ProjectSaveContext>(filePath);
 
-    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QStringLiteral("Save project"), context);
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("Save project %1").arg(QFileInfo(filePath).fileName()), context);
 
     plan->addSequentialStage("Setup", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> void {
 #ifdef PROJECT_SAVE_WORKFLOW_PLAN_VERBOSE

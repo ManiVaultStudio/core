@@ -38,17 +38,17 @@ using namespace mv::workflow;
 namespace
 {
 
-std::size_t resolveWorkerCount(const mv::workflow::WorkflowExecutionOptions& options)
+std::size_t resolveWorkerCount(const mv::workflow::WorkflowOptions& options)
 {
-    if (!options.parallel)
+    if (!options.execution.parallel)
         return 1;
 
     const auto hardwareThreadCount = std::max(1u, std::thread::hardware_concurrency());
 
-    if (options.maxWorkerThreadCount == 0)
+    if (options.execution.maxWorkerThreadCount == 0)
         return hardwareThreadCount;
 
-    return std::max<std::size_t>(1, std::min<std::size_t>(options.maxWorkerThreadCount, hardwareThreadCount));
+    return std::max<std::size_t>(1, std::min<std::size_t>(options.execution.maxWorkerThreadCount, hardwareThreadCount));
 }
 
 }
@@ -58,27 +58,27 @@ TaskflowWorkflowPlanExecutor::TaskflowWorkflowPlanExecutor(QObject* parent) :
 {
 }
 
-WorkflowResultFuture TaskflowWorkflowPlanExecutor::execute(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext, OptionalWorkflowExecutionOptions executionOptions)
+WorkflowResultFuture TaskflowWorkflowPlanExecutor::execute(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext, OptionalWorkflowOptions options)
 {
     if (!workflowPlan)
         throw std::runtime_error("Workflow plan is null");
 
     if (parentContext != nullptr) {
-        const auto resolvedOptions = executionOptions.value_or(parentContext->getState()->getExecutionOptions());
+        const auto resolvedOptions = options.value_or(parentContext->getState()->getOptions());
 
-        auto childContext = parentContext->createWorkflowChild(workflowPlan->getName(), workflowPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
+        auto childContext = parentContext->createNestedWorkflowChild(workflowPlan->getName(), workflowPlan->getWeight(), WorkflowPlan::JobProgressMode::Automatic);
 
-        return executeAsyncImpl(std::move(workflowPlan), resolvedOptions.reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, resolvedOptions, childContext);
+        return executeAsyncImpl(std::move(workflowPlan), resolvedOptions.reporting.progress ? Task::GuiScope::Modal : Task::GuiScope::None, resolvedOptions, childContext);
     }
 
-    const auto resolvedOptions = executionOptions.value_or(WorkflowExecutionOptions{});
+    const auto resolvedOptions = options.value_or(WorkflowOptions{});
 
-    return executeAsyncImpl(std::move(workflowPlan), resolvedOptions.reportProgress ? Task::GuiScope::Modal : Task::GuiScope::None, resolvedOptions, nullptr);
+    return executeAsyncImpl(std::move(workflowPlan), resolvedOptions.reporting.progress ? Task::GuiScope::Modal : Task::GuiScope::None, resolvedOptions, nullptr);
 }
 
-SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(UniqueWorkflowPlan workflowPlan, mv::Task* task, WorkflowExecutionOptions executionOptions)
+SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(UniqueWorkflowPlan workflowPlan, mv::Task* task, WorkflowOptions options)
 {
-    return executeRoot(*workflowPlan, task, executionOptions);
+    return executeRoot(*workflowPlan, task, options);
 }
 
 SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(UniqueWorkflowPlan workflowPlan, SharedWorkflowExecutionContext parentContext)
@@ -109,7 +109,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeBlocking(UniqueWorkflo
     return executeWithContext(*workflowPlan, context);
 }
 
-WorkflowResultFuture TaskflowWorkflowPlanExecutor::executeAsyncImpl(UniqueWorkflowPlan workflowPlan, Task::GuiScope guiScope, const WorkflowExecutionOptions& executionOptions, SharedWorkflowExecutionContext executionContext)
+WorkflowResultFuture TaskflowWorkflowPlanExecutor::executeAsyncImpl(UniqueWorkflowPlan workflowPlan, Task::GuiScope guiScope, const WorkflowOptions& options, SharedWorkflowExecutionContext executionContext)
 {
     auto state = std::make_shared<WorkflowResultFuture::State>();
 
@@ -126,12 +126,12 @@ WorkflowResultFuture TaskflowWorkflowPlanExecutor::executeAsyncImpl(UniqueWorkfl
 
     state->future = std::async(
         std::launch::async,
-        [this, state, workflowPlan = std::move(workflowPlan), task, executionOptions, executionContext]() mutable -> SharedWorkflowResult {
+        [this, state, workflowPlan = std::move(workflowPlan), task, options, executionContext]() mutable -> SharedWorkflowResult {
             try {
                 if (executionContext != nullptr)
                     return executeWithContext(*workflowPlan, executionContext);
 
-                return executeRoot(*workflowPlan, task, executionOptions);
+                return executeRoot(*workflowPlan, task, options);
             }
             catch (...) {
                 state->setException(std::current_exception());
@@ -142,12 +142,12 @@ WorkflowResultFuture TaskflowWorkflowPlanExecutor::executeAsyncImpl(UniqueWorkfl
     return WorkflowResultFuture(state);
 }
 
-SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& workflowPlan, Task* task, const WorkflowExecutionOptions& executionOptions)
+SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& workflowPlan, Task* task, const WorkflowOptions& options)
 {
     //_chromeObserver.reset();
     //_chromeObserver = _executor.make_observer<tf::ChromeObserver>();
 
-    auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task, executionOptions);
+    auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task, options);
 
     return executeWithContext(workflowPlan, rootContext);
 }
@@ -156,8 +156,8 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
 {
     rootContext = requireContext(rootContext, __FUNCTION__);
 
-    const auto executionOptions     = rootContext->getState() ? rootContext->getState()->getExecutionOptions() : WorkflowExecutionOptions{};
-    const bool chromeTracingEnabled = rootContext->isRootExecution() && executionOptions.profilingSinkType == WorkflowExecutionOptions::ProfilingSinkType::ChromeTracing;
+    const auto executionOptions     = rootContext->getState() ? rootContext->getState()->getOptions() : WorkflowOptions{};
+    const bool chromeTracingEnabled = rootContext->isRootExecution() && executionOptions.profiling.sinkType == WorkflowProfilingOptions::SinkType::ChromeTracing;
 
     std::shared_ptr<tf::ChromeObserver> chromeObserver;
 
@@ -170,7 +170,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
 
     std::optional<WorkflowConsoleDashboardScope> dashboardScope;
 
-    if (rootContext->isRootExecution() && executionOptions.enableConsoleDashboard)
+    if (rootContext->isRootExecution() && executionOptions.reporting.enableConsoleDashboard)
         dashboardScope.emplace(rootContext->getState());
 
     WorkflowExecutionLifecycleScope lifecycle(rootContext);
@@ -184,7 +184,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
         compileStages(stages, taskflow, rootContext);
 
         if (taskflow.num_tasks() > 0)
-            runTaskflowBlocking(taskflow, rootContext->getExecutionOptions());
+            runTaskflowBlocking(taskflow, rootContext->getOptions());
         };
 
     std::exception_ptr primaryException;
@@ -195,7 +195,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
         compileWorkflow(workflowPlan, taskflow, rootContext);
 
         if (taskflow.num_tasks() > 0)
-            runTaskflowBlocking(taskflow, rootContext->getExecutionOptions());
+            runTaskflowBlocking(taskflow, rootContext->getOptions());
     }
     catch (...) {
         primaryException = std::current_exception();
@@ -206,8 +206,8 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
             std::rethrow_exception(primaryException);
         }
         catch (const ManiVaultException& exception) {
-            rootContext->error(exception._message, exception._where, exception._details);
-            lifecycle.fail(exception._severity, exception._message, exception._details);
+            rootContext->error(exception.getMessage(), exception.getWhere(), exception.getDetails());
+            lifecycle.fail(exception.getSeverity(), exception.getMessage(), exception.getDetails());
 
             try {
                 runStages(workflowPlan.getOnFailureStages());
@@ -221,7 +221,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
                 rootContext->error("Failure stages failed with unknown error", workflowPlan.getName());
             }
 
-            if (exception._severity == SeverityLevel::Fatal)
+            if (exception.getSeverity() == SeverityLevel::Fatal)
                 std::rethrow_exception(primaryException);
         }
         catch (const std::exception& exception) {
@@ -306,7 +306,9 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
         result->setMetrics(state->metrics().snapshot());
     }
 
+    result->setStatus(result->deriveStatus());
     result->setDurationMS(durationMs);
+    result->setOptions(rootContext->getState()->getOptions());
 
     lifecycle.finish(durationMs);
 
@@ -319,7 +321,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
         }
     }
 
-    if (rootContext->isRootExecution() && rootContext->getState() && rootContext->getState()->getExecutionOptions().addNotification) {
+    if (rootContext->isRootExecution() && rootContext->getState() && rootContext->getState()->getOptions().reporting.finishedNotification) {
         addWorkflowFinishedNotification(workflowPlan.getName(), result, WorkflowResultRegistry::instance().add(result));
     }
 
@@ -442,7 +444,7 @@ void TaskflowWorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, Shar
     }
 }
 
-void TaskflowWorkflowPlanExecutor::ensureExecutor(const WorkflowExecutionOptions& options)
+void TaskflowWorkflowPlanExecutor::ensureExecutor(const WorkflowOptions& options)
 {
 	const auto workerCount = resolveWorkerCount(options);
 
@@ -470,33 +472,29 @@ TaskflowWorkflowPlanExecutor::CompiledTasks TaskflowWorkflowPlanExecutor::compil
 
 void TaskflowWorkflowPlanExecutor::addWorkflowFinishedNotification(const QString& workflowName, const SharedWorkflowResult& result, const QUuid& resultId)
 {
-    const auto url      = QString("app://workflow/results?workflowResultId=%1").arg(resultId.toString(QUuid::WithoutBraces));
-    const auto title    = QString("%1 finished in %2").arg(workflowName).arg(getElapsedTimeHumanReadable(result->getDurationMS(), true));
+    const auto url          = QStringLiteral("app://workflow/results?workflowResultId=%1").arg(resultId.toString(QUuid::WithoutBraces));
+    const auto warningUrl   = QStringLiteral("%1&levels=warning").arg(url);
+    const auto errorUrl     = QStringLiteral("%1&levels=error,fatal").arg(url);
+    const auto title        = QStringLiteral("%1 finished in %2").arg(workflowName).arg(getElapsedTimeHumanReadable(result->getDurationMS(), true));
 
-    QMetaObject::invokeMethod(&help(), [result, url, title]() {
+    QMetaObject::invokeMethod(&help(), [result, title, warningUrl, errorUrl]() {
         QString message;
 
-        if (!result->hasWarnings() && !result->hasErrors()) {
-            message = QStringLiteral("Completed successfully");
+        if ((result->hasErrors() || result->hasCriticalErrors()) && result->hasWarnings()) {
+            message = QStringLiteral("Failed with <a href=\"%1\">errors</a> and <a href=\"%2\">warnings</a>. Review the report.").arg(errorUrl, warningUrl);
+        }
+        else if (result->hasErrors() || result->hasCriticalErrors()) {
+            message = QStringLiteral("Failed with <a href=\"%1\">errors</a>. Review the report.").arg(errorUrl);
+        }
+        else if (result->hasWarnings()) {
+            message = QStringLiteral("Completed with <a href=\"%1\">warnings</a>. Review the report.").arg(warningUrl);
+        }
+        else {
+            message = QStringLiteral("Completed successfully.");
         }
 
-        if (result->hasWarnings() && !result->hasErrors()) {
-            message = QString("Completed with <a href=\"%1\">warnings</a>. Review the report.").arg(QString("%1&levels=warning").arg(url));
-        }
-
-        if (!result->hasWarnings() && result->hasErrors()) {
-            message = QString("Completed with <a href=\"%1\">errors</a>. Review the report.").arg(QString("%1&levels=error").arg(url));
-        }
-
-        if (result->hasWarnings() && result->hasErrors()) {
-            message = QString("Completed with <a href=\"%1\">warnings</a> and <a href=\"%2\">errors</a>. Review the report.").arg(QString("%1&levels=warning").arg(url), QString("%1&levels=error").arg(url));
-        }
-
-        if (!message.isEmpty()) {
-            help().addNotification(title, message);
-            qDebug() << title;
-        }
-        }, Qt::QueuedConnection);
+        help().addNotification(title, message, result->getStatusIcon());
+    }, Qt::QueuedConnection);
 }
 
 void TaskflowWorkflowPlanExecutor::executeCompiledJob(const WorkflowPlan::Job& job, tf::Subflow& subflow, SharedWorkflowExecutionContext jobContext)
@@ -536,7 +534,7 @@ void TaskflowWorkflowPlanExecutor::executeCompiledJob(const WorkflowPlan::Job& j
         lifecycle.finish();
     }
     catch (const ManiVaultException& maniVaultException) {
-        childContext->reportFailed(maniVaultException._severity, maniVaultException._message, maniVaultException._details);
+        childContext->reportFailed(maniVaultException.getSeverity(), maniVaultException.getMessage(), maniVaultException.getDetails());
         throw;
     }
     catch (const std::exception& exception) {
@@ -568,7 +566,7 @@ WorkflowHandle TaskflowWorkflowPlanExecutor::getFinalStageHandle(const WorkflowP
 	return {};
 }
 
-void TaskflowWorkflowPlanExecutor::runTaskflowBlocking(tf::Taskflow& taskflow, const WorkflowExecutionOptions& executionOptions)
+void TaskflowWorkflowPlanExecutor::runTaskflowBlocking(tf::Taskflow& taskflow, const WorkflowOptions& options)
 {
     if (taskflow.num_tasks() == 0)
         return;
@@ -576,7 +574,7 @@ void TaskflowWorkflowPlanExecutor::runTaskflowBlocking(tf::Taskflow& taskflow, c
     auto future = [&]() {
         std::scoped_lock lock(_executorMutex);
 
-        ensureExecutor(executionOptions);
+        ensureExecutor(options);
 
         return _executor->run(taskflow);
     }();

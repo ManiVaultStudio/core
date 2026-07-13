@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
-// A corresponding LICENSE file is located in the root directory of this source tree 
-// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// A corresponding LICENSE file is located in the root directory of this source tree
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #include "Notifications.h"
 
@@ -8,77 +8,83 @@
 
 #include <QMainWindow>
 #include <QEvent>
+#include <QTimer>
 
 namespace mv::util
 {
 
 Notifications::Notifications(QWidget* parent) :
-    QObject(parent),
-    _parentWidget(parent)
+    QObject(parent)
 {
 }
 
 void Notifications::showMessage(const QString& title, const QString& description, const QIcon& icon, const util::Notification::DurationType& durationType, std::int32_t delayMs)
 {
-    //Q_ASSERT(_parentWidget);
+    if (Application::getMainWindow()) {
+        const auto createNotification = [this, title, description, icon, durationType]() -> Notification* {
+            return new Notification(title, description, icon, _notifications.isEmpty() ? nullptr : _notifications.last(), durationType, Application::getMainWindow());
+        };
 
-    if (!_parentWidget)
-        return;
-
-    const auto addNotification = [this, title, description, icon, durationType]() -> void {
-        auto notification = new Notification(title, description, icon, _notifications.isEmpty() ? nullptr : _notifications.last(), durationType, _parentWidget);
-
-        connect(notification, &Notification::linkActivated, this, &Notifications::notificationLinkActivated);
-
-        notification->updatePosition();
-        notification->show();
-
-        _notifications.append(notification);
-
-        connect(notification, &Notification::finished, this, [this, notification]() {
-            _notifications.removeOne(notification);
-            notification->deleteLater();
-        });
-    };
-
-    if (delayMs > 0)
-        QTimer::singleShot(delayMs, addNotification);
-    else
-        addNotification();
+        if (delayMs > 0) {
+            QTimer::singleShot(delayMs, this, [this, createNotification]() {
+                addNotification(createNotification());
+            });
+        }
+        else {
+            addNotification(createNotification());
+        }
+    }
 }
 
 void Notifications::showTask(QPointer<Task> task)
 {
-    if (!_parentWidget)
-        return;
-
-    auto notification = new Notification(task, _notifications.isEmpty() ? nullptr : _notifications.last(), _parentWidget);
-
-    notification->show();
-
-    _notifications.append(notification);
-
-    connect(notification, &Notification::finished, this, [this, notification]() {
-        _notifications.removeOne(notification);
-        notification->deleteLater();
-    });
+    if (auto mainWindow = Application::getMainWindow()) {
+        addNotification(new Notification(task, _notifications.isEmpty() ? nullptr : _notifications.last(), mainWindow));
+    }
 }
 
-void Notifications::setParentWidget(QWidget* parentWidget)
+void Notifications::setupMainWindowSynchronization()
 {
-    _parentWidget = parentWidget;
-
-    Application::getMainWindow()->installEventFilter(this);
+    if (auto mainWindow = Application::getMainWindow()) {
+        mainWindow->removeEventFilter(this);
+        mainWindow->installEventFilter(this);
+    }
 }
 
 bool Notifications::eventFilter(QObject* watched, QEvent* event)
 {
     if (event->type() == QEvent::Resize) {
-        for (auto notification : _notifications)
-            QTimer::singleShot(10, notification, &Notification::updatePosition);
+        QTimer::singleShot(10, this, &Notifications::updateAllPositions);
     }
 
     return QObject::eventFilter(watched, event);
+}
+
+void Notifications::addNotification(Notification* notification)
+{
+    Q_ASSERT(notification);
+
+    if (!notification)
+        return;
+
+    connect(notification, &Notification::linkActivated, this, &Notifications::notificationLinkActivated);
+    connect(notification, &Notification::finished, this, [this, notification]() {
+        _notifications.removeOne(notification);
+        notification->deleteLater();
+
+        updateAllPositions();
+    });
+
+    notification->updatePosition();
+    notification->show();
+
+    _notifications.append(notification);
+}
+
+void Notifications::updateAllPositions()
+{
+    for (auto repositionNotification : _notifications)
+        repositionNotification->updatePosition();
 }
 
 }

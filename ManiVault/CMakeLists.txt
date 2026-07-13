@@ -291,6 +291,29 @@ if(${MV_USE_ERROR_LOGGING})
 
 endif()
 
+if(MV_ENABLE_CPPTRACE)
+
+    set(CPPTRACE_OPTIONS
+        "CPPTRACE_BUILD_BENCHMARKING OFF"
+        "CPPTRACE_BUILD_TOOLS OFF"
+        "CPPTRACE_PROVIDE_EXPORT_SET OFF"
+    )
+
+    # do not use the default backend libdwarf
+    if(UNIX AND NOT APPLE)
+        list(APPEND CPPTRACE_OPTIONS "CPPTRACE_GET_SYMBOLS_WITH_LIBBACKTRACE ON")
+    elseif(APPLE)
+        list(APPEND CPPTRACE_OPTIONS "CPPTRACE_GET_SYMBOLS_WITH_ADDR2LINE ON")
+    endif()
+
+    CPMAddPackage(
+        NAME cpptrace
+        GITHUB_REPOSITORY jeremy-rifkin/cpptrace
+        GIT_TAG v1.0.4
+        OPTIONS ${CPPTRACE_OPTIONS}
+    )
+endif()
+
 # -----------------------------------------------------------------------------
 # Source files
 # -----------------------------------------------------------------------------
@@ -421,6 +444,12 @@ if(${MV_USE_ERROR_LOGGING})
         add_dependencies(${MV_EXE} crashpad_handler)
     endif()
 endif()
+
+if(MV_ENABLE_CPPTRACE)
+    target_link_libraries(${MV_EXE} PRIVATE cpptrace::cpptrace)
+    target_compile_definitions(${MV_EXE} PRIVATE MV_ENABLE_CPPTRACE)
+endif()
+
 
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
 

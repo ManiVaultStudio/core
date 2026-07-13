@@ -56,4 +56,11 @@ static const SeverityLevels allSeverityLevels = {
     SeverityLevel::Fatal
 };
 
+/**
+* Get the icon of a severity level
+* @param level The severity level to get the icon of
+* @return The icon of the severity level
+*/
+QIcon CORE_EXPORT getSeverityLevelIcon(SeverityLevel level);
+
 }

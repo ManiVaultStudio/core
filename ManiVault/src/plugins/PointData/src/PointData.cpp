@@ -248,7 +248,7 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
 
         if (rawData.canConvert<QVariantMap>()) {
             const auto rawDataMap = rawData.toMap();
-            return populateBytesFromBlobMapWorkflow(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), executionContext->getExecutionOptions());
+            return populateBytesFromBlobMapWorkflow(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), executionContext->getOptions());
         }
 
         return std::make_unique<WorkflowPlan>("Populate data (no raw data found in variant map)");

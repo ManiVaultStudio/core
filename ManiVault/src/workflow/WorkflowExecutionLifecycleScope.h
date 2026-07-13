@@ -54,6 +54,7 @@ namespace mv::workflow
 class CORE_EXPORT WorkflowExecutionLifecycleScope
 {
 public:
+
     /**
      * @brief Creates a lifecycle scope for the given workflow execution context.
      *
@@ -86,7 +87,7 @@ public:
     void fail(util::SeverityLevel severity, const QString& message, QVariantMap details = {});
 
     /**
-     * @brief Reports the context as successfully finished and completes the lifecycle scope.
+     * @brief Reports successful completion.
      *
      * The reported duration is the elapsed time measured since construction. Calling this
      * function prevents the destructor from reporting completion a second time.
@@ -107,9 +108,10 @@ public:
     std::uint64_t elapsedMS() const;
 
 private:
-    SharedWorkflowExecutionContext  _context;           /** Context whose lifecycle is reported. */
-    QElapsedTimer                   _timer;             /** Timer used to measure elapsed execution time. */
-    bool                            _finished = false;  /** Whether the lifecycle has already been completed. */
+
+    SharedWorkflowExecutionContext  _context;           /**< Context whose lifecycle is reported */
+    QElapsedTimer                   _timer;             /**< Timer used to measure elapsed execution time */
+    bool                            _finished = false;  /**< Whether the lifecycle has already been completed */
 };
 
 }

@@ -588,6 +588,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/CodecRegistry.h
     src/util/CodecActionBinding.h
     src/util/SeverityLevel.h
+    src/util/StackFrame.h
 )
 
 if(APPLE)
@@ -685,7 +686,6 @@ set(PUBLIC_WORKFLOW_HEADERS
     src/workflow/WorkflowResultFuture.h
     src/workflow/WorkflowGuiThreadDispatcher.h
     src/workflow/WorkflowPlan.h
-    src/workflow/WorkflowExecutionOptions.h
     src/workflow/WorkflowMetric.h
     src/workflow/WorkflowExecutionMetrics.h
     src/workflow/WorkflowResultRegistry.h
@@ -701,6 +701,12 @@ set(PUBLIC_WORKFLOW_HEADERS
     src/workflow/WorkflowHandle.h
     src/workflow/WorkflowContextVariantMap.h
     src/workflow/WorkflowBatchingOptions.h
+    src/workflow/WorkflowMessageDetailsDelegate.h
+    src/workflow/WorkflowReportingOptions.h
+    src/workflow/WorkflowProfilingOptions.h
+    src/workflow/WorkflowParallelizationOptions.h
+    src/workflow/WorkflowOptions.h
+    src/workflow/WorkflowResultDetailsOptions.h
 )
 
 set(PUBLIC_WORKFLOW_SOURCES
@@ -731,6 +737,7 @@ set(PUBLIC_WORKFLOW_SOURCES
     src/workflow/WorkflowContextVariantMap.cpp
     src/workflow/WorkflowBatchingOptions.cpp
     src/workflow/WorkflowResultBase.cpp
+    src/workflow/WorkflowMessageDetailsDelegate.cpp
 )
 
 set(PUBLIC_WORKFLOW_FILES

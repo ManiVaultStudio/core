@@ -13,42 +13,51 @@
 class DataPropertiesPlugin;
 
 /**
- * Data properties widget class
+ * @brief Widget for displaying dataset property pages.
  *
- * Widget class for viewing/editing dataset property pages
+ * DataPropertiesWidget observes the current data hierarchy selection and
+ * rebuilds its grouped property-page UI for the selected data hierarchy items.
+ * Population is scheduled through a timer so expensive UI rebuilding can be
+ * coalesced when the selection changes rapidly.
  *
- * @author Thomas Kroes
+ * @maintainer Thomas Kroes
  */
 class DataPropertiesWidget : public QWidget
 {
 public:
 
     /**
-     * Construct with pointer to owning \p dataPropertiesPlugin and \p parent widget
-     * @param dataPropertiesPlugin Pointer to owning data properties plugin
-     * @param parent Pointer to parent widget
+     * @brief Constructs a data properties widget.
+     * @param dataPropertiesPlugin Owning data properties plugin.
+     * @param parent Optional parent widget.
      */
     DataPropertiesWidget(DataPropertiesPlugin* dataPropertiesPlugin, QWidget* parent = nullptr);
 
 protected:
 
-    /** Callback when is called when the selected items in the data hierarchy changed */
+    /** Handles changes to the selected data hierarchy items. */
     void dataHierarchySelectionChanged();
 
 private:
 
+    /** Begins a scheduled UI population pass. */
     void beginPopulate();
+
+    /** Populates the property UI for scheduled items. */
     void populate();
+
+    /** Finishes the current UI population pass. */
     void endPopulate();
 
 protected:
-    DataPropertiesPlugin*           _dataPropertiesPlugin;      /** Pointer to owning data properties plugin */
-    QVBoxLayout                     _layout;                    /** Main layout */
-    QTimer                          _populateTimer;             /** Timer for selectively populating the UI */
-    mv::DataHierarchyItems          _scheduledItems;            /** Items scheduled to be shown */
-    mv::DataHierarchyItems          _currentItems;              /** Items currently shown */
-    bool                            _abortPopulate;             /** Boolean determining whether the UI build process should be terminated */
-    bool                            _isPopulating;              /** Boolean determining whether the UI build process should be terminated */
-    mv::gui::GroupsAction           _groupsAction;              /** Groups action */
-    mv::gui::GroupsAction::Widget*  _groupsActionWidget;        /** Pointer to groups action widget (used to change label sizing) */
+
+    DataPropertiesPlugin*           _dataPropertiesPlugin;      /**< Owning data properties plugin */
+    QVBoxLayout                     _layout;                    /**< Main layout */
+    QTimer                          _populateTimer;             /**< Timer used to schedule UI population */
+    mv::DataHierarchyItems          _scheduledItems;            /**< Items scheduled to be shown */
+    mv::DataHierarchyItems          _currentItems;              /**< Items currently shown */
+    bool                            _abortPopulate;             /**< Whether the current UI population pass should abort */
+    bool                            _isPopulating;              /**< Whether the widget is currently populating its UI */
+    mv::gui::GroupsAction           _groupsAction;              /**< Groups action containing property page actions */
+    mv::gui::GroupsAction::Widget*  _groupsActionWidget;        /**< Groups action widget used to adjust label sizing */
 };

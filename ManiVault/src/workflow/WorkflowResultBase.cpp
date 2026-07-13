@@ -4,6 +4,8 @@
 
 #include "WorkflowResultBase.h"
 
+#include "util/StyledIcon.h"
+
 namespace mv::workflow
 {
 
@@ -22,9 +24,39 @@ WorkflowResultBase::Status WorkflowResultBase::getStatus() const
     return _status;
 }
 
+QIcon WorkflowResultBase::getStatusIcon() const
+{
+	switch (_status) {
+		case Status::Undefined:
+			return mv::util::StyledIcon("question");
+
+		case Status::Success:
+			return mv::util::StyledIcon("square-check");
+
+		case Status::Failed:
+			return mv::util::StyledIcon("triangle-exclamation");
+
+		case Status::Canceled:
+			return mv::util::StyledIcon("square-xmark");
+
+		default:
+			return mv::util::StyledIcon("question");
+	}
+}
+
 void WorkflowResultBase::setStatus(Status status)
 {
     _status = status;
+}
+
+void WorkflowResultBase::setOptions(const WorkflowOptions& options)
+{
+	_options = options;
+}
+
+const WorkflowOptions& WorkflowResultBase::getOptions() const
+{
+	return _options;
 }
 
 bool WorkflowResultBase::hasValue() const

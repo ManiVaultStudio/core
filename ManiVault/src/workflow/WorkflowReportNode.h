@@ -15,11 +15,13 @@ namespace mv::workflow
 {
 
 /**
- * @brief The WorkflowReportNode class represents a node in a hierarchical workflow report structure.
+ * @brief Node in a hierarchical workflow execution report.
  *
- * Each node can contain messages and child nodes, allowing for a structured representation of workflow execution results, warnings, and errors.
+ * Each report node stores messages for one workflow entity and owns child nodes
+ * for nested workflows, stages, or jobs. Access is synchronized because report
+ * nodes may be updated from multiple workflow worker threads.
  *
- * @author T. Kroes BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
+ * @maintainer T. Kroes BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowReportNode
 {
@@ -27,10 +29,10 @@ public:
 
     Q_DISABLE_COPY_MOVE(WorkflowReportNode)
 
-    /** A shared pointer type for WorkflowReportNode, allowing for easy management of node lifetimes and shared ownership across different parts of the workflow reporting system. */
+    /** Shared pointer type for workflow report nodes. */
     using SharedWorkflowReportNode = std::shared_ptr<WorkflowReportNode>;
 
-    /** A vector of shared pointers to WorkflowReportNode, representing the children of a report node in the hierarchical structure. */
+    /** Collection of child workflow report nodes. */
     using SharedWorkflowReportNodes = std::vector<SharedWorkflowReportNode>;
 
     /**
@@ -40,7 +42,8 @@ public:
     explicit WorkflowReportNode(QString name);
 
     /**
-     * @brief Creates a child report node with the specified name and adds it to this node's children.
+     * @brief Creates a child report node.
+     *
      * @param name The name of the child report node.
      * @return A shared pointer to the newly created child report node.
      */
@@ -75,28 +78,32 @@ public:
     SharedWorkflowReportNodes getChildren() const;
 
     /**
-     * @brief Checks if this report node or any of its descendants contain any error messages.
+     * @brief Checks for recursive errors.
+     *
      * @return True if there are error messages in this node or any of its descendants, false otherwise.
      */
     bool hasErrorsRecursive() const;
 
     /**
-     * @brief Gets the total count of warning messages in this report node and all of its descendants.
+     * @brief Gets the recursive warning count.
+     *
      * @return The total number of warning messages found in this node and its descendants.
      */
     std::int32_t getWarningCountRecursive() const;
     
     /**
-     * @brief Get the total count of error messages in this report node and all of its descendants.
+     * @brief Gets the recursive error count.
+     *
      * @return The total number of error messages found in this node and its descendants.
      */
     std::int32_t getErrorCountRecursive() const;
 
 private:
-    QString                     _name;          /** The name of the report node, typically representing a specific step or component in the workflow */
-    mutable QMutex              _mutex;         /** Mutex to protect access to the messages and children vectors for thread safety */
-    WorkflowMessages            _messages;      /** A list of messages associated with this report node, including informational messages, warnings, and errors */
-    SharedWorkflowReportNodes   _children;      /** A list of child report nodes, allowing for a hierarchical structure to represent sub-steps or components within the workflow */
+
+    QString                     _name;          /**< Human-readable report node name */
+    mutable QMutex              _mutex;         /**< Protects messages and child nodes */
+    WorkflowMessages            _messages;      /**< Messages emitted for this report node */
+    SharedWorkflowReportNodes   _children;      /**< Child report nodes */
 };
 
 }

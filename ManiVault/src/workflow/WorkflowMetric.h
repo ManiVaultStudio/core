@@ -6,36 +6,48 @@
 
 #include "ManiVaultGlobals.h"
 
+#include <QList>
 #include <QString>
+#include <QVariant>
 #include <QVariantMap>
 
 namespace mv::workflow
 {
 
+/** Type stored by a workflow metric value. */
 enum class WorkflowMetricValueType
 {
-    Integer,
-    FloatingPoint
+    Integer,        /**< Integral metric value */
+    FloatingPoint   /**< Floating-point metric value */
 };
 
+/**
+ * @brief Named metric captured during workflow execution.
+ */
 struct CORE_EXPORT WorkflowMetric
 {
+    /** Formats a metric value for display. */
     static QString formatMetricValue(const WorkflowMetric& metric);
 
+    /** Formats a metric for plain-text notifications. */
     static QString toNotificationString(const WorkflowMetric& metric);
 
+    /** Formats a metric for HTML notifications. */
     static QString toHtmlNotificationString(const WorkflowMetric& metric);
+
+    /** Formats multiple metrics as a plain-text notification summary. */
     static QString toNotificationSummary(
         const QList<WorkflowMetric>& metrics,
         const QString& separator = "\n");
 
+    /** Formats multiple metrics as an HTML notification summary. */
     static QString getWorkflowMetricsHtmlNotificationSummary(
         const QList<WorkflowMetric>& metrics);
 
-    QString     _name;
-    QString     _unit;
-    QVariant    _value;
-    QVariantMap _metadata;
+    QString     _name;      /**< Metric name */
+    QString     _unit;      /**< Metric unit label */
+    QVariant    _value;     /**< Metric value */
+    QVariantMap _metadata;  /**< Additional metric metadata */
 };
 
 }

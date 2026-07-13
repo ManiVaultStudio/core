@@ -62,22 +62,7 @@ QVariant AbstractWorkflowMessagesModel::LevelItem::data(int role /*= Qt::UserRol
             return getTooltip();
 
         case Qt::DecorationRole:
-        {
-	        switch (getWorkflowMessage()->level)
-	        {
-		        case SeverityLevel::Info:
-			        return StyledIcon("circle-info").withColor(QColor(220, 235, 255));
-
-		        case SeverityLevel::Warning:
-			        return StyledIcon("circle-exclamation").withColor(QColor(196, 162, 26));
-
-		        case SeverityLevel::Error:
-			        return StyledIcon("triangle-exclamation").withColor(QColor(196, 98, 30));
-
-		        case SeverityLevel::Fatal:
-			        return StyledIcon("triangle-exclamation").withColor(QColor(196, 32, 32));
-	        }
-        }
+	        return getSeverityLevelIcon(getWorkflowMessage()->level);
 
 	    case Qt::TextAlignmentRole:
 	        return Qt::AlignLeft;
@@ -139,28 +124,33 @@ QVariant AbstractWorkflowMessagesModel::LocationItem::data(int role /*= Qt::User
 
 QVariant AbstractWorkflowMessagesModel::DetailsItem::data(int role) const
 {
-    
+    const auto& details = getWorkflowMessage()->details;
     switch (role) {
 	    case Qt::EditRole:
-            return getWorkflowMessage()->details;
+	        return details;
 
-		case Qt::DisplayRole:
-            return QString("%1").arg(data(Qt::EditRole).toMap().isEmpty() ? "Not available..." : data(Qt::EditRole).toMap().keys().join(", "));
+	    case Qt::DisplayRole:
+	        return "";
 
-        case Qt::ToolTipRole:
-            return getTooltip();
-
-        case Qt::FontRole: {
-            QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-            font.setItalic(true);
-            return font;
+        case Qt::DecorationRole:
+        {
+            return details.isEmpty() ? StyledIcon() : StyledIcon("file-lines");
         }
 
-	    default:
-	        break;
+        case Qt::ToolTipRole:
+            return details.isEmpty() ? "No details" : "View diagnostic details";
+
+	    case Qt::FontRole: {
+	        QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+	        font.setItalic(true);
+	        return font;
     }
-    
-	return Item::data(role);
+
+    default:
+        break;
+    }
+
+    return Item::data(role);
 }
 
 QVariant AbstractWorkflowMessagesModel::TimeStampItem::data(int role /*= Qt::UserRole + 1*/) const
