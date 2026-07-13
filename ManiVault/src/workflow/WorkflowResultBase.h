@@ -6,10 +6,11 @@
 
 #include "ManiVaultGlobals.h"
 
+#include "WorkflowOptions.h"
+
 #include <QString>
 #include <QVariant>
-
-#include "WorkflowOptions.h"
+#include <QIcon>
 
 namespace mv::workflow
 {
