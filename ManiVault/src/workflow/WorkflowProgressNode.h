@@ -8,6 +8,7 @@
 #include "WorkflowExecutionNodeType.h"
 
 #include <QString>
+#include <QDateTime>
 #include <QElapsedTimer>
 #include <QMutex>
 #include <QVector>

@@ -16,6 +16,10 @@
 #include <QVariant>
 #include <QVariantMap>
 
+#include <QHash>
+#include <QUuid>
+#include <QVariant>
+
 namespace mv::workflow
 {
 
