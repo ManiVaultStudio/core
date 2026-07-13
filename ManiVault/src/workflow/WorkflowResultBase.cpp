@@ -24,6 +24,8 @@ WorkflowResultBase::Status WorkflowResultBase::getStatus() const
     return _status;
 }
 
+QIcon WorkflowResultBase::getStatusIcon() const
+{
 	switch (_status) {
 		case Status::Undefined:
 			return mv::util::StyledIcon("question");
