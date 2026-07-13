@@ -25,6 +25,7 @@
 #include <QMainWindow>
 #include <QDir>
 #include <QShortcut>
+#include <QOperatingSystemVersion>
 
 using nlohmann::json;
 
@@ -80,7 +81,12 @@ Application::Application(int& argc, char** argv) :
 
         _configurationAction.getStartPageConfigurationAction().getToggleCustomizationAction().setChecked(true);
 
-        Application::setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
+        if constexpr (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS)
+        {
+            Application::setWindowIcon(QIcon(":/Icons/AppIcon.icns"));
+        } else {
+            Application::setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
+        }
 	}
 }
 
