@@ -7,7 +7,6 @@
 #include "ManiVaultGlobals.h"
 #include "WorkflowContextBase.h"
 #include "WorkflowResult.h"
-#include "WorkflowResultFuture.h"
 #include "WorkflowJobResult.h"
 #include "WorkflowHandle.h"
 
@@ -558,11 +557,11 @@ private:
     template<typename Function>
     WorkflowHandle addStageTo(Stages& stages, QString name, Function&& function, JobThreadAffinity threadAffinity, double weight)
     {
-        if constexpr (std::is_invocable_r_v<WorkflowResultFuture, Function, const Job&, const SharedWorkflowExecutionContext&>) {
-				stages.emplace_back(name, ConcurrencyMode::Sequential, Jobs{ Job(name, AsyncJobFunction(std::forward<Function>(function)), threadAffinity)
-            }, weight);
-        }
-        else if constexpr (std::is_invocable_v<Function, const Job&, const SharedWorkflowExecutionContext&> || std::is_invocable_v<Function, Job&, const SharedWorkflowExecutionContext&> || std::is_invocable_v<Function, const SharedWorkflowExecutionContext&> || std::is_invocable_v<Function>) {
+        if constexpr (
+            std::is_invocable_v<Function, const Job&, const SharedWorkflowExecutionContext&> ||
+            std::is_invocable_v<Function, Job&, const SharedWorkflowExecutionContext&> ||
+            std::is_invocable_v<Function, const SharedWorkflowExecutionContext&> ||
+            std::is_invocable_v<Function>) {
             const auto jobName = name;
 
             stages.emplace_back(std::move(name), ConcurrencyMode::Sequential, Jobs{ Job(jobName, [fn = std::forward<Function>(function)](const Job& job, const SharedWorkflowExecutionContext& context) mutable {
@@ -570,7 +569,11 @@ private:
             }, threadAffinity)}, weight);
         }
         else {
-            static_assert(std::is_invocable_v<Function>, "Unsupported workflow stage function signature");
+            static_assert(std::is_invocable_v<Function>,
+                "Unsupported workflow stage function signature. Supported signatures are "
+                "void(const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&), "
+                "void(WorkflowPlan::Job&, const SharedWorkflowExecutionContext&), "
+                "void(const SharedWorkflowExecutionContext&), or void().");
         }
 
         return stages.back().getHandle();
