@@ -9,6 +9,9 @@
 
 #include <QString>
 
+#include <cstdint>
+#include <limits>
+
 namespace mv::workflow
 {
 

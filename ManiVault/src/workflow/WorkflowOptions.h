@@ -10,6 +10,8 @@
 #include "WorkflowReportingOptions.h"
 #include "WorkflowProfilingOptions.h"
 
+#include <optional>
+
 namespace mv::workflow
 {
 

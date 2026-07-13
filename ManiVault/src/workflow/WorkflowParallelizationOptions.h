@@ -6,6 +6,8 @@
 
 #include "ManiVaultGlobals.h"
 
+#include <cstdint>
+
 namespace mv::workflow
 {
 

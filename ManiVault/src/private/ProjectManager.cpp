@@ -765,7 +765,6 @@ void ProjectManager::saveProject(QString filePath)
                     .subjectName    = QFileInfo(filePath).fileName()
                 }
             }
-            //.profilingSinkType = WorkflowExecutionOptions::ProfilingSinkType::ChromeTracing
         }));
 
         future.onFinished(this, [this](SharedWorkflowResult result) {
