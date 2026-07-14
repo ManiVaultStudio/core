@@ -63,9 +63,9 @@ void ColorSchemesListModel::addBuiltInColorSchemes()
         addColorScheme(ColorScheme(ColorScheme::Mode::BuiltIn, name, description, palette));
     };
 
-    addBuiltInCustomColorScheme("Dark", "Dark color scheme", QColor(45, 45, 45), Qt::white, QColor(30, 30, 30), QColor(45, 45, 45), Qt::white, Qt::white, Qt::white, QColor(60, 60, 60), Qt::white, Qt::red);
+    addBuiltInCustomColorScheme("Dark", "Dark color scheme", QColor(45, 45, 45), Qt::white, QColor(30, 30, 30), QColor(45, 45, 45), QColor(45, 45, 45), Qt::white, Qt::white, QColor(60, 60, 60), Qt::white, Qt::red);
     addBuiltInCustomColorScheme("Light", "Light color scheme", Qt::white, Qt::black, Qt::white, QColor(240, 240, 240), Qt::white, Qt::black, Qt::black, QColor(220, 220, 220), Qt::black, Qt::red);
-    addBuiltInCustomColorScheme("Fusion (dark)", "Fusion dark color scheme", QColor(45, 45, 45), Qt::white, QColor(30, 30, 30), QColor(45, 45, 45), Qt::white, Qt::white, Qt::white, QColor(60, 60, 60), Qt::white, Qt::red);
+    addBuiltInCustomColorScheme("Fusion (dark)", "Fusion dark color scheme", QColor(45, 45, 45), Qt::white, QColor(30, 30, 30), QColor(45, 45, 45), QColor(45, 45, 45), Qt::white, Qt::white, QColor(60, 60, 60), Qt::white, Qt::red);
     addBuiltInCustomColorScheme("Fusion (light)", "Fusion light color scheme", Qt::white, Qt::black, Qt::white, QColor(240, 240, 240), Qt::white, Qt::black, Qt::black, QColor(220, 220, 220), Qt::black, Qt::red);
     addBuiltInCustomColorScheme("Google Material Design (dark)", "Google material design dark color scheme", QColor(33, 33, 33), QColor(220, 220, 220), QColor(50, 50, 50), QColor(40, 40, 40), QColor(50, 50, 50), QColor(220, 220, 220), QColor(220, 220, 220), QColor(50, 50, 50), QColor(220, 220, 220), QColor(220, 220, 220));
     addBuiltInCustomColorScheme("Google Material Design (light)", "Google material design light color scheme", QColor(245, 245, 245), QColor(0, 0, 0), QColor(255, 255, 255), QColor(240, 240, 240), QColor(255, 255, 255), QColor(0, 0, 0), QColor(0, 0, 0), QColor(230, 230, 230), QColor(0, 0, 0), QColor(0, 0, 0));

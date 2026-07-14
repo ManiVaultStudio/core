@@ -187,6 +187,9 @@ private:
      */
     void privateActivateCustomColorScheme() ;
 
+    /** Ensure exactly one light/dark system color scheme action is checked */
+    void normalizeSystemLightDarkColorSchemeActions();
+
     /**
      * Set the system light color scheme action to \p checked without emitting signals
      * @param checked Checked state
@@ -211,6 +214,20 @@ private:
 #if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
     static Qt::ColorScheme getCurrentSystemColorScheme();
 #endif
+
+    /**
+     * Get the color scheme that best matches \p palette
+     * @param palette Palette to classify
+     * @return Matching light/dark color scheme
+     */
+    static Qt::ColorScheme getPaletteColorScheme(const QPalette& palette);
+
+    /**
+     * Get an application palette for \p colorScheme
+     * @param colorScheme Requested color scheme
+     * @return Palette matching the requested color scheme
+     */
+    static QPalette getSystemColorSchemePalette(const Qt::ColorScheme& colorScheme);
 
 protected: // Action getters
 
