@@ -312,6 +312,12 @@ if(MV_ENABLE_CPPTRACE)
         GIT_TAG v1.0.4
         OPTIONS ${CPPTRACE_OPTIONS}
     )
+
+    set_target_properties(cpptrace-lib 
+        PROPERTIES
+        FOLDER CoreDependencies
+    )
+
 endif()
 
 # -----------------------------------------------------------------------------
