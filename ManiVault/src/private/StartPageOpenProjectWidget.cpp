@@ -80,6 +80,8 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     createCustomIcons();
 
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &StartPageOpenProjectWidget::updateCustomStyle);
+
     auto& startPageConfigurationAction = Application::current()->getConfigurationAction().getStartPageConfigurationAction();
 
     const auto toggleViews = [this, &startPageConfigurationAction]() -> void {
