@@ -154,10 +154,10 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(QVariantMap variantMap)
     };
 
     addManagerLoadStage(mv::dataHierarchy(), 100.0);
-    addManagerLoadStage(mv::plugins(), 1.0);
-	addManagerLoadStage(mv::events(), 1.0);
     addManagerLoadStage(mv::actions(), 1.0);
-
+	addManagerLoadStage(mv::plugins(), 1.0);
+	addManagerLoadStage(mv::events(), 1.0);
+    
     plan->addSequentialStage("Post-process", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
         if (getReadOnlyAction().isChecked() && getAllowedPluginsOnlyAction().isChecked()) {
 			for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes())
