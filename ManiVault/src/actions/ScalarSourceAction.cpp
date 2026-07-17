@@ -1,10 +1,6 @@
 #include "ScalarSourceAction.h"
-#include "ScatterplotPlugin.h"
 
 #include <PointData/PointData.h>
-
-#include <QGridLayout>
-#include <QHBoxLayout>
 
 namespace mv::gui {
 

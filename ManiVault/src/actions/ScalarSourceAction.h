@@ -1,11 +1,10 @@
 #pragma once
 
-#include <actions/GroupAction.h>
-#include <actions/DecimalRangeAction.h>
+#include "DecimalRangeAction.h"
+#include "GroupAction.h"
+#include "ScalarSourceModel.h"
 
 #include <PointData/DimensionPickerAction.h>
-
-#include "ScalarSourceModel.h"
 
 namespace mv::gui {
 

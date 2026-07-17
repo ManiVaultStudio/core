@@ -1,8 +1,7 @@
 #pragma once
 
-#include <actions/GroupAction.h>
-#include <actions/DatasetPickerAction.h>
-
+#include "DatasetPickerAction.h"
+#include "GroupAction.h"
 #include "ScalarSourceAction.h"
 
 namespace mv::gui {

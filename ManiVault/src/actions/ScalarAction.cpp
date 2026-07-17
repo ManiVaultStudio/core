@@ -1,8 +1,8 @@
 #include "ScalarAction.h"
 #include "ScalarSourceModel.h"
-#include "ScatterplotPlugin.h"
 
-#include <QHBoxLayout>
+#include <PointData/PointData.h>
+#include <ScatterplotPlugin.h>
 
 namespace mv::gui {
 
