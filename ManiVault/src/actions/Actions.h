@@ -21,6 +21,10 @@
 #include "IntegralAction.h"
 #include "IntegralRectangleAction.h"
 
+// Scalar includes
+#include "ScalarAction.h"
+#include "ScalarSourceAction.h"
+
 #include "OptionAction.h"
 #include "PixelSelectionAction.h"
 
