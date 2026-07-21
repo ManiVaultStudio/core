@@ -313,7 +313,7 @@ void DatasetPickerAction::connectToPublicAction(WidgetAction* publicAction, bool
 
     setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
 
-    WidgetAction::connectToPublicAction(publicAction, recursive);
+    OptionAction::connectToPublicAction(publicAction, recursive);
 }
 
 void DatasetPickerAction::disconnectFromPublicAction(bool recursive)
@@ -331,14 +331,14 @@ void DatasetPickerAction::disconnectFromPublicAction(bool recursive)
     disconnect(this, &DatasetPickerAction::datasetPicked, publicDatasetPickerAction, qOverload<mv::Dataset<mv::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
     disconnect(publicDatasetPickerAction, &DatasetPickerAction::datasetPicked, this, qOverload<mv::Dataset<mv::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
 
-    WidgetAction::disconnectFromPublicAction(recursive);
+    OptionAction::disconnectFromPublicAction(recursive);
 }
 
 void DatasetPickerAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    WidgetAction::fromVariantMap(variantMap);
+    OptionAction::fromVariantMap(variantMap);
 
-    if (PresetSerializationContext::isActive()())
+    if (PresetSerializationContext::isActive())
         return;
 
     variantMapMustContain(variantMap, "Value");
@@ -348,7 +348,7 @@ void DatasetPickerAction::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap DatasetPickerAction::toVariantMap() const
 {
-    QVariantMap variantMap = WidgetAction::toVariantMap();
+    auto variantMap = OptionAction::toVariantMap();
 
 	if (!PresetSerializationContext::isActive()) {
         variantMap.insert({
