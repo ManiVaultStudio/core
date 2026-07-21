@@ -35,7 +35,7 @@ public:
     /** Helper class for scoped value serialization disabling */
     struct CORE_EXPORT ValueSerializationDisabler {
         ValueSerializationDisabler() { disableValueSerialization(); }
-        virtual ~ValueSerializationDisabler() { enableValueSerialization(); }
+        ~ValueSerializationDisabler() { enableValueSerialization(); }
     };
 
 public:
