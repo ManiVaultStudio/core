@@ -33,17 +33,27 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title) 
     connect(this, &OptionAction::currentIndexChanged, this, [this](const std::int32_t& currentIndex) {
         const auto sourceModelRow = _datasetsFilterModel.mapToSource(_datasetsFilterModel.index(currentIndex, 0)).row();
 
+        if (sourceModelRow < 0)
+            return;
+
         emit datasetAboutToBePicked(getCurrentDataset());
+
+        Dataset<DatasetImpl> dataset;
 
         switch (_populationMode)
         {
             case AbstractDatasetsModel::PopulationMode::Manual:
-                emit datasetPicked(_datasetsListModel.getDataset(sourceModelRow));
+                dataset = _datasetsListModel.getDataset(sourceModelRow);
                 break;
 
             case AbstractDatasetsModel::PopulationMode::Automatic:
-                emit datasetPicked(mv::data().getDatasetsListModel().getDataset(sourceModelRow));
+                dataset = mv::data().getDatasetsListModel().getDataset(sourceModelRow);
                 break;
+        }
+        
+        if (dataset.isValid()) {
+            _currentDatasetId = dataset->getId();
+        	emit datasetPicked(dataset);
         }
     });
 
@@ -62,6 +72,10 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title) 
             return;
 
         _currentDatasetsIds = datasetsIds;
+
+        if (!_currentDatasetId.isEmpty()) {
+            setCurrentDataset(datasetsIds.contains(_currentDatasetId) ? _currentDatasetId : "");
+        }
 
         emit datasetsChanged(datasets);
     };
@@ -185,8 +199,11 @@ void DatasetPickerAction::setCurrentDataset(Dataset<DatasetImpl> currentDataset)
 
 void DatasetPickerAction::setCurrentDataset(const QString& datasetId)
 {
-    if (datasetId.isEmpty())
+    if (datasetId.isEmpty()) {
+        _currentDatasetId.clear();
+        setCurrentIndex(-1);
         return;
+    }
 
     QModelIndex datasetIndex;
 

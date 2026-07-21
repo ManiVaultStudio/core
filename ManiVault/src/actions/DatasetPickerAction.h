@@ -208,6 +208,7 @@ private:
     DatasetsFilterModel                     _datasetsFilterModel;           /** Filter model for the datasets model above */
     bool                                    _blockDatasetsChangedSignal;    /** Boolean determining whether the DatasetPickerAction::datasetsChanged(...) signal may be engaged in reponse to change in the DatasetPickerAction#_filterModel */
     QStringList                             _currentDatasetsIds;            /** Keep a list of current datasets identifiers so that we can avoid unnecessary emits of the DatasetPickerAction::datasetsChanged(...) signal */
+    QString                                 _currentDatasetId;              /** Keep track of the current dataset identifier so that we can avoid unnecessary emits of the DatasetPickerAction::datasetPicked(...) signal */
 
     static bool noValueSerialization;   /** Prevent the value from being serialized (used by preset serialization) */
 
