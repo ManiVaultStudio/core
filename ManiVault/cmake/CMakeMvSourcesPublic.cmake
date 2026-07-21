@@ -589,6 +589,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/CodecActionBinding.h
     src/util/SeverityLevel.h
     src/util/StackFrame.h
+    src/util/PresetSerializationScope.h
 )
 
 if(APPLE)
@@ -657,6 +658,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/CodecRegistry.cpp
     src/util/CodecActionBinding.cpp
     src/util/SeverityLevel.cpp
+    src/util/PresetSerializationScope.cpp
 )
 
 if(APPLE)
