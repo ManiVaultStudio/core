@@ -50,11 +50,17 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title) 
                 dataset = mv::data().getDatasetsListModel().getDataset(sourceModelRow);
                 break;
         }
-        
-        if (dataset.isValid()) {
-            _currentDatasetId = dataset->getId();
-        	emit datasetPicked(dataset);
+
+        if (!dataset.isValid()) {
+            _currentDatasetId.clear();
+            emit datasetPicked({});
+            return;
         }
+
+
+        _currentDatasetId = dataset->getId();
+
+        emit datasetPicked(dataset);
     });
 
     const auto filterModelChanged = [this]() -> void {
@@ -121,21 +127,18 @@ void DatasetPickerAction::setDatasets(Datasets datasets, bool silent /*= false*/
 
     setPopulationMode(AbstractDatasetsModel::PopulationMode::Manual);
 
-    if (silent) {
+    if (silent)
         blockDatasetsChangedSignal();
-        {
-            _datasetsListModel.setDatasets(datasets);
-        }
+
+    _datasetsListModel.setDatasets(std::move(datasets));
+
+    if (silent)
         unblockDatasetsChangedSignal();
-    }
-    else {
-        _datasetsListModel.setDatasets(datasets);
 
-        emit datasetsChanged(_datasetsListModel.getDatasets());
+    if (auto* publicAction =
+        dynamic_cast<DatasetPickerAction*>(getPublicAction())) {
+        setCurrentDataset(publicAction->getCurrentDataset());
     }
-
-    if (auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(getPublicAction()))
-        setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
 }
 
 void DatasetPickerAction::setFilterFunction(const DatasetsFilterModel::FilterFunction& filterFunction)
@@ -335,7 +338,7 @@ void DatasetPickerAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    if (isValueSerializationDisabled())
+    if (PresetSerializationContext::isActive()())
         return;
 
     variantMapMustContain(variantMap, "Value");
@@ -347,33 +350,13 @@ QVariantMap DatasetPickerAction::toVariantMap() const
 {
     QVariantMap variantMap = WidgetAction::toVariantMap();
 
-    if (!isValueSerializationDisabled()) {
+	if (!PresetSerializationContext::isActive()) {
         variantMap.insert({
             { "Value", getCurrentDatasetId() }
         });
     }
 
     return variantMap;
-}
-
-bool DatasetPickerAction::isValueSerializationDisabled()
-{
-    return noValueSerialization;
-}
-
-void DatasetPickerAction::setValueSerializationDisabled(bool valueSerializationDisabled)
-{
-    noValueSerialization = valueSerializationDisabled;
-}
-
-void DatasetPickerAction::disableValueSerialization()
-{
-    setValueSerializationDisabled(true);
-}
-
-void DatasetPickerAction::enableValueSerialization()
-{
-    setValueSerializationDisabled(false);
 }
 
 }

@@ -32,14 +32,6 @@ class CORE_EXPORT DatasetPickerAction : public OptionAction
 
 public:
 
-    /** Helper class for scoped value serialization disabling */
-    struct CORE_EXPORT ValueSerializationDisabler {
-        ValueSerializationDisabler() { disableValueSerialization(); }
-        ~ValueSerializationDisabler() { enableValueSerialization(); }
-    };
-
-public:
-
     /**
      * Constructor
      * @param parent Pointer to parent object
@@ -156,24 +148,6 @@ public: // Serialization
      * @return Variant map representation of the widget action
      */
     QVariantMap toVariantMap() const override;
-
-    /**
-     * Get whether value serialization is disabled
-     * @return Boolean determining whether value serialization is disabled
-     */
-    static bool isValueSerializationDisabled();
-
-    /**
-     * Set value serialization to \p valueSerializationDisabled
-     * @param valueSerializationDisabled Boolean determining whether value serialization is disabled
-     */
-    static void setValueSerializationDisabled(bool valueSerializationDisabled = true);
-
-    /** Disables serialization */
-    static void disableValueSerialization();
-
-    /** Disables serialization */
-    static void enableValueSerialization();
 
 signals:
 
