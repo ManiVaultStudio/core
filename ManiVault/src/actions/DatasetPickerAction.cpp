@@ -176,6 +176,11 @@ Dataset<DatasetImpl> DatasetPickerAction::getCurrentDataset() const
 
 void DatasetPickerAction::setCurrentDataset(Dataset<DatasetImpl> currentDataset)
 {
+    if (!currentDataset.isValid()) {
+        setCurrentDataset(QString{});
+        return;
+    }
+
     QModelIndex datasetIndex;
 
     if (currentDataset.isValid()) {
