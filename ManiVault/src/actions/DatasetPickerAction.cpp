@@ -6,6 +6,8 @@
 
 #include "event/Event.h"
 
+#include "util/Serialization.h"
+
 #ifdef _DEBUG
     //#define DATASET_PICKER_ACTION_VERBOSE
 #endif

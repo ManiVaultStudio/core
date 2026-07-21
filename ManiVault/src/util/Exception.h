@@ -1,98 +1,59 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
-// A corresponding LICENSE file is located in the root directory of this source tree 
-// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
-
 #pragma once
 
 #include "ManiVaultGlobals.h"
 
-#include <QMessageBox>
-#include <QDebug>
-#include <QException>
-#include <QIcon>
+#include <QString>
 
-namespace mv::util {
+#include <exception>
+
+class QWidget;
+
+namespace mv {
+
+class ManiVaultException;
+
+namespace util {
 
 /**
- * Exception class for ManiVault
+ * @brief Shows a modal exception dialog with a custom reason.
  *
- * Base class for exceptions in ManiVault.
+ * The dialog displays the supplied reason, includes technical stack-trace
+ * details when available from the active error manager, and offers a copy
+ * action for the full report.
  *
- * @author Thomas Kroes
+ * @param title Dialog title.
+ * @param reason Human-readable explanation of the error.
+ * @param parent Optional parent widget.
  */
-class CORE_EXPORT BaseException : public QException
-{
-public:
-
-    /**
-     * Construct with \p message and \p icon
-     * @param message Exception message
-     * @param icon Icon to display in message box (default is empty)
-     */
-    BaseException(const QString& message, const QIcon& icon = QIcon());
-
-    /**
-     * Get the exception message in UTF-8 format
-     * @return UTF-8 encoded exception message
-     */
-    const char* what() const noexcept override;
-
-    /** Raises an exception, required by QException for rethrowing */
-    void raise() const override;
-
-    /** Clones an exception, required by QException for rethrowing */
-    BaseException* clone() const override;
-
-    /**
-     * Get the exception message
-     * @return Exception message
-     */
-    QString getMessage() const;
-
-    /**
-     * Get the icon to display in message box
-     * @return Exception icon
-     */
-    QIcon getIcon() const;
-
-private:
-    QString     _message;       /** The exception message */
-    QByteArray  _messageUtf8;   /** UTF-8 encoded exception message */
-    QIcon       _icon;          /** Icon to display in message box */
-};
+CORE_EXPORT void exceptionMessageBox(const QString& title, const QString& reason, QWidget* parent = nullptr);
 
 /**
- * Create an exception message box using a title and reason
- * @param title Message box title
- * @param reason Reason for the exception
- * @param parent Pointer to parent widget
+ * @brief Shows a modal exception dialog with a generic error message.
+ * @param title Dialog title.
+ * @param parent Optional parent widget.
  */
-CORE_EXPORT inline void exceptionMessageBox(const QString& title, const QString& reason, QWidget* parent = nullptr)
-{
-    QMessageBox::critical(parent, title, reason);
-
-    qDebug() << title << reason;
-}
+CORE_EXPORT void exceptionMessageBox(const QString& title, QWidget* parent = nullptr);
 
 /**
- * Create an exception message box for unhandled exceptions
- * @param title Message box title
- * @param parent Pointer to parent widget
+ * @brief Shows a modal exception dialog for a standard C++ exception.
+ * @param title Dialog title.
+ * @param exception Exception whose what() text is shown as the error reason.
+ * @param parent Optional parent widget.
  */
-CORE_EXPORT inline void exceptionMessageBox(const QString& title, QWidget* parent = nullptr)
-{
-    exceptionMessageBox(title, "An unhandled error occurred.", parent);
-}
+CORE_EXPORT void exceptionMessageBox(const QString& title, const std::exception& exception, QWidget* parent = nullptr);
 
 /**
- * Create an exception message box using title and exception
- * @param title Message box title
- * @param exception Reference to exception
- * @param parent Pointer to parent widget
+ * @brief Shows a modal exception dialog for a ManiVault exception.
+ *
+ * The dialog uses the exception message and stack trace carried by the
+ * ManiVaultException instance.
+ *
+ * @param title Dialog title.
+ * @param exception ManiVault exception to display.
+ * @param parent Optional parent widget.
  */
-CORE_EXPORT inline void exceptionMessageBox(const QString& title, const std::exception& exception, QWidget* parent = nullptr)
-{
-    exceptionMessageBox(title, exception.what(), parent);
-}
+CORE_EXPORT void exceptionMessageBox(const QString& title, const ManiVaultException& exception, QWidget* parent = nullptr);
 
-}
+} // namespace util
+
+} // namespace mv

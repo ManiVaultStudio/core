@@ -5,6 +5,7 @@
 #include "EventManager.h"
 
 #include <util/Exception.h>
+#include <util/Serialization.h>
 
 #include <event/Event.h>
 
@@ -13,6 +14,7 @@
 
 using namespace mv::gui;
 using namespace mv::util;
+using namespace mv::workflow;
 
 #ifdef _DEBUG
     //#define EVENT_MANAGER_VERBOSE
@@ -120,6 +122,59 @@ void EventManager::registerEventListener(EventListener* eventListener)
 void EventManager::unregisterEventListener(EventListener* eventListener)
 {
     _eventListeners.erase(std::remove(_eventListeners.begin(), _eventListeners.end(), eventListener), _eventListeners.end());
+}
+
+bool EventManager::areDatasetsPartOfSelectionGroup(Dataset<DatasetImpl> d1, Dataset<DatasetImpl> d2)
+{
+    bool foundGroup = false;
+
+    for (KeyBasedSelectionGroup& selectionGroup : _selectionGroups)
+    {
+        if (selectionGroup.areDatasetsPartOfGroup(d1, d2))
+            foundGroup = true;
+    }
+    return foundGroup;
+}
+
+UniqueWorkflowPlan EventManager::fromVariantMapWorkflow(QVariantMap variantMap)
+{
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
+
+    plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        AbstractEventManager::fromVariantMap(variantMap);
+
+        variantMapMustContain(variantMap, "SelectionGroups");
+
+        auto selectionGroupsList = variantMap["SelectionGroups"].value<QVariantList>();
+
+        _selectionGroups.resize(selectionGroupsList.size());
+
+        for (int i = 0; i < selectionGroupsList.size(); i++)
+            _selectionGroups[i].fromVariantMap(selectionGroupsList[i].toMap());
+    });
+
+    return plan;
+}
+
+UniqueWorkflowPlan EventManager::toVariantMapWorkflow() const
+{
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
+
+    plan->addSequentialStage("Save", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        auto variantMap = AbstractEventManager::toVariantMap();
+
+        QVariantList selectionGroups;
+
+        for (auto& selectionGroup : _selectionGroups) {
+            selectionGroups.append(selectionGroup.toVariantMap());
+        }
+
+        variantMap["SelectionGroups"] = selectionGroups;
+
+        executionContext->setOutput(variantMap);
+	});
+
+    return plan;
 }
 
 void EventManager::notifyDatasetAdded(const Dataset<DatasetImpl>& dataset)
@@ -336,35 +391,6 @@ void EventManager::notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset)
     catch (...) {
         exceptionMessageBox("Unable to notify that a data was unlocked");
     }
-}
-
-void EventManager::fromVariantMap(const QVariantMap& variantMap)
-{
-    AbstractEventManager::fromVariantMap(variantMap);
-
-    variantMapMustContain(variantMap, "SelectionGroups");
-
-    QVariantList selectionGroupsList = variantMap["SelectionGroups"].value<QVariantList>();
-
-    _selectionGroups.resize(selectionGroupsList.size());
-    for (int i = 0; i < selectionGroupsList.size(); i++)
-        _selectionGroups[i].fromVariantMap(selectionGroupsList[i].toMap());
-}
-
-QVariantMap EventManager::toVariantMap() const
-{
-    QVariantMap variantMap = AbstractEventManager::toVariantMap();
-
-    QVariantList selectionGroups;
-
-    for (auto& selectionGroup : _selectionGroups)
-    {
-        selectionGroups.append(selectionGroup.toVariantMap());
-    }
-
-    variantMap["SelectionGroups"] = selectionGroups;
-
-    return variantMap;
 }
 
 }

@@ -61,6 +61,13 @@ public:
     bool eventFilter(QObject* target, QEvent* event) override;
 
     /**
+     * Respond to widget events
+     * @param event The event that took place
+     * @return Boolean indicating whether the event was handled
+     */
+    bool event(QEvent* event) override;
+
+    /**
      * Invoked when the widget is resized
      * @param resizeEvent Pointer to the resize event
      */

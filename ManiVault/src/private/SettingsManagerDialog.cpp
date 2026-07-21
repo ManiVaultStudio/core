@@ -7,6 +7,7 @@
 #include <CoreInterface.h>
 #include <QOperatingSystemVersion>
 #include <QVBoxLayout>
+#include <QStyle>
 
 using namespace mv;
 using namespace mv::util;
@@ -47,11 +48,30 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
         if (auto pluginGlobalSettingsGroupAction = pluginFactory->getGlobalSettingsGroupAction())
             _groupsAction.addGroupAction(pluginGlobalSettingsGroupAction);
     }
+
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &SettingsManagerDialog::updateCustomStyle);
 }
 
 QSize SettingsManagerDialog::sizeHint() const
 {
     return { 400, 500 };
+}
+
+void SettingsManagerDialog::updateCustomStyle()
+{
+    const auto widgets = findChildren<QWidget*>();
+
+    setWindowIcon(StyledIcon("gears"));
+
+    style()->unpolish(this);
+    style()->polish(this);
+    update();
+
+    for (auto widget : widgets) {
+        widget->style()->unpolish(widget);
+        widget->style()->polish(widget);
+        widget->update();
+    }
 }
 
 }

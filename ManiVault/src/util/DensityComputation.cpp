@@ -2,6 +2,10 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
+#ifdef _WIN32
+	#define NOMINMAX
+#endif
+
 #include "DensityComputation.h"
 
 #include "graphics/Bounds.h"
@@ -296,7 +300,7 @@ float DensityComputation::calculateMaxKDE()
     float maxKDE = std::numeric_limits<float>::lowest();
     for (size_t i = 0; i < kde.size(); i += 3) // only lookup red channel
     {
-        maxKDE = std::max(maxKDE, kde[i]);
+        maxKDE = (std::max)(maxKDE, static_cast<float>(kde[i]));
     }
 
     return maxKDE;

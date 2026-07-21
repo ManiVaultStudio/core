@@ -7,7 +7,6 @@
 #include "AbstractManager.h"
 #include "Application.h"
 #include "Project.h"
-#include "ProjectSerializationTask.h"
 
 #include "actions/TriggerAction.h"
 #include "actions/RecentFilesAction.h"
@@ -17,7 +16,7 @@
 #include "models/ProjectsTreeModel.h"
 #include "models/ProjectsModelProject.h"
 
-#include "util/Exception.h"
+#include "util/SeverityLevel.h"
 
 #include <QObject>
 #include <QMenu>
@@ -25,6 +24,7 @@
 #include <QFuture>
 
 #include "Task.h"
+#include "exception/ManiVaultException.h"
 
 namespace mv {
 
@@ -73,35 +73,6 @@ public:
         return temporaryDirTypeNames[temporaryDirType];
     };
 
-    /** Set state for the duration of the enveloping scope, reverts to idle when the object gets out of scope */
-    class CORE_EXPORT ScopedState {
-    public:
-
-        /**
-         * Construct with initialization state
-         * @param projectManager Pointer to project manager for which to set the state
-         * @param state State at scope begin (reverts to idle when the object gets out of scope)
-         */
-        ScopedState(AbstractProjectManager* projectManager, const State& state) :
-            _projectManager(projectManager),
-            _state(state)
-        {
-            Q_ASSERT(_projectManager != nullptr);
-
-            _projectManager->setState(state);
-        }
-
-        /** Revert to idle when object goes out of scope */
-        ~ScopedState()
-        {
-            _projectManager->setState(State::Idle);
-        }
-
-    private:
-        AbstractProjectManager* _projectManager;    /** Pointer to project manager for which to set the state */
-        State                   _state;             /** State during the scope */
-    };
-
     /** Task for monitoring the progress of: */
     enum class ProjectSerializationTaskType {
         ProjectSerialization,
@@ -110,13 +81,81 @@ public:
     };
 
     /** Exception class for file project download issue */
-    class ProjectDownloadException : public util::BaseException {
+    class ProjectDownloadException : public ManiVaultException {
     public:
 
         explicit ProjectDownloadException(const QString& message) :
-            BaseException(message, util::StyledIcon("download")) {}
+	        ManiVaultException(util::SeverityLevel::Error, message, "ProjectDownload", "Project", { {"icon", util::StyledIcon("download")} })
+        {
+        }
+    };
 
-        BaseException* clone() const override { return new ProjectDownloadException(*this); }
+    /** Parameters for project operations (opening, importing, saving, publishing) */
+    struct ProjectOperationParameters
+    {
+        bool            parallel = true;        /** Whether to parallelize the operation (currently only used for opening a project, but can be extended in the future if necessary) */
+        std::uint32_t   maxParallelThreads;     /** Maximum number of threads to use when parallelizing the operation (currently only used for opening a project, but can be extended in the future if necessary) */
+        std::uint32_t   maxLoggingDepth = 8;    /** Maximum depth of logging for the operation */
+    };
+
+    /** Parameters for opening a project */
+    struct ProjectOpenParameters : ProjectOperationParameters
+    {
+        QString filePath = "";  /** File path of the project to open (choose file path when empty) */
+
+        /**
+         * Determine whether the parameters are valid
+         * @return Boolean determining whether the parameters are valid (currently only checks whether the file path is not empty, but can be extended in the future if necessary)
+         */
+        [[nodiscard]] bool isValid() const
+        {
+            return !filePath.isEmpty();
+        }
+    };
+
+    /** Parameters for importing a project */
+    struct ProjectImportParameters : ProjectOperationParameters
+    {
+        QString filePath = "";  /** File path of the project to import (choose file path when empty) */
+
+    	/**
+         * Determine whether the parameters are valid
+         * @return Boolean determining whether the parameters are valid (currently only checks whether the file path is not empty, but can be extended in the future if necessary)
+         */
+        [[nodiscard]] bool isValid() const
+        {
+            return !filePath.isEmpty();
+        }
+    };
+
+    /** Parameters for downloading a project */
+    struct ProjectSaveParameters : ProjectOperationParameters
+    {
+        QString filePath = "";  /** File path of the project to save (choose file path when empty) */
+
+        /**
+         * Determine whether the parameters are valid
+         * @return Boolean determining whether the parameters are valid (currently only checks whether the file path is not empty, but can be extended in the future if necessary)
+         */
+        [[nodiscard]] bool isValid() const
+        {
+            return !filePath.isEmpty();
+        }
+    };
+
+    /** Parameters for publishing a project */
+    struct ProjectPublishParameters : ProjectOperationParameters
+    {
+        QString filePath = "";  /** File path of the project to publish (choose file path when empty) */
+
+        /**
+         * Determine whether the parameters are valid
+         * @return Boolean determining whether the parameters are valid (currently only checks whether the file path is not empty, but can be extended in the future if necessary)
+         */
+        [[nodiscard]] bool isValid() const
+        {
+            return !filePath.isEmpty();
+        }
     };
 
 public:
@@ -128,7 +167,6 @@ public:
     AbstractProjectManager(QObject* parent) :
         AbstractManager(parent, "Project"),
         _state(State::Idle),
-        _projectSerializationTask(this, "Project serialization"),
         _projectDownloadTask(this, "Project Download", { Task::GuiScope::Modal })
     {
     }
@@ -184,9 +222,8 @@ public:
     /**
      * Save a project to \p filePath
      * @param filePath File path of the project (choose file path when empty)
-     * @param password Encryption password
      */
-    virtual void saveProject(QString filePath = "", const QString& password = "") = 0;
+    virtual void saveProject(QString filePath) = 0;
 
     /** Save project to different file (user is prompted to choose the file location) */
     virtual void saveProjectAs() = 0;
@@ -306,16 +343,6 @@ public:
      */
     virtual QImage getWorkspacePreview(const QString& projectFilePath, const QSize& targetSize = QSize(500, 500)) const = 0;
 
-    /** Get task for project serialization */
-    ProjectSerializationTask& getProjectSerializationTask() {
-        auto application = Application::current();
-
-        if (application->getStartupTask().isRunning())
-            return application->getStartupTask().getLoadProjectTask();
-
-        return _projectSerializationTask;
-    }
-
 public: // Menus
 
     /**
@@ -401,6 +428,36 @@ public: // Miscellaneous
     const Task& getProjectDownloadTask() const {
         return _projectDownloadTask;
     }
+
+protected: // Operations parameters
+
+    /**
+     * Get parameters for opening a project (parameters will be obtained from a file dialog if necessary)
+     * @param filePath File path of the project for which to get the parameters
+     * @return Parameters for opening a project
+     */
+    virtual ProjectOpenParameters getProjectOpenParameters(const QString& filePath) const = 0;
+
+    /**
+     * Get parameters for importing a project (parameters will be obtained from a file dialog if necessary)
+     * @param filePath File path of the project for which to get the parameters
+     * @return Parameters for importing a project
+     */
+    virtual ProjectImportParameters getProjectImportParameters(const QString& filePath) const = 0;
+
+    /**
+     * Get parameters for saving a project (parameters will be obtained from a file dialog if necessary)
+     * @param filePath File path of the project for which to get the parameters
+     * @return Parameters for saving a project
+     */
+    virtual ProjectSaveParameters getProjectSaveParameters(const QString& filePath) const = 0;
+
+    /**
+     * Get parameters for publishing a project (parameters will be obtained from a file dialog if necessary)
+     * @param filePath File path of the project for which to get the parameters
+     * @return Parameters for publishing a project
+     */
+    virtual ProjectPublishParameters getProjectPublishParameters(const QString& filePath) const = 0;
 
 protected:
 
@@ -505,10 +562,9 @@ signals:
     void stateChanged(const State& state);
 
 private:
-    State                               _state;                         /** Determines the state of the project manager */
-    ProjectSerializationTask            _projectSerializationTask;      /** Task for project serialization */
-    Task                                _projectDownloadTask;           /** Progress reporting project downloading */
-    QMap<TemporaryDirType, QString>     _temporaryDirPaths;             /** Temporary directories for file open/save etc. */
+    State                                   _state;                     /** Determines the state of the project manager */
+    Task                                    _projectDownloadTask;       /** Progress reporting project downloading */
+    QMap<TemporaryDirType, QString>         _temporaryDirPaths;         /** Temporary directories for file open/save etc. */
 };
 
 }

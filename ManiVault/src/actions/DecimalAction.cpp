@@ -4,6 +4,8 @@
 
 #include "DecimalAction.h"
 
+#include "util/Serialization.h"
+
 #include <QHBoxLayout>
 
 #include <algorithm>

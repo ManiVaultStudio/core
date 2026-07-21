@@ -23,11 +23,111 @@
 #include <QVariant>
 #include <QRegularExpression>
 #include <QFileInfo>
+#include <QToolTip>
 
 #include <exception>
+#include <algorithm>
 
 namespace mv::util
 {
+
+    struct MemoryStats
+    {
+        double rssMB = 0.0;        // Resident Set Size
+        double privateMB = 0.0;    // Private / committed (if available)
+    };
+
+#ifdef Q_OS_WIN
+
+#include <windows.h>
+#include <psapi.h>
+
+    MemoryStats getMemoryStats()
+    {
+        PROCESS_MEMORY_COUNTERS_EX pmc;
+
+        GetProcessMemoryInfo(
+            GetCurrentProcess(),
+            reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&pmc),
+            sizeof(pmc));
+
+        MemoryStats s;
+        s.rssMB = pmc.WorkingSetSize / 1024.0 / 1024.0;
+        s.privateMB = pmc.PrivateUsage / 1024.0 / 1024.0;
+
+        return s;
+    }
+
+#endif
+
+#ifdef Q_OS_LINUX
+
+#include <QFile>
+#include <QTextStream>
+
+    MemoryStats getMemoryStats()
+    {
+        MemoryStats stats;
+
+        QFile file("/proc/self/status");
+
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+            return stats;
+
+        QTextStream stream(&file);
+
+        while (!stream.atEnd()) {
+            const QString line = stream.readLine();
+
+            if (line.startsWith("VmRSS:")) {
+                const auto kb = line.section(':', 1).simplified().section(' ', 0, 0).toDouble();
+                stats.rssMB = kb / 1024.0;
+            }
+            else if (line.startsWith("VmSize:")) {
+                const auto kb = line.section(':', 1).simplified().section(' ', 0, 0).toDouble();
+                stats.privateMB = kb / 1024.0;
+            }
+        }
+
+        return stats;
+    }
+
+#endif
+
+#ifdef Q_OS_MACOS
+
+#include <mach/mach.h>
+
+    MemoryStats getMemoryStats()
+    {
+        MemoryStats stats;
+
+        mach_task_basic_info info;
+        mach_msg_type_number_t count = MACH_TASK_BASIC_INFO_COUNT;
+
+        if (task_info(
+            mach_task_self(),
+            MACH_TASK_BASIC_INFO,
+            reinterpret_cast<task_info_t>(&info),
+            &count) == KERN_SUCCESS)
+        {
+            stats.rssMB = info.resident_size / 1024.0 / 1024.0;
+            stats.privateMB = info.virtual_size / 1024.0 / 1024.0;
+        }
+
+        return stats;
+    }
+
+#endif
+
+#if !defined(Q_OS_WIN) && !defined(Q_OS_LINUX) && !defined(Q_OS_MACOS)
+
+    MemoryStats getMemoryStats()
+    {
+        return {};
+    }
+
+#endif
 
 QString getIntegerCountHumanReadable(const double& count)
 {
@@ -101,6 +201,49 @@ QString getNoBytesHumanReadable(std::uint64_t byteCount, bool useIEC /*= true*/)
     return QString::number(size, 'f', 2) + " " + units[i];
 }
 
+QString getElapsedTimeHumanReadable(std::uint64_t ms, bool compact)
+{
+    if (ms < 1000)
+        return QString("%1 ms").arg(ms);
+
+    if (ms < 60'000) {
+        const double seconds = ms / 1000.0;
+
+        QString s = QString::number(seconds, 'f', seconds < 10.0 ? 1 : 0);
+
+        if (s.contains(QLatin1Char('.'))) {
+            s.remove(QRegularExpression("0+$"));
+            s.remove(QRegularExpression("\\.$"));
+        }
+
+        return s + "s";
+    }
+
+    const std::uint64_t totalSeconds = ms / 1000;
+    const std::uint64_t seconds = totalSeconds % 60;
+    const std::uint64_t minutes = (totalSeconds / 60) % 60;
+    const std::uint64_t hours = (totalSeconds / 3600) % 24;
+    const std::uint64_t days = totalSeconds / 86400;
+
+    QStringList parts;
+
+    if (days > 0)
+        parts << QString("%1d").arg(days);
+
+    if (hours > 0)
+        parts << QString("%1h").arg(hours);
+
+    if (minutes > 0)
+        parts << QString("%1m").arg(minutes);
+
+    if (seconds > 0 || (!compact && parts.isEmpty()))
+        parts << QString("%1s").arg(seconds);
+
+    if (parts.isEmpty())
+        return QStringLiteral("0s");
+
+    return parts.join(QLatin1Char(' '));
+}
 
 QString getTabIndentedMessage(QString message, const std::uint32_t& tabIndex)
 {
@@ -711,4 +854,220 @@ QString getFilenameFromWaterButlerMetadata(const QByteArray& raw)
 
 	return {};
 }
+
+void printLine(const QString& key, const QVariant& value /*= {}*/, int indent /*= 0*/, int colonColumn /*= 24*/)
+{
+    const QString indentStr(indent, ' ');
+    const QString left = indentStr + key;
+
+    if (!value.isValid()) {
+        qDebug().noquote() << left;
+        return;
+    }
+
+    int spaces = colonColumn - left.size();
+
+    if (spaces < 1) {
+        qDebug().noquote() << left + " : " + value.toString();
+        return;
+    }
+
+    qDebug().noquote() << left + QString(spaces, ' ') + ": " + value.toString();
+}
+
+void prettyPrintVariantMap(const QVariantMap& variantMap)
+{
+    qDebug().noquote() << QJsonDocument(QJsonObject::fromVariantMap(variantMap)).toJson(QJsonDocument::Indented);
+}
+
+QString prettyVariantMapString(const QVariantMap& variantMap)
+{
+    return QString::fromUtf8(QJsonDocument(QJsonObject::fromVariantMap(variantMap)).toJson(QJsonDocument::Indented));
+}
+
+QString variantMapToPrettyString(const QVariantMap& variantMap, int indent)
+{
+    return QJsonDocument(QJsonObject::fromVariantMap(variantMap)).toJson(QJsonDocument::Indented);
+}
+
+static QString cssColor(QPalette::ColorRole role)
+{
+    const auto pal = QToolTip::palette();
+    return pal.color(QPalette::Active, role).name();
+}
+
+QString variantMapToHtml(const QVariantMap& map, int depth /*= 0*/, int maxDepth /*= 2*/)
+{
+    if (depth >= maxDepth) {
+        return QString("<span style='font-style:italic;'>{%2 keys}</span>").arg(QString::number(map.size()));
+    }
+
+    auto html = QString("<table style='border-collapse:collapse; font-family:monospace; font-size:10px; border:none;'>");
+
+    int row = 0;
+
+    for (auto it = map.begin(); it != map.end(); ++it, ++row) {
+        html += QString(
+            "<tr>"
+	            "<td style='padding:2px 8px; font-weight:bold; vertical-align:top; white-space:nowrap;'>%1</td>"
+	            "<td style='padding:2px 8px; vertical-align:top;'>%2</td>"
+            "</tr>"
+        ).arg(it.key().toHtmlEscaped(),variantToHtml(it.value(), depth + 1, maxDepth));
+    }
+
+    html += "</table>";
+    return html;
+}
+
+QString variantListToHtml(const QVariantList& list, int depth, int maxDepth)
+{
+    if (depth >= maxDepth) {
+        return QString("<i>[%1 items]</i>").arg(list.size());
+    }
+
+    QString html = "<ul style='margin:0; padding-left:16px;'>";
+
+    for (const auto& v : list) {
+        html += QString("<li>%1</li>")
+            .arg(variantToHtml(v, depth + 1, maxDepth));
+    }
+
+    html += "</ul>";
+    return html;
+}
+
+QString variantToHtml(const QVariant& value, int depth, int maxDepth)
+{
+    switch (value.metaType().id()) {
+	    case QMetaType::QVariantMap:
+	        return variantMapToHtml(value.toMap(), depth, maxDepth);
+
+	    case QMetaType::QVariantList:
+	        return variantListToHtml(value.toList(), depth, maxDepth);
+
+	    default:
+	        return value.toString().toHtmlEscaped();
+    }
+}
+
+void logMemory(const QString& label)
+{
+    const auto stats = getMemoryStats();
+
+    qDebug().noquote()
+        << label
+        << "RSS MB:" << stats.rssMB
+        << "Private MB:" << stats.privateMB;
+}
+
+QVariant findNested(const QVariantMap& root, const QStringList& path)
+{
+	QVariant current = root;
+
+	for (const QString& key : path) {
+		if (!current.canConvert<QVariantMap>())
+			return {};
+
+		const QVariantMap map = current.toMap();
+
+		auto it = map.find(key);
+
+		if (it == map.end())
+			return {};
+
+		current = it.value();
+	}
+
+	return current;
+}
+
+QString describeVariantMapKeys(const QVariantMap& map, qsizetype maxKeys)
+{
+	QStringList keys = map.keys();
+
+	std::sort(keys.begin(), keys.end());
+
+	QStringList shownKeys = keys.mid(0, maxKeys);
+
+	QString suffix;
+
+	if (keys.size() > maxKeys) {
+		suffix = QString(" ... and %1 more").arg(keys.size() - maxKeys);
+	}
+
+	return QString("[%1%2]").arg(shownKeys.join(", "), suffix);
+}
+
+QString dumpHex(const QByteArray& bytes, qsizetype count)
+{
+	QStringList hex;
+
+	const qsizetype n = qMin(count, bytes.size());
+
+	for (qsizetype i = 0; i < n; ++i)
+	{
+		hex << QString("%1")
+		       .arg(static_cast<unsigned char>(bytes[i]), 2, 16, QLatin1Char('0'))
+		       .toUpper();
+	}
+
+	return hex.join(' ');
+}
+
+QVariantList stackTraceToVariantList(const StackTrace& stackTrace)
+{
+	QVariantList variantList;
+
+	variantList.reserve(stackTrace.size());
+
+	for (const auto& frame : stackTrace) {
+		variantList.append(QVariantMap{
+			{ "Function", frame.function },
+			{ "File",     frame.file },
+			{ "Line",     frame.line },
+			{ "Module",   frame.module },
+			{ "Address",  frame.address },
+			{ "Raw",      frame.raw }
+		});
+	}
+
+	return variantList;
+}
+
+StackTrace stackTraceFromVariantList(const QVariantList& frames)
+{
+	StackTrace stackTrace;
+
+	stackTrace.reserve(frames.size());
+
+	for (const auto& value : frames) {
+		const auto map = value.toMap();
+
+		StackFrame frame;
+
+		frame.function = map.value("Function").toString();
+		frame.file     = map.value("File").toString();
+		frame.line     = map.value("Line", -1).toInt();
+		frame.module   = map.value("Module").toString();
+		frame.address  = map.value("Address").toString();
+		frame.raw      = map.value("Raw").toString();
+
+		stackTrace.push_back(std::move(frame));
+	}
+
+	return stackTrace;
+}
+
+QVariantList stackTraceFunctionList(const StackTrace& stackTrace)
+{
+	QVariantList overview;
+
+	overview.reserve(stackTrace.size());
+
+	for (const auto& frame : stackTrace)
+		overview.append(frame.function);
+
+	return overview;
+}
+
 }

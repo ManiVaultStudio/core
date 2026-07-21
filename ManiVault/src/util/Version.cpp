@@ -3,6 +3,9 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "Version.h"
+#include "util/Serialization.h"
+
+#include <QRegularExpression>
 
 namespace mv::util {
 

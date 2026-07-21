@@ -4,6 +4,7 @@
 
 #include "Plugin.h"
 #include "CoreInterface.h"
+#include <QUuid>
 
 #ifdef _DEBUG
     #define PLUGIN_VERBOSE
@@ -142,9 +143,13 @@ void Plugin::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    Serializable::fromVariantMap(_guiNameAction, variantMap, "GuiName");
+    if (variantMap.contains("GuiName")) {
+        Serializable::fromVariantMap(_guiNameAction, variantMap, "GuiName");
+    }
 
-    _learningCenterAction.fromParentVariantMap(variantMap);
+    if (variantMap.contains(_learningCenterAction.getSerializationName())) {
+        _learningCenterAction.fromParentVariantMap(variantMap);
+    }
 }
 
 QVariantMap Plugin::toVariantMap() const

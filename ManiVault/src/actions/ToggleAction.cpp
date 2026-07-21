@@ -5,12 +5,12 @@
 #include "ToggleAction.h"
 
 #include "util/StyledIcon.h"
+#include "util/Serialization.h"
 
 #include <QCheckBox>
 #include <QPushButton>
 #include <QMenu>
 #include <QHBoxLayout>
-#include <QEvent>
 #include <QMouseEvent>
 #include <QLabel>
 

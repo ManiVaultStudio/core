@@ -4,9 +4,12 @@
 
 #pragma once
 
-#include "actions/GroupAction.h"
+#include "actions/HorizontalGroupAction.h"
 #include "actions/ToggleAction.h"
-#include "actions/IntegralAction.h"
+#include "actions/OptionAction.h"
+#include "actions/CodecSettingsAction.h"
+
+#include "util/BlobCodec.h"
 
 namespace mv {
 
@@ -17,7 +20,12 @@ namespace mv {
  * 
  * @author Thomas Kroes
  */
-class CORE_EXPORT ProjectCompressionAction final : public gui::GroupAction {
+class CORE_EXPORT ProjectCompressionAction final : public gui::HorizontalGroupAction {
+protected:
+
+    /** Maps codec display names to codec instances */
+    using CodecSettingsActionMap = std::unordered_map<QString, gui::CodecSettingsAction*>;
+
 public:
 
     /**
@@ -26,11 +34,20 @@ public:
      */
     ProjectCompressionAction(QObject* parent = nullptr);
 
+    gui::CodecSettingsAction* getCodecSettingsAction() const;
+
+    /**
+     * Create a new codec instance based on the current codec type and the associated settings action.
+     * @param parent Pointer to parent object
+     * @return Shared pointer to the created codec instance
+     */
+    util::SharedCodec createCodec(QObject* parent) const;
+
 public: // Serialization
 
     /**
      * Load compression action from variant
-     * @param Variant representation of the compression action
+     * @param variantMap Variant representation of the compression action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
@@ -43,15 +60,15 @@ public: // Serialization
 public: // Action getters
 
     gui::ToggleAction& getEnabledAction() { return _enabledAction; }
-    gui::IntegralAction& getLevelAction() { return _levelAction; }
+    gui::OptionAction& getCodecTypeAction() { return _codecTypeAction; }
 
 private:
-    gui::ToggleAction       _enabledAction;     /** Action to enable/disable project file compression */
-    gui::IntegralAction     _levelAction;       /** Action to control the amount of project file compression */
+    gui::ToggleAction       _enabledAction;             /** Action to enable/disable project file compression */
+    gui::OptionAction       _codecTypeAction;           /** Blob codec type action for project serialization */
+    CodecSettingsActionMap  _codecSettingsActionMap;    /** Maps codec display names to codec settings actions */
 
 public:
-    static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
-    static constexpr std::uint32_t  DEFAULT_COMPRESSION_LEVEL   = 2;        /** Default compression level*/
+    static constexpr bool   DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
 };
 
 }

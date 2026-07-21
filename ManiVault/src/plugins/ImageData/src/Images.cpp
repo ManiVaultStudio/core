@@ -8,7 +8,7 @@
 #include "InfoAction.h"
 
 #include <util/Exception.h>
-//#include <util/Timer.h>
+#include <util/Serialization.h>
 
 #include <DataHierarchyItem.h>
 #include <Dataset.h>
@@ -579,26 +579,31 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
             points->visitData([this, &points, dimensionIndex, &globalIndices, &scalarData](auto pointData) {
                 for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++) {
                     const auto targetPixelIndex = globalIndices[localPointIndex];
-
-                    // If the data has any linked data
-                    for (LinkedData& linkedData : points->getLinkedData())
-                    {
-                        // Check if the linked data has the same original full data, because we don't want to
-                        // add data here that belongs to a different dataset
-                        if (linkedData.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
-                        {
-                            SelectionMap::Indices linkedIndices;
-                    
-                            linkedData.getMapping().populateMappingIndices(targetPixelIndex, linkedIndices);
-                            
-                            // Fill in the data for all the linked data indices based on the location of the original id
-                            for (unsigned int linkedIndex : linkedIndices)
-                                scalarData[linkedIndex] = pointData[localPointIndex][dimensionIndex];
-                        }
-                    }
-
                     scalarData[targetPixelIndex] = pointData[localPointIndex][dimensionIndex];
                 }
+
+                // If the data has any linked data
+                for (LinkedData &linkedData : points->getLinkedData()) {
+                    // Check if the linked data has the same original full data,
+                    // because we don't want to add data here that belongs to a
+                    // different dataset
+                    if (linkedData.getTargetDataset()->getFullDataset<Points>() != points->getSourceDataset<Points>()->getFullDataset<Points>()) {
+                        continue;
+                    }
+                    for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++) {
+                        const auto targetPixelIndex = globalIndices[localPointIndex];
+
+                        SelectionMap::Indices linkedIndices;
+
+                        linkedData.getMapping().populateMappingIndices(targetPixelIndex, linkedIndices);
+
+                        // Fill in the data for all the linked data indices based on
+                        // the location of the original id
+                        for (unsigned int linkedIndex : linkedIndices)
+                          scalarData[linkedIndex] = pointData[localPointIndex][dimensionIndex];
+                    }
+                }
+
             });
         }
         else {
@@ -696,29 +701,32 @@ void Images::computeMaskData()
         points->visitData([this, &points, &globalIndices](auto pointData) {
             for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++) {
                 const auto targetPixelIndex = globalIndices[localPointIndex];
-
-                if (hasLinkedDataFlag(DatasetImpl::LinkedDataFlag::Receive)) {
-
-                    // If the data has any linked data
-                    for (LinkedData& linkedData : points->getLinkedData())
-                    {
-                        // Check if the linked data has the same original full data, because we don't want to
-                        // add data here that belongs to a different dataset
-                        if (linkedData.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
-                        {
-                            SelectionMap::Indices linkedIndices;
-
-                            linkedData.getMapping().populateMappingIndices(targetPixelIndex, linkedIndices);
-
-                            // Fill in the data for all the linked data indices based on the location of the original id
-                            for (unsigned int linkedIndex : linkedIndices)
-                                _maskData[linkedIndex] = 255;
-                        }
-                    }
-                }
-
                 _maskData[targetPixelIndex] = 255;
             }
+
+            if (!hasLinkedDataFlag(DatasetImpl::LinkedDataFlag::Receive))
+                return;
+
+            // If the data has any linked data
+            for (LinkedData &linkedData : points->getLinkedData()) {
+                if (linkedData.getTargetDataset()->getFullDataset<Points>() != points->getSourceDataset<Points>()->getFullDataset<Points>()) {
+                    continue;
+                }
+
+                for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++) {
+                    const auto targetPixelIndex = globalIndices[localPointIndex];
+                    SelectionMap::Indices linkedIndices;
+
+                    linkedData.getMapping().populateMappingIndices(targetPixelIndex,linkedIndices);
+
+                    // Fill in the data for all the linked data indices based on the
+                    // location of the original id
+                    for (unsigned int linkedIndex : linkedIndices)
+                      _maskData[linkedIndex] = 255;
+                }
+
+            }
+
         });
     }
 
@@ -781,6 +789,9 @@ void Images::updateVisibleRectangle()
     _visibleRectangle.setLeft(std::numeric_limits<int>::max());
     _visibleRectangle.setRight(std::numeric_limits<int>::lowest());
 
+    const int32_t imageWidth = getImageSize().width();
+    const float imageWidthF = static_cast<float>(imageWidth);
+
     // Loop over mask elements and compute the visible rectangle
     for (std::int32_t maskIndex = 0; maskIndex < _maskData.size(); maskIndex++) {
 
@@ -789,19 +800,20 @@ void Images::updateVisibleRectangle()
             continue;
 
         // Compute pixel coordinate from mask index
-        const auto pixelCoordinate = QPoint(maskIndex % getImageSize().width(), static_cast<std::int32_t>(floorf(maskIndex / static_cast<float>(getImageSize().width()))));
-
+        const auto pixelCoordinateY = static_cast<std::int32_t>(std::floor(static_cast<float>(maskIndex) / imageWidthF));
+        const auto pixelCoordinateX = maskIndex % imageWidth;
+    
         // Add pixel coordinate and possibly inflate the visible rectangle
-        _visibleRectangle.setLeft(std::min(_visibleRectangle.left(), pixelCoordinate.x()));
-        _visibleRectangle.setRight(std::max(_visibleRectangle.right(), pixelCoordinate.x()));
-        _visibleRectangle.setTop(std::min(_visibleRectangle.top(), pixelCoordinate.y()));
-        _visibleRectangle.setBottom(std::max(_visibleRectangle.bottom(), pixelCoordinate.y()));
+        _visibleRectangle.setTop(std::min(_visibleRectangle.top(), pixelCoordinateY));
+        _visibleRectangle.setBottom(std::max(_visibleRectangle.bottom(), pixelCoordinateY));
+        _visibleRectangle.setLeft(std::min(_visibleRectangle.left(), pixelCoordinateX));
+        _visibleRectangle.setRight(std::max(_visibleRectangle.right(), pixelCoordinateX));
     }
 }
 
 QPoint Images::getPixelCoordinateFromPixelIndex(const std::int32_t& pixelIndex) const
 {
-    return QPoint(pixelIndex % getImageSize().width(), static_cast<std::int32_t>(pixelIndex / static_cast<float>(getImageSize().width())));
+    return {pixelIndex % getImageSize().width(), static_cast<std::int32_t>(pixelIndex / static_cast<float>(getImageSize().width()))};
 }
 
 std::int32_t Images::getPixelIndexFromPixelCoordinate(const QPoint& pixelCoordinate) const
@@ -835,9 +847,9 @@ void Images::fromVariantMap(const QVariantMap& variantMap)
 
     if (variantMap.contains("MaskData"))
     {
-        auto size = _imageData->getImageSize();
+        const auto size = _imageData->getImageSize();
         _maskData.resize(static_cast<size_t>(size.width()) * size.height());
-        populateDataBufferFromVariantMap(variantMap["MaskData"].toMap(), (char*)_maskData.data());
+        populateBytesFromBlobMap(variantMap["MaskData"].toMap(), (char*)_maskData.data(), _maskData.size() * sizeof(std::uint8_t));
     }
 
     if (variantMap.contains("MaskDataGiven"))
@@ -856,15 +868,15 @@ QVariantMap Images::toVariantMap() const
 {
     auto variantMap = DatasetImpl::toVariantMap();
 
-    variantMap["TypeIndex"]                     = static_cast<std::int32_t>(getType());
-    variantMap["TypeName"]                      = ImageData::getTypeName(getType());
-    variantMap["NumberOfImages"]                = getNumberOfImages();
-    variantMap["ImageSize"]                     = QVariantMap({ { "Width", getImageSize().width() }, { "Height", getImageSize().height() } });
-    variantMap["NumberOfComponentsPerPixel"]    = getNumberOfComponentsPerPixel();
-    variantMap["ImageFilePaths"]                = getImageFilePaths();
-    variantMap["MaskData"]                      = rawDataToVariantMap((char*)_maskData.data(), _maskData.size() * sizeof(std::uint8_t), true);
-    variantMap["MaskDataGiven"]                 = _maskDataGiven;
-    variantMap["VisibleRectangle"]              = QVariantMap({ { "X", _visibleRectangle.x() }, { "Y", _visibleRectangle.y() },{ "Width", _visibleRectangle.width() }, { "Height", _visibleRectangle.height() } });
+    variantMap["TypeIndex"]                  = static_cast<std::int32_t>(getType());
+    variantMap["TypeName"]                   = ImageData::getTypeName(getType());
+    variantMap["NumberOfImages"]             = getNumberOfImages();
+    variantMap["ImageSize"]                  = QVariantMap({ { "Width", getImageSize().width() }, { "Height", getImageSize().height() } });
+    variantMap["NumberOfComponentsPerPixel"] = getNumberOfComponentsPerPixel();
+    variantMap["ImageFilePaths"]             = getImageFilePaths();
+    variantMap["MaskData"]                   = bytesToBlobVariantMap((char*)_maskData.data(), _maskData.size() * sizeof(std::uint8_t));
+    variantMap["MaskDataGiven"]              = _maskDataGiven;
+    variantMap["VisibleRectangle"]           = QVariantMap({ { "X", _visibleRectangle.x() }, { "Y", _visibleRectangle.y() },{ "Width", _visibleRectangle.width() }, { "Height", _visibleRectangle.height() } });
 
     return variantMap;
 }

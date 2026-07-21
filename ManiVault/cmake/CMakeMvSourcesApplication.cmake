@@ -262,6 +262,7 @@ set(PRIVATE_MANAGER_HEADERS
     ${PRIVATE_ERROR_MANAGER_HEADERS}
     ${PRIVATE_THEME_MANAGER_HEADERS}
     ${PRIVATE_SCRIPTING_MANAGER_HEADERS}
+    ${PRIVATE_SERIALIZATION_HEADERS}
 )
 
 set(PRIVATE_MANAGER_SOURCES
@@ -279,6 +280,7 @@ set(PRIVATE_MANAGER_SOURCES
     ${PRIVATE_ERROR_MANAGER_SOURCES}
     ${PRIVATE_THEME_MANAGER_SOURCES}
     ${PRIVATE_SCRIPTING_MANAGER_SOURCES}
+    ${PRIVATE_SERIALIZATION_SOURCES}
 )
 
 set(PRIVATE_MANAGER_FILES
@@ -327,6 +329,51 @@ endif()
 set(PRIVATE_APPLICATION_FILES
     ${PRIVATE_APPLICATION_HEADERS}
     ${PRIVATE_APPLICATION_SOURCES}
+)
+
+set(PRIVATE_WORKFLOW_HEADERS
+    src/private/ProjectOpenWorkflowPlan.h
+    src/private/ProjectSaveWorkflowPlan.h
+    src/private/ProjectPublishWorkflowPlan.h
+    src/private/ProjectPublishContext.h
+    src/private/TaskflowWorkflowPlanExecutor.h
+    src/private/Taskflow.h
+)
+
+set(PRIVATE_WORKFLOW_SOURCES
+    src/private/ProjectOpenWorkflowPlan.cpp
+    src/private/ProjectSaveWorkflowPlan.cpp
+    src/private/ProjectPublishWorkflowPlan.cpp
+    src/private/ProjectPublishContext.cpp
+    src/private/TaskflowWorkflowPlanExecutor.cpp
+)
+
+set(PRIVATE_WORKFLOW_FILES
+    ${PRIVATE_WORKFLOW_HEADERS}
+    ${PRIVATE_WORKFLOW_SOURCES}
+)
+
+set(PRIVATE_CODEC_HEADERS
+    src/private/PassthroughBlobCodec.h
+    src/private/PassthroughBlobCodecFactory.h
+    src/private/ZstdBlobCodec.h
+    src/private/ZstdBlobCodecFactory.h
+    src/private/ZstdCodecSettingsAction.h
+    src/private/PassthroughCodecSettingsAction.h
+)
+
+set(PRIVATE_CODEC_SOURCES
+    src/private/PassthroughBlobCodec.cpp
+    src/private/PassthroughBlobCodecFactory.cpp
+    src/private/ZstdBlobCodec.cpp
+    src/private/ZstdBlobCodecFactory.cpp
+    src/private/ZstdCodecSettingsAction.cpp
+    src/private/PassthroughCodecSettingsAction.cpp
+)
+
+set(PRIVATE_CODEC_FILES
+    ${PRIVATE_CODEC_HEADERS}
+    ${PRIVATE_CODEC_SOURCES}
 )
 
 set(PRIVATE_PAGES_COMMON_HEADERS
@@ -434,6 +481,8 @@ set(PRIVATE_HEADERS
 	${PRIVATE_LEARNING_PAGE_HEADERS}
     ${PRIVATE_MISCELLANEOUS_HEADERS}
     ${PRIVATE_ACTIONS_HEADERS}
+    ${PRIVATE_WORKFLOW_HEADERS}
+    ${PRIVATE_CODEC_HEADERS}
 )
 
 set(PRIVATE_SOURCES
@@ -445,6 +494,8 @@ set(PRIVATE_SOURCES
 	${PRIVATE_LEARNING_PAGE_SOURCES}
     ${PRIVATE_MISCELLANEOUS_SOURCES}
     ${PRIVATE_ACTIONS_SOURCES}
+    ${PRIVATE_WORKFLOW_SOURCES}
+    ${PRIVATE_CODEC_SOURCES}
     ${PRIVATE_HEADERS}
 )
 
@@ -473,3 +524,5 @@ source_group(Pages\\StartPage FILES ${PRIVATE_START_PAGE_FILES})
 source_group(Pages\\Learning FILES ${PRIVATE_LEARNING_PAGE_FILES})
 source_group(Miscellaneous FILES ${PRIVATE_MISCELLANEOUS_FILES})
 source_group(Actions FILES ${PRIVATE_ACTIONS_FILES})
+source_group(Workflow FILES ${PRIVATE_WORKFLOW_FILES})
+source_group(Codec FILES ${PRIVATE_CODEC_FILES})

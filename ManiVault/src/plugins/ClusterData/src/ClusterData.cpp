@@ -12,15 +12,20 @@
 
 #include "Application.h"
 
-#include <util/Serialization.h>
+#include <workflow/WorkflowContextVariantMap.h>
 
 #include <QtCore>
 #include <QtDebug>
 
 #include <set>
 
+#include "ClusterDataLegacySerialization.h"
+#include "ClustersSerializer.h"
+
+
 Q_PLUGIN_METADATA(IID "studio.manivault.ClusterData")
 
+using namespace mv::workflow;
 using namespace mv;
 using namespace mv::util;
 
@@ -118,132 +123,56 @@ std::int32_t ClusterData::getClusterIndex(const QString& clusterName) const
     return -1;
 }
 
-void ClusterData::fromVariantMap(const QVariantMap& variantMap)
+UniqueWorkflowPlan ClusterData::fromVariantMapWorkflow(QVariantMap variantMap)
 {
-    WidgetAction::fromVariantMap(variantMap);
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+
+    const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
+
+    if (appVersion < Version(1, 5, 0)) {
+        plan->addSequentialStage("Load legacy clusters raw data (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            legacy::ClusterDataLegacySerializer::fromVariantMapPre150(*this, variantMap, executionContext);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread);
+
+        return plan;
+    }
 
     const auto dataMap = variantMap["Data"].toMap();
-
-    variantMapMustContain(dataMap, "IndicesRawData");
-    variantMapMustContain(dataMap, "NumberOfIndices");
-
-    // Packed indices for all clusters
-    QVector<std::uint32_t> packedIndices;
-
-    packedIndices.resize(dataMap["NumberOfIndices"].toInt());
-
-    // Convert raw data to indices
-    populateDataBufferFromVariantMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data());
-
-    if (dataMap.contains("ClustersRawData")) {
-        QByteArray clustersByteArray;
-
-        QDataStream clustersDataStream(&clustersByteArray, QIODevice::ReadOnly);
-
-        const auto clustersRawDataSize = dataMap["ClustersRawDataSize"].toInt();
-
-        clustersByteArray.resize(clustersRawDataSize);
-
-        populateDataBufferFromVariantMap(dataMap["ClustersRawData"].toMap(), (char*)clustersByteArray.data());
-
-        QVariantList clusters;
-
-        clustersDataStream >> clusters;
-
-        _clusters.resize(clusters.count());
-
-        long clusterIndex = 0;
-
-        for (const auto& clusterVariant : clusters) {
-            const auto clusterMap = clusterVariant.toMap();
-
-            auto& cluster = _clusters[clusterIndex];
-
-            cluster.setName(clusterMap["Name"].toString());
-            cluster.setId(clusterMap["ID"].toString());
-            cluster.setColor(clusterMap["Color"].toString());
-
-            const auto globalIndicesOffset  = clusterMap["GlobalIndicesOffset"].toInt();
-            const auto numberOfIndices      = clusterMap["NumberOfIndices"].toInt();
-
-            cluster.getIndices() = std::vector<std::uint32_t>(packedIndices.begin() + globalIndicesOffset, packedIndices.begin() + globalIndicesOffset + numberOfIndices);
-
-            ++clusterIndex;
-        }
-    }
     
-    // For backwards compatibility
-    if (dataMap.contains("Clusters")) {
-        const auto clustersList = dataMap["Clusters"].toList();
-
-        _clusters.resize(clustersList.count());
-
-        for (const auto& clusterVariant : clustersList) {
-            const auto clusterMap   = clusterVariant.toMap();
-            const auto clusterIndex = clustersList.indexOf(clusterMap);
-
-            auto& cluster = _clusters[clusterIndex];
-
-            cluster.setName(clusterMap["Name"].toString());
-            cluster.setId(clusterMap["ID"].toString());
-            cluster.setColor(clusterMap["Color"].toString());
-
-            const auto globalIndicesOffset  = clusterMap["GlobalIndicesOffset"].toInt();
-            const auto numberOfIndices      = clusterMap["NumberOfIndices"].toInt();
-
-            cluster.getIndices() = std::vector<std::uint32_t>(packedIndices.begin() + globalIndicesOffset, packedIndices.begin() + globalIndicesOffset + numberOfIndices);
-        }
-    }
-}
-
-QVariantMap ClusterData::toVariantMap() const
-{
-    auto variantMap = WidgetAction::toVariantMap();
-
-    std::vector<std::uint32_t> indices;
-
-    for (const auto& cluster : _clusters)
-        indices.insert(indices.end(), cluster.getIndices().begin(), cluster.getIndices().end());
-
-    QVariantMap indicesRawData = rawDataToVariantMap((char*)indices.data(), indices.size() * sizeof(std::uint32_t), true);
-
-    std::size_t globalIndicesOffset = 0;
-
-    QVariantList clusters;
-
-    clusters.reserve(_clusters.count());
-
-    for (const auto& cluster : _clusters) {
-        const auto numberOfIndicesInCluster = cluster.getIndices().size();
-
-        clusters.push_back(QVariantMap({
-            { "Name", cluster.getName() },
-            { "ID", cluster.getId() },
-            { "Color", cluster.getColor() },
-            { "GlobalIndicesOffset", QVariant::fromValue(globalIndicesOffset) },
-            { "NumberOfIndices", QVariant::fromValue(numberOfIndicesInCluster) }
-        }));
-
-        globalIndicesOffset += numberOfIndicesInCluster;
-    }
-
-    // https://stackoverflow.com/questions/19537186/serializing-qvariant-through-qdatastream
-
-    QByteArray clustersByteArray;
-    QDataStream clustersDataStream(&clustersByteArray, QIODevice::WriteOnly);
-
-    clustersDataStream << clusters;
-
-    QVariantMap clustersRawData = rawDataToVariantMap((char*)clustersByteArray.data(), clustersByteArray.size(), true);
-
-    variantMap.insert({
-        { "ClustersRawData", clustersRawData },
-        { "ClustersRawDataSize", clustersByteArray.size() },
-        { "IndicesRawData", indicesRawData },
-        { "NumberOfIndices", QVariant::fromValue(indices.size()) }
+    plan->addNestedWorkflowStage("Load", [this, dataMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        return ClustersSerializer::fromVariantMapWorkflow(dataMap, _clusters);
     });
 
-    return variantMap;
+	return plan;
+}
+
+UniqueWorkflowPlan ClusterData::toVariantMapWorkflow() const
+{
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+
+    const auto baseSaveStage = plan->addNestedWorkflowStage("Save raw data base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+        return this->Plugin::toVariantMapWorkflow();
+    });
+
+    plan->addSequentialStage("Preflight", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        if (getClusters().size() > 500000) {
+            executionContext->warning(QString("%1 clusters dataset contains approximately %2 clusters; very large numbers of clusters can take considerable time to save and load. Consider reducing the number of clusters if project serialization performance becomes a concern.").arg(getGuiName()).arg(getIntegerCountHumanReadable(getClusters().size())));
+        }
+    });
+
+    const auto serializeClustersStage = plan->addNestedWorkflowStage("Serialize clusters", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+        return ClustersSerializer::toVariantMapWorkflow(_clusters);
+	});
+
+    plan->addSequentialStage("Save data", [this, baseSaveStage, serializeClustersStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        auto outputMap = executionContext->takeOutput(baseSaveStage).toMap();
+
+        outputMap.insert(executionContext->takeOutput(serializeClustersStage).toMap());
+
+        executionContext->setOutput(outputMap);
+    });
+
+    return plan;
 }
 
 void Clusters::init()
@@ -320,22 +249,52 @@ std::vector<std::uint32_t> Clusters::getSelectedIndices() const
     return selectedIndices;
 }
 
-void Clusters::fromVariantMap(const QVariantMap& variantMap)
+UniqueWorkflowPlan Clusters::fromVariantMapWorkflow(QVariantMap variantMap)
 {
-    DatasetImpl::fromVariantMap(variantMap);
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    getRawData<ClusterData>()->fromVariantMap(variantMap);
+    plan->addNestedWorkflowStage("Load common", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
+        return this->DatasetImpl::fromVariantMapWorkflow(variantMap);
+    });
 
-    events().notifyDatasetDataChanged(this);
+    const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
+
+    if (appVersion < Version(1, 5, 0)) {
+        plan->addSequentialStage("Load legacy clusters (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            legacy::ClustersLegacySerializer::fromVariantMapPre150(*this, variantMap, executionContext);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread);
+
+        return plan;
+    }
+
+    plan->addNestedWorkflowStage("Load raw data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
+		return getRawData<ClusterData>()->fromVariantMapWorkflow(variantMap);
+    });
+
+    return plan;
 }
 
-QVariantMap Clusters::toVariantMap() const
+UniqueWorkflowPlan Clusters::toVariantMapWorkflow() const
 {
-    auto variantMap = DatasetImpl::toVariantMap();
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    variantMap["Data"] = getRawData<ClusterData>()->toVariantMap();
+    const auto saveDatasetBaseStage = plan->addNestedWorkflowStage("Save dataset base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+        return this->DatasetImpl::toVariantMapWorkflow();
+    });
 
-    return variantMap;
+    const auto encodeRawDataStage = plan->addNestedWorkflowStage("Encode raw data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+        return getRawData<ClusterData>()->toVariantMapWorkflow();
+    });
+
+    const auto storeIndicesStage = plan->addSequentialStage("Save data", [this, saveDatasetBaseStage, encodeRawDataStage](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        auto outputMap = executionContext->takeOutput(saveDatasetBaseStage).toMap();
+
+        outputMap.insert("Data", executionContext->takeOutput(encodeRawDataStage));
+
+        executionContext->setOutput(outputMap);
+    });
+
+    return plan;
 }
 
 std::vector<std::uint32_t>& Clusters::getSelectionIndices()

@@ -5,6 +5,8 @@
 #include "ColorAction.h"
 #include "Application.h"
 
+#include "util/Serialization.h"
+
 #include <QDebug>
 #include <QPainter>
 #include <QStyleOption>

@@ -160,25 +160,6 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
-    /**
-     * Create a view plugin dock widget serialization task for \p viewPluginDockWidgetId (even if no instance is yet available)
-     * This is needed by the workspace manager for proper progress reporting
-     * @param parent Pointer to parent object
-     * @param viewPluginDockWidgetId Globally unique identifier of the view plugin dock widget
-     * @param dockManager Pointer to owning dock manager instance
-     */
-    static void preRegisterSerializationTask(QObject* parent, const QString& viewPluginDockWidgetId, DockManager* dockManager);
-
-    /**
-     * Get serialization task for \p viewPluginDockWidgetId
-     * @param viewPluginDockWidgetId Globally unique identifier of the view plugin dock widget
-     * @return Pointer to task, nullptr if not found
-     */
-    static mv::Task* getSerializationTask(const QString& viewPluginDockWidgetId);
-
-    /** Removes all tasks which where created with ViewPluginDockWidget::preRegisterSerializationTask(...) */
-    static void removeAllSerializationTasks();
-
 public: // View plugin isolation
 
     /** Caches the visibility */
@@ -209,7 +190,6 @@ private:
     CDockWidget                         _centralDockWidget;         /** Dock manager central widget */
     ads::CDockManager                   _dockManager;               /** Dock manager for internal docking */
     QMap<QString, CDockWidget*>         _settingsDockWidgetsMap;    /** Created dock widgets for settings actions */
-    //mv::Task                            _progressTask;              /** Task for reporting dock widget progress */
     ProgressOverlayWidget               _progressOverlayWidget;     /** Overlay widget which shows a very thin view progress bar */
 
 protected:

@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://manivault.org/schemas/raw-block-data.schema.json",
+  "$id": "project.blob.map.schema.json",
+   "title": "Project Blob Map",
+  "required": [
+    "Raw"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "Raw": {
+      "type": "object",
+      "required": [
+        "Size",
+        "BlockSize",
+        "NumberOfBlocks",
+        "Codec",
+        "Blocks"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "Size": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total uncompressed byte size of the raw data."
+        },
+        "BlockSize": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Nominal uncompressed block size in bytes."
+        },
+        "NumberOfBlocks": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of entries in Blocks."
+        },
+        "Codec": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Codec used to encode the block payloads, for example zstd."
+        },
+        "Blocks": {
+          "type": "array",
+          "description": "Encoded raw data blocks.",
+          "items": {
+            "$ref": "#/$defs/RawBlock"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "RawBlock": {
+      "type": "object",
+      "required": [
+        "Offset",
+        "Size"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "Offset": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Uncompressed byte offset of this block in the full raw byte stream."
+        },
+        "Size": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Uncompressed byte size of this block."
+        },
+        "CompressedSize": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Encoded byte size of the block payload."
+        },
+        "URI": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Relative URI or file name of the encoded block payload."
+        },
+        "Inline": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Inline encoded block payload, typically base64."
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "URI",
+            "CompressedSize"
+          ],
+          "not": {
+            "required": [
+              "Inline"
+            ]
+          }
+        },
+        {
+          "required": [
+            "Inline"
+          ],
+          "not": {
+            "required": [
+              "URI"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

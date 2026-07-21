@@ -22,6 +22,80 @@
 #include <QPainter>
 #include <QPainterPath>
 
+#include <algorithm>
+#include <cmath>
+
+namespace
+{
+    /**
+     * @brief Converts an sRGB channel to linear space.
+     * @param value Color channel value in the range 0-255.
+     * @return Linearized color channel value.
+     */
+    double getLinearColorChannel(int value)
+    {
+        const auto channel = static_cast<double>(value) / 255.0;
+
+        return channel <= 0.03928 ? channel / 12.92 : std::pow((channel + 0.055) / 1.055, 2.4);
+    }
+
+    /**
+     * @brief Computes relative luminance.
+     * @param color Color to evaluate.
+     * @return Relative luminance in linear RGB space.
+     */
+    double getRelativeLuminance(const QColor& color)
+    {
+        return 0.2126 * getLinearColorChannel(color.red()) +
+               0.7152 * getLinearColorChannel(color.green()) +
+               0.0722 * getLinearColorChannel(color.blue());
+    }
+
+    /**
+     * @brief Computes contrast ratio.
+     * @param foreground Foreground color.
+     * @param background Background color.
+     * @return WCAG contrast ratio between the foreground and background colors.
+     */
+    double getContrastRatio(const QColor& foreground, const QColor& background)
+    {
+        const auto foregroundLuminance = getRelativeLuminance(foreground);
+        const auto backgroundLuminance = getRelativeLuminance(background);
+        const auto lighter             = std::max(foregroundLuminance, backgroundLuminance);
+        const auto darker              = std::min(foregroundLuminance, backgroundLuminance);
+
+        return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    /**
+     * @brief Returns a readable notification link color.
+     *
+     * The active palette link color is used when it has enough contrast against
+     * the notification background. Otherwise, a light- or dark-theme fallback is
+     * selected before falling back to the normal text color.
+     *
+     * @return Link color for notification rich text.
+     */
+    QColor getNotificationLinkColor()
+    {
+        constexpr auto minimumContrastRatio = 4.5;
+
+        const auto palette         = QApplication::palette();
+        const auto backgroundColor = palette.color(QPalette::Normal, QPalette::Window);
+        const auto paletteLink     = palette.color(QPalette::Normal, QPalette::Link);
+
+        if (getContrastRatio(paletteLink, backgroundColor) >= minimumContrastRatio)
+            return paletteLink;
+
+        const auto fallbackLink = getRelativeLuminance(backgroundColor) < 0.5 ? QColor(96, 180, 255) : QColor(0, 90, 158);
+
+        if (getContrastRatio(fallbackLink, backgroundColor) >= minimumContrastRatio)
+            return fallbackLink;
+
+        return palette.color(QPalette::Normal, QPalette::Text);
+    }
+}
+
 namespace mv::util
 {
 
@@ -62,9 +136,11 @@ Notification::Notification(const QString& title, const QString& description, con
     _closing(false),
     _taskAction(nullptr, "Task")
 {
-    setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
+    setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus);
+    setWindowModality(Qt::NonModal);
     setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_ShowWithoutActivating);
+
     hide();
 
     if (_previousNotification)
@@ -93,7 +169,10 @@ Notification::Notification(const QString& title, const QString& description, con
 
     _messageLabel.setWordWrap(true);
     _messageLabel.setMinimumHeight(10);
-    _messageLabel.setOpenExternalLinks(true);
+    _messageLabel.setOpenExternalLinks(false);
+    _messageLabel.setTextInteractionFlags(Qt::TextBrowserInteraction);
+    
+    connect(&_messageLabel, &QLabel::linkActivated, this, &Notification::linkActivated);
 
     closePushButton->setFixedSize(18, 18);
     closePushButton->setIcon(StyledIcon("xmark"));
@@ -253,6 +332,13 @@ void Notification::updateMessageLabel()
     _titleLabel.setText(QString("<b>%1</b>").arg(_title));
 
     if (_task.isNull()) {
+        auto messagePalette = _messageLabel.palette();
+        const auto linkColor = getNotificationLinkColor();
+
+        messagePalette.setColor(QPalette::Link, linkColor);
+        messagePalette.setColor(QPalette::LinkVisited, linkColor);
+
+        _messageLabel.setPalette(messagePalette);
         _messageLabel.setTextFormat(Qt::RichText);
         _messageLabel.setText(_description);
         _messageLabel.adjustSize();
@@ -377,19 +463,22 @@ void Notification::showEvent(QShowEvent* event)
 
 void Notification::updatePosition()
 {
-    if (_previousNotification) {
-        _previousNotification->updateGeometry();
-        _previousNotification->adjustSize();
+    if (auto mainWindow = Application::getMainWindow()) {
+        if (_previousNotification) {
+            _previousNotification->updateGeometry();
+            _previousNotification->adjustSize();
 
-        move(QPoint(parentWidget()->mapToGlobal(QPoint(spacing, 0)).x(), _previousNotification->pos().y() - height() - spacing));
-    } else {
-        const auto statusBarHeight = Application::getMainWindow()->statusBar()->isVisible() ? Application::getMainWindow()->statusBar()->height() : 0;
+            move(QPoint(parentWidget()->mapToGlobal(QPoint(spacing, 0)).x(), _previousNotification->pos().y() - height() - spacing));
+        }
+        else {
+            const auto statusBarHeight = mainWindow->statusBar()->isVisible() ? mainWindow->statusBar()->height() : 0;
 
-        move(parentWidget()->mapToGlobal(QPoint(spacing, Application::getMainWindow()->height() - statusBarHeight - height() - spacing)));
+            move(parentWidget()->mapToGlobal(QPoint(spacing, mainWindow->height() - statusBarHeight - height() - spacing)));
+        }
+
+        if (_nextNotification)
+            QTimer::singleShot(25, _nextNotification, &Notification::updatePosition);
     }
-        
-    if (_nextNotification)
-        QTimer::singleShot(25, _nextNotification, &Notification::updatePosition);
 }
 
 }

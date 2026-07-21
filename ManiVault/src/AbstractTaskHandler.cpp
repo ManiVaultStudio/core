@@ -10,7 +10,7 @@ namespace mv {
 AbstractTaskHandler::AbstractTaskHandler(QObject* parent, Task* task) :
     QObject(parent),
     _task(task),
-    _minimumDuration(100),
+    _minimumDuration(50),
     _enabled(true)
 {
 }

@@ -9,6 +9,7 @@
 
 #include <QDebug>
 #include <QHBoxLayout>
+#include <QUuid>
 
 #ifdef _DEBUG
     //#define GROUP_ACTION_VERBOSE
@@ -284,9 +285,8 @@ void GroupAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
-    variantMapMustContain(variantMap, "Expanded");
-
-    setExpanded(variantMap["Expanded"].toBool());
+    if (variantMap.contains("Expanded"))
+		setExpanded(variantMap["Expanded"].toBool());
 }
 
 QVariantMap GroupAction::toVariantMap() const

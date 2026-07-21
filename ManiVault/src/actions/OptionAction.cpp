@@ -24,7 +24,8 @@ OptionAction::OptionAction(QObject* parent, const QString& title, const QStringL
     WidgetAction(parent, title),
     _customModel(nullptr),
     _currentIndex(-1),
-    _completerPopupFixedWidth(0)
+    _completerPopupFixedWidth(0),
+    _completionMatchMode(Qt::MatchContains)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -646,7 +647,8 @@ void OptionAction::StringsFilterModel::setTextFilter(const QString& textFilter)
 }
 
 OptionAction::LazyIndicesModel::LazyIndicesModel(QObject* parent): QAbstractListModel(parent)
-{}
+{
+}
 
 void OptionAction::LazyIndicesModel::setSourceAndMatches(QAbstractItemModel* sourceModel, const QVector<int>& matches)
 {

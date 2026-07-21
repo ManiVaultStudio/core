@@ -277,6 +277,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     src/actions/StatusBarAction.h
     src/actions/PluginStatusBarAction.h
     src/actions/EventAction.h
+    src/actions/CodecSettingsAction.h
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
@@ -293,6 +294,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     src/actions/StatusBarAction.cpp
     src/actions/PluginStatusBarAction.cpp
     src/actions/EventAction.cpp
+    src/actions/CodecSettingsAction.cpp
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES
@@ -581,6 +583,12 @@ set(PUBLIC_UTIL_HEADERS
     src/util/SplashScreenBridge.h
     src/util/StandardPaths.h
     src/util/CustomAssetsUrlSchemeHandler.h
+    src/util/BlobCodec.h
+    src/util/BlobCodecFactory.h
+    src/util/CodecRegistry.h
+    src/util/CodecActionBinding.h
+    src/util/SeverityLevel.h
+    src/util/StackFrame.h
 )
 
 if(APPLE)
@@ -644,6 +652,11 @@ set(PUBLIC_UTIL_SOURCES
 	src/util/SplashScreenBridge.cpp
 	src/util/StandardPaths.cpp
 	src/util/CustomAssetsUrlSchemeHandler.cpp
+	src/util/BlobCodec.cpp
+    src/util/BlobCodecFactory.cpp
+    src/util/CodecRegistry.cpp
+    src/util/CodecActionBinding.cpp
+    src/util/SeverityLevel.cpp
 )
 
 if(APPLE)
@@ -656,6 +669,80 @@ endif()
 set(PUBLIC_UTIL_FILES
     ${PUBLIC_UTIL_HEADERS}    
     ${PUBLIC_UTIL_SOURCES}
+)
+
+set(PUBLIC_WORKFLOW_HEADERS
+    src/workflow/AbstractWorkflowPlanExecutor.h
+    src/workflow/WorkflowExecutionContext.h
+    src/workflow/WorkflowContextBase.h
+    src/workflow/WorkflowResultBase.h
+    src/workflow/WorkflowJobResult.h
+    src/workflow/WorkflowStageResult.h
+    src/workflow/WorkflowResult.h
+    src/workflow/WorkflowMessage.h
+    src/workflow/WorkflowReportNode.h
+    src/workflow/WorkflowProgressNode.h
+    src/workflow/WorkflowExecutionState.h
+    src/workflow/WorkflowResultFuture.h
+    src/workflow/WorkflowGuiThreadDispatcher.h
+    src/workflow/WorkflowPlan.h
+    src/workflow/WorkflowMetric.h
+    src/workflow/WorkflowExecutionMetrics.h
+    src/workflow/WorkflowResultRegistry.h
+    src/workflow/WorkflowResultDialog.h
+    src/workflow/WorkflowConsoleFormatter.h
+    src/workflow/WorkflowExecutionLifecycleScope.h
+    src/workflow/WorkflowStageSummary.h
+    src/workflow/WorkflowExecutionNodeType.h
+    src/workflow/WorkflowConsoleDashboard.h
+    src/workflow/WorkflowConsoleDashboardScope.h
+    src/workflow/WorkflowRuntimeScoped.h
+    src/workflow/WorkflowContextVariantMap.h
+    src/workflow/WorkflowHandle.h
+    src/workflow/WorkflowContextVariantMap.h
+    src/workflow/WorkflowBatchingOptions.h
+    src/workflow/WorkflowMessageDetailsDelegate.h
+    src/workflow/WorkflowReportingOptions.h
+    src/workflow/WorkflowProfilingOptions.h
+    src/workflow/WorkflowParallelizationOptions.h
+    src/workflow/WorkflowOptions.h
+    src/workflow/WorkflowResultDetailsOptions.h
+)
+
+set(PUBLIC_WORKFLOW_SOURCES
+    src/workflow/AbstractWorkflowPlanExecutor.cpp    
+    src/workflow/WorkflowJobResult.cpp
+    src/workflow/WorkflowStageResult.cpp
+    src/workflow/WorkflowResult.cpp
+    src/workflow/WorkflowExecutionContext.cpp
+    src/workflow/WorkflowReportNode.cpp
+    src/workflow/WorkflowProgressNode.cpp
+    src/workflow/WorkflowExecutionState.cpp
+    src/workflow/WorkflowResultFuture.cpp
+    src/workflow/WorkflowPlan.cpp
+    src/workflow/WorkflowGuiThreadDispatcher.cpp
+    src/workflow/WorkflowMetric.cpp
+    src/workflow/WorkflowExecutionMetrics.cpp
+    src/workflow/WorkflowResultRegistry.cpp
+    src/workflow/WorkflowResultDialog.cpp
+    src/workflow/WorkflowConsoleFormatter.cpp
+    src/workflow/WorkflowExecutionLifecycleScope.cpp
+    src/workflow/WorkflowStageSummary.cpp
+    src/workflow/WorkflowExecutionNodeType.cpp
+    src/workflow/WorkflowConsoleDashboard.cpp
+    src/workflow/WorkflowConsoleDashboardScope.cpp
+    src/workflow/WorkflowRuntimeScoped.cpp
+    src/workflow/WorkflowContextVariantMap.cpp
+    src/workflow/WorkflowHandle.cpp
+    src/workflow/WorkflowContextVariantMap.cpp
+    src/workflow/WorkflowBatchingOptions.cpp
+    src/workflow/WorkflowResultBase.cpp
+    src/workflow/WorkflowMessageDetailsDelegate.cpp
+)
+
+set(PUBLIC_WORKFLOW_FILES
+    ${PUBLIC_WORKFLOW_HEADERS}
+    ${PUBLIC_WORKFLOW_SOURCES}
 )
 
 set(PUBLIC_HARDWARE_SPEC_UTIL_HEADERS
@@ -700,14 +787,12 @@ set(PUBLIC_PROJECT_HEADERS
     src/Project.h
     src/ProjectMetaAction.h
     src/ProjectCompressionAction.h
-    src/ProjectSerializationTask.h
 )
 
 set(PUBLIC_PROJECT_SOURCES
     src/Project.cpp
     src/ProjectMetaAction.cpp
     src/ProjectCompressionAction.cpp
-    src/ProjectSerializationTask.cpp
 )
 
 set(PUBLIC_PROJECT_FILES
@@ -732,20 +817,24 @@ set(PUBLIC_DATASET_HEADERS
     src/DataType.h
     src/RawData.h
     src/Set.h
+    src/SetLegacySerialization.h
     src/LinkedData.h
     src/SelectionGroup.h
     src/Dataset.h
     src/DatasetPrivate.h
     src/DatasetsMimeData.h
+    src/PropertiesSerializer.h
 )
 
 set(PUBLIC_DATASET_SOURCES
     src/Set.cpp
+    src/SetLegacySerialization.cpp
     src/LinkedData.cpp
     src/SelectionGroup.cpp
     src/Dataset.cpp
     src/DatasetPrivate.cpp
     src/DatasetsMimeData.cpp
+    src/PropertiesSerializer.cpp
 )
 
 set(PUBLIC_DATASET_FILES
@@ -1126,6 +1215,23 @@ set(PUBLIC_HUD_MODEL_FILES
     ${PUBLIC_HUD_MODEL_SOURCES}
 )
 
+set(PUBLIC_WORKFLOW_MESSAGES_MODEL_HEADERS
+    src/models/AbstractWorkflowMessagesModel.h
+    src/models/WorkflowMessagesListModel.h
+    src/models/WorkflowMessagesFilterModel.h
+)
+
+set(PUBLIC_WORKFLOW_MESSAGES_MODEL_SOURCES
+    src/models/AbstractWorkflowMessagesModel.cpp
+    src/models/WorkflowMessagesListModel.cpp
+    src/models/WorkflowMessagesFilterModel.cpp
+)
+
+set(PUBLIC_WORKFLOW_MESSAGES_MODEL_FILES
+    ${PUBLIC_WORKFLOW_MESSAGES_MODEL_HEADERS}
+    ${PUBLIC_WORKFLOW_MESSAGES_MODEL_SOURCES}
+)
+
 set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     src/GlobalSettingsGroupAction.h
     src/ParametersSettingsAction.h
@@ -1194,6 +1300,19 @@ set(PUBLIC_TASK_FILES
     ${PUBLIC_TASK_SOURCES}
 )
 
+set(PUBLIC_EXCEPTION_HEADERS
+    src/exception/ManiVaultException.h
+)
+
+set(PUBLIC_EXCEPTION_SOURCES
+    src/exception/ManiVaultException.cpp
+)
+    
+set(PUBLIC_EXCEPTION_FILES
+    ${PUBLIC_EXCEPTION_HEADERS}
+    ${PUBLIC_EXCEPTION_SOURCES}
+)
+
 # Automatically generated during cmake config
 set(PUBLIC_VERSION_HEADERS
     src/ManiVaultVersion.h
@@ -1224,6 +1343,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_RENDERERS_HEADERS}
     ${PUBLIC_GRAPHICS_HEADERS}
     ${PUBLIC_UTIL_HEADERS}
+    ${PUBLIC_WORKFLOW_HEADERS}
     ${PUBLIC_HARDWARE_SPEC_UTIL_HEADERS}
     ${PUBLIC_APPLICATION_HEADERS}
     ${PUBLIC_PROJECT_HEADERS}
@@ -1250,8 +1370,10 @@ set(PUBLIC_HEADERS
     ${PUBLIC_SCRIPTS_MODEL_HEADERS}
     ${PUBLIC_RECENT_FILES_MODEL_HEADERS}
     ${PUBLIC_HUD_MODEL_HEADERS}
+    ${PUBLIC_WORKFLOW_MESSAGES_MODEL_HEADERS}
     ${PUBLIC_GLOBAL_SETTINGS_HEADERS}
     ${PUBLIC_TASK_HEADERS}
+    ${PUBLIC_EXCEPTION_HEADERS}
     ${PUBLIC_NOTIFICATIONS_HEADERS}
     ${PUBLIC_VERSION_HEADERS}
     ${PUBLIC_GLOBALS_HEADERS}
@@ -1277,6 +1399,7 @@ set(PUBLIC_SOURCES
     ${PUBLIC_RENDERERS_SOURCES}
     ${PUBLIC_GRAPHICS_SOURCES}
     ${PUBLIC_UTIL_SOURCES}
+    ${PUBLIC_WORKFLOW_SOURCES}
     ${PUBLIC_HARDWARE_SPEC_UTIL_SOURCES}
     ${PUBLIC_APPLICATION_SOURCES}
     ${PUBLIC_PROJECT_SOURCES}
@@ -1303,8 +1426,10 @@ set(PUBLIC_SOURCES
     ${PUBLIC_SCRIPTS_MODEL_SOURCES}
     ${PUBLIC_RECENT_FILES_MODEL_SOURCES}
     ${PUBLIC_HUD_MODEL_SOURCES}
+    ${PUBLIC_WORKFLOW_MESSAGES_MODEL_SOURCES}
     ${PUBLIC_GLOBAL_SETTINGS_SOURCES}
     ${PUBLIC_TASK_SOURCES}
+    ${PUBLIC_EXCEPTION_SOURCES}
     ${PUBLIC_NOTIFICATIONS_SOURCES}
     ${PUBLIC_HEADERS}
 )
@@ -1344,6 +1469,7 @@ source_group(Renderers FILES ${PUBLIC_RENDERERS_FILES})
 source_group(Graphics FILES ${PUBLIC_GRAPHICS_FILES})
 source_group(Util FILES ${PUBLIC_UTIL_FILES})
 source_group(Util\\HardwareSpec FILES ${PUBLIC_HARDWARE_SPEC_UTIL_FILES})
+source_group(Workflow FILES ${PUBLIC_WORKFLOW_FILES})
 source_group(Application FILES ${PUBLIC_APPLICATION_FILES} ${PUBLIC_GLOBALS_HEADERS} ${PUBLIC_VERSION_HEADERS})
 source_group(Project FILES ${PUBLIC_PROJECT_FILES})
 source_group(Workspace FILES ${PUBLIC_WORKSPACE_FILES})
@@ -1366,9 +1492,11 @@ source_group(Models\\LearningCenter\\Tutorials FILES ${PUBLIC_LEARNING_CENTER_TU
 source_group(Models\\Projects FILES ${PUBLIC_PROJECTS_MODEL_FILES})
 source_group(Models\\ColorSchemes FILES ${PUBLIC_COLOR_SCHEMES_MODEL_FILES})
 source_group(Models\\Scripts FILES ${PUBLIC_SCRIPTS_MODEL_FILES})
+source_group(Models\\WorkflowMessages FILES ${PUBLIC_WORKFLOW_MESSAGES_MODEL_FILES})
 source_group(Models\\HardwareSpec FILES ${PUBLIC_HARDWARE_SPEC_MODEL_FILES})
 source_group(Models\\RecentFiles FILES ${PUBLIC_RECENT_FILES_MODEL_FILES})
 source_group(Models\\HUD FILES ${PUBLIC_HUD_MODEL_FILES})
 source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
 source_group(Task FILES ${PUBLIC_TASK_FILES})
+source_group(Exception FILES ${PUBLIC_EXCEPTION_FILES})
 source_group(Notifications FILES ${PUBLIC_NOTIFICATIONS_FILES})

@@ -8,6 +8,8 @@
 #include "ForegroundTask.h"
 #include "ManiVaultVersion.h"
 
+#include "ModalTask.h"
+
 #include "util/Exception.h"
 #include "util/Icon.h"
 #include "util/StandardPaths.h"
@@ -23,11 +25,13 @@
 #include <QMainWindow>
 #include <QDir>
 #include <QShortcut>
+#include <QOperatingSystemVersion>
 
 using nlohmann::json;
 
 using namespace mv::gui;
 using namespace mv::util;
+using namespace mv::workflow;
 
 namespace mv {
 
@@ -38,13 +42,13 @@ Application::Application(int& argc, char** argv) :
     Serializable("Application"),
     _core(nullptr),
     _version(MV_VERSION_MAJOR, MV_VERSION_MINOR, MV_VERSION_PATCH, std::string(MV_VERSION_SUFFIX.data())),
-    _serializationAborted(false),
     _startupProjectMetaAction(nullptr),
     _startupTask(nullptr),
     _temporaryDir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + QString("%1.%2").arg("ManiVault Studio", getId().mid(0, 6)))),
     _temporaryDirs(this),
     _lockFile(QDir::cleanPath(_temporaryDir.path() + QDir::separator() + "app.lock")),
-    _configurationAction(this, "Configuration")
+    _configurationAction(this, "Configuration"),
+    _workflowGuiThreadDispatcher(this)
 {
     _lockFile.lock();
 
@@ -77,7 +81,12 @@ Application::Application(int& argc, char** argv) :
 
         _configurationAction.getStartPageConfigurationAction().getToggleCustomizationAction().setChecked(true);
 
-        Application::setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
+        if constexpr (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS)
+        {
+            Application::setWindowIcon(QIcon(":/Icons/AppIcon.icns"));
+        } else {
+            Application::setWindowIcon(createIcon(QPixmap(":/Icons/AppIcon256")));
+        }
 	}
 }
 
@@ -206,19 +215,14 @@ Logger& Application::getLogger()
     return current()->_logger;
 }
 
-bool Application::isSerializationAborted()
-{
-    return current()->_serializationAborted;
-}
-
-void Application::setSerializationAborted(bool serializationAborted)
-{
-    current()->_serializationAborted = serializationAborted;
-}
-
 void Application::initialize()
 {
     _logger.initialize();
+}
+
+WorkflowGuiThreadDispatcher& Application::workflowGuiThreadDispatcher()
+{
+    return current()->_workflowGuiThreadDispatcher;
 }
 
 QMainWindow* Application::getMainWindow()
@@ -275,6 +279,20 @@ void Application::initializeAttributes()
     setApplicationName(applicationName);
 }
 
+AbstractWorkflowPlanExecutor& Application::getWorkflowPlanExecutor()
+{
+    Q_ASSERT(current()->_workflowPlanExecutor);
+
+    return *current()->_workflowPlanExecutor;
+}
+
+void Application::setWorkflowPlanExecutor(UniqueWorkflowPlanExecutor workflowPlanExecutor)
+{
+    Q_ASSERT(workflowPlanExecutor);
+
+    current()->_workflowPlanExecutor = std::move(workflowPlanExecutor);
+}
+
 ApplicationStartupTask& Application::getStartupTask()
 {
     return *_startupTask;
@@ -288,6 +306,11 @@ const QTemporaryDir& Application::getTemporaryDir() const
 Application::TemporaryDirs& Application::getTemporaryDirs()
 {
     return _temporaryDirs;
+}
+
+util::CodecRegistry& Application::getCodecRegistry()
+{
+	return _codecRegistry;
 }
 
 std::int32_t Application::requestOverrideCursor(Qt::CursorShape cursorShape)

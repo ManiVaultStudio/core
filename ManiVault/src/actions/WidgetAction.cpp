@@ -640,12 +640,11 @@ void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
 
     Serializable::fromVariantMap(variantMap);
 
-    variantMapMustContain(variantMap, "IsChecked");
-    variantMapMustContain(variantMap, "SortIndex");
-    variantMapMustContain(variantMap, "ConnectionPermissions");
+    if (variantMap.contains("IsChecked"))
+		setChecked(variantMap["IsChecked"].toBool());
 
-    setChecked(variantMap["IsChecked"].toBool());
-    setSortIndex(variantMap["SortIndex"].toInt());
+    if (variantMap.contains("SortIndex"))
+		setSortIndex(variantMap["SortIndex"].toInt());
 
     if (variantMap.contains("Stretch"))
         setStretch(variantMap["Stretch"].toInt());
@@ -656,16 +655,16 @@ void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
     if (variantMap.contains("IsForceDisabled"))
         setForceDisabled(variantMap["IsForceDisabled"].toBool());
 
-    setConnectionPermissions(variantMap["ConnectionPermissions"].toInt());
+    if (variantMap.contains("ConnectionPermissions"))
+		setConnectionPermissions(variantMap["ConnectionPermissions"].toInt());
+
     cacheConnectionPermissions(true);
 
     if (variantMap.contains("PublicActionID")) {
         const auto publicActionId = variantMap["PublicActionID"].toString();
 
         if (!publicActionId.isEmpty()) {
-            const auto publicAction = actions().getAction(publicActionId);
-
-            if (publicAction)
+            if (const auto publicAction = actions().getAction(publicActionId))
                 connectToPublicAction(publicAction, false);
         }
     }

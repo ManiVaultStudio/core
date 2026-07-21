@@ -28,6 +28,7 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= n
 
     connect(getAction(), &WidgetAction::isConnectedChanged, this, &WidgetActionLabel::updateNameLabel);
     connect(getAction(), &WidgetAction::connectionPermissionsChanged, this, &WidgetActionLabel::updateNameLabel);
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &WidgetActionLabel::updateCustomStyle);
 
     auto layout = new QHBoxLayout();
 
@@ -65,8 +66,9 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
             if (dynamic_cast<QWidget*>(target) != &_nameLabel)
                 break;
             
-            if (auto project = mv::projects().getCurrentProject(); !project->getStudioModeAction().isChecked())
-                break;
+            if (auto project = mv::projects().getCurrentProject())
+                if (!project->getStudioModeAction().isChecked())
+					break;
             
             auto mouseEvent = dynamic_cast<QMouseEvent*>(event);
 
@@ -161,6 +163,14 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
     return QWidget::eventFilter(target, event);
 }
 
+bool WidgetActionLabel::event(QEvent* event)
+{
+    if (event->type() == QEvent::ApplicationPaletteChange)
+        updateCustomStyle();
+
+    return WidgetActionViewWidget::event(event);
+}
+
 void WidgetActionLabel::resizeEvent(QResizeEvent* resizeEvent)
 {
     QWidget::resizeEvent(resizeEvent);
@@ -236,7 +246,7 @@ void WidgetActionLabel::updateCustomStyle()
         else
             _nameLabel.setStyleSheet(QString("QLabel { color: %1; }").arg(qApp->palette().text().color().name()));
     } else {
-        _nameLabel.setStyleSheet("color: gray;");
+        _nameLabel.setStyleSheet(QString("QLabel { color: %1; }").arg(qApp->palette().color(QPalette::Disabled, QPalette::Text).name()));
     }
 }
 

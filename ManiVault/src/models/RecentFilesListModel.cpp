@@ -65,7 +65,7 @@ void RecentFilesListModel::addRecentFilePath(const QString& filePath)
     appendRow(Row(RecentFile(filePath, QDateTime::currentDateTime())));
 
     while (rowCount() > maxRecentFiles)
-        removeRow(rowCount() - 1);
+        removeRow(0);
 
     save();
 

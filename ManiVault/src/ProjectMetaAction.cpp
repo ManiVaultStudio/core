@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
+// SPDX-License-Identifier: LGPL-3.0-or-later X
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
@@ -139,15 +139,28 @@ void ProjectMetaAction::fromVariantMap(const QVariantMap& variantMap)
     _splashScreenAction.fromParentVariantMap(variantMap);
     _studioModeAction.fromParentVariantMap(variantMap);
     _applicationIconAction.fromParentVariantMap(variantMap);
-    _compressionAction.fromParentVariantMap(variantMap);
+    _compressionAction.fromParentVariantMap(variantMap, true);
     _allowProjectSwitchingAction.fromParentVariantMap(variantMap, true);
     _allowedPluginsOnlyAction.fromParentVariantMap(variantMap, true);
     _allowedPluginsAction.fromParentVariantMap(variantMap, true);
 }
 
+workflow::UniqueWorkflowPlan ProjectMetaAction::fromVariantMapWorkflow(QVariantMap variantMap)
+{
+	workflow::UniqueWorkflowPlan plan = std::make_unique<workflow::WorkflowPlan>(QString("%1::fromVariantMap").arg(getSerializationName()));
+
+	plan->addSequentialStage("Load meta", [this, variantMap](const workflow::WorkflowPlan::Job&, const workflow::SharedWorkflowExecutionContext&) {
+             fromVariantMap(variantMap);
+	}, workflow::WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
+
+	return plan;
+}
+
 QVariantMap ProjectMetaAction::toVariantMap() const
 {
     auto variantMap = GroupAction::toVariantMap();
+
+    const_cast<ProjectMetaAction*>(this)->_applicationVersionAction.setVersion(Application::current()->getVersion());
 
     _applicationVersionAction.insertIntoVariantMap(variantMap);
     _projectVersionAction.insertIntoVariantMap(variantMap);

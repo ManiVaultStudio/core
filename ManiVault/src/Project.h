@@ -84,16 +84,25 @@ public: // Miscellaneous
 public: // Serialization
 
     /**
-     * Load project from variant
-     * @param Variant representation of the project
+     * Create a workflow that restores this object's state from a variant map.
+     *
+     * See Serializable::fromVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @param variantMap Serialized object state.
+     * @return Workflow plan that restores the object state when executed.
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
 
     /**
-     * Save project to variant
-     * @return Variant representation of the project
+     * Create a workflow that serializes this object's state to a variant map.
+     *
+     * See Serializable::toVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @return Workflow plan that serializes the object state when executed.
      */
-    QVariantMap toVariantMap() const override;
+    workflow::UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 public:
 
@@ -172,10 +181,6 @@ private:
     gui::ToggleAction       _overrideApplicationStatusBarAction;    /** Action for toggling whether the project inherits the status bar settings from the application or not */
     gui::ToggleAction       _statusBarVisibleAction;                /** Action for toggling the status bar visibility */
     gui::OptionsAction      _statusBarOptionsAction;                /** Options action for toggling status bar items on/off */
-
-protected:
-    static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
-    static constexpr std::uint32_t  DEFAULT_COMPRESSION_LEVEL   = 2;        /** Default compression level*/
 };
 
 }

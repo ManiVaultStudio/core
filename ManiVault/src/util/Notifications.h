@@ -9,17 +9,20 @@
 #include "Notification.h"
 
 #include <QObject>
+#include <QUrl>
 
 namespace mv::util
 {
 /**
- * Notifications manager class
+ * @brief Manager for stacked toast notifications.
  *
- * Orchestrates the creation and display of notifications (used solely by the help manager)
+ * Notifications creates Notification widgets, stacks them above the main window
+ * status bar, repositions them when the parent window changes size, and forwards
+ * activated notification links to interested consumers.
  *
- * Note: This class is developed for internal use only
+ * @note This class is intended for internal use by the help manager.
  *
- * @author Thomas Kroes
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT Notifications : public QObject
 {
@@ -28,46 +31,66 @@ class CORE_EXPORT Notifications : public QObject
 public:
 
     /**
-     * Construct notifications manager with \p parent widget
-     * @param parent Pointer to parent widget
+     * @brief Constructs a notifications manager.
+     * @note Notifications are positioned relative to the main window, above its status bar (the main window must be set up before creating a Notifications instance).
+     * @param parent Pointer to parent widget (if any).
      */
     explicit Notifications(QWidget* parent = nullptr);
 
     /**
-     * Show message with \p title, \p description and \p icon
-     * @param title Message title
-     * @param description Message description
-     * @param icon Message icon
-     * @param durationType Duration type of the notification
-     * @param delayMs Delay in milliseconds before the notification is shown
+     * @brief Shows a message notification.
+     * @param title Notification title.
+     * @param description Notification description, optionally rich text.
+     * @param icon Notification icon.
+     * @param durationType Display duration policy.
+     * @param delayMs Delay in milliseconds before the notification is shown.
      */
     void showMessage(const QString& title, const QString& description, const QIcon& icon, const util::Notification::DurationType& durationType, std::int32_t delayMs);
 
     /**
-     * Show \p task message
-     * @param task Task containing the notification details
+     * @brief Shows a task notification.
+     * @param task Task whose state is displayed by the notification.
      */
     void showTask(QPointer<Task> task);
 
     /**
-     * Set parent widget to \p parentWidget (notification widgets will anchor to this widget)
-     * @param parentWidget Pointer to parent widget
+     * @brief Sets up synchronization with the main window.
      */
-    void setParentWidget(QWidget* parentWidget);
+    void setupMainWindowSynchronization();
 
 protected:
 
     /**
-     * Watch \p watched for \p event
-     * @param watched Pointer to watched object
-     * @param event Event to watch
-     * @return Whether the event was handled
+     * @brief Repositions notifications when watched widgets resize.
+     * @param watched Watched object.
+     * @param event Event to handle.
+     * @return True if the event was handled.
      */
     bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
-    QWidget*                _parentWidget;      /** Pointer to parent widget */
-    QVector<Notification*>  _notifications;     /** Vector of notifications */
+
+    /**
+     * @brief Adds and displays a notification.
+     * @param notification Notification to add.
+     */
+    void addNotification(Notification* notification);
+
+    /**
+     * @brief Updates the positions of all visible notifications.
+     */
+    void updateAllPositions();
+
+signals:
+
+    /**
+     * @brief Emitted when a notification hyperlink is activated.
+     * @param url Activated hyperlink URL.
+     */
+    void notificationLinkActivated(const QUrl& url);
+
+private:
+    QVector<Notification*>  _notifications;     /**< Currently visible notifications in stack order */
 };
 
 }
