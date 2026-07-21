@@ -73,7 +73,7 @@ public:
     template<typename DatasetType>
     mv::Dataset<DatasetType> getCurrentDataset() const
     {
-        return getCurrentDataset();
+        return mv::Dataset<DatasetType>(DatasetPickerAction::getCurrentDataset());
     }
 
     /**
