@@ -11,17 +11,21 @@ namespace mv::util {
 /**
  * @brief Tracks preset serialization.
  *
- * PresetSerializationContext exposes a thread-local flag that allows
- * serialization code to detect whether it is currently running as part of
- * preset serialization.
+ * PresetSerializationScope exposes a thread-local flag for detecting preset
+ * serialization.
  *
- * Use Scope on the stack to enable the context for the current thread and
- * automatically restore the previous state when the scope exits. Nested scopes
- * preserve the state that was active before they were entered.
+ * Create a Scope object on the stack before serializing a preset. The scope
+ * enables preset serialization for the current thread and restores the previous
+ * state when it is destroyed. Nested scopes preserve the state that was active
+ * before they were entered.
+ *
+ * The class itself is intentionally not exported because it owns private
+ * thread-local storage. Only the functions that consumers call across the DLL
+ * boundary are exported.
  *
  * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
-class PresetSerializationContext
+class PresetSerializationScope
 {
 public:
 
@@ -31,6 +35,9 @@ public:
      * Scope enables the preset serialization context for the current thread
      * while the object exists. Destroying the scope restores the state that was
      * active before construction.
+     *
+     * Scope is exported so plugins and other consumers can safely create stack
+     * instances while the thread-local state remains private to the public DLL.
      */
     class CORE_EXPORT Scope
     {

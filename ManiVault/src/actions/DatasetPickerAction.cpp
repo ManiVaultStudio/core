@@ -6,6 +6,7 @@
 
 #include "event/Event.h"
 
+#include "util/PresetSerializationScope.h"
 #include "util/Serialization.h"
 
 #ifdef _DEBUG
@@ -338,7 +339,7 @@ void DatasetPickerAction::fromVariantMap(const QVariantMap& variantMap)
 {
     OptionAction::fromVariantMap(variantMap);
 
-    if (PresetSerializationContext::isActive())
+    if (PresetSerializationScope::isActive())
         return;
 
     variantMapMustContain(variantMap, "Value");
@@ -350,7 +351,7 @@ QVariantMap DatasetPickerAction::toVariantMap() const
 {
     auto variantMap = OptionAction::toVariantMap();
 
-	if (!PresetSerializationContext::isActive()) {
+	if (!PresetSerializationScope::isActive()) {
         variantMap.insert({
             { "Value", getCurrentDatasetId() }
         });
