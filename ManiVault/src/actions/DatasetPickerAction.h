@@ -19,12 +19,19 @@
 namespace mv::gui {
 
 /**
- * Dataset picker action class
+ * @brief Picks a dataset.
  *
- * For picking a dataset from a list
- * Automatically removes items when datasets are removed and renamed
+ * DatasetPickerAction presents datasets through an option action and keeps the
+ * available choices synchronized with the selected population mode.
  *
- * @author Thomas Kroes
+ * In automatic population mode, the action follows the global datasets model
+ * and applies the configured filter function. In manual population mode, the
+ * action uses the dataset list provided through setDatasets().
+ *
+ * The action tracks the selected dataset by identifier for serialization and
+ * emits dataset selection signals when the current dataset changes.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT DatasetPickerAction : public OptionAction
 {
@@ -85,6 +92,14 @@ public:
      * @return The globally unique identifier of the currently selected dataset (if any)
      */
     QString getCurrentDatasetId() const;
+
+    /**
+     * Get current dataset identifiers.
+     * @return Globally unique identifiers of the currently available datasets.
+     */
+    QStringList getCurrentDatasetIds() const;
+
+    Dataset<DatasetImpl> getDataset(const QString& datasetId) const;
 
     /** Invalidate the current filter so that the internal datasets list is refreshed (only when population mode is AbstractDatasetsModel::PopulationMode::Automatic) */
     void invalidateFilter();
@@ -183,8 +198,6 @@ private:
     bool                                    _blockDatasetsChangedSignal;    /** Boolean determining whether the DatasetPickerAction::datasetsChanged(...) signal may be engaged in reponse to change in the DatasetPickerAction#_filterModel */
     QStringList                             _currentDatasetsIds;            /** Keep a list of current datasets identifiers so that we can avoid unnecessary emits of the DatasetPickerAction::datasetsChanged(...) signal */
     QString                                 _currentDatasetId;              /** Keep track of the current dataset identifier so that we can avoid unnecessary emits of the DatasetPickerAction::datasetPicked(...) signal */
-
-    static bool noValueSerialization;   /** Prevent the value from being serialized (used by preset serialization) */
 
     friend class AbstractActionsManager;
 };
