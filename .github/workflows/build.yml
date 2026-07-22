@@ -73,7 +73,7 @@ jobs:
 
       - name: Windows build
         if: startsWith(runner.os, 'Windows')
-        uses: ManiVaultStudio/github-actions/conan_windows_build@main
+        uses: ManiVaultStudio/github-actions/conan_windows_build@feature/UpdateQt693
         with:
           conan-visual-version: ${{matrix.build-cversion}}
           conan-visual-runtime: ${{matrix.build-runtime}}
@@ -90,7 +90,7 @@ jobs:
 
       - name: Linux build
         if: startsWith(matrix.os, 'ubuntu')
-        uses: ManiVaultStudio/github-actions/conan_linuxmac_build@main
+        uses: ManiVaultStudio/github-actions/conan_linuxmac_build@feature/UpdateQt693
         with:
           conan-compiler: ${{matrix.build-compiler}}
           conan-cc: ${{matrix.build-cc}}
@@ -106,7 +106,7 @@ jobs:
           
       - name: Mac build
         if: startsWith(matrix.os, 'macos')
-        uses: ManiVaultStudio/github-actions/conan_linuxmac_build@main
+        uses: ManiVaultStudio/github-actions/conan_linuxmac_build@feature/UpdateQt693
         with:
           conan-compiler: ${{matrix.build-compiler}}
           conan-cc: ${{matrix.build-cc}}
