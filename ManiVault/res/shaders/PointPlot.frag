@@ -10,9 +10,14 @@
 #define EFFECT_SIZE    2
 #define EFFECT_OUTLINE 3
 #define EFFECT_COLOR_2D 4
+#define EFFECT_COLOR_2D_CHANNELS 5
+#define EFFECT_COLOR_RGB 6
 
 // Point properties
 uniform int   scalarEffect;
+
+// Color space for RGB coloring (0 = RGB; placeholder for future HSL/LAB)
+uniform int   colorSpace;
 
 // Data properties
 uniform vec4 dataBounds;
@@ -41,6 +46,8 @@ smooth in vec2  vTexCoord;
 flat   in int   vHighlight;
 flat   in int   vFocusHighlight;
 smooth in float vScalar;
+smooth in float vScalar2;
+smooth in float vScalar3;
 smooth in vec3  vColor;
 smooth in float vOpacity;
 smooth in vec2  vPosOrig;
@@ -102,8 +109,20 @@ void main()
 	{
         float channel1 = normalize(dataBounds[0], dataBounds[1], vPosOrig[0]);
         float channel2 = normalize(dataBounds[2], dataBounds[3], vPosOrig[1]);
-            
+
         color = texture(colormap, vec2(channel1, channel2)).rgb;
+	}
+
+	if (scalarEffect == EFFECT_COLOR_2D_CHANNELS)
+	{
+		// Color by two arbitrary channels (already normalized to [0, 1] in the vertex shader)
+		color = texture(colormap, vec2(vScalar, vScalar2)).rgb;
+	}
+
+	if (scalarEffect == EFFECT_COLOR_RGB)
+	{
+		// Assemble an RGB color from three channels (already normalized to [0, 1] in the vertex shader)
+		color = vec3(vScalar, vScalar2, vScalar3);
 	}
 
 	float opacity = 1.0;

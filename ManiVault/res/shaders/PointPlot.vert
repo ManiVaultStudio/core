@@ -21,7 +21,11 @@ uniform mat4 	mvp;            		/** Projection matrix from bounds space to clip 
 uniform bool 	hasHighlights;     		/** Whether a highlight buffer is used */
 uniform bool 	hasFocusHighlights;		/** Whether a focus highlight buffer is used */
 uniform bool 	hasScalars;        		/** Whether a scalar buffer is used */
-uniform vec3 	colorMapRange;     		/** Color map scalar range */
+uniform bool 	hasScalars2;       		/** Whether the second color scalar buffer is used (2D / RGB) */
+uniform bool 	hasScalars3;       		/** Whether the third color scalar buffer is used (RGB) */
+uniform vec3 	colorMapRange;     		/** Color map scalar range (channel 1) */
+uniform vec3 	colorMapRange2;    		/** Color map scalar range (channel 2) */
+uniform vec3 	colorMapRange3;    		/** Color map scalar range (channel 3) */
 uniform bool 	hasColors;         		/** Whether a color buffer is used */
 uniform bool 	hasSizes;          		/** Whether a point size buffer is used */
 uniform bool 	hasOpacities;			/** Whether an opacity buffer is used */
@@ -50,16 +54,20 @@ layout(location = 0) in vec2    vertex;         	/** Vertex input, always a [-1,
 layout(location = 1) in vec2    position;       	/** 2-Dimensional positions of points */
 layout(location = 2) in int     highlight;      	/** Mask of highlights over the points */
 layout(location = 3) in int     focusHighlight;		/** Mask of focus highlights over the points */
-layout(location = 4) in float   scalar;         	/** Point scalar */
+layout(location = 4) in float   scalar;         	/** Point scalar (color channel 1) */
 layout(location = 5) in vec3    color;          	/** Point color */
 layout(location = 6) in float   size;           	/** Point size */
 layout(location = 7) in float   opacity;        	/** Point opacity */
+layout(location = 8) in float   scalar2;        	/** Point scalar (color channel 2) */
+layout(location = 9) in float   scalar3;        	/** Point scalar (color channel 3) */
 
 // Output variables
 smooth out vec2  vTexCoord;
 flat   out int   vHighlight;
 flat   out int   vFocusHighlight;
 smooth out float vScalar;
+smooth out float vScalar2;
+smooth out float vScalar3;
 smooth out vec3  vColor;
 smooth out float vOpacity;
 smooth out vec2  vPosOrig;
@@ -150,6 +158,8 @@ void main()
 	vHighlight 		= hasHighlights ? highlight : 0;
 	vFocusHighlight = hasFocusHighlights ? focusHighlight : 0;
     vScalar 		= hasScalars ? (scalar - colorMapRange.x) / colorMapRange.z : 0;
+    vScalar2 		= hasScalars2 ? (scalar2 - colorMapRange2.x) / colorMapRange2.z : 0;
+    vScalar3 		= hasScalars3 ? (scalar3 - colorMapRange3.x) / colorMapRange3.z : 0;
     vColor 			= hasColors ? color : vec3(0.5);
     vOpacity 		= pointOpacity;
 	
