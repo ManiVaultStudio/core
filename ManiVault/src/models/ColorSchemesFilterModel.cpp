@@ -21,7 +21,7 @@ ColorSchemesFilterModel::ColorSchemesFilterModel(QObject* parent /*= nullptr*/) 
 {
     setRecursiveFilteringEnabled(true);
 
-    connect(&_modeFilterAction, &gui::OptionsAction::selectedOptionsChanged, this, &ColorSchemesFilterModel::invalidateFilter);
+    connect(&_modeFilterAction, &gui::OptionsAction::selectedOptionsChanged, this, &ColorSchemesFilterModel::invalidateModeFilter);
 }
 
 bool ColorSchemesFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
@@ -40,6 +40,11 @@ bool ColorSchemesFilterModel::filterAcceptsRow(int row, const QModelIndex& paren
     }
 
     return SortFilterProxyModel::filterAcceptsRow(row, parent);
+}
+
+void ColorSchemesFilterModel::invalidateModeFilter() {
+    beginFilterChange();
+    endFilterChange(QSortFilterProxyModel::Direction::Rows);
 }
 
 }
