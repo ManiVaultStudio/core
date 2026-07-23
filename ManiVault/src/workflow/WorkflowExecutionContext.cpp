@@ -272,9 +272,9 @@ void WorkflowExecutionContext::info(QString text, QString location, QVariantMap 
 
     if (_reportNode) {
         const auto parentContext    = getParent();
-        const auto parentId         = parentContext ? parentContext->getId().toString(QUuid::WithoutBraces) : QString{};
+        const auto parentContextId  = parentContext ? parentContext->getId().toString(QUuid::WithoutBraces) : QString{};
 
-        _reportNode->addMessage(SeverityLevel::Info, getName(), text, location, details, parentId);
+        _reportNode->addMessage(SeverityLevel::Info, getName(), text, location, details, getId().toString(QUuid::WithoutBraces), parentContextId);
     }
 }
 

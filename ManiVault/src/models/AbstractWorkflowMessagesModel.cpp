@@ -38,15 +38,7 @@ QString AbstractWorkflowMessagesModel::Item::getTooltip() const
     if (map.isEmpty())
         return {};
 
-    return QString(
-        "<p><b>Event details</b></p><p>%1</p>"
-    ).arg(variantMapToHtml(map));
-
-    return QString(
-        "<div style='background:%1; color:%2; padding:6px; border: 1px solid %3;'>"
-        "<div style='margin-left:8px; margin-bottom: 1px; font-size:14px; font-weight:bold;'>%4</div><p style='margin-top:0px;'>%5</p>"
-        "</div>"
-    ).arg(QToolTip::palette().color(QPalette::ToolTipBase).name(), QToolTip::palette().color(QPalette::ToolTipText).name(), QToolTip::palette().color(QPalette::Text).name(), "Event details", variantMapToHtml(map));
+    return QString("<p><b>Event details</b></p><p>%1</p>").arg(variantMapToHtml(map));
 }
 
 QVariant AbstractWorkflowMessagesModel::LevelItem::data(int role /*= Qt::UserRole + 1*/) const
@@ -174,6 +166,43 @@ QVariant AbstractWorkflowMessagesModel::TimeStampItem::data(int role /*= Qt::Use
     return Item::data(role);
 }
 
+QVariant AbstractWorkflowMessagesModel::IdItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	        return getWorkflowMessage()->id;
+	    case Qt::DisplayRole:
+	        return data(Qt::EditRole).toString();
+
+	    case Qt::ToolTipRole:
+	        return data(Qt::DisplayRole).toString();
+
+	    default:
+	        break;
+    }
+
+    return Item::data(role);
+}
+
+QVariant AbstractWorkflowMessagesModel::ParentIdItem::data(int role /*= Qt::UserRole + 1*/) const
+{
+    switch (role) {
+	    case Qt::EditRole:
+	        return getWorkflowMessage()->parentId;
+
+	    case Qt::DisplayRole:
+	        return data(Qt::EditRole).toString();
+
+	    case Qt::ToolTipRole:
+	        return data(Qt::DisplayRole).toString();
+
+	    default:
+	        break;
+    }
+
+    return Item::data(role);
+}
+
 AbstractWorkflowMessagesModel::AbstractWorkflowMessagesModel(QObject* parent) :
     StandardItemModel(parent)
 {
@@ -201,6 +230,12 @@ QVariant AbstractWorkflowMessagesModel::headerData(int section, Qt::Orientation 
 
         case Column::TimeStamp:
             return TimeStampItem::headerData(orientation, role);
+
+        case Column::ID:
+            return IdItem::headerData(orientation, role);
+
+        case Column::ParentID:
+            return ParentIdItem::headerData(orientation, role);
 
         default:
             break;

@@ -29,6 +29,8 @@ public:
         Location,
         Details,
         TimeStamp,
+        ID,
+        ParentID,
 
         Count
     };
@@ -257,6 +259,72 @@ public:
         }
     };
 
+    /** Item class for displaying the workflow message parent ID */
+    class CORE_EXPORT IdItem final : public Item {
+    public:
+
+        /** No need for specialized constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "ID";
+
+	            case Qt::ToolTipRole:
+	                return "Workflow message ID";
+            }
+
+            return {};
+        }
+    };
+
+    /** Item class for displaying the workflow message parent ID */
+    class CORE_EXPORT ParentIdItem final : public Item {
+    public:
+
+        /** No need for specialized constructor */
+        using Item::Item;
+
+        /**
+         * Get model data for \p role
+         * @return Data for \p role in variant form
+         */
+        QVariant data(int role = Qt::UserRole + 1) const override;
+
+        /**
+         * Get header data for \p orientation and \p role
+         * @param orientation Horizontal/vertical
+         * @param role Data role
+         * @return Header data
+         */
+        static QVariant headerData(Qt::Orientation orientation, int role) {
+            switch (role) {
+	            case Qt::DisplayRole:
+	            case Qt::EditRole:
+	                return "Parent ID";
+
+	            case Qt::ToolTipRole:
+	                return "Workflow message parent ID";
+            }
+
+            return {};
+        }
+    };
+
 protected:
 
     /** Convenience class for combining items in a row */
@@ -278,6 +346,8 @@ protected:
             append(new LocationItem(sharedMessage));
             append(new DetailsItem(sharedMessage));
             append(new TimeStampItem(sharedMessage));
+            append(new IdItem(sharedMessage));
+            append(new ParentIdItem(sharedMessage));
         }
     };
 
