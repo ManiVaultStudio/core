@@ -30,6 +30,7 @@ struct CORE_EXPORT WorkflowMessage
     QString             text;                                       /**< Human-readable message text */
     QVariantMap         details;                                    /**< Structured message details */
     QDateTime           timestamp = QDateTime::currentDateTime();   /**< Time when the message was created */
+    QString             parentId;                                   /**< Optional parent message ID for hierarchical message organization (mirrors the workflow execution context identifier) */
 };
 
 /** Shared immutable workflow message reference. */

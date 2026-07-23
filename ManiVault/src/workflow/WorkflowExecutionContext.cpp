@@ -271,7 +271,10 @@ void WorkflowExecutionContext::info(QString text, QString location, QVariantMap 
         qDebug().noquote() << message;
 
     if (_reportNode) {
-        _reportNode->addMessage(SeverityLevel::Info, getName(), text, location, details);
+        const auto parentContext    = getParent();
+        const auto parentId         = parentContext ? parentContext->getId().toString(QUuid::WithoutBraces) : QString{};
+
+        _reportNode->addMessage(SeverityLevel::Info, getName(), text, location, details, parentId);
     }
 }
 
@@ -287,8 +290,12 @@ void WorkflowExecutionContext::warning(QString text, QString location, QVariantM
     if (!message.isEmpty())
         qDebug().noquote() << message;
 
-	if (_reportNode)
-		_reportNode->addMessage(SeverityLevel::Warning, getName(), std::move(text), std::move(location), std::move(details));
+	if (_reportNode) {
+        const auto parentContext    = getParent();
+        const auto parentId         = parentContext ? parentContext->getId().toString(QUuid::WithoutBraces) : QString{};
+
+        _reportNode->addMessage(SeverityLevel::Warning, getName(), std::move(text), std::move(location), std::move(details), parentId);
+	}
 }
 
 void WorkflowExecutionContext::error(QString text, QString location, QVariantMap details) const
@@ -321,13 +328,12 @@ void WorkflowExecutionContext::error(QString text, QString location, QVariantMap
     if (!message.isEmpty())
         qDebug().noquote() << message;
 
-    if (_reportNode)
-        _reportNode->addMessage(
-            SeverityLevel::Error,
-            getName(),
-            std::move(text),
-            std::move(location),
-            std::move(details));
+    if (_reportNode) {
+	    const auto parentContext    = getParent();
+    	const auto parentId         = parentContext ? parentContext->getId().toString(QUuid::WithoutBraces) : QString{};
+
+    	_reportNode->addMessage(SeverityLevel::Error, getName(), std::move(text), std::move(location), std::move(details), parentId);
+    }
 }
 
 void WorkflowExecutionContext::setProgress(double value) const

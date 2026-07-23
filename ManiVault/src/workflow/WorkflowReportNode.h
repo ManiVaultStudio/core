@@ -56,8 +56,9 @@ public:
      * @param text The main text or content of the message.
      * @param location The specific location in the code or workflow where the message was generated (e.g., function name, line number).
      * @param details Additional details or metadata associated with the message (optional).
+     * @param parentId Optional parent message ID for hierarchical message organization (default is empty).
      */
-    void addMessage(util::SeverityLevel level, const QString& emitter, const QString& text, const QString& location, const QVariantMap& details = {});
+    void addMessage(util::SeverityLevel level, const QString& emitter, const QString& text, const QString& location, const QVariantMap& details = {}, const QString& parentId = "");
 
     /**
      * @brief Retrieves the name of this report node.
