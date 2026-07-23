@@ -11,14 +11,10 @@ on:
   pull_request:
   workflow_dispatch:
 
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
-
 # Get centrally defined build matrix
 jobs:
   prepare_matrix:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       matrix: ${{ steps.matrix_setup.outputs.matrix }}
     steps:
@@ -41,14 +37,14 @@ jobs:
     steps:
       - name: Checkout the source
         if: ${{ github.event_name != 'pull_request'}}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-depth: 0
 
       - name: Checkout the source (pull_request version)
         if: ${{ github.event_name == 'pull_request'}}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           submodules: recursive
@@ -60,12 +56,12 @@ jobs:
           sudo xcode-select -switch /Applications/Xcode_${{matrix.build-xcode-version}}.app
           
       - name: Setup python version
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Start ssh key agent
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.RULESSUPPORT_DEPLOY_KEY }}
 
