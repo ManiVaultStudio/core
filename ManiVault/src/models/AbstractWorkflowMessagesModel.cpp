@@ -171,6 +171,7 @@ QVariant AbstractWorkflowMessagesModel::IdItem::data(int role /*= Qt::UserRole +
     switch (role) {
 	    case Qt::EditRole:
 	        return getWorkflowMessage()->id;
+
 	    case Qt::DisplayRole:
 	        return data(Qt::EditRole).toString();
 

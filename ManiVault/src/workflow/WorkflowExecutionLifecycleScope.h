@@ -87,6 +87,14 @@ public:
     void fail(util::SeverityLevel severity, const QString& message, QVariantMap details = {});
 
     /**
+     * @brief Reports the context as failed without a message and completes the lifecycle scope.
+     *
+     * Calling this function prevents the destructor from reporting a successful finish.
+     * This should normally be called from an exception handler before rethrowing the exception.
+     */
+    void failWithoutMessage();
+
+    /**
      * @brief Reports successful completion.
      *
      * The reported duration is the elapsed time measured since construction. Calling this

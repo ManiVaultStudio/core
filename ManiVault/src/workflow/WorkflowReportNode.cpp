@@ -27,6 +27,11 @@ WorkflowReportNode::SharedWorkflowReportNode WorkflowReportNode::createChild(con
 
 void WorkflowReportNode::addMessage(SeverityLevel level, const QString& emitter, const QString& text, const QString& location, const QVariantMap& details, const QString& contextId, const QString& parentContextId)
 {
+    qDebug()
+        << "addMessage"
+        << text
+        << "this =" << this;
+
 	QMutexLocker lock(&_mutex);
 
     thread_local bool inAddMessage = false;

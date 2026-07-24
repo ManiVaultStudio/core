@@ -26,6 +26,8 @@ namespace mv {
         getSeverityLevelName(SeverityLevel::Fatal)
     })
 {
+	setRecursiveFilteringEnabled(true);
+
     connect(&_filterLevelAction, &gui::OptionsAction::selectedOptionsChanged, this, &WorkflowMessagesFilterModel::invalidateFilter);
 
     _filterLevelAction.setStretch(2);

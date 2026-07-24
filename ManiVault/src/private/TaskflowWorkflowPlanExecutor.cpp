@@ -206,16 +206,13 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
             std::rethrow_exception(primaryException);
         }
         catch (const ManiVaultException& exception) {
-            rootContext->error(exception.getMessage(), exception.getWhere(), exception.getDetails());
-            lifecycle.fail(exception.getSeverity(), exception.getMessage(), exception.getDetails());
+            lifecycle.failWithoutMessage();
 
             try {
                 runStages(workflowPlan.getOnFailureStages());
             }
             catch (const std::exception& failureException) {
-                rootContext->error(
-                    QString("Failure stages failed: %1").arg(QString::fromUtf8(failureException.what())),
-                    workflowPlan.getName());
+                rootContext->error(QString("Failure stages failed: %1").arg(QString::fromUtf8(failureException.what())), workflowPlan.getName());
             }
             catch (...) {
                 rootContext->error("Failure stages failed with unknown error", workflowPlan.getName());
@@ -227,16 +224,13 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
         catch (const std::exception& exception) {
             const auto message = QString::fromUtf8(exception.what());
 
-            rootContext->error(message, workflowPlan.getName());
-            lifecycle.fail(SeverityLevel::Error, message);
+            lifecycle.failWithoutMessage();
 
             try {
                 runStages(workflowPlan.getOnFailureStages());
             }
             catch (const std::exception& failureException) {
-                rootContext->error(
-                    QString("Failure stages failed: %1").arg(QString::fromUtf8(failureException.what())),
-                    workflowPlan.getName());
+                rootContext->error(QString("Failure stages failed: %1").arg(QString::fromUtf8(failureException.what())), workflowPlan.getName());
             }
             catch (...) {
                 rootContext->error("Failure stages failed with unknown error", workflowPlan.getName());
@@ -245,16 +239,13 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
             //std::rethrow_exception(primaryException);
         }
         catch (...) {
-            rootContext->error("Workflow failed with unknown error", workflowPlan.getName());
-            lifecycle.fail(SeverityLevel::Error, "Workflow failed with unknown error");
+            lifecycle.failWithoutMessage();
 
             try {
                 runStages(workflowPlan.getOnFailureStages());
             }
             catch (const std::exception& failureException) {
-                rootContext->error(
-                    QString("Failure stages failed: %1").arg(QString::fromUtf8(failureException.what())),
-                    workflowPlan.getName());
+                rootContext->error(QString("Failure stages failed: %1").arg(QString::fromUtf8(failureException.what())), workflowPlan.getName());
             }
             catch (...) {
                 rootContext->error("Failure stages failed with unknown error", workflowPlan.getName());
@@ -268,17 +259,13 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
         runStages(workflowPlan.getFinallyStages());
     }
     catch (const std::exception& exception) {
-        rootContext->error(
-            QString("Finally stages failed: %1").arg(QString::fromUtf8(exception.what())),
-            workflowPlan.getName());
+        rootContext->error(QString("Finally stages failed: %1").arg(QString::fromUtf8(exception.what())), workflowPlan.getName());
 
         if (!primaryException)
             throw;
     }
     catch (...) {
-        rootContext->error(
-            "Finally stages failed with unknown error",
-            workflowPlan.getName());
+        rootContext->error("Finally stages failed with unknown error", workflowPlan.getName());
 
         if (!primaryException)
             throw;
@@ -434,12 +421,17 @@ void TaskflowWorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, Shar
 
         lifecycle.finish();
     }
-    catch (const std::exception& e) {
-        jobContext->reportFailed(SeverityLevel::Error, QString::fromUtf8(e.what()));
+    catch (const ManiVaultException& exception) {
+        lifecycle.fail(exception.getSeverity(), exception.getMessage(), exception.getDetails());
+        throw;
+    }
+    catch (const std::exception& exception) {
+        lifecycle.fail(SeverityLevel::Error, QString::fromUtf8(exception.what()));
+
         throw;
     }
     catch (...) {
-        jobContext->reportFailed(SeverityLevel::Error, "Unknown exception");
+        lifecycle.fail(SeverityLevel::Error, "Unknown exception");
         throw;
     }
 }
@@ -534,19 +526,15 @@ void TaskflowWorkflowPlanExecutor::executeCompiledJob(const WorkflowPlan::Job& j
         lifecycle.finish();
     }
     catch (const ManiVaultException& maniVaultException) {
-        childContext->reportFailed(maniVaultException.getSeverity(), maniVaultException.getMessage(), maniVaultException.getDetails());
+        lifecycle.fail(maniVaultException.getSeverity(), maniVaultException.getMessage(), maniVaultException.getDetails());
         throw;
     }
     catch (const std::exception& exception) {
-        childContext->reportFailed(
-            SeverityLevel::Error,
-            QString::fromUtf8(exception.what()));
+        lifecycle.fail(SeverityLevel::Error, QString::fromUtf8(exception.what()));
         throw;
     }
     catch (...) {
-        childContext->reportFailed(
-            SeverityLevel::Error,
-            "Unknown exception");
+        lifecycle.fail(SeverityLevel::Error, "Unknown exception");
         throw;
     }
 }

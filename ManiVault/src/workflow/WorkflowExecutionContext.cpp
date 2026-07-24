@@ -292,9 +292,9 @@ void WorkflowExecutionContext::warning(QString text, QString location, QVariantM
 
 	if (_reportNode) {
         const auto parentContext    = getParent();
-        const auto parentId         = parentContext ? parentContext->getId().toString(QUuid::WithoutBraces) : QString{};
+        const auto parentContextId  = parentContext ? parentContext->getId().toString(QUuid::WithoutBraces) : QString{};
 
-        _reportNode->addMessage(SeverityLevel::Warning, getName(), std::move(text), std::move(location), std::move(details), parentId);
+        _reportNode->addMessage(SeverityLevel::Warning, getName(), std::move(text), std::move(location), std::move(details), getId().toString(QUuid::WithoutBraces), parentContextId);
 	}
 }
 
@@ -330,9 +330,9 @@ void WorkflowExecutionContext::error(QString text, QString location, QVariantMap
 
     if (_reportNode) {
 	    const auto parentContext    = getParent();
-    	const auto parentId         = parentContext ? parentContext->getId().toString(QUuid::WithoutBraces) : QString{};
+    	const auto parentContextId  = parentContext ? parentContext->getId().toString(QUuid::WithoutBraces) : QString{};
 
-    	_reportNode->addMessage(SeverityLevel::Error, getName(), std::move(text), std::move(location), std::move(details), parentId);
+    	_reportNode->addMessage(SeverityLevel::Error, getName(), std::move(text), std::move(location), std::move(details), getId().toString(QUuid::WithoutBraces), parentContextId);
     }
 }
 
@@ -474,6 +474,14 @@ void WorkflowExecutionContext::syncTaskProgress() const
     	if (task)
 			task->setProgress(progress);
     }, Qt::QueuedConnection);
+}
+
+void WorkflowExecutionContext::markFailed()
+{
+	if (_progressNode)
+		_progressNode->markFailed();
+
+	syncTaskProgress();
 }
 
 }

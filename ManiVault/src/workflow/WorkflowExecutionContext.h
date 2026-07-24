@@ -200,6 +200,9 @@ public:
      */
     void error(QString text, QString location = {}, QVariantMap details = {}) const;
 
+    /** Marks this context as failed in the progress node and synchronizes task progress. */
+    void markFailed();
+
     /** Sets this context progress and synchronizes task progress. */
     void setProgress(double value) const;
 
