@@ -15,6 +15,17 @@ namespace mv::workflow
 {
 
 /**
+ * @brief Workflow message kind.
+ *
+ * Workflow messages are categorized into different kinds to distinguish their purpose and usage.
+ */
+enum class MessageKind
+{
+    Lifecycle,      /**< Message related to the lifecycle of a workflow entity (e.g., start, finish, fail) */
+    Diagnostic      /**< Message providing diagnostic information about workflow execution (e.g., warnings, errors, info) */
+};
+
+/**
  * @brief Message generated during workflow execution.
  *
  * Workflow messages are stored in report nodes and may also be formatted for
@@ -30,8 +41,8 @@ struct CORE_EXPORT WorkflowMessage
     QString             text;                                       /**< Human-readable message text */
     QVariantMap         details;                                    /**< Structured message details */
     QDateTime           timestamp = QDateTime::currentDateTime();   /**< Time when the message was created */
-    QString             id;                                         /**< Unique message ID for hierarchical message organization (mirrors the workflow execution context identifier) */
-    QString             parentId;                                   /**< Optional parent message ID for hierarchical message organization (mirrors the parent workflow execution context identifier) */
+    QString             contextId;                                  /**< Unique context ID for hierarchical message organization (mirrors the workflow execution context identifier) */
+    QString             parentContextId;                            /**< Optional parent context ID for hierarchical message organization (mirrors the parent workflow execution context identifier) */
 };
 
 /** Shared immutable workflow message reference. */

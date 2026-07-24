@@ -27,7 +27,7 @@ void WorkflowMessagesTreeModel::setWorkflowResult(const workflow::SharedWorkflow
 
     	for (const auto& message : messages) {
 
-            const auto matches = match(index(0, static_cast<int>(Column::ID)), Qt::DisplayRole, message.parentId, 1, Qt::MatchExactly | Qt::MatchRecursive);
+            const auto matches = match(index(0, static_cast<int>(Column::ID)), Qt::DisplayRole, message.parentContextId, 1, Qt::MatchExactly | Qt::MatchRecursive);
 
             if (!matches.isEmpty()) {
                 const auto parentIndex  = matches.first().siblingAtColumn(0);

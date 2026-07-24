@@ -170,7 +170,7 @@ QVariant AbstractWorkflowMessagesModel::IdItem::data(int role /*= Qt::UserRole +
 {
     switch (role) {
 	    case Qt::EditRole:
-	        return getWorkflowMessage()->id;
+	        return getWorkflowMessage()->contextId;
 
 	    case Qt::DisplayRole:
 	        return data(Qt::EditRole).toString();
@@ -189,7 +189,7 @@ QVariant AbstractWorkflowMessagesModel::ParentIdItem::data(int role /*= Qt::User
 {
     switch (role) {
 	    case Qt::EditRole:
-	        return getWorkflowMessage()->parentId;
+	        return getWorkflowMessage()->parentContextId;
 
 	    case Qt::DisplayRole:
 	        return data(Qt::EditRole).toString();

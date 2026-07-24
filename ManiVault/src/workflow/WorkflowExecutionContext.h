@@ -179,8 +179,9 @@ public:
      * @param text The main text or content of the informational message to be added to the report node.
      * @param location The specific location in the code or workflow where the informational message was generated (e.g., function name, line number). This can be used to provide additional context for the message and help with debugging and tracing.
      * @param details Additional details or metadata associated with the informational message (optional). This can be used to provide further context or structured information related to the message, such as variable values, execution state, or other relevant data that may assist in understanding the message and its implications within the workflow execution.
+     * @param kind The kind of message being added, which can be either Lifecycle or Diagnostic. This parameter allows for categorizing the message based on its purpose and usage within the workflow execution context.
      */
-    void info(QString text, QString location = {}, QVariantMap details = {}) const;
+    void info(QString text, QString location = {}, QVariantMap details = {}, MessageKind kind = MessageKind::Diagnostic) const;
 
     /**
      * @brief Adds a warning message.
@@ -188,8 +189,9 @@ public:
      * @param text The main text or content of the warning message to be added to the report node.
      * @param location The specific location in the code or workflow where the warning message was generated (e.g., function name, line number). This can be used to provide additional context for the message and help with debugging and tracing.
      * @param details Additional details or metadata associated with the warning message (optional). This can be used to provide further context or structured information related to the message, such as variable values, execution state, or other relevant data that may assist in understanding the message and its implications within the workflow execution.
+     * * @param kind The kind of message being added, which can be either Lifecycle or Diagnostic. This parameter allows for categorizing the message based on its purpose and usage within the workflow execution context.
      */
-    void warning(QString text, QString location = {}, QVariantMap details = {}) const;
+    void warning(QString text, QString location = {}, QVariantMap details = {}, MessageKind kind = MessageKind::Diagnostic) const;
 
     /**
      * @brief Adds an error message.
@@ -197,8 +199,9 @@ public:
      * @param text The main text or content of the error message to be added to the report node.
      * @param location The specific location in the code or workflow where the error message was generated (e.g., function name, line number). This can be used to provide additional context for the message and help with debugging and tracing.
      * @param details Additional details or metadata associated with the error message (optional). This can be used to provide further context or structured information related to the message, such as variable values, execution state, or other relevant data that may assist in understanding the message and its implications within the workflow execution.
+     * * @param kind The kind of message being added, which can be either Lifecycle or Diagnostic. This parameter allows for categorizing the message based on its purpose and usage within the workflow execution context.
      */
-    void error(QString text, QString location = {}, QVariantMap details = {}) const;
+    void error(QString text, QString location = {}, QVariantMap details = {}, MessageKind kind = MessageKind::Diagnostic) const;
 
     /** Marks this context as failed in the progress node and synchronizes task progress. */
     void markFailed();
@@ -329,6 +332,15 @@ private:
 
     /** Synchronizes the GUI task progress from the shared execution state. */
     void syncTaskProgress() const;
+
+    /**
+     * @brief Adds a lifecycle message to the report node and console output.
+     * @param severity The severity level of the message.
+     * @param text The message text.
+     * @param location The location associated with the message.
+     * @param details Additional details for the message.
+     */
+    void addLifecycleMessage(util::SeverityLevel severity, QString text, QString location, QVariantMap details) const;
 
 private:
 

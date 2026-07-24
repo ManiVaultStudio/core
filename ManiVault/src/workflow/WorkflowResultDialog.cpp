@@ -65,13 +65,6 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
         layout->addWidget(messageLabel);
     }
 
-    for (const auto& message : workflowResult->getMessages()) {
-        qDebug().noquote()
-            << "id:" << message.id
-            << "parentId:" << message.parentId
-            << "text:" << message.text;
-    }
-
     _messagesTreeModel.setWorkflowResult(workflowResult);
     _messagesFilterModel.setSourceModel(&_messagesTreeModel);
 
