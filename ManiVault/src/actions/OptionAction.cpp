@@ -643,7 +643,8 @@ void OptionAction::StringsFilterModel::setTextFilter(const QString& textFilter)
 
     _textFilter = textFilter;
 
-    invalidateFilter(); // Reapply the filter
+    beginFilterChange();
+    endFilterChange(QSortFilterProxyModel::Direction::Rows);
 }
 
 OptionAction::LazyIndicesModel::LazyIndicesModel(QObject* parent): QAbstractListModel(parent)

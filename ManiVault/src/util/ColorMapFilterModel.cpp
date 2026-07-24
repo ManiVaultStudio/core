@@ -33,7 +33,8 @@ void ColorMapFilterModel::setType(const ColorMap::Type& type)
 
     _type = type;
 
-    invalidateFilter();
+    beginFilterChange();
+    endFilterChange(QSortFilterProxyModel::Direction::Rows);
 }
 
 }

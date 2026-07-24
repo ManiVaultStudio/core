@@ -41,6 +41,10 @@ public: // Action getters
     gui::OptionsAction& getModeFilterAction() { return _modeFilterAction; }
 
 private:
+    /** Invalidates the row filtering after the mode filter action changes */
+    void invalidateModeFilter();
+
+  private:
     gui::OptionsAction  _modeFilterAction;  /** Filter action for the color scheme mode */
 };
 
