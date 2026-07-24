@@ -397,43 +397,7 @@ void TaskflowWorkflowPlanExecutor::executeJobOnWorkerThread(
 
 void TaskflowWorkflowPlanExecutor::executeJob(const WorkflowPlan::Job& job, SharedWorkflowExecutionContext jobContext)
 {
-    jobContext = requireContext(jobContext, __FUNCTION__);
-
-    WorkflowExecutionLifecycleScope lifecycle(jobContext);
-
-    try {
-        switch (job.getThreadAffinity()) {
-	        case WorkflowPlan::JobThreadAffinity::CurrentWorkerThread:
-	            executeJobOnWorkerThread(job, jobContext);
-	            break;
-
-	        case WorkflowPlan::JobThreadAffinity::GuiThread:
-	            executeJobOnGuiThread(job, jobContext);
-	            break;
-        }
-
-        if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Atomic) {
-            jobContext->setProgress(1.0);
-        }
-        else if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Automatic && !jobContext->hasProgressChildren()) {
-            jobContext->setProgress(1.0);
-        }
-
-        lifecycle.finish();
-    }
-    catch (const ManiVaultException& exception) {
-        lifecycle.fail(exception.getSeverity(), exception.getMessage(), exception.getDetails());
-        throw;
-    }
-    catch (const std::exception& exception) {
-        lifecycle.fail(SeverityLevel::Error, QString::fromUtf8(exception.what()));
-
-        throw;
-    }
-    catch (...) {
-        lifecycle.fail(SeverityLevel::Error, "Unknown exception");
-        throw;
-    }
+    executeJobImpl(job, std::move(jobContext), true);
 }
 
 void TaskflowWorkflowPlanExecutor::ensureExecutor(const WorkflowOptions& options)
@@ -489,19 +453,16 @@ void TaskflowWorkflowPlanExecutor::addWorkflowFinishedNotification(const QString
     }, Qt::QueuedConnection);
 }
 
-void TaskflowWorkflowPlanExecutor::executeCompiledJob(const WorkflowPlan::Job& job, tf::Subflow& subflow, SharedWorkflowExecutionContext jobContext)
+void TaskflowWorkflowPlanExecutor::executeCompiledJob(const WorkflowPlan::Job& job, tf::Subflow& subflow, SharedWorkflowExecutionContext jobContext, bool reportLifecycle)
 {
     jobContext = requireContext(jobContext, __FUNCTION__);
 
     if (!job.isNestedWorkflow()) {
-        executeJob(job, jobContext);
+        executeJobImpl(job, jobContext, reportLifecycle);
         return;
     }
 
-    auto childContext = jobContext->createNestedWorkflowChild(
-        job.getName(),
-        job.getWeight(),
-        job.getProgressMode());
+    auto childContext = jobContext->createNestedWorkflowChild(job.getName(), job.getWeight(), job.getProgressMode());
 
     Q_ASSERT(childContext);
     Q_ASSERT(childContext->getState() == jobContext->getState());
@@ -581,4 +542,65 @@ void TaskflowWorkflowPlanExecutor::runTaskflowBlocking(tf::Taskflow& taskflow, c
 std::string TaskflowWorkflowPlanExecutor::makeTraceName(const QString& kind, const QString& name)
 {
 	return QString("%1 | %2").arg(kind, name).toStdString();
+}
+
+void TaskflowWorkflowPlanExecutor::executeJobImpl(const mv::workflow::WorkflowPlan::Job& job, mv::workflow::SharedWorkflowExecutionContext jobContext, bool reportLifecycle)
+{
+    jobContext = requireContext(jobContext, __FUNCTION__);
+
+    std::optional<WorkflowExecutionLifecycleScope> lifecycle;
+
+    if (reportLifecycle)
+        lifecycle.emplace(jobContext);
+
+    try {
+        switch (job.getThreadAffinity()) {
+	        case WorkflowPlan::JobThreadAffinity::CurrentWorkerThread:
+	            executeJobOnWorkerThread(job, jobContext);
+	            break;
+
+	        case WorkflowPlan::JobThreadAffinity::GuiThread:
+	            executeJobOnGuiThread(job, jobContext);
+	            break;
+        }
+
+        if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Atomic) {
+            jobContext->setProgress(1.0);
+        } else if (job.getProgressMode() == WorkflowPlan::JobProgressMode::Automatic && !jobContext->hasProgressChildren()) {
+            jobContext->setProgress(1.0);
+        }
+
+        if (lifecycle)
+            lifecycle->finish();
+    }
+    catch (const ManiVaultException& exception) {
+        if (lifecycle) {
+            lifecycle->fail(exception.getSeverity(), exception.getMessage(), exception.getDetails());
+        } else {
+            jobContext->reportFailed(exception.getSeverity(), exception.getMessage(), exception.getDetails());
+        }
+
+        throw;
+    }
+    catch (const std::exception& exception) {
+        const auto message = QString::fromUtf8(exception.what());
+
+        if (lifecycle) {
+            lifecycle->fail(SeverityLevel::Error, message);
+        } else {
+            jobContext->reportFailed(SeverityLevel::Error, message);
+        }
+
+        throw;
+    }
+    catch (...) {
+        if (lifecycle) {
+            lifecycle->fail(SeverityLevel::Error, "Unknown exception");
+        }
+        else {
+            jobContext->reportFailed(SeverityLevel::Error, "Unknown exception");
+        }
+
+        throw;
+    }
 }
