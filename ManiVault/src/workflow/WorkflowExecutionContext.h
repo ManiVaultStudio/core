@@ -342,6 +342,13 @@ private:
      */
     void addLifecycleMessage(util::SeverityLevel severity, QString text, QString location, QVariantMap details) const;
 
+    /**
+     * @brief Builds console output details for report messages.
+     * @param details Additional details to include in the console output.
+     * @return Variant map with context identity, hierarchy, and timing details for console output.
+     */
+    QVariantMap makeConsoleDetails(const QVariantMap& details) const;
+
 private:
 
     friend class WorkflowExecutionScope;

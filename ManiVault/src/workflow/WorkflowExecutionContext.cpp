@@ -272,7 +272,8 @@ void WorkflowExecutionContext::info(QString text, QString location, QVariantMap 
     QMutexLocker lock(&mutex);
 
     const auto maxDepth         = _state ? _state->getOptions().reporting.maxLoggingDepth : std::numeric_limits<int>::max();
-    const auto consoleMessage   = WorkflowConsoleFormatter::format(SeverityLevel::Info, text, location, details, maxDepth);
+    const auto consoleDetails   = makeConsoleDetails(details);
+    const auto consoleMessage   = WorkflowConsoleFormatter::format(SeverityLevel::Info, text, location, consoleDetails, maxDepth);
 
     if (!consoleMessage.isEmpty())
         qDebug().noquote() << consoleMessage;
@@ -299,7 +300,8 @@ void WorkflowExecutionContext::warning(QString text, QString location, QVariantM
     QMutexLocker lock(&mutex);
 
     const auto maxDepth         = _state ? _state->getOptions().reporting.maxLoggingDepth : std::numeric_limits<int>::max();
-    const auto consoleMessage   = WorkflowConsoleFormatter::format(SeverityLevel::Warning, text, location, details, maxDepth);
+    const auto consoleDetails   = makeConsoleDetails(details);
+    const auto consoleMessage   = WorkflowConsoleFormatter::format(SeverityLevel::Warning, text, location, consoleDetails, maxDepth);
 
     if (!consoleMessage.isEmpty())
         qDebug().noquote() << consoleMessage;
@@ -335,16 +337,7 @@ void WorkflowExecutionContext::error(QString text, QString location, QVariantMap
     if (hasDiagnosticId && !alreadyPrinted)
         printedDiagnosticIds.insert(diagnosticId);
 
-    QVariantMap consoleDetails = details;
-
-    if (alreadyPrinted) {
-        consoleDetails.remove("DiagnosticId");
-        consoleDetails.remove("Key");
-        consoleDetails.remove("SerializationName");
-        consoleDetails.remove("SourceLocation");
-        consoleDetails.remove("VariantMap");
-    }
-
+    const auto consoleDetails = makeConsoleDetails(details);
     const auto consoleMessage = WorkflowConsoleFormatter::format(SeverityLevel::Error, text, location, consoleDetails, alreadyPrinted ? 0 : maxDepth);
 
     if (!consoleMessage.isEmpty())
@@ -515,6 +508,24 @@ void WorkflowExecutionContext::addLifecycleMessage(SeverityLevel severity, QStri
 	const auto parentContextId = parentContext ? parentContext->getId().toString(QUuid::WithoutBraces) : QString{};
 
 	_reportNode->addMessage(severity, getName(), std::move(text), std::move(location), std::move(details), getId().toString(QUuid::WithoutBraces), parentContextId);
+}
+
+QVariantMap WorkflowExecutionContext::makeConsoleDetails(const QVariantMap& details) const
+{
+    auto consoleDetails = details;
+
+    const auto stackTraceSize = consoleDetails.value("StackTrace").toList().size();
+
+    consoleDetails.remove("StackTrace");
+    consoleDetails.remove("StackTraceSummary");
+
+    if (stackTraceSize > 0) {
+        consoleDetails["StackTrace"] =
+            QString("%1 frames; see the workflow result dialog for details")
+            .arg(stackTraceSize);
+    }
+
+    return consoleDetails;
 }
 
 void WorkflowExecutionContext::markFailed()
