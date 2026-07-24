@@ -1220,12 +1220,14 @@ set(PUBLIC_HUD_MODEL_FILES
 set(PUBLIC_WORKFLOW_MESSAGES_MODEL_HEADERS
     src/models/AbstractWorkflowMessagesModel.h
     src/models/WorkflowMessagesListModel.h
+    src/models/WorkflowMessagesTreeModel.h
     src/models/WorkflowMessagesFilterModel.h
 )
 
 set(PUBLIC_WORKFLOW_MESSAGES_MODEL_SOURCES
     src/models/AbstractWorkflowMessagesModel.cpp
     src/models/WorkflowMessagesListModel.cpp
+    src/models/WorkflowMessagesTreeModel.cpp
     src/models/WorkflowMessagesFilterModel.cpp
 )
 

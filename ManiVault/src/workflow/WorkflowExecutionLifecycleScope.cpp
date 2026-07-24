@@ -27,11 +27,19 @@ WorkflowExecutionLifecycleScope::~WorkflowExecutionLifecycleScope()
 
 void WorkflowExecutionLifecycleScope::fail(SeverityLevel severity, const QString& message, QVariantMap details /*= {}*/)
 {
-	if (_context && !_finished) {
-		_context->reportFailed(severity, message, std::move(details));
+    if (_context && !_finished) {
+        _context->reportFailed(severity, message, std::move(details));
 
-		_finished = true;
-	}
+        _finished = true;
+    }
+}
+
+void WorkflowExecutionLifecycleScope::failWithoutMessage()
+{
+    if (_context && !_finished) {
+        _context->markFailed();
+        _finished = true;
+    }
 }
 
 void WorkflowExecutionLifecycleScope::finish(std::uint64_t durationMs)

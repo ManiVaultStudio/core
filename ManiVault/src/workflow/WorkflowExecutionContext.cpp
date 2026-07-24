@@ -142,7 +142,9 @@ bool WorkflowExecutionContext::isRootExecution() const
 
 void WorkflowExecutionContext::reportStarted() const
 {
-    info(_name, {}, makeLifecycleDetails("started"));
+    const auto details = makeLifecycleDetails("started");
+
+    info(_name, {}, details, MessageKind::Lifecycle);
 
     if (_progressNode)
         _progressNode->markRunning();
@@ -150,11 +152,12 @@ void WorkflowExecutionContext::reportStarted() const
 
 void WorkflowExecutionContext::reportFinished(std::uint64_t durationMs)
 {
-    info(_name, {}, makeLifecycleDetails("finished", durationMs));
+    const auto details = makeLifecycleDetails("finished", durationMs);
 
-    if (_progressNode) {
+    info(_name, {}, details, MessageKind::Lifecycle);
+
+    if (_progressNode)
         _progressNode->markCompleted();
-    }
 
     syncTaskProgress();
 }
@@ -162,18 +165,22 @@ void WorkflowExecutionContext::reportFinished(std::uint64_t durationMs)
 void WorkflowExecutionContext::reportFailed(SeverityLevel severity, const QString& errorMessage, QVariantMap extraDetails /*= {}*/)
 {
     auto details = makeLifecycleDetails("failed");
+
     details["error"] = errorMessage;
 
     for (auto it = extraDetails.begin(); it != extraDetails.end(); ++it)
         details[it.key()] = it.value();
 
     if (!details.contains("StackTrace")) {
-        const auto stackTrace = mv::errors().getDebugStackTrace();
+        const auto stackTrace =
+            mv::errors().getDebugStackTrace();
+
         if (!stackTrace.isEmpty())
-            details["StackTrace"] = stackTraceToVariantList(stackTrace);
+            details["StackTrace"] =
+            stackTraceToVariantList(stackTrace);
     }
 
-    message(severity, errorMessage, {}, details);
+    message(severity, errorMessage, {}, std::move(details));
 
     if (_progressNode)
         _progressNode->markFailed();
@@ -184,9 +191,10 @@ void WorkflowExecutionContext::reportFailed(SeverityLevel severity, const QStrin
 void WorkflowExecutionContext::reportSkipped(const QString& reason)
 {
     auto details = makeLifecycleDetails("skipped");
-    details["reason"] = reason;
 
-    warning(_name, {}, details);
+	details["reason"] = reason;
+
+    warning(_name, {}, details, MessageKind::Lifecycle);
 
     if (_progressNode)
         _progressNode->markSkipped();
@@ -203,7 +211,7 @@ void WorkflowExecutionContext::reportStageSummary(const WorkflowStageSummary& su
     for (auto it = summaryMap.begin(); it != summaryMap.end(); ++it)
         details[it.key()] = it.value();
 
-    info(_name, {}, details);
+    info(_name, {}, details, MessageKind::Lifecycle);
 }
 
 QVariantMap WorkflowExecutionContext::makeLifecycleDetails(const QString& event, std::uint64_t durationMs /*= 0*/) const
@@ -258,40 +266,63 @@ void WorkflowExecutionContext::message(SeverityLevel severity, QString text, QSt
 	}
 }
 
-void WorkflowExecutionContext::info(QString text, QString location, QVariantMap details) const
+void WorkflowExecutionContext::info(QString text, QString location, QVariantMap details, MessageKind kind) const
 {
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    const auto maxDepth = _state ? _state->getOptions().reporting.maxLoggingDepth : std::numeric_limits<int>::max();
+    const auto maxDepth         = _state ? _state->getOptions().reporting.maxLoggingDepth : std::numeric_limits<int>::max();
+    const auto consoleDetails   = makeConsoleDetails(details);
+    const auto consoleMessage   = WorkflowConsoleFormatter::format(SeverityLevel::Info, text, location, consoleDetails, maxDepth);
 
-    const auto message = WorkflowConsoleFormatter::format(SeverityLevel::Info, text, location, details, maxDepth);
+    if (!consoleMessage.isEmpty())
+        qDebug().noquote() << consoleMessage;
 
-    if (!message.isEmpty())
-        qDebug().noquote() << message;
+    if (!_reportNode)
+        return;
 
-    if (_reportNode) {
-        _reportNode->addMessage(SeverityLevel::Info, getName(), text, location, details);
+    const auto contextId = getId().toString(QUuid::WithoutBraces);
+
+    if (kind == MessageKind::Lifecycle) {
+        const auto parentContext    = getParent();
+        const auto parentContextId  = parentContext ? parentContext->getId().toString(QUuid::WithoutBraces) : QString{};
+
+        _reportNode->addMessage(SeverityLevel::Info, getName(), std::move(text), std::move(location), std::move(details), contextId, parentContextId);
+    }
+    else {
+        _reportNode->addMessage(SeverityLevel::Info, getName(), std::move(text), std::move(location), std::move(details), QUuid::createUuid().toString(QUuid::WithoutBraces), contextId);
     }
 }
 
-void WorkflowExecutionContext::warning(QString text, QString location, QVariantMap details) const
+void WorkflowExecutionContext::warning(QString text, QString location, QVariantMap details, MessageKind kind) const
 {
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    const auto maxDepth = _state ? _state->getOptions().reporting.maxLoggingDepth : std::numeric_limits<int>::max();
-		
-    const auto message = WorkflowConsoleFormatter::format(SeverityLevel::Warning, text, location, details, maxDepth);
+    const auto maxDepth         = _state ? _state->getOptions().reporting.maxLoggingDepth : std::numeric_limits<int>::max();
+    const auto consoleDetails   = makeConsoleDetails(details);
+    const auto consoleMessage   = WorkflowConsoleFormatter::format(SeverityLevel::Warning, text, location, consoleDetails, maxDepth);
 
-    if (!message.isEmpty())
-        qDebug().noquote() << message;
+    if (!consoleMessage.isEmpty())
+        qDebug().noquote() << consoleMessage;
 
-	if (_reportNode)
-		_reportNode->addMessage(SeverityLevel::Warning, getName(), std::move(text), std::move(location), std::move(details));
+    if (!_reportNode)
+        return;
+
+    const auto contextId = getId().toString(QUuid::WithoutBraces);
+
+    if (kind == MessageKind::Lifecycle) {
+        const auto parentContext    = getParent();
+        const auto parentContextId  = parentContext ? parentContext->getId().toString(QUuid::WithoutBraces) : QString{};
+
+        _reportNode->addMessage(SeverityLevel::Warning, getName(),std::move(text), std::move(location), std::move(details), contextId, parentContextId);
+    }
+    else {
+        _reportNode->addMessage(SeverityLevel::Warning, getName(), std::move(text), std::move(location), std::move(details), QUuid::createUuid().toString(QUuid::WithoutBraces), contextId);
+    }
 }
 
-void WorkflowExecutionContext::error(QString text, QString location, QVariantMap details) const
+void WorkflowExecutionContext::error(QString text, QString location, QVariantMap details, MessageKind kind) const
 {
     static QMutex mutex;
     static QSet<QString> printedDiagnosticIds;
@@ -306,28 +337,26 @@ void WorkflowExecutionContext::error(QString text, QString location, QVariantMap
     if (hasDiagnosticId && !alreadyPrinted)
         printedDiagnosticIds.insert(diagnosticId);
 
-    QVariantMap consoleDetails = details;
+    const auto consoleDetails = makeConsoleDetails(details);
+    const auto consoleMessage = WorkflowConsoleFormatter::format(SeverityLevel::Error, text, location, consoleDetails, alreadyPrinted ? 0 : maxDepth);
 
-    if (alreadyPrinted) {
-        consoleDetails.remove("DiagnosticId");
-        consoleDetails.remove("Key");
-        consoleDetails.remove("SerializationName");
-        consoleDetails.remove("SourceLocation");
-        consoleDetails.remove("VariantMap");
+    if (!consoleMessage.isEmpty())
+        qDebug().noquote() << consoleMessage;
+
+    if (!_reportNode)
+        return;
+
+    const auto contextId = getId().toString(QUuid::WithoutBraces);
+
+    if (kind == MessageKind::Lifecycle) {
+        const auto parentContext    = getParent();
+        const auto parentContextId  = parentContext ? parentContext->getId().toString(QUuid::WithoutBraces) : QString{};
+
+        _reportNode->addMessage(SeverityLevel::Error, getName(), std::move(text), std::move(location), std::move(details),contextId, parentContextId);
     }
-
-    const auto message = WorkflowConsoleFormatter::format(SeverityLevel::Error, text, location, consoleDetails, alreadyPrinted ? 0 : maxDepth);
-
-    if (!message.isEmpty())
-        qDebug().noquote() << message;
-
-    if (_reportNode)
-        _reportNode->addMessage(
-            SeverityLevel::Error,
-            getName(),
-            std::move(text),
-            std::move(location),
-            std::move(details));
+    else {
+        _reportNode->addMessage(SeverityLevel::Error, getName(), std::move(text), std::move(location), std::move(details), QUuid::createUuid().toString(QUuid::WithoutBraces), contextId);
+    }
 }
 
 void WorkflowExecutionContext::setProgress(double value) const
@@ -468,6 +497,43 @@ void WorkflowExecutionContext::syncTaskProgress() const
     	if (task)
 			task->setProgress(progress);
     }, Qt::QueuedConnection);
+}
+
+void WorkflowExecutionContext::addLifecycleMessage(SeverityLevel severity, QString text, QString location, QVariantMap details) const
+{
+	if (!_reportNode)
+		return;
+
+	const auto parentContext   = getParent();
+	const auto parentContextId = parentContext ? parentContext->getId().toString(QUuid::WithoutBraces) : QString{};
+
+	_reportNode->addMessage(severity, getName(), std::move(text), std::move(location), std::move(details), getId().toString(QUuid::WithoutBraces), parentContextId);
+}
+
+QVariantMap WorkflowExecutionContext::makeConsoleDetails(const QVariantMap& details) const
+{
+    auto consoleDetails = details;
+
+    const auto stackTraceSize = consoleDetails.value("StackTrace").toList().size();
+
+    consoleDetails.remove("StackTrace");
+    consoleDetails.remove("StackTraceSummary");
+
+    if (stackTraceSize > 0) {
+        consoleDetails["StackTrace"] =
+            QString("%1 frames; see the workflow result dialog for details")
+            .arg(stackTraceSize);
+    }
+
+    return consoleDetails;
+}
+
+void WorkflowExecutionContext::markFailed()
+{
+	if (_progressNode)
+		_progressNode->markFailed();
+
+	syncTaskProgress();
 }
 
 }

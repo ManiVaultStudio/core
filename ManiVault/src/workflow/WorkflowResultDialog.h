@@ -10,7 +10,7 @@
 
 #include "util/SeverityLevel.h"
 
-#include "models/WorkflowMessagesListModel.h"
+#include "models/WorkflowMessagesTreeModel.h"
 #include "models/WorkflowMessagesFilterModel.h"
 
 #include <QDialog>
@@ -46,7 +46,7 @@ public:
 
 private:
 
-    WorkflowMessagesListModel       _messagesListModel;    /**< Source model containing workflow messages */
+    WorkflowMessagesTreeModel       _messagesTreeModel;    /**< Source model containing workflow messages */
     WorkflowMessagesFilterModel     _messagesFilterModel;  /**< Filter model for visible severity levels */
 
 };

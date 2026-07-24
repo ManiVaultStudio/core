@@ -26,7 +26,7 @@ namespace mv {
         getSeverityLevelName(SeverityLevel::Fatal)
     })
 {
-  connect(&_filterLevelAction, &gui::OptionsAction::selectedOptionsChanged, this, &WorkflowMessagesFilterModel::invalidateModeFilter);
+	connect(&_filterLevelAction, &gui::OptionsAction::selectedOptionsChanged, this, &WorkflowMessagesFilterModel::invalidateModeFilter);
 
     _filterLevelAction.setStretch(2);
 }

@@ -238,8 +238,9 @@ private: // Helpers
 	 * @param job Workflow job to execute.
 	 * @param subflow Taskflow subflow used for nested workflows.
 	 * @param jobContext Execution context for the job.
+	 * @param reportLifecycle Whether to report the job lifecycle.
 	 */
-    void executeCompiledJob(const mv::workflow::WorkflowPlan::Job& job, tf::Subflow& subflow, mv::workflow::SharedWorkflowExecutionContext jobContext);
+    void executeCompiledJob(const mv::workflow::WorkflowPlan::Job& job, tf::Subflow& subflow, mv::workflow::SharedWorkflowExecutionContext jobContext, bool reportLifecycle = true);
 
     /**
 	 * @brief Compiles a sequence of workflow stages.
@@ -293,9 +294,8 @@ private: // Helpers
 
         for (const auto& job : stage.getJobs()) {
             auto jobContext = collapseSingleJob ? stageContext : stageContext->createJobChild(job.getName(), job.getWeight(), job.getProgressMode());
-
-            auto task = flow.emplace([this, job, jobContext](tf::Subflow& subflow) mutable {
-                executeCompiledJob(job, subflow, jobContext);
+            auto task       = flow.emplace([this, job, jobContext, collapseSingleJob](tf::Subflow& subflow) mutable {
+            	executeCompiledJob(job, subflow, jobContext, !collapseSingleJob);
             });
 
             task.name(makeTraceName(job.isNestedWorkflow() ? "Nested" : "Job", collapseSingleJob ? stage.getName() : job.getName()));
@@ -333,9 +333,8 @@ private: // Helpers
 
         for (const auto& job : stage.getJobs()) {
             auto jobContext = collapseSingleJob ? stageContext : stageContext->createJobChild(job.getName(), job.getWeight(), job.getProgressMode());
-
-            auto task = flow.emplace([this, job, jobContext](tf::Subflow& subflow) mutable {
-                executeCompiledJob(job, subflow, jobContext);
+            auto task       = flow.emplace([this, job, jobContext, collapseSingleJob](tf::Subflow& subflow) mutable {
+                executeCompiledJob(job, subflow, jobContext, !collapseSingleJob);
             });
 
             task.name(makeTraceName(job.isNestedWorkflow() ? "Nested" : "Job", collapseSingleJob ? stage.getName() : job.getName()));
@@ -479,6 +478,8 @@ private: // Helpers
 	 * @return Trace name.
 	 */
     static std::string makeTraceName(const QString& kind, const QString& name);
+
+    void executeJobImpl(const mv::workflow::WorkflowPlan::Job& job, mv::workflow::SharedWorkflowExecutionContext jobContext, bool reportLifecycle);
 
 private:
 

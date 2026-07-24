@@ -65,8 +65,8 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
         layout->addWidget(messageLabel);
     }
 
-    _messagesListModel.setWorkflowResult(workflowResult);
-    _messagesFilterModel.setSourceModel(&_messagesListModel);
+    _messagesTreeModel.setWorkflowResult(workflowResult);
+    _messagesFilterModel.setSourceModel(&_messagesTreeModel);
 
     auto& filterlevelAction = _messagesFilterModel.getFilterLevelAction();
 
@@ -88,7 +88,7 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     treeView->setModel(&_messagesFilterModel);
     treeView->setSortingEnabled(true);
     treeView->sortByColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), Qt::AscendingOrder);
-    treeView->setRootIsDecorated(false);
+    treeView->setRootIsDecorated(true);
     treeView->setItemDelegateForColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), new WorkflowMessageDetailsDelegate(treeView));
     treeView->setMouseTracking(true);
 
@@ -96,7 +96,7 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
 
     header->setStretchLastSection(false);
 
-    header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level), QHeaderView::Fixed);
+    header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Level), QHeaderView::ResizeToContents);
     header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Emitter), QHeaderView::Interactive);
     header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Location), QHeaderView::Interactive);
     header->setSectionResizeMode(static_cast<int>(AbstractWorkflowMessagesModel::Column::Text), QHeaderView::Stretch);
@@ -112,6 +112,8 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::Emitter), true);
     header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::Location), true);
     header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::TimeStamp), true);
+    header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::ID), true);
+    header->setSectionHidden(static_cast<int>(AbstractWorkflowMessagesModel::Column::ParentID), true);
 
     auto toggleButton = new QToolButton(this);
 
