@@ -27,6 +27,7 @@ namespace mv {
     })
 {
 	setRecursiveFilteringEnabled(true);
+    setDynamicSortFilter(true);
 
     connect(&_filterLevelAction, &gui::OptionsAction::selectedOptionsChanged, this, &WorkflowMessagesFilterModel::invalidateFilter);
 
