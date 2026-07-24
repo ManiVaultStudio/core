@@ -26,10 +26,7 @@ namespace mv {
         getSeverityLevelName(SeverityLevel::Fatal)
     })
 {
-	setRecursiveFilteringEnabled(true);
-    setDynamicSortFilter(true);
-
-    connect(&_filterLevelAction, &gui::OptionsAction::selectedOptionsChanged, this, &WorkflowMessagesFilterModel::invalidateFilter);
+	connect(&_filterLevelAction, &gui::OptionsAction::selectedOptionsChanged, this, &WorkflowMessagesFilterModel::invalidateModeFilter);
 
     _filterLevelAction.setStretch(2);
 }
@@ -123,6 +120,11 @@ bool WorkflowMessagesFilterModel::lessThan(const QModelIndex& lhs, const QModelI
 	}
 
 	return SortFilterProxyModel::lessThan(lhs, rhs);
+}
+
+void WorkflowMessagesFilterModel::invalidateModeFilter() {
+  beginFilterChange();
+  endFilterChange(QSortFilterProxyModel::Direction::Rows);
 }
 
 }

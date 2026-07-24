@@ -75,11 +75,11 @@
         <file>colormaps/1D/YlGn.png</file>
         <file>colormaps/1D/YlGnBu.png</file>
         <file>colormaps/1D/YlOrBr.png</file>
-        <file>colormaps/2D/example_a.png</file>
-        <file>colormaps/2D/example_b.png</file>
-        <file>colormaps/2D/example_c.png</file>
-        <file>colormaps/2D/example_d.png</file>
-		<file>colormaps/2D/random.png</file>
+        <file>colormaps/2D/Mittelstaed.png</file>
+        <file>colormaps/2D/Teuling.png</file>
+        <file>colormaps/2D/Bremm.png</file>
+        <file>colormaps/2D/Bremm_stretched.png</file>
+		<file>colormaps/2D/Random.png</file>
     </qresource>
 	<qresource prefix="/HTML">
         <file alias="Markdown">html/markdown.html</file>

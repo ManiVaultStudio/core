@@ -62,5 +62,6 @@ void ClustersFilterModel::setNameFilter(const QString& nameFilter)
 
     _nameFilter = nameFilter;
 
-	invalidateFilter();
+    beginFilterChange();
+    endFilterChange(QSortFilterProxyModel::Direction::Rows);
 }

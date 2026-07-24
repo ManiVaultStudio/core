@@ -233,10 +233,15 @@ QImage ColorMapAction::getColorMapImage() const
     if (getCustomColorMapAction().isChecked())
         colorMapImage = getEditor1DAction().getColorMapImage();
 
-    const auto mirrorHorizontally   = getMirrorAction(Axis::X).isChecked();
-    const auto mirrorVertically     = getMirrorAction(Axis::Y).isChecked();
+    Qt::Orientations orientations;
 
-    colorMapImage = colorMapImage.mirrored(mirrorHorizontally, mirrorVertically);
+    if (getMirrorAction(Axis::X).isChecked())
+        orientations |= Qt::Horizontal;
+
+    if (getMirrorAction(Axis::Y).isChecked())
+        orientations |= Qt::Vertical;
+
+    colorMapImage = colorMapImage.flipped(orientations);
 
     if (getDiscretizeAction().isChecked()) {
 

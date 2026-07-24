@@ -47,6 +47,10 @@ public: // Action getters
     gui::OptionsAction& getFilterLevelAction() { return _filterLevelAction; }
 
 private:
+  /** Invalidates the row filtering after the mode filter action changes */
+  void invalidateModeFilter();
+
+private:
     gui::OptionsAction  _filterLevelAction;    /** Options action for filtering based on message level */
 };
 

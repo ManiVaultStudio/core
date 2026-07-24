@@ -140,7 +140,11 @@ Notification::Notification(const QString& title, const QString& description, con
     setWindowModality(Qt::NonModal);
     setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_ShowWithoutActivating);
-
+    
+#ifdef Q_OS_MACOS
+    setAttribute(Qt::WA_MacAlwaysShowToolWindow);
+#endif
+    
     hide();
 
     if (_previousNotification)
