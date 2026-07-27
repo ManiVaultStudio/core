@@ -18,108 +18,70 @@ namespace mv::workflow
 {
 
 /**
- * @brief RAII helper for reporting the lifecycle of a workflow execution context.
+ * @brief Reports workflow context lifecycle events.
  *
- * WorkflowExecutionLifecycleScope reports that the supplied execution context has started
- * when the scope is constructed, measures the elapsed execution time, and reports completion
- * when the scope is explicitly finished or when the scope is destroyed.
+ * WorkflowExecutionLifecycleScope reports that the supplied execution context
+ * has started when the scope is constructed, measures elapsed execution time,
+ * and reports completion when the scope is explicitly finished or destroyed.
  *
- * This class is intended to be used at execution boundaries, such as workflow, stage, or job
- * execution. It keeps lifecycle reporting centralized and prevents duplicated start/finish
- * logging code throughout the executor.
+ * If fail() is called, the scope is marked as finished so the destructor does
+ * not also report successful completion.
  *
- * If fail() is called, a failure is reported and the scope is marked as finished, preventing
- * the destructor from also reporting a successful finish.
- *
- * Typical usage:
- *
- * @code
- * auto jobContext = stageContext->createJobChild(job.getName());
- * WorkflowExecutionLifecycleScope lifecycle(jobContext);
- *
- * try {
- *     executeJob(job, jobContext);
- *     lifecycle.finish();
- * }
- * catch (const std::exception& e) {
- *     lifecycle.fail(QString::fromUtf8(e.what()));
- *     throw;
- * }
- * catch (...) {
- *     lifecycle.fail("Unknown exception");
- *     throw;
- * }
- * @endcode
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowExecutionLifecycleScope
 {
 public:
 
     /**
-     * @brief Creates a lifecycle scope for the given workflow execution context.
-     *
-     * If the context is valid, the elapsed-time timer is started and the context receives
-     * a started lifecycle report.
-     *
-     * @param context The workflow execution context whose lifecycle should be reported.
+     * @brief Creates a lifecycle scope.
+     * @param context Workflow execution context whose lifecycle is reported.
      */
     explicit WorkflowExecutionLifecycleScope(SharedWorkflowExecutionContext context);
 
     /**
      * @brief Destroys the lifecycle scope.
      *
-     * If the scope has not already been completed using finish() or fail(), this destructor
-     * reports the context as successfully finished using the elapsed time measured since
-     * construction.
+     * If the scope has not already been completed, the destructor reports the
+     * context as successfully finished.
      */
     ~WorkflowExecutionLifecycleScope();
 
     /**
      * @brief Reports the context as failed and completes the lifecycle scope.
-     *
-     * Calling this function prevents the destructor from reporting a successful finish.
-     * This should normally be called from an exception handler before rethrowing the exception.
-     *
-     * @param severity Severity level of the failure to include in the lifecycle report.
-     * @param message Human-readable failure message to include in the lifecycle report.
-     * @param details Additional details to include in the lifecycle report.
+     * @param severity Failure severity.
+     * @param message Human-readable failure message.
+     * @param details Additional failure details.
      */
     void fail(util::SeverityLevel severity, const QString& message, QVariantMap details = {});
 
     /**
-     * @brief Reports the context as failed without a message and completes the lifecycle scope.
-     *
-     * Calling this function prevents the destructor from reporting a successful finish.
-     * This should normally be called from an exception handler before rethrowing the exception.
+     * @brief Reports failure without adding a message.
      */
     void failWithoutMessage();
 
     /**
-     * @brief Reports successful completion.
-     *
-     * The reported duration is the elapsed time measured since construction. Calling this
-     * function prevents the destructor from reporting completion a second time.
+     * @brief Reports successful completion with an explicit duration.
+     * @param durationMs Duration in milliseconds.
      */
     void finish(std::uint64_t durationMs);
 
+    /**
+     * @brief Reports successful completion.
+     */
     void finish();
 
     /**
-	 * @brief Returns the elapsed time since this lifecycle scope was created.
-	 *
-	 * The elapsed time is measured in milliseconds using the internal QElapsedTimer.
-	 * This can be used to copy the same measured duration into a WorkflowResult
-	 * before the lifecycle scope is finished or destroyed.
-	 *
-	 * @return Elapsed wall-clock time in milliseconds.
-	 */
-    std::uint64_t elapsedMS() const;
+     * @brief Returns the elapsed scope duration.
+     * @return Elapsed wall-clock time in milliseconds.
+     */
+    [[nodiscard]] std::uint64_t elapsedMS() const;
 
 private:
 
-    SharedWorkflowExecutionContext  _context;           /**< Context whose lifecycle is reported */
-    QElapsedTimer                   _timer;             /**< Timer used to measure elapsed execution time */
-    bool                            _finished = false;  /**< Whether the lifecycle has already been completed */
+    SharedWorkflowExecutionContext  _context;           /**< Context whose lifecycle is reported. */
+    QElapsedTimer                   _timer;             /**< Timer used to measure elapsed execution time. */
+    bool                            _finished = false;  /**< Whether the lifecycle has already been completed. */
 };
 
 }

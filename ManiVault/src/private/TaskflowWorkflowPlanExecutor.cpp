@@ -181,7 +181,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
 
         tf::Taskflow taskflow;
 
-        compileStages(stages, taskflow, rootContext);
+        [[maybe_unused]] const auto tasks = compileStages(stages, taskflow, rootContext);
 
         if (taskflow.num_tasks() > 0)
             runTaskflowBlocking(taskflow, rootContext->getOptions());
@@ -192,7 +192,7 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
     try {
         tf::Taskflow taskflow;
 
-        compileWorkflow(workflowPlan, taskflow, rootContext);
+        [[maybe_unused]] const auto tasks = compileWorkflow(workflowPlan, taskflow, rootContext);
 
         if (taskflow.num_tasks() > 0)
             runTaskflowBlocking(taskflow, rootContext->getOptions());
@@ -477,7 +477,7 @@ void TaskflowWorkflowPlanExecutor::executeCompiledJob(const WorkflowPlan::Job& j
         if (!childPlan)
             throw std::runtime_error("Nested workflow job returned null workflow plan");
 
-        compileWorkflow(*childPlan, subflow, childContext);
+        [[maybe_unused]] const auto tasks = compileWorkflow(*childPlan, subflow, childContext);
 
         subflow.join();
 

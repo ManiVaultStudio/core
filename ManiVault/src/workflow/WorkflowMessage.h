@@ -15,14 +15,15 @@ namespace mv::workflow
 {
 
 /**
- * @brief Workflow message kind.
+ * @brief Defines the workflow message category.
  *
- * Workflow messages are categorized into different kinds to distinguish their purpose and usage.
+ * Lifecycle messages describe execution state transitions. Diagnostic messages
+ * describe warnings, errors, or informational details emitted during execution.
  */
 enum class MessageKind
 {
-    Lifecycle,      /**< Message related to the lifecycle of a workflow entity (e.g., start, finish, fail) */
-    Diagnostic      /**< Message providing diagnostic information about workflow execution (e.g., warnings, errors, info) */
+    Lifecycle,      /**< Message related to the lifecycle of a workflow entity. */
+    Diagnostic      /**< Message providing diagnostic information about workflow execution. */
 };
 
 /**
@@ -31,18 +32,18 @@ enum class MessageKind
  * Workflow messages are stored in report nodes and may also be formatted for
  * console output or result dialogs.
  *
- * @maintainer BioVault Thomas Kroes (Biomedical Visual Analytics Unit LUMC - TU Delft)
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 struct CORE_EXPORT WorkflowMessage
 {
-	util::SeverityLevel level = util::SeverityLevel::Info;          /**< Message severity */
-    QString             emitter;                                    /**< Component or workflow entity that emitted the message */
-    QString             location;                                   /**< Optional source or workflow location */
-    QString             text;                                       /**< Human-readable message text */
-    QVariantMap         details;                                    /**< Structured message details */
-    QDateTime           timestamp = QDateTime::currentDateTime();   /**< Time when the message was created */
-    QString             contextId;                                  /**< Unique context ID for hierarchical message organization (mirrors the workflow execution context identifier) */
-    QString             parentContextId;                            /**< Optional parent context ID for hierarchical message organization (mirrors the parent workflow execution context identifier) */
+    util::SeverityLevel level = util::SeverityLevel::Info;          /**< Message severity. */
+    QString             emitter;                                    /**< Component or workflow entity that emitted the message. */
+    QString             location;                                   /**< Optional source or workflow location. */
+    QString             text;                                       /**< Human-readable message text. */
+    QVariantMap         details;                                    /**< Structured message details. */
+    QDateTime           timestamp = QDateTime::currentDateTime();   /**< Time when the message was created. */
+    QString             contextId;                                  /**< Identifier of the workflow execution context that emitted the message. */
+    QString             parentContextId;                            /**< Identifier of the parent workflow execution context, if any. */
 };
 
 /** Shared immutable workflow message reference. */

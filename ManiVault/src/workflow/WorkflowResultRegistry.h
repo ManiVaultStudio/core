@@ -31,6 +31,8 @@ namespace mv::workflow
  * removed from the registry.
  *
  * The registry is implemented as a thread-safe singleton.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowResultRegistry : public QObject
 {
@@ -38,23 +40,25 @@ class CORE_EXPORT WorkflowResultRegistry : public QObject
 
 public:
 
-    /** @return Thread-safe singleton workflow result registry. */
-    static WorkflowResultRegistry& instance();
+    /**
+     * @brief Returns the workflow result registry singleton.
+     * @return Thread-safe singleton registry.
+     */
+    [[nodiscard]] static WorkflowResultRegistry& instance();
 
     /**
-     * @brief Add a workflow result to the registry.
-     * @param result Shared pointer to the workflow result.
+     * @brief Adds a workflow result to the registry.
+     * @param result Shared workflow result to store.
      * @return Unique identifier assigned to the stored result.
      */
-    QUuid add(SharedWorkflowResult result);
+    [[nodiscard]] QUuid add(SharedWorkflowResult result);
 
     /**
-     * @brief Retrieve a workflow result from the registry.
+     * @brief Retrieves a workflow result from the registry.
      * @param id Identifier returned by add().
-     * @return The associated workflow result, or nullptr if no result with the
-     * specified identifier exists.
+     * @return Associated workflow result, or nullptr.
      */
-    SharedWorkflowResult get(const QUuid& id) const;
+    [[nodiscard]] SharedWorkflowResult get(const QUuid& id) const;
 
     /**
      * @brief Remove a workflow result from the registry.
@@ -64,8 +68,8 @@ public:
 
 private:
 
-    mutable QMutex                      _mutex;     /**< Protects concurrent access to the registry */
-    QHash<QUuid, SharedWorkflowResult>  _results;   /**< Registered workflow results indexed by identifier */
+    mutable QMutex                      _mutex;     /**< Protects concurrent access to the registry. */
+    QHash<QUuid, SharedWorkflowResult>  _results;   /**< Registered workflow results indexed by identifier. */
 };
 
 }

@@ -18,11 +18,18 @@ namespace mv::workflow
 {
 
 /**
- * @brief Thread-safe node in the workflow progress tree.
+ * @brief Tracks progress for a workflow execution node.
  *
- * Progress nodes mirror the execution hierarchy and aggregate child progress
- * using relative weights. They are shared by execution contexts and the console
- * dashboard.
+ * WorkflowProgressNode mirrors the hierarchy created by WorkflowExecutionContext.
+ * Leaf nodes store explicit progress values, while parent nodes derive their
+ * progress from the weighted average of their children. This allows the root
+ * node to represent aggregate progress for the entire workflow execution.
+ *
+ * The class is designed for concurrent workflow execution. Public accessors and
+ * mutators synchronize access internally, and createSnapshot() returns a value
+ * tree suitable for dashboards, console formatting, and diagnostics.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class WorkflowProgressNode : public std::enable_shared_from_this<WorkflowProgressNode>
 {
@@ -31,128 +38,217 @@ public:
     /** Semantic execution node type. */
     using Type = WorkflowExecutionNodeType;
 
-    /** Progress lifecycle state. */
+    /**
+     * @brief Defines the lifecycle state of a progress node.
+     */
     enum class Status {
-        Pending,    /**< Node has not started */
-        Running,    /**< Node is currently executing */
-        Completed,  /**< Node completed successfully */
-        Failed,     /**< Node failed */
-        Skipped     /**< Node was skipped */
+        Pending,    /**< Node has been created but has not started. */
+        Running,    /**< Node is currently executing. */
+        Completed,  /**< Node finished successfully. */
+        Failed,     /**< Node finished with an error. */
+        Skipped     /**< Node was intentionally skipped. */
     };
 
-    /** Immutable progress snapshot for rendering and reporting. */
+    /**
+     * @brief Value copy of a progress node and its descendants.
+     *
+     * Snapshots decouple rendering and reporting code from the live progress
+     * tree. They capture the node's current state, aggregate progress, elapsed
+     * time, child counts, and recursively captured child snapshots.
+     */
     struct Snapshot
     {
-        Type type = Type::Undefined;           /**< Semantic node type */
-        Status status = Status::Pending;       /**< Snapshot status */
-
-        QString name;                          /**< Node name */
-
-        double progress = 0.0;                 /**< Aggregated progress value */
-        double weight = 1.0;                   /**< Relative progress weight */
-
-        int childCount = 0;                    /**< Number of child nodes */
-        int completedChildCount = 0;           /**< Number of completed child nodes */
-
-        qint64 elapsedMilliseconds = 0;        /**< Elapsed execution time in milliseconds */
-
-        QVector<Snapshot> children;            /**< Child snapshots */
+        Type                type = Type::Undefined;         /**< Semantic workflow node type. */
+        Status              status = Status::Pending;       /**< Current lifecycle state. */
+        QString             name;                           /**< Human-readable node name. */
+        double              progress = 0.0;                 /**< Normalized progress in the range [0.0, 1.0]. */
+        double              weight = 1.0;                   /**< Relative contribution to the parent node. */
+        int                 childCount = 0;                 /**< Number of direct child nodes. */
+        int                 completedChildCount = 0;        /**< Number of direct children with a terminal status. */
+        qint64              elapsedMilliseconds = 0;        /**< Elapsed runtime in milliseconds. */
+        QVector<Snapshot>   children;                       /**< Snapshots of direct child nodes. */
     };
 
-    /** @return Thread-safe snapshot of this node and its descendants. */
-    Snapshot createSnapshot() const;
+    /**
+     * @brief Creates a recursive snapshot of this progress subtree.
+     * @return Snapshot containing the current node state and child snapshots.
+     */
+    [[nodiscard]] Snapshot createSnapshot() const;
 
 public:
 
     /** Shared pointer type for workflow progress nodes. */
     using Ptr = std::shared_ptr<WorkflowProgressNode>;
 
-    /** Constructs a workflow progress node. */
+    /**
+     * @brief Constructs a progress node.
+     *
+     * Prefer createRoot() and createChild() in workflow code so parent-child
+     * relationships are established consistently.
+     *
+     * @param type Semantic workflow node type.
+     * @param name Human-readable node name.
+     * @param parent Parent progress node, or nullptr for a root node.
+     * @param weight Relative contribution to the parent node's progress.
+     */
     explicit WorkflowProgressNode(Type type, QString name, Ptr parent, double weight = 1.0);
 
-    /** Creates a root progress node. */
-    static Ptr createRoot(Type type, const QString& name, double weight = 1.0);
+    /**
+     * @brief Creates a root progress node.
+     * @param type Semantic workflow node type.
+     * @param name Human-readable root node name.
+     * @param weight Relative progress weight, normally 1.0 for roots.
+     * @return Shared root progress node.
+     */
+    [[nodiscard]] static Ptr createRoot(Type type, const QString& name, double weight = 1.0);
 
-    /** Creates a child progress node. */
-    Ptr createChild(Type type, QString name, double weight = 1.0);
+    /**
+     * @brief Creates and registers a child progress node.
+     * @param type Semantic workflow node type.
+     * @param name Human-readable child node name.
+     * @param weight Relative contribution to this node's aggregate progress.
+     * @return Shared child progress node.
+     */
+    [[nodiscard]] Ptr createChild(Type type, QString name, double weight = 1.0);
 
-    /** @return True when this node has child progress nodes. */
-    bool hasChildren() const;
+    /**
+     * @brief Returns whether this node has direct children.
+     * @return True if this node has at least one child.
+     */
+    [[nodiscard]] bool hasChildren() const;
 
-    /** Sets direct progress for this node. */
+    /**
+     * @brief Sets explicit progress for a leaf node.
+     *
+     * The value is clamped to [0.0, 1.0]. Calls on non-leaf nodes are ignored
+     * because parent progress is computed from child progress.
+     *
+     * @param value Normalized progress value.
+     */
     void setProgress(double value);
 
-    /** @return Aggregated progress for this node. */
-    double getProgress() const;
+    /**
+     * @brief Returns this node's current progress.
+     *
+     * Leaf nodes return their explicit progress. Parent nodes return the
+     * weighted average of their children's progress.
+     *
+     * @return Normalized progress value in the range [0.0, 1.0].
+     */
+    [[nodiscard]] double getProgress() const;
 
-    /** @return Relative progress weight. */
-    double getWeight() const;
+    /**
+     * @brief Returns this node's relative contribution to its parent.
+     * @return Progress weight.
+     */
+    [[nodiscard]] double getWeight() const;
 
-    /** @return Semantic execution node type. */
-    Type getType() const;
+    /**
+     * @brief Returns the semantic workflow node type.
+     * @return Workflow execution node type.
+     */
+    [[nodiscard]] Type getType() const;
 
-    /** @return Human-readable node name. */
-    QString getName() const;
+    /**
+     * @brief Returns the human-readable node name.
+     * @return Node name.
+     */
+    [[nodiscard]] QString getName() const;
 
-    /** @return Current progress status. */
-    Status getStatus() const;
+    /**
+     * @brief Returns the current lifecycle state.
+     * @return Node status.
+     */
+    [[nodiscard]] Status getStatus() const;
 
-    /** @return Parent progress node, or nullptr for root nodes. */
-    Ptr getParent() const;
+    /**
+     * @brief Returns the parent node.
+     * @return Shared parent node, or nullptr for a root node.
+     */
+    [[nodiscard]] Ptr getParent() const;
 
-    /** @return Child progress nodes. */
-    QVector<Ptr> getChildren() const;
+    /**
+     * @brief Returns direct child nodes.
+     * @return Copy of the current child pointer list.
+     */
+    [[nodiscard]] QVector<Ptr> getChildren() const;
 
-    /** @return Number of child progress nodes. */
-    int getChildCount() const;
+    /**
+     * @brief Returns the number of direct child nodes.
+     * @return Child count.
+     */
+    [[nodiscard]] int getChildCount() const;
 
-    /** @return Number of completed child progress nodes. */
-    int getCompletedChildCount() const;
+    /**
+     * @brief Returns the number of direct children with terminal status.
+     *
+     * Completed, failed, and skipped children are all considered finished.
+     *
+     * @return Finished child count.
+     */
+    [[nodiscard]] int getCompletedChildCount() const;
 
-    /** @return Elapsed execution time in milliseconds. */
-    std::int64_t getElapsedMilliseconds() const;
+    /**
+     * @brief Returns elapsed runtime for this node.
+     *
+     * Pending nodes report zero. Running nodes report the active timer value.
+     * Terminal nodes report the elapsed time captured when they finished.
+     *
+     * @return Elapsed time in milliseconds.
+     */
+    [[nodiscard]] std::int64_t getElapsedMilliseconds() const;
 
-    /** @return Elapsed execution time without locking. */
-    std::int64_t getElapsedMillisecondsUnlocked() const;
+    /**
+     * @brief Returns elapsed runtime without locking.
+     *
+     * This helper is intended for internal use by callers that already hold
+     * this node's mutex.
+     *
+     * @return Elapsed time in milliseconds.
+     */
+    [[nodiscard]] std::int64_t getElapsedMillisecondsUnlocked() const;
 
-    /** Marks this node as running. */
+    /** Marks the node as running and starts elapsed-time tracking if needed. */
     void markRunning();
 
-    /** Marks this node as completed. */
+    /** Marks the node as completed and captures elapsed time if it was running. */
     void markCompleted();
 
-    /** Marks this node as failed. */
+    /** Marks the node as failed and captures elapsed time if it was running. */
     void markFailed();
 
-    /** Marks this node as skipped. */
+    /** Marks the node as skipped and captures elapsed time if it was running. */
     void markSkipped();
 
-    /** @return True when this node has no parent. */
-    bool isRoot() const;
+    /**
+     * @brief Returns whether this node has no parent.
+     * @return True if this node is a root progress node.
+     */
+    [[nodiscard]] bool isRoot() const;
 
 private:
 
-    /** Sets the node status. */
+    /** Updates lifecycle state and timer bookkeeping. */
     void setStatus(Status status);
 
-    /** @return True when this node has a terminal status. */
-    bool isFinished() const;
+    /** Returns whether this node is completed, failed, or skipped. */
+    [[nodiscard]] bool isFinished() const;
 
-    /** @return True when this node has a terminal status without locking. */
-    bool isFinishedUnlocked() const;
+    /** Returns whether this node is completed, failed, or skipped without locking. */
+    [[nodiscard]] bool isFinishedUnlocked() const;
 
 private:
 
-    mutable QMutex                          _mutex;                 /**< Protects progress node state */
-    Type                                    _type = Type::Undefined; /**< Semantic execution node type */
-    QString                                 _name;                  /**< Human-readable node name */
-    std::weak_ptr<WorkflowProgressNode>     _parent;                /**< Parent progress node */
-    double                                  _weight = 1.0;          /**< Relative progress weight */
-    Status                                  _status = Status::Pending;  /**< Current progress status */
-    double                                  _selfProgress = 0.0;    /**< Direct progress for this node */
-    QElapsedTimer                           _timer;                 /**< Timer used for elapsed duration */
-    qint64                                  _finishedElapsedMs = 0;  /**< Captured elapsed time after finishing */
-    QVector<Ptr>                            _children;              /**< Child progress nodes */
+    mutable QMutex                          _mutex;                    /**< Protects access to mutable node state for concurrent workflow updates. */
+    Type                                    _type = Type::Undefined;   /**< Semantic workflow execution type represented by this node. */
+    QString                                 _name;                     /**< Human-readable node name used in reports, logs, and progress displays. */
+    std::weak_ptr<WorkflowProgressNode>     _parent;                   /**< Weak parent reference to avoid ownership cycles in the progress tree. */
+    double                                  _weight = 1.0;             /**< Relative contribution of this node to its parent's aggregate progress. */
+    Status                                  _status = Status::Pending; /**< Current lifecycle state of this node. */
+    double                                  _selfProgress = 0.0;       /**< Explicit progress value used when this node has no children. */
+    QElapsedTimer                           _timer;                    /**< Timer used to measure elapsed runtime while the node is running. */
+    qint64                                  _finishedElapsedMs = 0;    /**< Captured elapsed runtime once the node reaches a terminal state. */
+    QVector<Ptr>                            _children;                 /**< Direct child progress nodes used for hierarchical progress aggregation. */
 };
 
 }

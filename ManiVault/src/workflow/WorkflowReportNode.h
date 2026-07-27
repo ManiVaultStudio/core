@@ -21,7 +21,7 @@ namespace mv::workflow
  * for nested workflows, stages, or jobs. Access is synchronized because report
  * nodes may be updated from multiple workflow worker threads.
  *
- * @maintainer T. Kroes BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowReportNode
 {
@@ -36,76 +36,72 @@ public:
     using SharedWorkflowReportNodes = std::vector<SharedWorkflowReportNode>;
 
     /**
-     * @brief Constructs a WorkflowReportNode with the given name.
-     * @param name The name of the report node, typically representing a specific step or component in the workflow.
+     * @brief Constructs a report node.
+     * @param name Human-readable report node name.
      */
     explicit WorkflowReportNode(QString name);
 
     /**
      * @brief Creates a child report node.
-     *
-     * @param name The name of the child report node.
-     * @return A shared pointer to the newly created child report node.
+     * @param name Human-readable child node name.
+     * @return Shared child report node.
      */
-    SharedWorkflowReportNode createChild(const QString& name);
+    [[nodiscard]] SharedWorkflowReportNode createChild(const QString& name);
 
     /**
-     * Adds a message to this report node.
-     * @param level The severity level of the message (e.g., Info, Warning, Error, Fatal).
-     * @param emitter The name of the component or module that generated the message.
-     * @param text The main text or content of the message.
-     * @param location The specific location in the code or workflow where the message was generated (e.g., function name, line number).
-     * @param details Additional details or metadata associated with the message (optional).
-     * @param contextId Optional context ID for associating the message with a specific workflow execution context (default is empty).
-     * @param parentContextId Optional parent context ID for hierarchical message organization (default is empty).
+     * @brief Adds a message to this report node.
+     * @param level Message severity level.
+     * @param emitter Component that emitted the message.
+     * @param text Message text.
+     * @param location Source or workflow location associated with the message.
+     * @param details Additional structured details.
+     * @param contextId Optional workflow execution context identifier.
+     * @param parentContextId Optional parent workflow execution context identifier.
      */
     void addMessage(util::SeverityLevel level, const QString& emitter, const QString& text, const QString& location, const QVariantMap& details = {}, const QString& contextId = "", const QString& parentContextId = "");
 
     /**
-     * @brief Retrieves the name of this report node.
-     * @return The name of the report node.
+     * @brief Returns the report node name.
+     * @return Human-readable report node name.
      */
-    QString getName() const;
+    [[nodiscard]] QString getName() const;
 
     /**
-     * @brief Retrieves the messages associated with this report node.
-     * @return A vector of WorkflowMessage objects representing the messages for this node.
+     * @brief Returns messages emitted for this node.
+     * @return Copy of the message list.
      */
-    WorkflowMessages getMessages() const;
+    [[nodiscard]] WorkflowMessages getMessages() const;
 
     /**
-     * @brief Retrieves the child report nodes of this report node.
-     * @return A vector of shared pointers to WorkflowReportNode representing the children of this node.
+     * @brief Returns direct child report nodes.
+     * @return Copy of the child node list.
      */
-    SharedWorkflowReportNodes getChildren() const;
+    [[nodiscard]] SharedWorkflowReportNodes getChildren() const;
 
     /**
-     * @brief Checks for recursive errors.
-     *
-     * @return True if there are error messages in this node or any of its descendants, false otherwise.
+     * @brief Returns whether this subtree contains errors.
+     * @return True if this node or any descendant contains an error.
      */
-    bool hasErrorsRecursive() const;
+    [[nodiscard]] bool hasErrorsRecursive() const;
 
     /**
-     * @brief Gets the recursive warning count.
-     *
-     * @return The total number of warning messages found in this node and its descendants.
+     * @brief Counts warnings in this subtree.
+     * @return Number of warning messages in this node and its descendants.
      */
-    std::int32_t getWarningCountRecursive() const;
+    [[nodiscard]] std::int32_t getWarningCountRecursive() const;
     
     /**
-     * @brief Gets the recursive error count.
-     *
-     * @return The total number of error messages found in this node and its descendants.
+     * @brief Counts errors in this subtree.
+     * @return Number of error messages in this node and its descendants.
      */
-    std::int32_t getErrorCountRecursive() const;
+    [[nodiscard]] std::int32_t getErrorCountRecursive() const;
 
 private:
 
-    QString                     _name;          /**< Human-readable report node name */
-    mutable QMutex              _mutex;         /**< Protects messages and child nodes */
-    WorkflowMessages            _messages;      /**< Messages emitted for this report node */
-    SharedWorkflowReportNodes   _children;      /**< Child report nodes */
+    QString                     _name;          /**< Human-readable report node name. */
+    mutable QMutex              _mutex;         /**< Protects messages and child nodes. */
+    WorkflowMessages            _messages;      /**< Messages emitted for this report node. */
+    SharedWorkflowReportNodes   _children;      /**< Child report nodes. */
 };
 
 }

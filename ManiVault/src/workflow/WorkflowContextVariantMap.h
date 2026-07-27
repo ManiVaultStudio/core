@@ -17,36 +17,27 @@ namespace mv::workflow
 {
 
 /**
- * @brief Workflow context for sharing QVariantMap-based data between workflow stages.
+ * @brief Shares QVariantMap data between workflow stages.
  *
  * This context provides a thread-safe key/value store that can be used by
  * workflow stages to exchange intermediate data during (serialization or
  * deserialization) workflows.
  *
- * Typical usage:
- *
- * @code
- * auto context = std::make_shared<VariantMapWorkflowContext>();
- *
- * context->setValue("Dataset", datasetMap);
- * context->setValue("Children", childrenMap);
- *
- * const auto datasetMap = context->value("Dataset").toMap();
- * @endcode
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowContextVariantMap final : public WorkflowContextBase
 {
 public:
 
     /**
-     * @brief Gets the complete map.
-     * @return A copy of the stored QVariantMap.
+     * @brief Returns the complete map.
+     * @return Copy of the stored QVariantMap.
      */
-    QVariantMap getMap() const;
+    [[nodiscard]] QVariantMap getMap() const;
 
     /**
      * @brief Replaces the complete map with the provided one.
-     * @param map The new map to store.
+     * @param map Map to store.
      */
     void setMap(const QVariantMap& map);
 
@@ -55,30 +46,28 @@ public:
      * @param key Key to test for existence.
      * @return True if the key exists, otherwise false.
      */
-    bool contains(const QString& key) const;
+    [[nodiscard]] bool contains(const QString& key) const;
 
     /**
-     * @brief Gets a value from the map.
+     * @brief Returns a value from the map.
      * @param key Key to retrieve.
      * @param defaultValue Value returned when the key is not present.
-     * @return The stored value or the provided default value.
+     * @return Stored value, or the provided default value.
      */
-    QVariant value(const QString& key, const QVariant& defaultValue = {}) const;
+    [[nodiscard]] QVariant value(const QString& key, const QVariant& defaultValue = {}) const;
 
     /**
-     * @brief Gets a QVariantMap value from the map.
+     * @brief Returns a QVariantMap value from the map.
      * @param key Key to retrieve.
      * @return The stored value converted to QVariantMap, or an empty map if the
      * key does not exist or cannot be converted.
      */
-    QVariantMap mapValue(const QString& key) const;
+    [[nodiscard]] QVariantMap mapValue(const QString& key) const;
 
     /**
      * @brief Stores a value in the map.
      * @param key Key to store.
      * @param value Value to associate with the key.
-     *
-     * If the key already exists its value is replaced.
      */
     void setValue(const QString& key, const QVariant& value);
 
@@ -90,11 +79,9 @@ public:
     QVariant takeValue(const QString& key);
 
     /**
-	 * @brief Merges all key/value pairs from another QVariantMap into the result map.
-	 * @param values Map containing values to merge.
-	 *
-	 * Existing keys are overwritten by values from the supplied map.
-	 */
+     * @brief Merges key/value pairs into the map.
+     * @param values Map containing values to merge.
+     */
     void merge(const QVariantMap& values);
 
     /**
@@ -104,11 +91,14 @@ public:
 
 private:
 
-    mutable QMutex  _mutex;     /**< Synchronizes access to the map */
-    QVariantMap     _map;       /**< Shared workflow data */
+    mutable QMutex  _mutex;     /**< Synchronizes access to the map. */
+    QVariantMap     _map;       /**< Shared workflow data. */
 };
 
+/** Unique ownership pointer type for QVariantMap workflow contexts. */
 using UniqueVariantMapWorkflowContext = std::unique_ptr<WorkflowContextVariantMap>;
+
+/** Shared ownership pointer type for QVariantMap workflow contexts. */
 using SharedVariantMapWorkflowContext = std::shared_ptr<WorkflowContextVariantMap>;
 
 }

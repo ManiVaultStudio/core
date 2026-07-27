@@ -9,6 +9,7 @@
 #include "WorkflowOptions.h"
 #include "WorkflowReportNode.h"
 #include "WorkflowProgressNode.h"
+
 #include <QUuid>
 #include <QHash>
 #include <QMutex>
@@ -16,21 +17,17 @@
 #include <QVariant>
 #include <QVariantMap>
 
-#include <QHash>
-#include <QUuid>
-#include <QVariant>
-
 namespace mv::workflow
 {
 
 /**
- * @brief Overall lifecycle status of a workflow execution.
+ * @brief Defines the overall lifecycle status of a workflow execution.
  */
 enum class WorkflowExecutionStatus {
-    Idle,       /**< Workflow has not started */
-    Running,    /**< Workflow is currently executing */
-    Finished,   /**< Workflow completed successfully */
-    Failed      /**< Workflow failed during execution */
+    Idle,       /**< Workflow has not started. */
+    Running,    /**< Workflow is currently executing. */
+    Finished,   /**< Workflow completed successfully. */
+    Failed      /**< Workflow failed during execution. */
 };
 
 /**
@@ -62,16 +59,28 @@ public:
      */
     WorkflowExecutionState(const WorkflowReportNode::SharedWorkflowReportNode& reportRoot, const WorkflowProgressNode::Ptr& progressRoot, WorkflowOptions options = {});
 
-    /** @return Root report node for the workflow execution. */
+    /**
+     * @brief Returns the root report node.
+     * @return Root report node for this execution.
+     */
     [[nodiscard]] WorkflowReportNode::SharedWorkflowReportNode getReportRoot() const;
 
-    /** @return Root progress node for the workflow execution. */
+    /**
+     * @brief Returns the root progress node.
+     * @return Root progress node for this execution.
+     */
     [[nodiscard]] WorkflowProgressNode::Ptr getProgressRoot() const;
 
-    /** @return Workflow options captured for this execution. */
+    /**
+     * @brief Returns the workflow options.
+     * @return Options captured for this execution.
+     */
     [[nodiscard]] WorkflowOptions getOptions() const;
 
-    /** @return Current workflow execution status. */
+    /**
+     * @brief Returns the workflow execution status.
+     * @return Current execution status.
+     */
     [[nodiscard]] WorkflowExecutionStatus getStatus() const;
 
     /**
@@ -80,21 +89,33 @@ public:
      */
     void setStatus(WorkflowExecutionStatus status);
 
-    /** @return Aggregated progress of the root progress node. */
+    /**
+     * @brief Returns overall workflow progress.
+     * @return Aggregated progress of the root progress node.
+     */
     [[nodiscard]] double getOverallProgress() const;
 
-    /** @return Messages collected recursively from the report tree. */
+    /**
+     * @brief Collects messages from the report tree.
+     * @return Messages collected recursively from the report tree.
+     */
     [[nodiscard]] WorkflowMessages collectMessages() const;
 
-public: // Metrics
+public:
 
-    /** @return Mutable execution metrics accumulator. */
+    /**
+     * @brief Returns the mutable execution metrics accumulator.
+     * @return Execution metrics accumulator.
+     */
     [[nodiscard]] WorkflowExecutionMetrics& metrics();
 
-    /** @return Const execution metrics accumulator. */
+    /**
+     * @brief Returns the execution metrics accumulator.
+     * @return Const execution metrics accumulator.
+     */
     [[nodiscard]] const WorkflowExecutionMetrics& metrics() const;
 
-public: // Result values
+public:
 
     /**
      * @brief Publishes a named result value for an execution context.
@@ -114,7 +135,7 @@ public: // Result values
      */
     [[nodiscard]] QVariantMap takeResultValues(const QUuid& contextId);
 
-public: // Workflow outputs
+public:
 
     /**
      * @brief Stores an output value under an output identifier.
@@ -158,16 +179,16 @@ private:
 
 private:
 
-    WorkflowReportNode::SharedWorkflowReportNode    _reportRoot;                /**< Root report tree shared by all execution contexts */
-    WorkflowProgressNode::Ptr                       _progressRoot;              /**< Root progress tree shared by all execution contexts */
-    WorkflowOptions                                 _options;                   /**< Options captured for this workflow execution */
-    mutable QMutex                                  _mutex;                     /**< Protects mutable execution status */
-    WorkflowExecutionStatus                         _status = WorkflowExecutionStatus::Idle;    /**< Current execution status */
-    WorkflowExecutionMetrics                        _metrics;                   /**< Aggregate execution metrics */
-    mutable QMutex                                  _resultValuesMutex;         /**< Protects context result values */
-    QHash<QUuid, QVariantMap>                       _resultValuesByContext;     /**< Published result values indexed by context id */
-    mutable QMutex                                  _outputsMutex;              /**< Protects routed workflow outputs */
-    QHash<QUuid, QVariant>                          _outputs;                   /**< Output values indexed by output id */
+    WorkflowReportNode::SharedWorkflowReportNode    _reportRoot;                                /**< Root report tree shared by all execution contexts. */
+    WorkflowProgressNode::Ptr                       _progressRoot;                              /**< Root progress tree shared by all execution contexts. */
+    WorkflowOptions                                 _options;                                   /**< Options captured for this workflow execution. */
+    mutable QMutex                                  _mutex;                                     /**< Protects mutable execution status. */
+    WorkflowExecutionStatus                         _status = WorkflowExecutionStatus::Idle;    /**< Current execution status. */
+    WorkflowExecutionMetrics                        _metrics;                                   /**< Aggregate execution metrics. */
+    mutable QMutex                                  _resultValuesMutex;                         /**< Protects context result values. */
+    QHash<QUuid, QVariantMap>                       _resultValuesByContext;                     /**< Published result values indexed by context id. */
+    mutable QMutex                                  _outputsMutex;                              /**< Protects routed workflow outputs. */
+    QHash<QUuid, QVariant>                          _outputs;                                   /**< Output values indexed by output id. */
 };
 
 }

@@ -7,85 +7,86 @@
 #include "util/BlobCodec.h"
 
 /**
- * BLOB Codec implementation for Z-standard compressed data.
+ * @brief Encodes blob data with Zstandard compression.
  *
- * @author Thomas Kroes (Biomedical Visual Analytics Unit LUMC - TU Delft)
+ * ZstdBlobCodec compresses and decompresses raw blob data using the compression
+ * level supplied by its codec settings action.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class ZstdBlobCodec final : public mv::util::BlobCodec
 {
 public:
 
     /**
-     * Constructs a Zstandard codec with a pointer to a parent object and a codec settings action.
-     * @param parent Pointer to parent object
-     * @param codecSettingsAction Codec settings action for this codec (must be a valid pointer)
+     * @brief Constructs a Zstandard blob codec.
+     * @param parent Optional parent object.
+     * @param codecSettingsAction Codec settings action used by this codec.
      */
     explicit ZstdBlobCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction);
 
-    /** Returns the codec type */
+    /**
+     * @brief Returns the codec type.
+     * @return Blob codec type.
+     */
     [[nodiscard]] Type getType() const override;
 
-    /** Returns the codec name used for serialization/debugging */
+    /**
+     * @brief Returns the codec name.
+     * @return Name used for serialization and diagnostics.
+     */
     [[nodiscard]] QString getName() const override;
 
     /**
-     * @brief Encode a block of raw bytes and return the encoded data.
-     * @note This method will throw an exception if encoding fails. The returned QByteArray is only valid if the encoding was successful.
-     * @param input Raw input bytes
-     * @return Encoded bytes
+     * @brief Encodes raw bytes.
+     * @param input Raw input bytes.
+     * @return Encoded bytes.
      */
     [[nodiscard]] QByteArray encode(const QByteArray& input) const override;
 
     /**
-     * @brief Encode a block of raw bytes and return the encoded data.
-     * @note This method will throw an exception if encoding fails. The returned QByteArray is only valid if the encoding was successful.
-     * @param data Pointer to raw input bytes
-     * @param size Size of the raw input bytes in bytes
-     * @return Encoded bytes
+     * @brief Encodes raw bytes.
+     * @param data Pointer to raw input bytes.
+     * @param size Size of the raw input in bytes.
+     * @return Encoded bytes.
      */
     [[nodiscard]] QByteArray encode(const char* data, qsizetype size) const override;
 
     /**
-     * @brief Decode a previously encoded block of bytes and return the decoded data.
-     * @note This method will throw an exception if decoding fails. The returned QByteArray is only valid if the decoding was successful.
-     * @param input Encoded input bytes
-     * @param expectedSize Expected decoded size in bytes, or -1 if unknown
-     * @return Decoded bytes
+     * @brief Decodes encoded bytes.
+     * @param input Encoded input bytes.
+     * @param expectedSize Expected decoded size in bytes, or -1 if unknown.
+     * @return Decoded bytes.
      */
     [[nodiscard]] QByteArray decode(const QByteArray& input, qsizetype expectedSize = -1) const override;
 
     /**
-     * Decode a previously encoded block of zstd bytes directly to a provided output buffer.
-     *
-     * @param encodedData Zstd-encoded input bytes
-     * @param destination Output buffer to which the decoded data is copied
-     * @param destinationSize Size of the output buffer in bytes
-     * @return Decoded bytes or an error
+     * @brief Decodes encoded bytes into an output buffer.
+     * @param encodedData Zstandard-encoded input bytes.
+     * @param destination Output buffer.
+     * @param destinationSize Size of the output buffer in bytes.
      */
     void decodeTo(const QByteArray& encodedData, char* destination, std::uint64_t destinationSize) const override;
 
-    /*
-     * Load encoded data from a file on disk and decode it.
-     *
-     * @param filePath Path of the file on disk from which the encoded data is loaded
-     * @param expectedSize Expected decoded size in bytes, or -1 if unknown
-     * @return Decoded bytes or an error
+    /**
+     * @brief Decodes data from a file.
+     * @param filePath Source file path.
+     * @param expectedSize Expected decoded size in bytes, or -1 if unknown.
+     * @return Decoded bytes.
      */
     [[nodiscard]] QByteArray decodeFromFile(const QString& filePath, qsizetype expectedSize = -1) const override;
 
-    /*
-     * Load encoded data from a file on disk and decode it directly to a provided output buffer.
-     *
-     * @param filePath Path of the file on disk from which the encoded data is loaded
-     * @param destination Output buffer to which the decoded data is copied
-     * @param destinationSize Size of the output buffer in bytes
-     * @return Decoded bytes or an error
+    /**
+     * @brief Decodes file data into an output buffer.
+     * @param filePath Source file path.
+     * @param destination Output buffer.
+     * @param destinationSize Size of the output buffer in bytes.
      */
     void decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const override;
 
     /**
-     * Get file extension for this codec (without leading dot, e.g. "zstd" for Zstandard codec)
-     * @return File extension for this codec
+     * @brief Returns the file extension used by this codec.
+     * @return File extension without a leading dot.
      */
     [[nodiscard]] QString getFileExtension() const override;
 };
