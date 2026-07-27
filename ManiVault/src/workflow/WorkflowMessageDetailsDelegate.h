@@ -10,6 +10,7 @@
 #include <QStandardItem>
 #include <QStyledItemDelegate>
 #include <QVariant>
+
 namespace mv::workflow
 {
 
@@ -24,6 +25,8 @@ namespace mv::workflow
  *
  * The delegate is intended for use with the details column of the workflow
  * messages view.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class WorkflowMessageDetailsDelegate final : public QStyledItemDelegate
 {
@@ -51,19 +54,28 @@ public:
 
 private:
 
-    /** Opens a dialog for browsing structured workflow message details. */
+    /**
+     * @brief Opens a dialog for structured workflow message details.
+     * @param details Details to display.
+     */
     void showDetailsBrowser(const QVariantMap& details);
 
-    /** Populates a tree model from a QVariant value. */
+    /**
+     * @brief Populates a tree model from a QVariant value.
+     * @param parent Parent item to append to.
+     * @param key Key associated with the value.
+     * @param value Value to add.
+     */
     static void populateModel(
-        QStandardItem* parent,
-        const QString& key,
-        const QVariant& value);
+        QStandardItem* parent, const QString& key, const QVariant& value);
 
-    /** Creates a key/value row for the details model. */
-    static QList<QStandardItem*> makeRow(
-        const QString& key,
-        const QString& value = {});
+    /**
+     * @brief Creates a key/value row for the details model.
+     * @param key Row key.
+     * @param value Row value.
+     * @return Items representing the row.
+     */
+    [[nodiscard]] static QList<QStandardItem*> makeRow(const QString& key, const QString& value = {});
 };
 
 } // namespace mv::workflow

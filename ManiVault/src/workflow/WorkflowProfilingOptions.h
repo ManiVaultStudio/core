@@ -9,17 +9,23 @@
 namespace mv::workflow
 {
 
-/** Options that configure workflow profiling and tracing. */
+/**
+ * @brief Configures workflow profiling and tracing.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
+ */
 struct CORE_EXPORT WorkflowProfilingOptions
 {
-    /** Profiling sink used for workflow execution. */
+    /**
+     * @brief Defines the profiling output sink.
+     */
     enum class SinkType
     {
-        None,               /**< No profiling or tracing */
-        ChromeTracing       /**< Chrome tracing compatible output */
+        None,               /**< No profiling or tracing. */
+        ChromeTracing       /**< Chrome tracing-compatible output. */
     };
 
-    SinkType   sinkType = SinkType::None;     /**< Profiling sink used for execution */
+    SinkType   sinkType = SinkType::None;     /**< Profiling sink used for execution. */
 };
 
 }

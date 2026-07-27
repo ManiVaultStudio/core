@@ -6,46 +6,76 @@
 
 #include "ZstdCodecSettingsAction.h"
 
-
 #include <util/BlobCodec.h>
 #include <util/BlobCodecFactory.h>
 
 /**
- * @brief Factory interface for creating Zstandard codec instances.
+ * @brief Creates Zstandard blob codec instances.
  *
- * This factory is expected to live in the main thread
+ * This factory owns the default settings action and creates Zstandard-compressed
+ * blob codec instances.
  *
- * @author Thomas Kroes
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class ZstdBlobCodecFactory final : public mv::util::BlobCodecFactory
 {
 public:
 
+    /**
+     * @brief Constructs a Zstandard codec factory.
+     * @param parent Optional parent object.
+     */
     ZstdBlobCodecFactory(QObject* parent = nullptr);
 
+    /**
+     * @brief Destroys the codec factory.
+     */
     ~ZstdBlobCodecFactory();
 
-	mv::util::BlobCodec::Type type() const override;
-
-	QString key() const override;
-
-	QString displayName() const override;
+    /**
+     * @brief Returns the codec type.
+     * @return Blob codec type.
+     */
+    [[nodiscard]] mv::util::BlobCodec::Type type() const override;
 
     /**
-     * Get default codec settings action for this codec (returns nullptr if no settings are needed)
-     * @return Default codec settings action for this codec (returns nullptr if no settings are needed)
+     * @brief Returns the codec registry key.
+     * @return Unique codec key.
      */
-    const mv::gui::CodecSettingsAction* getDefaultCodecSettingsAction() const override;
+    [[nodiscard]] QString key() const override;
 
-    mv::gui::CodecSettingsAction* createCodecSettingsAction(QObject* parent) const override;
+    /**
+     * @brief Returns the user-facing codec name.
+     * @return Display name.
+     */
+    [[nodiscard]] QString displayName() const override;
+
+    /**
+     * @brief Returns the default codec settings action.
+     * @return Default settings action for this codec.
+     */
+    [[nodiscard]] const mv::gui::CodecSettingsAction* getDefaultCodecSettingsAction() const override;
+
+    /**
+     * @brief Creates a codec settings action.
+     * @param parent Optional parent object.
+     * @return Newly created settings action.
+     */
+    [[nodiscard]] mv::gui::CodecSettingsAction* createCodecSettingsAction(QObject* parent) const override;
 
 protected:
 
-    
-    std::shared_ptr<mv::util::BlobCodec> createCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction = nullptr) const override;
+    /**
+     * @brief Creates a Zstandard blob codec.
+     * @param parent Optional parent object.
+     * @param codecSettingsAction Codec settings action to use.
+     * @return Shared codec instance.
+     */
+    [[nodiscard]] std::shared_ptr<mv::util::BlobCodec> createCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction = nullptr) const override;
 
 private:
-    ZstdCodecSettingsAction     _defaultSettingsAction;     /** Default codec settings action for this codec */
+
+    ZstdCodecSettingsAction _defaultSettingsAction;  /**< Default codec settings action for this codec. */
 
     friend class mv::util::CodecRegistry;
 };

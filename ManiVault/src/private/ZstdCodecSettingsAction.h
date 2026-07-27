@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
-// A corresponding LICENSE file is located in the root directory of this source tree 
-// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// A corresponding LICENSE file is located in the root directory of this source tree
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #pragma once
 
@@ -8,9 +8,12 @@
 #include <actions/IntegralAction.h>
 
 /**
- * TODO
+ * @brief Settings action for the Zstandard blob codec.
  *
- * @author Thomas Kroes
+ * The action exposes the compression level used when creating Zstandard codec
+ * instances.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class ZstdCodecSettingsAction : public mv::gui::CodecSettingsAction
 {
@@ -19,17 +22,21 @@ class ZstdCodecSettingsAction : public mv::gui::CodecSettingsAction
 public:
 
     /**
-     * Construct with \p parent object and \p title
-     * @param parent Pointer to parent object
-     * @param title Title of the action
+     * @brief Constructs a Zstandard codec settings action.
+     * @param parent Optional parent object.
+     * @param title Action title.
      */
     ZstdCodecSettingsAction(QObject* parent, const QString& title);
 
-public: // Action getters
+public:
 
-     /** Get compression level action (1-22) */
-    mv::gui::IntegralAction& getLevelAction() { return _levelAction; }
+    /**
+     * @brief Returns the compression level action.
+     * @return Compression level action.
+     */
+    [[nodiscard]] mv::gui::IntegralAction& getLevelAction() { return _levelAction; }
 
 private:
-    mv::gui::IntegralAction  _levelAction;   /** Compression level action (1-22) */
+
+    mv::gui::IntegralAction  _levelAction;   /**< Compression level action in the range [1, 22]. */
 };

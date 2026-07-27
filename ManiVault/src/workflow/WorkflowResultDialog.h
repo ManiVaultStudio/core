@@ -26,6 +26,11 @@ namespace mv::workflow
 
 /**
  * @brief Dialog that displays workflow result messages.
+ *
+ * The dialog presents workflow diagnostics and allows callers to filter visible
+ * messages by severity.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowResultDialog : public QDialog
 {
@@ -41,13 +46,16 @@ public:
      */
     WorkflowResultDialog(const SharedWorkflowResult& workflowResult, util::SeverityLevels levels = util::allSeverityLevels, QWidget* parent = nullptr);
 
-    /** @return Preferred dialog size. */
+    /**
+     * @brief Returns the preferred dialog size.
+     * @return Preferred dialog size.
+     */
     QSize sizeHint() const override;
 
 private:
 
-    WorkflowMessagesTreeModel       _messagesTreeModel;    /**< Source model containing workflow messages */
-    WorkflowMessagesFilterModel     _messagesFilterModel;  /**< Filter model for visible severity levels */
+    WorkflowMessagesTreeModel       _messagesTreeModel;    /**< Source model containing workflow messages. */
+    WorkflowMessagesFilterModel     _messagesFilterModel;  /**< Filter model for visible severity levels. */
 
 };
 

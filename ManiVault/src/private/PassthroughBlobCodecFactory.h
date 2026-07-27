@@ -10,40 +10,71 @@
 #include <util/BlobCodecFactory.h>
 
 /**
- * @brief Factory interface for creating pass-through codec instances.
+ * @brief Creates pass-through blob codec instances.
  *
- * This factory is expected to live in the main thread
+ * This factory owns the default settings action and creates uncompressed blob
+ * codec instances.
  *
- * @author Thomas Kroes
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class PassthroughBlobCodecFactory final : public mv::util::BlobCodecFactory
 {
 public:
 
-	PassthroughBlobCodecFactory(QObject* parent = nullptr);
-
-    ~PassthroughBlobCodecFactory();
-
-    mv::util::BlobCodec::Type type() const override;
-
-    QString key() const override;
-
-    QString displayName() const override;
+    /**
+     * @brief Constructs a pass-through codec factory.
+     * @param parent Optional parent object.
+     */
+    PassthroughBlobCodecFactory(QObject* parent = nullptr);
 
     /**
-    * Get default codec settings action for this codec (returns nullptr if no settings are needed)
-    * @return Default codec settings action for this codec (returns nullptr if no settings are needed)
-    */
-    const mv::gui::CodecSettingsAction* getDefaultCodecSettingsAction() const override;
+     * @brief Destroys the codec factory.
+     */
+    ~PassthroughBlobCodecFactory();
 
-    mv::gui::CodecSettingsAction* createCodecSettingsAction(QObject* parent) const override;
+    /**
+     * @brief Returns the codec type.
+     * @return Blob codec type.
+     */
+    [[nodiscard]] mv::util::BlobCodec::Type type() const override;
+
+    /**
+     * @brief Returns the codec registry key.
+     * @return Unique codec key.
+     */
+    [[nodiscard]] QString key() const override;
+
+    /**
+     * @brief Returns the user-facing codec name.
+     * @return Display name.
+     */
+    [[nodiscard]] QString displayName() const override;
+
+    /**
+     * @brief Returns the default codec settings action.
+     * @return Default settings action for this codec.
+     */
+    [[nodiscard]] const mv::gui::CodecSettingsAction* getDefaultCodecSettingsAction() const override;
+
+    /**
+     * @brief Creates a codec settings action.
+     * @param parent Optional parent object.
+     * @return Newly created settings action.
+     */
+    [[nodiscard]] mv::gui::CodecSettingsAction* createCodecSettingsAction(QObject* parent) const override;
 
 protected:
 
-    std::shared_ptr<mv::util::BlobCodec> createCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction = nullptr) const override;
+    /**
+     * @brief Creates a pass-through blob codec.
+     * @param parent Optional parent object.
+     * @param codecSettingsAction Codec settings action to use.
+     * @return Shared codec instance.
+     */
+    [[nodiscard]] std::shared_ptr<mv::util::BlobCodec> createCodec(QObject* parent, mv::gui::CodecSettingsAction* codecSettingsAction = nullptr) const override;
 
 private:
-    PassthroughCodecSettingsAction     _defaultSettingsAction;     /** Default codec settings action for this codec */
+    PassthroughCodecSettingsAction _defaultSettingsAction;  /**< Default codec settings action for this codec. */
 
     friend class mv::util::CodecRegistry;
 };

@@ -15,13 +15,20 @@
 namespace mv::workflow
 {
 
-/** Options that configure workflow execution behavior. */
+/**
+ * @brief Configures workflow execution behavior.
+ *
+ * WorkflowOptions groups execution, batching, reporting, and profiling settings
+ * passed to workflow executors.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
+ */
 struct CORE_EXPORT WorkflowOptions
 {
-    WorkflowParallelizationOptions  execution;      /**< Parallelization options for workflow jobs */
-	WorkflowBatchingOptions         batching;       /**< Batch-size options for serialization work */
-    WorkflowReportingOptions        reporting;      /**< Reporting, notification, and result-dialog options */
-    WorkflowProfilingOptions        profiling;      /**< Profiling and trace sink options */
+    WorkflowParallelizationOptions  execution;      /**< Parallelization options for workflow jobs. */
+    WorkflowBatchingOptions         batching;       /**< Batch-size options for serialization work. */
+    WorkflowReportingOptions        reporting;      /**< Reporting, notification, and result-dialog options. */
+    WorkflowProfilingOptions        profiling;      /**< Profiling and trace sink options. */
 };
 
 /** Optional workflow execution options. */

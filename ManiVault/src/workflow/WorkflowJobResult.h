@@ -27,13 +27,18 @@ public:
 
     /**
      * @brief Constructs a workflow job result.
-     * @param workflowName The name of the workflow that produced this result. This can be used for identification and logging purposes, allowing you to associate the result with a specific workflow execution.
+     * @param workflowName Name of the workflow job that produced this result.
      */
     WorkflowJobResult(const QString& workflowName);
 };
 
+/** Unique ownership pointer type for workflow job results. */
 using UniqueWorkflowJobResult   = std::unique_ptr<WorkflowJobResult>;
+
+/** Shared ownership pointer type for workflow job results. */
 using SharedWorkflowJobResult   = std::shared_ptr<WorkflowJobResult>;
+
+/** Qt future type for workflow job results. */
 using WorkflowJobResultFuture   = QFuture<WorkflowJobResult>;
 
 }

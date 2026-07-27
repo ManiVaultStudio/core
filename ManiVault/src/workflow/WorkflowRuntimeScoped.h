@@ -11,14 +11,23 @@ namespace mv::workflow
 {
 
 /**
- * @brief Access point for executing workflow plans in the current runtime scope.
+ * @brief Executes workflow plans through the active runtime.
+ *
+ * This facade provides scoped access to the workflow runtime used by the
+ * application. It keeps call sites independent from the concrete executor
+ * implementation.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowRuntimeScoped
 {
 public:
 
-    /** @return Singleton workflow runtime scope. */
-    static WorkflowRuntimeScoped& instance();
+    /**
+     * @brief Returns the workflow runtime scope singleton.
+     * @return Runtime scope instance.
+     */
+    [[nodiscard]] static WorkflowRuntimeScoped& instance();
 
     /**
      * @brief Executes a workflow plan synchronously under a parent context.

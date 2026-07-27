@@ -16,7 +16,7 @@ namespace mv::workflow
 {
 
 /**
- * @brief Base result shared by workflows, stages, and jobs.
+ * @brief Stores common workflow result state.
  *
  * WorkflowResultBase stores the workflow entity name, status, optional QVariant
  * output value, and execution options associated with a result.
@@ -27,66 +27,63 @@ class CORE_EXPORT WorkflowResultBase
 {
 public:
 
-    /** Status of a workflow result. */
+    /**
+     * @brief Defines the lifecycle outcome of a workflow result.
+     */
     enum class Status {
-        Undefined,      /**< Result status has not been set */
-        Success,        /**< Execution completed successfully */
-        Failed,         /**< Execution failed */
-        Canceled        /**< Execution was canceled */
+        Undefined,      /**< Result status has not been set. */
+        Success,        /**< Execution completed successfully. */
+        Failed,         /**< Execution failed. */
+        Canceled        /**< Execution was canceled. */
     };
 
 public:
 
     /**
      * @brief Constructs a workflow result base.
-     *
-     * The workflow name is used for identification and logging.
-     *
-     * @param workflowName The name of the workflow that produced this result. This can be used for identification and logging purposes, allowing you to associate the result with a specific workflow execution.
+     * @param workflowName Name of the workflow entity that produced this result.
      */
     WorkflowResultBase(const QString& workflowName);
 
-public: // General
+public:
 
     /**
-     * @brief Retrieves the workflow name.
-     *
-     * @return The name of the workflow that produced this result. This can be used for identification and logging purposes, allowing you to associate the result with a specific workflow execution.
+     * @brief Returns the workflow entity name.
+     * @return Name of the workflow entity that produced this result.
      */
-    QString getWorkflowName() const;
+    [[nodiscard]] QString getWorkflowName() const;
 
     /**
-     * @brief Retrieves the status of the workflow result.
-     * @return The status of the workflow result, which can be Undefined, Success, Failed, or Canceled.
+     * @brief Returns the result status.
+     * @return Current result status.
      */
-    Status getStatus() const;
+    [[nodiscard]] Status getStatus() const;
 
     /**
-     * @brief Retrieves the status icon.
-     *
-     * @return The icon representing the status of the workflow result. This can be used for visual representation in user interfaces, allowing users to quickly identify the status of the workflow execution.
+     * @brief Returns the icon representing the result status.
+     * @return Status icon.
      */
-    QIcon getStatusIcon() const;
+    [[nodiscard]] QIcon getStatusIcon() const;
 
     /**
      * @brief Sets the status of the workflow result.
-     * @param status The status to be set for the workflow result, which can be Undefined, Success, Failed, or Canceled.
+     * @param status Status to store.
      */
     void setStatus(Status status);
 
     /**
-     * @brief Sets the workflow options associated with this result.
-     * @param options The workflow options to be set for this result.
+     * @brief Stores the workflow options used during execution.
+     * @param options Workflow options to store.
      */
     void setOptions(const WorkflowOptions& options);
 
     /**
-     * @brief Retrieves the workflow options associated with this result.
-     * @return The workflow options associated with this result.
+     * @brief Returns the workflow options used during execution.
+     * @return Stored workflow options.
      */
-    const WorkflowOptions& getOptions() const;
+    [[nodiscard]] const WorkflowOptions& getOptions() const;
 
-public: // Value
+public:
 
     /**
      * @brief Checks whether a value is available.
@@ -94,38 +91,38 @@ public: // Value
      * Use this before reading the QVariant output when the producing workflow
      * may not have emitted a value.
      *
-     * @return True if the workflow result contains a valid value, false otherwise.
+     * @return True if the workflow result contains a valid value.
      */
-    bool hasValue() const;
+    [[nodiscard]] bool hasValue() const;
 
     /**
      * @brief Retrieves the produced value.
      *
      * The value can contain any type supported by QVariant.
      *
-     * @return The value produced by the workflow execution.
+     * @return Value produced by workflow execution.
      */
-    const QVariant& getValue() const;
+    [[nodiscard]] const QVariant& getValue() const;
 
     /**
      * @brief Sets the produced value.
      *
-     * @param value The value to be set for the workflow result.
+     * @param value Value to store.
      */
     void setValue(const QVariant& value);
 
     /**
      * @brief Moves the produced value into the result.
      *
-     * @param value The value to be set for the workflow result.
+     * @param value Value to move into the result.
      */
     void setValue(QVariant&& value);
 
     /**
      * @brief Converts and stores the produced value.
      *
-     * @tparam T The type of the value being set.
-     * @param value The value to be set for the workflow result.
+     * @tparam T Value type.
+     * @param value Value to convert and store.
      */
     template<typename T>
     void setValue(T&& value) {
@@ -135,11 +132,11 @@ public: // Value
     /**
      * @brief Checks whether the value can convert to a type.
      *
-     * @tparam T The type to which the value is being checked for conversion.
-     * @return True if the value can be converted to the specified type T, false otherwise.
+     * @tparam T Target value type.
+     * @return True if the value can be converted to T.
      */
     template<typename T>
-    bool canConvert() const {
+    [[nodiscard]] bool canConvert() const {
         return _value.canConvert<T>();
     }
 
@@ -148,22 +145,22 @@ public: // Value
      *
      * Check canConvert<T>() first when conversion is uncertain.
      *
-     * @tparam T The type to which the value is being accessed.
-     * @return The value produced by the workflow execution as a specified type T.
+     * @tparam T Target value type.
+     * @return Value converted to T.
      */
     template<typename T>
-    T value() const {
+    [[nodiscard]] T value() const {
         return _value.value<T>();
     }
 
     /**
      * @brief Tries to retrieve the value as a type.
      *
-     * @tparam T The type to which the value is being accessed.
-     * @return An optional containing the value produced by the workflow execution as a specified type T if it can be converted, or an empty optional if it cannot be converted.
+     * @tparam T Target value type.
+     * @return Converted value, or std::nullopt when conversion is not possible.
      */
     template<typename T>
-    std::optional<T> tryValue() const
+    [[nodiscard]] std::optional<T> tryValue() const
     {
         if (!_value.isValid() || !_value.canConvert<T>())
             return std::nullopt;
@@ -173,10 +170,10 @@ public: // Value
 
 private:
 
-    QString             _workflowName;                  /**< Name of the workflow entity that produced this result */
-    Status              _status = Status::Undefined;    /**< Result status */
-    QVariant            _value;                         /**< Optional value produced by execution */
-    WorkflowOptions     _options;                       /**< Workflow options used for execution */
+    QString             _workflowName;                  /**< Name of the workflow entity that produced this result. */
+    Status              _status = Status::Undefined;    /**< Result status. */
+    QVariant            _value;                         /**< Optional value produced by execution. */
+    WorkflowOptions     _options;                       /**< Workflow options used for execution. */
 };
 
 }

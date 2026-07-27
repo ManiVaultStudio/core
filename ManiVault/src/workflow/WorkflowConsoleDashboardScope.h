@@ -12,6 +12,11 @@ namespace mv::workflow
 
 /**
  * @brief RAII scope that starts and stops a workflow console dashboard.
+ *
+ * The scope starts the dashboard on construction and stops it during
+ * destruction.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowConsoleDashboardScope
 {
@@ -23,12 +28,14 @@ public:
      */
     explicit WorkflowConsoleDashboardScope(WorkflowExecutionState::Ptr state);
 
-    /** Stops the dashboard. */
+    /**
+     * @brief Stops the dashboard.
+     */
     ~WorkflowConsoleDashboardScope();
 
 private:
 
-    std::unique_ptr<WorkflowConsoleDashboard> _dashboard;  /**< Owned console dashboard */
+    std::unique_ptr<WorkflowConsoleDashboard> _dashboard;  /**< Owned console dashboard. */
 };
 
 }
