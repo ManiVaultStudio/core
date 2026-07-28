@@ -27,13 +27,18 @@ public:
 
     /**
      * @brief Constructs a workflow stage result.
-     * @param workflowName The name of the workflow that produced this result. This can be used for identification and logging purposes, allowing you to associate the result with a specific workflow execution.
+     * @param workflowName Name of the workflow stage that produced this result.
      */
     WorkflowStageResult(const QString& workflowName);
 };
 
+/** Unique ownership pointer type for workflow stage results. */
 using UniqueWorkflowStageResult = std::unique_ptr<WorkflowStageResult>;
+
+/** Shared ownership pointer type for workflow stage results. */
 using SharedWorkflowStageResult = std::shared_ptr<WorkflowStageResult>;
+
+/** Qt future type for workflow stage results. */
 using WorkflowStageFuture       = QFuture<WorkflowStageResult>;
 
 }

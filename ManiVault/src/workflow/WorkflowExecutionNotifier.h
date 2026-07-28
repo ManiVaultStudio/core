@@ -12,6 +12,12 @@ namespace mv::workflow
 
 /**
  * @brief QObject notifier for workflow execution UI updates.
+ *
+ * WorkflowExecutionNotifier exposes workflow progress and status changes as Qt
+ * signals so UI components can observe execution without coupling to the
+ * executor internals.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT WorkflowExecutionNotifier : public QObject
 {
@@ -19,15 +25,24 @@ class CORE_EXPORT WorkflowExecutionNotifier : public QObject
 
 public:
 
-    /** Constructs a workflow execution notifier. */
+    /**
+     * @brief Constructs a workflow execution notifier.
+     * @param parent Optional parent object.
+     */
     explicit WorkflowExecutionNotifier(QObject* parent = nullptr);
 
-    /** Sets the task whose progress is observed. */
+    /**
+     * @brief Sets the task whose progress is observed.
+     * @param task Task to observe, or nullptr.
+     */
     void setTask(Task* task);
 
 signals:
 
-    /** Emitted when the overall workflow progress changes. */
+    /**
+     * @brief Emitted when the overall workflow progress changes.
+     * @param overallProgress Normalized workflow progress.
+     */
     void progressChanged(double overallProgress);
 
     /** Emitted when workflow messages change. */

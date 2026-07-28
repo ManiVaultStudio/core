@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
-// A corresponding LICENSE file is located in the root directory of this source tree 
-// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// A corresponding LICENSE file is located in the root directory of this source tree
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #pragma once
 
@@ -15,6 +15,7 @@
 #include <QUuid>
 #include <optional>
 #include <concepts>
+
 namespace mv
 {
     class Task;
@@ -29,24 +30,26 @@ class WorkflowExecutionContext;
 class WorkflowPlan;
 
 /** Shared reference to a workflow execution context. */
-using SharedWorkflowExecutionContext    = std::shared_ptr<WorkflowExecutionContext>;
+using SharedWorkflowExecutionContext = std::shared_ptr<WorkflowExecutionContext>;
 
 /** Shared reference to a workflow plan executor. */
-using SharedWorkflowPlanExecutor        = std::shared_ptr<AbstractWorkflowPlanExecutor>;
+using SharedWorkflowPlanExecutor = std::shared_ptr<AbstractWorkflowPlanExecutor>;
 
 /** Collection of workflow execution contexts. */
-using SharedWorkflowExecutionContexts   = std::vector<SharedWorkflowExecutionContext>;
+using SharedWorkflowExecutionContexts = std::vector<SharedWorkflowExecutionContext>;
 
 /** Unique owner for a workflow plan. */
-using UniqueWorkflowPlan                = std::unique_ptr<WorkflowPlan>;
+using UniqueWorkflowPlan = std::unique_ptr<WorkflowPlan>;
 
 /**
- * @brief Describes the stages and jobs that make up a workflow execution.
+ * @brief Describes an executable workflow.
  *
- * A WorkflowPlan contains main stages, optional success/failure/finalization
- * stages, shared workflow context, and relative progress weight information.
- * Stages may execute sequentially, in parallel, or in batches, and individual
- * jobs can run normal functions or create nested workflow plans.
+ * WorkflowPlan is a declarative description consumed by an
+ * AbstractWorkflowPlanExecutor. It contains main stages, optional
+ * success/failure/finalization stages, shared workflow context, and relative
+ * progress weight information. Stages may execute sequentially, in parallel,
+ * or in batches, and individual jobs can run normal functions or create nested
+ * workflow plans.
  *
  * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
@@ -54,38 +57,48 @@ class CORE_EXPORT WorkflowPlan
 {
 public:
 
-    /** Describes whether jobs in a stage run sequentially or in parallel. */
+    /**
+     * @brief Defines how jobs inside a stage are scheduled.
+     */
     enum class ConcurrencyMode
     {
-        Sequential, /**< Jobs run one after another */
-        Parallel    /**< Jobs may run concurrently */
+        Sequential, /**< Jobs run one after another. */
+        Parallel    /**< Jobs may run concurrently. */
     };
 
-    /** Describes when a stage group should execute within the workflow lifecycle. */
+    /**
+     * @brief Defines the workflow phase in which a stage participates.
+     */
     enum class StageExecutionPolicy {
-        Main,       /**< Main workflow execution */
-        OnSuccess,  /**< Runs after successful main execution */
-        OnFailure,  /**< Runs after failed main execution */
-        Finally     /**< Runs after main and success/failure stages */
+        Main,       /**< Main workflow execution. */
+        OnSuccess,  /**< Runs after successful main execution. */
+        OnFailure,  /**< Runs after failed main execution. */
+        Finally     /**< Runs after main and success/failure stages. */
     };
 
-    /** Describes which thread a job should run on. */
+    /**
+     * @brief Defines which thread a job should run on.
+     */
     enum class JobThreadAffinity {
-        CurrentWorkerThread,   /**< Run on the current worker thread */
-        GuiThread              /**< Dispatch to the GUI thread */
+        CurrentWorkerThread,   /**< Run on the current worker thread. */
+        GuiThread              /**< Dispatch to the GUI thread. */
     };
 
-    /** Describes how job completion is determined. */
+    /**
+     * @brief Defines how job completion is determined.
+     */
     enum class JobCompletionPolicy {
-        Auto,           /**< Completion is inferred by the executor */
-        ManualOrNested  /**< Completion is controlled manually or by nested workflow progress */
+        Auto,           /**< Completion is inferred by the executor. */
+        ManualOrNested  /**< Completion is controlled manually or by nested workflow progress. */
     };
 
-    /** Describes how job progress contributes to parent progress. */
+    /**
+     * @brief Defines how job progress contributes to parent progress.
+     */
     enum class JobProgressMode {
-        Automatic,  /**< Leaf jobs auto-complete when they have no children */
-        Atomic,     /**< Nested workflow progress is treated as one job unit */
-        Nested      /**< Nested workflows contribute fine-grained progress */
+        Automatic,  /**< Leaf jobs auto-complete when they have no children. */
+        Atomic,     /**< Nested workflow progress is treated as one job unit. */
+        Nested      /**< Nested workflows contribute fine-grained progress. */
     };
 
     /** Shared mutable variant-map context used by workflow plans and jobs. */
@@ -96,28 +109,30 @@ public:
     class Job;
 
     /** Callable job body. */
-    using JobFunction                       = std::function<void(const Job&, const SharedWorkflowExecutionContext& )>;
+    using JobFunction = std::function<void(const Job&, const SharedWorkflowExecutionContext&)>;
 
     /** Collection of callable job bodies. */
-    using JobFunctions                      = std::vector<JobFunction>;
+    using JobFunctions = std::vector<JobFunction>;
 
     /** Function that creates a nested workflow plan for a job. */
-    using NestedWorkflowFunction            = std::function<UniqueWorkflowPlan(const Job&,const SharedWorkflowExecutionContext&)>;
+    using NestedWorkflowFunction = std::function<UniqueWorkflowPlan(const Job&, const SharedWorkflowExecutionContext&)>;
 
     /** Function that resolves a batched stage size from an execution context. */
-    using WorkflowBatchSizeFunction         = std::function<std::size_t(const SharedWorkflowExecutionContext&)>;
+    using WorkflowBatchSizeFunction = std::function<std::size_t(const SharedWorkflowExecutionContext&)>;
 
     /** Optional batched stage size resolver. */
     using OptionalWorkflowBatchSizeFunction = std::optional<WorkflowBatchSizeFunction>;
 
-    /** Wrapper used to disambiguate nested workflow jobs. */
+    /**
+     * @brief Wrapper used to disambiguate nested workflow jobs.
+     */
     struct NestedWorkflowJob
     {
-        NestedWorkflowFunction function;    /**< Function that creates the nested workflow plan */
+        NestedWorkflowFunction function;    /**< Function that creates the nested workflow plan. */
     };
 
     /**
-     * @brief Executable unit inside a workflow stage.
+     * @brief Smallest executable unit in a workflow.
      *
      * Jobs either wrap a function or a nested workflow factory. Each job has an
      * identifier, output identifier, thread affinity, progress mode, relative
@@ -128,10 +143,12 @@ public:
     {
     public:
 
-        /** Describes the payload type of a job. */
+        /**
+         * @brief Defines the concrete kind of work represented by the job.
+         */
         enum class JobKind {
-            Function,       /**< Job executes a function */
-            NestedWorkflow  /**< Job creates and executes a nested workflow */
+            Function,       /**< Job executes a callable directly. */
+            NestedWorkflow  /**< Job creates and executes a nested workflow. */
         };
 
     public:
@@ -139,29 +156,64 @@ public:
         /** Error message type stored by jobs. */
         using ErrorString = QString;
 
-        /** Constructs a function job. */
+        /**
+         * @brief Constructs a function job.
+         * @param name Human-readable job name.
+         * @param function Callable executed by this job.
+         * @param threadAffinity Preferred execution thread.
+         * @param progressMode Progress reporting mode for this job.
+         */
         Job(QString name, JobFunction function, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, JobProgressMode progressMode = JobProgressMode::Automatic);
 
-        /** Constructs a nested workflow job from a nested workflow factory. */
+        /**
+         * @brief Constructs a nested workflow job.
+         * @param name Human-readable job name.
+         * @param nestedWorkflowFunction Function that creates the nested workflow.
+         * @param threadAffinity Preferred execution thread.
+         * @param progressMode Progress reporting mode for this job.
+         * @param weight Relative progress weight.
+         */
         Job(QString name, NestedWorkflowFunction nestedWorkflowFunction, JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread, JobProgressMode progressMode = JobProgressMode::Automatic, double weight = 1.0);
 
-        /** Constructs a nested workflow job from a nested workflow wrapper. */
+        /**
+         * @brief Constructs a nested workflow job from a wrapper.
+         * @param name Human-readable job name.
+         * @param job Nested workflow job descriptor.
+         * @param threadAffinity Preferred execution thread.
+         * @param progressMode Progress reporting mode for this job.
+         * @param weight Relative progress weight.
+         */
         Job(QString name, NestedWorkflowJob job, JobThreadAffinity threadAffinity, JobProgressMode progressMode, double weight);
 
-        /** @return Unique job identifier. */
-        QUuid getId() const { return _id; }
+        /**
+         * @brief Returns the unique job identifier.
+         * @return Unique job identifier.
+         */
+        [[nodiscard]] QUuid getId() const { return _id; }
 
-        /** Sets the output identifier used to route this job's output. */
+        /**
+         * @brief Assigns the identifier used for storing this job's output.
+         * @param outputId Output identifier.
+         */
         void setOutputId(const QUuid& outputId);
 
-        /** @return Explicit output identifier, or the job identifier when none is set. */
-        QUuid getOutputId() const;
+        /**
+         * @brief Returns the identifier used for storing this job's output.
+         * @return Output identifier.
+         */
+        [[nodiscard]] QUuid getOutputId() const;
 
-        /** @return Workflow handle for this job. */
-        WorkflowHandle getHandle() const;
+        /**
+         * @brief Returns a handle that refers to this job.
+         * @return Workflow handle for this job.
+         */
+        [[nodiscard]] WorkflowHandle getHandle() const;
 
-        /** @return Human-readable job name. */
-        QString getName() const;
+        /**
+         * @brief Returns the human-readable job name.
+         * @return Job name.
+         */
+        [[nodiscard]] QString getName() const;
 
         /** Runs the job function in the supplied execution context. */
         void run(SharedWorkflowExecutionContext context) const;
@@ -170,7 +222,7 @@ public:
         void setResult(QVariant result);
 
         /** @return Current job result value. */
-        const QVariant& getResult() const;
+        [[nodiscard]] const QVariant& getResult() const;
 
         /** Clears the stored result value. */
         void clearResult();
@@ -179,10 +231,10 @@ public:
         void setError(QString error);
 
         /** @return True when the job has an error message. */
-        bool hasError() const;
+        [[nodiscard]] bool hasError() const;
 
         /** @return Stored error message. */
-        const QString& getError() const;
+        [[nodiscard]] const QString& getError() const;
 
         /** Clears the stored error message. */
         void clearError();
@@ -197,74 +249,77 @@ public:
         void fail(QString error);
 
         /** @return Thread affinity for this job. */
-        JobThreadAffinity getThreadAffinity() const;
+        [[nodiscard]] JobThreadAffinity getThreadAffinity() const;
 
         /** @return Relative progress weight for this job. */
-        double getWeight() const;
+        [[nodiscard]] double getWeight() const;
 
-        /** Sets the relative progress weight and returns a copy of this job. */
-        Job weighted(double weight);
+        /** Returns a copy of this job with a different relative progress weight. */
+        [[nodiscard]] Job weighted(double weight);
 
         /** @return Progress aggregation mode for this job. */
-        JobProgressMode getProgressMode() const;
+        [[nodiscard]] JobProgressMode getProgressMode() const;
 
         /** @return True when this job creates a nested workflow. */
-        bool isNestedWorkflow() const
+        [[nodiscard]] bool isNestedWorkflow() const
         {
             return _kind == JobKind::NestedWorkflow;
         }
 
-        /** Creates the nested workflow plan for this job. */
-        UniqueWorkflowPlan createNestedWorkflow(
-            const SharedWorkflowExecutionContext& context) const
+        /**
+         * @brief Creates the nested workflow represented by this job.
+         * @param context Workflow execution context used during nested workflow creation.
+         * @return Newly created nested workflow plan.
+         */
+        [[nodiscard]] UniqueWorkflowPlan createNestedWorkflow(const SharedWorkflowExecutionContext& context) const
         {
             Q_ASSERT(_nestedWorkflowFunction);
             return _nestedWorkflowFunction(*this, context);
         }
 
-    public: // Workflow context access for jobs
+    public:
 
         /**
-         * @brief Gets the shared workflow context associated with this job.
-         * @return A SharedWorkflowContext object that provides access to the shared workflow context for this job.
+         * @brief Returns the shared workflow context associated with this job.
+         * @return Shared workflow context.
          */
-        SharedWorkflowContext getWorkflowContext() const;
+        [[nodiscard]] SharedWorkflowContext getWorkflowContext() const;
 
         /**
-         * @brief Gets the typed shared workflow context.
+         * @brief Returns the shared workflow context cast to a specific type.
          *
-         * @tparam WorkflowContextType The specific derived type of WorkflowContextBase that you want to access the workflow context as.
-         * @return A std::shared_ptr<WorkflowContextType> that points to the workflow context cast to the specified type if the cast is successful, or nullptr if the cast fails.
+         * @tparam WorkflowContextType Target workflow context type.
+         * @return Context cast to WorkflowContextType, or nullptr if the cast fails.
          */
         template<typename WorkflowContextType>
-        std::shared_ptr<WorkflowContextType> getWorkflowContextAs() const {
+        [[nodiscard]] std::shared_ptr<WorkflowContextType> getWorkflowContextAs() const {
             static_assert(std::derived_from<WorkflowContextType, WorkflowContextBase>, "WorkflowContextType must derive from WorkflowContextBase");
 
             return std::dynamic_pointer_cast<WorkflowContextType>(_workflowContext);
         }
 
-    protected: // Workflow context access for jobs
+    protected:
 
         /**
          * @brief Sets the shared workflow context for this job.
-         * @param workflowContext The shared workflow context to be associated with this job.
+         * @param workflowContext Shared workflow context to associate with this job.
          */
         void setWorkflowContext(SharedWorkflowContext workflowContext);
 
     private:
 
-        QUuid                       _id = QUuid::createUuid();                             /**< Unique job identifier */
-        QUuid                       _outputId;                                             /**< Optional output routing identifier */
-        QString                     _name;                                                 /**< Human-readable job name */
-        JobKind                     _kind = JobKind::Function;                             /**< Job payload type */
-        JobFunction                 _function;                                             /**< Function job body */
-        NestedWorkflowFunction      _nestedWorkflowFunction;                               /**< Nested workflow factory */
-        QVariant                    _result;                                               /**< Job-local result value */
-        std::optional<QString>      _error;                                                /**< Optional job error message */
-        JobThreadAffinity           _threadAffinity = JobThreadAffinity::CurrentWorkerThread;  /**< Required execution thread */
-        double                      _weight = 1.0;                                         /**< Relative progress weight */
-        JobProgressMode             _progressMode = JobProgressMode::Automatic;            /**< Progress aggregation mode */
-        SharedWorkflowContext       _workflowContext;                                      /**< Shared workflow context inherited from the plan */
+        QUuid                       _id = QUuid::createUuid();                                 /**< Unique job identifier. */
+        QUuid                       _outputId;                                                 /**< Optional output routing identifier. */
+        QString                     _name;                                                     /**< Human-readable job name. */
+        JobKind                     _kind = JobKind::Function;                                 /**< Job payload type. */
+        JobFunction                 _function;                                                 /**< Function job body. */
+        NestedWorkflowFunction      _nestedWorkflowFunction;                                   /**< Nested workflow factory. */
+        QVariant                    _result;                                                   /**< Job-local result value. */
+        std::optional<QString>      _error;                                                    /**< Optional job error message. */
+        JobThreadAffinity           _threadAffinity = JobThreadAffinity::CurrentWorkerThread;  /**< Required execution thread. */
+        double                      _weight = 1.0;                                             /**< Relative progress weight. */
+        JobProgressMode             _progressMode = JobProgressMode::Automatic;                /**< Progress aggregation mode. */
+        SharedWorkflowContext       _workflowContext;                                          /**< Shared workflow context inherited from the plan. */
 
         friend class WorkflowPlan;
     };
@@ -283,68 +338,87 @@ public:
     {
     public:
 
-        /** Constructs a sequential or parallel stage. */
+        /**
+         * @brief Constructs a sequential or parallel stage.
+         * @param name Human-readable stage name.
+         * @param concurrencyMode Stage concurrency mode.
+         * @param jobs Jobs contained by the stage.
+         * @param weight Relative progress weight.
+         */
         Stage(QString name, ConcurrencyMode concurrencyMode, Jobs jobs, double weight = 1.0);
 
-        /** Constructs a batched parallel stage. */
+        /**
+         * @brief Constructs a batched parallel stage.
+         * @param name Human-readable stage name.
+         * @param jobs Jobs executed in batches.
+         * @param batchSizeFunction Function that resolves the batch size.
+         * @param weight Relative progress weight.
+         */
         Stage(QString name, Jobs jobs, WorkflowBatchSizeFunction batchSizeFunction, double weight);
 
         /** @return Unique stage identifier. */
-        QUuid getId() const;
+        [[nodiscard]] QUuid getId() const;
 
         /** @return Workflow handle for this stage. */
-        WorkflowHandle getHandle() const;
+        [[nodiscard]] WorkflowHandle getHandle() const;
 
         /** @return Stage concurrency mode. */
-        ConcurrencyMode getConcurrencyMode() const;
+        [[nodiscard]] ConcurrencyMode getConcurrencyMode() const;
 
         /** @return True when the stage runs sequentially. */
-        bool isSequential() const;
+        [[nodiscard]] bool isSequential() const;
 
         /** @return True when the stage runs in parallel. */
-        bool isParallel() const;
+        [[nodiscard]] bool isParallel() const;
 
         /** @return True when this is a batched parallel stage. */
-        bool isBatchedParallel() const;
+        [[nodiscard]] bool isBatchedParallel() const;
 
-        /** Sets the batch-size resolver for a parallel stage. */
+        /**
+         * @brief Sets the batch-size resolver for a parallel stage.
+         * @param batchSizeFunction Function that resolves the batch size.
+         */
         void setBatchSizeFunction(WorkflowBatchSizeFunction batchSizeFunction);
 
-        /** Resolves the batch size for the supplied execution context. */
-        std::size_t resolveBatchSize(const SharedWorkflowExecutionContext& executionContext) const;
+        /**
+         * @brief Resolves the batch size for an execution context.
+         * @param executionContext Execution context used by the resolver.
+         * @return Batch size to use for this stage.
+         */
+        [[nodiscard]] std::size_t resolveBatchSize(const SharedWorkflowExecutionContext& executionContext) const;
 
         /** @return Human-readable stage name. */
-        QString getName() const;
+        [[nodiscard]] QString getName() const;
 
         /** @return Const jobs in this stage. */
-        const Jobs& getJobs() const;
+        [[nodiscard]] const Jobs& getJobs() const;
 
         /** @return Mutable jobs in this stage. */
-        Jobs& getJobs();
+        [[nodiscard]] Jobs& getJobs();
 
         /** Sets the relative progress weight for this stage. */
         void setWeight(double weight);
 
         /** @return Relative progress weight for this stage. */
-        double getWeight() const;
+        [[nodiscard]] double getWeight() const;
 
         /** @return True when the stage contains GUI-thread jobs. */
-        bool containsGuiThreadJobs() const;
+        [[nodiscard]] bool containsGuiThreadJobs() const;
 
         /** @return True when the stage contains worker-thread jobs. */
-        bool containsWorkerThreadJobs() const;
+        [[nodiscard]] bool containsWorkerThreadJobs() const;
 
         /** @return True when the stage's concurrency mode supports its job thread affinities. */
-        bool isThreadAffinityCompatible() const;
+        [[nodiscard]] bool isThreadAffinityCompatible() const;
 
     private:
 
-        QUuid                               _id = QUuid::createUuid();         /**< Unique stage identifier */
-        QString                             _name;                             /**< Human-readable stage name */
-        ConcurrencyMode                     _concurrencyMode;                  /**< Stage concurrency mode */
-        Jobs                                _jobs;                             /**< Jobs contained by this stage */
-        double                              _weight = 1.0;                     /**< Relative progress weight */
-        OptionalWorkflowBatchSizeFunction   _batchSizeFunction;                /**< Optional batch-size resolver for parallel stages */
+        QUuid                               _id = QUuid::createUuid();         /**< Unique stage identifier. */
+        QString                             _name;                             /**< Human-readable stage name. */
+        ConcurrencyMode                     _concurrencyMode;                  /**< Stage concurrency mode. */
+        Jobs                                _jobs;                             /**< Jobs contained by this stage. */
+        double                              _weight = 1.0;                     /**< Relative progress weight. */
+        OptionalWorkflowBatchSizeFunction   _batchSizeFunction;                /**< Optional batch-size resolver for parallel stages. */
     };
 
     using Stages = std::vector<Stage>;
@@ -377,15 +451,33 @@ public:
     }
 
     /** @return Human-readable workflow plan name. */
-    QString getName() const;
+    [[nodiscard]] QString getName() const;
 
-    /** Adds a sequential stage to the main workflow stage list. */
+    /**
+     * @brief Adds a sequential stage to the main workflow stage list.
+     * @param name Human-readable stage name.
+     * @param jobs Jobs contained by the stage.
+     * @param weight Relative progress weight.
+     * @return Handle for the added stage.
+     */
     WorkflowHandle addSequentialStage(QString name, Jobs jobs, double weight = 1.0);
 
-    /** Adds a parallel stage to the main workflow stage list. */
+    /**
+     * @brief Adds a parallel stage to the main workflow stage list.
+     * @param name Human-readable stage name.
+     * @param jobs Jobs contained by the stage.
+     * @param weight Relative progress weight.
+     * @return Handle for the added stage.
+     */
     WorkflowHandle addParallelStage(QString name, Jobs jobs, double weight = 1.0);
 
-    /** Adds a parallel stage containing only nested workflow jobs. */
+    /**
+     * @brief Adds a parallel stage containing only nested workflow jobs.
+     * @param name Human-readable stage name.
+     * @param jobs Nested workflow jobs contained by the stage.
+     * @param weight Relative progress weight.
+     * @return Handle for the added stage.
+     */
     WorkflowHandle addParallelNestedWorkflowStage(QString name, Jobs jobs, double weight = 1.0);
 
     /**
@@ -406,7 +498,14 @@ public:
      */
     WorkflowHandle addBatchedParallelStage(const QString& name, Jobs jobs, WorkflowBatchSizeFunction batchSizeFunction);
 
-    /** Adds a stage using an explicit concurrency mode. */
+    /**
+     * @brief Adds a stage using an explicit concurrency mode.
+     * @param name Human-readable stage name.
+     * @param mode Stage concurrency mode.
+     * @param jobs Jobs contained by the stage.
+     * @param weight Relative progress weight.
+     * @return Handle for the added stage.
+     */
     WorkflowHandle addStage(QString name, ConcurrencyMode mode, Jobs jobs, double weight = 1.0);
 
     /** Adds a single-function stage that runs when the main workflow succeeds. */
@@ -428,19 +527,19 @@ public:
     }
 
     /** @return Const main workflow stages. */
-	const Stages& getStages() const;
+    [[nodiscard]] const Stages& getStages() const;
 
     /** @return Mutable main workflow stages. */
-	Stages& getStages();
+    [[nodiscard]] Stages& getStages();
 
     /** @return Stages that execute after successful main execution. */
-    const Stages& getOnSuccessStages() const;
+    [[nodiscard]] const Stages& getOnSuccessStages() const;
 
     /** @return Stages that execute after failed main execution. */
-    const Stages& getOnFailureStages() const;
+    [[nodiscard]] const Stages& getOnFailureStages() const;
 
     /** @return Stages that execute during finalization. */
-    const Stages& getFinallyStages() const;
+    [[nodiscard]] const Stages& getFinallyStages() const;
 
     /**
      * @brief Gets the shared workflow context.
@@ -448,21 +547,21 @@ public:
      * The workflow context can store data shared across stages and jobs in
      * this plan.
      *
-     * @return A SharedWorkflowContext object that provides access to the shared workflow context for this workflow plan.
+     * @return Shared workflow context.
      */
-    SharedWorkflowContext getWorkflowContext() const;
+    [[nodiscard]] SharedWorkflowContext getWorkflowContext() const;
 
     /**
-     * @brief Gets the typed shared workflow context.
+     * @brief Returns the shared workflow context cast to a specific type.
      *
      * WorkflowContextType must derive from WorkflowContextBase. The method
      * returns nullptr when the stored context has a different type.
      *
-     * @tparam WorkflowContextType The specific derived type of WorkflowContextBase that you want to access the workflow context as.
-     * @return A std::shared_ptr<WorkflowContextType> that points to the workflow context cast to the specified type, or nullptr if the cast fails.
+     * @tparam WorkflowContextType Target workflow context type.
+     * @return Context cast to WorkflowContextType, or nullptr if the cast fails.
      */
     template<typename WorkflowContextType>
-    std::shared_ptr<WorkflowContextType> getWorkflowContextAs() const {
+    [[nodiscard]] std::shared_ptr<WorkflowContextType> getWorkflowContextAs() const {
         static_assert(std::derived_from<WorkflowContextType, WorkflowContextBase>, "WorkflowContextType must derive from WorkflowContextBase");
         return std::dynamic_pointer_cast<WorkflowContextType>(_workflowContext);
     }
@@ -471,32 +570,7 @@ public:
     void setWeight(double weight);
 
     /** @return Relative progress weight for this workflow plan. */
-    double getWeight() const;
-
-public:
-
-    //template<typename Function>
-    //void addNestedWorkflowStage(
-    //    QString name,
-    //    Function&& function,
-    //    JobThreadAffinity threadAffinity = JobThreadAffinity::CurrentWorkerThread,
-    //    double weight = 1.0)
-    //{
-    //    _stages.emplace_back(
-    //        name,
-    //        ConcurrencyMode::Sequential,
-    //        Jobs{
-    //            Job(
-    //                name,
-    //                NestedWorkflowFunction(std::forward<Function>(function)),
-    //                threadAffinity,
-    //                JobProgressMode::Automatic,
-    //                weight
-    //            )
-    //        },
-    //        weight
-    //    );
-    //}
+    [[nodiscard]] double getWeight() const;
 
     /**
      * @brief Adds a sequential stage that executes a nested workflow.
@@ -517,10 +591,7 @@ private:
      * @param context Execution context for the job.
      */
     template<typename Function>
-    static void invokeJobFunction(
-        Function& function,
-        const Job& job,
-        const SharedWorkflowExecutionContext& context)
+    static void invokeJobFunction(Function& function, const Job& job, const SharedWorkflowExecutionContext& context)
     {
         if constexpr (std::is_invocable_v<Function, const Job&, const SharedWorkflowExecutionContext&>) {
             function(job, context);
@@ -580,14 +651,13 @@ private:
     }
 
 private:
-
-    QString                 _name;                  /**< Human-readable workflow plan name */
-    Stages                  _stages;                /**< Main workflow stages */
-    Stages                  _onSuccessStages;       /**< Stages executed after successful main execution */
-    Stages                  _onFailureStages;       /**< Stages executed after failed main execution */
-    Stages                  _finalizationStages;    /**< Stages executed during finalization */
-    SharedWorkflowContext   _workflowContext;       /**< Shared workflow context passed to stages and jobs */
-    double                  _weight = 1.0;          /**< Relative progress weight when this plan is nested */
+    QString                 _name;                  /**< Human-readable workflow plan name. */
+    Stages                  _stages;                /**< Main workflow stages. */
+    Stages                  _onSuccessStages;       /**< Stages executed after successful main execution. */
+    Stages                  _onFailureStages;       /**< Stages executed after failed main execution. */
+    Stages                  _finalizationStages;    /**< Stages executed during finalization. */
+    SharedWorkflowContext   _workflowContext;       /**< Shared workflow context passed to stages and jobs. */
+    double                  _weight = 1.0;          /**< Relative progress weight when this plan is nested. */
     
 };
 

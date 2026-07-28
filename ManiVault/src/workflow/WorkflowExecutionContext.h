@@ -23,6 +23,16 @@
 namespace mv::workflow
 {
 
+/**
+ * @brief Runtime context for one workflow execution node.
+ *
+ * WorkflowExecutionContext binds together the report node, progress node,
+ * shared execution state, optional task, and hierarchy metadata for a workflow,
+ * stage, or job. Contexts form a tree that mirrors the workflow plan during
+ * execution.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
+ */
 class CORE_EXPORT WorkflowExecutionContext : public std::enable_shared_from_this<WorkflowExecutionContext>
 {
 public:
@@ -39,7 +49,9 @@ public:
     /** Semantic execution node type. */
     using Type = WorkflowExecutionNodeType;
 
-    /** Constructs an empty workflow execution context. */
+    /**
+     * @brief Constructs an empty workflow execution context.
+     */
     WorkflowExecutionContext();
 
     /**
@@ -53,8 +65,11 @@ public:
      */
     WorkflowExecutionContext(QString name, ReportNodePtr reportNode, ProgressNodePtr progressNode, StatePtr state, Task* task = nullptr, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
 
-    /** @return Semantic execution node type for this context. */
-    Type getType() const
+    /**
+     * @brief Returns the semantic execution node type.
+     * @return Semantic execution node type for this context.
+     */
+    [[nodiscard]] Type getType() const
     {
         return _type;
     }
@@ -85,7 +100,7 @@ public:
      * @param progressMode Progress aggregation mode for the child.
      * @return Child execution context, or nullptr if this context is invalid.
      */
-    SharedWorkflowExecutionContext createChild(Type type, const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
+    [[nodiscard]] SharedWorkflowExecutionContext createChild(Type type, const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
 
     /**
      * @brief Creates a workflow child context.
@@ -103,36 +118,64 @@ public:
      * - Receives its own unique execution identifier
      * - Is classified as a Workflow execution context
      *
-     * This function is typically used when:
-     * - Executing a root workflow from another workflow executor
-     * - Creating logical workflow boundaries
-     * - Constructing nested execution hierarchies
-     * - Establishing workflow-level progress aggregation
-     *
      * @param name Human-readable name of the child workflow context.
      * @param weight Relative progress contribution weight of the child workflow.
      * @param progressMode Progress reporting mode used by the child workflow.
      * @return Shared pointer to the newly created workflow execution context.
      */
-    SharedWorkflowExecutionContext createWorkflowChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
+    [[nodiscard]] SharedWorkflowExecutionContext createWorkflowChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
 
-    /** Creates a nested workflow child context. */
-    SharedWorkflowExecutionContext createNestedWorkflowChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
+    /**
+     * @brief Creates a nested workflow child context.
+     * @param name Human-readable child context name.
+     * @param weight Relative progress contribution of the child.
+     * @param progressMode Progress aggregation mode for the child.
+     * @return Nested workflow child context.
+     */
+    [[nodiscard]] SharedWorkflowExecutionContext createNestedWorkflowChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
 
-    /** Creates a sequential stage child context. */
-    SharedWorkflowExecutionContext createSequentialStageChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
+    /**
+     * @brief Creates a sequential stage child context.
+     * @param name Human-readable child context name.
+     * @param weight Relative progress contribution of the child.
+     * @param progressMode Progress aggregation mode for the child.
+     * @return Sequential stage child context.
+     */
+    [[nodiscard]] SharedWorkflowExecutionContext createSequentialStageChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
 
-    /** Creates a parallel stage child context. */
-    SharedWorkflowExecutionContext createParallelStageChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
+    /**
+     * @brief Creates a parallel stage child context.
+     * @param name Human-readable child context name.
+     * @param weight Relative progress contribution of the child.
+     * @param progressMode Progress aggregation mode for the child.
+     * @return Parallel stage child context.
+     */
+    [[nodiscard]] SharedWorkflowExecutionContext createParallelStageChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
 
-    /** Creates a job child context. */
-    SharedWorkflowExecutionContext createJobChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
+    /**
+     * @brief Creates a job child context.
+     * @param name Human-readable child context name.
+     * @param weight Relative progress contribution of the child.
+     * @param progressMode Progress aggregation mode for the child.
+     * @return Job child context.
+     */
+    [[nodiscard]] SharedWorkflowExecutionContext createJobChild(const QString& name, double weight = 1.0, WorkflowPlan::JobProgressMode progressMode = WorkflowPlan::JobProgressMode::Automatic);
 
-    /** Creates a typed child context with an explicit progress weight and mode. */
-    SharedWorkflowExecutionContext createTypedChild(Type type, const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode);
+    /**
+     * @brief Creates a typed child context.
+     * @param type Semantic child context type.
+     * @param name Human-readable child context name.
+     * @param weight Relative progress contribution of the child.
+     * @param progressMode Progress aggregation mode for the child.
+     * @return Typed child execution context.
+     */
+    [[nodiscard]] SharedWorkflowExecutionContext createTypedChild(Type type, const QString& name, double weight, WorkflowPlan::JobProgressMode progressMode);
 
-    /** @return True when this context has no parent context. */
-    bool isRootExecution() const;
+    /**
+     * @brief Returns whether this context has no parent.
+     * @return True for root execution contexts.
+     */
+    [[nodiscard]] bool isRootExecution() const;
 
 public:
 
@@ -157,18 +200,18 @@ public:
      * @param durationMs Optional event duration in milliseconds.
      * @return Variant map with context identity, hierarchy, and timing details.
      */
-    QVariantMap makeLifecycleDetails(const QString& event, std::uint64_t durationMs = 0) const;
+    [[nodiscard]] QVariantMap makeLifecycleDetails(const QString& event, std::uint64_t durationMs = 0) const;
 
 public:
 
     /** @return True when the progress node has child progress nodes. */
-    bool hasProgressChildren() const;
+    [[nodiscard]] bool hasProgressChildren() const;
 
     /** @return True when this context has report, progress, and state objects. */
-    bool isValid() const;
+    [[nodiscard]] bool isValid() const;
 
     /** @return Human-readable context name. */
-    QString getName() const;
+    [[nodiscard]] QString getName() const;
 
     /** Adds a message with an explicit severity to the report node and console output. */
     void message(util::SeverityLevel severity, QString text, QString location, QVariantMap details) const;
@@ -176,30 +219,30 @@ public:
     /**
      * @brief Adds an informational message.
      *
-     * @param text The main text or content of the informational message to be added to the report node.
-     * @param location The specific location in the code or workflow where the informational message was generated (e.g., function name, line number). This can be used to provide additional context for the message and help with debugging and tracing.
-     * @param details Additional details or metadata associated with the informational message (optional). This can be used to provide further context or structured information related to the message, such as variable values, execution state, or other relevant data that may assist in understanding the message and its implications within the workflow execution.
-     * @param kind The kind of message being added, which can be either Lifecycle or Diagnostic. This parameter allows for categorizing the message based on its purpose and usage within the workflow execution context.
+     * @param text Message text.
+     * @param location Source or workflow location associated with the message.
+     * @param details Additional structured details.
+     * @param kind Message category.
      */
     void info(QString text, QString location = {}, QVariantMap details = {}, MessageKind kind = MessageKind::Diagnostic) const;
 
     /**
      * @brief Adds a warning message.
      *
-     * @param text The main text or content of the warning message to be added to the report node.
-     * @param location The specific location in the code or workflow where the warning message was generated (e.g., function name, line number). This can be used to provide additional context for the message and help with debugging and tracing.
-     * @param details Additional details or metadata associated with the warning message (optional). This can be used to provide further context or structured information related to the message, such as variable values, execution state, or other relevant data that may assist in understanding the message and its implications within the workflow execution.
-     * * @param kind The kind of message being added, which can be either Lifecycle or Diagnostic. This parameter allows for categorizing the message based on its purpose and usage within the workflow execution context.
+     * @param text Message text.
+     * @param location Source or workflow location associated with the message.
+     * @param details Additional structured details.
+     * @param kind Message category.
      */
     void warning(QString text, QString location = {}, QVariantMap details = {}, MessageKind kind = MessageKind::Diagnostic) const;
 
     /**
      * @brief Adds an error message.
      *
-     * @param text The main text or content of the error message to be added to the report node.
-     * @param location The specific location in the code or workflow where the error message was generated (e.g., function name, line number). This can be used to provide additional context for the message and help with debugging and tracing.
-     * @param details Additional details or metadata associated with the error message (optional). This can be used to provide further context or structured information related to the message, such as variable values, execution state, or other relevant data that may assist in understanding the message and its implications within the workflow execution.
-     * * @param kind The kind of message being added, which can be either Lifecycle or Diagnostic. This parameter allows for categorizing the message based on its purpose and usage within the workflow execution context.
+     * @param text Message text.
+     * @param location Source or workflow location associated with the message.
+     * @param details Additional structured details.
+     * @param kind Message category.
      */
     void error(QString text, QString location = {}, QVariantMap details = {}, MessageKind kind = MessageKind::Diagnostic) const;
 
@@ -210,62 +253,47 @@ public:
     void setProgress(double value) const;
 
     /** @return Current progress value for this context. */
-    double getProgress() const;
+    [[nodiscard]] double getProgress() const;
 
     /** @return Report node associated with this context. */
-    ReportNodePtr getReportNode() const;
+    [[nodiscard]] ReportNodePtr getReportNode() const;
 
     /** @return Progress node associated with this context. */
-    ProgressNodePtr getProgressNode() const;
+    [[nodiscard]] ProgressNodePtr getProgressNode() const;
 
     /** @return Shared execution state associated with this context. */
-    StatePtr getState() const;
+    [[nodiscard]] StatePtr getState() const;
 
     /** @return Progress aggregation mode for this context. */
-    WorkflowPlan::JobProgressMode getProgressMode() const;
+    [[nodiscard]] WorkflowPlan::JobProgressMode getProgressMode() const;
 
     /**
-     * @brief Gets the execution path.
+     * @brief Returns the execution path.
      *
      * The path is built from this context and its ancestors, starting at the
      * root context.
      *
-     * @param separator The string to use as a separator between levels of the execution path. The default value is " / ", but it can be customized to use any other separator as needed (e.g., " > ", " -> ", etc.).
-     * @return The execution path of this workflow execution context as a string, with each level of the hierarchy separated by the specified separator.
+     * @param separator Separator inserted between path elements.
+     * @return Execution path string.
      */
-    QString getExecutionPath(const QString& separator = "/") const;
+    [[nodiscard]] QString getExecutionPath(const QString& separator = "/") const;
 
     /**
-     * @brief Gets the hierarchical depth.
-     *
-     * The depth represents how deeply nested this context is relative to the root workflow execution context.
-     * A root workflow execution context has a depth of 0, its direct children have a depth of 1, and so on.
-     *
-     * The depth is derived from the execution path associated with this context. Since the execution path
-     * always contains at least the name of the current context itself, the depth is computed as:
-     *
-     *     executionPath.size() - 1
-     *
-     * This value is primarily useful for:
-     * - Rendering hierarchical console or log output with indentation
-     * - Visualizing nested workflows, stages, and jobs
-     * - Debugging workflow execution structure
-     * - Computing relative execution scope information
-     *
-     * @return The hierarchical depth of this workflow execution context, where 0 represents the root context.
+     * @brief Returns the hierarchical depth.
+     * @return Depth relative to the root context.
      */
-    std::int32_t getDepth() const;
+    [[nodiscard]] std::int32_t getDepth() const;
 
     /** @return Workflow options from the shared execution state, or defaults if unavailable. */
-    WorkflowOptions getOptions() const;
+    [[nodiscard]] WorkflowOptions getOptions() const;
 
-public: // ID
+public:
 
     /**
-     * Get the unique identifier of this workflow execution context. This ID is used for tracing and logging purposes, and can be used to correlate log messages and trace events with specific workflow executions.
-     * @return The unique identifier of this workflow execution context.
+     * @brief Returns the unique context identifier.
+     * @return Unique identifier of this workflow execution context.
      */
-    QUuid getId() const;
+    [[nodiscard]] QUuid getId() const;
 
     /**
      * @brief Sets the output identifier used by setOutput() and takeOutput().
@@ -274,20 +302,20 @@ public: // ID
     void setOutputId(const QUuid& outputId);
 
     /** @return Output identifier used by this context. */
-    QUuid getOutputId() const;
+    [[nodiscard]] QUuid getOutputId() const;
 
     /**
-     * Get the unique identifier of the parent workflow execution context, if any. This can be used to correlate log messages and trace events with parent-child relationships between workflow executions.
-     * @return The unique identifier of the parent workflow execution context, or a null QUuid if this is a root context.
+     * @brief Returns the parent context identifier.
+     * @return Parent context identifier, or a null QUuid for root contexts.
      */
-    QUuid getParentId() const;
+    [[nodiscard]] QUuid getParentId() const;
 
-public: // Result values
+public:
 
     /** @return Task associated with this context, or nullptr. */
-    Task* getTask() const;
+    [[nodiscard]] Task* getTask() const;
 
-public: // Child context and output  management
+public:
 
     /**
      * @brief Registers a named child context.
@@ -317,7 +345,7 @@ public: // Child context and output  management
      * @param handle Workflow handle whose id identifies the output.
      * @return Output value, or an invalid QVariant when unavailable.
      */
-    QVariant takeOutput(const WorkflowHandle& handle);
+    [[nodiscard]] QVariant takeOutput(const WorkflowHandle& handle);
 
     /** @return Parent execution context, or nullptr for root contexts. */
     [[nodiscard]] SharedWorkflowExecutionContext getParent() const;
@@ -326,7 +354,7 @@ public: // Child context and output  management
     [[nodiscard]] QStringList getChildNames() const;
 
     /** @return True when the output id differs from this context id. */
-    bool hasExplicitOutputId() const;
+    [[nodiscard]] bool hasExplicitOutputId() const;
 
 private:
 
@@ -335,10 +363,10 @@ private:
 
     /**
      * @brief Adds a lifecycle message to the report node and console output.
-     * @param severity The severity level of the message.
-     * @param text The message text.
-     * @param location The location associated with the message.
-     * @param details Additional details for the message.
+     * @param severity Message severity.
+     * @param text Message text.
+     * @param location Source or workflow location associated with the message.
+     * @param details Additional structured details.
      */
     void addLifecycleMessage(util::SeverityLevel severity, QString text, QString location, QVariantMap details) const;
 
@@ -347,7 +375,7 @@ private:
      * @param details Additional details to include in the console output.
      * @return Variant map with context identity, hierarchy, and timing details for console output.
      */
-    QVariantMap makeConsoleDetails(const QVariantMap& details) const;
+    [[nodiscard]] QVariantMap makeConsoleDetails(const QVariantMap& details) const;
 
 private:
 
@@ -355,20 +383,20 @@ private:
 
 private:
 
-    QString                                         _name;                                                      /**< Human-readable execution context name */
-    QUuid                                           _id;                                                        /**< Unique execution context identifier */
-    QUuid                                           _outputId;                                                  /**< Identifier used to route output values */
-    QUuid                                           _parentId;                                                  /**< Unique identifier of the parent context, if any */
-    QStringList                                     _executionPath;                                             /**< Hierarchical execution path from the root context */
-    ReportNodePtr                                   _reportNode;                                                /**< Report node associated with this context */
-    ProgressNodePtr                                 _progressNode;                                              /**< Progress node associated with this context */
-    StatePtr                                        _state;                                                     /**< Shared execution state for the root workflow */
-    QPointer<Task>                                  _task;                                                      /**< Task used for GUI progress reporting */
-    WorkflowPlan::JobProgressMode                   _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /**< Progress aggregation mode */
-    Type                                            _type = Type::Workflow;                                     /**< Semantic execution node type */
-    std::weak_ptr<WorkflowExecutionContext>         _parent;                                                    /**< Parent execution context */
-    mutable QMutex                                  _childrenMutex;                                             /**< Protects child context lookup */
-    QHash<QString, SharedWorkflowExecutionContext>  _childrenByName;                                            /**< Child contexts indexed by name */
+    QString                                         _name;                                                      /**< Human-readable execution context name. */
+    QUuid                                           _id;                                                        /**< Unique execution context identifier. */
+    QUuid                                           _outputId;                                                  /**< Identifier used to route output values. */
+    QUuid                                           _parentId;                                                  /**< Unique identifier of the parent context, if any. */
+    QStringList                                     _executionPath;                                             /**< Hierarchical execution path from the root context. */
+    ReportNodePtr                                   _reportNode;                                                /**< Report node associated with this context. */
+    ProgressNodePtr                                 _progressNode;                                              /**< Progress node associated with this context. */
+    StatePtr                                        _state;                                                     /**< Shared execution state for the root workflow. */
+    QPointer<Task>                                  _task;                                                      /**< Task used for GUI progress reporting. */
+    WorkflowPlan::JobProgressMode                   _progressMode = WorkflowPlan::JobProgressMode::Automatic;   /**< Progress aggregation mode. */
+    Type                                            _type = Type::Workflow;                                     /**< Semantic execution node type. */
+    std::weak_ptr<WorkflowExecutionContext>         _parent;                                                    /**< Parent execution context. */
+    mutable QMutex                                  _childrenMutex;                                             /**< Protects child context lookup. */
+    QHash<QString, SharedWorkflowExecutionContext>  _childrenByName;                                            /**< Child contexts indexed by name. */
 };
 
 /** Shared reference to a WorkflowExecutionContext. */

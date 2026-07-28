@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
-// A corresponding LICENSE file is located in the root directory of this source tree 
-// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// A corresponding LICENSE file is located in the root directory of this source tree
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #pragma once
 
@@ -15,6 +15,7 @@
  *
  * @param filePath Project file path to open.
  * @return Workflow plan for opening the project.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
-mv::workflow::UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath);
-    
+[[nodiscard]] mv::workflow::UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath);

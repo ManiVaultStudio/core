@@ -12,22 +12,28 @@ namespace mv::workflow
 {
 
 /**
- * @brief Options for customizing the details of a workflow result.
+ * @brief Customizes workflow result dialog text.
+ *
+ * These values are used when a workflow result is presented to the user. The
+ * operation and subject names produce contextual default text, while the
+ * override fields replace the generated title or message entirely.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 struct CORE_EXPORT WorkflowResultDetailsOptions
 {
-    QString operationName;      /**< Operation label, such as "Save project" or "Open project" */
-    QString subjectName;        /**< Subject label, such as a project filename */
+    QString operationName;      /**< Operation label, such as "Save project" or "Open project". */
+    QString subjectName;        /**< Subject label, such as a project filename. */
 
-    QString overrideTitle;      /**< Full result-dialog title override */
-    QString overrideMessage;    /**< Full result-dialog intro message override */
+    QString overrideTitle;      /**< Full result-dialog title override. */
+    QString overrideMessage;    /**< Full result-dialog intro message override. */
 
     /**
      * @brief Creates the result-dialog title.
      * @param workflowName Fallback workflow name.
      * @return Dialog title.
      */
-    QString makeTitle(const QString& workflowName) const
+    [[nodiscard]] QString makeTitle(const QString& workflowName) const
     {
         if (!overrideTitle.isEmpty())
             return overrideTitle;
@@ -43,7 +49,7 @@ struct CORE_EXPORT WorkflowResultDetailsOptions
      * @param workflowName Fallback workflow name.
      * @return Dialog message.
      */
-    QString makeMessage(const QString& workflowName) const
+    [[nodiscard]] QString makeMessage(const QString& workflowName) const
     {
         if (!overrideMessage.isEmpty())
             return overrideMessage;
@@ -61,7 +67,7 @@ struct CORE_EXPORT WorkflowResultDetailsOptions
      * @brief Creates the subject line for the result-dialog.
      * @return Subject line, or empty if no subject is set.
      */
-    QString makeSubjectLine() const
+    [[nodiscard]] QString makeSubjectLine() const
     {
         if (subjectName.isEmpty())
             return {};

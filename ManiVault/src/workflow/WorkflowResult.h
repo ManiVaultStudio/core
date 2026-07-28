@@ -15,10 +15,12 @@ namespace mv::workflow
 {
 
 /**
- * @brief Result of a complete workflow execution.
+ * @brief Stores the final outcome of a workflow execution.
  *
- * WorkflowResult extends WorkflowResultBase with execution duration, collected
- * workflow messages, and metrics captured during the run.
+ * WorkflowResult extends WorkflowResultBase with workflow-level execution
+ * details: total duration, emitted messages, severity-based message queries,
+ * and collected metrics. The optional output value and execution status are
+ * inherited from WorkflowResultBase.
  *
  * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
@@ -26,114 +28,152 @@ class CORE_EXPORT WorkflowResult final : public WorkflowResultBase
 {
 public:
 
-	/**
+    /**
      * @brief Constructs a workflow result.
-     *
-     * The workflow name is used for identification and logging.
-     *
-	 * @param workflowName The name of the workflow that produced this result. This can be used for identification and logging purposes, allowing you to associate the result with a specific workflow execution.
-	 */
-	WorkflowResult(const QString& workflowName);
-
-public: // General
-
-    /**
-     * @brief Retrieves the duration of the workflow execution in milliseconds.
-     * @return The duration of the workflow execution in milliseconds.
+     * @param workflowName Name of the workflow that produced this result.
      */
-    std::uint64_t getDurationMS() const;
+    WorkflowResult(const QString& workflowName);
+
+public:
 
     /**
-     * @brief Sets the duration of the workflow execution in milliseconds.
-     * @param duration The duration to be set for the workflow execution in milliseconds.
+     * @brief Returns the workflow execution duration.
+     * @return Duration in milliseconds.
+     */
+    [[nodiscard]] std::uint64_t getDurationMS() const;
+
+    /**
+     * @brief Sets the workflow execution duration.
+     * @param duration Duration in milliseconds.
      */
     void setDurationMS(std::uint64_t duration);
 
-public: // Messages
-
-    /** @return All messages collected during workflow execution. */
-    WorkflowMessages getMessages() const;
-
-    /** @return Messages with warning severity. */
-    WorkflowMessages getWarningMessages() const;
-
-    /** @return Messages with error severity. */
-    WorkflowMessages getErrorMessages() const;
-
-    /** @return Messages with fatal severity. */
-    WorkflowMessages getFatalErrorMessages() const;
-
-    /** Sets the messages collected during workflow execution. */
-    void setMessages(const WorkflowMessages& workflowMessages);
-
-    /** Returns messages whose severity is contained in the supplied set. */
-    WorkflowMessages getMessagesByLevels(const util::SeverityLevels& severityLevels) const;
-
-    /** Returns the number of messages whose severity is contained in the supplied set. */
-    int getMessageCountByLevels(const util::SeverityLevels& severityLevels) const;
-
-    /** @return True when this result contains warning messages. */
-    bool hasWarnings() const;
-
-    /** @return True when this result contains error messages. */
-    bool hasErrors() const;
-
-    /** @return True when this result contains fatal error messages. */
-    bool hasCriticalErrors() const;
-
-    /** @return Number of warning messages. */
-    int getWarningCount() const;
-
-    /** @return Number of error messages. */
-    int getErrorCount() const;
-
-    /** @return Number of fatal error messages. */
-    int getFatalErrorCount() const;
-
-    /** @return True when this result contains messages of the specified severity level. */
-    Status deriveStatus() const;
-
-	/** @return A summary text describing the workflow result, including status and message counts. */
-    QString getSummaryText() const;
-
-public: // Metrics
+public:
 
     /**
-     * @brief Sets workflow metrics.
-     *
-     * Metrics provide measurements for analysis, monitoring, and optimization
-     * of the workflow execution.
-     *
-     * @param metrics The vector of WorkflowMetric objects to be associated with this workflow result. Each WorkflowMetric object represents a specific metric with its name, value, and optional details. By providing a vector of metrics, you can include multiple measurements that capture different aspects of the workflow execution, allowing for a comprehensive evaluation and analysis of the workflow's performance and outcomes.
+     * @brief Returns all messages emitted during workflow execution.
+     * @return Copy of the workflow message list.
+     */
+    [[nodiscard]] WorkflowMessages getMessages() const;
+
+    /**
+     * @brief Returns warning messages emitted during workflow execution.
+     * @return Messages with Warning severity.
+     */
+    [[nodiscard]] WorkflowMessages getWarningMessages() const;
+
+    /**
+     * @brief Returns error messages emitted during workflow execution.
+     * @return Messages with Error severity.
+     */
+    [[nodiscard]] WorkflowMessages getErrorMessages() const;
+
+    /**
+     * @brief Returns fatal error messages emitted during workflow execution.
+     * @return Messages with Fatal severity.
+     */
+    [[nodiscard]] WorkflowMessages getFatalErrorMessages() const;
+
+    /**
+     * @brief Replaces the workflow message list.
+     * @param workflowMessages Messages to store on this result.
+     */
+    void setMessages(const WorkflowMessages& workflowMessages);
+
+    /**
+     * @brief Returns messages whose severity is included in the requested set.
+     * @param severityLevels Severity levels to include.
+     * @return Filtered workflow messages.
+     */
+    [[nodiscard]] WorkflowMessages getMessagesByLevels(const util::SeverityLevels& severityLevels) const;
+
+    /**
+     * @brief Counts messages whose severity is included in the requested set.
+     * @param severityLevels Severity levels to include.
+     * @return Number of matching messages.
+     */
+    [[nodiscard]] int getMessageCountByLevels(const util::SeverityLevels& severityLevels) const;
+
+    /**
+     * @brief Returns whether the result contains warning messages.
+     * @return True if at least one warning message exists.
+     */
+    [[nodiscard]] bool hasWarnings() const;
+
+    /**
+     * @brief Returns whether the result contains error messages.
+     * @return True if at least one error message exists.
+     */
+    [[nodiscard]] bool hasErrors() const;
+
+    /**
+     * @brief Returns whether the result contains fatal error messages.
+     * @return True if at least one fatal error message exists.
+     */
+    [[nodiscard]] bool hasCriticalErrors() const;
+
+    /**
+     * @brief Counts warning messages.
+     * @return Number of warning messages.
+     */
+    [[nodiscard]] int getWarningCount() const;
+
+    /**
+     * @brief Counts error messages.
+     * @return Number of error messages.
+     */
+    [[nodiscard]] int getErrorCount() const;
+
+    /**
+     * @brief Counts fatal error messages.
+     * @return Number of fatal error messages.
+     */
+    [[nodiscard]] int getFatalErrorCount() const;
+
+    /**
+     * @brief Derives a status from the collected messages.
+     * @return Failed when error or fatal messages exist, otherwise Success.
+     */
+    [[nodiscard]] Status deriveStatus() const;
+
+    /**
+     * @brief Builds a compact summary text.
+     * @return Summary containing status and message counts.
+     */
+    [[nodiscard]] QString getSummaryText() const;
+
+public:
+
+    /**
+     * @brief Replaces the metrics associated with this workflow result.
+     * @param metrics Metrics collected during workflow execution.
      */
     void setMetrics(QVector<WorkflowMetric> metrics);
 
     /**
-     * @brief Retrieves workflow metrics.
-     *
-     * Metrics may include execution time, resource usage, throughput, or other
-     * measurements relevant to the workflow.
-     *
-     * @return A vector of WorkflowMetric objects associated with this workflow result. Each WorkflowMetric object represents a specific metric with its name, value, and optional details. By providing a vector of metrics, you can access multiple measurements that capture different aspects of the workflow execution, allowing for a comprehensive evaluation and analysis of the workflow's performance and outcomes.
+     * @brief Returns metrics collected during workflow execution.
+     * @return Copy of the workflow metrics.
      */
-    QVector<WorkflowMetric> getMetrics() const;
+    [[nodiscard]] QVector<WorkflowMetric> getMetrics() const;
 
     /**
-     * @brief Retrieves a workflow metric by name.
-     *
-     * @param name The name of the metric to be retrieved. This should correspond to the name of a metric that was set for this workflow result. By providing the name of the metric, you can access the specific measurement that you are interested in, allowing for targeted analysis and evaluation of the workflow's performance and outcomes.
-     * @return An optional containing the WorkflowMetric object with the specified name if it exists, or an empty optional if no such metric is found. By returning an optional, this method allows for safe retrieval of metrics without risking errors or undefined behavior if the requested metric does not exist.
+     * @brief Returns a metric by name.
+     * @param name Name of the metric to retrieve.
+     * @return Matching metric, or std::nullopt when no metric with this name exists.
      */
-    std::optional<WorkflowMetric> getMetric(const QString& name) const;
+    [[nodiscard]] std::optional<WorkflowMetric> getMetric(const QString& name) const;
 
 private:
 
-    std::uint64_t               _duration = 0;      /**< Workflow execution duration in milliseconds */
-    WorkflowMessages            _messages;          /**< Messages collected during workflow execution */
-    QVector<WorkflowMetric>     _metrics;           /**< Metrics captured during workflow execution */
+    std::uint64_t               _duration = 0;      /**< Workflow execution duration in milliseconds. */
+    WorkflowMessages            _messages;          /**< Messages emitted during workflow execution. */
+    QVector<WorkflowMetric>     _metrics;           /**< Metrics collected during workflow execution. */
 };
 
+/** Unique ownership pointer type for workflow results. */
 using UniqueWorkflowResult = std::unique_ptr<WorkflowResult>;
+
+/** Shared ownership pointer type for workflow results. */
 using SharedWorkflowResult = std::shared_ptr<WorkflowResult>;
 
 }

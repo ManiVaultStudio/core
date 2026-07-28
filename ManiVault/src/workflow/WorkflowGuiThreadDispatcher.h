@@ -22,6 +22,8 @@ namespace mv::workflow
  *
  * @note This object must be created on the GUI thread and must remain associated
  * with that thread for its entire lifetime.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class WorkflowGuiThreadDispatcher : public QObject
 {

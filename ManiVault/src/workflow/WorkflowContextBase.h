@@ -28,10 +28,16 @@ class CORE_EXPORT WorkflowContextBase
 {
 public:
 
+    /**
+     * @brief Destroys the workflow context.
+     */
     virtual ~WorkflowContextBase() = default;
 };
 
+/** Unique ownership pointer type for workflow contexts. */
 using UniqueWorkflowContext = std::unique_ptr<WorkflowContextBase>;
+
+/** Shared ownership pointer type for workflow contexts. */
 using SharedWorkflowContext = std::shared_ptr<WorkflowContextBase>;
 
 }
