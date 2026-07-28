@@ -36,7 +36,8 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title) 
 
         if (currentIndex < 0) {
             _currentDatasetId.clear();
-            emit datasetPicked({});
+
+            emit currentDatasetChanged({});
             return;
         }
 
@@ -45,7 +46,8 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title) 
 
         if (!sourceIndex.isValid()) {
             _currentDatasetId.clear();
-            emit datasetPicked({});
+
+            emit currentDatasetChanged({});
             return;
         }
 
@@ -63,7 +65,12 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title) 
 
         _currentDatasetId = dataset.isValid() ? dataset->getId() : QString{};
 
-        emit datasetPicked(dataset);
+        emit currentDatasetChanged(dataset);
+
+        if (dataset.isValid()) {
+            Q_ASSERT(dataset.isValid());
+            emit datasetPicked(dataset);
+        }
     });
 
     const auto filterModelChanged = [this]() -> void {
@@ -315,8 +322,8 @@ void DatasetPickerAction::connectToPublicAction(WidgetAction* publicAction, bool
     if (publicDatasetPickerAction == nullptr)
         return;
 
-    connect(this, &DatasetPickerAction::datasetPicked, publicDatasetPickerAction, qOverload<mv::Dataset<mv::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
-    connect(publicDatasetPickerAction, &DatasetPickerAction::datasetPicked, this, qOverload<mv::Dataset<mv::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
+    connect(this, &DatasetPickerAction::currentDatasetChanged, publicDatasetPickerAction, qOverload<mv::Dataset<mv::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
+    connect(publicDatasetPickerAction, &DatasetPickerAction::currentDatasetChanged, this, qOverload<mv::Dataset<mv::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
 
     setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
 
@@ -335,8 +342,8 @@ void DatasetPickerAction::disconnectFromPublicAction(bool recursive)
     if (publicDatasetPickerAction == nullptr)
         return;
 
-    disconnect(this, &DatasetPickerAction::datasetPicked, publicDatasetPickerAction, qOverload<mv::Dataset<mv::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
-    disconnect(publicDatasetPickerAction, &DatasetPickerAction::datasetPicked, this, qOverload<mv::Dataset<mv::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
+    disconnect(this, &DatasetPickerAction::currentDatasetChanged, publicDatasetPickerAction, qOverload<mv::Dataset<mv::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
+    disconnect(publicDatasetPickerAction, &DatasetPickerAction::currentDatasetChanged, this, qOverload<mv::Dataset<mv::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
 
     OptionAction::disconnectFromPublicAction(recursive);
 }
