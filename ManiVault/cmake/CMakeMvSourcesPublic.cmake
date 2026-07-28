@@ -747,6 +747,21 @@ set(PUBLIC_WORKFLOW_FILES
     ${PUBLIC_WORKFLOW_SOURCES}
 )
 
+set(PUBLIC_PARALLEL_HEADERS
+    src/parallel/Parallel.h
+    src/parallel/ExecutionChain.h
+)
+
+set(PUBLIC_PARALLEL_SOURCES
+    src/parallel/Parallel.cpp
+    src/parallel/ExecutionChain.cpp
+)
+
+set(PUBLIC_PARALLEL_FILES
+    ${PUBLIC_PARALLEL_HEADERS}
+    ${PUBLIC_PARALLEL_SOURCES}
+)
+
 set(PUBLIC_HARDWARE_SPEC_UTIL_HEADERS
 	src/util/HardwareComponentSpec.h
 	src/util/DisplayComponentSpec.h
@@ -1474,6 +1489,7 @@ source_group(Graphics FILES ${PUBLIC_GRAPHICS_FILES})
 source_group(Util FILES ${PUBLIC_UTIL_FILES})
 source_group(Util\\HardwareSpec FILES ${PUBLIC_HARDWARE_SPEC_UTIL_FILES})
 source_group(Workflow FILES ${PUBLIC_WORKFLOW_FILES})
+source_group(Parallel FILES ${PUBLIC_PARALLEL_FILES})
 source_group(Application FILES ${PUBLIC_APPLICATION_FILES} ${PUBLIC_GLOBALS_HEADERS} ${PUBLIC_VERSION_HEADERS})
 source_group(Project FILES ${PUBLIC_PROJECT_FILES})
 source_group(Workspace FILES ${PUBLIC_WORKSPACE_FILES})
