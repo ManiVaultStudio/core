@@ -7,7 +7,9 @@
 #include "WidgetAction.h"
 #include "WidgetActionToolButton.h"
 
+#include <QActionEvent>
 #include <QCloseEvent>
+#include <QCoreApplication>
 #include <QDebug>
 #include <QEvent>
 #include <QVBoxLayout>
@@ -74,12 +76,25 @@ WidgetActionToolButtonMenu::DeferredLoadWidgetAction::ActionWidget::ActionWidget
     layout->setContentsMargins(0, 0, 0, 0);
 
     setLayout(layout);
+
+    // _widget for a button is built for one specific action.
+    // If a different action is assigned to the button, it needs to be invalidated.
+    connect(&_widgetActionToolButton, &WidgetActionToolButton::actionChanged, this, [this]() -> void {
+        delete _widget;
+        _widget = nullptr;
+    });
 }
 
 QSize WidgetActionToolButtonMenu::DeferredLoadWidgetAction::ActionWidget::sizeHint() const
 {
-    if (auto currentAction = _widgetActionToolButton.getAction())
-        return currentAction->getPopupSizeHint();
+    // Most actions leave the popup size hint unset.
+    // If the contained action changes this is needed to resize properly
+    if (auto currentAction = _widgetActionToolButton.getAction()) {
+        const auto popupSizeHint = currentAction->getPopupSizeHint();
+
+        if (popupSizeHint.isValid())
+            return popupSizeHint;
+    }
 
     if (_widget)
         return _widget->sizeHint();
@@ -96,6 +111,13 @@ void WidgetActionToolButtonMenu::DeferredLoadWidgetAction::ActionWidget::initial
             _widget->setProperty("Popup", true);
 
             layout()->addWidget(_widget);
+
+            // QMenu measures its items once. Changing the contained action needs to be communicated to to update geometry aftrer init.
+            auto& menu = _widgetActionToolButton.getMenu();
+
+            QActionEvent actionChangedEvent(QEvent::ActionChanged, &menu.getDeferredLoadWidgetAction());
+
+            QCoreApplication::sendEvent(&menu, &actionChangedEvent);
         }
     }
 }
