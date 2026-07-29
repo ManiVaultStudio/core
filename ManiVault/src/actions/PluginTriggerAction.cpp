@@ -54,7 +54,7 @@ PluginTriggerAction::PluginTriggerAction(const PluginTriggerAction& pluginTrigge
     _configurationAction(nullptr),
     _requestPluginCallback()
 {
-    setText(pluginTriggerAction.text());
+    PluginTriggerAction::setText(title);
     setToolTip(pluginTriggerAction.toolTip());
     setIcon(pluginTriggerAction.icon());
 
