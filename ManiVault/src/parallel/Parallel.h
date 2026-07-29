@@ -6,25 +6,28 @@
 
 #include "ManiVaultGlobals.h"
 
-#include "WorkflowExecutionOptions.h"
+#include "ParallelExecutionChain.h"
+
+#include "workflow/WorkflowOptions.h"
+
+#include <QString>
 
 namespace mv
 {
 
-class Parallel
+class CORE_EXPORT Parallel
 {
 public:
-    static void run(...);
+    template<typename Function>
+    static void run(const QString& name, Function&& function, const workflow::WorkflowOptions& options = {});
 
-    static void forRange(...);
+    template<typename Range, typename Function>
+    static void forEach(const QString& name, Range&& range, Function&& function, const workflow::WorkflowOptions& options = {});
 
-    static void forEach(...);
+    template<typename Range, typename Function>
+    static auto map(const QString& name, Range&& range, Function&& function, const workflow::WorkflowOptions& options = {});
 
-    static auto map(...);
-
-    //static auto reduce(...);      // later
-
-    //static auto transform(...);   // maybe later
+    static ParallelExecutionChain stages(const QString& name = {});
 };
 
 }

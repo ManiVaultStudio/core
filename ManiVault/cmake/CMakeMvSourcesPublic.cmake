@@ -749,12 +749,12 @@ set(PUBLIC_WORKFLOW_FILES
 
 set(PUBLIC_PARALLEL_HEADERS
     src/parallel/Parallel.h
-    src/parallel/ExecutionChain.h
+    src/parallel/ParallelExecutionChain.h
 )
 
 set(PUBLIC_PARALLEL_SOURCES
     src/parallel/Parallel.cpp
-    src/parallel/ExecutionChain.cpp
+    src/parallel/ParallelExecutionChain.cpp
 )
 
 set(PUBLIC_PARALLEL_FILES
@@ -1363,6 +1363,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_GRAPHICS_HEADERS}
     ${PUBLIC_UTIL_HEADERS}
     ${PUBLIC_WORKFLOW_HEADERS}
+    ${PUBLIC_PARALLEL_HEADERS}
     ${PUBLIC_HARDWARE_SPEC_UTIL_HEADERS}
     ${PUBLIC_APPLICATION_HEADERS}
     ${PUBLIC_PROJECT_HEADERS}
@@ -1419,6 +1420,7 @@ set(PUBLIC_SOURCES
     ${PUBLIC_GRAPHICS_SOURCES}
     ${PUBLIC_UTIL_SOURCES}
     ${PUBLIC_WORKFLOW_SOURCES}
+    ${PUBLIC_PARALLEL_SOURCES}
     ${PUBLIC_HARDWARE_SPEC_UTIL_SOURCES}
     ${PUBLIC_APPLICATION_SOURCES}
     ${PUBLIC_PROJECT_SOURCES}
