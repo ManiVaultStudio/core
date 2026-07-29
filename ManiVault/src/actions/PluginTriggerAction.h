@@ -31,7 +31,7 @@ class CORE_EXPORT PluginTriggerAction : public TriggerAction
 {
     Q_OBJECT
     
-        /** Request plugin callback function (invoked when the trigger action is triggered) */
+    /** Request plugin callback function (invoked when the trigger action is triggered) */
     using RequestPluginCallback = std::function<void(PluginTriggerAction&)>;
 
 public:
