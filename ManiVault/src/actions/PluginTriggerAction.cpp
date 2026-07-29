@@ -110,7 +110,7 @@ void PluginTriggerAction::initialize()
 
 void PluginTriggerAction::setText(const QString& text)
 {
-    QAction::setText(text);
+    TriggerAction::setText(text.split("/").back());
 
     switch (_pluginFactory->getType())
     {
@@ -143,7 +143,7 @@ void PluginTriggerAction::setText(const QString& text)
     }
 
     _menuLocation.append("/");
-    _menuLocation.append(this->text());
+    _menuLocation.append(text);
 }
 
 void PluginTriggerAction::setRequestPluginCallback(RequestPluginCallback requestPluginCallback)

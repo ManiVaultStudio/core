@@ -40,7 +40,7 @@ public:
      * Constructor
      * @param parent Pointer to parent object
      * @param pluginFactory Pointer to plugin factory
-     * @param title Title of the plugin trigger action
+     * @param title Title and menu location of the plugin trigger action, 'menu/entry' will create a nested entry
      * @param icon Icon
      * @param tooltip Tooltip of the plugin trigger action
      */
@@ -50,7 +50,7 @@ public:
      * Constructor
      * @param parent Pointer to parent object
      * @param pluginFactory Pointer to plugin factory
-     * @param title Title of the plugin trigger action
+     * @param title Title and menu location of the plugin trigger action, 'menu/entry' will create a nested entry
      * @param tooltip Tooltip of the plugin trigger action
      * @param icon Icon
      * @param requestPluginCallback Callback which is invoked when the trigger action is triggered
@@ -77,7 +77,7 @@ public:
 
     /**
      * Set menu location of the plugin trigger action
-     * @param location Location of the plugin trigger action in a menu
+     * @param menuLocation Location of the plugin trigger action in a menu
      */
     void setMenuLocation(const QString& menuLocation);
 
