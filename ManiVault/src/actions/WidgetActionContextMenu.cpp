@@ -146,26 +146,6 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 
                     QHash<QString, QMenu*> menuCache;
 
-                    auto ensureMenuPath = [&](const QStringList& parts) -> QMenu* {
-                        auto current = connectToViewPluginActionMenu;
-
-                        QString currentPath;
-
-                        for (const auto& part : parts) {
-                            currentPath += "/" + part;
-
-                            if (!menuCache.contains(currentPath)) {
-                                auto subMenu = new QMenu(part, current);
-                                current->addMenu(subMenu);
-                                menuCache.insert(currentPath, subMenu);
-                            }
-
-                            current = menuCache[currentPath];
-                        }
-
-                        return current;
-                    };
-
                     for (auto candidateAction : viewPlugin->findChildren<WidgetAction*>()) {
                         if (candidateAction == firstAction)
                             continue;
@@ -189,7 +169,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
                         if (!parts.isEmpty() && parts.last() == candidateAction->text())
                             parts.removeLast();
 
-                        auto targetMenu = ensureMenuPath(parts);
+                        auto targetMenu = ensureMenuPath(connectToViewPluginActionMenu, parts, menuCache);
                         auto action     = new QAction(candidateAction->text(), targetMenu);
 
                     	targetMenu->addAction(action);
