@@ -20,7 +20,7 @@ PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFa
     _configurationAction(nullptr),
     _requestPluginCallback()
 {
-    setText(title);
+    PluginTriggerAction::setText(title);
     setToolTip(tooltip);
     setIcon(icon);
 
@@ -39,7 +39,7 @@ PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFa
     _configurationAction(nullptr),
     _requestPluginCallback(requestPluginCallback)
 {
-    setText(title);
+    PluginTriggerAction::setText(title);
     setToolTip(tooltip);
     setIcon(icon);
 
