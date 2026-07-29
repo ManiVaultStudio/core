@@ -69,16 +69,15 @@ DockManager::ViewPluginDockWidgets DockManager::getViewPluginDockWidgets(bool fl
 {
     ViewPluginDockWidgets viewPluginDockWidgets;
 
-    for (auto dockWidget : dockWidgets()) {
+    for (auto dockWidget : dockWidgetsMap()) {
+        if (!dockWidget)
+            continue;
+
+        if (!floating && dockWidget->isFloating())
+            continue;
+
         if (auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget))
             viewPluginDockWidgets.push_back(viewPluginDockWidget);
-    }
-     
-    if (floating)  {
-        for (auto floatingDockContainer : floatingWidgets())
-            for (auto dockWidget : floatingDockContainer->dockWidgets())
-                if (auto viewPluginDockWidget = dynamic_cast<ViewPluginDockWidget*>(dockWidget))
-                    viewPluginDockWidgets.push_back(viewPluginDockWidget);
     }
 
     return viewPluginDockWidgets;
@@ -96,7 +95,7 @@ ViewPluginDockWidget* DockManager::findViewPluginDockWidget(const mv::plugin::Vi
     if (!viewPlugin)
         return nullptr;
 
-    for (auto dockWidget : dockWidgets()) {
+    for (auto dockWidget : dockWidgetsMap()) {
         if (viewPlugin->getId() == dockWidget->property("ViewPluginId").toString())
             return dynamic_cast<ViewPluginDockWidget*>(dockWidget);
     }
@@ -111,7 +110,7 @@ CDockAreaWidget* DockManager::findDockAreaWidget(const ViewPlugin* viewPlugin) c
     if (!viewPlugin)
         return nullptr;
 
-    for (auto dockWidget : dockWidgets()) {
+    for (auto dockWidget : dockWidgetsMap()) {
         if (viewPlugin->getId() == dockWidget->property("ViewPluginId").toString())
             return dockWidget->dockAreaWidget();
     }
