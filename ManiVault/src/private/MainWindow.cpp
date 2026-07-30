@@ -11,6 +11,7 @@
 #include "ViewMenu.h"
 #include "ProjectsMenu.h"
 #include "HelpMenu.h"
+#include "ParallelPhantomTestSuite.h"
 
 #include <Application.h>
 #include <CoreInterface.h>
@@ -19,8 +20,6 @@
 
 #include <actions/ToggleAction.h>
 #include <actions/PluginStatusBarAction.h>
-
-#include <parallel/Parallel.h>
 
 #include "FrontPagesStatusBarAction.h"
 #include "ManiVaultVersionStatusBarAction.h"
@@ -182,12 +181,8 @@ void MainWindow::initialize()
 
     parallelPhantomTestShortcut->setContext(Qt::ApplicationShortcut);
 
-    connect(parallelPhantomTestShortcut, &QShortcut::activated, this, [] {
-        workflow::WorkflowOptions options;
-
-        options.reporting.finishedNotification = true;
-
-        Parallel::runPhantomTest(options);
+    connect(parallelPhantomTestShortcut, &QShortcut::activated, this, [this] {
+        mv::detail::ParallelPhantomTestSuite::run(this);
     });
 
 	auto fileMenuAction     = menuBar()->addMenu(new FileMenu());
