@@ -7,6 +7,7 @@
 #include <Application.h>
 #include <BackgroundTask.h>
 #include <CoreInterface.h>
+#include <ModalTask.h>
 
 #include <parallel/Parallel.h>
 
@@ -91,6 +92,19 @@ BackgroundTask* createBackgroundTask(const QString& name, bool mayKill)
 
     QMetaObject::invokeMethod(qApp, [&task, name, mayKill] {
         task = new BackgroundTask(nullptr, name, true, Task::Status::Undefined, mayKill);
+        task->setMayKill(mayKill);
+        task->setRunning();
+    }, Qt::BlockingQueuedConnection);
+
+    return task;
+}
+
+ModalTask* createModalTask(const QString& name, bool mayKill)
+{
+    ModalTask* task = nullptr;
+
+    QMetaObject::invokeMethod(qApp, [&task, name, mayKill] {
+        task = new ModalTask(nullptr, name, Task::Status::Undefined, mayKill);
         task->setMayKill(mayKill);
         task->setRunning();
     }, Qt::BlockingQueuedConnection);
@@ -309,7 +323,7 @@ UniqueWorkflowPlan makeNestedWorkflowPlan(const QString& name, std::int32_t step
     return plan;
 }
 
-void executeWithBackgroundTask(UniqueWorkflowPlan plan, BackgroundTask* task, WorkflowOptions options, const std::shared_ptr<std::atomic_bool>& canceled = {})
+void executeWithTask(UniqueWorkflowPlan plan, Task* task, WorkflowOptions options, const std::shared_ptr<std::atomic_bool>& canceled = {})
 {
     QPointer<Task> safeTask(task);
 
@@ -393,7 +407,7 @@ Scenario makeBackgroundProgressScenario()
             auto task = createBackgroundTask("Parallel phantom background progress", false);
 
             postTaskNotification(task);
-            executeWithBackgroundTask(makeParallelProgressPlan("Parallel phantom background progress", 8, 50, 150), task, notificationOptions());
+            executeWithTask(makeParallelProgressPlan("Parallel phantom background progress", 8, 50, 150), task, notificationOptions());
         }
     };
 }
@@ -440,7 +454,37 @@ Scenario makeNestedWorkflowScenario()
             auto task = createBackgroundTask("Parallel phantom nested workflow", false);
 
             postTaskNotification(task);
-            executeWithBackgroundTask(makeNestedWorkflowPlan("Parallel phantom nested workflow", 36, 120), task, notificationOptions());
+            executeWithTask(makeNestedWorkflowPlan("Parallel phantom nested workflow", 36, 120), task, notificationOptions());
+        }
+    };
+}
+
+Scenario makeModalCancellationScenario()
+{
+    const QVariantMap parameters{
+        { "jobs", 6 },
+        { "steps", 120 },
+        { "stepDelayMs", 180 },
+        { "cancelMode", "manual modal task dialog" },
+        { "taskScope", "Modal" }
+    };
+
+    return {
+        "Parallel modal cancellation",
+        "Runs a killable modal task so cancellation can be requested from the modal task dialog.",
+        parameters,
+        [parameters] {
+            postNotification("Starting parallel phantom scenario", "Running the modal-cancellation scenario. Use the modal task dialog to cancel this task.", parameters);
+
+            auto canceled = std::make_shared<std::atomic_bool>(false);
+            auto task     = createModalTask("Parallel phantom modal cancellation", true);
+
+            QObject::connect(task, &Task::requestAbort, task, [task, canceled] {
+                canceled->store(true);
+                task->setProgressDescription("Modal cancellation requested");
+            });
+
+            executeWithTask(makeParallelProgressPlan("Parallel phantom modal cancellation", 6, 120, 180, canceled), task, notificationOptions(), canceled);
         }
     };
 }
@@ -478,7 +522,7 @@ Scenario makeCancellationScenario()
             }, Qt::QueuedConnection);
 
             postTaskNotification(task);
-            executeWithBackgroundTask(makeParallelProgressPlan("Parallel phantom cancellation", 8, 80, 100, canceled), task, notificationOptions(), canceled);
+            executeWithTask(makeParallelProgressPlan("Parallel phantom cancellation", 8, 80, 100, canceled), task, notificationOptions(), canceled);
         }
     };
 }
@@ -490,6 +534,7 @@ std::vector<Scenario> makeScenarios()
         makeBackgroundProgressScenario(),
         makeModalProgressScenario(),
         makeNestedWorkflowScenario(),
+        makeModalCancellationScenario(),
         makeCancellationScenario()
     };
 }
