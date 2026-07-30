@@ -27,5 +27,5 @@ inline std::string MV_VERSION_STRING(const bool noSuffix = false) {
 }
 
 constexpr bool MV_IS_DEV() {
-    return MV_VERSION_SUFFIX == std::array<char, 4>{ 'd', 'e', 'v', '\0' };
+    return std::string_view(MV_VERSION_SUFFIX.data()) == "dev";
 }
