@@ -20,6 +20,8 @@
 #include <actions/ToggleAction.h>
 #include <actions/PluginStatusBarAction.h>
 
+#include <parallel/Parallel.h>
+
 #include "FrontPagesStatusBarAction.h"
 #include "ManiVaultVersionStatusBarAction.h"
 #include "PluginsStatusBarAction.h"
@@ -174,6 +176,18 @@ void MainWindow::initialize()
 
     connect(customizeApplicationShortcut, &QShortcut::activated, this, [this] {
         Application::current()->getConfigurationAction().getConfigureAction().trigger();
+    });
+
+    auto parallelPhantomTestShortcut = new QShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::ShiftModifier | Qt::Key_P), this);
+
+    parallelPhantomTestShortcut->setContext(Qt::ApplicationShortcut);
+
+    connect(parallelPhantomTestShortcut, &QShortcut::activated, this, [] {
+        workflow::WorkflowOptions options;
+
+        options.reporting.finishedNotification = true;
+
+        Parallel::runPhantomTest(options);
     });
 
 	auto fileMenuAction     = menuBar()->addMenu(new FileMenu());
