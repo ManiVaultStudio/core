@@ -22,8 +22,10 @@
 #include <QThread>
 #include <QTimer>
 #include <QVariantMap>
+#include <QStringList>
 
 #include <atomic>
+#include <chrono>
 #include <functional>
 #include <memory>
 #include <stdexcept>
@@ -114,11 +116,20 @@ WorkflowOptions progressNotificationOptions()
     return options;
 }
 
-void runWorkLoop(const SharedWorkflowExecutionContext& context, std::int32_t steps, std::int32_t stepDelayMs, const std::shared_ptr<std::atomic_bool>& canceled = {})
+void setTaskProgressDescription(const SharedWorkflowExecutionContext& context, const QString& description)
+{
+    if (auto task = context->getTask())
+        task->setProgressDescription(description);
+}
+
+void runWorkLoop(const SharedWorkflowExecutionContext& context, std::int32_t steps, std::int32_t stepDelayMs, const QStringList& descriptions, const std::shared_ptr<std::atomic_bool>& canceled = {})
 {
     for (std::int32_t step = 0; step < steps; ++step) {
         if (canceled && canceled->load())
             throw std::runtime_error("Parallel phantom scenario was canceled");
+
+        if (!descriptions.isEmpty())
+            setTaskProgressDescription(context, descriptions[step % descriptions.size()]);
 
         QThread::msleep(stepDelayMs);
         context->setProgress(static_cast<double>(step + 1) / static_cast<double>(steps));
@@ -128,22 +139,171 @@ void runWorkLoop(const SharedWorkflowExecutionContext& context, std::int32_t ste
 UniqueWorkflowPlan makeParallelProgressPlan(const QString& name, std::int32_t jobCount, std::int32_t steps, std::int32_t stepDelayMs, const std::shared_ptr<std::atomic_bool>& canceled = {})
 {
     auto plan = std::make_unique<WorkflowPlan>(name);
+    const QStringList jobNames{
+        "Opening dataset header",
+        "Reading point coordinates",
+        "Reading dimension names",
+        "Decoding selection groups",
+        "Loading color maps",
+        "Resolving view presets",
+        "Saving preview cache",
+        "Writing project manifest",
+        "Compressing workspace state",
+        "Updating recent projects",
+        "Indexing source metadata",
+        "Closing archive stream"
+    };
+
+    plan->addSequentialStage("Open phantom project file", [steps, stepDelayMs, canceled](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) {
+        runWorkLoop(context, steps / 2, stepDelayMs, {
+            "Opening project file",
+            "Reading archive header",
+            "Validating project version",
+            "Preparing workflow context"
+        }, canceled);
+    });
 
     WorkflowPlan::Jobs jobs;
 
     jobs.reserve(jobCount);
 
     for (std::int32_t index = 0; index < jobCount; ++index) {
-        jobs.emplace_back(QStringLiteral("Process phantom item %1").arg(index + 1), [index, steps, stepDelayMs, canceled](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) {
-            context->info(QStringLiteral("Started phantom item %1").arg(index + 1), "ParallelPhantomTestSuite");
-            runWorkLoop(context, steps, stepDelayMs, canceled);
+        const auto jobName = jobNames[index % jobNames.size()];
+
+        jobs.emplace_back(jobName, [jobName, steps, stepDelayMs, canceled](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) {
+            context->info(QStringLiteral("Started %1").arg(jobName), "ParallelPhantomTestSuite");
+            runWorkLoop(context, steps, stepDelayMs, {
+                QStringLiteral("%1: scanning blocks").arg(jobName),
+                QStringLiteral("%1: transforming records").arg(jobName),
+                QStringLiteral("%1: updating progress").arg(jobName),
+                QStringLiteral("%1: committing results").arg(jobName)
+            }, canceled);
         });
     }
 
-    plan->addParallelStage("Process phantom items", std::move(jobs));
+    plan->addParallelStage("Read and transform phantom data", std::move(jobs));
+    plan->addSequentialStage("Save phantom project file", [steps, stepDelayMs, canceled](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) {
+        runWorkLoop(context, steps / 2, stepDelayMs, {
+            "Saving project manifest",
+            "Writing workspace layout",
+            "Flushing compressed blocks",
+            "Updating recent-project entry"
+        }, canceled);
+    });
     plan->addSequentialStage("Summarize phantom work", [](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) {
+        setTaskProgressDescription(context, "Writing workflow summary");
         context->warning("Synthetic warning from the phantom suite", "ParallelPhantomTestSuite");
         context->setProgress(1.0);
+    });
+
+    return plan;
+}
+
+UniqueWorkflowPlan makeViewRestoreWorkflow(const QString& name, std::int32_t steps, std::int32_t stepDelayMs)
+{
+    auto plan = std::make_unique<WorkflowPlan>(name);
+
+    plan->addSequentialStage("Open view preset", [steps, stepDelayMs](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) {
+        runWorkLoop(context, steps, stepDelayMs, {
+            "Opening view preset",
+            "Reading camera state",
+            "Reading layer visibility",
+            "Preparing renderer settings"
+        });
+    });
+
+    WorkflowPlan::Jobs jobs;
+
+    jobs.emplace_back("Restore scatterplot view", [steps, stepDelayMs](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) {
+        runWorkLoop(context, steps, stepDelayMs, {
+            "Restoring scatterplot view",
+            "Binding coordinate dimensions",
+            "Applying color mapping",
+            "Refreshing visible selection"
+        });
+    });
+
+    jobs.emplace_back("Restore table view", [steps, stepDelayMs](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) {
+        runWorkLoop(context, steps, stepDelayMs, {
+            "Restoring table view",
+            "Rebuilding visible columns",
+            "Restoring sort order",
+            "Applying row filters"
+        });
+    });
+
+    jobs.emplace_back("Restore differential expression view", [steps, stepDelayMs](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) {
+        runWorkLoop(context, steps, stepDelayMs, {
+            "Restoring differential expression view",
+            "Loading comparison groups",
+            "Recomputing summary labels",
+            "Refreshing volcano plot"
+        });
+    });
+
+    plan->addParallelStage("Restore view plugins", std::move(jobs));
+    plan->addSequentialStage("Activate restored views", [steps, stepDelayMs](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) {
+        runWorkLoop(context, steps / 2, stepDelayMs, {
+            "Activating restored views",
+            "Docking view panels",
+            "Publishing current view state"
+        });
+    });
+
+    return plan;
+}
+
+UniqueWorkflowPlan makeDatasetRestoreWorkflow(const QString& name, std::int32_t steps, std::int32_t stepDelayMs)
+{
+    auto plan = std::make_unique<WorkflowPlan>(name);
+
+    plan->addSequentialStage("Read dataset metadata", [steps, stepDelayMs](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) {
+        runWorkLoop(context, steps, stepDelayMs, {
+            "Reading dataset metadata",
+            "Resolving dimension aliases",
+            "Validating sparse matrix blocks",
+            "Preparing derived statistics"
+        });
+    });
+
+    plan->addNestedWorkflowStage("Restore nested view workflow", [steps, stepDelayMs](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        return makeViewRestoreWorkflow("Restore linked views", steps, stepDelayMs);
+    });
+
+    plan->addSequentialStage("Publish dataset availability", [steps, stepDelayMs](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) {
+        runWorkLoop(context, steps / 2, stepDelayMs, {
+            "Publishing dataset availability",
+            "Updating dataset picker options",
+            "Refreshing data hierarchy"
+        });
+    });
+
+    return plan;
+}
+
+UniqueWorkflowPlan makeNestedWorkflowPlan(const QString& name, std::int32_t steps, std::int32_t stepDelayMs)
+{
+    auto plan = std::make_unique<WorkflowPlan>(name);
+
+    plan->addSequentialStage("Open project container", [steps, stepDelayMs](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) {
+        runWorkLoop(context, steps, stepDelayMs, {
+            "Opening project container",
+            "Reading root manifest",
+            "Resolving storage codecs",
+            "Preparing nested restore workflow"
+        });
+    });
+
+    plan->addNestedWorkflowStage("Restore nested dataset workflow", [steps, stepDelayMs](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        return makeDatasetRestoreWorkflow("Restore primary dataset", steps, stepDelayMs);
+    });
+
+    plan->addSequentialStage("Finalize nested project restore", [steps, stepDelayMs](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& context) {
+        runWorkLoop(context, steps / 2, stepDelayMs, {
+            "Finalizing nested project restore",
+            "Saving recovered layout",
+            "Writing restore summary"
+        });
     });
 
     return plan;
@@ -208,6 +368,7 @@ Scenario makeSmokeScenario()
         [parameters] {
             postNotification("Starting parallel phantom scenario", "Running the smoke-test scenario.", parameters);
             Parallel::runPhantomTest(notificationOptions());
+            std::this_thread::sleep_for(std::chrono::seconds(3));
         }
     };
 }
@@ -215,9 +376,9 @@ Scenario makeSmokeScenario()
 Scenario makeBackgroundProgressScenario()
 {
     const QVariantMap parameters{
-        { "jobs", 12 },
-        { "steps", 20 },
-        { "stepDelayMs", 75 },
+        { "jobs", 8 },
+        { "steps", 50 },
+        { "stepDelayMs", 150 },
         { "taskScope", "Background" },
         { "taskNotification", true }
     };
@@ -232,7 +393,7 @@ Scenario makeBackgroundProgressScenario()
             auto task = createBackgroundTask("Parallel phantom background progress", false);
 
             postTaskNotification(task);
-            executeWithBackgroundTask(makeParallelProgressPlan("Parallel phantom background progress", 12, 20, 75), task, notificationOptions());
+            executeWithBackgroundTask(makeParallelProgressPlan("Parallel phantom background progress", 8, 50, 150), task, notificationOptions());
         }
     };
 }
@@ -240,9 +401,9 @@ Scenario makeBackgroundProgressScenario()
 Scenario makeModalProgressScenario()
 {
     const QVariantMap parameters{
-        { "jobs", 5 },
-        { "steps", 18 },
-        { "stepDelayMs", 65 },
+        { "jobs", 6 },
+        { "steps", 45 },
+        { "stepDelayMs", 140 },
         { "taskScope", "Modal" },
         { "workflowOption", "reporting.progress" }
     };
@@ -253,7 +414,33 @@ Scenario makeModalProgressScenario()
         parameters,
         [parameters] {
             postNotification("Starting parallel phantom scenario", "Running the modal-progress scenario.", parameters);
-            runAsyncModalProgressScenario(makeParallelProgressPlan("Parallel phantom modal progress", 5, 18, 65), progressNotificationOptions());
+            runAsyncModalProgressScenario(makeParallelProgressPlan("Parallel phantom modal progress", 6, 45, 140), progressNotificationOptions());
+        }
+    };
+}
+
+Scenario makeNestedWorkflowScenario()
+{
+    const QVariantMap parameters{
+        { "nestingDepth", 3 },
+        { "mode", "nested WorkflowPlan" },
+        { "steps", 36 },
+        { "stepDelayMs", 120 },
+        { "taskScope", "Background" },
+        { "taskNotification", true }
+    };
+
+    return {
+        "Parallel nested workflow progress",
+        "Runs a three-level nested workflow with sequential and parallel stages at different depths.",
+        parameters,
+        [parameters] {
+            postNotification("Starting parallel phantom scenario", "Running the nested-workflow scenario.", parameters);
+
+            auto task = createBackgroundTask("Parallel phantom nested workflow", false);
+
+            postTaskNotification(task);
+            executeWithBackgroundTask(makeNestedWorkflowPlan("Parallel phantom nested workflow", 36, 120), task, notificationOptions());
         }
     };
 }
@@ -262,9 +449,9 @@ Scenario makeCancellationScenario()
 {
     const QVariantMap parameters{
         { "jobs", 8 },
-        { "steps", 40 },
-        { "stepDelayMs", 80 },
-        { "autoCancelAfterMs", 900 },
+        { "steps", 80 },
+        { "stepDelayMs", 100 },
+        { "autoCancelAfterMs", 3000 },
         { "taskScope", "Background" }
     };
 
@@ -284,14 +471,14 @@ Scenario makeCancellationScenario()
             });
 
             QMetaObject::invokeMethod(qApp, [task] {
-                QTimer::singleShot(900, task, [task] {
+                QTimer::singleShot(3000, task, [task] {
                     if (task)
                         task->kill();
                 });
             }, Qt::QueuedConnection);
 
             postTaskNotification(task);
-            executeWithBackgroundTask(makeParallelProgressPlan("Parallel phantom cancellation", 8, 40, 80, canceled), task, notificationOptions(), canceled);
+            executeWithBackgroundTask(makeParallelProgressPlan("Parallel phantom cancellation", 8, 80, 100, canceled), task, notificationOptions(), canceled);
         }
     };
 }
@@ -302,6 +489,7 @@ std::vector<Scenario> makeScenarios()
         makeSmokeScenario(),
         makeBackgroundProgressScenario(),
         makeModalProgressScenario(),
+        makeNestedWorkflowScenario(),
         makeCancellationScenario()
     };
 }
@@ -309,6 +497,7 @@ std::vector<Scenario> makeScenarios()
 void ParallelPhantomTestSuite::run(QObject* owner)
 {
     static std::atomic_bool running = false;
+    constexpr auto scenarioDelay = std::chrono::seconds(5);
 
     bool expected = false;
 
@@ -319,14 +508,16 @@ void ParallelPhantomTestSuite::run(QObject* owner)
 
     QPointer<QObject> safeOwner(owner);
 
-    std::thread([safeOwner] {
+    std::thread([safeOwner, scenarioDelay] {
         const auto scenarios = makeScenarios();
 
-        postNotification("Starting parallel phantom suite", QStringLiteral("Running %1 hidden parallel workflow scenarios.").arg(scenarios.size()));
+        postNotification("Starting parallel phantom suite", QStringLiteral("Running %1 hidden parallel workflow scenarios with a 5-second pause between scenarios.").arg(scenarios.size()));
 
-        for (const auto& scenario : scenarios) {
+        for (auto scenarioIndex = std::size_t{ 0 }; scenarioIndex < scenarios.size(); ++scenarioIndex) {
             if (!safeOwner)
                 break;
+
+            const auto& scenario = scenarios[scenarioIndex];
 
             try {
                 scenario.run();
@@ -337,6 +528,9 @@ void ParallelPhantomTestSuite::run(QObject* owner)
             catch (...) {
                 postNotification(QStringLiteral("%1 failed").arg(scenario.name), "Unknown exception.");
             }
+
+            if (scenarioIndex + 1 < scenarios.size())
+                std::this_thread::sleep_for(scenarioDelay);
         }
 
         postNotification("Parallel phantom suite finished", "All hidden parallel workflow scenarios have been started or completed.");
