@@ -61,9 +61,8 @@ void Serializable::setSerializationName(const QString& serializationName)
 
 void Serializable::fromVariantMap(const QVariantMap& variantMap)
 {
-    variantMapMustContain(variantMap, "ID");
-
-    _id = variantMap["ID"].toString();
+    if (variantMap.contains("ID") && variantMap["ID"].canConvert<QString>())
+        _id = variantMap["ID"].toString();
 
     _serializationCounter[static_cast<int>(Direction::From)]++;
 }

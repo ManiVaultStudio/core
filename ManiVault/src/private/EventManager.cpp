@@ -143,14 +143,14 @@ UniqueWorkflowPlan EventManager::fromVariantMapWorkflow(QVariantMap variantMap)
     plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
         AbstractEventManager::fromVariantMap(variantMap);
 
-        variantMapMustContain(variantMap, "SelectionGroups");
+        if (variantMap.contains("SelectionGroups") && variantMap["SelectionGroups"].canConvert<QVariantList>()) {
+            auto selectionGroupsList = variantMap["SelectionGroups"].value<QVariantList>();
 
-        auto selectionGroupsList = variantMap["SelectionGroups"].value<QVariantList>();
+            _selectionGroups.resize(selectionGroupsList.size());
 
-        _selectionGroups.resize(selectionGroupsList.size());
-
-        for (int i = 0; i < selectionGroupsList.size(); i++)
-            _selectionGroups[i].fromVariantMap(selectionGroupsList[i].toMap());
+            for (int i = 0; i < selectionGroupsList.size(); i++)
+                _selectionGroups[i].fromVariantMap(selectionGroupsList[i].toMap());
+        }
     });
 
     return plan;
