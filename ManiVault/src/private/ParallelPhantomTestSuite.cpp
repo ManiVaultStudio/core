@@ -7,7 +7,6 @@
 #include <Application.h>
 #include <BackgroundTask.h>
 #include <CoreInterface.h>
-#include <ModalTask.h>
 
 #include <parallel/Parallel.h>
 
@@ -99,19 +98,6 @@ BackgroundTask* createBackgroundTask(const QString& name, bool mayKill)
     return task;
 }
 
-ModalTask* createModalTask(const QString& name, bool mayKill)
-{
-    ModalTask* task = nullptr;
-
-    QMetaObject::invokeMethod(qApp, [&task, name, mayKill] {
-        task = new ModalTask(nullptr, name, Task::Status::Undefined, mayKill);
-        task->setMayKill(mayKill);
-        task->setRunning();
-    }, Qt::BlockingQueuedConnection);
-
-    return task;
-}
-
 WorkflowOptions notificationOptions()
 {
     WorkflowOptions options;
@@ -130,16 +116,32 @@ WorkflowOptions progressNotificationOptions()
     return options;
 }
 
+WorkflowOptions progressCancellationNotificationOptions()
+{
+    auto options = progressNotificationOptions();
+
+    options.cancellation.enabled = true;
+
+    return options;
+}
+
 void setTaskProgressDescription(const SharedWorkflowExecutionContext& context, const QString& description)
 {
     if (auto task = context->getTask())
         task->setProgressDescription(description);
 }
 
+bool isCancellationRequested(const SharedWorkflowExecutionContext& context)
+{
+    const auto task = context->getTask();
+
+    return task && (task->isAboutToBeAborted() || task->isAborting() || task->isAborted());
+}
+
 void runWorkLoop(const SharedWorkflowExecutionContext& context, std::int32_t steps, std::int32_t stepDelayMs, const QStringList& descriptions, const std::shared_ptr<std::atomic_bool>& canceled = {})
 {
     for (std::int32_t step = 0; step < steps; ++step) {
-        if (canceled && canceled->load())
+        if ((canceled && canceled->load()) || isCancellationRequested(context))
             throw std::runtime_error("Parallel phantom scenario was canceled");
 
         if (!descriptions.isEmpty())
@@ -475,16 +477,7 @@ Scenario makeModalCancellationScenario()
         parameters,
         [parameters] {
             postNotification("Starting parallel phantom scenario", "Running the modal-cancellation scenario. Use the modal task dialog to cancel this task.", parameters);
-
-            auto canceled = std::make_shared<std::atomic_bool>(false);
-            auto task     = createModalTask("Parallel phantom modal cancellation", true);
-
-            QObject::connect(task, &Task::requestAbort, task, [task, canceled] {
-                canceled->store(true);
-                task->setProgressDescription("Modal cancellation requested");
-            });
-
-            executeWithTask(makeParallelProgressPlan("Parallel phantom modal cancellation", 6, 120, 180, canceled), task, notificationOptions(), canceled);
+            runAsyncModalProgressScenario(makeParallelProgressPlan("Parallel phantom modal cancellation", 6, 120, 180), progressCancellationNotificationOptions());
         }
     };
 }

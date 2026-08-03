@@ -118,6 +118,7 @@ WorkflowResultFuture TaskflowWorkflowPlanExecutor::executeAsyncImpl(UniqueWorkfl
     if (guiScope != Task::GuiScope::None) {
         task = new Task(nullptr, workflowPlan->getName());
         task->setGuiScopes({ guiScope });
+        task->setMayKill(options.cancellation.enabled);
         task->setStatus(Task::Status::Running);
         task->setProgress(0.0f);
     }
@@ -146,6 +147,9 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeRoot(WorkflowPlan& wor
 {
     //_chromeObserver.reset();
     //_chromeObserver = _executor.make_observer<tf::ChromeObserver>();
+
+    if (task && options.cancellation.enabled)
+        task->setMayKill(true);
 
     auto rootContext = WorkflowExecutionContext::makeRoot(workflowPlan.getName(), task, options);
 

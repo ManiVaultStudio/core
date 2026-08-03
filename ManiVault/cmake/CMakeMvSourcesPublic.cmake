@@ -707,6 +707,7 @@ set(PUBLIC_WORKFLOW_HEADERS
     src/workflow/WorkflowReportingOptions.h
     src/workflow/WorkflowProfilingOptions.h
     src/workflow/WorkflowParallelizationOptions.h
+    src/workflow/WorkflowCancellationOptions.h
     src/workflow/WorkflowOptions.h
     src/workflow/WorkflowResultDetailsOptions.h
 )
