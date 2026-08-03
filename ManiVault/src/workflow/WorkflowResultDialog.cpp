@@ -91,6 +91,7 @@ WorkflowResultDialog::WorkflowResultDialog(const SharedWorkflowResult& workflowR
     treeView->setRootIsDecorated(true);
     treeView->setItemDelegateForColumn(static_cast<int>(AbstractWorkflowMessagesModel::Column::Details), new WorkflowMessageDetailsDelegate(treeView));
     treeView->setMouseTracking(true);
+    treeView->expandRecursively(QModelIndex());
 
     auto header = treeView->header();
 

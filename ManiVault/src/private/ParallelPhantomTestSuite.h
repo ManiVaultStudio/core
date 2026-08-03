@@ -5,6 +5,7 @@
 #pragma once
 
 class QObject;
+class QWidget;
 
 namespace mv::detail
 {
@@ -23,6 +24,9 @@ public:
 
     /** Starts the suite if no suite run is already active. */
     static void run(QObject* owner);
+
+    /** Shows the hidden scenario picker menu. */
+    static void showMenu(QWidget* parent);
 
 private:
 

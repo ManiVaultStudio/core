@@ -182,7 +182,7 @@ void MainWindow::initialize()
     parallelPhantomTestShortcut->setContext(Qt::ApplicationShortcut);
 
     connect(parallelPhantomTestShortcut, &QShortcut::activated, this, [this] {
-        mv::detail::ParallelPhantomTestSuite::run(this);
+        mv::detail::ParallelPhantomTestSuite::showMenu(this);
     });
 
 	auto fileMenuAction     = menuBar()->addMenu(new FileMenu());
