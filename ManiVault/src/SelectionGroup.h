@@ -19,6 +19,8 @@ class CORE_EXPORT BiMap : public util::Serializable
 public:
     void addKeyValuePairs(const std::vector<QString>& keys, const std::vector<uint32_t>& values);
 
+    std::vector<QString> getKeys() const;
+
     std::vector<QString> getKeysByValues(const std::vector<uint32_t>& values) const;
     std::vector<uint32_t> getValuesByKeys(const std::vector<QString>& keys, bool verbose = false) const;
     std::vector<int> getValuesByKeysWithMissingValue(const std::vector<QString>& keys, int missingValue) const;
@@ -46,9 +48,13 @@ class CORE_EXPORT KeyBasedSelectionGroup : public util::Serializable
 public:
     BiMap& getBiMap(Dataset<DatasetImpl> dataset);
 
+    void addDataset(Dataset<DatasetImpl> dataset, const std::vector<QString>& keys);
     void addDataset(Dataset<DatasetImpl> dataset, BiMap& bimap);
 
     void selectionChanged(Dataset<DatasetImpl> dataset, const std::vector<uint32_t>& indices) const;
+
+    bool areDatasetsPartOfGroup(Dataset<DatasetImpl> d1, Dataset<DatasetImpl> d2);
+    std::vector<int> getMappingBetweenDatasets(Dataset<DatasetImpl> fromDataset, Dataset<DatasetImpl> toDataset);
 
 public: // Serialization
     /**

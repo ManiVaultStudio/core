@@ -20,9 +20,6 @@
 #include <QItemSelectionModel>
 #include <QTreeView>
 
-using namespace mv::gui;
-using namespace mv::util;
-
 class ClustersAction;
 
 /**
@@ -32,7 +29,7 @@ class ClustersAction;
  *
  * @author Thomas Kroes
  */
-class ClustersActionWidget : public WidgetActionWidget {
+class ClustersActionWidget : public mv::gui::WidgetActionWidget {
 public:
 
     /**

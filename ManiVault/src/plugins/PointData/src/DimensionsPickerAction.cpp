@@ -428,16 +428,16 @@ void DimensionsPickerAction::computeStatistics()
                             {
                                 const auto i = &statisticsPerDimension - statisticsData;
 
-                                for (unsigned j{}; j < numberOfPoints; ++j)
+                                for (std::uint64_t j{}; j < numberOfPoints; ++j)
                                 {
                                     data[j] = beginOfData[j * numberOfDimensions + i];
                                 }
                             }
 
                             double sum{};
-                            unsigned numberOfNonZeroValues{};
+                            std::uint64_t numberOfNonZeroValues{};
 
-                            for (unsigned j{}; j < numberOfPoints; ++j)
+                            for (std::uint64_t j{}; j < numberOfPoints; ++j)
                             {
                                 const auto value = data[j];
 
@@ -451,7 +451,7 @@ void DimensionsPickerAction::computeStatistics()
 
                             double sumOfSquares{};
 
-                            for (unsigned j{}; j < numberOfPoints; ++j)
+                            for (std::uint64_t j{}; j < numberOfPoints; ++j)
                             {
                                 const auto value = data[j] - mean;
                                 sumOfSquares += value * value;
@@ -477,7 +477,7 @@ void DimensionsPickerAction::computeStatistics()
             qDebug()
                 << " Duration: " << QTime::currentTime().msecsTo(time) << " microsecond(s)";
 
-            for (unsigned i{}; i <= 1; ++i)
+            for (std::uint64_t i{}; i <= 1; ++i)
             {
                 std::set<double> distinctStandardDeviations;
 

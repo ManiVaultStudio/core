@@ -29,7 +29,7 @@ FilterClustersAction::FilterClustersAction(ClustersActionWidget* clustersActionW
     };
 
     // Update the filter model filter when the name filter action string changes
-    connect(&_nameFilterAction, &StringAction::stringChanged, this, updateNameFilter);
+    connect(&_nameFilterAction, &mv::gui::StringAction::stringChanged, this, updateNameFilter);
 
     // Do an initial update of the model name filter
     updateNameFilter();

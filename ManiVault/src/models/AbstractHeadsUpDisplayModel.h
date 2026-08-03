@@ -229,7 +229,7 @@ public: // Add/remove items
      * Add \p headsUpDisplayItem to the model
      * @param headsUpDisplayItem Heads-up display item to add
      */
-    void addHeadsUpDisplayItem(util::HeadsUpDisplayItemSharedPtr& headsUpDisplayItem);
+    void addHeadsUpDisplayItem(util::HeadsUpDisplayItemSharedPtr headsUpDisplayItem);
 
     /**
      * Remove \p headsUpDisplayItem

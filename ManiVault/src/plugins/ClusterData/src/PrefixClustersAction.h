@@ -7,9 +7,6 @@
 #include <actions/StringAction.h>
 #include <actions/TriggerAction.h>
 
-using namespace mv;
-using namespace mv::gui;
-
 class ClustersAction;
 
 /**
@@ -19,12 +16,12 @@ class ClustersAction;
  *
  * @author Thomas Kroes
  */
-class PrefixClustersAction : public TriggerAction
+class PrefixClustersAction : public mv::gui::TriggerAction
 {
 protected:
 
     /** Widget class for prefix clusters action */
-    class Widget : public WidgetActionWidget {
+    class Widget : public mv::gui::WidgetActionWidget {
     public:
 
         /**
@@ -54,11 +51,11 @@ public:
 
 public: // Action getters
 
-    StringAction& getPrefixAction() { return _prefixAction; }
-    TriggerAction& getApplyAction() { return _applyAction; }
+    mv::gui::StringAction& getPrefixAction() { return _prefixAction; }
+    mv::gui::TriggerAction& getApplyAction() { return _applyAction; }
 
 protected:
-    ClustersAction&     _clustersAction;        /** Reference to clusters action */
-    StringAction        _prefixAction;          /** Cluster name prefix action */
-    TriggerAction       _applyAction;           /** Apply cluster name prefixes action */
+    ClustersAction&             _clustersAction;        /** Reference to clusters action */
+    mv::gui::StringAction       _prefixAction;          /** Cluster name prefix action */
+    mv::gui::TriggerAction      _applyAction;           /** Apply cluster name prefixes action */
 };

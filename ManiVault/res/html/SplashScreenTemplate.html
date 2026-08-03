@@ -115,29 +115,28 @@
 			z-index: 99999;
 		}
 
-		#description {
+		#progress #description {
 			flex: 1;
-			overflow: hidden;         /* prevent overflow */
-			text-overflow: ellipsis;  /* show … when too long */
+			overflow: hidden;
+			text-overflow: ellipsis;
 			white-space: nowrap;
 			color: rgb(220, 220, 220);
 			padding-left: 5px;
 		}
 
-		.bar-container {
-			flex: 0 0 150px;          /* fixed width (adjust as you like) */
-			height: 4px;              /* thin bar */
+		#progress #bar-container {
+			flex: 0 0 150px;
+			height: 4px;
 			background: #ddd;
 			border-radius: 2px;
 			overflow: hidden;
 		}
 		
-		#bar {
+		#progress #bar-container #bar {
 			width: 0px;
 			height: 100%;
 			background: #3b82f6;
-			transition: width .2s linear;
-			transition: transform .2s linear; /* smooth updates */
+			transition: width .2s linear, transform .2s linear;
 			will-change: transform;
 		}
   
@@ -165,14 +164,13 @@
         </tr>
       </table>
 	  <div>
-		
 	</div>
-	<div id="progress" class="progress">
-		<div id="description" class="description"></div>
-		<div class="bar-container">
-			<div id="bar" class="bar"></div>
+		<div id="progress">
+			<div id="description"></div>
+			<div id="bar-container">
+				<div id="bar"></div>
+			</div>
 		</div>
-	</div>
     </div>
 	<script src="qrc:/qtwebchannel/qwebchannel.js"></script>
 	<script>

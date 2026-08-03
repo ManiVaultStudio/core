@@ -16,15 +16,21 @@
 
 #include <QString>
 #include <QColor>
-#include <QUuid>
 
 #include <vector>
-
-using namespace mv;
 
 const mv::DataType ClusterType = mv::DataType(QString("Clusters"));
 
 class InfoAction;
+
+namespace mv
+{
+    namespace legacy
+    {
+        class ClusterDataLegacySerializer;
+        class ClustersLegacySerializer;
+    }
+}
 
 class CLUSTERDATA_EXPORT ClusterData : public mv::plugin::RawData
 {
@@ -39,7 +45,7 @@ public:
      * @param guid Globally unique dataset identifier (use only for deserialization)
      * @return Smart pointer to dataset
      */
-    Dataset<DatasetImpl> createDataSet(const QString& guid = "") const override;
+    mv::Dataset<mv::DatasetImpl> createDataSet(const QString& guid = "") const override;
 
     /**
      * Get clusters
@@ -99,30 +105,41 @@ public:
 public: // Serialization
 
     /**
-     * Load widget action from variant
-     * @param Variant representation of the widget action
+     * Create a workflow that restores this object's state from a variant map.
+     *
+     * See Serializable::fromVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @param variantMap Serialized object state.
+     * @return Workflow plan that restores the object state when executed.
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    mv::workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
 
     /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
+     * Create a workflow that serializes this object's state to a variant map.
+     *
+     * See Serializable::toVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @return Workflow plan that serializes the object state when executed.
      */
-    QVariantMap toVariantMap() const override;
+    mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 private:
     QVector<Cluster>    _clusters;      /** Clusters data */
+
+    friend class mv::legacy::ClusterDataLegacySerializer;
 };
 
 // =============================================================================
 // Cluster Set
 // =============================================================================
 
-class CLUSTERDATA_EXPORT Clusters : public DatasetImpl
+class CLUSTERDATA_EXPORT Clusters : public mv::DatasetImpl
 {
 public:
     Clusters(QString dataName, bool mayUnderive = false, const QString& guid = "") :
-        DatasetImpl(dataName, mayUnderive, guid)
+        mv::DatasetImpl(dataName, mayUnderive, guid)
     {
     }
 
@@ -185,14 +202,14 @@ public:
      * Get a copy of the dataset
      * @return Smart pointer to copy of the dataset
      */
-    Dataset<DatasetImpl> copy() const override
+    mv::Dataset<DatasetImpl> copy() const override
     {
         auto clusters = new Clusters(getRawDataName());
 
         clusters->setText(text());
         clusters->indices = indices;
         
-        return Dataset<DatasetImpl>(clusters);
+        return mv::Dataset<DatasetImpl>(clusters);
     }
 
     /**
@@ -202,7 +219,7 @@ public:
      * @param visible Whether the subset will be visible in the UI
      * @return Smart pointer to the created subset
      */
-    Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const  override
+    mv::Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const mv::Dataset<DatasetImpl>& parentDataSet = mv::Dataset<DatasetImpl>(), const bool& visible = true) const  override
     {
         return mv::data().createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
@@ -260,21 +277,31 @@ public: // Selection
 public: // Serialization
 
     /**
-     * Load widget action from variant
-     * @param Variant representation of the widget action
+     * Create a workflow that restores this object's state from a variant map.
+     *
+     * See Serializable::fromVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @param variantMap Serialized object state.
+     * @return Workflow plan that restores the object state when executed.
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    mv::workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
 
     /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
+     * Create a workflow that serializes this object's state to a variant map.
+     *
+     * See Serializable::toVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @return Workflow plan that serializes the object state when executed.
      */
-    QVariantMap toVariantMap() const override;
+    mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
+    std::vector<unsigned int>  indices;
+    QSharedPointer<InfoAction> _infoAction;    /** Shared pointer to info action */
+    mv::EventListener          _eventListener; /** Listen to HDPS events */
 
-    std::vector<unsigned int>       indices;
-    QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */
-    EventListener                   _eventListener;     /** Listen to HDPS events */
+    friend class mv::legacy::ClustersLegacySerializer;
 };
 
 // =============================================================================
@@ -286,7 +313,7 @@ class ClusterDataFactory : public mv::plugin::RawDataFactory
     Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID   "studio.manivault.ClusterData"
-                      FILE  "ClusterData.json")
+                      FILE  "PluginInfo.json")
     
 public:
     ClusterDataFactory();

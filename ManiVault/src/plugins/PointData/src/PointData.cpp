@@ -3,16 +3,22 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "PointData.h"
+#include "PointDataLegacySerialization.h"
 
 #include "DimensionsPickerAction.h"
 #include "InfoAction.h"
+#include "DimensionNamesSerializer.h"
 
 #include <Application.h>
 
 #include <actions/GroupAction.h>
 #include <event/Event.h>
 #include <graphics/Vector2f.h>
+
 #include <util/Serialization.h>
+#include <util/JSON.h>
+
+#include <workflow/WorkflowContextVariantMap.h>
 
 #include <QDebug>
 #include <QtCore>
@@ -27,11 +33,74 @@ Q_PLUGIN_METADATA(IID "studio.manivault.PointData")
 // PointData
 // =============================================================================
 
+using namespace mv;
+using namespace mv::plugin;
 using namespace mv::util;
+using namespace mv::workflow;
 
-PointData::~PointData(void)
+namespace
 {
-    
+    namespace local
+    {
+        template<typename outT, typename inT>
+        inline outT safe_numeric_cast(const inT value)
+        {
+            static_assert(std::is_integral_v<inT> && std::is_integral_v<outT>);
+
+            assert(value >= std::numeric_limits<outT>::min() && value <= std::numeric_limits<outT>::max());
+            return static_cast<outT>(value);
+        }
+    }
+
+}
+
+PointData::ElementTypeSpecifier PointData::elementTypeSpecifier(const QString& typeName)
+{
+    if (typeName == "float32")
+        return ElementTypeSpecifier::float32;
+    else if (typeName == "bfloat16")
+        return ElementTypeSpecifier::bfloat16;
+    else if (typeName == "int32")
+        return ElementTypeSpecifier::int32;
+    else if (typeName == "uint32")
+        return ElementTypeSpecifier::uint32;
+    else if (typeName == "int16")
+        return ElementTypeSpecifier::int16;
+    else if (typeName == "uint16")
+        return ElementTypeSpecifier::uint16;
+    else if (typeName == "int8")
+        return ElementTypeSpecifier::int8;
+    else if (typeName == "uint8")
+        return ElementTypeSpecifier::uint8;
+
+    return ElementTypeSpecifier::float32; // Default to float32 if the type name is not recognized
+}
+
+QString PointData::elementTypeName(const ElementTypeSpecifier elementTypeSpecifier)
+{
+    switch (elementTypeSpecifier) 
+    {
+        case ElementTypeSpecifier::float32:
+            return "float32";
+        case ElementTypeSpecifier::bfloat16:
+            return "bfloat16";
+        case ElementTypeSpecifier::int32:
+            return "int32";
+        case ElementTypeSpecifier::uint32:
+            return "uint32";
+        case ElementTypeSpecifier::int16:
+            return "int16";
+        case ElementTypeSpecifier::uint16:
+            return "uint16";
+        case ElementTypeSpecifier::int8:
+            return "int8";
+        case ElementTypeSpecifier::uint8:
+            return "uint8";
+        default:
+            return "unknown";
+    }
+
+    return "unknown";
 }
 
 void PointData::init()
@@ -43,7 +112,7 @@ mv::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) 
     return mv::Dataset<DatasetImpl>(new Points(getName(), true, guid));
 }
 
-std::uint32_t PointData::getNumPoints() const
+std::uint64_t PointData::getNumPoints() const
 {
     if (_numDimensions == 0)
     {
@@ -52,12 +121,12 @@ std::uint32_t PointData::getNumPoints() const
     }
 
     if (_isDense)
-        return static_cast<unsigned int>(getSizeOfVector() / _numDimensions);
+        return static_cast<std::uint64_t>(getSizeOfVector() / _numDimensions);
     else
         return _numRows;
 }
 
-std::uint32_t PointData::getNumDimensions() const
+std::uint64_t PointData::getNumDimensions() const
 {
     return _numDimensions;
 }
@@ -99,7 +168,7 @@ const std::vector<QString>& PointData::getDimensionNames() const
 void PointData::setData(const std::nullptr_t, const std::size_t numPoints, const std::size_t numDimensions)
 {
     resizeVector(numPoints * numDimensions);
-    _numDimensions = static_cast<unsigned int>(numDimensions);
+    _numDimensions = static_cast<std::uint64_t>(numDimensions);
 }
 
 void PointData::setDimensionNames(const std::vector<QString>& dimNames)
@@ -132,102 +201,135 @@ void PointData::setValueAt(const std::size_t index, const float newValue)
         _variantOfVectors);
 }
 
-void PointData::fromVariantMap(const QVariantMap& variantMap)
+UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
 {
-    variantMapMustContain(variantMap, "Data");
-    variantMapMustContain(variantMap, "NumberOfPoints");
-    variantMapMustContain(variantMap, "NumberOfDimensions");
+    //Plugin::fromVariantMap(variantMap);
 
-    const auto data                 = variantMap["Data"].toMap();
-    const auto numberOfPoints       = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
-    const auto numberOfDimensions   = variantMap["NumberOfDimensions"].toUInt();
-    const auto numberOfElements     = numberOfPoints * numberOfDimensions;
-    const auto elementTypeIndex     = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
-    const auto rawData              = data["Raw"].toMap();
+    const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
-    bool isDense = true;
-    if (variantMap.contains("Dense"))
-        isDense = variantMap["Dense"].toBool();;
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1(%2)").arg(getSerializationName()).arg(__FUNCTION__));
 
-    _isDense = isDense;
-    _numDimensions = numberOfDimensions;
+    if (appVersion < Version(1, 5, 0)) {
+        plan->addSequentialStage("Load legacy point data (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            legacy::PointDataLegacySerializer::fromVariantMapPre150(*this, variantMap, executionContext);
+        });
 
-    if (_isDense)
-    {
+        return plan;
+    }
+
+    plan->addSequentialStage("Allocate storage", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        variantMapMustContain(variantMap, "Data");
+        variantMapMustContain(variantMap, "NumberOfPoints");
+        variantMapMustContain(variantMap, "NumberOfDimensions");
+
+        const auto dataMap              = variantMap["Data"].toMap();
+        const auto numberOfPoints       = static_cast<std::size_t>(variantMap["NumberOfPoints"].toULongLong());
+        const auto numberOfDimensions   = static_cast<std::size_t>(variantMap["NumberOfDimensions"].toULongLong());
+        const auto numberOfElements     = numberOfPoints * numberOfDimensions;
+        const auto elementTypeIndex     = dataMap.contains("TypeName") ? elementTypeSpecifier(dataMap.value("TypeName").toString()) : static_cast<ElementTypeSpecifier>(dataMap.value("TypeIndex").toInt());
+
+        _isDense        = variantMap.value("Dense", true).toBool();
+        _numDimensions  = numberOfDimensions;
+
         setElementTypeSpecifier(elementTypeIndex);
         resizeVector(numberOfElements);
-        populateDataBufferFromVariantMap(rawData, (char*)getDataVoidPtr());
-    }
-    else
-    {
-        variantMapMustContain(variantMap, "NumberOfNonZeroElements");
+    });
 
-        const auto numberOfNonZeroElements = variantMap["NumberOfNonZeroElements"].toULongLong();
+    plan->addNestedWorkflowStage("Populate data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        QVariant rawData;
 
-        std::vector<char> bytes((numberOfPoints + 1) * sizeof(size_t) + numberOfNonZeroElements * (sizeof(size_t) + sizeof(float)));
+        if (variantMap.contains("Data") && variantMap["Data"].canConvert<QVariantMap>()) {
+            const auto dataMap = variantMap["Data"].toMap();
 
-        populateDataBufferFromVariantMap(rawData, bytes.data());
-        _numRows = static_cast<unsigned int>(numberOfPoints); // FIXME should be redundant
+            if (dataMap.contains("Raw") && dataMap["Raw"].canConvert<QVariantMap>()) {
+                rawData = dataMap["Raw"];
+            }
+        }
 
-        size_t offset = 0;
-        std::vector<size_t> rowPointers(numberOfPoints + 1);
-        std::memcpy(rowPointers.data(), bytes.data() + offset, rowPointers.size() * sizeof(size_t));
+        if (rawData.canConvert<QVariantMap>()) {
+            const auto rawDataMap = rawData.toMap();
+            return populateBytesFromBlobMapWorkflow(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), executionContext->getOptions());
+        }
 
-        offset += rowPointers.size() * sizeof(size_t);
-        std::vector<size_t> colIndices(numberOfNonZeroElements);
-        std::memcpy(colIndices.data(), bytes.data() + offset, colIndices.size() * sizeof(size_t));
+        return std::make_unique<WorkflowPlan>("Populate data (no raw data found in variant map)");
+    });
 
-        offset += colIndices.size() * sizeof(float);
-        std::vector<float> values(numberOfNonZeroElements);
-        std::memcpy(values.data(), bytes.data() + offset, values.size() * sizeof(float));
-
-        _sparseData.setData(numberOfPoints, numberOfDimensions, std::move(rowPointers), std::move(colIndices), std::move(values));
-
-        qDebug() << "Loaded sparse data with" << _numRows << "points and" << _numDimensions << "dimensions.";
-    }
+    return plan;
 }
 
-QVariantMap PointData::toVariantMap() const
+UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 {
-    const auto numberOfElements = getNumberOfElements();
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    if (_isDense)
-    {
-        const auto typeSpecifier = getElementTypeSpecifier();
-        const auto typeSpecifierName = getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
-        const auto typeIndex = static_cast<std::int32_t>(typeSpecifier);
+    //const auto baseSaveStage = plan->addNestedWorkflowStage("Save raw data base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+    //    return this->Plugin::toVariantMapWorkflow();
+    //})
+    //
+    //
+    //;
 
-        QVariantMap rawData = rawDataToVariantMap((const char*)getDataConstVoidPtr(), getRawDataSize(), true);
+    if (_isDense) {
+        const auto storeRawStage = plan->addNestedWorkflowStage("Save raw", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            return bytesToBlobVariantMapWorkflow(static_cast<const char*>(getDataConstVoidPtr()), getRawDataSize());
+        });
 
-        return {
-            { "TypeIndex", QVariant::fromValue(typeIndex) },
-            { "TypeName", QVariant(typeSpecifierName) },
-            { "Raw", QVariant::fromValue(rawData) },
-            { "NumberOfElements", QVariant::fromValue(numberOfElements) }
-        };
+        plan->addSequentialStage("Build map", [this, storeRawStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            QVariantMap outputMap;
+
+            const auto typeSpecifier        = getElementTypeSpecifier();
+            const auto typeSpecifierName    = getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
+            const auto typeIndex            = static_cast<std::int32_t>(typeSpecifier);
+            const auto rawMap               = executionContext->takeOutput(storeRawStage).toMap();
+
+            outputMap.insert("TypeIndex", QVariant::fromValue(typeIndex));
+            outputMap.insert("TypeName", QVariant(typeSpecifierName));
+            outputMap.insert("Raw", rawMap);
+            outputMap.insert("NumberOfElements", QVariant::fromValue(getNumberOfElements()));
+
+            const auto expectedBytes = getRawDataSize();
+            const auto blobTotalSize = rawMap["Size"].toULongLong();
+
+            if (blobTotalSize != expectedBytes) {
+                throw ManiVaultException(
+                    SeverityLevel::Error,
+                    "PointData blob size does not match declared point-data dimensions",
+                    QString("Dataset '%1' declares %2 points x %3 dimensions = %4 bytes, but blob total size is %5 bytes")
+                    .arg(getGuiName())
+                    .arg(getNumPoints())
+                    .arg(getNumDimensions())
+                    .arg(expectedBytes)
+                    .arg(blobTotalSize),
+                    __FUNCTION__
+                );
+            }
+
+            executionContext->setOutput(outputMap);
+        });
+    } else {
+        plan->addSequentialStage("Build map", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            QVariantMap outputMap;
+
+            std::vector<char> bytes;
+
+            const auto& indexPointers   = _sparseData.getIndexPointers();
+            const auto& colIndices      = _sparseData.getColIndices();
+            const auto& values          = _sparseData.getValues();
+
+            const auto* indexPointersBytes  = reinterpret_cast<const char*>(indexPointers.data());
+            const auto* colIndicesBytes     = reinterpret_cast<const char*>(colIndices.data());
+            const auto* valuesBytes         = reinterpret_cast<const char*>(values.data());
+
+            bytes.insert(bytes.end(), indexPointersBytes, indexPointersBytes + indexPointers.size() * sizeof(size_t));
+            bytes.insert(bytes.end(), colIndicesBytes, colIndicesBytes + colIndices.size() * sizeof(size_t));
+            bytes.insert(bytes.end(), valuesBytes, valuesBytes + values.size() * sizeof(float));
+
+            outputMap.insert("Raw", bytesToBlobVariantMap(bytes.data(), bytes.size()));
+
+            executionContext->setOutput(outputMap);
+        });
     }
-    else
-    {
-        std::vector<char> bytes;
 
-        const std::vector<size_t>& indexPointers = _sparseData.getIndexPointers();
-        const std::vector<size_t>& colIndices = _sparseData.getColIndices();
-        const std::vector<float>& values = _sparseData.getValues();
-
-        const char* indexPointersBytes = (const char*) (indexPointers.data());
-        const char* colIndicesBytes = (const char*) (colIndices.data());
-        const char* valuesBytes = (const char*) (values.data());
-
-        bytes.insert(bytes.end(), indexPointersBytes, indexPointersBytes + indexPointers.size() * sizeof(size_t));
-        bytes.insert(bytes.end(), colIndicesBytes, colIndicesBytes + colIndices.size() * sizeof(size_t));
-        bytes.insert(bytes.end(), valuesBytes, valuesBytes + values.size() * sizeof(float));
-
-        QVariantMap rawData = rawDataToVariantMap(bytes.data(), bytes.size(), true);
-
-        return {
-            { "Raw", QVariant::fromValue(rawData) }
-        };
-    }
+    return plan;
 }
 
 void PointData::extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const
@@ -284,7 +386,7 @@ void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, 
 }
 
 
-void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices) const
+void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<std::uint32_t>& indices) const
 {
     CheckDimensionIndex(dimensionIndex1);
     CheckDimensionIndex(dimensionIndex2);
@@ -313,10 +415,6 @@ Points::Points(QString dataName, bool mayUnderive /*= true*/, const QString& gui
 {
 }
 
-Points::~Points()
-{
-}
-
 void Points::init()
 {
     DatasetImpl::init();
@@ -328,7 +426,7 @@ void Points::init()
     };
 
     //if (isFull()) {
-        _dimensionsPickerGroupAction = new GroupAction(this, "Dimensions Group");
+        _dimensionsPickerGroupAction = new gui::GroupAction(this, "Dimensions Group");
 
         _dimensionsPickerGroupAction->setText("Dimensions");
         _dimensionsPickerGroupAction->setShowLabels(false);
@@ -556,7 +654,7 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
     getTask().setVisible(!(projects().isOpeningProject() || projects().isImportingProject()));
     getTask().setRunning();
 
-    auto pointIndexOffset = 0u;
+    std::uint64_t pointIndexOffset = 0lu;
 
     QCoreApplication::processEvents();
 
@@ -571,7 +669,7 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
         {
             SelectionMap selectionMapToTarget;
 
-            for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
+            for (std::uint64_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
                 selectionMapToTarget.getMap()[pointIndexOffset + pointIndex] = std::vector<std::uint32_t>({ targetGlobalIndices[pointIndex] });
 
             addLinkedData(targetPoints, selectionMapToTarget);
@@ -581,8 +679,8 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
         {
             SelectionMap selectionMapToSource;
 
-            for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
-                selectionMapToSource.getMap()[targetGlobalIndices[pointIndex]] = std::vector<std::uint32_t>({ pointIndexOffset + pointIndex });
+            for (std::uint64_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
+                selectionMapToSource.getMap()[targetGlobalIndices[pointIndex]] = std::vector<std::uint32_t>({ ::local::safe_numeric_cast<std::uint32_t>(pointIndexOffset + pointIndex) });
 
             targetPoints->addLinkedData(toSmartPointer(), selectionMapToSource);
 
@@ -610,7 +708,7 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
 /*                            Index transformation                            */
 /* -------------------------------------------------------------------------- */
 
-void Points::getGlobalIndices(std::vector<unsigned int>& globalIndices) const
+void Points::getGlobalIndices(std::vector<std::uint32_t>& globalIndices) const
 {
     if (isProxy())
     {
@@ -648,18 +746,18 @@ void Points::getGlobalIndices(std::vector<unsigned int>& globalIndices) const
 
         for (const Dataset<Points>& subset : subsetChain)
         {
-            for (int i = 0; i < globalIndices.size(); i++)
+            for (std::uint64_t i = 0; i < globalIndices.size(); i++)
                 globalIndices[i] = subset->indices[globalIndices[i]];
         }
     }
 }
 
-void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndices, std::vector<bool>& selected) const
+void Points::selectedLocalIndices(const std::vector<std::uint32_t>& selectionIndices, std::vector<bool>& selected) const
 {
     //Timer timer(__FUNCTION__);
 
     // Find the global indices of this dataset
-    std::vector<unsigned int> localGlobalIndices;
+    std::vector<std::uint32_t> localGlobalIndices;
     getGlobalIndices(localGlobalIndices);
 
     if (isProxy()) {
@@ -673,12 +771,12 @@ void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndi
         // In an array the size of the full raw data, mark selected points as true
         std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
 
-        for (const unsigned int& selectionIndex : selectionIndices)
+        for (const std::uint32_t& selectionIndex : selectionIndices)
             globalSelection[selectionIndex] = true;
 
         // For all local points find out which are selected
         selected.resize(localGlobalIndices.size(), false);
-        for (int i = 0; i < localGlobalIndices.size(); i++)
+        for (std::uint64_t i = 0; i < localGlobalIndices.size(); i++)
         {
             if (globalSelection[localGlobalIndices[i]])
                 selected[i] = true;
@@ -686,7 +784,7 @@ void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndi
     }
 }
 
-void Points::getLocalSelectionIndices(std::vector<unsigned int>& localSelectionIndices) const
+void Points::getLocalSelectionIndices(std::vector<std::uint32_t>& localSelectionIndices) const
 {
     if (isProxy())
     {
@@ -698,18 +796,18 @@ void Points::getLocalSelectionIndices(std::vector<unsigned int>& localSelectionI
     auto selection = getSelection<Points>();
 
     // Find the global indices of this dataset
-    std::vector<unsigned int> localGlobalIndices;
+    std::vector<std::uint32_t> localGlobalIndices;
     getGlobalIndices(localGlobalIndices);
 
     // In an array the size of the full raw data, mark selected points as true
     std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
-    for (const unsigned int& selectionIndex : selection->indices)
+    for (const std::uint32_t& selectionIndex : selection->indices)
         globalSelection[selectionIndex] = true;
 
     // For all local points find out which are selected
     std::vector<bool> selected(localGlobalIndices.size(), false);
     int indexCount = 0;
-    for (int i = 0; i < localGlobalIndices.size(); i++)
+    for (std::uint64_t i = 0; i < localGlobalIndices.size(); i++)
     {
         if (globalSelection[localGlobalIndices[i]])
         {
@@ -719,8 +817,8 @@ void Points::getLocalSelectionIndices(std::vector<unsigned int>& localSelectionI
     }
 
     localSelectionIndices.resize(indexCount);
-    int c = 0;
-    for (int i = 0; i < selected.size(); i++)
+    std::uint64_t c = 0;
+    for (std::uint64_t i = 0; i < selected.size(); i++)
     {
         if (selected[i])
             localSelectionIndices[c++] = i;
@@ -816,7 +914,7 @@ static void resolveLinkedPointData(const LinkedData& linkedData, const std::vect
         const SelectionMap& mapping = linkedData.getMapping();
 
         // Create separate vector of additional linked selected points
-        std::vector<unsigned int> linkedIndices;
+        std::vector<std::uint32_t> linkedIndices;
 
         // Reserve at least as much space as required for a 1-1 mapping
         linkedIndices.reserve(indices.size());
@@ -923,7 +1021,7 @@ bool Points::canSelectInvert() const
 
 void Points::selectAll()
 {
-    std::vector<unsigned int> selectionIndices;
+    std::vector<std::uint32_t> selectionIndices;
 
     selectionIndices.resize(getNumPoints());
 
@@ -947,25 +1045,25 @@ void Points::selectNone()
 void Points::selectInvert()
 {
     // Get the locally selected indices (the points in the subset that are selected)
-    std::vector<unsigned int> localSelectionIndices;
+    std::vector<std::uint32_t> localSelectionIndices;
     getLocalSelectionIndices(localSelectionIndices);
 
     // Compute the inverse of this
     const auto numberOfPoints = getNumPoints();
     std::set<std::uint32_t> selectionSet(localSelectionIndices.begin(), localSelectionIndices.end());
 
-    std::vector<unsigned int> selectionIndices;
+    std::vector<std::uint32_t> selectionIndices;
     selectionIndices.reserve(numberOfPoints - selectionSet.size());
 
-    for (std::uint32_t i = 0; i < numberOfPoints; i++)
+    for (std::uint64_t i = 0; i < numberOfPoints; i++)
         if (selectionSet.find(i) == selectionSet.end())
             selectionIndices.push_back(i);
 
     // Convert the inverted indices back to global indices
-    std::vector<unsigned int> globalIndices;
+    std::vector<std::uint32_t> globalIndices;
     getGlobalIndices(globalIndices);
 
-    for (unsigned int& index : selectionIndices)
+    for (std::uint32_t& index : selectionIndices)
     {
         index = globalIndices[index];
     }
@@ -975,151 +1073,136 @@ void Points::selectInvert()
     events().notifyDatasetDataSelectionChanged(this);
 }
 
-void Points::fromVariantMap(const QVariantMap& variantMap)
+UniqueWorkflowPlan Points::fromVariantMapWorkflow(QVariantMap variantMap)
 {
-    DatasetImpl::fromVariantMap(variantMap);
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    variantMapMustContain(variantMap, "DimensionNames");
-    variantMapMustContain(variantMap, "Selection");
+    plan->addNestedWorkflowStage("Load dataset base", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        return this->DatasetImpl::fromVariantMapWorkflow(variantMap);
+    });
 
-    // For backwards compatibility, check PluginVersion
-    if (variantMap["PluginVersion"] == "No Version" && !variantMap["Full"].toBool())
-    {
-        makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
+    const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
 
-        qWarning() << "[ManiVault deprecation warning]: This project was saved with an older ManiVault version (<1.0). "
-            "Please save the project again to ensure compatibility with newer ManiVault versions. "
-            "Future releases may not be able to load this projects otherwise. ";
+    if (appVersion < Version(1, 5, 0)) {
+        plan->addSequentialStage("Load legacy points raw data (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            legacy::PointsLegacySerializer::fromVariantMapPre150(*this, variantMap, executionContext);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread);
+
+        return plan;
     }
 
-    // Load raw point data
-    if (isFull())
-        getRawData<PointData>()->fromVariantMap(variantMap);
-    else
-    {
-        variantMapMustContain(variantMap, "Indices");
-    
-        const auto& indicesMap = variantMap["Indices"].toMap();
-    
-        indices.resize(indicesMap["Count"].toInt());
-    
-        populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
-    }
+    plan->addNestedWorkflowStage("Load raw data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
+        return getRawData<PointData>()->fromVariantMapWorkflow(variantMap);
+    });
 
-    // Load dimension names
-    QStringList dimensionNameList;
-    std::vector<QString> dimensionNames;
+    plan->addSequentialStage("Load selection", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        variantMapMustContain(variantMap, "Selection");
 
-    // Fetch dimension names from map
-    const auto fetchDimensionNames = [&variantMap]() -> QStringList {
-        QStringList dimensionNames;
-
-        // Dimension names in byte array format
-        QByteArray dimensionsByteArray;
-
-        // Copy the dimension names raw data into the byte array
-        dimensionsByteArray.resize(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
-        populateDataBufferFromVariantMap(variantMap["DimensionNames"].toMap(), (char*)dimensionsByteArray.data());
-
-        // Open input data stream
-        QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::ReadOnly);
-
-        // Stream the data to the dimension names
-        dimensionsDataStream >> dimensionNames;
-
-        return dimensionNames;
-        };
-
-    if (variantMap["NumberOfDimensions"].toInt() > 1000)
-        dimensionNameList = fetchDimensionNames();
-    else
-        dimensionNameList = variantMap["DimensionNames"].toStringList();
-
-    if (dimensionNameList.size() == getNumDimensions())
-    {
-        for (const auto& dimensionName : dimensionNameList)
-            dimensionNames.push_back(dimensionName);
-    }
-    else
-    {
-        for (std::uint32_t dimensionIndex = 0; dimensionIndex < getNumDimensions(); dimensionIndex++)
-            dimensionNames.emplace_back(QString("Dim %1").arg(QString::number(dimensionIndex)));
-    }
-
-    setDimensionNames(dimensionNames);
-
-    if (variantMap.contains("Dimensions")) {
-        _dimensionsPickerAction->fromParentVariantMap(variantMap);
-    }
-
-    events().notifyDatasetDataChanged(this);
-
-    // Handle saved selection
-    if (isFull()) {
         const auto& selectionMap = variantMap["Selection"].toMap();
 
-        const auto count = selectionMap["Count"].toInt();
+        const auto count = selectionMap["Count"].value<std::uint64_t>();
 
         if (count > 0) {
             auto selectionSet = getSelection<Points>();
 
             selectionSet->indices.resize(count);
 
-            populateDataBufferFromVariantMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data());
+            populateBytesFromBlobMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), count * sizeof(uint32_t));
 
             events().notifyDatasetDataSelectionChanged(this);
         }
-    }
+    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+
+    plan->addSequentialStage("Load indices", [this, variantMap](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        variantMapMustContain(variantMap, "Indices");
+
+        const auto& indicesMap = variantMap["Indices"].toMap();
+
+        indices.resize(indicesMap["Count"].value<std::uint64_t>());
+
+        if (!indices.empty())
+			populateBytesFromBlobMap(indicesMap["Raw"].toMap(), (char*)indices.data(), indices.size() * sizeof(uint32_t));
+    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+
+    const auto serializeDimensionsStage = plan->addNestedWorkflowStage("Load dimensions", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+        return DimensionNamesSerializer::fromVariantMapWorkflow(this, variantMap);
+    });
+
+    return plan;
 }
 
-QVariantMap Points::toVariantMap() const
+UniqueWorkflowPlan Points::toVariantMapWorkflow() const
 {
-    auto variantMap = DatasetImpl::toVariantMap();
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    QStringList dimensionNames;
-    QByteArray dimensionsByteArray;
-    QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::WriteOnly);
+    const auto saveDatasetBaseStage = plan->addNestedWorkflowStage("Save dataset base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+        return this->DatasetImpl::toVariantMapWorkflow();
+    });
 
-    if (getDimensionNames().size() == getNumDimensions()) {
-        for (const auto& dimensionName : getDimensionNames())
-            dimensionNames << dimensionName;
-    }
-    else {
-        for (std::uint32_t dimensionIndex = 0; dimensionIndex < getNumDimensions(); dimensionIndex++)
-            dimensionNames << QString("Dim %1").arg(QString::number(dimensionIndex));
-    }
-
-    if (dimensionNames.size() > 1000)
-        dimensionsDataStream << dimensionNames;
-
-    QVariantMap indices;
-
-    indices["Count"]    = QVariant::fromValue(this->indices.size());
-    indices["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t), true);
-
-    QVariantMap selection;
+    WorkflowHandle encodeRawDataStage;
 
     if (isFull()) {
-        auto selectionSet = getSelection<Points>();
-
-        selection["Count"]  = QVariant::fromValue(selectionSet->indices.size());
-        selection["Raw"]    = rawDataToVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t), true);
+        encodeRawDataStage = plan->addNestedWorkflowStage("Encode raw data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+            return getRawData<PointData>()->toVariantMapWorkflow();
+        });
     }
 
-    variantMap["Data"]                  = isFull() ? getRawData<PointData>()->toVariantMap() : QVariantMap();
-    variantMap["NumberOfPoints"]        = getNumPoints();
-    variantMap["Indices"]               = indices;
-    variantMap["Selection"]             = selection;
-    variantMap["DimensionNames"]        = (dimensionNames.size() > 1000) ? rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true) : QVariant::fromValue(dimensionNames);
-    variantMap["NumberOfDimensions"]    = getNumDimensions();
-    variantMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
+    const auto storeRawDataStage = plan->addSequentialStage("Store raw data", [this, saveDatasetBaseStage, encodeRawDataStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> void {
+        auto datasetMap = executionContext->takeOutput(saveDatasetBaseStage).toMap();
 
-    variantMap["Dense"]                 = Experimental::isDense(this);
+    	datasetMap["Data"]                      = isFull() ? executionContext->takeOutput(encodeRawDataStage).toMap() : QVariantMap();
+        datasetMap["NumberOfPoints"]            = QVariant::fromValue<std::uint64_t>(getNumPoints());
+        datasetMap["Dense"]                     = Experimental::isDense(this);
+        datasetMap["NumberOfNonZeroElements"]   = QVariant::fromValue(Experimental::getNumNonZeroElements(this));
 
-    if (!Experimental::isDense(this))
-        variantMap["NumberOfNonZeroElements"] = QVariant::fromValue(Experimental::getNumNonZeroElements(this));
-    
-    return variantMap;
+        executionContext->setOutput(datasetMap);
+    });
+
+    const auto storeIndicesStage = plan->addSequentialStage("Save indices", [this, storeRawDataStage](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        auto datasetMap = executionContext->takeOutput(storeRawDataStage).toMap();
+
+        QVariantMap indicesMap;
+
+        indicesMap["Count"] = QVariant::fromValue<std::uint64_t>(this->indices.size());
+        indicesMap["Raw"]   = bytesToBlobVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t));
+
+        datasetMap["Indices"] = indicesMap;
+
+        executionContext->setOutput(datasetMap);
+    });
+
+    const auto saveSelectionStage = plan->addSequentialStage("Save selection", [this, storeIndicesStage](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        auto datasetMap = executionContext->takeOutput(storeIndicesStage).toMap();
+
+        QVariantMap selection;
+
+        if (isFull()) {
+            auto selectionSet = getSelection<Points>();
+
+            selection["Count"]  = QVariant::fromValue<std::uint64_t>(selectionSet->indices.size());
+            selection["Raw"]    = bytesToBlobVariantMap((char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(std::uint32_t));
+        }
+
+        datasetMap["Selection"] = selection;
+
+        executionContext->setOutput(datasetMap);
+    });
+
+    const auto serializeDimensionsStage = plan->addNestedWorkflowStage("Serialize dimensions", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+        return DimensionNamesSerializer::toVariantMapWorkflow(getRawData<PointData>()->getDimensionNames());
+    });
+
+    const auto saveDimensionsStage = plan->addSequentialStage("Save dimensions", [this, saveSelectionStage, serializeDimensionsStage](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+        auto datasetMap = executionContext->takeOutput(saveSelectionStage).toMap();
+
+        datasetMap["DimensionNames"]        = executionContext->takeOutput(serializeDimensionsStage).toMap();
+        datasetMap["NumberOfDimensions"]    = QVariant::fromValue<std::uint64_t>(getNumDimensions());
+        datasetMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
+
+        executionContext->setOutput(datasetMap);
+    });
+
+    return plan;
 }
 
 // =============================================================================

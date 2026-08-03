@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
-// A corresponding LICENSE file is located in the root directory of this source tree 
-// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// A corresponding LICENSE file is located in the root directory of this source tree
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #pragma once
 
@@ -16,15 +16,28 @@
 
 #include <QAbstractListModel>
 
-namespace mv::gui {
+namespace mv::gui
+{
 
 /**
- * Dataset picker action class
+ * @brief Picks a dataset.
  *
- * For picking a dataset from a list
- * Automatically removes items when datasets are removed and renamed
+ * DatasetPickerAction presents datasets through an option action and keeps the
+ * available choices synchronized with the selected population mode.
  *
- * @author Thomas Kroes
+ * In automatic population mode, the action follows the global datasets model
+ * and applies the configured filter function. In manual population mode, the
+ * action uses the dataset list provided through setDatasets().
+ *
+ * The action tracks the selected dataset by identifier for serialization and
+ * emits dataset selection signals when the current dataset changes.
+ *
+ * currentDatasetChanged() is the complete state-change signal. It emits a
+ * valid dataset when a dataset is selected and an invalid dataset when the
+ * selection is cleared. datasetPicked() is retained as the selection-specific
+ * compatibility signal and is emitted only for valid datasets.
+ *
+ * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
 class CORE_EXPORT DatasetPickerAction : public OptionAction
 {
@@ -32,176 +45,215 @@ class CORE_EXPORT DatasetPickerAction : public OptionAction
 
 public:
 
-    /** Helper class for scoped value serialization disabling */
-    struct CORE_EXPORT ValueSerializationDisabler {
-        ValueSerializationDisabler() { disableValueSerialization(); }
-        virtual ~ValueSerializationDisabler() { enableValueSerialization(); }
-    };
-
-public:
-
     /**
-     * Constructor
-     * @param parent Pointer to parent object
-     * @param title Title of the action
-     * @param mode Picker mode
+     * @brief Constructs a dataset picker action.
+     * @param parent Parent object.
+     * @param title Action title.
      */
     Q_INVOKABLE DatasetPickerAction(QObject* parent, const QString& title);
 
     /**
-     * Get datasets
-     * @return Datasets
+     * @brief Returns selectable datasets.
+     * @return Datasets currently visible through the picker after filtering.
      */
-    mv::Datasets getDatasets() const;
+    [[nodiscard]] mv::Datasets getDatasets() const;
 
     /**
-     * Set the datasets from which can be picked (mode is set to StorageMode::Manual)
-     * @param datasets Datasets from which can be picked
-     * @param silent Whether the signal datasetsChanged is emitted
+     * @brief Sets selectable datasets.
+     *
+     * Assigning datasets switches the action to manual population mode.
+     *
+     * @param datasets Datasets that can be selected.
+     * @param silent Whether to suppress datasetsChanged() while replacing the list.
      */
     void setDatasets(mv::Datasets datasets, bool silent = false);
 
     /**
-     * Set datasets filter function
-     * @param filterFunction Filter lambda (triggered when datasets are added and/or removed from the global datasets model)
+     * @brief Sets the dataset filter function.
+     * @param filterFunction Function used by the filter model to decide which datasets are selectable.
      */
     void setFilterFunction(const DatasetsFilterModel::FilterFunction& filterFunction);
 
-    /** Get the current dataset */
-    mv::Dataset<> getCurrentDataset() const;
+    /**
+     * @brief Returns the current dataset.
+     * @return Currently selected dataset, or an invalid dataset when no dataset is selected.
+     */
+    [[nodiscard]] mv::Dataset<> getCurrentDataset() const;
 
-    /** Get the current dataset */
+    /**
+     * @brief Returns the current dataset as a typed dataset.
+     * @tparam DatasetType Target dataset implementation type.
+     * @return Currently selected dataset cast to \p DatasetType.
+     */
     template<typename DatasetType>
-    mv::Dataset<DatasetType> getCurrentDataset() const
+    [[nodiscard]] mv::Dataset<DatasetType> getCurrentDataset() const
     {
-        return getCurrentDataset();
+        return mv::Dataset<DatasetType>(DatasetPickerAction::getCurrentDataset());
     }
 
     /**
-     * Set current dataset to \p currentDataset
-     * @param currentDataset Smart pointer to current dataset
+     * @brief Sets the current dataset.
+     * @param currentDataset Dataset to select, or an invalid dataset to clear the selection.
      */
     void setCurrentDataset(mv::Dataset<mv::DatasetImpl> currentDataset);
 
     /**
-     * Set current dataset by \p datasetId
-     * @param datasetId Current dataset globally unique identifier
+     * @brief Sets the current dataset by identifier.
+     * @param datasetId Globally unique identifier of the dataset to select, or an empty string to clear the selection.
      */
     void setCurrentDataset(const QString& datasetId);
 
     /**
-     * Get current dataset globally unique identifier
-     * @return The globally unique identifier of the currently selected dataset (if any)
+     * @brief Returns the current dataset identifier.
+     * @return Globally unique identifier of the selected dataset, or an empty string when no dataset is selected.
      */
-    QString getCurrentDatasetId() const;
-
-public: // Population
+    [[nodiscard]] QString getCurrentDatasetId() const;
 
     /**
-     * Get current population mode
-     * @return Population mode
+     * @brief Returns selectable dataset identifiers.
+     * @return Globally unique identifiers of all currently selectable datasets.
      */
-    AbstractDatasetsModel::PopulationMode getPopulationMode() const;
+    [[nodiscard]] QStringList getCurrentDatasetIds() const;
 
     /**
-     * Set population mode to \p populationMode
-     * @param populationMode Population mode
+     * @brief Returns a dataset by identifier.
+     * @param datasetId Globally unique dataset identifier to look up.
+     * @return Dataset with the requested identifier, or an invalid dataset when it is not selectable.
+     */
+    [[nodiscard]] Dataset<DatasetImpl> getDataset(const QString& datasetId) const;
+
+    /**
+     * @brief Refreshes the dataset filter.
+     *
+     * Invalidates the internal filter model so the selectable dataset list is
+     * recomputed. This is primarily useful in automatic population mode.
+     */
+    void invalidateFilter();
+
+public:
+
+    /**
+     * @brief Returns the population mode.
+     * @return Current population mode.
+     */
+    [[nodiscard]] AbstractDatasetsModel::PopulationMode getPopulationMode() const;
+
+    /**
+     * @brief Sets the population mode.
+     * @param populationMode Population mode to use for selectable datasets.
      */
     void setPopulationMode(AbstractDatasetsModel::PopulationMode populationMode);
 
 private:
 
-    /** Handle changes to the population mode */
+    /**
+     * @brief Applies the current population mode.
+     *
+     * Reconnects the filter model to either the manual datasets model or the
+     * global datasets model.
+     */
     void populationModeChanged();
 
-    /** Blocks the DatasetPickerAction::datasetsChanged() signal from being emitted */
+    /**
+     * @brief Blocks datasetsChanged().
+     */
     void blockDatasetsChangedSignal();
 
-    /** Allows the DatasetPickerAction::datasetsChanged() signal to be emitted */
+    /**
+     * @brief Unblocks datasetsChanged().
+     */
     void unblockDatasetsChangedSignal();
 
     /**
-     * Get whether the DatasetPickerAction::datasetsChanged() may be emitted
-     * @return Boolean determining whether the DatasetPickerAction::datasetsChanged() may be emitted
+     * @brief Returns whether datasetsChanged() is blocked.
+     * @return Whether datasetsChanged() is currently blocked.
      */
-    bool isDatasetsChangedSignalBlocked() const;
+    [[nodiscard]] bool isDatasetsChangedSignalBlocked() const;
 
-protected: // Linking
+protected:
 
     /**
-     * Connect this action to a public action
-     * @param publicAction Pointer to public action to connect to
-     * @param recursive Whether to also connect descendant child actions
+     * @brief Connects this action to a public action.
+     * @param publicAction Public action to connect to.
+     * @param recursive Whether to also connect descendant child actions.
      */
     void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
 
     /**
-     * Disconnect this action from its public action
-     * @param recursive Whether to also disconnect descendant child actions
+     * @brief Disconnects this action from its public action.
+     * @param recursive Whether to also disconnect descendant child actions.
      */
     void disconnectFromPublicAction(bool recursive) override;
 
-public: // Serialization
+public:
 
     /**
-     * Load widget action from variant map
-     * @param Variant map representation of the widget action
+     * @brief Loads the action from a variant map.
+     * @param variantMap Variant map representation of the action.
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 
     /**
-     * Save widget action to variant map
-     * @return Variant map representation of the widget action
+     * @brief Saves the action to a variant map.
+     * @return Variant map representation of the action.
      */
-    QVariantMap toVariantMap() const override;
-
-    /**
-     * Get whether value serialization is disabled
-     * @return Boolean determining whether value serialization is disabled
-     */
-    static bool isValueSerializationDisabled();
-
-    /**
-     * Set value serialization to \p valueSerializationDisabled
-     * @param valueSerializationDisabled Boolean determining whether value serialization is disabled
-     */
-    static void setValueSerializationDisabled(bool valueSerializationDisabled = true);
-
-    /** Disables serialization */
-    static void disableValueSerialization();
-
-    /** Disables serialization */
-    static void enableValueSerialization();
+    [[nodiscard]] QVariantMap toVariantMap() const override;
 
 signals:
 
     /**
-     * Signals that a dataset has been picked
-     * @param pickedDataset Smart pointer to picked dataset
+     * @brief Signals that the current dataset is about to change.
+     *
+     * The signal carries the previously selected dataset. The dataset can be
+     * invalid when no dataset was selected.
+     *
+     * @param currentDataset Previously selected dataset, or an invalid dataset when no dataset was selected.
+     */
+    void datasetAboutToBePicked(mv::Dataset<> currentDataset);
+
+    /**
+     * @brief Signals that a valid dataset has been picked.
+     *
+     * This compatibility signal is emitted only for valid dataset selections.
+     * Code that also needs to react to cleared selections should use
+     * currentDatasetChanged().
+     *
+     * @param pickedDataset Newly selected dataset. The dataset is guaranteed to be valid.
      */
     void datasetPicked(mv::Dataset<> pickedDataset);
 
     /**
-     * Signals that selectable datasets changed
-     * @param datasets Selectable datasets
+     * @brief Signals that the current dataset changed.
+     *
+     * This is the canonical state-change signal. A valid dataset means a
+     * dataset is selected; an invalid dataset means the selection was cleared
+     * or could no longer be resolved.
+     *
+     * @param dataset Newly selected dataset, or an invalid dataset when the selection was cleared.
+     */
+    void currentDatasetChanged(Dataset<DatasetImpl> dataset);
+
+    /**
+     * @brief Signals that selectable datasets changed.
+     * @param datasets Current selectable datasets.
      */
     void datasetsChanged(mv::Datasets datasets);
 
     /**
-     * Signals that the population mode changed from \p previousPopulationMode to \p currentPopulationMode
-     * @param previousPopulationMode Previous population mode
-     * @param currentPopulationMode Current population mode
+     * @brief Signals that the population mode changed.
+     * @param previousPopulationMode Previous population mode.
+     * @param currentPopulationMode Current population mode.
      */
     void populationModeChanged(AbstractDatasetsModel::PopulationMode previousPopulationMode, AbstractDatasetsModel::PopulationMode currentPopulationMode);
 
 private:
-    AbstractDatasetsModel::PopulationMode   _populationMode;                /** Population mode (e.g. manual or automatic) */
-    DatasetsListModel                       _datasetsListModel;             /** Datasets list model for manual population (mv::data().getDatasetsListModel() otherwise) */
-    DatasetsFilterModel                     _datasetsFilterModel;           /** Filter model for the datasets model above */
-    bool                                    _blockDatasetsChangedSignal;    /** Boolean determining whether the DatasetPickerAction::datasetsChanged(...) signal may be engaged in reponse to change in the DatasetPickerAction#_filterModel */
-    QStringList                             _currentDatasetsIds;            /** Keep a list of current datasets identifiers so that we can avoid unnecessary emits of the DatasetPickerAction::datasetsChanged(...) signal */
 
-    static bool noValueSerialization;   /** Prevent the value from being serialized (used by preset serialization) */
+    AbstractDatasetsModel::PopulationMode   _populationMode;                /**< Selectable dataset population mode. */
+    DatasetsListModel                       _datasetsListModel;             /**< Manual datasets model. */
+    DatasetsFilterModel                     _datasetsFilterModel;           /**< Filter model applied to the active datasets model. */
+    bool                                    _blockDatasetsChangedSignal;    /**< Whether datasetsChanged() is temporarily blocked. */
+    QStringList                             _currentDatasetsIds;            /**< Cached selectable dataset identifiers. */
+    QString                                 _currentDatasetId;              /**< Identifier of the currently selected dataset. */
 
     friend class AbstractActionsManager;
 };

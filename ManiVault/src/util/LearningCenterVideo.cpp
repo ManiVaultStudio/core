@@ -4,6 +4,8 @@
 
 #include "LearningCenterVideo.h"
 
+#include "exception/ManiVaultException.h"
+
 #include <QMovie>
 #include <QFutureWatcher>
 
@@ -35,7 +37,7 @@ LearningCenterVideo::LearningCenterVideo(const Type& type, const QString& title,
                         setThumbnailImage(QImage::fromData(future.result()));
                     });
                 }
-                catch (const BaseException& exception) {
+                catch (const ManiVaultException& exception) {
                     qCritical() << "Download video thumbnail image failed for" << thumbnailUrl << ":" << exception.what();
                 }
                 catch (const std::exception& exception) {

@@ -38,7 +38,7 @@ public:
      * Facade for IconAction::getLanguageIcon()
      * @return Icon
      */
-    const QIcon& getIcon() const;
+    QIcon getIcon() const;
 
     /**
      * Set the current icon to \p icon

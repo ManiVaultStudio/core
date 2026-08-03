@@ -14,6 +14,8 @@
 #include <QWidgetAction>
 #include <QPointer>
 
+#include "workflow/WorkflowPlan.h"
+
 class QLabel;
 class QMenu;
 
@@ -168,12 +170,13 @@ public: // Hierarchy queries
     WidgetActionsOfType<WidgetActionType> getAncestors() const {
         WidgetActionsOfType<WidgetActionType> ancestors;
 
-        auto currentParent = dynamic_cast<WidgetActionType*>(parent());
+        auto currentParent = parent();
 
         while (currentParent) {
-            ancestors << currentParent;
+            if (auto ancestor = dynamic_cast<WidgetActionType*>(currentParent))
+                ancestors << ancestor;
 
-            currentParent = dynamic_cast<WidgetActionType*>(currentParent->parent());
+            currentParent = currentParent->parent();
         }
 
         return ancestors;
@@ -282,6 +285,8 @@ public: // Hierarchy queries
         return false;
     }
 
+
+
 public: // Location
 
     /**
@@ -319,6 +324,12 @@ public:
                 qDebug() << segments.join("/");
         }
     }
+
+    /**
+     * Find the nearest plugin ancestor of the action
+     * @return Pointer to plugin ancestor, otherwise nullptr
+     */
+    plugin::Plugin* findPluginAncestor() const;
 
 public:
 
@@ -832,7 +843,7 @@ public: // Serialization
 
     /**
      * Load widget action from variant map
-     * @param Variant map representation of the widget action
+     * @param variantMap Variant map representation of the widget action
      */
     void fromVariantMap(const QVariantMap& variantMap) override;
 

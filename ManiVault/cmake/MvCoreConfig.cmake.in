@@ -6,6 +6,8 @@ set(ManiVault_INCLUDE_DIR "${ManiVault_INSTALL_DIR}/$<CONFIGURATION>/include")
 set(ManiVault_LIB_DIR "${ManiVault_INSTALL_DIR}/$<CONFIGURATION>/lib")
 set_and_check(ManiVault_CMAKE_DIR "${PACKAGE_PREFIX_DIR}/cmake/mv" CACHE INTERNAL "")
 
+set(ManiVault_CXX_STANDARD @MV_CXX_STANDARD@)
+
 list(APPEND ManiVault_LINK_LIBS ManiVault::Core ManiVault::PointData ManiVault::ClusterData ManiVault::ImageData ManiVault::ColorData ManiVault::TextData)
 
 include("${ManiVault_CMAKE_DIR}/ManiVaultTargets.cmake")
@@ -16,6 +18,7 @@ check_required_components("@PROJECT_NAME@")
 include("${ManiVault_CMAKE_DIR}/mv_install_dependencies_utils.cmake")
 include("${ManiVault_CMAKE_DIR}/mv_check_and_set_AVX.cmake")
 include("${ManiVault_CMAKE_DIR}/mv_plugin_meta_data.cmake")
+include("${ManiVault_CMAKE_DIR}/mv_project_defaults.cmake")
 
 message(STATUS "Found ManiVault version ${ManiVault_VERSION}. Use for example as:")
 message(STATUS "   find_package(ManiVault COMPONENTS Core PointData ClusterData ImageData ColorData TextData CONFIG)")

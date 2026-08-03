@@ -7,6 +7,7 @@
 #include "AnalysisPlugin.h"
 #include "CoreInterface.h"
 #include "DataHierarchyItem.h"
+#include "PropertiesSerializer.h"
 
 #include "util/Exception.h"
 #include "util/Serialization.h"
@@ -14,11 +15,56 @@
 
 #include <algorithm>
 
+#include "SetLegacySerialization.h"
+
 using namespace mv::gui;
 using namespace mv::util;
+using namespace mv::workflow;
 
 namespace mv
 {
+
+namespace
+{
+    /** Utility class for managing workflow context in a thread-safe manner */
+    class ToVariantMapWorkflowContext final : public workflow::WorkflowContextBase
+    {
+    public:
+
+        /**
+         * @brief Gets the indices from the context.
+         * @return The indices stored in the context
+         */
+        QVariantMap getResult() const {
+            QMutexLocker locker(&_mutex);
+            return _result;
+        }
+
+        /**
+         * @brief Gets a specific value from the result map of the context using the provided key.
+         * @param key The key to look up in the result map
+         * @return The value associated with the provided key in the result map, or an invalid QVariant if the key does not exist
+         */
+        QVariant getResultValue(const QString& key) const {
+            QMutexLocker locker(&_mutex);
+            return _result.value(key);
+        }
+
+        /**
+         * @brief Sets a key-value pair in the result map of the context.
+         * @param key The key to be set in the result map
+         * @param value The value to be associated with the key in the result map
+         */
+        void setResultValue(const QString& key, const QVariant& value) {
+            QMutexLocker locker(&_mutex);
+            _result.insert(key, value);
+        }
+
+    private:
+        mutable QMutex      _mutex;     /** Mutex for synchronizing access to the context */
+        QVariantMap         _result;    /** The QVariantMap that will hold the final result of the workflow execution, containing the serialized headers and indices data. This map will be returned at the end of the workflow execution and can be used for further processing or storage. */
+    };
+}
 
 void DatasetImpl::makeSubsetOf(Dataset<DatasetImpl> fullDataset)
 {
@@ -142,110 +188,140 @@ mv::plugin::AnalysisPlugin* DatasetImpl::getAnalysis()
     return _analysis;
 }
 
-void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
+UniqueWorkflowPlan DatasetImpl::fromVariantMapWorkflow(QVariantMap variantMap)
 {
-    WidgetAction::fromVariantMap(variantMap);
+    auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
-    variantMapMustContain(variantMap, "Name");
-    variantMapMustContain(variantMap, "Locked");
-    variantMapMustContain(variantMap, "StorageType");
-    variantMapMustContain(variantMap, "DataType");
-    variantMapMustContain(variantMap, "Derived");
-//    variantMapMustContain(variantMap, "Full");
-    variantMapMustContain(variantMap, "LinkedData");
-
-    setText(variantMap["Name"].toString());
-    setLocked(variantMap["Locked"].toBool());
-    setStorageType(static_cast<StorageType>(variantMap["StorageType"].toInt()));
-
-    assert(variantMap["DataType"].toString() == getDataType().getTypeString());
-
-    if (variantMap["Derived"].toBool())
-    {
-        if (variantMap.contains("SourceDatasetID"))
-            setSourceDataset(mv::data().getDataset(variantMap["SourceDatasetID"].toString()));
-        else
-            setSourceDataset(getParent());
-
-        assert(_sourceDataset.isValid());
-    }
-
-    // For backwards compatibility, check PluginVersion
-    if (!(variantMap["PluginVersion"] == "No Version") && !variantMap["Full"].toBool())
-    {        
-        if (variantMap.contains("FullDatasetID"))
-            makeSubsetOf(mv::data().getDataset(variantMap["FullDatasetID"].toString()));
-        else
-            makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
-
-        assert(variantMap["PluginKind"].toString() == _rawData->getKind());
-
-        assert(_fullDataset.isValid());
-    }
-
-    if (variantMap.contains("GroupIndex") && variantMap["GroupIndex"].toInt() >= 0)
-        setGroupIndex(variantMap["GroupIndex"].toInt());
-
-    if (variantMap.contains("MayUnderive"))
-        _mayUnderive = variantMap["MayUnderive"].toBool();
-
-    if (variantMap.contains("Properties"))
-    {
-        _properties = mv::util::loadQVariant(variantMap["Properties"]).toMap();
-    }
-    
-
-    if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {
-        Datasets proxyMembers;
-
-        for (const auto& proxyMemberGuid : variantMap["ProxyMembers"].toStringList())
-            proxyMembers << mv::data().getDataset(proxyMemberGuid);
-
-        setProxyMembers(proxyMembers);
-    }
-
-    for (const auto& linkedDataVariant : variantMap["LinkedData"].toList()) {
-        LinkedData linkedData;
-
-        linkedData.fromVariantMap(linkedDataVariant.toMap());
-
-        _linkedData.push_back(linkedData);
-    }
-}
-
-QVariantMap DatasetImpl::toVariantMap() const
-{
-    auto variantMap = WidgetAction::toVariantMap();
-
-    QStringList proxyMemberGuids;
-
-    for (const auto& proxyMember : _proxyMembers)
-        proxyMemberGuids << proxyMember->getId();
-
-    QVariantList linkedDataList;
-
-    for (const auto& ld : _linkedData)
-        linkedDataList.push_back(ld.toVariantMap());
-
-    variantMap.insert({
-        { "Name", QVariant::fromValue(text()) },
-        { "Locked", QVariant::fromValue(_locked) },
-        { "StorageType", QVariant::fromValue(static_cast<std::int32_t>(getStorageType())) },
-        { "ProxyMembers", QVariant::fromValue(proxyMemberGuids) },
-        { "DataType", QVariant::fromValue(getDataType().getTypeString()) },
-        { "PluginKind", QVariant::fromValue(_rawData->getKind()) },
-        { "PluginVersion", QVariant::fromValue(_rawData->getVersion()) },
-        { "Derived", QVariant::fromValue(isDerivedData()) },
-        { "MayUnderive", QVariant::fromValue(mayUnderive()) },
-        { "Full", QVariant::fromValue(isFull()) },
-        { "SourceDatasetID", isDerivedData() ? QVariant::fromValue(_sourceDataset->getId()) : "" },
-        { "FullDatasetID", isFull() ? "" : QVariant::fromValue(_fullDataset->getId()) },
-        { "GroupIndex", QVariant::fromValue(getGroupIndex()) },
-        { "LinkedData", linkedDataList },
-        { "Properties", mv::util::storeQVariant(_properties)}
+    plan->addNestedWorkflowStage("Load widget action", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) mutable -> UniqueWorkflowPlan {
+	    return this->WidgetAction::fromVariantMapWorkflow(variantMap);
     });
 
-    return variantMap;
+    const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
+
+    if (appVersion < Version(1, 5, 0)) {
+        plan->addSequentialStage("Load legacy points (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+            legacy::SetLegacySerializer::fromVariantMapPre150(*this, variantMap);
+        }, WorkflowPlan::JobThreadAffinity::GuiThread);
+
+        return plan;
+    }
+
+    plan->addNestedWorkflowStage("Load properties", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) mutable -> UniqueWorkflowPlan {
+        return PropertiesSerializer::fromVariantMapWorkflow(variantMap["Properties"].toMap(), _properties, executionContext);
+    });
+
+    plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        variantMapMustContain(variantMap, "Name");
+        variantMapMustContain(variantMap, "Locked");
+        variantMapMustContain(variantMap, "StorageType");
+        variantMapMustContain(variantMap, "DataType");
+        variantMapMustContain(variantMap, "Derived");
+        variantMapMustContain(variantMap, "LinkedData");
+
+        setText(variantMap["Name"].toString());
+        setLocked(variantMap["Locked"].toBool());
+        setStorageType(static_cast<StorageType>(variantMap["StorageType"].toInt()));
+
+        assert(variantMap["DataType"].toString() == getDataType().getTypeString());
+
+        if (variantMap["Derived"].toBool())
+        {
+            if (variantMap.contains("SourceDatasetID"))
+                setSourceDataset(mv::data().getDataset(variantMap["SourceDatasetID"].toString()));
+            else
+                setSourceDataset(getParent());
+
+            assert(_sourceDataset.isValid());
+        }
+
+        // For backwards compatibility, check PluginVersion
+        if (!(variantMap["PluginVersion"] == "No Version") && !variantMap["Full"].toBool())
+        {
+            if (variantMap.contains("FullDatasetID"))
+                makeSubsetOf(mv::data().getDataset(variantMap["FullDatasetID"].toString()));
+            else
+                makeSubsetOf(getParent()->getFullDataset<mv::DatasetImpl>());
+
+            assert(variantMap["PluginKind"].toString() == _rawData->getKind());
+
+            assert(_fullDataset.isValid());
+        }
+
+        if (variantMap.contains("GroupIndex") && variantMap["GroupIndex"].toInt() >= 0)
+            setGroupIndex(variantMap["GroupIndex"].toInt());
+
+        if (variantMap.contains("MayUnderive"))
+            _mayUnderive = variantMap["MayUnderive"].toBool();
+
+        if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {
+            Datasets proxyMembers;
+
+            for (const auto& proxyMemberGuid : variantMap["ProxyMembers"].toStringList())
+                proxyMembers << mv::data().getDataset(proxyMemberGuid);
+
+            setProxyMembers(proxyMembers);
+        }
+
+        for (const auto& linkedDataVariant : variantMap["LinkedData"].toList()) {
+            LinkedData linkedData;
+
+            linkedData.fromVariantMap(linkedDataVariant.toMap());
+
+            _linkedData.push_back(linkedData);
+        }
+    });
+
+    return plan;
+}
+
+UniqueWorkflowPlan DatasetImpl::toVariantMapWorkflow() const
+{
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+
+    const auto saveActionStage = plan->addNestedWorkflowStage("Save action", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+        return this->WidgetAction::toVariantMapWorkflow();
+    });
+
+    const auto savePropertiesStage = plan->addNestedWorkflowStage("Save properties", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
+        return PropertiesSerializer::toVariantMapWorkflow(_properties);
+    });
+
+    plan->addSequentialStage("Save map", [this, saveActionStage, savePropertiesStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> void {
+        auto resultMap      = executionContext->takeOutput(saveActionStage).toMap();
+        auto propertiesMap  = executionContext->takeOutput(savePropertiesStage).toMap();
+
+        QStringList proxyMemberGuids;
+
+        for (const auto& proxyMember : _proxyMembers)
+            proxyMemberGuids << proxyMember->getId();
+
+        QVariantList linkedDataList;
+
+        for (const auto& linkedData : _linkedData)
+            linkedDataList.push_back(linkedData.toVariantMap());
+
+        resultMap.insert({
+	        { "Name", QVariant::fromValue(text()) },
+	        { "Locked", QVariant::fromValue(_locked) },
+	        { "StorageType", QVariant::fromValue(static_cast<std::int32_t>(getStorageType())) },
+	        { "ProxyMembers", QVariant::fromValue(proxyMemberGuids) },
+	        { "DataType", QVariant::fromValue(getDataType().getTypeString()) },
+	        { "PluginKind", QVariant::fromValue(_rawData->getKind()) },
+	        { "PluginVersion", QVariant::fromValue(_rawData->getVersion()) },
+	        { "Derived", QVariant::fromValue(isDerivedData()) },
+	        { "MayUnderive", QVariant::fromValue(mayUnderive()) },
+	        { "Full", QVariant::fromValue(isFull()) },
+	        { "SourceDatasetID", isDerivedData() ? QVariant::fromValue(_sourceDataset->getId()) : "" },
+	        { "FullDatasetID", isFull() ? "" : QVariant::fromValue(_fullDataset->getId()) },
+	        { "GroupIndex", QVariant::fromValue(getGroupIndex()) },
+	        { "LinkedData", linkedDataList },
+	        { "Properties", propertiesMap }
+        });
+
+        executionContext->setOutput(resultMap);
+	});
+
+    return plan;
 }
 
 std::int32_t DatasetImpl::getGroupIndex() const

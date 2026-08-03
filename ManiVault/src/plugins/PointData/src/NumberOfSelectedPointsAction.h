@@ -10,10 +10,6 @@
 
 #include <QTimer>
 
-using namespace mv;
-using namespace mv::util;
-using namespace mv::gui;
-
 /**
  * Number of selected points action class
  *
@@ -21,12 +17,12 @@ using namespace mv::gui;
  *
  * @author Thomas Kroes
  */
-class NumberOfSelectedPointsAction : public WidgetAction
+class NumberOfSelectedPointsAction : public mv::gui::WidgetAction
 {
 protected:
 
     /** Widget class for number of selected points action */
-    class Widget : public WidgetActionWidget {
+    class Widget : public mv::gui::WidgetActionWidget {
     public:
 
         /**
@@ -58,19 +54,19 @@ public:
      * @param parent Pointer to parent object
      * @param points Smart pointer to points dataset
      */
-    NumberOfSelectedPointsAction(QObject* parent, const Dataset<Points>& points);
+    NumberOfSelectedPointsAction(QObject* parent, const mv::Dataset<Points>& points);
 
     /**
      * Get points
      * @return Smart pointer to points dataset
      */
-    Dataset<Points>& getPoints();
+    mv::Dataset<Points>& getPoints();
 
 public: // Action getters
 
-    StringAction& getNumberOfSelectedPointsAction() { return _numberOfSelectedPointsAction; }
+    mv::gui::StringAction& getNumberOfSelectedPointsAction() { return _numberOfSelectedPointsAction; }
 
 protected:
-    Dataset<Points>     _points;                            /** Points dataset reference */
-    StringAction        _numberOfSelectedPointsAction;      /** Number of selected points action */
+    mv::Dataset<Points>     _points;                            /** Points dataset reference */
+    mv::gui::StringAction   _numberOfSelectedPointsAction;      /** Number of selected points action */
 };

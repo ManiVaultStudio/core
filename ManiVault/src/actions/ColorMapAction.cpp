@@ -6,6 +6,8 @@
 #include "Application.h"
 #include "CoreInterface.h"
 
+#include "util/Serialization.h"
+
 #include <QHBoxLayout>
 #include <QPaintEvent>
 #include <QPainter>
@@ -220,7 +222,7 @@ QString ColorMapAction::getColorMap() const
 QImage ColorMapAction::getColorMapImage() const
 {
     if (getCurrentColorMapAction().getModel() == nullptr)
-        return QImage();
+        return {};
 
     const auto filteredModelIndex = getCurrentColorMapAction().getModel()->index(getCurrentColorMapAction().getCurrentIndex(), 0);
 
@@ -231,10 +233,15 @@ QImage ColorMapAction::getColorMapImage() const
     if (getCustomColorMapAction().isChecked())
         colorMapImage = getEditor1DAction().getColorMapImage();
 
-    const auto mirrorHorizontally   = getMirrorAction(Axis::X).isChecked();
-    const auto mirrorVertically     = getMirrorAction(Axis::Y).isChecked();
+    Qt::Orientations orientations;
 
-    colorMapImage = colorMapImage.mirrored(mirrorHorizontally, mirrorVertically);
+    if (getMirrorAction(Axis::X).isChecked())
+        orientations |= Qt::Horizontal;
+
+    if (getMirrorAction(Axis::Y).isChecked())
+        orientations |= Qt::Vertical;
+
+    colorMapImage = colorMapImage.flipped(orientations);
 
     if (getDiscretizeAction().isChecked()) {
 
@@ -513,7 +520,7 @@ void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
 
     const auto penColor = isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::Shadow) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText);
 
-    colorMapImage = colorMapImage.scaled(colorMapRectangle.size(), Qt::AspectRatioMode::IgnoreAspectRatio).mirrored(false, true);
+    colorMapImage = colorMapImage.scaled(colorMapRectangle.size(), Qt::AspectRatioMode::IgnoreAspectRatio);
 
     QBrush colorMapPixMapBrush(colorMapImage);
 

@@ -3,17 +3,12 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "NavigationAction.h"
-
+#include "CoreInterface.h"
 #include "GroupSectionTreeItem.h"
+#include "CoreInterface.h"
 
 #include "util/StyledIcon.h"
 #include "util/Icon.h"
-
-#ifdef _DEBUG
-    //#define NAVIGATION_ACTION_VERBOSE
-#endif
-
-//#define NAVIGATION_ACTION_VERBOSE
 
 using namespace mv::util;
 
@@ -35,7 +30,18 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomMarginAction(this, "Zoom margin"),
     _zoomGroupAction(this, "Zoom group")
 {
-    //setShowLabels(false);
+    setConnectionPermissionsToAll();
+
+	_zoomOutAction.setConnectionPermissionsToForceNone(true);
+    _zoomInAction.setConnectionPermissionsToForceNone(true);
+    _zoomExtentsAction.setConnectionPermissionsToForceNone(true);
+    _zoomSelectionAction.setConnectionPermissionsToForceNone(true);
+    _zoomRegionAction.setConnectionPermissionsToForceNone(true);
+    _freezeNavigation.setConnectionPermissionsToForceNone(true);
+    _zoomRectangleAction.setConnectionPermissionsToForceNone(true);
+    _zoomFactorAction.setConnectionPermissionsToForceNone(true);
+    _zoomMarginAction.setConnectionPermissionsToForceNone(true);
+    _zoomGroupAction.setConnectionPermissionsToForceNone(true);
 
     _zoomOutAction.setToolTip("Zoom out by 10% (-)");
     _zoomPercentageAction.setToolTip("Zoom in/out (+)");
@@ -43,13 +49,11 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomExtentsAction.setToolTip("Zoom to the boundaries of the scene (o)");
     _zoomSelectionAction.setToolTip("Zoom to the boundaries of the current selection (b)");
     _zoomRegionAction.setToolTip("Zoom to a picked region");
-    _freezeNavigation.setToolTip("Freeze the navigation");
+    _freezeNavigation.setToolTip("Toggle the navigation on/off");
 
-    _freezeNavigation.setIconByName("icicles");
-    _freezeNavigation.setDefaultWidgetFlags(ToggleAction::WidgetFlag::CheckBox);
+    _freezeNavigation.setIconByName("hand-pointer");
 
     _zoomPercentageAction.setOverrideSizeHint(QSize(300, 0));
-    _zoomPercentageAction.setConnectionPermissionsToAll();
 
     _zoomOutAction.setIconByName("search-minus");
     _zoomInAction.setIconByName("search-plus");
@@ -71,7 +75,6 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomCenterAction.setIconByName("ruler");
     _zoomCenterAction.setDefaultWidgetFlags(GroupAction::WidgetFlag::Vertical);
     _zoomCenterAction.setPopupSizeHint(QSize(250, 0));
-    _zoomCenterAction.setConnectionPermissionsToAll(true);
 
     _zoomCenterAction.getXAction().setDefaultWidgetFlags(DecimalAction::WidgetFlag::SpinBox);
     _zoomCenterAction.getYAction().setDefaultWidgetFlags(DecimalAction::WidgetFlag::SpinBox);
@@ -81,6 +84,7 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomGroupAction.setShowLabels(false);
     _zoomGroupAction.setIconByName("magnifying-glass");
 
+    _zoomGroupAction.addAction(&_freezeNavigation, ToggleAction::PushButtonIcon);
     _zoomGroupAction.addAction(&_zoomOutAction, TriggerAction::Icon);
     _zoomGroupAction.addAction(&_zoomPercentageAction);
     _zoomGroupAction.addAction(&_zoomInAction, TriggerAction::Icon);
@@ -88,21 +92,23 @@ NavigationAction::NavigationAction(QObject* parent, const QString& title) :
     _zoomGroupAction.addAction(&_zoomExtentsAction, TriggerAction::Icon);
     _zoomGroupAction.addAction(&_zoomSelectionAction, TriggerAction::Icon);
     _zoomGroupAction.addAction(&_zoomRegionAction, TriggerAction::Icon);
+    _zoomGroupAction.addAction(&_zoomMarginAction);
     
     addAction(&_zoomGroupAction, 1);
-    addAction(&_freezeNavigation, 50);
-    addAction(&_zoomMarginAction);
 
     const auto updateReadOnly = [this]() -> void {
-        const auto notFrozen = _freezeNavigation.isChecked();
+        const bool navigationIsActive = isNavigationActive();
 
-        _zoomOutAction.setEnabled(!notFrozen);
-        _zoomPercentageAction.setEnabled(!notFrozen);
-        _zoomInAction.setEnabled(!notFrozen);
-        _zoomExtentsAction.setEnabled(!notFrozen);
-        _zoomSelectionAction.setEnabled(!notFrozen);
-        _zoomRegionAction.setEnabled(!notFrozen);
-        _zoomCenterAction.setEnabled(!notFrozen);
+        _freezeNavigation.setIconByName(navigationIsActive ? "hand-pointer":  "hand-back-fist");
+
+        _zoomOutAction.setEnabled(navigationIsActive);
+        _zoomPercentageAction.setEnabled(navigationIsActive);
+        _zoomInAction.setEnabled(navigationIsActive);
+        _zoomExtentsAction.setEnabled(navigationIsActive);
+        _zoomSelectionAction.setEnabled(navigationIsActive);
+        _zoomRegionAction.setEnabled(navigationIsActive);
+        _zoomCenterAction.setEnabled(navigationIsActive);
+        _zoomMarginAction.setEnabled(navigationIsActive);
     };
 
     updateReadOnly();
@@ -119,13 +125,50 @@ void NavigationAction::setShortcutsEnabled(bool shortcutsEnabled)
     _zoomRegionAction.setShortcut(shortcutsEnabled ? QKeySequence("F") : QKeySequence());
 }
 
+void NavigationAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)
+{
+    auto publicNavigationSourceAction = dynamic_cast<NavigationAction*>(publicAction);
+
+    Q_ASSERT(publicNavigationSourceAction != nullptr);
+
+    if (publicNavigationSourceAction == nullptr)
+        return;
+
+    if (recursive) {
+        actions().connectPrivateActionToPublicAction(&_zoomCenterAction, &publicNavigationSourceAction->getZoomCenterAction(), recursive);
+        actions().connectPrivateActionToPublicAction(&_zoomPercentageAction, &publicNavigationSourceAction->getZoomPercentageAction(), recursive);
+    }
+
+    HorizontalToolbarAction::connectToPublicAction(publicAction, recursive);
+}
+
+void NavigationAction::disconnectFromPublicAction(bool recursive)
+{
+    if (!isConnected())
+        return;
+
+    if (recursive) {
+        actions().disconnectPrivateActionFromPublicAction(&_zoomCenterAction, recursive);
+        actions().disconnectPrivateActionFromPublicAction(&_zoomPercentageAction, recursive);
+    }
+
+    HorizontalToolbarAction::disconnectFromPublicAction(recursive);
+}
+
 void NavigationAction::fromVariantMap(const QVariantMap& variantMap)
 {
     HorizontalToolbarAction::fromVariantMap(variantMap);
 
-    _zoomCenterAction.fromParentVariantMap(variantMap);
-    _zoomFactorAction.fromParentVariantMap(variantMap);
-    _zoomPercentageAction.fromParentVariantMap(variantMap);
+    _zoomOutAction.fromParentVariantMap(variantMap, true);
+    _zoomPercentageAction.fromParentVariantMap(variantMap, true);
+    _zoomInAction.fromParentVariantMap(variantMap, true);
+    _zoomExtentsAction.fromParentVariantMap(variantMap, true);
+    _zoomSelectionAction.fromParentVariantMap(variantMap, true);
+    _zoomRegionAction.fromParentVariantMap(variantMap, true);
+    _freezeNavigation.fromParentVariantMap(variantMap, true);
+    //_zoomRectangleAction.fromParentVariantMap(variantMap); // Buggy behavior if uncommented
+    _zoomCenterAction.fromParentVariantMap(variantMap, true);
+    _zoomFactorAction.fromParentVariantMap(variantMap, true);
     _zoomMarginAction.fromParentVariantMap(variantMap, true);
 }
 
@@ -133,9 +176,16 @@ QVariantMap NavigationAction::toVariantMap() const
 {
     auto variantMap = HorizontalToolbarAction::toVariantMap();
 
+    _zoomOutAction.insertIntoVariantMap(variantMap);
+    _zoomPercentageAction.insertIntoVariantMap(variantMap);
+    _zoomInAction.insertIntoVariantMap(variantMap);
+    _zoomExtentsAction.insertIntoVariantMap(variantMap);
+    _zoomSelectionAction.insertIntoVariantMap(variantMap);
+    _zoomRegionAction.insertIntoVariantMap(variantMap);
+    _freezeNavigation.insertIntoVariantMap(variantMap);
+    //_zoomRectangleAction.insertIntoVariantMap(variantMap);
     _zoomCenterAction.insertIntoVariantMap(variantMap);
     _zoomFactorAction.insertIntoVariantMap(variantMap);
-    _zoomPercentageAction.insertIntoVariantMap(variantMap);
     _zoomMarginAction.insertIntoVariantMap(variantMap);
 
     return variantMap;

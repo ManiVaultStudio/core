@@ -10,6 +10,9 @@
 
 #include <Application.h>
 
+using namespace mv;
+using namespace mv::gui;
+
 PrefixClustersAction::PrefixClustersAction(ClustersAction& clustersAction) :
     TriggerAction(&clustersAction, "Prefix"),
     _clustersAction(clustersAction),

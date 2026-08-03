@@ -80,6 +80,8 @@ StartPageOpenProjectWidget::StartPageOpenProjectWidget(StartPageContentWidget* s
 
     createCustomIcons();
 
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &StartPageOpenProjectWidget::updateCustomStyle);
+
     auto& startPageConfigurationAction = Application::current()->getConfigurationAction().getStartPageConfigurationAction();
 
     const auto toggleViews = [this, &startPageConfigurationAction]() -> void {
@@ -377,7 +379,7 @@ void StartPageOpenProjectWidget::setupProjectsModelSection()
             if (const auto project = projectsTreeModel.getProject(sourceIndex)) {
                 auto projectPageAction = addProjectPageAction(project);
 
-                //qDebug() << "Adding project page action for" << project->getTitle() << "at filter row index" << filterRowIndex;
+                //qDebug() << "Adding project page action for" << project->getName() << "at filter row index" << filterRowIndex;
 
                 if (const auto numberOfChildren = _projectsFilterModel.rowCount(filterIndex); numberOfChildren >= 1) {
                     QStringList childProjectNames;

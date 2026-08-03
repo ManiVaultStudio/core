@@ -9,6 +9,11 @@ project(${MV_CORE}
     DESCRIPTION "Core application and library of ManiVault Studio, a flexible and extensible visual analytics framework for high-dimensional data"
     LANGUAGES CXX C)
 
+if(APPLE)
+  enable_language(OBJC)
+  enable_language(OBJCXX)
+endif()
+
 # These three targets defined in this CMakeLists.txt
 set(MV_APPLICATION_NAME "ManiVault Studio")  # Name of the executable
 set(MV_EXE MV_Application)                   # The ManiVault executable target
@@ -17,7 +22,9 @@ set(MV_PUBLIC_LIB Core)                      # A public shared library used by p
 # -----------------------------------------------------------------------------
 # CMake Settings
 # -----------------------------------------------------------------------------
-set(CMAKE_CXX_STANDARD 20)
+set(MV_CXX_STANDARD 20)
+
+set(CMAKE_CXX_STANDARD ${MV_CXX_STANDARD})
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -40,6 +47,10 @@ include(mv_install_dependencies_utils)
 # Helper function to handle plugin meta data
 include(mv_plugin_meta_data)
 
+# Set OS specific compiler and build settings
+include(mv_project_defaults)
+mv_project_defaults()
+
 # Generate a header file that contains the EXPORT macro for public libraries
 include(GenerateExportHeader)
 
@@ -47,71 +58,12 @@ include(GenerateExportHeader)
 include(CPM)
 
 # create a file that defines MV_VERSION_MAJOR, etc
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ManiVaultVersion.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/ManiVaultVersion.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/ManiVaultVersion.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/ManiVaultVersion.h" @ONLY)
 
 if(${MV_USE_ERROR_LOGGING})
     # Check for size of long (used in sentry)
     include(CheckTypeSize)
     check_type_size("long" CMAKE_SIZEOF_LONG)
-endif()
-
-# -----------------------------------------------------------------------------
-# Apple settings
-# -----------------------------------------------------------------------------
-if(APPLE)
-    # These are the properties for the Info.plist in the mac bindle
-    set(MACOSX_BUNDLE_BUNDLE_NAME "ManiVault Studio")
-    set(MACOSX_BUNDLE_PATHNAME "ManiVault\ Studio")
-    set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
-    set(MACOSX_BUNDLE_LONG_VERSION_STRING "1.0")
-    set(MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0")
-    set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2023. All rights reserved.")
-    set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.biovault.mv")
-    set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
-
-    # use, i.e. don't skip the full RPATH for the build tree
-    set(CMAKE_SKIP_BUILD_RPATH  FALSE)
-
-    # when building, don't use the install RPATH already
-    # (but later on when installing)
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-
-    set(CMAKE_INSTALL_RPATH "@loader_path")
-
-    # add the automatically determined parts of the RPATH
-    # which point to directories outside the build tree to the install RPATH
-    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-endif()
-
-
-# -----------------------------------------------------------------------------
-# Other Unix settings
-# -----------------------------------------------------------------------------
-if(UNIX AND NOT APPLE)
-    # use, i.e. don't skip the full RPATH for the build tree
-    set(CMAKE_SKIP_BUILD_RPATH  FALSE)
-
-    # when building, don't use the install RPATH already
-    # (but later on when installing)
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-
-    set(CMAKE_INSTALL_RPATH "${MV_INSTALL_DIR}/$<CONFIGURATION>/lib")
-
-    # add the automatically determined parts of the RPATH
-    # which point to directories outside the build tree to the install RPATH
-    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-endif()
-
-
-# -----------------------------------------------------------------------------
-# Windows compiler and linker flags
-# -----------------------------------------------------------------------------
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MD")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif()
 
 # -----------------------------------------------------------------------------
@@ -134,22 +86,44 @@ message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 CPMAddPackage(
   NAME              ZLIB
   GITHUB_REPOSITORY madler/zlib
-  GIT_TAG           v1.3.1
-  OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "SKIP_INSTALL_ALL ON" "ZLIB_BUILD_SHARED OFF" "ZLIB_BUILD_STATIC ON"
+  GIT_TAG           v1.3.2
+  OPTIONS 
+    "ZLIB_BUILD_EXAMPLES OFF" 
+    "ZLIB_BUILD_SHARED OFF" 
+    "ZLIB_BUILD_STATIC ON"
+    "ZLIB_BUILD_TESTING OFF"
+    "ZLIB_INSTALL OFF"
 )
-
-set_target_properties(zlib PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
 add_library(ZLIB::ZLIB ALIAS zlibstatic)
 set(ZLIB_LIBRARIES zlibstatic)
+set_target_properties(zlibstatic PROPERTIES 
+    POSITION_INDEPENDENT_CODE ON
+    FOLDER CoreDependencies
+    C_STANDARD ${CMAKE_C_STANDARD}
+    C_STANDARD_REQUIRED ${CMAKE_C_STANDARD_REQUIRED}
+    C_EXTENSIONS ${CMAKE_C_EXTENSIONS}
+)
 
 # File compression: QuaZip
 CPMAddPackage(
   NAME              quazip
   GITHUB_REPOSITORY stachenov/quazip
-  GIT_TAG           v1.5
-  OPTIONS "QUAZIP_QT_MAJOR_VERSION 6" "QUAZIP_BZIP2 OFF" "QUAZIP_INSTALL OFF" "BUILD_SHARED_LIBS OFF"
+  GIT_TAG           v1.7.2
+  OPTIONS 
+    "QUAZIP_QT_MAJOR_VERSION 6" 
+    "QUAZIP_BZIP2 OFF" 
+    "QUAZIP_INSTALL OFF" 
+    "BUILD_SHARED_LIBS OFF"
+    "QUAZIP_ENABLE_QTEXTCODEC OFF"
+)
+
+set_target_properties(QuaZip PROPERTIES 
+    FOLDER CoreDependencies
+    CXX_STANDARD ${CMAKE_CXX_STANDARD}
+    CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED}
+    CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS}
 )
 
 # Serialization: JSON
@@ -159,34 +133,41 @@ CPMAddPackage(
   GIT_TAG           v3.12.0
   DOWNLOAD_ONLY     YES
   OPTIONS
-      "JSON_BuildTests=OFF"            # skip upstream tests
-      "JSON_MultipleHeaders=ON"        # shave compile time (optional)
+    "JSON_BuildTests=OFF"            # skip upstream tests
+    "JSON_MultipleHeaders=ON"        # shave compile time (optional)
 )
 
 # Serialization: Add valijson as a header-only library
 CPMAddPackage(
   NAME              valijson
   GITHUB_REPOSITORY tristanpenman/valijson
-  GIT_TAG           v1.0.6 
+  GIT_TAG           v1.1.0
   #GIT_SUBMODULES   ""                  # Does not yet work with CPM, see workaround from https://github.com/cpm-cmake/CPM.cmake/pull/461#issuecomment-1665044141
   GIT_SUBMODULES    "doc"               # list an existing subdir from the repo to not download any submodules
   DOWNLOAD_ONLY     YES
-  OPTIONS "VALIJSON_BUILD_TESTS OFF" "VALIJSON_USE_EXCEPTIONS ON"
+  OPTIONS 
+    "VALIJSON_BUILD_TESTS OFF" 
+    "VALIJSON_USE_EXCEPTIONS ON"
 )
 
 # Layout: Qt Advanced docking system
 CPMAddPackage(
   NAME              advanced_docking
   GITHUB_REPOSITORY githubuser0xFFFF/Qt-Advanced-Docking-System
-  GIT_TAG           4.4.1
-  OPTIONS "BUILD_EXAMPLES OFF"
+  GIT_TAG           5.0.0
+  OPTIONS 
+    "BUILD_EXAMPLES OFF"
 )
 
-if(MV_UNITY_BUILD)
-    set_target_properties(qtadvanceddocking-qt6 PROPERTIES UNITY_BUILD ON)
-endif()
-
-set_target_properties(qtadvanceddocking-qt6 PROPERTIES PROJECT_LABEL "qtadvanceddocking" OUTPUT_NAME "qtadvanceddocking")
+set_target_properties(qtadvanceddocking-qt6 PROPERTIES 
+    PROJECT_LABEL "qtadvanceddocking" 
+    OUTPUT_NAME "qtadvanceddocking"
+    FOLDER CoreDependencies
+    UNITY_BUILD ${MV_UNITY_BUILD}
+    CXX_STANDARD ${CMAKE_CXX_STANDARD}
+    CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED}
+    CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS}
+)
 
 # bfloat16 implementation for pre c++23
 CPMAddPackage(
@@ -196,6 +177,48 @@ CPMAddPackage(
   DOWNLOAD_ONLY     YES
   EXCLUDE_FROM_ALL  YES
   SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
+)
+
+CPMAddPackage(
+    NAME zstd
+    GITHUB_REPOSITORY facebook/zstd
+    GIT_TAG v1.5.7
+    SOURCE_SUBDIR build/cmake
+    EXCLUDE_FROM_ALL                # exlcude the clean-all & uninstall targets, libzstd_static will still be built as it is linked to
+    OPTIONS
+        "ZSTD_BUILD_PROGRAMS OFF"
+        "ZSTD_BUILD_TESTS OFF"
+        "ZSTD_BUILD_CONTRIB OFF"
+        "ZSTD_BUILD_SHARED OFF"
+        "ZSTD_BUILD_STATIC ON"
+)
+
+set_target_properties(libzstd_static PROPERTIES 
+    POSITION_INDEPENDENT_CODE ON
+    FOLDER CoreDependencies
+    C_STANDARD ${CMAKE_C_STANDARD}
+    C_STANDARD_REQUIRED ${CMAKE_C_STANDARD_REQUIRED}
+    C_EXTENSIONS ${CMAKE_C_EXTENSIONS}
+)
+
+set_target_properties(clean-all PROPERTIES 
+    FOLDER CoreDependencies
+)
+set_target_properties(uninstall PROPERTIES 
+    FOLDER CoreDependencies
+)
+
+CPMAddPackage(
+    NAME Taskflow
+    GITHUB_REPOSITORY taskflow/taskflow
+    GIT_TAG v4.1.0
+    OPTIONS
+        "TF_BUILD_BENCHMARKS OFF"
+        "TF_BUILD_CUDA OFF"
+        "TF_BUILD_EXAMPLES OFF"
+        "TF_BUILD_PROFILER OFF"
+        "TF_BUILD_TESTS OFF"
+        "TF_BUILD_MODULES OFF"
 )
 
 # Use of Sentry on MacOS breaks the build so turn it off for now...
@@ -208,14 +231,11 @@ if(${MV_USE_ERROR_LOGGING})
         set(SENTRY_TRANSPORT "curl")        # Use the curl HTTP transport
     endif()
 
-    # Add preprocessor directive to notify sources of error logging
-    add_compile_definitions(ERROR_LOGGING)
-
     CPMAddPackage(
-        NAME sentry-native
-        GIT_REPOSITORY https://github.com/getsentry/sentry-native.git
-        GIT_TAG 0.7.20 														# Use the latest stable version
-        EXCLUDE_FROM_ALL  YES
+        NAME                sentry-native
+        GITHUB_REPOSITORY   getsentry/sentry-native
+        GIT_TAG             0.15.2
+        EXCLUDE_FROM_ALL    YES
         OPTIONS
             "SENTRY_BACKEND crashpad"										# Use Crashpad for crash reporting
             "SENTRY_TRANSPORT ${SENTRY_TRANSPORT}"
@@ -224,26 +244,40 @@ if(${MV_USE_ERROR_LOGGING})
             "CRASHPAD_ENABLE_INSTALL_DEV OFF"
     )
 
+    set_target_properties(sentry mini_chromium
+        PROPERTIES
+        FOLDER CoreDependencies
+        C_STANDARD ${CMAKE_C_STANDARD}
+        C_STANDARD_REQUIRED ${CMAKE_C_STANDARD_REQUIRED}
+        C_EXTENSIONS ${CMAKE_C_EXTENSIONS}
+        CXX_STANDARD ${CMAKE_CXX_STANDARD}
+        CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED}
+        CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS}
+    )
+    
+    set(CRASHPAD_LIBS crashpad_client crashpad_compat crashpad_getopt crashpad_handler crashpad_handler_lib crashpad_minidump crashpad_mpack crashpad_snapshot crashpad_tools crashpad_util crashpad_zlib)
+    
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-        # Put targets in the proper source folder
-        set_target_properties(sentry mini_chromium
-            PROPERTIES
-            FOLDER CoreDependencies
-        )
-        
-        # Put targets in the proper source folder
-        set_target_properties(crashpad_client crashpad_compat crashpad_getopt crashpad_handler crashpad_handler_lib crashpad_minidump crashpad_snapshot crashpad_tools crashpad_util crashpad_wer crashpad_zlib
-            PROPERTIES
-            FOLDER CoreDependencies/Crashpad
-        )
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        set_target_properties(sentry PROPERTIES
-            CXX_EXTENSIONS ON
-            C_EXTENSIONS ON
-        )
+        list(APPEND CRASHPAD_LIBS crashpad_wer)
+    endif()
+    
+    set_target_properties(${CRASHPAD_LIBS}
+        PROPERTIES
+        FOLDER CoreDependencies/Crashpad
+        CXX_STANDARD ${CMAKE_CXX_STANDARD}
+        CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED}
+        CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS}
+    )
 
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         target_compile_definitions(sentry PRIVATE
             _GNU_SOURCE
+        )
+        # override settings for sentry
+        set_target_properties(sentry
+            PROPERTIES
+            C_EXTENSIONS ON
+            CXX_EXTENSIONS ON
         )
     endif()
 
@@ -257,8 +291,33 @@ if(${MV_USE_ERROR_LOGGING})
 
 endif()
 
-if(APPLE)
-    set(CMAKE_XCODE_GENERATE_SCHEME ON)
+if(MV_ENABLE_CPPTRACE)
+
+    set(CPPTRACE_OPTIONS
+        "CPPTRACE_BUILD_BENCHMARKING OFF"
+        "CPPTRACE_BUILD_TOOLS OFF"
+        "CPPTRACE_PROVIDE_EXPORT_SET OFF"
+    )
+
+    # do not use the default backend libdwarf
+    if(UNIX AND NOT APPLE)
+        list(APPEND CPPTRACE_OPTIONS "CPPTRACE_GET_SYMBOLS_WITH_LIBBACKTRACE ON")
+    elseif(APPLE)
+        list(APPEND CPPTRACE_OPTIONS "CPPTRACE_GET_SYMBOLS_WITH_ADDR2LINE ON")
+    endif()
+
+    CPMAddPackage(
+        NAME cpptrace
+        GITHUB_REPOSITORY jeremy-rifkin/cpptrace
+        GIT_TAG v1.0.4
+        OPTIONS ${CPPTRACE_OPTIONS}
+    )
+
+    set_target_properties(cpptrace-lib 
+        PROPERTIES
+        FOLDER CoreDependencies
+    )
+
 endif()
 
 # -----------------------------------------------------------------------------
@@ -280,6 +339,7 @@ set_target_properties(${MV_PUBLIC_LIB} PROPERTIES
     AUTOMOC ON
     PROJECT_LABEL "MV_Public"       # Set the project name in VS different to the target name
     OUTPUT_NAME "MV_Public"         # Set the library output name different to the target name
+    UNITY_BUILD ${MV_UNITY_BUILD}
 )
 
 target_sources(${MV_PUBLIC_LIB}
@@ -294,10 +354,18 @@ target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${valijson_SOURCE_DIR}/include")
 
-target_compile_features(${MV_PUBLIC_LIB} PRIVATE cxx_std_20)
+target_compile_features(${MV_PUBLIC_LIB} PUBLIC cxx_std_${MV_CXX_STANDARD})
 
-target_compile_definitions(${MV_PUBLIC_LIB} PRIVATE MV_SHARED_EXPORT)
-target_compile_definitions(${MV_PUBLIC_LIB} PRIVATE VALIJSON_USE_EXCEPTIONS=1)
+target_compile_definitions(${MV_PUBLIC_LIB} 
+    PRIVATE 
+        MV_SHARED_EXPORT
+        VALIJSON_USE_EXCEPTIONS=1
+)
+
+target_compile_options(${MV_PUBLIC_LIB} 
+    PRIVATE
+        $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
+)
 
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Core)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Gui)
@@ -316,10 +384,6 @@ if(MV_PRECOMPILE_HEADERS)
     )
 endif()
 
-if(MV_UNITY_BUILD)
-    set_target_properties(${MV_PUBLIC_LIB} PROPERTIES UNITY_BUILD ON)
-endif()
-
 # -----------------------------------------------------------------------------
 # Target MV_EXE
 # -----------------------------------------------------------------------------
@@ -328,6 +392,7 @@ add_executable(${MV_EXE} MACOSX_BUNDLE WIN32)
 set_target_properties(${MV_EXE} PROPERTIES
     AUTOMOC ON
     OUTPUT_NAME ${MV_APPLICATION_NAME}
+    UNITY_BUILD ${MV_UNITY_BUILD}
 )
 
 target_sources(${MV_EXE}
@@ -348,9 +413,20 @@ target_include_directories(${MV_EXE} PRIVATE
 target_include_directories(${MV_EXE} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
 target_include_directories(${MV_EXE} PRIVATE "${valijson_SOURCE_DIR}/include")
 
-target_compile_features(${MV_EXE} PRIVATE cxx_std_20)
+target_compile_features(${MV_EXE} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
 target_compile_definitions(${MV_EXE} PRIVATE VALIJSON_USE_EXCEPTIONS=1)
+
+target_compile_options(${MV_EXE} 
+    PRIVATE
+        $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
+)
+
+target_link_options(${MV_EXE}
+    PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:/ENTRY:mainCRTStartup>
+        $<$<CXX_COMPILER_ID:MSVC>:/SUBSYSTEM:CONSOLE>
+)
 
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Core)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Gui)
@@ -361,6 +437,8 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
 target_link_libraries(${MV_EXE} PRIVATE QuaZip)
+target_link_libraries(${MV_EXE} PRIVATE Taskflow)
+target_link_libraries(${MV_EXE} PRIVATE libzstd_static)
 
 if(${MV_USE_ERROR_LOGGING})
     target_compile_definitions(${MV_EXE} PRIVATE MV_USE_ERROR_LOGGING=1)
@@ -373,6 +451,12 @@ if(${MV_USE_ERROR_LOGGING})
     endif()
 endif()
 
+if(MV_ENABLE_CPPTRACE)
+    target_link_libraries(${MV_EXE} PRIVATE cpptrace::cpptrace)
+    target_compile_definitions(${MV_EXE} PRIVATE MV_ENABLE_CPPTRACE)
+endif()
+
+
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use AVX if enabled and available
@@ -384,32 +468,17 @@ if(MV_PRECOMPILE_HEADERS)
     )
 endif()
 
-if(MV_UNITY_BUILD)
-    set_target_properties(${MV_EXE} PROPERTIES UNITY_BUILD ON)
-endif()
-
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+if(APPLE)
     set_target_properties(${MV_EXE} PROPERTIES
-        LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:CONSOLE"
+        # Find libraries relative to the executable in the macOS .app tree
+        BUILD_WITH_INSTALL_RPATH True
+        INSTALL_RPATH "@loader_path;@executable_path/../Frameworks"
+        # Debug ManiVault Studio from the install directory
+        XCODE_SCHEME_WORKING_DIRECTORY "$<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>"
+        XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING NO
+        XCODE_SCHEME_EXECUTABLE "${MV_INSTALL_DIR}/Debug/ManiVault Studio.app"
     )
 endif()
-
-if(APPLE)
-    
-    # Find libraries relative to the executable in the macOS .app tree
-    set_target_properties(${MV_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
-
-    # Debug ManiVault Studio from the install directory
-    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_WORKING_DIRECTORY "$<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>")   
-    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING NO)
-    set_target_properties(${MV_EXE} PROPERTIES XCODE_SCHEME_EXECUTABLE "${MV_INSTALL_DIR}/Debug/ManiVault Studio.app")
-    
-endif()
-
-set_target_properties(qtadvanceddocking-qt6 QuaZip zlib zlibstatic
-    PROPERTIES
-    FOLDER CoreDependencies
-)
 
 # -----------------------------------------------------------------------------
 # Plugin projects
@@ -424,10 +493,22 @@ add_subdirectory(src/plugins/TasksPlugin)
 add_subdirectory(src/plugins/SampleScopePlugin)
 add_subdirectory(src/plugins/TutorialPlugin)
 
-set_target_properties(DataHierarchyPlugin DataPropertiesPlugin SharedParametersPlugin LoggingPlugin TasksPlugin SampleScopePlugin TutorialPlugin
-    PROPERTIES
-    FOLDER SystemPlugins
+set(MV_SYSTEM_PLUGINS
+    DataHierarchyPlugin 
+    DataPropertiesPlugin 
+    SharedParametersPlugin 
+    LoggingPlugin 
+    TasksPlugin 
+    SampleScopePlugin 
+    TutorialPlugin
 )
+
+foreach(system_plugin_target IN LISTS MV_SYSTEM_PLUGINS)
+    target_compile_options(${system_plugin_target}
+        PRIVATE
+            $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
+    )
+endforeach()
 
 # Data plugins
 add_subdirectory(src/plugins/PointData)
@@ -436,10 +517,20 @@ add_subdirectory(src/plugins/TextData)
 add_subdirectory(src/plugins/ClusterData)
 add_subdirectory(src/plugins/ImageData)
 
-set_target_properties(PointData ColorData TextData ClusterData ImageData
-    PROPERTIES
-    FOLDER DataPlugins
+set(MV_DATA_PLUGINS
+    PointData 
+    ColorData 
+    TextData 
+    ClusterData 
+    ImageData
 )
+
+foreach(data_plugin_target IN LISTS MV_DATA_PLUGINS)
+    target_compile_options(${data_plugin_target}
+        PRIVATE
+            $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
+    )
+endforeach()
 
 # -----------------------------------------------------------------------------
 # Installation
@@ -447,6 +538,16 @@ set_target_properties(PointData ColorData TextData ClusterData ImageData
 
 # Install the ManiVault executable 
 if(APPLE)
+    # These are the properties for the Info.plist in the mac bundle
+    set(MACOSX_BUNDLE_BUNDLE_NAME "ManiVault Studio")
+    set(MACOSX_BUNDLE_PATHNAME "ManiVault\ Studio")
+    set(MACOSX_BUNDLE_BUNDLE_VERSION "${MV_VERSION_MAJOR}.${MV_VERSION_MINOR}")
+    set(MACOSX_BUNDLE_LONG_VERSION_STRING "${MV_VERSION_MAJOR}.${MV_VERSION_MINOR}.${MV_VERSION_PATCH}")
+    set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${MV_VERSION_MAJOR}.${MV_VERSION_MINOR}")
+    set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2023. All rights reserved.")
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.biovault.mv")
+    set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
+
     # set(BUNDLE_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
     set(BUNDLE_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/ManiVault Studio.app")
     set(WEBENGINEINSTALL_CMD "${CMAKE_CURRENT_SOURCE_DIR}/macos_webengineinstall.sh")
@@ -456,15 +557,6 @@ if(APPLE)
     )
     # -always-overwrite
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
-
-    set(MACOSX_BUNDLE_ADDITIONAL_LIBS
-        \"$<TARGET_FILE:qtadvanceddocking-qt6>\"
-        \"$<TARGET_FILE:${MV_PUBLIC_LIB}>\"
-    )
-
-    if(${MV_USE_ERROR_LOGGING})
-        list(APPEND MACOSX_BUNDLE_ADDITIONAL_LIBS \"$<TARGET_FILE:sentry>\" \"$<TARGET_FILE:crashpad_wer>\" \"$<TARGET_FILE:crashpad_handler}>\")
-    endif()
 
     install(CODE "
         message(\"**** MacOS bundle install ****\")
@@ -478,13 +570,8 @@ if(APPLE)
             if(NOT retval EQUAL 0)
                 message(FATAL_ERROR \"macdeployqt failed\")
             endif()
-
-
-            message(\"**** Copy additional libs: \${MACOSX_BUNDLE_ADDITIONAL_LIBS}\")
-            file(COPY \${MACOSX_BUNDLE_ADDITIONAL_LIBS} DESTINATION \"${BUNDLE_DIR}/Contents/Frameworks/\")
         endif()
     " COMPONENT MACOS_BUNDLE)
-
       
     install(CODE "execute_process(
             COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt6_DIR} \"${BUNDLE_DIR}\"
@@ -532,6 +619,7 @@ install(FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_install_dependencies.cmake.in"
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_check_and_set_AVX.cmake"
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_plugin_meta_data.cmake"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_project_defaults.cmake"
         DESTINATION cmake/mv
         COMPONENT MVPUBLIC_CMAKE_HELPER
 )
@@ -542,6 +630,12 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION .                COMPONENT MV_EXECUTABLE    CONFIGURATIONS "Debug" OPTIONAL)
     install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION $<CONFIGURATION> COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "RelWithDebInfo" OPTIONAL)
     install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION .                COMPONENT MV_EXECUTABLE    CONFIGURATIONS "RelWithDebInfo" OPTIONAL)
+
+    if(MV_RELWITHDEBUGINFO)
+        install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION $<CONFIGURATION> COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "Release" OPTIONAL)
+        install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION .                COMPONENT MV_EXECUTABLE    CONFIGURATIONS "Release" OPTIONAL)
+    endif()
+
 endif()
 
 # Generate the version file for use with find_package
@@ -573,6 +667,7 @@ set(ManiVault_LIB_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/lib/" CACHE INTERNAL "
 set(ManiVault_INSTALL_DIR "${MV_INSTALL_DIR}" CACHE INTERNAL "")
 set(ManiVault_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" CACHE INTERNAL "") # this differs from config
 set(ManiVault_VERSION "${MV_VERSION}" CACHE INTERNAL "")
+set(ManiVault_CXX_STANDARD "${MV_CXX_STANDARD}" CACHE INTERNAL "")
 
 # Call the install functions of the all public targets
 # needed for plugins directly after the build
@@ -628,6 +723,27 @@ if(APPLE)
             --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
             --verbose
     )
+
+    # Make required non-Qt dylibs available in the build-tree app bundle for debugger runs
+    add_custom_command(TARGET ${MV_EXE} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:qtadvanceddocking-qt6>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
+        # Keep one real dylib and add a SONAME alias so dyld can resolve @rpath/libqtadvanceddocking*.4.dylib. Make sure to remove any existing SONAME (symlink) first.
+        COMMAND ${CMAKE_COMMAND} -E rm -f "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/$<TARGET_SONAME_FILE_NAME:qtadvanceddocking-qt6>"
+        COMMAND ${CMAKE_COMMAND} -E create_symlink "$<TARGET_FILE_NAME:qtadvanceddocking-qt6>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/$<TARGET_SONAME_FILE_NAME:qtadvanceddocking-qt6>"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:${MV_PUBLIC_LIB}>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
+        COMMENT "Copying bundle framework dependencies for build-tree debugging"
+	)
+
+    if(${MV_USE_ERROR_LOGGING})
+        add_custom_command(TARGET ${MV_EXE} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:sentry>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:crashpad_wer>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:crashpad_handler>" "$<TARGET_FILE_DIR:${MV_EXE}>/../Frameworks/"
+            COMMENT "Copying bundle framework dependencies for build-tree debugging (error logging)"
+        )
+    endif()
+
 endif()
 
 if(NOT APPLE)
@@ -645,12 +761,21 @@ if(NOT APPLE)
     # on windows, the DLLs should be placed in the same directory as the executable
     add_custom_command(TARGET ${MV_EXE} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency runtime libraries"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qtadvanceddocking-qt6> ${MV_INSTALL_DIR}/$<CONFIGURATION>$<IF:$<CXX_COMPILER_ID:MSVC>,,/lib/>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:qtadvanceddocking-qt6> ${MV_INSTALL_DIR}/$<CONFIGURATION>/$<IF:$<CXX_COMPILER_ID:MSVC>,,lib/>$<TARGET_FILE_NAME:qtadvanceddocking-qt6>
     )
 
-    if(${MV_USE_ERROR_LOGGING} AND NOT APPLE)
+    # Create a symlink, e.g. libqtadvanceddockingd.so.4 -> libqtadvanceddockingd.so.4.5.0
+    if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        add_custom_command(TARGET ${MV_EXE} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E create_symlink
+                $<TARGET_FILE_NAME:qtadvanceddocking-qt6>
+                ${MV_INSTALL_DIR}/$<CONFIGURATION>/lib/$<TARGET_SONAME_FILE_NAME:qtadvanceddocking-qt6>
+        )
+    endif()
+
+    if(${MV_USE_ERROR_LOGGING})
         # Install sentry artifacts
-        add_custom_command(TARGET ${MV_EXE}  POST_BUILD
+        add_custom_command(TARGET ${MV_EXE} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E echo "Installing: crashpad_handler executable"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:crashpad_handler> ${MV_INSTALL_DIR}/$<CONFIGURATION>/
         )

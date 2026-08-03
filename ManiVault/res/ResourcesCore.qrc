@@ -26,6 +26,7 @@
         <file alias="AppIcon256">icons/AppIcon256.png</file>
         <file alias="AppIcon512">icons/AppIcon512.png</file>
         <file alias="AppIcon1024">icons/AppIcon1024.png</file>
+        <file alias="AppIconIcns">icons/AppIcon.icns</file>
     </qresource>
     <qresource prefix="/Images">
         <file alias="AppBackground256">images/AppBackground256.png</file>
@@ -45,7 +46,6 @@
         <file>shaders/DensityCompute.frag</file>
         <file>shaders/GradientCompute.frag</file>
 		<file>shaders/GradientCompute.vert</file>
-        <file>shaders/GradientCompute.frag</file>
         <file>shaders/MeanshiftCompute.frag</file>
 		<file>shaders/MeanshiftCompute.vert</file>
         <file>shaders/DensityDraw.frag</file>
@@ -75,11 +75,11 @@
         <file>colormaps/1D/YlGn.png</file>
         <file>colormaps/1D/YlGnBu.png</file>
         <file>colormaps/1D/YlOrBr.png</file>
-        <file>colormaps/2D/example_a.png</file>
-        <file>colormaps/2D/example_b.png</file>
-        <file>colormaps/2D/example_c.png</file>
-        <file>colormaps/2D/example_d.png</file>
-		<file>colormaps/2D/random.png</file>
+        <file>colormaps/2D/Mittelstaed.png</file>
+        <file>colormaps/2D/Teuling.png</file>
+        <file>colormaps/2D/Bremm.png</file>
+        <file>colormaps/2D/Bremm_stretched.png</file>
+		<file>colormaps/2D/Random.png</file>
     </qresource>
 	<qresource prefix="/HTML">
         <file alias="Markdown">html/markdown.html</file>
@@ -90,5 +90,6 @@
         <file alias="TutorialsSchema">json/tutorials.schema.json</file>
 		<file alias="ProjectsSchema">json/projects.schema.json</file>
 		<file alias="VideosSchema">json/videos.schema.json</file>
+		<file alias="ProjectBlobMap">json/project.blob.map.schema.json</file>
     </qresource>
 </RCC>

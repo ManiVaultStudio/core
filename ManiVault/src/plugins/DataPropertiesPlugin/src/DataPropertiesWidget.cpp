@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
-// A corresponding LICENSE file is located in the root directory of this source tree 
-// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// A corresponding LICENSE file is located in the root directory of this source tree
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #include "DataPropertiesWidget.h"
 #include "DataPropertiesPlugin.h"
@@ -140,17 +140,17 @@ void DataPropertiesWidget::populate()
                 }
 
                 _groupsAction.setGroupActions(groupActions);
-            }
 
-            if (_abortPopulate)
-                populate();
+                if (_abortPopulate)
+                    populate();
+            }
         }
         catch (std::exception& e)
         {
-            exceptionMessageBox("Cannot update data properties", e);
+            mv::util::exceptionMessageBox("Cannot update data properties", e);
         }
         catch (...) {
-            exceptionMessageBox("Cannot update data properties");
+            mv::util::exceptionMessageBox("Cannot update data properties");
         }
     }
     endPopulate();

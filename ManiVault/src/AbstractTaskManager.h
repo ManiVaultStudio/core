@@ -21,6 +21,7 @@ namespace mv
  *
  * Base abstract task manager class for global task management.
  *
+ * @ingroup mv_managers
  * @author Thomas Kroes
  */
 class CORE_EXPORT AbstractTaskManager : public AbstractManager

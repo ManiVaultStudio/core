@@ -24,7 +24,8 @@ OptionAction::OptionAction(QObject* parent, const QString& title, const QStringL
     WidgetAction(parent, title),
     _customModel(nullptr),
     _currentIndex(-1),
-    _completerPopupFixedWidth(0)
+    _completerPopupFixedWidth(0),
+    _completionMatchMode(Qt::MatchContains)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -380,10 +381,12 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     };
 
     const auto updateReadOnlyAndSelection = [this, optionAction]() -> void {
+        /* TODO
         if (optionAction->getCurrentIndex() < 0)
             setEnabled(optionAction->getNumberOfOptions() >= 1);
         else
             setEnabled(optionAction->getNumberOfOptions() >= 2);
+        */
 
         setCurrentText(optionAction->getCurrentText());
     };
@@ -640,11 +643,13 @@ void OptionAction::StringsFilterModel::setTextFilter(const QString& textFilter)
 
     _textFilter = textFilter;
 
-    invalidateFilter(); // Reapply the filter
+    beginFilterChange();
+    endFilterChange(QSortFilterProxyModel::Direction::Rows);
 }
 
 OptionAction::LazyIndicesModel::LazyIndicesModel(QObject* parent): QAbstractListModel(parent)
-{}
+{
+}
 
 void OptionAction::LazyIndicesModel::setSourceAndMatches(QAbstractItemModel* sourceModel, const QVector<int>& matches)
 {

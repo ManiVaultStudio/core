@@ -4,6 +4,8 @@
 
 #include "VariantAction.h"
 
+#include "util/Serialization.h"
+
 using namespace mv::util;
 
 namespace mv::gui {

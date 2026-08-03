@@ -6,6 +6,7 @@
 #include "WidgetAction.h"
 #include "WidgetActionContextMenu.h"
 #include "Application.h"
+#include "CoreInterface.h"
 
 #include <QDebug>
 #include <QHBoxLayout>
@@ -27,6 +28,7 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= n
 
     connect(getAction(), &WidgetAction::isConnectedChanged, this, &WidgetActionLabel::updateNameLabel);
     connect(getAction(), &WidgetAction::connectionPermissionsChanged, this, &WidgetActionLabel::updateNameLabel);
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &WidgetActionLabel::updateCustomStyle);
 
     auto layout = new QHBoxLayout();
 
@@ -52,13 +54,22 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= n
 
 bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 {
+    bool isInStudioMode = false;
+    
+    if (auto project = mv::projects().getCurrentProject())
+        isInStudioMode = project->getStudioModeAction().isChecked();
+    
     switch (event->type())
     {
         case QEvent::MouseButtonPress:
         {
             if (dynamic_cast<QWidget*>(target) != &_nameLabel)
                 break;
-
+            
+            if (auto project = mv::projects().getCurrentProject())
+                if (!project->getStudioModeAction().isChecked())
+					break;
+            
             auto mouseEvent = dynamic_cast<QMouseEvent*>(event);
 
             switch (mouseEvent->button())
@@ -106,6 +117,9 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::Enter:
         {
+            if (!isInStudioMode)
+                break;
+            
             if (dynamic_cast<QWidget*>(target) != &_nameLabel)
                 break;
 
@@ -118,6 +132,9 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::Leave:
         {
+            if (!isInStudioMode)
+                break;
+            
             if (dynamic_cast<QWidget*>(target) != &_nameLabel)
                 break;
 
@@ -144,6 +161,14 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
     }
 
     return QWidget::eventFilter(target, event);
+}
+
+bool WidgetActionLabel::event(QEvent* event)
+{
+    if (event->type() == QEvent::ApplicationPaletteChange)
+        updateCustomStyle();
+
+    return WidgetActionViewWidget::event(event);
 }
 
 void WidgetActionLabel::resizeEvent(QResizeEvent* resizeEvent)
@@ -193,10 +218,15 @@ QString WidgetActionLabel::getLabelText() const
 void WidgetActionLabel::updateNameLabel()
 {
     const auto connectionEnabled = getAction()->mayPublish(WidgetAction::Gui) || getAction()->mayConnect(WidgetAction::Gui) || getAction()->mayDisconnect(WidgetAction::Gui);
-
+    
+    bool isInStudioMode = false;
+    
+    if (auto project = mv::projects().getCurrentProject())
+        isInStudioMode = project->getStudioModeAction().isChecked();
+    
     auto font = _nameLabel.font();
-
-    font.setUnderline(getAction()->isEnabled() && connectionEnabled);
+    
+    font.setUnderline(getAction()->isEnabled() && connectionEnabled && isInStudioMode);
     font.setItalic(getAction()->isConnected());
 
     _nameLabel.setFont(font);
@@ -216,7 +246,7 @@ void WidgetActionLabel::updateCustomStyle()
         else
             _nameLabel.setStyleSheet(QString("QLabel { color: %1; }").arg(qApp->palette().text().color().name()));
     } else {
-        _nameLabel.setStyleSheet("color: gray;");
+        _nameLabel.setStyleSheet(QString("QLabel { color: %1; }").arg(qApp->palette().color(QPalette::Disabled, QPalette::Text).name()));
     }
 }
 

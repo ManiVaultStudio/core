@@ -14,6 +14,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QFutureWatcher>
+#include <QDialogButtonBox>
 
 #ifdef _DEBUG
     //#define ABSTRACT_PROJECTS_MODEL_VERBOSE

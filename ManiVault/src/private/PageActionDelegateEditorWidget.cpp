@@ -83,7 +83,7 @@ PageActionDelegateEditorWidget::PageActionDelegateEditorWidget(QWidget* parent /
 
     updateOverlayWidgetVisibility();
 
-    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &PageActionDelegateEditorWidget::updateCustomStyle);
+    connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &PageActionDelegateEditorWidget::updateIcon);
 }
 
 void PageActionDelegateEditorWidget::setEditorData(const QModelIndex& index)
@@ -140,6 +140,9 @@ void PageActionDelegateEditorWidget::leaveEvent(QEvent* event)
 
 void PageActionDelegateEditorWidget::updateIcon()
 {
+    if (!_pageAction)
+        return;
+
     _iconLabel.setPixmap(_pageAction->getIcon().pixmap(PageAction::isCompactView() ? QSize(14, 14) : QSize(24, 24)));
 
     updateCustomStyle();

@@ -11,7 +11,6 @@
 #include "actions/HorizontalGroupAction.h"
 #include "actions/DecimalRectangleAction.h"
 #include "actions/DecimalPointAction.h"
-#include "actions/VerticalGroupAction.h"
 #include "actions/ZoomMarginAction.h"
 
 #include <QObject>
@@ -48,6 +47,21 @@ public:
      */
     void setShortcutsEnabled(bool shortcutsEnabled);
 
+protected: // Linking
+
+    /**
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
+     * @param recursive Whether to also connect descendant child actions
+     */
+    void connectToPublicAction(WidgetAction* publicAction, bool recursive) override;
+
+    /**
+     * Disconnect this action from its public action
+     * @param recursive Whether to also disconnect descendant child actions
+     */
+    void disconnectFromPublicAction(bool recursive) override;
+
 public: // Serialization
 
     /**
@@ -62,6 +76,10 @@ public: // Serialization
      */
 
     QVariantMap toVariantMap() const override;
+
+public: // State getters
+    [[nodiscard]] bool isNavigationFrozen() const { return _freezeNavigation.isChecked(); }
+    [[nodiscard]] bool isNavigationActive() const { return !isNavigationFrozen(); }
 
 public: // Action getters
 

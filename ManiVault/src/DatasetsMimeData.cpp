@@ -22,6 +22,11 @@ Datasets DatasetsMimeData::getDatasets() const
     return _datasets;
 }
 
+const Datasets& DatasetsMimeData::getDatasetsRef() const
+{
+    return _datasets;
+}
+
 QString DatasetsMimeData::format()
 {
     return "application/datasets";

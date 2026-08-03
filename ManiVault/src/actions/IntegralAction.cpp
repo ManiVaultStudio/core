@@ -4,6 +4,8 @@
 
 #include "IntegralAction.h"
 
+#include "util/Serialization.h"
+
 #include <QHBoxLayout>
 
 using namespace mv::util;

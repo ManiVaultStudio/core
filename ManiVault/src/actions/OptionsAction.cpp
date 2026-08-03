@@ -6,6 +6,7 @@
 #include "ModelSelectionAction.h"
 
 #include "util/Miscellaneous.h"
+#include "util/Serialization.h"
 
 #include "widgets/FileDialog.h"
 
@@ -688,15 +689,15 @@ OptionsAction::FileAction::FileAction(OptionsAction& optionsAction) :
 
             QFile jsonFile(fileOpenDialog.selectedFiles().first());
 
-            jsonFile.open(QFile::ReadOnly);
+            if (jsonFile.open(QFile::ReadOnly)) {
+                const auto jsonDocument = QJsonDocument::fromJson(jsonFile.readAll());
+                const auto variantMap = jsonDocument.toVariant().toMap();
+                const auto selection = variantMap["selection"].toStringList();
 
-            const auto jsonDocument = QJsonDocument::fromJson(jsonFile.readAll());
-            const auto variantMap   = jsonDocument.toVariant().toMap();
-            const auto selection    = variantMap["selection"].toStringList();
+                _optionsAction.setSelectedOptions(selection);
 
-            _optionsAction.setSelectedOptions(selection);
-
-            _loadSelectionAction.setEnabled(false);
+                _loadSelectionAction.setEnabled(false);
+            }
         });
 
         fileOpenDialog.exec();
@@ -723,10 +724,10 @@ OptionsAction::FileAction::FileAction(OptionsAction& optionsAction) :
 
             QFile jsonFile(fileSaveDialog.selectedFiles().first());
 
-            jsonFile.open(QFile::WriteOnly);
-            jsonFile.write(jsonDocument.toJson());
-
-            _saveSelectionAction.setEnabled(false);
+            if (jsonFile.open(QFile::WriteOnly)) {
+                jsonFile.write(jsonDocument.toJson());
+                _saveSelectionAction.setEnabled(false);
+            }
         });
 
         fileSaveDialog.exec();

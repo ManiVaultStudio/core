@@ -12,10 +12,6 @@
 #include <QTimer>
 #include <QListView>
 
-using namespace mv;
-using namespace mv::gui;
-using namespace mv::util;
-
 /**
  * Selected indices action class
  *
@@ -23,12 +19,12 @@ using namespace mv::util;
  *
  * @author Thomas Kroes
  */
-class SelectedIndicesAction : public WidgetAction
+class SelectedIndicesAction : public mv::gui::WidgetAction
 {
 protected:
 
     /** Widget class for points info action */
-    class Widget : public WidgetActionWidget {
+    class Widget : public mv::gui::WidgetActionWidget {
     public:
 
         /**
@@ -73,13 +69,13 @@ public:
      * @param parent Pointer to parent object
      * @param points Smart pointer to points dataset
      */
-    SelectedIndicesAction(QObject* parent, const Dataset<Points>& points);
+    SelectedIndicesAction(QObject* parent, const mv::Dataset<Points>& points);
 
     /**
      * Get points
      * @return Smart pointer to points dataset
      */
-    Dataset<Points>& getPoints();
+    mv::Dataset<Points>& getPoints();
 
     /**
      * Get selected indices
@@ -89,13 +85,13 @@ public:
 
 public: // Action getters
 
-    TriggerAction& getUpdateAction() { return _updateAction; }
-    ToggleAction& getManualUpdateAction() { return _manualUpdateAction; }
+    mv::gui::TriggerAction& getUpdateAction() { return _updateAction; }
+    mv::gui::ToggleAction& getManualUpdateAction() { return _manualUpdateAction; }
 
 protected:
-    Dataset<Points>     _points;                    /** Points dataset reference */
-    TriggerAction       _updateAction;              /** Update action */
-    ToggleAction        _manualUpdateAction;        /** Manual update action */
+    mv::Dataset<Points>     _points;                    /** Points dataset reference */
+    mv::gui::TriggerAction  _updateAction;              /** Update action */
+    mv::gui::ToggleAction   _manualUpdateAction;        /** Manual update action */
 
     /** Above this threshold, selected indices need to be updated manually */
     static const std::int32_t MANUAL_UPDATE_THRESHOLD = 1000;

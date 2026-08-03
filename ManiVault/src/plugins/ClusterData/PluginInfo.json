@@ -1,0 +1,8 @@
+{
+    "name" : "Cluster",
+    "version" :  {
+        "plugin" : "1.0.0"
+    },
+    "type" : "Data",
+    "dependencies" : ["Points"]
+}

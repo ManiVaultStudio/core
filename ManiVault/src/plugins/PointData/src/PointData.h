@@ -20,15 +20,13 @@
 #include <QDebug>
 #include <QMap>
 #include <QString>
-#include <QVariant>
+#include <QVariantMap>
 
 #include <array>
 #include <cassert>
 #include <utility>
 #include <variant>
 #include <vector>
-
-using namespace mv::plugin;
 
 namespace mv
 {
@@ -37,6 +35,12 @@ namespace mv
 
     namespace gui {
         class GroupAction;
+    }
+
+    namespace legacy
+    {
+        class PointDataLegacySerializer;
+        class PointsLegacySerializer;
     }
 }
 
@@ -68,6 +72,9 @@ public:
         int8,
         uint8
     };
+
+    static ElementTypeSpecifier elementTypeSpecifier(const QString& typeName);
+    static QString elementTypeName(const ElementTypeSpecifier elementTypeSpecifier);
 
 private:
     using VariantOfVectors = std::variant <
@@ -205,16 +212,16 @@ public:
     template <std::size_t N>
     using ElementTypeAt = typename std::variant_alternative_t<N, VariantOfVectors>::value_type;
 
-    PointData(PluginFactory* factory) : RawData(factory, PointType) { }
-    ~PointData(void) override;
+    PointData(mv::plugin::PluginFactory* factory) : RawData(factory, PointType) { }
+    ~PointData() override = default;
 
     void init() override;
 
     mv::Dataset<mv::DatasetImpl> createDataSet(const QString& guid = "") const override;
 
-    std::uint32_t getNumPoints() const;
+    std::uint64_t getNumPoints() const;
 
-    std::uint32_t getNumDimensions() const;
+    std::uint64_t getNumDimensions() const;
 
     std::uint64_t getNumberOfElements() const;
 
@@ -269,7 +276,7 @@ public:
 
     void extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
     void extractFullDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
-    void extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices) const;
+    void extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<std::uint32_t>& indices) const;
     
     template <typename ResultContainer, typename DimensionIndices>
     void populateFullDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
@@ -277,14 +284,14 @@ public:
         CheckDimensionIndices(dimensionIndices);
         std::visit([&resultContainer, this, &dimensionIndices](const auto& vec)
             {
-                const std::ptrdiff_t numPoints{ getNumPoints() };
-                std::ptrdiff_t resultIndex{};
+                const std::uint64_t numPoints{ getNumPoints() };
+                std::uint64_t resultIndex{};
 
-                for (std::ptrdiff_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
+                for (std::uint64_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
                 {
-                    const std::ptrdiff_t n{ pointIndex * _numDimensions };
+                    const std::uint64_t n{ pointIndex * _numDimensions };
 
-                    for (const std::ptrdiff_t dimensionIndex : dimensionIndices)
+                    for (const std::uint64_t dimensionIndex : dimensionIndices)
                     {
                         resultContainer[resultIndex] = vec[n + dimensionIndex];
                         ++resultIndex;
@@ -301,14 +308,14 @@ public:
 
         std::visit([&resultContainer, this, &dimensionIndices, &indices](const auto& vec)
             {
-                const std::ptrdiff_t numPoints{ static_cast<std::uint32_t>(indices.size()) };
-                std::ptrdiff_t resultIndex{};
+                const std::uint64_t numPoints{ static_cast<std::uint64_t>(indices.size()) };
+                std::uint64_t resultIndex{};
 
-                for (std::ptrdiff_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
+                for (std::uint64_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
                 {
-                    const std::ptrdiff_t n{ indices[pointIndex] * _numDimensions };
+                    const std::uint64_t n{ indices[pointIndex] * _numDimensions };
 
-                    for (const std::ptrdiff_t dimensionIndex : dimensionIndices)
+                    for (const std::uint64_t dimensionIndex : dimensionIndices)
                     {
                         resultContainer[resultIndex] = vec[n + dimensionIndex];
                         ++resultIndex;
@@ -352,7 +359,7 @@ public:
     void convertData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
         convertData(data, numPoints * numDimensions);
-        _numDimensions = static_cast<std::uint32_t>(numDimensions);
+        _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
 
     /// Converts the specified data to the internal data, using static_cast for each data element.
@@ -362,7 +369,7 @@ public:
     void convertData(const T& inputDataContainer, const std::size_t numDimensions)
     {
         convertData(inputDataContainer.data(), inputDataContainer.size());
-        _numDimensions = static_cast<std::uint32_t>(numDimensions);
+        _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
 
     /// Copies the specified data into the internal data, sets the number of
@@ -372,7 +379,7 @@ public:
     void setData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
          _variantOfVectors = VariantOfVectors( std::vector<T>(data, data + numPoints * numDimensions) );
-         _numDimensions = static_cast<std::uint32_t>(numDimensions);
+         _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
 
 
@@ -387,7 +394,7 @@ public:
     void setData(const std::vector<T>& data, const std::size_t numDimensions)
     {
         _variantOfVectors = VariantOfVectors(data);
-        _numDimensions = static_cast<unsigned int>(numDimensions);
+        _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
 
     /// Efficiently "moves" the data from the specified vector into the internal
@@ -397,7 +404,7 @@ public:
     void setData(std::vector<T>&& data, const std::size_t numDimensions)
     {
         _variantOfVectors = VariantOfVectors(std::move(data));
-        _numDimensions = static_cast<unsigned int>(numDimensions);
+        _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
 
     void setDimensionNames(const std::vector<QString>& dimNames);
@@ -422,7 +429,7 @@ public: // Sparse data, test implementation
         static void setSparseData(PointData* points, size_t numRows, size_t numCols, const std::vector<size_t>& rowPointers, const std::vector<size_t>& colIndices, const std::vector<float>& values)
         {
             points->_sparseData.setData(numRows, numCols, rowPointers, colIndices, values);
-            points->_numRows = static_cast<uint32_t>(numRows);
+            points->_numRows = static_cast<uint64_t>(numRows);
             points->setData(std::vector<float> {}, numCols);
             points->_isDense = false;
         }
@@ -430,7 +437,7 @@ public: // Sparse data, test implementation
         static void setSparseData(PointData* points, size_t numRows, size_t numCols, std::vector<size_t>&& rowPointers, std::vector<size_t>&& colIndices, std::vector<float>&& values)
         {
             points->_sparseData.setData(numRows, numCols, std::move(rowPointers), std::move(colIndices), std::move(values));
-            points->_numRows = static_cast<uint32_t>(numRows);
+            points->_numRows = static_cast<uint64_t>(numRows);
             points->setData(std::vector<float> {}, numCols);
             points->_isDense = false;
         }
@@ -468,31 +475,43 @@ public: // Sparse data, test implementation
     };
 
 public: // Serialization
-    /**
-     * Load point data from variant map
-     * @param Variant map representation of the point data
-     */
-    void fromVariantMap(const QVariantMap& variantMap) final;
 
     /**
-     * Save point data to variant map
-     * @return Variant map representation of the point data
+     * Create a workflow that restores this object's state from a variant map.
+     *
+     * See Serializable::fromVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @param variantMap Serialized object state.
+     * @return Workflow plan that restores the object state when executed.
      */
-    QVariantMap toVariantMap() const final;
+    mv::workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
+
+    /**
+     * Create a workflow that serializes this object's state to a variant map.
+     *
+     * See Serializable::toVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @return Workflow plan that serializes the object state when executed.
+     */
+    mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const final;
 
 private:
     VariantOfVectors _variantOfVectors;
 
     /** Number of features of each data point */
-    unsigned int _numDimensions = 1;
+    std::uint64_t _numDimensions = 1;
 
     std::vector<QString> _dimNames;
 
 private: // Sparse data, experimental
-    unsigned int _numRows = 0;
+    std::uint64_t _numRows = 0;
     SparseMatrix<size_t, size_t, float> _sparseData = {};
 
     bool _isDense = true;
+
+    friend class mv::legacy::PointDataLegacySerializer;
 };
 
 // =============================================================================
@@ -600,7 +619,7 @@ private:
 
 public:
     Points(QString dataName, bool mayUnderive = true, const QString& guid = "");
-    ~Points() override;
+    ~Points() override = default;
 
     void init() override;
 
@@ -775,7 +794,7 @@ public:
         getRawData<PointData>()->populateDataForDimensions(resultContainer, dimensionIndices, indices);
     }
 
-    unsigned int getNumRawPoints() const
+    std::uint64_t getNumRawPoints() const
     {
         if (isProxy()) {
             return getNumPoints();
@@ -792,10 +811,10 @@ public:
      */
     bool mayProxy(const mv::Datasets& proxyDatasets) const override;
 
-    unsigned int getNumPoints() const
+    std::uint64_t getNumPoints() const
     {
         if (isProxy()) {
-            auto numberOfPoints = 0;
+            std::uint64_t numberOfPoints = 0;
 
             for (auto& proxyMember : getProxyMembers())
                 numberOfPoints += mv::Dataset<Points>(proxyMember)->getNumPoints();
@@ -803,12 +822,16 @@ public:
             return numberOfPoints;
         }
         else {
-            if (isFull()) return getRawData<PointData>()->getNumPoints();
-                else return static_cast<std::uint32_t>(indices.size());
+            if (isFull()) {
+                return getRawData<PointData>()->getNumPoints();
+            }
+            else {
+                return static_cast<std::uint64_t>(indices.size());
+            }
         }
     }
 
-    unsigned int getNumDimensions() const
+    std::uint64_t getNumDimensions() const
     {
         if (isProxy()) {
             return mv::Dataset<Points>(getProxyMembers().first())->getNumDimensions();
@@ -924,7 +947,7 @@ public: // Index transformation
      * indexes into through being a subset or derived data or a combination.
      * @param globalIndices Resulting vector of global indices into the original raw data
      */
-    void getGlobalIndices(std::vector<unsigned int>& globalIndices) const;
+    void getGlobalIndices(std::vector<std::uint32_t>& globalIndices) const;
 
     /**
      * Passing a vector of global selection indices, returns a vector of booleans
@@ -933,9 +956,9 @@ public: // Index transformation
      * @param Vector of global selection indices
      * @param Boolean vector of locally selected points
      */
-    void selectedLocalIndices(const std::vector<unsigned int>& selectionIndices, std::vector<bool>& selected) const;
+    void selectedLocalIndices(const std::vector<std::uint32_t>& selectionIndices, std::vector<bool>& selected) const;
 
-    void getLocalSelectionIndices(std::vector<unsigned int>& localSelectionIndices) const;
+    void getLocalSelectionIndices(std::vector<std::uint32_t>& localSelectionIndices) const;
 
 
 public: // Action getters
@@ -982,16 +1005,25 @@ public: // Selection
 public: // Serialization
 
     /**
-     * Load widget action from variant
-     * @param Variant representation of the widget action
+     * Create a workflow that restores this object's state from a variant map.
+     *
+     * See Serializable::fromVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @param variantMap Serialized object state.
+     * @return Workflow plan that restores the object state when executed.
      */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    mv::workflow::UniqueWorkflowPlan fromVariantMapWorkflow(QVariantMap variantMap) override;
 
     /**
-        * Save widget action to variant
-        * @return Variant representation of the widget action
-        */
-    QVariantMap toVariantMap() const override;
+     * Create a workflow that serializes this object's state to a variant map.
+     *
+     * See Serializable::toVariantMapWorkflow() for the full contract,
+     * execution semantics, and implementation requirements.
+     *
+     * @return Workflow plan that serializes the object state when executed.
+     */
+    mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const override;
 
 public: // Linked data
 
@@ -1003,24 +1035,26 @@ public: // Linked data
 
 public:
 
-    std::vector<unsigned int> indices;
+    std::vector<std::uint32_t> indices;
 
     InfoAction*                 _infoAction;                    /** Non-owning pointer to info action */
     mv::gui::GroupAction*       _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
     DimensionsPickerAction*     _dimensionsPickerAction;        /** Non-owning pointer to dimensions picker action */
     mv::EventListener           _eventListener;                 /** Listen to HDPS events */
+
+    friend class mv::legacy::PointsLegacySerializer;
 };
 
 // =============================================================================
 // Factory
 // =============================================================================
 
-class PointDataFactory : public RawDataFactory
+class PointDataFactory : public mv::plugin::RawDataFactory
 {
     Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)
         Q_OBJECT
         Q_PLUGIN_METADATA(IID   "studio.manivault.PointData"
-                          FILE  "PointData.json")
+                          FILE  "PluginInfo.json")
 
 public:
     PointDataFactory();

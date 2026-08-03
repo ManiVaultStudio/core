@@ -12,7 +12,6 @@ set(TEXTDATA_SOURCES
     src/InfoAction.cpp
     src/OrderedMap.h
     src/OrderedMap.cpp
-    src/TextData.json
 )
 
 set(TEXTDATA_HEADERS
@@ -21,15 +20,20 @@ set(TEXTDATA_HEADERS
     src/OrderedMap.h
 )
 
-source_group( Plugin FILES ${TEXTDATA_SOURCES})
+set(TEXTDATA_AUX
+    PluginInfo.json
+)
 
-add_library(${TEXTDATA} SHARED ${TEXTDATA_SOURCES})
+source_group(Plugin FILES ${TEXTDATA_SOURCES})
+source_group(Aux FILES ${TEXTDATA_AUX})
+
+add_library(${TEXTDATA} SHARED ${TEXTDATA_SOURCES} ${TEXTDATA_AUX})
 
 add_library(ManiVault::${TEXTDATA} ALIAS ${TEXTDATA})
 
 target_include_directories(${TEXTDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${TEXTDATA} PRIVATE cxx_std_20)
+target_compile_features(${TEXTDATA} PUBLIC cxx_std_${MV_CXX_STANDARD})
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
@@ -44,8 +48,11 @@ target_link_libraries(${TEXTDATA} PRIVATE Qt6::Widgets)
 target_link_libraries(${TEXTDATA} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${TEXTDATA} PRIVATE ${MV_PUBLIC_LIB})
 
-set_target_properties(${TEXTDATA} PROPERTIES PUBLIC_HEADER "${TEXTDATA_HEADERS}")
-set_target_properties(${TEXTDATA} PROPERTIES AUTOMOC ON)
+set_target_properties(${TEXTDATA} PROPERTIES 
+    AUTOMOC ON
+    PUBLIC_HEADER "${TEXTDATA_HEADERS}"
+    UNITY_BUILD ${MV_UNITY_BUILD}
+)
 
 install(TARGETS ${TEXTDATA}
     EXPORT "ManiVaultPublicExport"
@@ -61,3 +68,5 @@ add_custom_command(TARGET ${TEXTDATA} POST_BUILD
         --config $<CONFIGURATION>
         --prefix ${MV_INSTALL_DIR}
 )
+
+mv_handle_plugin_config(${TEXTDATA})

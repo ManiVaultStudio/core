@@ -20,7 +20,7 @@ PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFa
     _configurationAction(nullptr),
     _requestPluginCallback()
 {
-    setText(title);
+    PluginTriggerAction::setText(title);
     setToolTip(tooltip);
     setIcon(icon);
 
@@ -39,7 +39,7 @@ PluginTriggerAction::PluginTriggerAction(QObject* parent, const plugin::PluginFa
     _configurationAction(nullptr),
     _requestPluginCallback(requestPluginCallback)
 {
-    setText(title);
+    PluginTriggerAction::setText(title);
     setToolTip(tooltip);
     setIcon(icon);
 
@@ -54,7 +54,7 @@ PluginTriggerAction::PluginTriggerAction(const PluginTriggerAction& pluginTrigge
     _configurationAction(nullptr),
     _requestPluginCallback()
 {
-    setText(pluginTriggerAction.text());
+    PluginTriggerAction::setText(title);
     setToolTip(pluginTriggerAction.toolTip());
     setIcon(pluginTriggerAction.icon());
 
@@ -110,7 +110,7 @@ void PluginTriggerAction::initialize()
 
 void PluginTriggerAction::setText(const QString& text)
 {
-    QAction::setText(text);
+    TriggerAction::setText(text.split("/").back());
 
     switch (_pluginFactory->getType())
     {
@@ -143,7 +143,7 @@ void PluginTriggerAction::setText(const QString& text)
     }
 
     _menuLocation.append("/");
-    _menuLocation.append(this->text());
+    _menuLocation.append(text);
 }
 
 void PluginTriggerAction::setRequestPluginCallback(RequestPluginCallback requestPluginCallback)

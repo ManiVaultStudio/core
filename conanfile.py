@@ -51,7 +51,7 @@ class HdpsCoreConan(ConanFile):
     install_dir = None
     this_dir = os.path.dirname(os.path.realpath(__file__))
 
-    requires = ("qt/6.8.3@lkeb/stable")
+    requires = ("qt/6.10.3@lkeb/stable")
 
     scm = {"type": "git", "subfolder": "hdps/core", "url": "auto", "revision": "auto"}
 
@@ -159,6 +159,7 @@ class HdpsCoreConan(ConanFile):
         MV_USE_ERROR_LOGGING = "ON"
         MV_PRECOMPILE_HEADERS = "ON"
         MV_UNITY_BUILD = "ON"
+        MV_RELWITHDEBUGINFO = "ON"
 
         # Do not use some options on the release builds 
         current_branch_name = self.get_current_branch_name()
@@ -171,9 +172,10 @@ class HdpsCoreConan(ConanFile):
         if self.settings.os == "Macos":
             MV_USE_ERROR_LOGGING = "OFF"
 
-        tc.variables["MV_PRECOMPILE_HEADERS"] = MV_PRECOMPILE_HEADERS
-        tc.variables["MV_UNITY_BUILD"] = MV_UNITY_BUILD
-        tc.variables["MV_USE_ERROR_LOGGING"] = MV_USE_ERROR_LOGGING
+        tc.cache_variables["MV_PRECOMPILE_HEADERS"] = MV_PRECOMPILE_HEADERS
+        tc.cache_variables["MV_UNITY_BUILD"] = MV_UNITY_BUILD
+        tc.cache_variables["MV_USE_ERROR_LOGGING"] = MV_USE_ERROR_LOGGING
+        tc.cache_variables["MV_RELWITHDEBUGINFO"] = MV_RELWITHDEBUGINFO
         
         try:
             tc.generate()
@@ -204,11 +206,6 @@ class HdpsCoreConan(ConanFile):
         print("**** Install RELWITHDEBINFO *****")
         cmake.install(build_type="RelWithDebInfo")
 
-        print("**** Build RELEASE *****")
-        cmake.build(build_type="Release")
-        print("**** Install RELEASE *****")
-        cmake.install(build_type="Release")
-
     def package(self):
         # if just running package
         if self.install_dir is None:
@@ -235,10 +232,6 @@ class HdpsCoreConan(ConanFile):
             # remove the bundle before packaging -
             # it contains the complete QtWebEngine > 1GB
             shutil.rmtree(str(pathlib.Path(self.install_dir, "RelWithDebInfo/ManiVault Studio.app")))
-            shutil.rmtree(str(pathlib.Path(self.install_dir, "Release/ManiVault Studio.app")))
-        elif self.settings.os == "Macos":
-            # also remove Release even in bundle build to keep package size down
-            shutil.rmtree(str(pathlib.Path(self.install_dir, "Release/ManiVault Studio.app")))
 
         # Add the pdb files next to the libs for RelWithDebInfo linking
         if tools.os_info.is_windows:
@@ -254,6 +247,3 @@ class HdpsCoreConan(ConanFile):
         self.cpp_info.relwithdebinfo.libdirs = ["RelWithDebInfo/lib"]
         self.cpp_info.relwithdebinfo.bindirs = ["RelWithDebInfo/Plugins", "RelWithDebInfo"]
         self.cpp_info.relwithdebinfo.includedirs = ["RelWithDebInfo/include", "RelWithDebInfo"]
-        self.cpp_info.release.libdirs = ["Release/lib"]
-        self.cpp_info.release.bindirs = ["Release/Plugins", "Release"]
-        self.cpp_info.release.includedirs = ["Release/include", "Release"]

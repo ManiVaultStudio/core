@@ -17,9 +17,6 @@
 
 #include <QItemSelectionModel>
 
-using namespace mv::gui;
-using namespace mv::util;
-
 /**
  * Clusters action class
  *
@@ -27,7 +24,7 @@ using namespace mv::util;
  *
  * @author Thomas Kroes
  */
-class CLUSTERDATA_EXPORT ClustersAction : public WidgetAction
+class CLUSTERDATA_EXPORT ClustersAction : public mv::gui::WidgetAction
 {
     Q_OBJECT
 
@@ -65,7 +62,7 @@ public:
      * @param parent Pointer to parent object
      * @param clustersDataset Smart pointer to clusters
      */
-    ClustersAction(QObject* parent, Dataset<Clusters> clustersDataset = Dataset<Clusters>());
+    ClustersAction(QObject* parent, mv::Dataset<Clusters> clustersDataset = mv::Dataset<Clusters>());
 
     /**
      * Get clusters
@@ -77,13 +74,13 @@ public:
      * Get clusters dataset
      * @return Smart pointer to clusters dataset
      */
-    Dataset<Clusters>& getClustersDataset();
+    mv::Dataset<Clusters>& getClustersDataset();
 
     /**
      * Set clusters dataset
      * @param clustersDataset Smart pointer to clusters dataset
      */
-    void setClustersDataset(Dataset<Clusters> clustersDataset);
+    void setClustersDataset(mv::Dataset<Clusters> clustersDataset);
 
     /**
      * Create subset from selected clusters
@@ -125,7 +122,7 @@ signals:
     void refreshClusters();
 
 protected:
-    Dataset<Clusters>           _clustersDataset;           /** Smart pointer to the clusters dataset */
+    mv::Dataset<Clusters>       _clustersDataset;           /** Smart pointer to the clusters dataset */
     ClustersModel               _clustersModel;             /** Clusters model */
     ColorizeClustersAction      _colorizeClustersAction;    /** Colorize clusters action */
     PrefixClustersAction        _prefixClustersAction;      /** Prefix clusters action */

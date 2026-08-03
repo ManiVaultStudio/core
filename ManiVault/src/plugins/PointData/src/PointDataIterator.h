@@ -16,7 +16,7 @@ namespace mv
         // Its data members: 
         ValueIteratorType _valueIterator{};
         IndexIteratorType _indexIterator{};
-        unsigned _numberOfDimensions{};
+        std::uint64_t _numberOfDimensions{};
         IndexFunctionType _indexFunction;
 
         using PointViewType = PointView<ValueIteratorType>;
@@ -37,7 +37,7 @@ namespace mv
         PointDataIterator(
             const ValueIteratorType valueIterator,
             const IndexIteratorType indexIterator,
-            const unsigned numberOfDimensions,
+            const std::uint64_t numberOfDimensions,
             const IndexFunctionType indexFunction)
             :
             _valueIterator{ valueIterator },

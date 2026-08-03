@@ -5,8 +5,9 @@
 #include "StringsAction.h"
 #include "Application.h"
 
+#include "util/Serialization.h"
+
 #include <QHBoxLayout>
-#include <QStandardItemModel>
 
 using namespace mv::util;
 

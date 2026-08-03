@@ -4,6 +4,8 @@
 
 #include "Cluster.h"
 
+#include <CoreInterface.h>
+
 #include <QUuid>
 #include <QImage>
 
@@ -13,10 +15,7 @@ Cluster::Cluster(const QString& name /*= ""*/, const QColor& color /*= Qt::gray*
     _name(name),
     _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _color(color),
-    _indices(indices),
-    _median(),
-    _mean(),
-    _stddev()
+    _indices(indices)
 {
 }
 
@@ -25,11 +24,11 @@ QString Cluster::getName() const
     return _name;
 }
 
-void Cluster::setName(const QString& name)
+void Cluster::setName(QString name)
 {
-    Q_ASSERT(!name.isEmpty());
+//    Q_ASSERT(!name.isEmpty());
 
-    _name = name;
+    _name = std::move(name);
 }
 
 QString Cluster::getId() const
@@ -37,9 +36,9 @@ QString Cluster::getId() const
     return _id;
 }
 
-void Cluster::setId(const QString& id)
+void Cluster::setId(QString id)
 {
-    _id = id;
+    _id = std::move(id);
 }
 
 QColor Cluster::getColor() const
@@ -47,7 +46,7 @@ QColor Cluster::getColor() const
     return _color;
 }
 
-void Cluster::setColor(const QColor& color)
+void Cluster::setColor(QColor color)
 {
     _color = color;
 }
@@ -67,9 +66,9 @@ std::uint32_t Cluster::getNumberOfIndices() const
     return static_cast<std::uint32_t>(_indices.size());
 }
 
-void Cluster::setIndices(const std::vector<unsigned int>& indices)
+void Cluster::setIndices(std::vector<unsigned int> indices)
 {
-    _indices = indices;
+    _indices = std::move(indices);
 }
 
 void Cluster::colorizeClusters(QVector<Cluster>& clusters, std::int32_t randomSeed /*= 0*/)
@@ -102,5 +101,9 @@ void Cluster::colorizeClusters(QVector<Cluster>& clusters, const QImage& colorMa
 
 Cluster Cluster::copy() const
 {
-    return Cluster(_name, _color, _indices);
+    return {
+        _name,
+        _color,
+        _indices
+    };
 }

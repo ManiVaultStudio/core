@@ -12,6 +12,7 @@
 #include <QIcon>
 #include <QObject>
 #include <QPalette>
+#include <QVariant>
 
 #include "StyledIconEngine.h"
 

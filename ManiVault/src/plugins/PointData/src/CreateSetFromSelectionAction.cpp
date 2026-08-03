@@ -24,7 +24,7 @@ CreateSetFromSelectionAction::CreateSetFromSelectionAction(QObject* parent, cons
 
     _nameAction.setPlaceHolderString("Enter set name here...");
 
-    connect(&_createAction, &TriggerAction::triggered, this, [this]() -> void {
+    connect(&_createAction, &mv::gui::TriggerAction::triggered, this, [this]() -> void {
         auto points = _points->isDerivedData() ? _points->getSourceDataset<Points>() : _points;
 
         if (points->isProxy()) {
@@ -47,7 +47,7 @@ CreateSetFromSelectionAction::CreateSetFromSelectionAction(QObject* parent, cons
         _createAction.setEnabled(!_nameAction.getString().isEmpty());
     };
 
-    connect(&_nameAction, &StringAction::stringChanged, this, updateCreateAction);
+    connect(&_nameAction, &gui::StringAction::stringChanged, this, updateCreateAction);
 
     updateCreateAction();
 }

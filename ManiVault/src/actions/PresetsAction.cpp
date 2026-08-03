@@ -5,7 +5,7 @@
 #include "PresetsAction.h"
 #include "Application.h"
 
-#include "actions/DatasetPickerAction.h"
+#include "util/PresetSerializationScope.h"
 
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -193,7 +193,7 @@ void PresetsAction::loadPreset(const QString& name)
 
     emit presetAboutToBeLoaded(name);
     {
-        const DatasetPickerAction::ValueSerializationDisabler valueSerializationDisabler;
+        const PresetSerializationScope::Scope scope;
 
         _sourceAction->fromVariantMap(_presets[name].toMap());
     }
@@ -209,7 +209,7 @@ void PresetsAction::savePreset(const QString& name)
     if (name.isEmpty())
         return;
 
-    const DatasetPickerAction::ValueSerializationDisabler valueSerializationDisabler;
+    const PresetSerializationScope::Scope scope;
 
     auto sourceActionVariantMap = _sourceAction->toVariantMap();
 

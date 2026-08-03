@@ -6,10 +6,6 @@
 
 #include "PointData.h"
 
-using namespace mv;
-using namespace mv::util;
-using namespace mv::gui;
-
 /**
  * Edit proxy datasets action class
  *
@@ -17,14 +13,14 @@ using namespace mv::gui;
  *
  * @author Thomas Kroes
  */
-class EditProxyDatasetsAction : public WidgetAction
+class EditProxyDatasetsAction : public mv::gui::WidgetAction
 {
     Q_OBJECT
 
 protected:
 
     /** Widget class for edit proxy datasets action */
-    class Widget : public WidgetActionWidget {
+    class Widget : public mv::gui::WidgetActionWidget {
     public:
 
         /**
@@ -51,16 +47,16 @@ public:
      * @param parent Pointer to parent object
      * @param points Smart pointer to points dataset
      */
-    EditProxyDatasetsAction(QObject* parent, const Dataset<Points>& points);
+    EditProxyDatasetsAction(QObject* parent, const mv::Dataset<Points>& points);
 
     /**
      * Get points
      * @return Smart pointer to points dataset
      */
-    Dataset<Points>& getPoints();
+    mv::Dataset<Points>& getPoints();
 
 public: // Action getters
 
 protected:
-    Dataset<Points>     _points;        /** Points dataset reference */
+    mv::Dataset<Points>     _points;        /** Points dataset reference */
 };

@@ -13,14 +13,11 @@
 #include <actions/TriggerAction.h>
 #include <actions/HorizontalGroupAction.h>
 #include <actions/TreeAction.h>
-#include <actions/LabelProxyAction.h>
 
 #include <Dataset.h>
 
 #include <QDialog>
 #include <QTimer>
-
-using namespace mv::gui;
 
 /**
  * Remove datasets dialog class
@@ -69,15 +66,15 @@ protected:
     mv::Datasets                    _candidateDatasets;             /** All datasets eligible for removal */
     DatasetsToRemoveModel           _model;                         /** Model with all candidate datasets */
     DatasetsToRemoveFilterModel     _filterModel;                   /** Filter model for the model above */
-    VerticalGroupAction             _mainGroupAction;               /** Main group action layout */
-    StringAction                    _messageAction;                 /** Message action for informing the user about the existence of descendant datasets */
-    OptionAction                    _descendantsModeAction;         /** Option action for switching between keeping and removing descendant datasets */
-    VerticalGroupAction             _selectDatasetsGroupAction;     /** Vertical group action for configuring selected datasets */
-    TreeAction                      _selectDatasetsAction;          /** Tree action for dataset tree visualization and selection */
-    TriggerAction                   _selectAllDatasetsAction;       /** Trigger action to select all datasets */
-    HorizontalGroupAction           _bottomHorizontalGroupAction;   /** Group action for bottom actions */
-    ToggleAction                    _showAgainAction;               /** Toggle action to hide or show the dialog next time */
-    TriggerAction                   _removeAction;                  /** Trigger action to remove the dataset (s) */
-    TriggerAction                   _cancelAction;                  /** Trigger action to cancel the removal and the dialog */
+    mv::gui::VerticalGroupAction    _mainGroupAction;               /** Main group action layout */
+    mv::gui::StringAction           _messageAction;                 /** Message action for informing the user about the existence of descendant datasets */
+    mv::gui::OptionAction           _descendantsModeAction;         /** Option action for switching between keeping and removing descendant datasets */
+    mv::gui::VerticalGroupAction    _selectDatasetsGroupAction;     /** Vertical group action for configuring selected datasets */
+    mv::gui::TreeAction             _selectDatasetsAction;          /** Tree action for dataset tree visualization and selection */
+    mv::gui::TriggerAction          _selectAllDatasetsAction;       /** Trigger action to select all datasets */
+    mv::gui::HorizontalGroupAction  _bottomHorizontalGroupAction;   /** Group action for bottom actions */
+    mv::gui::ToggleAction           _showAgainAction;               /** Toggle action to hide or show the dialog next time */
+    mv::gui::TriggerAction          _removeAction;                  /** Trigger action to remove the dataset (s) */
+    mv::gui::TriggerAction          _cancelAction;                  /** Trigger action to cancel the removal and the dialog */
     QTimer                          _updateRemoveActionTimer;       /** Timer to prevent redundant updates of the remove action */
 };

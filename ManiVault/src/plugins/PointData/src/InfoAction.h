@@ -13,10 +13,6 @@
 
 #include <actions/StringAction.h>
 
-using namespace mv;
-using namespace mv::gui;
-using namespace mv::util;
-
 /**
  * Info action class
  *
@@ -24,7 +20,7 @@ using namespace mv::util;
  *
  * @author Thomas Kroes
  */
-class InfoAction : public GroupAction
+class InfoAction : public mv::gui::GroupAction
 {
 public:
 
@@ -33,26 +29,26 @@ public:
      * @param parent Pointer to parent object
      * @param points Smart pointer to points dataset
      */
-    InfoAction(QObject* parent, const Dataset<Points>& points);
+    InfoAction(QObject* parent, const mv::Dataset<Points>& points);
 
 public: // Action getters
 
-    StringAction& getDataStorageAction() { return _dataStorageAction; }
+    mv::gui::StringAction& getDataStorageAction() { return _dataStorageAction; }
     ProxyDatasetsAction& getProxyDatasetsAction() { return _proxyDatasetsAction; }
-    StringAction& getNumberOfPointsAction() { return _numberOfPointsAction; }
-    StringAction& getNumberOfDimensionsAction() { return _numberOfDimensionsAction; }
-    StringAction& getRawDataSizeAction() { return _rawDataSizeAction; }
+    mv::gui::StringAction& getNumberOfPointsAction() { return _numberOfPointsAction; }
+    mv::gui::StringAction& getNumberOfDimensionsAction() { return _numberOfDimensionsAction; }
+    mv::gui::StringAction& getRawDataSizeAction() { return _rawDataSizeAction; }
     NumberOfSelectedPointsAction& getNumberOfSelectedPointsAction() { return _numberOfSelectedPointsAction; }
     SelectedIndicesAction& getSelectedIndicesAction() { return _selectedIndicesAction; }
     CreateSetFromSelectionAction& getCreateSetFromSelection() { return _createSetFromSelection; }
 
 protected:
-    Dataset<Points>                 _points;                            /** Points dataset reference */
-    StringAction                    _dataStorageAction;                 /** Type of data storage action */
+    mv::Dataset<Points>             _points;                            /** Points dataset reference */
+    mv::gui::StringAction           _dataStorageAction;                 /** Type of data storage action */
     ProxyDatasetsAction             _proxyDatasetsAction;               /** Proxy datasets action */
-    StringAction                    _numberOfPointsAction;              /** Number of points action */
-    StringAction                    _numberOfDimensionsAction;          /** Number of dimensions action */
-    StringAction                    _rawDataSizeAction;                 /** Amount of memory for raw data */    
+    mv::gui::StringAction           _numberOfPointsAction;              /** Number of points action */
+    mv::gui::StringAction           _numberOfDimensionsAction;          /** Number of dimensions action */
+    mv::gui::StringAction           _rawDataSizeAction;                 /** Amount of memory for raw data */
     NumberOfSelectedPointsAction    _numberOfSelectedPointsAction;      /** Number of selected points action */
     SelectedIndicesAction           _selectedIndicesAction;             /** Selected indices action */
     CreateSetFromSelectionAction    _createSetFromSelection;            /** Create set from selection action */

@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.22)
 
 set(SHARED_PARAMETERS_PLUGIN "SharedParametersPlugin")
-PROJECT(${SHARED_PARAMETERS_PLUGIN})
+PROJECT(${SHARED_PARAMETERS_PLUGIN} LANGUAGES CXX)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(PLUGIN
     src/SharedParametersPlugin.h
@@ -14,7 +16,7 @@ set(MODELS
 )
 
 set(AUX
-    src/SharedParametersPlugin.json
+    PluginInfo.json
 )
 
 set(SHARED_PARAMETERS_SOURCES
@@ -33,7 +35,7 @@ add_dependencies(${SHARED_PARAMETERS_PLUGIN} ${MV_PUBLIC_LIB})
 
 target_include_directories(${SHARED_PARAMETERS_PLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include")
 
-target_compile_features(${SHARED_PARAMETERS_PLUGIN} PRIVATE cxx_std_20)
+target_compile_features(${SHARED_PARAMETERS_PLUGIN} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
 target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
@@ -42,7 +44,10 @@ target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${SHARED_PARAMETERS_PLUGIN} ${MV_USE_AVX})
 
-set_target_properties(${SHARED_PARAMETERS_PLUGIN} PROPERTIES AUTOMOC ON)
+set_target_properties(${SHARED_PARAMETERS_PLUGIN} PROPERTIES
+    AUTOMOC ON
+    UNITY_BUILD ${MV_UNITY_BUILD}
+)
 
 install(TARGETS ${SHARED_PARAMETERS_PLUGIN}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
@@ -56,8 +61,10 @@ add_custom_command(TARGET ${SHARED_PARAMETERS_PLUGIN} POST_BUILD
 	--prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
 )
 
+mv_handle_plugin_config(${SHARED_PARAMETERS_PLUGIN})
+
 # Automatically set the debug environment (command + working directory) for MSVC
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set_property(TARGET ${SHARED_PARAMETERS_PLUGIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>)
     set_property(TARGET ${SHARED_PARAMETERS_PLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,"${MV_INSTALL_DIR}/Debug/${MV_APPLICATION_NAME}.exe",$<IF:$<CONFIG:RELWITHDEBINFO>,"${MV_INSTALL_DIR}/RelWithDebInfo/${MV_APPLICATION_NAME}.exe","${MV_INSTALL_DIR}/Release/${MV_APPLICATION_NAME}.exe">>)
 endif()

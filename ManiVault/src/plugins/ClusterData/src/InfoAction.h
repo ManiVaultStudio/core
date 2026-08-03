@@ -11,14 +11,6 @@
 #include "actions/StringAction.h"
 #include "event/EventListener.h"
 
-namespace mv {
-    class CoreInterface;
-}
-
-using namespace mv;
-using namespace mv::gui;
-using namespace mv::util;
-
 /**
  * Info action class
  *
@@ -26,7 +18,7 @@ using namespace mv::util;
  *
  * @author Thomas Kroes
  */
-class InfoAction : public GroupAction
+class InfoAction : public mv::gui::GroupAction
 {
 public:
 
@@ -39,11 +31,11 @@ public:
 
 public: // Action getters
 
-    StringAction& getNumberOfClustersAction() { return _numberOfClustersAction; }
+    mv::gui::StringAction& getNumberOfClustersAction() { return _numberOfClustersAction; }
 
 protected:
-    Dataset<Clusters>       _clusters;                  /** Clusters dataset smart pointer */
-    StringAction            _numberOfClustersAction;    /** Number of points action */
+    mv::Dataset<Clusters>   _clusters;                  /** Clusters dataset smart pointer */
+    mv::gui::StringAction   _numberOfClustersAction;    /** Number of points action */
     ClustersAction          _clustersAction;            /** Clusters action */
     mv::EventListener       _eventListener;             /** Listen to ManiniVault events */
 };

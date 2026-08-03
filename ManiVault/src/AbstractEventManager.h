@@ -18,6 +18,7 @@ class KeyBasedSelectionGroup;
  *
  * Base abstract event manager class for managing events.
  *
+ * @ingroup mv_managers
  * @author Thomas Kroes
  */
 class CORE_EXPORT AbstractEventManager : public AbstractManager
@@ -102,6 +103,8 @@ public:
      * @param eventListener Pointer to event listener to unregister
      */
     virtual void unregisterEventListener(EventListener* eventListener) = 0;
+
+    virtual bool areDatasetsPartOfSelectionGroup(Dataset<DatasetImpl> d1, Dataset<DatasetImpl> d2) = 0;
 
 protected:
 

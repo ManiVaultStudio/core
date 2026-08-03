@@ -59,10 +59,7 @@ signals:
 
 protected:
     void registerFunctions();
-
-protected slots:
-    [[deprecated("Will be removed in 2.0. Connect to the communicationBridgeReady() or webPageFullyLoaded() signals instead.")]]
-    virtual void initWebPage() {}
+    virtual void initWebPage() {}       // TRANSITION: Will be deprecated before 2.0 and probably removed. Connect to the communicationBridgeReady() or webPageFullyLoaded() instead of relying on this method.
 
 private slots:
     void onJsBridgeIsAvailable();

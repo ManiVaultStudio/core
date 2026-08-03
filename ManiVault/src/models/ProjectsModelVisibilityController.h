@@ -5,14 +5,13 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+#include "models/AbstractProjectsModel.h"
 
 #include <QStandardItemModel>
 #include <QObject>
 #include <functional>
 
 namespace mv {
-
-class AbstractProjectsModel;
 
 /**
  * Projects model visibility controller class

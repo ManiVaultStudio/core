@@ -1,29 +1,33 @@
 cmake_minimum_required(VERSION 3.22)
 
 set(COLORDATA "ColorData")
-PROJECT(${COLORDATA})
+PROJECT(${COLORDATA} LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(COLORDATA_SOURCES
     src/ColorData.h
     src/ColorData.cpp
-    src/ColorData.json
 )
 
 set(COLORDATA_HEADERS
     src/ColorData.h
 )
 
-source_group( Plugin FILES ${COLORDATA_SOURCES})
+set(COLORDATA_AUX
+    PluginInfo.json
+)
 
-add_library(${COLORDATA} SHARED ${COLORDATA_SOURCES})
+source_group(Plugin FILES ${COLORDATA_SOURCES})
+source_group(Aux FILES ${COLORDATA_AUX})
+
+add_library(${COLORDATA} SHARED ${COLORDATA_SOURCES} ${COLORDATA_AUX})
 
 add_library(ManiVault::${COLORDATA} ALIAS ${COLORDATA})
 
 target_include_directories(${COLORDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${COLORDATA} PRIVATE cxx_std_20)
+target_compile_features(${COLORDATA} PUBLIC cxx_std_${MV_CXX_STANDARD})
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
@@ -38,8 +42,11 @@ target_link_libraries(${COLORDATA} PRIVATE Qt6::Widgets)
 target_link_libraries(${COLORDATA} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${COLORDATA} PRIVATE ${MV_PUBLIC_LIB})
 
-set_target_properties(${COLORDATA} PROPERTIES PUBLIC_HEADER "${COLORDATA_HEADERS}")
-set_target_properties(${COLORDATA} PROPERTIES AUTOMOC ON)
+set_target_properties(${COLORDATA} PROPERTIES 
+    AUTOMOC ON
+    PUBLIC_HEADER "${COLORDATA_HEADERS}"
+    UNITY_BUILD ${MV_UNITY_BUILD}
+)
 
 install(TARGETS ${COLORDATA}
     EXPORT "ManiVaultPublicExport"
@@ -55,3 +62,5 @@ add_custom_command(TARGET ${COLORDATA} POST_BUILD
         --config $<CONFIGURATION>
         --prefix ${MV_INSTALL_DIR}
 )
+
+mv_handle_plugin_config(${COLORDATA})

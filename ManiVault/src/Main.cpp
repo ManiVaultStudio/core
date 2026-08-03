@@ -6,15 +6,20 @@
 #include "private/Archiver.h"
 #include "private/Core.h"
 #include "private/NoProxyRectanglesFusionStyle.h"
+#include "private/PassthroughBlobCodec.h"
+#include "private/PassthroughBlobCodecFactory.h"
+#include "private/ZstdBlobCodec.h"
+#include "private/ZstdBlobCodecFactory.h"
+#include "private/TaskflowWorkflowPlanExecutor.h"
 
 #include <Application.h>
 #include <ManiVaultVersion.h>
 
 #include <models/ProjectsTreeModel.h>
 
-#include <util/Icon.h>
 #include <util/HardwareSpec.h>
 #include <util/StandardPaths.h>
+#include <util/BlobCodec.h>
 
 #include <ModalTask.h>
 #include <ModalTaskHandler.h>
@@ -45,7 +50,6 @@ int main(int argc, char *argv[])
     // Destroy temporary application
     tempApp.reset();
 
-
 #ifdef Q_OS_MAC
     QSurfaceFormat defaultFormat;
     
@@ -70,11 +74,18 @@ int main(int argc, char *argv[])
 
     Application application(argc, argv);
 
+    Application::setWorkflowPlanExecutor(std::make_unique<TaskflowWorkflowPlanExecutor>());
+
+    codecRegistry().registerFactory(std::make_unique<PassthroughBlobCodecFactory>(&application));
+    codecRegistry().registerFactory(std::make_unique<ZstdBlobCodecFactory>(&application));
+
     Core core;
 
     application.setCore(&core);
 
     core.createManagers();
+
+    workflow::AbstractWorkflowPlanExecutor::installNotificationLinkHandler();
 
     auto& splashScreenAction = application.getConfigurationAction().getBrandingConfigurationAction().getSplashScreenAction();
 

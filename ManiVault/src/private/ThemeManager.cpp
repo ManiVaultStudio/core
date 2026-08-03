@@ -14,6 +14,7 @@
 
 #include <QStyleHints>
 #include <QGuiApplication>
+#include <QPixmapCache>
 
 using namespace mv::gui;
 using namespace mv::util;
@@ -30,10 +31,11 @@ ThemeManager::ThemeSettings::ThemeSettings(QObject* parent):
     _colorScheme(Qt::ColorScheme::Unknown)
 {
     _updateThemeTimer.setSingleShot(true);
-    _updateThemeTimer.setInterval(1000);
-    _updateThemeTimer.start();
+    _updateThemeTimer.setInterval(0);
 
     connect(&_updateThemeTimer, &QTimer::timeout, this, &ThemeSettings::updateTheme);
+
+    _updateThemeTimer.start();
 }
 
 void ThemeManager::ThemeSettings::setColorSchemeMode(const ColorSchemeMode& colorSchemeMode)
@@ -74,7 +76,7 @@ void ThemeManager::ThemeSettings::updateTheme()
         {
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
             qApp->styleHints()->setColorScheme(_colorScheme);
-            qApp->setPalette(QApplication::style()->standardPalette());
+            qApp->setPalette(ThemeManager::getSystemColorSchemePalette(_colorScheme));
 #endif
 
 #ifdef Q_OS_MACOS
@@ -87,7 +89,7 @@ void ThemeManager::ThemeSettings::updateTheme()
         {
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
             qApp->styleHints()->setColorScheme(_colorScheme);
-            qApp->setPalette(QApplication::style()->standardPalette());
+            qApp->setPalette(ThemeManager::getSystemColorSchemePalette(_colorScheme));
 #endif
 
 #ifdef Q_OS_MACOS
@@ -112,12 +114,15 @@ void ThemeManager::ThemeSettings::updateTheme()
         case ColorSchemeMode::Custom:
         {
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
+            qApp->styleHints()->setColorScheme(ThemeManager::getPaletteColorScheme(_palette));
             qApp->setPalette(_palette);
             mv::help().addNotification("Theme update", QString("Custom <b>%1</b> theme has been activated.").arg(_paletteName), util::StyledIcon("palette"));
 #endif
             break;
         }
     }
+
+    QPixmapCache::clear();
 
     AbstractThemeManager::restyleAllWidgets();
     deleteLater();
@@ -404,10 +409,11 @@ void ThemeManager::addCustomColorScheme(const CustomColorSchemeMode& mode, const
 
 ThemeManager::ThemeSettings* ThemeManager::getRequestThemeSettings()
 {
-    if (_requestThemeSettings.isNull())
-        _requestThemeSettings = new ThemeSettings();
+    if (_requestThemeSettings.isNull()) {
+        _requestThemeSettings = new ThemeSettings(this);
 
-    connect(_requestThemeSettings, &QObject::destroyed, this, &AbstractThemeManager::colorSchemeChanged);
+        connect(_requestThemeSettings, &QObject::destroyed, this, &AbstractThemeManager::colorSchemeChanged);
+    }
 
     return _requestThemeSettings;
 }
@@ -451,14 +457,63 @@ Qt::ColorScheme ThemeManager::getCurrentSystemColorScheme()
 #endif
 }
 
+Qt::ColorScheme ThemeManager::getPaletteColorScheme(const QPalette& palette)
+{
+    return palette.color(QPalette::Window).lightness() < palette.color(QPalette::WindowText).lightness() ? Qt::ColorScheme::Dark : Qt::ColorScheme::Light;
+}
+
+QPalette ThemeManager::getSystemColorSchemePalette(const Qt::ColorScheme& colorScheme)
+{
+    if (colorScheme != Qt::ColorScheme::Dark)
+        return QApplication::style()->standardPalette();
+
+    auto palette = QApplication::style()->standardPalette();
+
+    palette.setColor(QPalette::Window, QColor(45, 45, 45));
+    palette.setColor(QPalette::WindowText, Qt::white);
+    palette.setColor(QPalette::Base, QColor(30, 30, 30));
+    palette.setColor(QPalette::AlternateBase, QColor(45, 45, 45));
+    palette.setColor(QPalette::ToolTipBase, QColor(45, 45, 45));
+    palette.setColor(QPalette::ToolTipText, Qt::white);
+    palette.setColor(QPalette::Text, Qt::white);
+    palette.setColor(QPalette::Button, QColor(60, 60, 60));
+    palette.setColor(QPalette::ButtonText, Qt::white);
+    palette.setColor(QPalette::BrightText, Qt::red);
+    palette.setColor(QPalette::Light, QColor(75, 75, 75));
+    palette.setColor(QPalette::Midlight, QColor(60, 60, 60));
+    palette.setColor(QPalette::Dark, QColor(35, 35, 35));
+    palette.setColor(QPalette::Mid, QColor(45, 45, 45));
+    palette.setColor(QPalette::Shadow, QColor(20, 20, 20));
+    palette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+    palette.setColor(QPalette::HighlightedText, Qt::white);
+    palette.setColor(QPalette::Link, QColor(42, 130, 218));
+    palette.setColor(QPalette::LinkVisited, QColor(170, 130, 218));
+    palette.setColor(QPalette::PlaceholderText, QColor(160, 160, 160));
+
+    palette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(130, 130, 130));
+    palette.setColor(QPalette::Disabled, QPalette::Text, QColor(130, 130, 130));
+    palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(130, 130, 130));
+    palette.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(130, 130, 130));
+    palette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
+    palette.setColor(QPalette::Disabled, QPalette::Base, QColor(35, 35, 35));
+    palette.setColor(QPalette::Disabled, QPalette::Button, QColor(45, 45, 45));
+
+    return palette;
+}
+
 void ThemeManager::privateActivateSystemColorScheme()
 {
 #ifdef THEME_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
+    const auto currentSystemColorScheme = getCurrentSystemColorScheme();
+
+    _systemColorScheme      = currentSystemColorScheme;
+    _applicationColorScheme = currentSystemColorScheme;
+
     getRequestThemeSettings()->setColorSchemeMode(ColorSchemeMode::System);
-    getRequestThemeSettings()->setColorScheme(getCurrentSystemColorScheme());
+    getRequestThemeSettings()->setColorScheme(currentSystemColorScheme);
 }
 
 void ThemeManager::privateActivateSystemColorSchemeLightDark()
@@ -466,6 +521,8 @@ void ThemeManager::privateActivateSystemColorSchemeLightDark()
 #ifdef THEME_MANAGER_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
+
+    normalizeSystemLightDarkColorSchemeActions();
 
     if (_systemDarkColorSchemeAction.isChecked())
         privateActivateDarkSystemColorScheme();
@@ -481,6 +538,8 @@ void ThemeManager::privateActivateLightSystemColorScheme()
 #endif
 
     if (isSystemColorSchemeModeActive() || isSystemLightDarkColorSchemeModeActive()) {
+        _applicationColorScheme = Qt::ColorScheme::Light;
+
         getRequestThemeSettings()->setColorSchemeMode(ColorSchemeMode::SystemLightDark);
         getRequestThemeSettings()->setColorScheme(Qt::ColorScheme::Light);
     }
@@ -493,6 +552,8 @@ void ThemeManager::privateActivateDarkSystemColorScheme()
 #endif
 
     if (isSystemColorSchemeModeActive() || isSystemLightDarkColorSchemeModeActive()) {
+        _applicationColorScheme = Qt::ColorScheme::Dark;
+
         getRequestThemeSettings()->setColorSchemeMode(ColorSchemeMode::SystemLightDark);
         getRequestThemeSettings()->setColorScheme(Qt::ColorScheme::Dark);
     }
@@ -507,10 +568,33 @@ void ThemeManager::privateActivateCustomColorScheme()
     const auto currentCustomColorSchemeName = _colorSchemeAction.getCurrentColorSchemeAction().getCurrentText();
     const auto customColorSchemes           = getCustomColorSchemes();
 
-    if (isCustomColorSchemeModeActive() && customColorSchemes.keys().contains(currentCustomColorSchemeName)) {
+    if (isCustomColorSchemeModeActive() && customColorSchemes.contains(currentCustomColorSchemeName)) {
+        const auto palette = customColorSchemes.value(currentCustomColorSchemeName).getPalette();
+
+        _applicationColorScheme = getPaletteColorScheme(palette);
+
         getRequestThemeSettings()->setColorSchemeMode(ColorSchemeMode::Custom);
-        getRequestThemeSettings()->setPalette(customColorSchemes[currentCustomColorSchemeName].getPalette(), currentCustomColorSchemeName);
+        getRequestThemeSettings()->setPalette(palette, currentCustomColorSchemeName);
     }
+}
+
+void ThemeManager::normalizeSystemLightDarkColorSchemeActions()
+{
+    const auto lightChecked = _systemLightColorSchemeAction.isChecked();
+    const auto darkChecked  = _systemDarkColorSchemeAction.isChecked();
+
+    if (lightChecked != darkChecked)
+        return;
+
+    auto colorScheme = _applicationColorScheme;
+
+    if (colorScheme == Qt::ColorScheme::Unknown)
+        colorScheme = getCurrentSystemColorScheme();
+
+    const auto useLightColorScheme = colorScheme == Qt::ColorScheme::Light;
+
+    setSystemLightColorSchemeActionCheckedSilent(useLightColorScheme);
+    setSystemDarkColorSchemeActionCheckedSilent(!useLightColorScheme);
 }
 
 void ThemeManager::setSystemLightColorSchemeActionCheckedSilent(bool checked)

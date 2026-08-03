@@ -26,13 +26,13 @@ ModalTaskHandler::ModalTaskHandler(QObject* parent) :
 
     _filterModel.setSourceModel(&_model);
     _filterModel.getTaskScopeFilterAction().setSelectedOptions({ "Modal" });
-    _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Finished", "Aborting" });
+    _filterModel.getTaskStatusFilterAction().setSelectedOptions({ "Running", "Running Indeterminate", "Aborting" });
     _filterModel.getTopLevelTasksOnlyAction().setChecked(true);
 
     _minimumDurationTimer.setSingleShot(true);
 
     const auto updateMinimumDurationTimer = [this]() -> void {
-        _minimumDurationTimer.setInterval(getMinimumDuration());
+        _minimumDurationTimer.setInterval(static_cast<int>(getMinimumDuration()));
     };
 
     updateMinimumDurationTimer();
@@ -66,8 +66,9 @@ void ModalTaskHandler::updateDialogVisibility()
     qDebug() << __FUNCTION__ << numberOfModalTasks;
 #endif
 
-    if (numberOfModalTasks == 0 && _modalTasksDialog.isVisible())
+    if (numberOfModalTasks == 0 && _modalTasksDialog.isVisible()) {
         _modalTasksDialog.close();
+    }
 
     if (numberOfModalTasks >= 1 && !_modalTasksDialog.isVisible()) {
         auto mainWindow = Application::getMainWindow();
@@ -78,8 +79,6 @@ void ModalTaskHandler::updateDialogVisibility()
         _modalTasksDialog.move(mainWindowGeometry.center() - _modalTasksDialog.rect().center());
         _modalTasksDialog.show();
     }
-
-    QCoreApplication::processEvents();
 }
 
 TasksTreeModel& ModalTaskHandler::getModel()

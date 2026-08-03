@@ -5,7 +5,8 @@
 #include "PluginPickerAction.h"
 
 #include "CoreInterface.h"
-#include "event/Event.h"
+
+#include "util/Serialization.h"
 
 #ifdef _DEBUG
     //#define PLUGIN_PICKER_ACTION_VERBOSE

@@ -1,0 +1,16 @@
+/** @defgroup mv_api ManiVault API
+ *  Public API reference for ManiVault.
+ */
+
+/** @defgroup mv_managers Managers
+ *  @ingroup mv_api
+ */
+
+/** @defgroup mv_gui GUI
+ *  @ingroup mv_api
+ */
+
+/** @defgroup mv_util Utilities
+ *  @ingroup mv_api
+ */
+

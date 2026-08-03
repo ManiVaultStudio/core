@@ -288,7 +288,7 @@ void MainWindow::initialize()
     const auto updateMenuVisibility = [fileMenuAction, projectsMenuAction]() -> void {
         const auto projectIsReadOnly = projects().getCurrentProject()->getReadOnlyAction().isChecked();
     
-        fileMenuAction->setVisible(!projectIsReadOnly);
+        //fileMenuAction->setVisible(!projectIsReadOnly);
         projectsMenuAction->setVisible(projectIsReadOnly ? projects().getCurrentProject()->getAllowProjectSwitchingAction().isChecked() : true);
         };
     

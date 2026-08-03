@@ -30,6 +30,7 @@ namespace mv
  *
  * Base abstract settings manager class for managing global settings
  *
+ * @ingroup mv_managers
  * @author Thomas Kroes
  */
 class CORE_EXPORT AbstractSettingsManager : public AbstractManager

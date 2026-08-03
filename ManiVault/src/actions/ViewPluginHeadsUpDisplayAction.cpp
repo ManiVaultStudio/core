@@ -76,6 +76,10 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
     _treeView.adjustSize();
     _treeView.setObjectName("TreeView");
 
+    //_treeView.setStyleSheet("background-color: rgb(255, 0, 0);");
+
+
+
     connect(&_viewPluginHeadsUpDisplayAction->getHeadsUpDisplayTreeModel(), &QAbstractItemModel::rowsInserted, &_treeView, [this](const QModelIndex& parent, int first, int last) {
         if (parent.isValid())
             _treeView.expand(parent);
@@ -103,6 +107,8 @@ ViewPluginHeadsUpDisplayAction::HeadsUpDisplayWidget::HeadsUpDisplayWidget(QWidg
     if (auto header = _treeView.header()) {
         header->hideSection(static_cast<int>(AbstractHeadsUpDisplayModel::Column::Id));
         header->hideSection(static_cast<int>(AbstractHeadsUpDisplayModel::Column::Description));
+
+        header->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
     }
 
     auto layout = new QVBoxLayout();

@@ -31,6 +31,7 @@ namespace mv {
  *
  * This class provides an interface for the theme manager
  *
+ * @ingroup mv_managers
  * @author Thomas Kroes
  */
 class CORE_EXPORT AbstractThemeManager : public AbstractManager

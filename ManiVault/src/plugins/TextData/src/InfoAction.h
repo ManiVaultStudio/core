@@ -10,10 +10,6 @@
 
 #include <actions/StringAction.h>
 
-using namespace mv;
-using namespace mv::gui;
-using namespace mv::util;
-
 /**
  * Info action class
  *
@@ -21,7 +17,7 @@ using namespace mv::util;
  *
  * @author Julian Thijssen and Thomas Kroes
  */
-class InfoAction : public GroupAction
+class InfoAction : public mv::gui::GroupAction
 {
 public:
 
@@ -30,17 +26,17 @@ public:
      * @param parent Pointer to parent object
      * @param points Smart pointer to points dataset
      */
-    InfoAction(QObject* parent, const Dataset<Text>& dataset);
+    InfoAction(QObject* parent, const mv::Dataset<Text>& dataset);
 
 public: // Action getters
 
-    StringAction& getDataStorageAction() { return _dataStorageAction; }
-    StringAction& getNumberOfPointsAction() { return _numberOfPointsAction; }
-    StringAction& getRawDataSizeAction() { return _rawDataSizeAction; }
+    mv::gui::StringAction& getDataStorageAction() { return _dataStorageAction; }
+    mv::gui::StringAction& getNumberOfPointsAction() { return _numberOfPointsAction; }
+    mv::gui::StringAction& getRawDataSizeAction() { return _rawDataSizeAction; }
 
 protected:
-    Dataset<Text>                   _dataset;                           /** Text dataset reference */
-    StringAction                    _dataStorageAction;                 /** Type of data storage action */
-    StringAction                    _numberOfPointsAction;              /** Number of points action */
-    StringAction                    _rawDataSizeAction;                 /** Amount of memory for raw data */
+    mv::Dataset<Text>       _dataset;                           /** Text dataset reference */
+    mv::gui::StringAction   _dataStorageAction;                 /** Type of data storage action */
+    mv::gui::StringAction   _numberOfPointsAction;              /** Number of points action */
+    mv::gui::StringAction   _rawDataSizeAction;                 /** Amount of memory for raw data */
 };

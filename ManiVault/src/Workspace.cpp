@@ -53,9 +53,7 @@ Workspace::Workspace(const QString& filePath, QObject* parent /*= nullptr*/) :
 
         QByteArray workspaceByteArray = workspaceJsonFile.readAll();
 
-        QJsonDocument jsonDocument;
-
-        jsonDocument = QJsonDocument::fromJson(workspaceByteArray);
+        QJsonDocument jsonDocument = QJsonDocument::fromJson(workspaceByteArray);
 
         if (jsonDocument.isNull() || jsonDocument.isEmpty())
             throw std::runtime_error("JSON document is invalid");

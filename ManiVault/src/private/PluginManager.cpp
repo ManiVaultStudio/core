@@ -41,6 +41,7 @@ namespace mv {
 using namespace util;
 using namespace plugin;
 using namespace gui;
+using namespace workflow;
 
 PluginManager::PluginManager(QObject* parent) :
     AbstractPluginManager(parent),
@@ -101,22 +102,16 @@ void PluginManager::loadPluginFactories()
     qDebug() << "Loading plugin factories";
 #endif
 
-    QDir pluginsDir(StandardPaths::getPluginsDirectory());
+    const QDir pluginsDir(StandardPaths::getPluginsDirectory());
+    const QDir pluginsDependenciesDir(StandardPaths::getPluginDependenciesDirectory());
     
     _pluginFactories.clear();
 
     auto getPluginDependencyDir = [](const QDir& dir, const QString& name) -> std::pair<QDir, bool> {
         QDir dependenciesDir = dir;
 
-        dependenciesDir.cdUp();
-
-    	if (!dependenciesDir.cd("PluginDependencies"))  // name by convention
-            return { dependenciesDir, false };
-
     	if (!dependenciesDir.cd(name))
             return { dependenciesDir, false };
-
-    	dependenciesDir.cd(name);
 
     	return { dependenciesDir, true };
     };
@@ -140,10 +135,10 @@ void PluginManager::loadPluginFactories()
         return baseName;
         };
 
-    auto loadPluginDependencies = [&getLibraryName, &getPluginDependencyDir](const QDir& pluginDir, const QString& fileName) -> void {
+    auto loadPluginDependencies = [&getLibraryName, &getPluginDependencyDir](const QDir& pluginsDependenciesDir, const QString& fileName) -> void {
 
         const auto pluginName = getLibraryName(fileName);
-        const auto [pluginDependenciesDir, pluginDependenciesExists] = getPluginDependencyDir(pluginDir, pluginName);
+        const auto [pluginDependenciesDir, pluginDependenciesExists] = getPluginDependencyDir(pluginsDependenciesDir, pluginName);
 
         if (!pluginDependenciesExists)
             return;
@@ -189,7 +184,7 @@ void PluginManager::loadPluginFactories()
     for (const auto& fileName: resolvedPlugins)
     {
         // Load plugin dependencies, if there are any
-        loadPluginDependencies(pluginsDir, fileName);
+        loadPluginDependencies(pluginsDependenciesDir, fileName);
 
         // Dynamic loader of plugin shared library
         QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
@@ -288,7 +283,7 @@ QStringList PluginManager::resolveDependencies(QDir pluginDir) const
      * immediately add it to the list of resolved plugins. Dependencies are given by a list of plugin kinds
      * under the 'dependencies' key in the accompanying .json metadata file.
      */
-    for (QString fileName: pluginDir.entryList(QDir::Files))
+    for (const QString& fileName: pluginDir.entryList(QDir::Files))
     {
         QPluginLoader pluginLoader(pluginDir.absoluteFilePath(fileName));
 
@@ -373,6 +368,30 @@ QStringList PluginManager::resolveDependencies(QDir pluginDir) const
 
 plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets inputDatasets /*= Datasets()*/, Datasets outputDatasets /*= Datasets()*/)
 {
+    try {
+	    if (!_pluginFactories.keys().contains(kind))
+	    	throw std::runtime_error("Unrecognized plugin kind");
+
+    	auto pluginFactory = _pluginFactories[kind];
+
+        if (!mv::projects().isOpeningProject() && pluginFactory->getType() == plugin::Type::VIEW)
+            return requestViewPlugin(kind, nullptr, gui::DockAreaFlag::Right, inputDatasets);
+        
+        return privateRequestPlugin(kind, inputDatasets, outputDatasets);
+
+    } catch (std::exception& exception) {
+        throw ManiVaultException(SeverityLevel::Error, "Unable to create plugin", exception.what(), __FUNCTION__, {
+             { "Plugin kind", kind }
+        });
+    } catch (...) {
+        throw ManiVaultException(SeverityLevel::Error, "Unable to create plugin", "Unknown error", __FUNCTION__, {
+             { "Plugin kind", kind }
+		});
+    }
+}
+
+plugin::Plugin* PluginManager::privateRequestPlugin(const QString& kind, Datasets inputDatasets /*= Datasets()*/, Datasets outputDatasets /*= Datasets()*/)
+{
     try
     {
         if (!_pluginFactories.keys().contains(kind))
@@ -392,36 +411,38 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets input
 
         switch (pluginFactory->getType()) {
             case plugin::Type::ANALYSIS: {
-                auto analysisPlugin = dynamic_cast<AnalysisPlugin*>(pluginInstance);
+                if (auto analysisPlugin = dynamic_cast<AnalysisPlugin*>(pluginInstance)) {
+                    if (!inputDatasets.isEmpty())
+                        analysisPlugin->setInputDatasets(inputDatasets);
 
-                if (!inputDatasets.isEmpty())
-                    analysisPlugin->setInputDatasets(inputDatasets);
-
-                if (!outputDatasets.isEmpty())
-                    analysisPlugin->setOutputDatasets(outputDatasets);
+                    if (!outputDatasets.isEmpty())
+                        analysisPlugin->setOutputDatasets(outputDatasets);
+                }
 
                 break;
             }
 
             case plugin::Type::TRANSFORMATION: {
-                auto analysisPlugin = dynamic_cast<TransformationPlugin*>(pluginInstance);
-
-                if (!inputDatasets.isEmpty())
-                    analysisPlugin->setInputDatasets(inputDatasets);
+                if (auto transformationPlugin = dynamic_cast<TransformationPlugin*>(pluginInstance)) {
+                    if (!inputDatasets.isEmpty())
+                        transformationPlugin->setInputDatasets(inputDatasets);
+                }
 
                 break;
             }
 
             case plugin::Type::WRITER: {
-                auto writerPlugin = dynamic_cast<WriterPlugin*>(pluginInstance);
-
-                if (!inputDatasets.isEmpty())
-                    writerPlugin->setInputDatasets(inputDatasets);
+                if (auto writerPlugin = dynamic_cast<WriterPlugin*>(pluginInstance)) {
+                    if (!inputDatasets.isEmpty())
+                        writerPlugin->setInputDatasets(inputDatasets);
+                }
 
                 break;
             }
 
-            default:
+			case plugin::Type::DATA:
+			case plugin::Type::LOADER:
+			case plugin::Type::VIEW:
                 break;
         }
 
@@ -436,16 +457,17 @@ plugin::Plugin* PluginManager::requestPlugin(const QString& kind, Datasets input
         emit pluginAdded(pluginInstance);
 
         return pluginInstance;
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to create plugin", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to create plugin");
-    }
-
-    return {};
+	}
+	catch (std::exception& exception) {
+	    throw ManiVaultException(SeverityLevel::Error, "Unable to create plugin", exception.what(), __FUNCTION__, {
+	         { "Plugin kind", kind }
+	    });
+	}
+	catch (...) {
+	    throw ManiVaultException(SeverityLevel::Error, "Unable to create plugin", "Unknown error", __FUNCTION__, {
+	         { "Plugin kind", kind }
+	    });
+	}
 }
 
 plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin::ViewPlugin* dockToViewPlugin /*= nullptr*/, gui::DockAreaFlag dockArea /*= gui::DockAreaFlag::Right*/, Datasets datasets /*= Datasets()*/)
@@ -463,19 +485,20 @@ plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin
         if (viewPluginFactory->getStartFloating())
             return requestViewPluginFloated(kind, datasets);
 
-        const auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(requestPlugin(kind, datasets));
-
-        if (viewPlugin != nullptr)
+        if (const auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(privateRequestPlugin(kind, datasets))) {
             mv::workspaces().addViewPlugin(viewPlugin, dockToViewPlugin, dockArea);
-
-        return viewPlugin;
+            return viewPlugin;
+        }
     }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to create view plugin", e);
+    catch (std::exception& exception) {
+        throw ManiVaultException(SeverityLevel::Error, "Unable to create view plugin", exception.what(), __FUNCTION__, {
+             { "Plugin kind", kind }
+        });
     }
     catch (...) {
-        exceptionMessageBox("Unable to create view plugin");
+        throw ManiVaultException(SeverityLevel::Error, "Unable to create view plugin", "Unknown error", __FUNCTION__, {
+             { "Plugin kind", kind }
+        });
     }
 
     return {};
@@ -483,12 +506,13 @@ plugin::ViewPlugin* PluginManager::requestViewPlugin(const QString& kind, plugin
 
 plugin::ViewPlugin* PluginManager::requestViewPluginFloated(const QString& kind, Datasets datasets)
 {
-    const auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(requestPlugin(kind, datasets));
-
-    if (viewPlugin != nullptr)
+    if (const auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(privateRequestPlugin(kind, datasets))) {
         mv::workspaces().addViewPluginFloated(viewPlugin);
 
-    return viewPlugin;
+    	return viewPlugin;
+    }
+
+    return {};
 }
 
 void PluginManager::addPlugin(plugin::Plugin* plugin)
@@ -512,7 +536,11 @@ void PluginManager::addPlugin(plugin::Plugin* plugin)
                 break;
             }
 
+            case plugin::Type::ANALYSIS:
+            case plugin::Type::LOADER:
+            case plugin::Type::WRITER:
             case plugin::Type::VIEW:
+            case plugin::Type::TRANSFORMATION:
                 break;
         }
 
@@ -522,34 +550,46 @@ void PluginManager::addPlugin(plugin::Plugin* plugin)
         {
             case plugin::Type::ANALYSIS:
             {
-                auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
-
-                if (analysisPlugin)
+                if (auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin)) {
                     events().notifyDatasetAdded(analysisPlugin->getOutputDataset());
+                }
 
                 break;
             }
 
             case plugin::Type::LOADER:
             {
-                dynamic_cast<plugin::LoaderPlugin*>(plugin)->loadData();
+                if (auto loaderPlugin = dynamic_cast<plugin::LoaderPlugin*>(plugin)) {
+                    loaderPlugin->loadData();
+                }
+                
                 break;
             }
 
             case plugin::Type::WRITER:
             {
-                dynamic_cast<plugin::WriterPlugin*>(plugin)->writeData();
+                if (auto writerPlugin = dynamic_cast<plugin::WriterPlugin*>(plugin)) {
+                    writerPlugin->writeData();
+                }
+
                 break;
             }
 
+            case plugin::Type::DATA:
+            case plugin::Type::TRANSFORMATION:
+            case plugin::Type::VIEW:
+                break;
         }
     }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to add plugin", e);
+    catch (std::exception& exception) {
+        throw ManiVaultException(SeverityLevel::Error, "Unable to add plugin", exception.what(), __FUNCTION__, {
+             { "Plugin name", plugin->getGuiName() }
+        });
     }
     catch (...) {
-        exceptionMessageBox("Unable to add plugin");
+        throw ManiVaultException(SeverityLevel::Error, "Unable to add plugin", "Unknown error", __FUNCTION__, {
+             { "Plugin name", plugin->getGuiName() }
+        });
     }
 }
 
@@ -581,12 +621,15 @@ void PluginManager::destroyPlugin(plugin::Plugin* plugin)
         }
         emit pluginDestroyed(pluginId);
     }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to destroy plugin", e);
+    catch (std::exception& exception) {
+        throw ManiVaultException(SeverityLevel::Error, "Unable to destroy plugin", exception.what(), __FUNCTION__, {
+             { "Plugin name", plugin->getGuiName() }
+        });
     }
     catch (...) {
-        exceptionMessageBox("Unable to destroy plugin");
+        throw ManiVaultException(SeverityLevel::Error, "Unable to destroy plugin", "Unknown error", __FUNCTION__, {
+             { "Plugin name", plugin->getGuiName() }
+        });
     }
 }
 
@@ -613,12 +656,15 @@ void PluginManager::destroyPluginById(const QString& pluginId)
         }
         emit pluginDestroyed(pluginId);
     }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to destroy plugin", e);
+    catch (std::exception& exception) {
+        throw ManiVaultException(SeverityLevel::Error, "Unable to destroy plugin", exception.what(), __FUNCTION__, {
+             { "Plugin ID", pluginId }
+            });
     }
     catch (...) {
-        exceptionMessageBox("Unable to destroy plugin");
+        throw ManiVaultException(SeverityLevel::Error, "Unable to destroy plugin", "Unknown error", __FUNCTION__, {
+             { "Plugin ID", pluginId }
+        });
     }
 }
 
@@ -833,101 +879,121 @@ QIcon PluginManager::getPluginIcon(const QString& pluginKind) const
     return StyledIcon(_pluginFactories[pluginKind]->icon());
 }
 
-void PluginManager::fromVariantMap(const QVariantMap& variantMap)
+UniqueWorkflowPlan PluginManager::fromVariantMapWorkflow(QVariantMap variantMap)
 {
-    Serializable::fromVariantMap(variantMap);
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
 
-    variantMapMustContain(variantMap, "UsedPlugins");
+    plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        Serializable::fromVariantMap(variantMap);
 
-    QStringList missingPluginKinds;
+        QVariantList usedPluginsList;
 
-    for (const auto& usedPlugin : variantMap["UsedPlugins"].toList())
-        if (!_pluginFactories.contains(usedPlugin.toString()))
-            missingPluginKinds << usedPlugin.toString();
+        if (variantMap.contains(getSerializationName()))
+            usedPluginsList = variantMap[getSerializationName()].toList();
 
-    if (variantMap.contains("LoadedAnalyses"))
-    {
-        for (const auto& loadedAnalysis : variantMap["LoadedAnalyses"].toList())
-            missingPluginKinds.removeAll(loadedAnalysis.toMap()["Kind"].toString());
+        // Pre 1.5.0
+        if (variantMap.contains("UsedPlugins"))
+            usedPluginsList = variantMap["UsedPlugins"].toList();
 
-        missingPluginKinds.squeeze();
+        QStringList missingPluginKinds;
 
-        if (!missingPluginKinds.isEmpty())
-            throw std::runtime_error(QString("One or more plugins are not available: %1").arg(missingPluginKinds.join(", ")).toLocal8Bit());
+        for (const auto& usedPlugin : usedPluginsList)
+            if (!_pluginFactories.contains(usedPlugin.toString()))
+                missingPluginKinds << usedPlugin.toString();
 
-        for (const auto& loadedAnalysis : variantMap["LoadedAnalyses"].toList())
-        {
-            auto analysisPluginMap = loadedAnalysis.toMap();
+        if (variantMap.contains("LoadedAnalyses")) {
+	        for (const auto& loadedAnalysis : variantMap["LoadedAnalyses"].toList())
+	        	missingPluginKinds.removeAll(loadedAnalysis.toMap()["Kind"].toString());
 
-            variantMapMustContain(analysisPluginMap, "Kind");
-            variantMapMustContain(analysisPluginMap, "InputDatasetsIDs");
-            variantMapMustContain(analysisPluginMap, "OutputDatasetsIDs");
+			missingPluginKinds.squeeze();
 
-            auto analysisPluginKind = analysisPluginMap["Kind"].toString();
+			if (!missingPluginKinds.isEmpty())
+				throw std::runtime_error(QString("One or more plugins are not available: %1").arg(missingPluginKinds.join(", ")).toLocal8Bit());
 
-            if (_pluginFactories.contains(analysisPluginKind))
-            {
-                auto inputDatasetsGUIDs = analysisPluginMap["InputDatasetsIDs"].toStringList();
-                auto outputDatasetsGUIDs = analysisPluginMap["OutputDatasetsIDs"].toStringList();
+			for (const auto& loadedAnalysis : variantMap["LoadedAnalyses"].toList())
+			{
+				auto analysisPluginMap = loadedAnalysis.toMap();
 
-                Datasets inputDatasets;
+				variantMapMustContain(analysisPluginMap, "Kind");
+				variantMapMustContain(analysisPluginMap, "InputDatasetsIDs");
+				variantMapMustContain(analysisPluginMap, "OutputDatasetsIDs");
 
-                for (const auto& inputDatasetGUID : inputDatasetsGUIDs)
-                    inputDatasets << mv::data().getDataset(inputDatasetGUID);
+				auto analysisPluginKind = analysisPluginMap["Kind"].toString();
 
-                Datasets outputDatasets;
+				if (_pluginFactories.contains(analysisPluginKind))
+				{
+					auto inputDatasetsGUIDs = analysisPluginMap["InputDatasetsIDs"].toStringList();
+					auto outputDatasetsGUIDs = analysisPluginMap["OutputDatasetsIDs"].toStringList();
 
-                for (const auto& outputDatasetGUID : outputDatasetsGUIDs)
-                    outputDatasets << mv::data().getDataset(outputDatasetGUID);
+					Datasets inputDatasets;
 
-                auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugins().requestPlugin(analysisPluginKind, inputDatasets, outputDatasets));
+					for (const auto& inputDatasetGUID : inputDatasetsGUIDs)
+						inputDatasets << mv::data().getDataset(inputDatasetGUID);
 
-                if (analysisPlugin)
-                    analysisPlugin->fromVariantMap(analysisPluginMap);
-            }
+					Datasets outputDatasets;
+
+					for (const auto& outputDatasetGUID : outputDatasetsGUIDs)
+						outputDatasets << mv::data().getDataset(outputDatasetGUID);
+
+					auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugins().requestPlugin(analysisPluginKind, inputDatasets, outputDatasets));
+
+					if (analysisPlugin)
+						analysisPlugin->fromVariantMap(analysisPluginMap);
+				}
+			}
         }
-    }
+
+        executionContext->setOutput(QVariant());
+    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+
+    return plan;
 }
 
-QVariantMap PluginManager::toVariantMap() const
+UniqueWorkflowPlan PluginManager::toVariantMapWorkflow() const
 {
-    auto variantMap = Serializable::toVariantMap();
+    UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
 
-    QVariantList usedPluginsList;     // Kinds of used plugins
-    QVariantList loadedAnalysesList;  // Opened analysis plugin instances
+    plan->addSequentialStage("Save", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        auto variantMap = Serializable::toVariantMap();
 
-    for (const auto& pluginFactory : _pluginFactories.values())
-        if ((pluginFactory->getType() == Type::DATA || pluginFactory->getType() == Type::ANALYSIS || pluginFactory->getType() == Type::VIEW) && pluginFactory->getNumberOfInstances() > 0)
-            usedPluginsList << pluginFactory->getKind();
+        QVariantList usedPluginsList;     // Kinds of used plugins
+        QVariantList loadedAnalysesList;  // Opened analysis plugin instances
 
-    for (const auto& loadedPlugin : _plugins) {
-        if (loadedPlugin->getType() == Type::ANALYSIS)
-        {
-            // Make sure the analysisPlugin overloads toVariantMap() and fromVariantMap(QVariantMap) before saving it in the project
-            auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(loadedPlugin.get());
-            const QMetaObject* metaObj = analysisPlugin->metaObject();
+        for (const auto& pluginFactory : _pluginFactories.values())
+            if ((pluginFactory->getType() == Type::DATA || pluginFactory->getType() == Type::ANALYSIS || pluginFactory->getType() == Type::VIEW) && pluginFactory->getNumberOfInstances() > 0)
+                usedPluginsList << pluginFactory->getKind();
 
-            if (metaObj == nullptr)
-                continue;
+        for (const auto& loadedPlugin : _plugins) {
+            if (loadedPlugin->getType() == Type::ANALYSIS)
+            {
+                // Make sure the analysisPlugin overloads toVariantMap() and fromVariantMap(QVariantMap) before saving it in the project
+                auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(loadedPlugin.get());
+                const QMetaObject* metaObj = analysisPlugin->metaObject();
 
-            auto toVariantMapIndex = metaObj->indexOfMethod(QMetaObject::normalizedSignature("toVariantMap()").constData());
-            auto fromVariantMapIndex = metaObj->indexOfMethod(QMetaObject::normalizedSignature("fromVariantMap(QVariantMap)").constData());
+                if (metaObj == nullptr)
+                    continue;
 
-            if (toVariantMapIndex != -1 && fromVariantMapIndex != -1)
-                loadedAnalysesList << analysisPlugin->toVariantMap();
-            else if (toVariantMapIndex != -1)
-                qWarning() << "PluginManager::toVariantMap(): " << analysisPlugin->getName() << " implements toVariantMap() but not fromVariantMap(QVariantMap) - analysis plugin is not saved.";
-            else if (fromVariantMapIndex != -1)
-                qWarning() << "PluginManager::toVariantMap(): " << analysisPlugin->getName() << " implements fromVariantMap(QVariantMap) but not toVariantMap() - analysis plugin is not saved.";
+                auto toVariantMapIndex = metaObj->indexOfMethod(QMetaObject::normalizedSignature("toVariantMap()").constData());
+                auto fromVariantMapIndex = metaObj->indexOfMethod(QMetaObject::normalizedSignature("fromVariantMap(QVariantMap)").constData());
+
+                if (toVariantMapIndex != -1 && fromVariantMapIndex != -1)
+                    loadedAnalysesList << analysisPlugin->toVariantMap();
+                else if (toVariantMapIndex != -1)
+                    qWarning() << "PluginManager::toVariantMap(): " << analysisPlugin->getName() << " implements toVariantMap() but not fromVariantMap(QVariantMap) - analysis plugin is not saved.";
+                else if (fromVariantMapIndex != -1)
+                    qWarning() << "PluginManager::toVariantMap(): " << analysisPlugin->getName() << " implements fromVariantMap(QVariantMap) but not toVariantMap() - analysis plugin is not saved.";
+            }
         }
-    }
 
-    variantMap.insert({
-        { "UsedPlugins", usedPluginsList },
-        { "LoadedAnalyses", loadedAnalysesList }
+        variantMap.insert({
+            { "UsedPlugins", usedPluginsList },
+            { "LoadedAnalyses", loadedAnalysesList }
+        });
+
+        executionContext->setOutput(variantMap);
     });
 
-    return variantMap;
+    return plan;
 }
 
 const PluginsListModel& PluginManager::getListModel() const

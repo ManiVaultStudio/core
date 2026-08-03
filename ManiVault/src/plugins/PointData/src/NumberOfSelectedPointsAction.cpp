@@ -8,6 +8,8 @@
 #include <QListView>
 #include <QStringListModel>
 
+using namespace mv;
+
 NumberOfSelectedPointsAction::NumberOfSelectedPointsAction(QObject* parent, const Dataset<Points>& points) :
     WidgetAction(parent, "Number Of Selected Points"),
     _points(points),

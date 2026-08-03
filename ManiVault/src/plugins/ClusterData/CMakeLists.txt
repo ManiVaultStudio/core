@@ -1,21 +1,25 @@
 cmake_minimum_required(VERSION 3.22)
 
 set(CLUSTERDATA "ClusterData")
-PROJECT(${CLUSTERDATA})
+PROJECT(${CLUSTERDATA} LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(CLUSTERD_SOURCES
+set(CLUSTER_SOURCES
     src/ClusterData.h
     src/ClusterData.cpp
+    src/ClusterDataLegacySerialization.h
+    src/ClusterDataLegacySerialization.cpp
+    src/ClustersSerializer.h
+    src/ClustersSerializer.cpp
     src/Cluster.h
     src/Cluster.cpp
-    src/ClusterData.json
 )
 
 set(CLUSTER_HEADERS
     src/Cluster.h
     src/ClusterData.h
+    src/ClusterDataLegacySerialization.h
     src/ClustersAction.h
     src/ClustersActionWidget.h
     src/ClustersModel.h
@@ -68,18 +72,23 @@ set(DIALOG_SOURCES
     src/OverwriteClustersConfirmationDialog.cpp
 )
 
-source_group(Plugin FILES ${CLUSTERD_SOURCES})
+set(CLUSTER_AUX
+    PluginInfo.json
+)
+
+source_group(Plugin FILES ${CLUSTER_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 source_group(Model FILES ${MODEL_SOURCES})
 source_group(Dialog FILES ${DIALOG_SOURCES})
+source_group(Aux FILES ${CLUSTER_AUX})
 
-add_library(${CLUSTERDATA} SHARED ${CLUSTERD_SOURCES} ${ACTIONS_SOURCES} ${MODEL_SOURCES} ${DIALOG_SOURCES})
+add_library(${CLUSTERDATA} SHARED ${CLUSTER_SOURCES} ${ACTIONS_SOURCES} ${MODEL_SOURCES} ${DIALOG_SOURCES} ${CLUSTER_AUX})
 
 add_library(ManiVault::${CLUSTERDATA} ALIAS ${CLUSTERDATA})
 
 target_include_directories(${CLUSTERDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-target_compile_features(${CLUSTERDATA} PRIVATE cxx_std_20)
+target_compile_features(${CLUSTERDATA} PUBLIC cxx_std_${MV_CXX_STANDARD})
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
@@ -98,12 +107,11 @@ target_link_libraries(${CLUSTERDATA} PRIVATE PointData)
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${CLUSTERDATA} ${MV_USE_AVX})
 
-set_target_properties(${CLUSTERDATA} PROPERTIES PUBLIC_HEADER "${CLUSTER_HEADERS}")
-set_target_properties(${CLUSTERDATA} PROPERTIES AUTOMOC ON)
-
-if(MV_UNITY_BUILD)
-    set_target_properties(${CLUSTERDATA} PROPERTIES UNITY_BUILD ON)
-endif()
+set_target_properties(${CLUSTERDATA} PROPERTIES 
+    AUTOMOC ON
+    PUBLIC_HEADER "${CLUSTER_HEADERS}"
+    UNITY_BUILD ${MV_UNITY_BUILD}
+)
 
 install(TARGETS ${CLUSTERDATA}
     EXPORT "ManiVaultPublicExport"
@@ -119,3 +127,5 @@ add_custom_command(TARGET ${CLUSTERDATA} POST_BUILD
         --config $<CONFIGURATION>
         --prefix ${MV_INSTALL_DIR}
 )
+
+mv_handle_plugin_config(${CLUSTERDATA})

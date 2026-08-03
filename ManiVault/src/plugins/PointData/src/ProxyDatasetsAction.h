@@ -9,10 +9,6 @@
 
 #include <actions/StringAction.h>
 
-using namespace mv;
-using namespace mv::util;
-using namespace mv::gui;
-
 /**
  * Proxy datasets action class
  *
@@ -20,7 +16,7 @@ using namespace mv::gui;
  *
  * @author Thomas Kroes
  */
-class ProxyDatasetsAction : public WidgetAction
+class ProxyDatasetsAction : public mv::gui::WidgetAction
 {
     Q_OBJECT
 
@@ -54,11 +50,11 @@ public:
      * @param parent Pointer to parent object
      * @param points Smart pointer to points dataset
      */
-    ProxyDatasetsAction(QObject* parent, const Dataset<Points>& points);
+    ProxyDatasetsAction(QObject* parent, const mv::Dataset<Points>& points);
 
 public: // Action getters
 
-    StringAction& getCountAction() { return _countAction; }
+    mv::gui::StringAction& getCountAction() { return _countAction; }
     EditProxyDatasetsAction& getEditProxyDatasetsAction() { return _editProxyDatasetsAction; }
 
 signals:
@@ -69,7 +65,7 @@ signals:
     void dimensionNamesChanged(const QStringList& dimensionNames);
 
 protected:
-    Dataset<Points>             _points;                        /** Points dataset reference */
-    StringAction                _countAction;                   /** Number of proxy datasets action */
+    mv::Dataset<Points>         _points;                        /** Points dataset reference */
+    mv::gui::StringAction       _countAction;                   /** Number of proxy datasets action */
     EditProxyDatasetsAction     _editProxyDatasetsAction;       /** Manual update action */
 };

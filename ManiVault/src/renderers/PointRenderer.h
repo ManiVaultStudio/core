@@ -22,7 +22,7 @@ namespace mv
         };
 
         enum PointEffect {
-            None, Color, Size, Outline, Color2D
+            None, Color, Size, Outline, Color2D, Color2DChannels, ColorRGB
         };
 
         enum class PointSelectionDisplayMode {
@@ -38,16 +38,20 @@ namespace mv
             BufferObject _highlightBuffer;
             BufferObject _focusHighlightsBuffer;
             BufferObject _colorScalarBuffer;
+            BufferObject _colorScalarBuffer2;
+            BufferObject _colorScalarBuffer3;
             BufferObject _sizeScalarBuffer;
             BufferObject _opacityScalarBuffer;
             BufferObject _colorBuffer;
 
-            PointArrayObject() : QOpenGLFunctions_3_3_Core(), _handle(0), _colorScalarsRange(0, 1, 1) {}
+            PointArrayObject() : QOpenGLFunctions_3_3_Core(), _handle(0), _colorScalarsRange(0, 1, 1), _colorScalarsRange2(0, 1, 1), _colorScalarsRange3(0, 1, 1) {}
             void init();
             void setPositions(const std::vector<Vector2f>& positions);
             void setHighlights(const std::vector<char>& highlights);
             void setFocusHighlights(const std::vector<char>& focusHighlights);
             void setScalars(const std::vector<float>& scalars, bool adjustColorMapRange);
+            void setScalars2(const std::vector<float>& scalars, bool adjustColorMapRange);
+            void setScalars3(const std::vector<float>& scalars, bool adjustColorMapRange);
             void setSizeScalars(const std::vector<float>& scalars);
             void setOpacityScalars(const std::vector<float>& scalars);
             void setColors(const std::vector<Vector3f>& colors);
@@ -56,6 +60,8 @@ namespace mv
             const std::vector<char>& getHighlights() const { return _highlights; }
             const std::vector<char>& getFocusHighlights() const { return _focusHighlights; }
             const std::vector<float>& getScalars() const { return _colorScalars; }
+            const std::vector<float>& getScalars2() const { return _colorScalars2; }
+            const std::vector<float>& getScalars3() const { return _colorScalars3; }
             const std::vector<float>& getSizeScalars() const { return _sizeScalars; }
             const std::vector<float>& getOpacityScalars() const { return _opacityScalars; }
             const std::vector<Vector3f>& getColors() const { return _colors; }
@@ -65,6 +71,8 @@ namespace mv
             bool hasHighlights() const { return !_highlights.empty(); }
             bool hasFocusHighlights() const { return !_focusHighlights.empty(); }
             bool hasColorScalars() const { return !_colorScalars.empty(); }
+            bool hasColorScalars2() const { return !_colorScalars2.empty(); }
+            bool hasColorScalars3() const { return !_colorScalars3.empty(); }
             bool hasSizeScalars() const { return !_sizeScalars.empty(); }
             bool hasOpacityScalars() const { return !_opacityScalars.empty(); }
             bool hasColors() const { return !_colors.empty(); }
@@ -75,6 +83,14 @@ namespace mv
 
             void setColorMapRange(const mv::Vector3f& colorMapRange) {
                 _colorScalarsRange = colorMapRange;
+            }
+
+            Vector3f getColorMapRange2() const {
+                return _colorScalarsRange2;
+            }
+
+            Vector3f getColorMapRange3() const {
+                return _colorScalarsRange3;
             }
 
             void draw();
@@ -92,6 +108,8 @@ namespace mv
             const uint ATTRIBUTE_SCALARS_COLOR      = 4;
             const uint ATTRIBUTE_SCALARS_SIZE       = 6;
             const uint ATTRIBUTE_SCALARS_OPACITY    = 7;
+            const uint ATTRIBUTE_SCALARS_COLOR2     = 8;
+            const uint ATTRIBUTE_SCALARS_COLOR3     = 9;
 
             /* Point attributes */
             std::vector<Vector2f>   _positions;
@@ -100,17 +118,23 @@ namespace mv
             std::vector<char>       _focusHighlights;
             
             /** Scalar channels */
-            std::vector<float>  _colorScalars;      /** Point color scalar channel */
+            std::vector<float>  _colorScalars;      /** Point color scalar channel (channel 1) */
+            std::vector<float>  _colorScalars2;     /** Point color scalar channel 2 (2D / RGB coloring) */
+            std::vector<float>  _colorScalars3;     /** Point color scalar channel 3 (RGB coloring) */
             std::vector<float>  _sizeScalars;       /** Point size scalar channel */
             std::vector<float>  _opacityScalars;    /** Point opacity scalar channel */
 
             /** Scalar ranges */
-            Vector3f    _colorScalarsRange;     /** Scalar range of the point color scalars */
+            Vector3f    _colorScalarsRange;     /** Scalar range of the point color scalars (channel 1) */
+            Vector3f    _colorScalarsRange2;    /** Scalar range of the point color scalars (channel 2) */
+            Vector3f    _colorScalarsRange3;    /** Scalar range of the point color scalars (channel 3) */
 
             bool _dirtyPositions        = false;
             bool _dirtyHighlights       = false;
             bool _dirtyFocusHighlights  = false;
             bool _dirtyColorScalars     = false;
+            bool _dirtyColorScalars2    = false;
+            bool _dirtyColorScalars3    = false;
             bool _dirtySizeScalars      = false;
             bool _dirtyOpacityScalars   = false;
             bool _dirtyColors           = false;
@@ -151,6 +175,8 @@ namespace mv
             void setHighlights(const std::vector<char>& highlights, const std::int32_t& numSelectedPoints);
             void setFocusHighlights(const std::vector<char>& focusHighlights, const std::int32_t& numberOfFocusHighlights);
             void setColorChannelScalars(const std::vector<float>& scalars, bool adjustColorMapRange = true);
+            void setColorChannel2Scalars(const std::vector<float>& scalars, bool adjustColorMapRange = true);
+            void setColorChannel3Scalars(const std::vector<float>& scalars, bool adjustColorMapRange = true);
             void setSizeChannelScalars(const std::vector<float>& scalars);
             void setOpacityChannelScalars(const std::vector<float>& scalars);
             void setColors(const std::vector<Vector3f>& colors);

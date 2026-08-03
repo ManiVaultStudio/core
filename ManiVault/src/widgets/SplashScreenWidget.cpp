@@ -102,12 +102,6 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
     _dropShadowEffect.setOffset(7);
 #endif
 
-    connect(&_processEventsTimer, &QTimer::timeout, this, []() -> void {
-        QCoreApplication::processEvents();
-    });
-
-    _processEventsTimer.start(100);
-
     _roundedFrameLayout.setContentsMargins(0, 0, 0, 0);
     _roundedFrameLayout.addWidget(&_webEngineView);
 
@@ -141,8 +135,6 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
 
 SplashScreenWidget::~SplashScreenWidget()
 {
-    _processEventsTimer.stop();
-
     disconnectFromCurrentTask();
 }
 

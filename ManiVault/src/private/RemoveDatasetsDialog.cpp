@@ -13,7 +13,7 @@
 #include <QVBoxLayout>
 #include <QHeaderView>
 
-using namespace mv;
+using namespace mv::gui;
 using namespace mv::util;
 
 RemoveDatasetsDialog::RemoveDatasetsDialog(mv::Datasets selectedDatasets, QWidget* parent /*= nullptr*/) :
@@ -48,7 +48,7 @@ RemoveDatasetsDialog::RemoveDatasetsDialog(mv::Datasets selectedDatasets, QWidge
     _mainGroupAction.addStretch();
     _mainGroupAction.addAction(&_bottomHorizontalGroupAction);
 
-    DataHierarchyItems selectedDataHierarchyItems, topLevelSelectedDataHierarchyItems;
+    mv::DataHierarchyItems selectedDataHierarchyItems, topLevelSelectedDataHierarchyItems;
 
     for (auto& selectedDataset : selectedDatasets)
         selectedDataHierarchyItems << &selectedDataset->getDataHierarchyItem();
@@ -67,10 +67,10 @@ RemoveDatasetsDialog::RemoveDatasetsDialog(mv::Datasets selectedDatasets, QWidge
     _messageAction.setString(QString("The selected dataset%1 contain%2 %3 child%4, what would you like to do with them?").arg(_selectedDatasets.count() == 1 ? "" : "s", _selectedDatasets.count() == 1 ? "s" : "", QString::number(_descendantDatasets.count()), _descendantDatasets.count() >= 2 ? "ren" : ""));
 
     _descendantsModeAction.setDefaultWidgetFlags(OptionAction::WidgetFlag::HorizontalButtons);
-    _descendantsModeAction.setCurrentIndex(settings().getMiscellaneousSettings().getKeepDescendantsAfterRemovalAction().isChecked() ? 0 : 1);
+    _descendantsModeAction.setCurrentIndex(mv::settings().getMiscellaneousSettings().getKeepDescendantsAfterRemovalAction().isChecked() ? 0 : 1);
 
     connect(&_descendantsModeAction, &OptionAction::currentIndexChanged, this, [this](const std::int32_t& currentIndex) -> void {
-        settings().getMiscellaneousSettings().getKeepDescendantsAfterRemovalAction().setChecked(currentIndex == 0);
+        mv::settings().getMiscellaneousSettings().getKeepDescendantsAfterRemovalAction().setChecked(currentIndex == 0);
     });
 
     _selectDatasetsAction.initialize(&_model, &_filterModel, "dataset");
@@ -134,10 +134,10 @@ RemoveDatasetsDialog::RemoveDatasetsDialog(mv::Datasets selectedDatasets, QWidge
     _bottomHorizontalGroupAction.addAction(&_removeAction);
     _bottomHorizontalGroupAction.addAction(&_cancelAction);
 
-    _showAgainAction.setChecked(settings().getMiscellaneousSettings().getAskConfirmationBeforeRemovingDatasetsAction().isChecked());
+    _showAgainAction.setChecked(mv::settings().getMiscellaneousSettings().getAskConfirmationBeforeRemovingDatasetsAction().isChecked());
 
     connect(&_showAgainAction, &ToggleAction::toggled, this, [this](bool toggled) -> void {
-        settings().getMiscellaneousSettings().getAskConfirmationBeforeRemovingDatasetsAction().setChecked(toggled);
+        mv::settings().getMiscellaneousSettings().getAskConfirmationBeforeRemovingDatasetsAction().setChecked(toggled);
     });
 
     _removeAction.setToolTip("Remove the dataset(s)");

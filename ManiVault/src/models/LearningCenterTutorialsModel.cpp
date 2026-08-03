@@ -87,8 +87,8 @@ LearningCenterTutorialsModel::LearningCenterTutorialsModel(QObject* parent /*= n
                         }
                     });
                 }
-                catch (const BaseException& exception) {
-                    qCritical() << "Download failed for" << dsn << ":" << exception.what();
+                catch (const ManiVaultException& maniVaultException) {
+                    qCritical() << "Download failed for" << dsn << ":" << maniVaultException.what();
                 }
                 catch (const std::exception& exception) {
                     qCritical() << "Download failed for" << dsn << ":" << exception.what();

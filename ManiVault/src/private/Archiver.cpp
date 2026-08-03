@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QThread>
+#include <QMutexLocker>
 
 #include <quazip/JlCompress.h>
 
@@ -179,6 +180,44 @@ void Archiver::extractSingleFile(const QString& compressedFilePath, const QStrin
 
     if (zip.getZipError() != 0)
         throw std::runtime_error("Decompression error occurred");
+}
+
+QByteArray Archiver::readZipEntryToMemory(const QString& zipPath, const QString& entryName)
+{
+    static QMutex zipReadMutex;
+
+    QByteArray data;
+
+    QMutexLocker lock(&zipReadMutex);
+    {
+        QuaZip zip(zipPath);
+
+        if (!zip.open(QuaZip::mdUnzip)) {
+            throw std::runtime_error(
+                QString("Unable to open ZIP archive: %1").arg(zipPath).toStdString());
+        }
+
+        if (!zip.setCurrentFile(entryName)) {
+            throw std::runtime_error(
+                QString("Unable to locate ZIP entry: %1").arg(entryName).toStdString());
+        }
+
+        QuaZipFile file(&zip);
+
+        if (!file.open(QIODevice::ReadOnly)) {
+            throw std::runtime_error(
+                QString("Unable to open ZIP entry for reading: %1").arg(entryName).toStdString());
+        }
+
+        data = file.readAll();
+
+        if (file.getZipError() != UNZ_OK) {
+            throw std::runtime_error(
+                QString("Failed while reading ZIP entry: %1").arg(entryName).toStdString());
+        }
+    }
+
+	return data;
 }
 
 void Archiver::compressSubDirectory(QuaZip* parentZip, const QString& directory, const QString& parentDirectory, bool recursive /*= true*/, std::int32_t compressionLevel /*= 0*/, const QString& password /*= ""*/, QDir::Filters filters /*= QDir::Filter::Files*/)

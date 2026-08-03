@@ -6,14 +6,12 @@
 
 #include <QHash>
 #include <QDebug>
+#include <QUrl>
 #include <algorithm>
 
 #ifdef _DEBUG
     #define PROJECTS_MODEL_VISIBILITY_CONTROLLER _VERBOSE
 #endif
-
-using namespace mv::gui;
-using namespace mv::util;
 
 namespace mv {
 

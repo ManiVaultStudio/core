@@ -3,6 +3,9 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "Version.h"
+#include "util/Serialization.h"
+
+#include <QRegularExpression>
 
 namespace mv::util {
 
@@ -85,7 +88,7 @@ std::string Version::getVersionString() const
     if (!isValid())
         return {};
 
-    if(_suffix == " ")
+    if(_suffix.empty() || _suffix.find_first_not_of(" ") == std::string::npos)
         return std::to_string(_major) + "." + std::to_string(_minor) + "." + std::to_string(_patch);
     else
         return std::to_string(_major) + "." + std::to_string(_minor) + "." + std::to_string(_patch) + "-" + _suffix;

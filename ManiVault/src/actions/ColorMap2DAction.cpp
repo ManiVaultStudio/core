@@ -8,7 +8,7 @@ using namespace mv::util;
 
 namespace mv::gui {
 
-ColorMap2DAction::ColorMap2DAction(QObject* parent, const QString& title, const QString& colorMap /*= "example_a"*/) :
+ColorMap2DAction::ColorMap2DAction(QObject* parent, const QString& title, const QString& colorMap /*= "Mittelstaed"*/) :
     ColorMapAction(parent, title, ColorMap::Type::TwoDimensional, colorMap)
 {
 }

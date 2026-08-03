@@ -25,8 +25,8 @@ using namespace mv::gui;
 QPointer<DockManager> ViewPluginsDockWidget::dockManager = QPointer<DockManager>();
 
 ViewPluginsDockWidget::ViewPluginsDockWidget(const QPointer<DockManager>& dockManager, QWidget* parent /*= nullptr*/) :
-    CDockWidget("View plugins", parent),
-    _centralDockWidget("Central dock widget")
+    CDockWidget(nullptr, "View plugins", parent),
+    _centralDockWidget(nullptr, "Central dock widget", nullptr)
 {
     ViewPluginsDockWidget::dockManager = dockManager;
 

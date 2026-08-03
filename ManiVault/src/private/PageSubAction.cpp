@@ -106,22 +106,22 @@ ProjectPurgePageSubAction::ProjectPurgePageSubAction(ProjectsModelProjectSharedP
         
         try {
             if (!_project)
-                throw BaseException("Project is null");
+                throw std::runtime_error("Project is null");
 
             const auto downloadedProjectFilePath = _project->getDownloadedProjectFilePath();
 
             if (downloadedProjectFilePath.isEmpty())
-                throw BaseException("File path is empty");
+                throw std::runtime_error("File path is empty");
 
             qDebug() << "Purging downloaded project" << downloadedProjectFilePath;
 
             const auto fileInfo = QFileInfo(downloadedProjectFilePath);
 
             if (!fileInfo.exists())
-                throw BaseException("File does not exist");
+                throw std::runtime_error("File does not exist");
 
             if (!QFile::remove(downloadedProjectFilePath))
-                throw BaseException("Unable to remove file");
+                throw std::runtime_error("Unable to remove file");
 
             _project->setDownloaded();
 

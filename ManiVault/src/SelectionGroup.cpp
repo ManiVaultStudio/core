@@ -171,11 +171,22 @@ namespace mv
         for (size_t i = 0; i < _datasets.size(); i++)
         {
             Dataset<DatasetImpl> d = _datasets[i];
-            if (d == dataset)
+            if (d == dataset && d.isValid())
             {
                 return _biMaps[i];
             }
         }
+        throw std::runtime_error("Dataset not found in selection group");
+    }
+
+    void KeyBasedSelectionGroup::addDataset(Dataset<DatasetImpl> dataset, const std::vector<QString>& keys)
+    {
+        _datasets.push_back(dataset);
+        BiMap bimap;
+        std::vector<uint32_t> indices(keys.size());
+        std::iota(indices.begin(), indices.end(), 0);
+        bimap.addKeyValuePairs(keys, indices);
+        _biMaps.push_back(std::move(bimap));
     }
 
     void KeyBasedSelectionGroup::addDataset(Dataset<DatasetImpl> dataset, BiMap& bimap)
@@ -194,7 +205,7 @@ namespace mv
         for (size_t i = 0; i < _datasets.size(); i++)
         {
             Dataset<DatasetImpl> d = _datasets[i];
-            if (d == dataset)
+            if (d == dataset && d.isValid())
             {
                 keys = _biMaps[i].getKeysByValues(indices);
             }
@@ -203,7 +214,7 @@ namespace mv
         for (size_t i = 0; i < _datasets.size(); i++)
         {
             Dataset<DatasetImpl> d = _datasets[i];
-            if (d != dataset)
+            if (d != dataset && d.isValid())
             {
                 std::vector<uint32_t> indices = _biMaps[i].getValuesByKeys(keys);
                 
@@ -262,4 +273,46 @@ namespace mv
 
         return variantMap;
     }
+
+    std::vector<QString> BiMap::getKeys() const
+    {
+        std::vector<uint32_t> values(_vkMap.size());
+        std::iota(values.begin(), values.end(), 0);
+        std::vector<QString> keys(values.size());
+        for (int i = 0; i < values.size(); i++)
+        {
+            try {
+                keys[i] = _vkMap.at(values[i]);
+            }
+            catch (std::exception&) {
+                continue;
+            }
+        }
+        return keys;
+    }
+
+    bool KeyBasedSelectionGroup::areDatasetsPartOfGroup(Dataset<DatasetImpl> d1, Dataset<DatasetImpl> d2)
+    {
+        bool foundDataset1 = false;
+        bool foundDataset2 = false;
+
+        for (Dataset<DatasetImpl> d : _datasets)
+        {
+            if (d.getDatasetId() == d1.getDatasetId())
+                foundDataset1 = true;
+            if (d.getDatasetId() == d2.getDatasetId())
+                foundDataset2 = true;
+        }
+        return foundDataset1 && foundDataset2;
+    }
+
+    std::vector<int> KeyBasedSelectionGroup::getMappingBetweenDatasets(Dataset<DatasetImpl> fromDataset, Dataset<DatasetImpl> toDataset)
+    {
+        BiMap& fromBimap = getBiMap(fromDataset);
+        std::vector<QString> keys = fromBimap.getKeys();
+        BiMap& toBimap = getBiMap(toDataset);
+        std::vector<int> values = toBimap.getValuesByKeysWithMissingValue(keys, -1);
+        return values;
+    }
+
 }

@@ -7,9 +7,6 @@
 #include "actions/StringAction.h"
 #include "actions/TriggerAction.h"
 
-using namespace mv;
-using namespace mv::gui;
-
 class ClustersActionWidget;
 
 /**
@@ -54,11 +51,11 @@ public:
 
 public: // Action getters
 
-    StringAction& getSubsetNameAction() { return _subsetNameAction; }
-    TriggerAction& getCreateSubsetAction() { return _createSubsetAction; }
+    mv::gui::StringAction& getSubsetNameAction() { return _subsetNameAction; }
+    mv::gui::TriggerAction& getCreateSubsetAction() { return _createSubsetAction; }
 
 protected:
     ClustersActionWidget*   _clustersActionWidget;      /** Pointer to clusters action widget */
-    StringAction            _subsetNameAction;          /** Subset name action */
-    TriggerAction           _createSubsetAction;        /** Create subset action */
+    mv::gui::StringAction            _subsetNameAction;          /** Subset name action */
+    mv::gui::TriggerAction           _createSubsetAction;        /** Create subset action */
 };

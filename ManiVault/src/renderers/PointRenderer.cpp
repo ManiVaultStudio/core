@@ -74,6 +74,20 @@ namespace mv
             glVertexAttribPointer(ATTRIBUTE_SCALARS_COLOR, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
             glVertexAttribDivisor(ATTRIBUTE_SCALARS_COLOR, 1);
 
+            // Scalar buffer for point color channel 2 (2D / RGB coloring), disabled by default
+            _colorScalarBuffer2.create();
+            _colorScalarBuffer2.bind();
+
+            glVertexAttribPointer(ATTRIBUTE_SCALARS_COLOR2, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+            glVertexAttribDivisor(ATTRIBUTE_SCALARS_COLOR2, 1);
+
+            // Scalar buffer for point color channel 3 (RGB coloring), disabled by default
+            _colorScalarBuffer3.create();
+            _colorScalarBuffer3.bind();
+
+            glVertexAttribPointer(ATTRIBUTE_SCALARS_COLOR3, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+            glVertexAttribDivisor(ATTRIBUTE_SCALARS_COLOR3, 1);
+
             // Scalar buffer for point size, disabled by default
             _sizeScalarBuffer.create();
             _sizeScalarBuffer.bind();
@@ -136,6 +150,62 @@ namespace mv
             _colorScalars = scalars;
 
             _dirtyColorScalars = true;
+        }
+
+        void PointArrayObject::setScalars2(const std::vector<float>& scalars, bool adjustColorMapRange)
+        {
+            if (adjustColorMapRange)
+            {
+                _colorScalarsRange2.x = std::numeric_limits<float>::max();
+                _colorScalarsRange2.y = -std::numeric_limits<float>::max();
+
+                // Determine scalar range
+                for (const float& scalar : scalars)
+                {
+                    if (scalar < _colorScalarsRange2.x)
+                        _colorScalarsRange2.x = scalar;
+
+                    if (scalar > _colorScalarsRange2.y)
+                        _colorScalarsRange2.y = scalar;
+                }
+
+                _colorScalarsRange2.z = _colorScalarsRange2.y - _colorScalarsRange2.x;
+
+                if (_colorScalarsRange2.z < 1e-07)
+                    _colorScalarsRange2.z = static_cast<float>(1e-07);
+            }
+
+            _colorScalars2 = scalars;
+
+            _dirtyColorScalars2 = true;
+        }
+
+        void PointArrayObject::setScalars3(const std::vector<float>& scalars, bool adjustColorMapRange)
+        {
+            if (adjustColorMapRange)
+            {
+                _colorScalarsRange3.x = std::numeric_limits<float>::max();
+                _colorScalarsRange3.y = -std::numeric_limits<float>::max();
+
+                // Determine scalar range
+                for (const float& scalar : scalars)
+                {
+                    if (scalar < _colorScalarsRange3.x)
+                        _colorScalarsRange3.x = scalar;
+
+                    if (scalar > _colorScalarsRange3.y)
+                        _colorScalarsRange3.y = scalar;
+                }
+
+                _colorScalarsRange3.z = _colorScalarsRange3.y - _colorScalarsRange3.x;
+
+                if (_colorScalarsRange3.z < 1e-07)
+                    _colorScalarsRange3.z = static_cast<float>(1e-07);
+            }
+
+            _colorScalars3 = scalars;
+
+            _dirtyColorScalars3 = true;
         }
 
         void PointArrayObject::setSizeScalars(const std::vector<float>& scalars)
@@ -219,7 +289,27 @@ namespace mv
                 _dirtyColorScalars = false;
             }
 
-            
+            if (_dirtyColorScalars2)
+            {
+                _colorScalarBuffer2.bind();
+                _colorScalarBuffer2.setData(_colorScalars2);
+
+                enableAttribute(ATTRIBUTE_SCALARS_COLOR2, true);
+
+                _dirtyColorScalars2 = false;
+            }
+
+            if (_dirtyColorScalars3)
+            {
+                _colorScalarBuffer3.bind();
+                _colorScalarBuffer3.setData(_colorScalars3);
+
+                enableAttribute(ATTRIBUTE_SCALARS_COLOR3, true);
+
+                _dirtyColorScalars3 = false;
+            }
+
+
             if (_dirtySizeScalars)
             {
                 _sizeScalarBuffer.bind();
@@ -323,6 +413,16 @@ namespace mv
         void PointRenderer::setColorChannelScalars(const std::vector<float>& scalars, bool adjustColorMapRange)
         {
             _gpuPoints.setScalars(scalars, adjustColorMapRange);
+        }
+
+        void PointRenderer::setColorChannel2Scalars(const std::vector<float>& scalars, bool adjustColorMapRange)
+        {
+            _gpuPoints.setScalars2(scalars, adjustColorMapRange);
+        }
+
+        void PointRenderer::setColorChannel3Scalars(const std::vector<float>& scalars, bool adjustColorMapRange)
+        {
+            _gpuPoints.setScalars3(scalars, adjustColorMapRange);
         }
 
         void PointRenderer::setSizeChannelScalars(const std::vector<float>& scalars)
@@ -501,6 +601,8 @@ namespace mv
                 _shader.uniform1i("hasHighlights", _gpuPoints.hasHighlights());
                 _shader.uniform1i("hasFocusHighlights", _gpuPoints.hasFocusHighlights());
                 _shader.uniform1i("hasScalars", _gpuPoints.hasColorScalars());
+                _shader.uniform1i("hasScalars2", _gpuPoints.hasColorScalars2());
+                _shader.uniform1i("hasScalars3", _gpuPoints.hasColorScalars3());
                 _shader.uniform1i("hasColors", _gpuPoints.hasColors());
                 _shader.uniform1i("hasSizes", _gpuPoints.hasSizeScalars());
                 _shader.uniform1i("hasOpacities", _gpuPoints.hasOpacityScalars());
@@ -509,7 +611,16 @@ namespace mv
                 if (_gpuPoints.hasColorScalars())
                     _shader.uniform3f("colorMapRange", _gpuPoints.getColorMapRange());
 
-                if (_colormap.isCreated() && (_pointEffect == PointEffect::Color || _pointEffect == PointEffect::Color2D))
+                if (_gpuPoints.hasColorScalars2())
+                    _shader.uniform3f("colorMapRange2", _gpuPoints.getColorMapRange2());
+
+                if (_gpuPoints.hasColorScalars3())
+                    _shader.uniform3f("colorMapRange3", _gpuPoints.getColorMapRange3());
+
+                // Color space for RGB coloring (0 = RGB; placeholder for future HSL/LAB)
+                _shader.uniform1i("colorSpace", 0);
+
+                if (_colormap.isCreated() && (_pointEffect == PointEffect::Color || _pointEffect == PointEffect::Color2D || _pointEffect == PointEffect::Color2DChannels))
                 {
                     _colormap.bind(0);
                     _shader.uniform1i("colormap", 0);

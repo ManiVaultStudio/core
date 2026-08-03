@@ -170,17 +170,6 @@ protected:
 
 public:
 
-    /** Exception class for file downloader issues */
-    class Exception : public BaseException {
-    public:
-
-        /**
-         * Construct with \p message
-         * @param message Message describing the download issue
-         */
-        explicit Exception(const QString& message);
-    };
-
     /**
      * Get the shared network access manager instance
      * @return Reference to the shared QNetworkAccessManager instance
@@ -335,7 +324,7 @@ private:
                 if (!state->sink->open(safeReply, url, targetDirectory, overwriteAllowed, &errorString)) {
                     safeReply->abort();
 
-                    promise->setException(std::make_exception_ptr(Exception(errorString)));
+                    promise->setException(std::make_exception_ptr(errorString));
 
                     finishOnce([safeReply]() {
                         safeReply->deleteLater();
@@ -369,7 +358,7 @@ private:
                     if (!state->sink->write(chunk, &errorString)) {
                         state->sink->cancel();
 
-                        promise->setException(std::make_exception_ptr(Exception(errorString)));
+                        promise->setException(std::make_exception_ptr(errorString));
 
                         finishOnce([safeReply]() {
                             safeReply->deleteLater();
@@ -409,7 +398,7 @@ private:
 
                         notifyError(urlDisplayString, errorString);
 
-                        promise->setException(std::make_exception_ptr(Exception(errorString)));
+                        promise->setException(std::make_exception_ptr(errorString));
 
                         finishOnce([safeReply]() {
                             safeReply->deleteLater();
@@ -430,7 +419,7 @@ private:
 
                         notifyError(urlDisplayString, errorString);
 
-                        promise->setException(std::make_exception_ptr(Exception(errorString)));
+                        promise->setException(std::make_exception_ptr(errorString));
 
                         finishOnce([safeReply]() {
                             safeReply->deleteLater();
@@ -459,7 +448,7 @@ private:
 
                     notifyError(urlDisplayString, errorString);
 
-                    promise->setException(std::make_exception_ptr(Exception(errorString)));
+                    promise->setException(std::make_exception_ptr(errorString));
 
                     finishOnce([safeReply]() {
                         safeReply->deleteLater();

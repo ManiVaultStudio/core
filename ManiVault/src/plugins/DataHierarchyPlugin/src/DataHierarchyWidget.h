@@ -10,12 +10,10 @@
 #include <models/DataHierarchyTreeModel.h>
 #include <models/DataHierarchyFilterModel.h>
 
-#include <actions/ToggleAction.h>
 #include <actions/TriggerAction.h>
 
 #include <widgets/HierarchyWidget.h>
 
-#include <DataHierarchyItem.h>
 #include <Dataset.h>
 
 #include <QWidget>
@@ -82,7 +80,6 @@ protected:
 
     /**
      * Initializes the model selection from the data hierarchy
-     * @param parentFilterModelIndex The parent filter model index for which to update the child model items
      */
     void initializeSelection();
 
@@ -92,5 +89,5 @@ private:
     mv::gui::HierarchyWidget        _hierarchyWidget;       /** Widget for displaying hierarchy */
     mv::gui::TriggerAction          _resetAction;           /** Reset all action */
     UnhideAction                    _unhideAction;          /** Action class for un-hiding hidden datasets */
-    StatisticsAction                _statisticsAction;      /** Action class for showing data manager statistics */
+    QPointer<StatisticsAction>      _statisticsAction;      /** Action class for showing data manager statistics */
 };

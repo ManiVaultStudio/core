@@ -37,6 +37,11 @@ public:
     }
 
 private:
+
+    /** Update styling after a theme change */
+    void updateCustomStyle();
+
+private:
     GroupsAction    _groupsAction;      /** Groups action for all global settings sections */
 };
 

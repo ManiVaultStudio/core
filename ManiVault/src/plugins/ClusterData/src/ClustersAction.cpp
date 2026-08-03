@@ -11,6 +11,8 @@
 #include <QHeaderView>
 #include <QVBoxLayout>
 
+using namespace mv;
+
 ClustersAction::ClustersAction(QObject* parent, Dataset<Clusters> clustersDataset /*= Dataset<Clusters>()*/) :
     WidgetAction(parent, "Clusters"),
     _clustersDataset(),
