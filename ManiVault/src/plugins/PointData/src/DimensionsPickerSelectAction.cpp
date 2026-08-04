@@ -38,12 +38,6 @@ DimensionsPickerSelectAction::DimensionsPickerSelectAction(DimensionsPickerActio
     _saveSelectionAction.setToolTip("Save dimension selection to file");
     _loadExclusionAction.setToolTip("Load dimension exclusion selection to file");
 
-    _selectVisibleAction.setIconByName("eye");
-    _selectNonVisibleAction.setIconByName("eye-slash");
-
-    _selectVisibleAction.setDefaultWidgetFlags(TriggerAction::Icon);
-    _selectNonVisibleAction.setDefaultWidgetFlags(TriggerAction::Icon);
-
     const auto selectionFileFilter = tr("Text files (*.txt);;All files (*.*)");
 
     // Update the visible dimensions when the selection threshold changes
