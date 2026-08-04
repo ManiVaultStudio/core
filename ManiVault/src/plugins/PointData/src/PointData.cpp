@@ -386,6 +386,25 @@ void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, 
 }
 
 
+void PointData::extractDataForDimension(std::vector<float> &result, const int dimensionIndex, const std::vector<std::uint32_t> &indices) const
+{
+    CheckDimensionIndex(dimensionIndex);
+
+    result.resize(indices.size());
+
+    std::visit(
+        [&result, this, dimensionIndex,
+         indices](const auto &vec) {
+          const auto resultSize = result.size();
+
+          for (std::size_t i{}; i < resultSize; ++i) {
+            const auto n = std::size_t{indices[i]} * _numDimensions;
+            result[i] = vec[n + dimensionIndex];
+          }
+        },
+        _variantOfVectors);
+}
+
 void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<std::uint32_t>& indices) const
 {
     CheckDimensionIndex(dimensionIndex1);
@@ -516,10 +535,6 @@ void Points::setData(std::nullptr_t, const std::size_t numPoints, const std::siz
 
 void Points::extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const
 {
-    // This overload assumes that the data set is "full".
-    // Please remove the assert once non-full support is implemented (if necessary).
-    assert(isFull());
-
     if (isProxy()) {
         result.resize(getNumPoints());
 
@@ -540,7 +555,13 @@ void Points::extractDataForDimension(std::vector<float>& result, const int dimen
         }
     }
     else {
-        getRawData<PointData>()->extractFullDataForDimension(result, dimensionIndex);
+        const auto rawPointData = getRawData<PointData>();
+
+        if (isFull())
+            rawPointData->extractFullDataForDimension(result, dimensionIndex);
+        else
+            rawPointData->extractDataForDimension(result, dimensionIndex, indices);
+
     }
 }
 
