@@ -239,22 +239,26 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
         const auto dataLock = lockData();
 
         variantMapMustContain(variantMap, "Data");
-        variantMapMustContain(variantMap, "NumberOfPoints");
+        variantMapMustContain(variantMap, "NumberOfPoints");        // not used
         variantMapMustContain(variantMap, "NumberOfDimensions");
 
-        const auto dataMap              = variantMap["Data"].toMap();
-        const auto numberOfPoints       = static_cast<std::size_t>(variantMap["NumberOfPoints"].toULongLong());
-        const auto numberOfDimensions   = static_cast<std::size_t>(variantMap["NumberOfDimensions"].toULongLong());
-        const auto numberOfElements     = numberOfPoints * numberOfDimensions;
-        const auto elementTypeIndex     = dataMap.contains("TypeName") ? elementTypeSpecifier(dataMap.value("TypeName").toString()) : static_cast<ElementTypeSpecifier>(dataMap.value("TypeIndex").toInt());
-
-        _isDense        = variantMap.value("Dense", true).toBool();
-        _numDimensions  = numberOfDimensions;
-
-        setElementTypeSpecifier(elementTypeIndex);
-        resizeVector(numberOfElements);
+        const auto dataMap  = variantMap["Data"].toMap();
+        _isDense            = variantMap.value("Dense", true).toBool();
+        _numDimensions      = static_cast<std::size_t>( variantMap["NumberOfDimensions"].toULongLong());
 
         if (dataMap.contains("Raw") && dataMap["Raw"].canConvert<QVariantMap>()) {
+          variantMapMustContain(dataMap, "NumberOfElements");
+
+          const auto numberOfElements = static_cast<std::size_t>(
+                dataMap["NumberOfElements"].toULongLong());
+
+            const auto elementTypeIndex = dataMap.contains("TypeName") 
+              ? elementTypeSpecifier(dataMap.value("TypeName").toString()) 
+              : static_cast<ElementTypeSpecifier>(dataMap.value("TypeIndex").toInt());
+
+            setElementTypeSpecifier(elementTypeIndex);
+            resizeVector(numberOfElements);
+          
             // Keep allocation and all writes to the exposed buffer mutually
             // exclusive. The synchronous decoder is intentional here: a
             // std::mutex lock may not be handed from this workflow worker to
