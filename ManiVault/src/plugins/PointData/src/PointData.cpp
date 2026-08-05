@@ -241,14 +241,15 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
         variantMapMustContain(variantMap, "Data");
         variantMapMustContain(variantMap, "NumberOfPoints");        // not used
         variantMapMustContain(variantMap, "NumberOfDimensions");
-        variantMapMustContain(variantMap, "NumberOfElements");
 
         const auto dataMap  = variantMap["Data"].toMap();
         _isDense            = variantMap.value("Dense", true).toBool();
         _numDimensions      = static_cast<std::size_t>( variantMap["NumberOfDimensions"].toULongLong());
 
         if (dataMap.contains("Raw") && dataMap["Raw"].canConvert<QVariantMap>()) {
-            const auto numberOfRawElements = static_cast<std::size_t>(
+          variantMapMustContain(dataMap, "NumberOfElements");
+
+          const auto numberOfElements = static_cast<std::size_t>(
                 dataMap["NumberOfElements"].toULongLong());
 
             const auto elementTypeIndex = dataMap.contains("TypeName") 
@@ -256,7 +257,7 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
               : static_cast<ElementTypeSpecifier>(dataMap.value("TypeIndex").toInt());
 
             setElementTypeSpecifier(elementTypeIndex);
-            resizeVector(numberOfRawElements);
+            resizeVector(numberOfElements);
           
             // Keep allocation and all writes to the exposed buffer mutually
             // exclusive. The synchronous decoder is intentional here: a
