@@ -114,6 +114,8 @@ mv::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) 
 
 std::uint64_t PointData::getNumPoints() const
 {
+    const auto dataLock = lockData();
+
     if (_numDimensions == 0)
     {
         qWarning() << "Number of dimensions is 0 in point data ";
@@ -128,17 +130,21 @@ std::uint64_t PointData::getNumPoints() const
 
 std::uint64_t PointData::getNumDimensions() const
 {
+    const auto dataLock = lockData();
     return _numDimensions;
 }
 
 std::uint64_t PointData::getNumberOfElements() const
 {
+    const auto dataLock = lockData();
     return getSizeOfVector();
 }
 
 
 std::uint64_t PointData::getRawDataSize() const
 {
+    const auto dataLock = lockData();
+
     if (_isDense)
     {
         std::uint64_t elementSize = std::visit([](auto& vec) { return vec.empty() ? 0u : sizeof(vec[0]); }, _variantOfVectors);
@@ -152,27 +158,34 @@ std::uint64_t PointData::getRawDataSize() const
 
 void* PointData::getDataVoidPtr()
 {
+    const auto dataLock = lockData();
     return std::visit([](auto& vec) { return (void*)vec.data(); }, _variantOfVectors);
 }
 
 const void* PointData::getDataConstVoidPtr() const
 {
+    const auto dataLock = lockData();
     return std::visit([](const auto& vec) { return (const void*)vec.data(); }, _variantOfVectors);
 }
 
 const std::vector<QString>& PointData::getDimensionNames() const
 {
+    const auto dataLock = lockData();
     return _dimNames;
 }
 
 void PointData::setData(const std::nullptr_t, const std::size_t numPoints, const std::size_t numDimensions)
 {
+    const auto dataLock = lockData();
+
     resizeVector(numPoints * numDimensions);
     _numDimensions = static_cast<std::uint64_t>(numDimensions);
 }
 
 void PointData::setDimensionNames(const std::vector<QString>& dimNames)
 {
+    const auto dataLock = lockData();
+
     if (dimNames.empty())
         return;
 
@@ -184,6 +197,8 @@ void PointData::setDimensionNames(const std::vector<QString>& dimNames)
 
 float PointData::getValueAt(const std::size_t index) const
 {
+    const auto dataLock = lockData();
+
     return std::visit([index](const auto& vec)
         {
             return static_cast<float>(vec[index]);
@@ -193,6 +208,8 @@ float PointData::getValueAt(const std::size_t index) const
 
 void PointData::setValueAt(const std::size_t index, const float newValue)
 {
+    const auto dataLock = lockData();
+
     std::visit([index, newValue](auto& vec)
         {
             using value_type = typename std::remove_reference_t<decltype(vec)>::value_type;
@@ -211,13 +228,16 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
 
     if (appVersion < Version(1, 5, 0)) {
         plan->addSequentialStage("Load legacy point data (< 1.5.0)", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            const auto dataLock = lockData();
             legacy::PointDataLegacySerializer::fromVariantMapPre150(*this, variantMap, executionContext);
         });
 
         return plan;
     }
 
-    plan->addSequentialStage("Allocate storage", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+    plan->addSequentialStage("Allocate and populate storage", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        const auto dataLock = lockData();
+
         variantMapMustContain(variantMap, "Data");
         variantMapMustContain(variantMap, "NumberOfPoints");
         variantMapMustContain(variantMap, "NumberOfDimensions");
@@ -233,25 +253,17 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
 
         setElementTypeSpecifier(elementTypeIndex);
         resizeVector(numberOfElements);
-    });
 
-    plan->addNestedWorkflowStage("Populate data", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
-        QVariant rawData;
+        if (dataMap.contains("Raw") && dataMap["Raw"].canConvert<QVariantMap>()) {
+            // Keep allocation and all writes to the exposed buffer mutually
+            // exclusive. The synchronous decoder is intentional here: a
+            // std::mutex lock may not be handed from this workflow worker to
+            // the parallel workers used by populateBytesFromBlobMapWorkflow().
+            const auto rawDataSize = getRawDataSize();
 
-        if (variantMap.contains("Data") && variantMap["Data"].canConvert<QVariantMap>()) {
-            const auto dataMap = variantMap["Data"].toMap();
-
-            if (dataMap.contains("Raw") && dataMap["Raw"].canConvert<QVariantMap>()) {
-                rawData = dataMap["Raw"];
-            }
+            if (rawDataSize > 0)
+                populateBytesFromBlobMap(dataMap["Raw"].toMap(), static_cast<char*>(getDataVoidPtr()), rawDataSize);
         }
-
-        if (rawData.canConvert<QVariantMap>()) {
-            const auto rawDataMap = rawData.toMap();
-            return populateBytesFromBlobMapWorkflow(rawDataMap, static_cast<char*>(getDataVoidPtr()), getRawDataSize(), executionContext->getOptions());
-        }
-
-        return std::make_unique<WorkflowPlan>("Populate data (no raw data found in variant map)");
     });
 
     return plan;
@@ -260,6 +272,12 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
 UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 {
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
+    bool isDense;
+
+    {
+        const auto dataLock = lockData();
+        isDense = _isDense;
+    }
 
     //const auto baseSaveStage = plan->addNestedWorkflowStage("Save raw data base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
     //    return this->Plugin::toVariantMapWorkflow();
@@ -268,12 +286,21 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
     //
     //;
 
-    if (_isDense) {
-        const auto storeRawStage = plan->addNestedWorkflowStage("Save raw", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-            return bytesToBlobVariantMapWorkflow(static_cast<const char*>(getDataConstVoidPtr()), getRawDataSize());
+    if (isDense) {
+        const auto storeRawStage = plan->addNestedWorkflowStage("Save raw", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+            const auto dataLock = lockData();
+            const auto rawMap   = bytesToBlobVariantMap(static_cast<const char*>(getDataConstVoidPtr()), getRawDataSize());
+            auto storePlan      = std::make_unique<WorkflowPlan>("Publish point data blob");
+
+            storePlan->addSequentialStage("Publish point data blob", [rawMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& storeExecutionContext) {
+                storeExecutionContext->setOutput(rawMap);
+            });
+
+            return storePlan;
         });
 
         plan->addSequentialStage("Build map", [this, storeRawStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            const auto dataLock = lockData();
             QVariantMap outputMap;
 
             const auto typeSpecifier        = getElementTypeSpecifier();
@@ -307,6 +334,7 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
         });
     } else {
         plan->addSequentialStage("Build map", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            const auto dataLock = lockData();
             QVariantMap outputMap;
 
             std::vector<char> bytes;
@@ -334,6 +362,8 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 
 void PointData::extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const
 {
+    const auto dataLock = lockData();
+
     CheckDimensionIndex(dimensionIndex);
 
     result.resize(getNumPoints());
@@ -353,6 +383,8 @@ void PointData::extractFullDataForDimension(std::vector<float>& result, const in
 
 void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const
 {
+    const auto dataLock = lockData();
+
     if (_isDense)
     {
         CheckDimensionIndex(dimensionIndex1);
@@ -407,6 +439,8 @@ void PointData::extractDataForDimension(std::vector<float> &result, const int di
 
 void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<std::uint32_t>& indices) const
 {
+    const auto dataLock = lockData();
+
     CheckDimensionIndex(dimensionIndex1);
     CheckDimensionIndex(dimensionIndex2);
 
