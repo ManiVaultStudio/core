@@ -24,6 +24,7 @@
 
 #include <array>
 #include <cassert>
+#include <mutex>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -61,6 +62,8 @@ class ClusterAction;
 class POINTDATA_EXPORT PointData : public mv::plugin::RawData
 {
 public:
+    using DataLock = std::unique_lock<std::recursive_mutex>;
+
     enum class ElementTypeSpecifier
     {
         float32,
@@ -215,6 +218,17 @@ public:
     PointData(mv::plugin::PluginFactory* factory) : RawData(factory, PointType) { }
     ~PointData() override = default;
 
+    /**
+     * Acquires exclusive access to the point-data storage and its metadata.
+     *
+     * Keep the returned lock alive for the complete lifetime of any pointer,
+     * iterator or reference obtained from this PointData instance.
+     */
+    [[nodiscard]] DataLock lockData() const
+    {
+        return DataLock(_dataMutex);
+    }
+
     void init() override;
 
     mv::Dataset<mv::DatasetImpl> createDataSet(const QString& guid = "") const override;
@@ -256,6 +270,8 @@ public:
     template <typename ReturnType = void, typename FunctionObject>
     ReturnType constVisitFromBeginToEnd(FunctionObject functionObject) const
     {
+        const auto dataLock = lockData();
+
         return std::visit([functionObject](const auto& vec) -> ReturnType
             {
                 return functionObject(std::cbegin(vec), std::cend(vec));
@@ -267,6 +283,8 @@ public:
     template <typename ReturnType = void, typename FunctionObject>
     ReturnType visitFromBeginToEnd(FunctionObject functionObject)
     {
+        const auto dataLock = lockData();
+
         return std::visit([functionObject](auto& vec) -> ReturnType
             {
                 return functionObject(std::begin(vec), std::end(vec));
@@ -282,6 +300,8 @@ public:
     template <typename ResultContainer, typename DimensionIndices>
     void populateFullDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
     {
+        const auto dataLock = lockData();
+
         CheckDimensionIndices(dimensionIndices);
         std::visit([&resultContainer, this, &dimensionIndices](const auto& vec)
             {
@@ -305,6 +325,8 @@ public:
     template <typename ResultContainer, typename DimensionIndices, typename Indices>
     void populateDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices, const Indices& indices) const
     {
+        const auto dataLock = lockData();
+
         CheckDimensionIndices(dimensionIndices);
 
         std::visit([&resultContainer, this, &dimensionIndices, &indices](const auto& vec)
@@ -336,17 +358,20 @@ public:
 
     ElementTypeSpecifier getElementType() const
     {
+        const auto dataLock = lockData();
         return getElementTypeSpecifier();
     }
 
     void setElementType(const ElementTypeSpecifier elementTypSpecifier)
     {
+        const auto dataLock = lockData();
         setElementTypeSpecifier(elementTypSpecifier);
     }
 
     template <typename T>
     void setElementType()
     {
+        const auto dataLock = lockData();
         constexpr auto elementTypSpecifier = getElementTypeSpecifier<T>();
         setElementType(elementTypSpecifier);
     }
@@ -359,6 +384,8 @@ public:
     template <typename T>
     void convertData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
+        const auto dataLock = lockData();
+
         convertData(data, numPoints * numDimensions);
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
@@ -369,6 +396,8 @@ public:
     template <typename T>
     void convertData(const T& inputDataContainer, const std::size_t numDimensions)
     {
+        const auto dataLock = lockData();
+
         convertData(inputDataContainer.data(), inputDataContainer.size());
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
@@ -379,6 +408,8 @@ public:
     template <typename T>
     void setData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
+         const auto dataLock = lockData();
+
          _variantOfVectors = VariantOfVectors( std::vector<T>(data, data + numPoints * numDimensions) );
          _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
@@ -394,6 +425,8 @@ public:
     template <typename T>
     void setData(const std::vector<T>& data, const std::size_t numDimensions)
     {
+        const auto dataLock = lockData();
+
         _variantOfVectors = VariantOfVectors(data);
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
@@ -404,6 +437,8 @@ public:
     template <typename T>
     void setData(std::vector<T>&& data, const std::size_t numDimensions)
     {
+        const auto dataLock = lockData();
+
         _variantOfVectors = VariantOfVectors(std::move(data));
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
@@ -429,6 +464,7 @@ public: // Sparse data, test implementation
 
         static void setSparseData(PointData* points, size_t numRows, size_t numCols, const std::vector<size_t>& rowPointers, const std::vector<size_t>& colIndices, const std::vector<float>& values)
         {
+            const auto dataLock = points->lockData();
             points->_sparseData.setData(numRows, numCols, rowPointers, colIndices, values);
             points->_numRows = static_cast<uint64_t>(numRows);
             points->setData(std::vector<float> {}, numCols);
@@ -437,6 +473,7 @@ public: // Sparse data, test implementation
 
         static void setSparseData(PointData* points, size_t numRows, size_t numCols, std::vector<size_t>&& rowPointers, std::vector<size_t>&& colIndices, std::vector<float>&& values)
         {
+            const auto dataLock = points->lockData();
             points->_sparseData.setData(numRows, numCols, std::move(rowPointers), std::move(colIndices), std::move(values));
             points->_numRows = static_cast<uint64_t>(numRows);
             points->setData(std::vector<float> {}, numCols);
@@ -444,27 +481,34 @@ public: // Sparse data, test implementation
         }
 
         static SparseMatrix<size_t, size_t, float>& getSparseData(PointData* points)
-        { 
+        {
+            // The returned reference is only safe while the caller retains a
+            // lock acquired with PointData::lockData().
             return points->_sparseData; 
         }
 
         static bool isDense(const PointData* points)
         {
+            const auto dataLock = points->lockData();
             return points->_isDense;
         }
 
         static void setIsDense(PointData* points, bool isDense)
         {
+            const auto dataLock = points->lockData();
             points->_isDense = isDense;
         }
 
         static size_t getNumNonZeroElements(const PointData* points)
         {
+            const auto dataLock = points->lockData();
             return points->_sparseData.getNumNonZeros();
         }
 
         static std::vector<float> row(const PointData* points, size_t rowIndex)
         {
+            const auto dataLock = points->lockData();
+
             if (points->_isDense)
             {
                 qWarning() << ".row() not implemented for dense data";
@@ -499,6 +543,8 @@ public: // Serialization
     mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const final;
 
 private:
+    mutable std::recursive_mutex _dataMutex;
+
     VariantOfVectors _variantOfVectors;
 
     /** Number of features of each data point */
