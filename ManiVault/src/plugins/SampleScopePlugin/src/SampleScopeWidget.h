@@ -47,7 +47,7 @@ public:
      * Set widget to \p widget
      * @param widget Pointer to widget
      */
-    void setViewWidget(const QWidget* widget);
+    void setViewWidget(QWidget* widget);
 
     /**
      * Get no samples overlay widget
