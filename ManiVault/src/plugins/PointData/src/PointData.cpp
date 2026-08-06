@@ -1175,12 +1175,13 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(QVariantMap variantMap)
 
         const auto count = selectionMap["Count"].value<std::uint64_t>();
 
-        if (count > 0) {
+        if (isFull()) {
             auto selectionSet = getSelection<Points>();
 
             selectionSet->indices.resize(count);
 
-            populateBytesFromBlobMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), count * sizeof(uint32_t));
+            if (count > 0)
+                populateBytesFromBlobMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), count * sizeof(uint32_t));
 
             events().notifyDatasetDataSelectionChanged(this);
         }
