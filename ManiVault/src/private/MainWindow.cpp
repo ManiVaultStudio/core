@@ -11,6 +11,7 @@
 #include "ViewMenu.h"
 #include "ProjectsMenu.h"
 #include "HelpMenu.h"
+#include "ParallelPhantomTestSuite.h"
 
 #include <Application.h>
 #include <CoreInterface.h>
@@ -174,6 +175,14 @@ void MainWindow::initialize()
 
     connect(customizeApplicationShortcut, &QShortcut::activated, this, [this] {
         Application::current()->getConfigurationAction().getConfigureAction().trigger();
+    });
+
+    auto parallelPhantomTestShortcut = new QShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::ShiftModifier | Qt::Key_P), this);
+
+    parallelPhantomTestShortcut->setContext(Qt::ApplicationShortcut);
+
+    connect(parallelPhantomTestShortcut, &QShortcut::activated, this, [this] {
+        mv::detail::ParallelPhantomTestSuite::showMenu(this);
     });
 
 	auto fileMenuAction     = menuBar()->addMenu(new FileMenu());

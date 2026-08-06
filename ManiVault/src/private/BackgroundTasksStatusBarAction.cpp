@@ -11,6 +11,7 @@
 #endif
 
 #include <QDebug>
+#include <QProgressBar>
 
 using namespace mv;
 using namespace mv::gui;
@@ -37,11 +38,14 @@ BackgroundTasksStatusBarAction::BackgroundTasksStatusBarAction(QObject* parent, 
 
     getBarGroupAction().addAction(&_overallBackgroundTaskAction);
 
-    _overallBackgroundTaskAction.setEnabled(false);
     _overallBackgroundTaskAction.setStretch(1);
     _overallBackgroundTaskAction.setTask(&overallBackgroundTask);
     _overallBackgroundTaskAction.setToolTip(toolTip());
-    _overallBackgroundTaskAction.getProgressAction().setDefaultWidgetFlags(ProgressAction::Label);
+    _overallBackgroundTaskAction.getProgressAction().setDefaultWidgetFlags(ProgressAction::HorizontalBar);
+    _overallBackgroundTaskAction.getProgressAction().setWidgetConfigurationFunction([](WidgetAction* action, QWidget* widget) -> void {
+        if (auto progressBar = widget->findChild<QProgressBar*>("ProgressBar"))
+            progressBar->setMinimumWidth(220);
+    });
 
     const auto overallBackgroundTaskTextFormatter = [this](Task& task) -> QString {
         const auto numberOfChildTasks = task.getChildTasksForGuiScopesAndStatuses(false, true, { Task::GuiScope::Background }, { Task::Status::Running, Task::Status::RunningIndeterminate }).count();

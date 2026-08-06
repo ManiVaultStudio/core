@@ -235,6 +235,7 @@ ProgressAction::LabelWidget::LabelWidget(QWidget* parent, ProgressAction* progre
     connect(_progressAction, &ProgressAction::numberOfStepsChanged, this, updateText);
     connect(_progressAction, &ProgressAction::valueChanged, this, updateText);
     connect(_progressAction, &ProgressAction::textFormatChanged, this, updateText);
+    connect(_progressAction, &ProgressAction::overrideTextFormatChanged, this, updateText);
 }
 
 ProgressAction::LineEditWidget::LineEditWidget(QWidget* parent, ProgressAction* progressAction, const std::int32_t& widgetFlags) :
@@ -254,6 +255,7 @@ ProgressAction::LineEditWidget::LineEditWidget(QWidget* parent, ProgressAction* 
     connect(_progressAction, &ProgressAction::numberOfStepsChanged, this, updateText);
     connect(_progressAction, &ProgressAction::valueChanged, this, updateText);
     connect(_progressAction, &ProgressAction::textFormatChanged, this, updateText);
+    connect(_progressAction, &ProgressAction::overrideTextFormatChanged, this, updateText);
 }
 
 QWidget* ProgressAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -295,7 +297,7 @@ float ProgressAction::getPercentage() const
 
 QString ProgressAction::getText() const
 {
-    auto text = _textFormat;
+    auto text = getTextFormat();
 
     text.replace("%p", QString::number(getPercentage(), 'f', 1));
     text.replace("%v", QString::number(getProgress()));

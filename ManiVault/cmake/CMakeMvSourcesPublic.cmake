@@ -707,6 +707,7 @@ set(PUBLIC_WORKFLOW_HEADERS
     src/workflow/WorkflowReportingOptions.h
     src/workflow/WorkflowProfilingOptions.h
     src/workflow/WorkflowParallelizationOptions.h
+    src/workflow/WorkflowCancellationOptions.h
     src/workflow/WorkflowOptions.h
     src/workflow/WorkflowResultDetailsOptions.h
 )
@@ -745,6 +746,21 @@ set(PUBLIC_WORKFLOW_SOURCES
 set(PUBLIC_WORKFLOW_FILES
     ${PUBLIC_WORKFLOW_HEADERS}
     ${PUBLIC_WORKFLOW_SOURCES}
+)
+
+set(PUBLIC_PARALLEL_HEADERS
+    src/parallel/Parallel.h
+    src/parallel/ParallelExecutionChain.h
+)
+
+set(PUBLIC_PARALLEL_SOURCES
+    src/parallel/Parallel.cpp
+    src/parallel/ParallelExecutionChain.cpp
+)
+
+set(PUBLIC_PARALLEL_FILES
+    ${PUBLIC_PARALLEL_HEADERS}
+    ${PUBLIC_PARALLEL_SOURCES}
 )
 
 set(PUBLIC_HARDWARE_SPEC_UTIL_HEADERS
@@ -1348,6 +1364,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_GRAPHICS_HEADERS}
     ${PUBLIC_UTIL_HEADERS}
     ${PUBLIC_WORKFLOW_HEADERS}
+    ${PUBLIC_PARALLEL_HEADERS}
     ${PUBLIC_HARDWARE_SPEC_UTIL_HEADERS}
     ${PUBLIC_APPLICATION_HEADERS}
     ${PUBLIC_PROJECT_HEADERS}
@@ -1404,6 +1421,7 @@ set(PUBLIC_SOURCES
     ${PUBLIC_GRAPHICS_SOURCES}
     ${PUBLIC_UTIL_SOURCES}
     ${PUBLIC_WORKFLOW_SOURCES}
+    ${PUBLIC_PARALLEL_SOURCES}
     ${PUBLIC_HARDWARE_SPEC_UTIL_SOURCES}
     ${PUBLIC_APPLICATION_SOURCES}
     ${PUBLIC_PROJECT_SOURCES}
@@ -1474,6 +1492,7 @@ source_group(Graphics FILES ${PUBLIC_GRAPHICS_FILES})
 source_group(Util FILES ${PUBLIC_UTIL_FILES})
 source_group(Util\\HardwareSpec FILES ${PUBLIC_HARDWARE_SPEC_UTIL_FILES})
 source_group(Workflow FILES ${PUBLIC_WORKFLOW_FILES})
+source_group(Parallel FILES ${PUBLIC_PARALLEL_FILES})
 source_group(Application FILES ${PUBLIC_APPLICATION_FILES} ${PUBLIC_GLOBALS_HEADERS} ${PUBLIC_VERSION_HEADERS})
 source_group(Project FILES ${PUBLIC_PROJECT_FILES})
 source_group(Workspace FILES ${PUBLIC_WORKSPACE_FILES})
