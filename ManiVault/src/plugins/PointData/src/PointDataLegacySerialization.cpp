@@ -160,12 +160,13 @@ void PointsLegacySerializer::fromVariantMapPre150(Points& points, const QVariant
 
         auto selectionSet = points.getSelection<Points>();
 
-        selectionSet->indices.resize(count);
+        if (count > 0 &&selectionSet.isValid()) {
+	        selectionSet->indices.resize(count);
 
-        if (count > 0)
-            populateBytesFromBlobMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(decltype(selectionSet->indices)::value_type));
+			populateBytesFromBlobMap(selectionMap["Raw"].toMap(), (char*)selectionSet->indices.data(), selectionSet->indices.size() * sizeof(decltype(selectionSet->indices)::value_type));
 
-        events().notifyDatasetDataSelectionChanged(points);
+        	events().notifyDatasetDataSelectionChanged(points);
+        }
     }
 }
 
