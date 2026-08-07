@@ -197,7 +197,14 @@ void PointData::setDimensionNames(const std::vector<QString>& dimNames)
 
 float PointData::getValueAt(const std::size_t index) const
 {
-    const auto dataLock = lockData();
+    // Intentionally not locking here.
+   //
+   // This is a fine-grained legacy accessor and is frequently used from
+   // parallel loops. Callers must ensure that the underlying point-data
+   // storage is not modified concurrently.
+   //
+   // Use lockData() / the bulk-access APIs when synchronized access is
+   // required.
 
     return std::visit([index](const auto& vec)
         {
@@ -208,7 +215,14 @@ float PointData::getValueAt(const std::size_t index) const
 
 void PointData::setValueAt(const std::size_t index, const float newValue)
 {
-    const auto dataLock = lockData();
+    // Intentionally not locking here.
+   //
+   // This is a fine-grained legacy setter and is frequently used from
+   // parallel loops. Callers must ensure that the underlying point-data
+   // storage is not modified concurrently.
+   //
+   // Use lockData() / the bulk-access APIs when synchronized access is
+   // required.
 
     std::visit([index, newValue](auto& vec)
         {
