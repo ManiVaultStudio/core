@@ -59,7 +59,7 @@ void SentryErrorLogger::initialize()
 void SentryErrorLogger::start()
 {
     if (!getUserHasOptedAction().isChecked() || !getEnabledAction().isChecked()) {
-        start();
+        return;
     }
 
     qDebug() << "Starting Sentry error logging...";
