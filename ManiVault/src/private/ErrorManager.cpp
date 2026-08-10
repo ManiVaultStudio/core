@@ -119,7 +119,7 @@ void ErrorManager::reset()
 
 void ErrorManager::showErrorLoggingConsentDialog()
 {
-#ifdef MV_ERROR_LOGGING
+#ifdef MV_USE_ERROR_LOGGING
     ErrorLoggingConsentDialog errorLoggingConsentDialog;
     errorLoggingConsentDialog.exec();
 #endif
