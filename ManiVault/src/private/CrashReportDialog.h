@@ -28,7 +28,7 @@ public:
     /** Crash user-supplied additional information */
     struct CrashUserInfo
     {
-        bool        _sendReport;        /** Boolean determining whether to send a crash report or not */
+        bool        _submitFeedback;    /** Whether the user chose to submit optional feedback */
         QString     _feedback;          /** Feedback on the crash */
         QString     _contactDetails;    /** Contact details of the issuer */
     };

@@ -30,7 +30,7 @@ ErrorManager::ErrorManager(QObject* parent) :
     _loggingUserHasOptedAction(this, "User has opted", false),
     _loggingEnabledAction(this, "Toggle error reporting", false),
     _loggingDsnAction(this, "Sentry DSN", "https://211289c773dcc267b1bb536b6c3a23f7@lkebsentry.nl/2"),
-    _loggingShowCrashReportDialogAction(this, "Show crash report dialog", true)
+    _loggingShowCrashReportDialogAction(this, "Ask for feedback after a crash", true)
 {
     _loggingAskConsentDialogAction.setToolTip("Show the error logging consent dialog");
     _loggingAskConsentDialogAction.setDefaultWidgetFlags(TriggerAction::IconText);
@@ -50,7 +50,7 @@ ErrorManager::ErrorManager(QObject* parent) :
     _loggingDsnAction.getValidator().setRegularExpression(QRegularExpression(R"(^https?://[a-f0-9]{32}@[a-z0-9\.-]+(:\d+)?/[\d]+$)"));
 
     _loggingShowCrashReportDialogAction.setSettingsPrefix(QString("%1Logging/ShowCrashReportDialog").arg(getSettingsPrefix()));
-    _loggingShowCrashReportDialogAction.setToolTip("Show the crash report dialog prior to sending an error report");
+    _loggingShowCrashReportDialogAction.setToolTip("Ask for optional feedback on the next launch after a crash");
 
     const auto allowErrorReportingChanged = [this]() -> void {
         _loggingShowCrashReportDialogAction.setEnabled(_loggingEnabledAction.isChecked());

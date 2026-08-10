@@ -4,15 +4,15 @@
 
 #include "CrashReportDialog.h"
 
-#include <CoreInterface.h>
+#include <util/StyledIcon.h>
 
-#include <Application.h>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 
 #ifdef _DEBUG
     #define CRASH_REPORT_DIALOG_VERBOSE
 #endif
 
-using namespace mv;
 using namespace mv::util;
 
 QIcon CrashReportDialog::windowIcon         = QIcon();
@@ -21,11 +21,11 @@ QIcon CrashReportDialog::exclamationIcon    = QIcon();
 
 CrashReportDialog::CrashReportDialog(QWidget* parent):
     QDialog(parent),
-    _notificationLabel("ManiVault Studio has encountered an error and needs to close. Please help us improve by providing some information about what happened.\n"),
-    _feedbackLabel("What were you doing when the crash occurred?"),
+    _notificationLabel("ManiVault Studio closed unexpectedly during its previous run. A technical crash report was recorded because error reporting is enabled. You can optionally help us improve by providing some information about what happened.\n"),
+    _feedbackLabel("What were you doing before ManiVault Studio closed?"),
     _contactLabel("\nYour email (optional):"),
-    _sendButton("Send report"),
-    _cancelButton("Cancel")
+    _sendButton("Submit feedback"),
+    _cancelButton("Not now")
 {
     setWindowTitle("Crash report");
     setWindowModality(Qt::ApplicationModal);
@@ -46,7 +46,7 @@ CrashReportDialog::CrashReportDialog(QWidget* parent):
 
     _layout.addWidget(&_feedbackLabel);
 
-    _feedbackTextEdit.setPlaceholderText("Describe the steps leading to the crash...");
+    _feedbackTextEdit.setPlaceholderText("Describe the steps leading up to the crash...");
 
     _layout.addWidget(&_feedbackTextEdit);
 
@@ -71,7 +71,6 @@ CrashReportDialog::CrashReportDialog(QWidget* parent):
 
     _layout.addWidget(&_contactLineEdit);
 
-    _buttonsLayout.addWidget(const_cast<gui::ToggleAction&>(mv::settings().getErrorLoggingSettingsAction().getShowCrashReportDialogAction()).createWidget(this));
     _buttonsLayout.addStretch(1);
     _buttonsLayout.addWidget(&_sendButton);
     _buttonsLayout.addWidget(&_cancelButton);

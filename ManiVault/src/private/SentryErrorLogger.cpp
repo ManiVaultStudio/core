@@ -3,13 +3,12 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "SentryErrorLogger.h"
-#include "CrashReportDialog.h"
-
 #include <ManiVaultVersion.h>
 
 #include "sentry.h"
 
 #include <QOperatingSystemVersion>
+#include <QCoreApplication>
 
 using namespace mv;
 using namespace mv::gui;
@@ -74,8 +73,18 @@ void SentryErrorLogger::start()
     sentry_options_t* options = sentry_options_new();
     
     sentry_options_set_dsn(options, dsn.toUtf8());
-    sentry_options_set_handler_path(options, QString("%1/%2").arg(QDir::currentPath(), getCrashpadHandlerExecutableName()).toUtf8());
+    sentry_options_set_handler_path(options, QDir(QCoreApplication::applicationDirPath()).filePath(getCrashpadHandlerExecutableName()).toUtf8());
     sentry_options_set_database_path(options, ".sentry-native");
+
+    if (getShowCrashReportDialogAction().isChecked()) {
+#ifdef Q_OS_WIN
+        const auto crashReporterExecutable = "ManiVault Crash Reporter.exe";
+#else
+        const auto crashReporterExecutable = "ManiVault Crash Reporter";
+#endif
+        sentry_options_set_external_crash_reporter_path(options,
+            QDir(QCoreApplication::applicationDirPath()).filePath(crashReporterExecutable).toUtf8());
+    }
 
     const auto releaseString = getReleaseString().toUtf8();
 
@@ -83,50 +92,28 @@ void SentryErrorLogger::start()
     sentry_options_set_debug(options, 1);
     sentry_options_set_environment(options, "debug");
     sentry_options_set_release(options, releaseString + "-debug");
-    sentry_set_tag("build_type", "debug");
 #else
     sentry_options_set_debug(options, 0);
     sentry_options_set_environment(options, "release");
     sentry_options_set_release(options, releaseString + "-release");
+#endif
+
+    if (sentry_init(options) != 0) {
+        qDebug() << "Sentry error logging is not running";
+        return;
+    }
+
+    qDebug() << "Sentry error logging is running, crash reports will send to: " + dsn;
+
+#ifdef _DEBUG
+    sentry_set_tag("build_type", "debug");
+#else
     sentry_set_tag("build_type", "release");
 #endif
 
-    static const bool showCrashReportDialog = getShowCrashReportDialogAction().isChecked();
-
-    qDebug() << "showCrashReportDialog" << showCrashReportDialog;
-
-    sentry_options_set_before_send(options, [](sentry_value_t event, void* hint, void* closure) -> sentry_value_t {
-        //auto showCrashReportDialog = static_cast<bool*>(closure);
-
-        //qDebug() << "Sending crash report..." << showCrashReportDialog;
-        if (!showCrashReportDialog)
-            return event;
-
-        CrashReportDialog crashReportDialog;
-
-        if (crashReportDialog.exec() == QDialog::Accepted) {
-            const auto crashUserInfo = crashReportDialog.getCrashUserInfo();
-
-            if (crashUserInfo._sendReport) {
-                sentry_value_t extra = sentry_value_new_object();
-
-                sentry_value_set_by_key(extra, "feedback", sentry_value_new_string(crashUserInfo._feedback.toUtf8()));
-                sentry_value_set_by_key(extra, "contactInfo", sentry_value_new_string(crashUserInfo._contactDetails.toUtf8()));
-
-                sentry_value_set_by_key(event, "extra", extra);
-
-                if (auto eventJson = sentry_value_to_json(event))
-                    sentry_free(eventJson);
-            }
-        }
-
-        return event;
-    }, nullptr);
-
-    if (sentry_init(options) == 0)
-        qDebug() << "Sentry error logging is running, crash reports will send to: " + dsn;
-    else
-        qDebug() << "Sentry error logging is not running";
+    // The external crash reporter handles feedback and owns the crash envelope.
+    // Clear the marker so a handled crash does not prompt again on later runs.
+    sentry_clear_crashed_last_run();
     
     addNotification("Started", {
         QString("%1 error logging").arg(getLoggerName()),

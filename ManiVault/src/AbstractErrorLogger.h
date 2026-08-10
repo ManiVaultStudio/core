@@ -133,13 +133,13 @@ public:
             if (toggled)
                 addNotification("ShowCrashReportDialog", {
                     QString("%1 error logging").arg(_loggerName),
-                    QString("A window will popup when a fatal error occurs in which you can give details surrounding the crash. This setting will take effect after restarting the application."),
+                    QString("A feedback window will open on the next launch after a crash. This setting will take effect after restarting the application."),
                     util::StyledIcon("bug")
                 });
             else
                 addNotification("ShowCrashReportDialog", {
                     QString("%1 error logging").arg(_loggerName),
-                    QString("You will not be asked for details surrounding a crash, a report will be sent automatically to the Sentry server. This setting will take effect after restarting the application."),
+                    QString("You will not be asked for optional feedback after a crash. Technical crash reporting remains controlled by the error logging setting. This setting will take effect after restarting the application."),
                     util::StyledIcon("bug")
                 });
         });

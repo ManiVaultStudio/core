@@ -40,6 +40,8 @@
 #include <QRandomGenerator>
 #include <QShortcut>
 
+#include <cstdlib>
+
 #ifdef _DEBUG
     #define MAIN_WINDOW_VERBOSE
 #endif
@@ -184,6 +186,35 @@ void MainWindow::initialize()
     connect(parallelPhantomTestShortcut, &QShortcut::activated, this, [this] {
         mv::detail::ParallelPhantomTestSuite::showMenu(this);
     });
+
+#ifdef MV_USE_ERROR_LOGGING
+    // Deliberately undiscoverable in the UI: this exercises the complete
+    // Crashpad and next-launch crash-feedback path for development/testing.
+    auto crashReportingTestShortcut = new QShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::ShiftModifier | Qt::Key_C), this);
+
+    crashReportingTestShortcut->setContext(Qt::ApplicationShortcut);
+
+    connect(crashReportingTestShortcut, &QShortcut::activated, this, [this] {
+        const auto& errorManager = mv::errors();
+
+        if (!errorManager.getLoggingUserHasOptedAction().isChecked() || !errorManager.getLoggingEnabledAction().isChecked()) {
+            QMessageBox::information(this,
+                tr("Crash reporting test"),
+                tr("Sentry error reporting must be enabled before running the crash reporting test."));
+            return;
+        }
+
+        const auto response = QMessageBox::warning(this,
+            tr("Crash reporting test"),
+            tr("This test will deliberately crash ManiVault Studio. Any unsaved work will be lost.\n\n"
+               "After restarting, the crash feedback dialog should appear. Continue?"),
+            QMessageBox::Yes | QMessageBox::Cancel,
+            QMessageBox::Cancel);
+
+        if (response == QMessageBox::Yes)
+            std::abort();
+    });
+#endif
 
 	auto fileMenuAction     = menuBar()->addMenu(new FileMenu());
     auto viewMenuAction     = menuBar()->addMenu(new ViewMenu());
