@@ -50,4 +50,7 @@ private:
      * @return Boolean determining whether the DSN is valid
      */
     bool isDsnValid() const override;
+
+private:
+    bool _isRunning = false;    /** Whether the Sentry SDK initialized successfully */
 };

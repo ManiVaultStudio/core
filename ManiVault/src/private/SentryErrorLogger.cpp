@@ -60,6 +60,11 @@ void SentryErrorLogger::initialize()
 
 void SentryErrorLogger::start()
 {
+    if (_isRunning) {
+        qDebug() << "Sentry error logging is already running";
+        return;
+    }
+
     if (!getUserHasOptedAction().isChecked() || !getEnabledAction().isChecked()) {
         return;
     }
@@ -139,9 +144,19 @@ void SentryErrorLogger::start()
 #endif
 
     if (sentry_init(options) != 0) {
-        qDebug() << "Sentry error logging is not running";
+        qWarning() << "Cannot start Sentry: SDK initialization failed";
+
+        addNotification("InitializationFailed", {
+            "Sentry error logging disabled",
+            "Sentry could not initialize. Error and crash reports will not be sent during this session. See the application log for technical details.",
+            StyledIcon("triangle-exclamation"),
+            5000
+        });
+
         return;
     }
+
+    _isRunning = true;
 
     qDebug() << "Sentry error logging is running, crash reports will send to: " + dsn;
 
@@ -168,7 +183,11 @@ void SentryErrorLogger::start()
 
 void SentryErrorLogger::stop()
 {
+    if (!_isRunning)
+        return;
+
     sentry_close();
+    _isRunning = false;
 }
 
 QString SentryErrorLogger::getReleaseString()
