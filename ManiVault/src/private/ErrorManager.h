@@ -64,12 +64,16 @@ public:
      */
     util::StackTrace getDebugStackTrace() const override;
 
+    /** Forwards a caught exception to the configured error logger. */
+    void reportHandledException(const QString& title, const QString& exceptionType, const QString& reason, util::SeverityLevel severity, const util::StackTrace& stackTrace, const QString& diagnosticId = {},const QString& where = {}) override;
+
 public: // Action getters
 
     gui::TriggerAction& getLoggingAskConsentDialogAction() override { return _loggingAskConsentDialogAction; }              /**< Returns the action for asking error logging consent */
     gui::ToggleAction& getLoggingUserHasOptedAction() override  { return _loggingUserHasOptedAction; }                      /**< Returns the action tracking whether the user has opted in */
     gui::ToggleAction& getLoggingEnabledAction() override { return _loggingEnabledAction; }                                 /**< Returns the action for enabling error logging */
     gui::StringAction& getLoggingDsnAction() override { return _loggingDsnAction; }                                         /**< Returns the error logging data source name action */
+    gui::ToggleAction& getLoggingReportHandledExceptionsAction() override { return _loggingReportHandledExceptionsAction; } /**< Returns the action for reporting handled exceptions */
     gui::ToggleAction& getLoggingShowCrashReportDialogAction() override { return _loggingShowCrashReportDialogAction; }     /**< Returns the crash report dialog toggle action */
 
 private:
@@ -78,6 +82,7 @@ private:
     gui::ToggleAction   _loggingUserHasOptedAction;             /**< Tracks whether the user has opted in or out */
     gui::ToggleAction   _loggingEnabledAction;                  /**< Toggles error logging on or off */
     gui::StringAction   _loggingDsnAction;                      /**< Error logging data source name action */
+    gui::ToggleAction   _loggingReportHandledExceptionsAction;  /**< Toggles reporting of handled exceptions */
     gui::ToggleAction   _loggingShowCrashReportDialogAction;    /**< Toggles crash report dialog visibility */
 };
 

@@ -36,6 +36,7 @@ public: // Action getters
     const gui::ToggleAction& getUserHasOptedAction() const;                 /** Get action for user has opted */  
     const gui::ToggleAction& getEnabledAction() const;                      /** Get action for logging enabled */
     const gui::StringAction& getDsnAction() const;                          /** Get action for logging data source name (DSN) */
+    const gui::ToggleAction& getReportHandledExceptionsAction() const;      /** Get action for reporting handled exceptions */
     const gui::ToggleAction& getShowCrashReportDialogAction() const;        /** Get action for showing a crash report dialog when the application fails */
 };
 

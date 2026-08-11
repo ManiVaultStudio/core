@@ -11,6 +11,8 @@
 #include "CoreInterface.h"
 
 #include "util/StyledIcon.h"
+#include "util/SeverityLevel.h"
+#include "util/StackFrame.h"
 
 #include <QTimer>
 
@@ -67,6 +69,18 @@ public:
 
     /** Connects to the error logging global settings */
     virtual void initialize() = 0;
+
+    /** Reports an exception that was caught and presented to the user. */
+    virtual void reportHandledException(const QString& title, const QString& exceptionType, const QString& reason, util::SeverityLevel severity, const util::StackTrace& stackTrace, const QString& diagnosticId = {}, const QString& where = {})
+    {
+        Q_UNUSED(title)
+        Q_UNUSED(exceptionType)
+        Q_UNUSED(reason)
+        Q_UNUSED(severity)
+        Q_UNUSED(stackTrace)
+        Q_UNUSED(diagnosticId)
+        Q_UNUSED(where)
+    }
 
     /**
      * Get the logger name

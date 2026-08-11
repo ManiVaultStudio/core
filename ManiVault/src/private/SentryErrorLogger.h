@@ -26,6 +26,9 @@ public:
     /** Connects to the error logging global settings */
     void initialize() override;
 
+    /** Sends a caught exception as a non-fatal Sentry event. */
+    void reportHandledException(const QString& title, const QString& exceptionType, const QString& reason, mv::util::SeverityLevel severity, const mv::util::StackTrace& stackTrace, const QString& diagnosticId = {}, const QString& where = {}) override;
+
 private:
 
     /**

@@ -190,6 +190,78 @@ void SentryErrorLogger::stop()
     _isRunning = false;
 }
 
+void SentryErrorLogger::reportHandledException(const QString& title,
+                                               const QString& exceptionType,
+                                               const QString& reason,
+                                               util::SeverityLevel severity,
+                                               const util::StackTrace& stackTrace,
+                                               const QString& diagnosticId,
+                                               const QString& where)
+{
+    if (!_isRunning)
+        return;
+
+    auto event     = sentry_value_new_event();
+    auto exception = sentry_value_new_exception(exceptionType.toUtf8().constData(), reason.toUtf8().constData());
+    auto sentryStackTrace = sentry_value_new_object();
+    auto frames = sentry_value_new_list();
+
+    // Sentry expects frames from the oldest call to the point where the
+    // exception occurred; cpptrace provides them in the opposite order.
+    for (auto frameIterator = stackTrace.crbegin(); frameIterator != stackTrace.crend(); ++frameIterator) {
+        const auto& frame = *frameIterator;
+        auto sentryFrame = sentry_value_new_object();
+
+        if (!frame.function.isEmpty())
+            sentry_value_set_by_key(sentryFrame, "function", sentry_value_new_string(frame.function.toUtf8().constData()));
+
+        if (!frame.file.isEmpty())
+            sentry_value_set_by_key(sentryFrame, "filename", sentry_value_new_string(QFileInfo(frame.file).fileName().toUtf8().constData()));
+
+        if (frame.line >= 0)
+            sentry_value_set_by_key(sentryFrame, "lineno", sentry_value_new_int32(frame.line));
+
+        if (!frame.module.isEmpty())
+            sentry_value_set_by_key(sentryFrame, "module", sentry_value_new_string(QFileInfo(frame.module).fileName().toUtf8().constData()));
+
+        if (!frame.address.isEmpty())
+            sentry_value_set_by_key(sentryFrame, "instruction_addr", sentry_value_new_string(frame.address.toUtf8().constData()));
+
+        sentry_value_append(frames, sentryFrame);
+    }
+
+    sentry_value_set_by_key(sentryStackTrace, "frames", frames);
+    sentry_value_set_by_key(exception, "stacktrace", sentryStackTrace);
+    sentry_event_add_exception(event, exception);
+
+    const auto level = [&severity]() {
+        switch (severity) {
+            case util::SeverityLevel::Info:    return "info";
+            case util::SeverityLevel::Warning: return "warning";
+            case util::SeverityLevel::Error:   return "error";
+            case util::SeverityLevel::Fatal:   return "fatal";
+        }
+
+        return "error";
+    }();
+
+    sentry_value_set_by_key(event, "level", sentry_value_new_string(level));
+
+    auto extra = sentry_value_new_object();
+
+    if (!title.isEmpty())
+        sentry_value_set_by_key(extra, "dialog_title", sentry_value_new_string(title.toUtf8().constData()));
+
+    if (!diagnosticId.isEmpty())
+        sentry_value_set_by_key(extra, "diagnostic_id", sentry_value_new_string(diagnosticId.toUtf8().constData()));
+
+    if (!where.isEmpty())
+        sentry_value_set_by_key(extra, "where", sentry_value_new_string(where.toUtf8().constData()));
+
+    sentry_value_set_by_key(event, "extra", extra);
+    sentry_capture_event(event);
+}
+
 QString SentryErrorLogger::getReleaseString()
 {
     if (!getEnabledAction().isChecked())

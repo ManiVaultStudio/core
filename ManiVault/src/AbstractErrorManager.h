@@ -7,6 +7,7 @@
 #include "AbstractManager.h"
 
 #include "util/StackFrame.h"
+#include "util/SeverityLevel.h"
 
 #include "actions/ToggleAction.h"
 #include "actions/StringAction.h"
@@ -83,6 +84,18 @@ public:
         return {};
     }
 
+    /** Reports a caught exception to the active error logger, when available. */
+    virtual void reportHandledException(const QString& title, const QString& exceptionType, const QString& reason, util::SeverityLevel severity, const util::StackTrace& stackTrace, const QString& diagnosticId = {}, const QString& where = {})
+    {
+        Q_UNUSED(title)
+        Q_UNUSED(exceptionType)
+        Q_UNUSED(reason)
+        Q_UNUSED(severity)
+        Q_UNUSED(stackTrace)
+        Q_UNUSED(diagnosticId)
+        Q_UNUSED(where)
+    }
+
 protected:
 
     /**
@@ -109,6 +122,7 @@ public: // Const action getters
     virtual const gui::ToggleAction& getLoggingUserHasOptedAction()  const { return const_cast<AbstractErrorManager*>(this)->getLoggingUserHasOptedAction(); };                     /** Get action for user has opted */
     virtual const gui::ToggleAction& getLoggingEnabledAction()  const { return const_cast<AbstractErrorManager*>(this)->getLoggingEnabledAction(); };                               /** Get action for logging enabled */
     virtual const gui::StringAction& getLoggingDsnAction()  const { return const_cast<AbstractErrorManager*>(this)->getLoggingDsnAction(); };                                       /** Get action for logging data source name (DSN) */
+    virtual const gui::ToggleAction& getLoggingReportHandledExceptionsAction() const { return const_cast<AbstractErrorManager*>(this)->getLoggingReportHandledExceptionsAction(); } /** Get action for reporting handled exceptions */
     virtual const gui::ToggleAction& getLoggingShowCrashReportDialogAction()  const { return const_cast<AbstractErrorManager*>(this)->getLoggingShowCrashReportDialogAction(); };   /** Get action for showing a crash report dialog when the application fails */
 
 protected: // Non-const action getters
@@ -117,6 +131,7 @@ protected: // Non-const action getters
     virtual gui::ToggleAction& getLoggingUserHasOptedAction() = 0;              /** Get action for user has opted */
     virtual gui::ToggleAction& getLoggingEnabledAction() = 0;                   /** Get action for logging enabled */
     virtual gui::StringAction& getLoggingDsnAction() = 0;                       /** Get action for logging data source name (DSN) */
+    virtual gui::ToggleAction& getLoggingReportHandledExceptionsAction() = 0;   /** Get action for reporting handled exceptions */
     virtual gui::ToggleAction& getLoggingShowCrashReportDialogAction() = 0;     /** Get action for showing a crash report dialog when the application fails */
 
 private:

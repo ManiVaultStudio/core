@@ -24,6 +24,8 @@
 #include <QHeaderView>
 #include <QTreeWidget>
 
+#include <typeinfo>
+
 namespace mv::util {
 
 namespace
@@ -230,6 +232,8 @@ void exceptionMessageBox(const QString& title, const QString& reason, QWidget* p
 {
     const auto stackTrace = mv::errors().getDebugStackTrace();
 
+    mv::errors().reportHandledException(title, "UnknownException", reason, SeverityLevel::Error, stackTrace);
+
     exceptionDialog(title, reason, stackTrace, parent);
 
     qDebug() << title << reason;
@@ -245,12 +249,24 @@ void exceptionMessageBox(const QString& title, QWidget* parent)
 
 void exceptionMessageBox(const QString& title, const std::exception& exception, QWidget* parent)
 {
-    exceptionMessageBox(title, exception.what(), parent);
+    const auto reason     = QString::fromUtf8(exception.what());
+    const auto stackTrace = mv::errors().getDebugStackTrace();
+
+    mv::errors().reportHandledException(title, QString::fromLatin1(typeid(exception).name()), reason, SeverityLevel::Error, stackTrace);
+
+    exceptionDialog(title, reason, stackTrace, parent);
+
+    qDebug() << title << reason;
+
+    for (const auto& frame : stackTrace)
+        qDebug() << stackFrameToString(frame);
 }
 
 void exceptionMessageBox(const QString& title, const ManiVaultException& exception, QWidget* parent)
 {
     const auto stackTrace = exception.getStackTrace();
+
+    mv::errors().reportHandledException(title, "ManiVaultException", exception.getWhat(), exception.getSeverity(), stackTrace, exception.getDiagnosticId().toString(QUuid::WithoutBraces), exception.getWhere());
 
     exceptionDialog(title, exception.getMessage(), stackTrace, parent);
 

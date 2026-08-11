@@ -4,6 +4,7 @@
 
 #include "ErrorManager.h"
 #include "ErrorLoggingConsentDialog.h"
+#include "AbstractErrorLogger.h"
 
 #include <QRegularExpression>
 
@@ -30,6 +31,7 @@ ErrorManager::ErrorManager(QObject* parent) :
     _loggingUserHasOptedAction(this, "User has opted", false),
     _loggingEnabledAction(this, "Toggle error reporting", false),
     _loggingDsnAction(this, "Sentry DSN", "https://211289c773dcc267b1bb536b6c3a23f7@lkebsentry.nl/2"),
+    _loggingReportHandledExceptionsAction(this, "Report handled exceptions", false),
     _loggingShowCrashReportDialogAction(this, "Ask for feedback after a crash", true)
 {
     _loggingAskConsentDialogAction.setToolTip("Show the error logging consent dialog");
@@ -49,11 +51,15 @@ ErrorManager::ErrorManager(QObject* parent) :
     _loggingDsnAction.setToolTip("The Sentry error logging data source name");
     _loggingDsnAction.getValidator().setRegularExpression(QRegularExpression(R"(^https?://[a-f0-9]{32}@[a-z0-9\.-]+(:\d+)?/[\d]+$)"));
 
+    _loggingReportHandledExceptionsAction.setSettingsPrefix(QString("%1Logging/ReportHandledExceptions").arg(getSettingsPrefix()));
+    _loggingReportHandledExceptionsAction.setToolTip("Send non-fatal exceptions that the application catches and shows in an exception dialog to Sentry");
+
     _loggingShowCrashReportDialogAction.setSettingsPrefix(QString("%1Logging/ShowCrashReportDialog").arg(getSettingsPrefix()));
     _loggingShowCrashReportDialogAction.setToolTip("Ask for optional feedback on the next launch after a crash");
 
     const auto allowErrorReportingChanged = [this]() -> void {
         _loggingShowCrashReportDialogAction.setEnabled(_loggingEnabledAction.isChecked());
+        _loggingReportHandledExceptionsAction.setEnabled(_loggingEnabledAction.isChecked());
         _loggingDsnAction.setEnabled(_loggingEnabledAction.isChecked());
     };
 
@@ -85,6 +91,7 @@ void ErrorManager::initialize()
         errorLoggingSettingsAction.addAction(&getLoggingAskConsentDialogAction());
         errorLoggingSettingsAction.addAction(&getLoggingEnabledAction());
         errorLoggingSettingsAction.addAction(&getLoggingDsnAction());
+        errorLoggingSettingsAction.addAction(&getLoggingReportHandledExceptionsAction());
         errorLoggingSettingsAction.addAction(&getLoggingShowCrashReportDialogAction());
 
 #ifdef MV_USE_ERROR_LOGGING
@@ -170,6 +177,15 @@ util::StackTrace ErrorManager::getDebugStackTrace() const
 #endif
 
     return stackTrace;
+}
+
+void ErrorManager::reportHandledException(const QString& title, const QString& exceptionType, const QString& reason, util::SeverityLevel severity, const util::StackTrace& stackTrace, const QString& diagnosticId, const QString& where)
+{
+    if (!getLoggingReportHandledExceptionsAction().isChecked())
+        return;
+
+    if (auto* errorLogger = getErrorLogger())
+        errorLogger->reportHandledException(title, exceptionType, reason, severity, stackTrace, diagnosticId, where);
 }
 
 }
