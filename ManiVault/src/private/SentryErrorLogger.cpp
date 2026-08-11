@@ -23,6 +23,7 @@ namespace
     constexpr qsizetype maximumSentryTextLength = 4096;
     constexpr qsizetype maximumHandledExceptionsPerSession = 50;
     constexpr qint64 handledExceptionCooldownMilliseconds = 60 * 1000;
+    constexpr uint64_t sentryShutdownTimeoutMilliseconds = 2000;
 
     QString sanitizeForSentry(const QString& text)
     {
@@ -144,6 +145,7 @@ void SentryErrorLogger::start()
     sentry_options_set_dsn(options, dsn.toUtf8());
     sentry_options_set_handler_path(options, QDir(QCoreApplication::applicationDirPath()).filePath(getCrashpadHandlerExecutableName()).toUtf8());
     sentry_options_set_database_path(options, sentryDatabasePath.toUtf8());
+    sentry_options_set_shutdown_timeout(options, sentryShutdownTimeoutMilliseconds);
 
     if (getShowCrashReportDialogAction().isChecked()) {
 #ifdef Q_OS_WIN
@@ -228,7 +230,11 @@ void SentryErrorLogger::stop()
     if (!_isRunning)
         return;
 
-    sentry_close();
+    const auto dumpedEnvelopes = sentry_close();
+
+    if (dumpedEnvelopes > 0)
+        qWarning() << "Sentry shutdown timed out;" << dumpedEnvelopes << "envelope(s) were persisted for delivery during a later session";
+
     _isRunning = false;
     _handledExceptionSessionTimer.invalidate();
     _handledExceptionLastSent.clear();
