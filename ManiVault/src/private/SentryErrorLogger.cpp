@@ -11,11 +11,50 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
+#include <QRegularExpression>
 #include <QStandardPaths>
 
 using namespace mv;
 using namespace mv::gui;
 using namespace mv::util;
+
+namespace
+{
+    constexpr qsizetype maximumSentryTextLength = 4096;
+    constexpr qsizetype maximumHandledExceptionsPerSession = 50;
+    constexpr qint64 handledExceptionCooldownMilliseconds = 60 * 1000;
+
+    QString sanitizeForSentry(const QString& text)
+    {
+        auto sanitized = text;
+
+        const auto redactDirectory = [&sanitized](const QString& directory, const QString& replacement) {
+            if (directory.isEmpty() || QDir(directory).isRoot())
+                return;
+
+            sanitized.replace(QDir::cleanPath(directory), replacement, Qt::CaseInsensitive);
+            sanitized.replace(QDir::toNativeSeparators(QDir::cleanPath(directory)), replacement, Qt::CaseInsensitive);
+        };
+
+        redactDirectory(QDir::homePath(), "<home>");
+        redactDirectory(QDir::tempPath(), "<temp>");
+
+        static const QRegularExpression windowsUserPath(R"(([A-Z]:[\\/](?:Users|Documents and Settings)[\\/])[^\\/\s]+)", QRegularExpression::CaseInsensitiveOption);
+        static const QRegularExpression unixUserPath(R"((/(?:home|Users)/)[^/\s]+)", QRegularExpression::CaseInsensitiveOption);
+        static const QRegularExpression emailAddress(R"(\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b)", QRegularExpression::CaseInsensitiveOption);
+        static const QRegularExpression urlCredentials(R"((\b[A-Z][A-Z0-9+.-]*://)[^/\s:@]+(?::[^/\s@]*)?@)", QRegularExpression::CaseInsensitiveOption);
+
+        sanitized.replace(windowsUserPath, "\\1<user>");
+        sanitized.replace(unixUserPath, "\\1<user>");
+        sanitized.replace(emailAddress, "<email>");
+        sanitized.replace(urlCredentials, "\\1<credentials>@");
+
+        if (sanitized.size() > maximumSentryTextLength)
+            sanitized = sanitized.left(maximumSentryTextLength) + "...[truncated]";
+
+        return sanitized;
+    }
+}
 
 SentryErrorLogger::SentryErrorLogger(QObject* parent /*= nullptr*/) :
     AbstractErrorLogger("Sentry", parent)
@@ -157,6 +196,9 @@ void SentryErrorLogger::start()
     }
 
     _isRunning = true;
+    _handledExceptionSessionTimer.start();
+    _handledExceptionLastSent.clear();
+    _handledExceptionsSent = 0;
 
     qDebug() << "Sentry error logging is running, crash reports will send to: " + dsn;
 
@@ -188,23 +230,42 @@ void SentryErrorLogger::stop()
 
     sentry_close();
     _isRunning = false;
+    _handledExceptionSessionTimer.invalidate();
+    _handledExceptionLastSent.clear();
+    _handledExceptionsSent = 0;
 }
 
-void SentryErrorLogger::reportHandledException(const QString& title,
-                                               const QString& exceptionType,
-                                               const QString& reason,
-                                               util::SeverityLevel severity,
-                                               const util::StackTrace& stackTrace,
-                                               const QString& diagnosticId,
-                                               const QString& where)
+void SentryErrorLogger::reportHandledException(const QString& title, const QString& exceptionType, const QString& reason, util::SeverityLevel severity, const util::StackTrace& stackTrace, const QString& diagnosticId, const QString& where)
 {
     if (!_isRunning)
         return;
 
+    const auto sanitizedReason = sanitizeForSentry(reason);
+    const auto fingerprint = exceptionType + QLatin1Char('\n') + sanitizedReason;
+    const auto now = _handledExceptionSessionTimer.elapsed();
+
+    for (auto iterator = _handledExceptionLastSent.begin(); iterator != _handledExceptionLastSent.end();) {
+        if (now - iterator.value() >= handledExceptionCooldownMilliseconds)
+            iterator = _handledExceptionLastSent.erase(iterator);
+        else
+            ++iterator;
+    }
+
+    if (_handledExceptionsSent >= maximumHandledExceptionsPerSession || _handledExceptionLastSent.contains(fingerprint))
+        return;
+
+    _handledExceptionLastSent.insert(fingerprint, now);
+    ++_handledExceptionsSent;
+
     auto event     = sentry_value_new_event();
-    auto exception = sentry_value_new_exception(exceptionType.toUtf8().constData(), reason.toUtf8().constData());
+    auto exception = sentry_value_new_exception(exceptionType.toUtf8().constData(), sanitizedReason.toUtf8().constData());
     auto sentryStackTrace = sentry_value_new_object();
     auto frames = sentry_value_new_list();
+    auto sentryFingerprint = sentry_value_new_list();
+
+    sentry_value_append(sentryFingerprint, sentry_value_new_string("{{ default }}"));
+    sentry_value_append(sentryFingerprint, sentry_value_new_string("handled-exception"));
+    sentry_value_set_by_key(event, "fingerprint", sentryFingerprint);
 
     // Sentry expects frames from the oldest call to the point where the
     // exception occurred; cpptrace provides them in the opposite order.
@@ -250,13 +311,13 @@ void SentryErrorLogger::reportHandledException(const QString& title,
     auto extra = sentry_value_new_object();
 
     if (!title.isEmpty())
-        sentry_value_set_by_key(extra, "dialog_title", sentry_value_new_string(title.toUtf8().constData()));
+        sentry_value_set_by_key(extra, "dialog_title", sentry_value_new_string(sanitizeForSentry(title).toUtf8().constData()));
 
     if (!diagnosticId.isEmpty())
         sentry_value_set_by_key(extra, "diagnostic_id", sentry_value_new_string(diagnosticId.toUtf8().constData()));
 
     if (!where.isEmpty())
-        sentry_value_set_by_key(extra, "where", sentry_value_new_string(where.toUtf8().constData()));
+        sentry_value_set_by_key(extra, "where", sentry_value_new_string(sanitizeForSentry(where).toUtf8().constData()));
 
     sentry_value_set_by_key(event, "extra", extra);
     sentry_capture_event(event);

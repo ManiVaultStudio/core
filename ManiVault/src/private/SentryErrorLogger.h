@@ -6,6 +6,9 @@
 
 #include <AbstractErrorLogger.h>
 
+#include <QElapsedTimer>
+#include <QHash>
+
 /**
  * Sentry error logger class
  *
@@ -55,5 +58,8 @@ private:
     bool isDsnValid() const override;
 
 private:
-    bool _isRunning = false;    /** Whether the Sentry SDK initialized successfully */
+    bool                    _isRunning = false;                  /** Whether the Sentry SDK initialized successfully */
+    QElapsedTimer           _handledExceptionSessionTimer;      /** Monotonic clock used for handled-exception throttling */
+    QHash<QString, qint64>  _handledExceptionLastSent;          /** Last transmission time for each handled-exception fingerprint */
+    qsizetype               _handledExceptionsSent = 0;         /** Number of handled exceptions sent during this session */
 };
