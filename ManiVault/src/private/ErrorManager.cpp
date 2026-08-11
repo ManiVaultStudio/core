@@ -48,8 +48,13 @@ ErrorManager::ErrorManager(QObject* parent) :
 //#endif
     
     _loggingDsnAction.setSettingsPrefix(QString("%1Logging/DSN").arg(getSettingsPrefix()));
-    _loggingDsnAction.setToolTip("The Sentry error logging data source name");
-    _loggingDsnAction.getValidator().setRegularExpression(QRegularExpression(R"(^https?://[a-f0-9]{32}@[a-z0-9\.-]+(:\d+)?/[\d]+$)"));
+    _loggingDsnAction.setToolTip("The Sentry Data Source Name (DSN). Hosted and self-hosted HTTP(S) DSNs with optional ports and path prefixes are supported.");
+
+    // Current Sentry DSNs do not require a 32-character hexadecimal public
+    // key or a numeric project identifier. Keep this structural validator in
+    // line with sentry-native: scheme, public key, optional secret, host and
+    // optional port/path prefix, followed by a non-empty project identifier.
+    _loggingDsnAction.getValidator().setRegularExpression(QRegularExpression(R"(^https?://[A-Z0-9._~%-]+(?::[A-Z0-9._~%-]+)?@(?:\[[0-9A-F:.]+\]|[A-Z0-9.-]+)(?::[0-9]{1,5})?/(?:[A-Z0-9._~!$&'()*+,;=:@%-]+/)*[A-Z0-9._~!$&'()*+,;=:@%-]+/?$)", QRegularExpression::CaseInsensitiveOption));
 
     _loggingReportHandledExceptionsAction.setSettingsPrefix(QString("%1Logging/ReportHandledExceptions").arg(getSettingsPrefix()));
     _loggingReportHandledExceptionsAction.setToolTip("Send handled error- and fatal-level exceptions shown in an exception dialog to Sentry. Informational and warning-level exceptions remain local.");
