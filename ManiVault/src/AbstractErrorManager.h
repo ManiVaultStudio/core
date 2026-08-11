@@ -84,7 +84,7 @@ public:
         return {};
     }
 
-    /** Reports a caught exception to the active error logger, when available. */
+    /** Reports an eligible caught exception to the active error logger, when available. */
     virtual void reportHandledException(const QString& title, const QString& exceptionType, const QString& reason, util::SeverityLevel severity, const util::StackTrace& stackTrace, const QString& diagnosticId = {}, const QString& where = {})
     {
         Q_UNUSED(title)

@@ -52,7 +52,7 @@ ErrorManager::ErrorManager(QObject* parent) :
     _loggingDsnAction.getValidator().setRegularExpression(QRegularExpression(R"(^https?://[a-f0-9]{32}@[a-z0-9\.-]+(:\d+)?/[\d]+$)"));
 
     _loggingReportHandledExceptionsAction.setSettingsPrefix(QString("%1Logging/ReportHandledExceptions").arg(getSettingsPrefix()));
-    _loggingReportHandledExceptionsAction.setToolTip("Send non-fatal exceptions that the application catches and shows in an exception dialog to Sentry");
+    _loggingReportHandledExceptionsAction.setToolTip("Send handled error- and fatal-level exceptions shown in an exception dialog to Sentry. Informational and warning-level exceptions remain local.");
 
     _loggingShowCrashReportDialogAction.setSettingsPrefix(QString("%1Logging/ShowCrashReportDialog").arg(getSettingsPrefix()));
     _loggingShowCrashReportDialogAction.setToolTip("Ask for optional feedback on the next launch after a crash");
@@ -183,6 +183,16 @@ void ErrorManager::reportHandledException(const QString& title, const QString& e
 {
     if (!getLoggingReportHandledExceptionsAction().isChecked())
         return;
+
+    switch (severity) {
+        case util::SeverityLevel::Info:
+        case util::SeverityLevel::Warning:
+            return;
+
+        case util::SeverityLevel::Error:
+        case util::SeverityLevel::Fatal:
+            break;
+    }
 
     if (auto* errorLogger = getErrorLogger())
         errorLogger->reportHandledException(title, exceptionType, reason, severity, stackTrace, diagnosticId, where);
