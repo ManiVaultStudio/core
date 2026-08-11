@@ -21,6 +21,8 @@
 #include <actions/ToggleAction.h>
 #include <actions/PluginStatusBarAction.h>
 
+#include <util/StyledIcon.h>
+
 #include "FrontPagesStatusBarAction.h"
 #include "ManiVaultVersionStatusBarAction.h"
 #include "PluginsStatusBarAction.h"
@@ -189,7 +191,7 @@ void MainWindow::initialize()
 
 #ifdef MV_USE_ERROR_LOGGING
     // Deliberately undiscoverable in the UI: this exercises the complete
-    // Crashpad and next-launch crash-feedback path for development/testing.
+    // Crashpad and external crash-feedback path for development/testing.
     auto crashReportingTestShortcut = new QShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::ShiftModifier | Qt::Key_C), this);
 
     crashReportingTestShortcut->setContext(Qt::ApplicationShortcut);
@@ -204,12 +206,19 @@ void MainWindow::initialize()
             return;
         }
 
-        const auto response = QMessageBox::warning(this,
-            tr("Crash reporting test"),
-            tr("This test will deliberately crash ManiVault Studio. Any unsaved work will be lost.\n\n"
-               "After restarting, the crash feedback dialog should appear. Continue?"),
-            QMessageBox::Yes | QMessageBox::Cancel,
-            QMessageBox::Cancel);
+        QMessageBox confirmationDialog(this);
+
+        confirmationDialog.setWindowTitle(tr("Crash reporting test"));
+        confirmationDialog.setText(tr("This test will deliberately crash ManiVault Studio. Any unsaved work will be lost.\n\n"
+                                      "Immediately after the crash, a separate crash feedback dialog should appear. Continue?"));
+        const QIcon bugIcon = mv::util::StyledIcon("bug");
+
+        confirmationDialog.setWindowIcon(bugIcon);
+        confirmationDialog.setIcon(QMessageBox::Warning);
+        confirmationDialog.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+        confirmationDialog.setDefaultButton(QMessageBox::Cancel);
+
+        const auto response = confirmationDialog.exec();
 
         if (response == QMessageBox::Yes)
             std::abort();

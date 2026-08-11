@@ -9,6 +9,8 @@
 
 #include <QOperatingSystemVersion>
 #include <QCoreApplication>
+#include <QDir>
+#include <QStandardPaths>
 
 using namespace mv;
 using namespace mv::gui;
@@ -71,10 +73,32 @@ void SentryErrorLogger::start()
     const auto dsn = getDsnAction().getString();
 
     sentry_options_t* options = sentry_options_new();
+
+    const auto cachePath          = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    const auto sentryDatabasePath = QDir(cachePath).filePath("Sentry");
+
+    if (cachePath.isEmpty() || !QDir().mkpath(sentryDatabasePath)) {
+        qWarning() << "Cannot start Sentry: unable to create its cache directory at" << sentryDatabasePath;
+
+        const auto reason = cachePath.isEmpty()
+            ? QString("The operating system did not provide a writable application cache location.")
+            : QString("The cache directory <code>%1</code> could not be created. Check the directory permissions and available disk space.")
+                  .arg(sentryDatabasePath.toHtmlEscaped());
+
+        addNotification("CacheDirectoryUnavailable", {
+            "Sentry error logging disabled",
+            QString("Sentry could not start. %1 Error and crash reports will not be sent during this session.").arg(reason),
+            StyledIcon("triangle-exclamation"),
+            5000
+        });
+
+        sentry_options_free(options);
+        return;
+    }
     
     sentry_options_set_dsn(options, dsn.toUtf8());
     sentry_options_set_handler_path(options, QDir(QCoreApplication::applicationDirPath()).filePath(getCrashpadHandlerExecutableName()).toUtf8());
-    sentry_options_set_database_path(options, ".sentry-native");
+    sentry_options_set_database_path(options, sentryDatabasePath.toUtf8());
 
     if (getShowCrashReportDialogAction().isChecked()) {
 #ifdef Q_OS_WIN
