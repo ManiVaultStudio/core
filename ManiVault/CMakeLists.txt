@@ -457,6 +457,7 @@ if(${MV_USE_ERROR_LOGGING})
             src/private/CrashReporterMain.cpp
             src/private/CrashReportDialog.cpp
             src/private/CrashReportDialog.h
+            ${RESOURCE_FILES}
         )
 
         set_target_properties(${MV_CRASH_REPORTER} PROPERTIES

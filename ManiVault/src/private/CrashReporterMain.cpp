@@ -7,7 +7,12 @@
 #include "sentry.h"
 
 #include <QApplication>
+#include <QDir>
 #include <QFile>
+#include <QIcon>
+#include <QProcess>
+#include <QStandardPaths>
+#include <QStyleFactory>
 
 #include <cstdlib>
 
@@ -29,6 +34,12 @@ int main(int argc, char* argv[])
 {
     QApplication application(argc, argv);
 
+    QApplication::setApplicationName("ManiVault Crash Reporter");
+    QApplication::setApplicationDisplayName("ManiVault Crash Reporter");
+    QApplication::setStyle(QStyleFactory::create("Fusion"));
+    QApplication::setWindowIcon(QIcon(":/Icons/AppIcon256"));
+    CrashReportDialog::initialize();
+
     if (application.arguments().size() != 2)
         return EXIT_FAILURE;
 
@@ -49,9 +60,12 @@ int main(int argc, char* argv[])
     }
 
     auto* options = sentry_options_new();
+    const auto sentryDatabasePath = QDir(QStandardPaths::writableLocation(QStandardPaths::CacheLocation)).filePath("Sentry");
 
     sentry_options_set_backend(options, nullptr);
     sentry_options_set_dsn(options, dsn.constData());
+    sentry_options_set_database_path(options, sentryDatabasePath.toUtf8());
+    sentry_options_set_shutdown_timeout(options, 5000);
 
     if (sentry_init(options) != 0) {
         sentry_envelope_free(envelope);
@@ -62,23 +76,35 @@ int main(int argc, char* argv[])
     // envelope independently of whether they provide additional feedback.
     sentry_capture_envelope(envelope);
 
-    CrashReportDialog crashReportDialog;
+    CrashReportDialog crashReportDialog(QString::fromUtf8(eventId));
+    CrashReportDialog::CrashUserInfo crashUserInfo{};
 
     if (crashReportDialog.exec() == QDialog::Accepted) {
-        const auto crashUserInfo = crashReportDialog.getCrashUserInfo();
+        crashUserInfo             = crashReportDialog.getCrashUserInfo();
         const auto feedback      = crashUserInfo._feedback.toUtf8();
         const auto contactInfo   = crashUserInfo._contactDetails.toUtf8();
         const auto eventUuid     = sentry_uuid_from_string(eventId.constData());
 
-        sentry_capture_feedback(sentry_value_new_feedback(
-            feedback.isEmpty() ? "No additional details were provided." : feedback.constData(),
-            contactInfo.isEmpty() ? nullptr : contactInfo.constData(),
-            nullptr,
-            &eventUuid));
+        if (crashUserInfo._submitFeedback) {
+            // Feedback association requires the referenced event to have
+            // reached Sentry first. Flush the previously queued crash envelope
+            // before adding its feedback to the transport queue.
+            sentry_flush(5000);
+            sentry_capture_feedback(sentry_value_new_feedback(feedback.isEmpty() ? "Contact information supplied without additional feedback." : feedback.constData(), contactInfo.isEmpty() ? nullptr : contactInfo.constData(), nullptr, &eventUuid));
+        }
     }
 
     sentry_close();
     QFile::remove(envelopePath);
+
+    if (crashUserInfo._restartApplication) {
+#ifdef Q_OS_WIN
+        const auto applicationExecutable = "ManiVault Studio.exe";
+#else
+        const auto applicationExecutable = "ManiVault Studio";
+#endif
+        QProcess::startDetached(QDir(QCoreApplication::applicationDirPath()).filePath(applicationExecutable), {});
+    }
 
     return EXIT_SUCCESS;
 }

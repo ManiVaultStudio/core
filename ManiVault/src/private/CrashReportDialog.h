@@ -5,9 +5,11 @@
 #pragma once
 
 #include <QDialog>
+#include <QFrame>
 #include <QLineEdit>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QToolButton>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QAction>
@@ -29,6 +31,7 @@ public:
     struct CrashUserInfo
     {
         bool        _submitFeedback;    /** Whether the user chose to submit optional feedback */
+        bool        _restartApplication;/** Whether the user chose to restart ManiVault Studio */
         QString     _feedback;          /** Feedback on the crash */
         QString     _contactDetails;    /** Contact details of the issuer */
     };
@@ -39,7 +42,7 @@ public:
      * Construct with pointer to \p parent widget
      * @param parent Pointer to parent widget (maybe nullptr)
      */
-    explicit CrashReportDialog(QWidget* parent = nullptr);
+    explicit CrashReportDialog(const QString& eventId, QWidget* parent = nullptr);
 
     /** Get preferred size */
     QSize sizeHint() const override {
@@ -61,20 +64,33 @@ public:
     static void initialize();
 
 private:
+    /** Updates feedback submission availability from the current input. */
+    void updateSubmitButton();
+
+private:
     QVBoxLayout     _layout;                /** Main layout */
-    QHBoxLayout     _notificationLayout;    /** Notification layout */
-    QLabel          _notificationIcon;      /** Notification icon */
     QLabel          _notificationLabel;     /** Notification label */
     QLabel          _feedbackLabel;         /** Feedback label */
     QLabel          _contactLabel;          /** Contact label */
+    QLabel          _privacyLabel;          /** Link to the Sentry privacy policy */
+    QLabel          _eventIdTitleLabel;     /** Crash event identifier title */
+    QLabel          _eventIdLabel;          /** Crash event identifier */
     QPlainTextEdit  _feedbackTextEdit;      /** Feedback text multi line input */
     QLineEdit       _contactLineEdit;       /** Issuer contact details single line text input */
+    QHBoxLayout     _eventIdLayout;          /** Crash event identifier and copy action layout */
+    QFrame          _eventIdSeparator;       /** Separator before the copy action */
+    QToolButton     _copyEventIdButton;      /** Copies the crash event identifier */
     QHBoxLayout     _buttonsLayout;         /** Bottom buttons layout */
     QPushButton     _sendButton;            /** Sends the crash report when triggered  */
+    QPushButton     _restartButton;         /** Restarts ManiVault Studio */
     QPushButton     _cancelButton;          /** Cancels the dialog when triggered */
     QAction         _trailingAction;        /** Action at the end of the contact line input */
+    bool            _submitFeedback;        /** Whether optional feedback should be submitted */
+    bool            _restartApplication;    /** Whether ManiVault Studio should be restarted */
+    QString         _eventId;                /** Crash event identifier */
 
     static QIcon    windowIcon;         /** Window bug icon */
-    static QIcon    frownIcon;          /** Frown icon */
     static QIcon    exclamationIcon;    /** Exclamation icon */
+    static QIcon    copyIcon;           /** Copy-to-clipboard icon */
+    static QIcon    checkIcon;          /** Successful-copy icon */
 };
