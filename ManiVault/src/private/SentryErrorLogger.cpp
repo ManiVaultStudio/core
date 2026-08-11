@@ -37,8 +37,8 @@ namespace
             sanitized.replace(QDir::toNativeSeparators(QDir::cleanPath(directory)), replacement, Qt::CaseInsensitive);
         };
 
-        redactDirectory(QDir::homePath(), "<home>");
         redactDirectory(QDir::tempPath(), "<temp>");
+        redactDirectory(QDir::homePath(), "<home>");
 
         static const QRegularExpression windowsUserPath(R"(([A-Z]:[\\/](?:Users|Documents and Settings)[\\/])[^\\/\s]+)", QRegularExpression::CaseInsensitiveOption);
         static const QRegularExpression unixUserPath(R"((/(?:home|Users)/)[^/\s]+)", QRegularExpression::CaseInsensitiveOption);
@@ -47,8 +47,8 @@ namespace
 
         sanitized.replace(windowsUserPath, "\\1<user>");
         sanitized.replace(unixUserPath, "\\1<user>");
-        sanitized.replace(emailAddress, "<email>");
         sanitized.replace(urlCredentials, "\\1<credentials>@");
+        sanitized.replace(emailAddress, "<email>");
 
         if (sanitized.size() > maximumSentryTextLength)
             sanitized = sanitized.left(maximumSentryTextLength) + "...[truncated]";
@@ -290,9 +290,6 @@ void SentryErrorLogger::reportHandledException(const QString& title, const QStri
 
         if (!frame.module.isEmpty())
             sentry_value_set_by_key(sentryFrame, "module", sentry_value_new_string(QFileInfo(frame.module).fileName().toUtf8().constData()));
-
-        if (!frame.address.isEmpty())
-            sentry_value_set_by_key(sentryFrame, "instruction_addr", sentry_value_new_string(frame.address.toUtf8().constData()));
 
         sentry_value_append(frames, sentryFrame);
     }
