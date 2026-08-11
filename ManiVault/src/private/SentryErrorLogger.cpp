@@ -10,6 +10,7 @@
 #include <QOperatingSystemVersion>
 #include <QCoreApplication>
 #include <QDir>
+#include <QFileInfo>
 #include <QStandardPaths>
 
 using namespace mv;
@@ -106,8 +107,23 @@ void SentryErrorLogger::start()
 #else
         const auto crashReporterExecutable = "ManiVault Crash Reporter";
 #endif
-        sentry_options_set_external_crash_reporter_path(options,
-            QDir(QCoreApplication::applicationDirPath()).filePath(crashReporterExecutable).toUtf8());
+        const auto crashReporterPath = QDir(QCoreApplication::applicationDirPath()).filePath(crashReporterExecutable);
+        const auto crashReporterInfo = QFileInfo(crashReporterPath);
+
+        if (crashReporterInfo.exists() && crashReporterInfo.isFile()) {
+            sentry_options_set_external_crash_reporter_path(options, crashReporterPath.toUtf8());
+        } else {
+            qWarning() << "Cannot enable Sentry crash feedback: the external crash reporter was not found at" << crashReporterPath
+                       << "Technical crash reports will still be sent automatically.";
+
+            addNotification("CrashReporterUnavailable", {
+                "Crash feedback unavailable",
+                QString("The crash feedback application could not be found at <code>%1</code>. Technical crash reports will still be sent automatically, but you will not be asked for optional feedback after a crash.")
+                    .arg(crashReporterPath.toHtmlEscaped()),
+                StyledIcon("triangle-exclamation"),
+                5000
+            });
+        }
     }
 
     const auto releaseString = getReleaseString().toUtf8();
