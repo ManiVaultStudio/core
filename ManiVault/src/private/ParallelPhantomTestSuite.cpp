@@ -19,7 +19,6 @@
 
 #include <QCoreApplication>
 #include <QAction>
-#include <QCursor>
 #include <QMenu>
 #include <QMetaObject>
 #include <QPointer>
@@ -1061,40 +1060,30 @@ void ParallelPhantomTestSuite::run(QObject* owner)
     runScenarios(owner, makeScenarios(), true);
 }
 
-void ParallelPhantomTestSuite::showMenu(QWidget* parent)
+void ParallelPhantomTestSuite::populateMenu(QMenu& menu, QObject* owner)
 {
     auto scenarios = makeScenarios();
-    QMenu menu(parent);
+    menu.clear();
 
-    menu.setTitle("Parallel Phantom Tests");
+    auto runAllAction = menu.addAction(util::StyledIcon("forward-fast"), "Run all scenarios sequentially");
 
-    auto runAllAction = menu.addAction("Run all scenarios sequentially");
+    QObject::connect(runAllAction, &QAction::triggered, owner, [owner] {
+        run(owner);
+    });
 
-    runAllAction->setData(-1);
     menu.addSeparator();
 
-    auto singleScenarioMenu = menu.addMenu("Run single scenario");
+    auto singleScenarioMenu = menu.addMenu(util::StyledIcon("list-check"), "Run single scenario");
 
     for (auto scenarioIndex = std::size_t{ 0 }; scenarioIndex < scenarios.size(); ++scenarioIndex) {
-        auto action = singleScenarioMenu->addAction(scenarios[scenarioIndex].name);
+        auto action = singleScenarioMenu->addAction(util::StyledIcon("play"), scenarios[scenarioIndex].name);
 
-        action->setData(static_cast<int>(scenarioIndex));
         action->setToolTip(scenarios[scenarioIndex].description);
+
+        QObject::connect(action, &QAction::triggered, owner, [owner, scenarioIndex] {
+            runScenario(owner, scenarioIndex);
+        });
     }
-
-    const auto selectedAction = menu.exec(QCursor::pos());
-
-    if (selectedAction == nullptr)
-        return;
-
-    const auto selectedIndex = selectedAction->data().toInt();
-
-    if (selectedIndex < 0) {
-        run(parent);
-        return;
-    }
-
-    runScenario(parent, static_cast<std::size_t>(selectedIndex));
 }
 
 }

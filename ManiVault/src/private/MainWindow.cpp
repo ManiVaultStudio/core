@@ -11,7 +11,10 @@
 #include "ViewMenu.h"
 #include "ProjectsMenu.h"
 #include "HelpMenu.h"
-#include "ParallelPhantomTestSuite.h"
+
+#ifdef Q_OS_WIN
+    #include "DeveloperMenu.h"
+#endif
 
 #include <Application.h>
 #include <CoreInterface.h>
@@ -20,10 +23,6 @@
 
 #include <actions/ToggleAction.h>
 #include <actions/PluginStatusBarAction.h>
-
-#include <util/StyledIcon.h>
-#include <util/Exception.h>
-#include <exception/ManiVaultException.h>
 
 #include "FrontPagesStatusBarAction.h"
 #include "ManiVaultVersionStatusBarAction.h"
@@ -34,7 +33,6 @@
 #include "WorkspaceStatusBarAction.h"
 
 #include <QDebug>
-#include <QDir>
 #include <QMessageBox>
 #include <QScreen>
 #include <QMenuBar>
@@ -44,8 +42,6 @@
 #include <QStatusBar>
 #include <QRandomGenerator>
 #include <QShortcut>
-
-#include <cstdlib>
 
 #ifdef _DEBUG
     #define MAIN_WINDOW_VERBOSE
@@ -184,82 +180,27 @@ void MainWindow::initialize()
         Application::current()->getConfigurationAction().getConfigureAction().trigger();
     });
 
-    auto parallelPhantomTestShortcut = new QShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::ShiftModifier | Qt::Key_P), this);
-
-    parallelPhantomTestShortcut->setContext(Qt::ApplicationShortcut);
-
-    connect(parallelPhantomTestShortcut, &QShortcut::activated, this, [this] {
-        mv::detail::ParallelPhantomTestSuite::showMenu(this);
-    });
-
-#ifdef MV_USE_ERROR_LOGGING
-    // Deliberately undiscoverable in the UI: this exercises handled-exception
-    // reporting or the complete Crashpad and external crash-feedback path.
-    auto crashReportingTestShortcut = new QShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::ShiftModifier | Qt::Key_C), this);
-
-    crashReportingTestShortcut->setContext(Qt::ApplicationShortcut);
-
-    connect(crashReportingTestShortcut, &QShortcut::activated, this, [this] {
-        const auto& errorManager = mv::errors();
-        const QIcon bugIcon = mv::util::StyledIcon("bug");
-        QMessageBox testTypeDialog(this);
-
-        testTypeDialog.setWindowIcon(bugIcon);
-        testTypeDialog.setWindowTitle(tr("Error reporting test"));
-        testTypeDialog.setText(tr("Choose which error-reporting path to test.\n\n"
-                                  "A handled exception is safe and keeps the application running. It is sent to Sentry only when handled-exception reporting is enabled.\n\n"
-                                  "A fatal crash closes the application and may cause unsaved work to be lost."));
-        testTypeDialog.setIcon(QMessageBox::Information);
-
-        auto handledExceptionButton = testTypeDialog.addButton(tr("Handled exception"), QMessageBox::ActionRole);
-        auto fatalCrashButton        = testTypeDialog.addButton(tr("Fatal crash"), QMessageBox::DestructiveRole);
-
-        testTypeDialog.addButton(QMessageBox::Cancel);
-        testTypeDialog.exec();
-
-        if (testTypeDialog.clickedButton() == handledExceptionButton) {
-            try {
-                const auto technicalReason = QString("Simulated handled exception containing privacy test values: home=%1, temp=%2, email=test.user@example.com, url=https://test-user:test-password@example.com/private.").arg(QDir::homePath(), QDir::tempPath());
-
-                throw ManiVaultException(util::SeverityLevel::Error, tr("This is a simulated handled exception. The application can continue normally."), technicalReason, QString("Handled exception simulator at %1").arg(QDir::homePath()), { { "test_only", true } });
-            } catch (const ManiVaultException& exception) {
-                util::exceptionMessageBox(tr("Handled exception reporting test"), exception, this);
-            }
-
-            return;
-        }
-
-        if (testTypeDialog.clickedButton() != fatalCrashButton)
-            return;
-
-        if (!errorManager.getLoggingUserHasOptedAction().isChecked() || !errorManager.getLoggingEnabledAction().isChecked()) {
-            QMessageBox::information(this,
-                tr("Crash reporting test"),
-                tr("Sentry error reporting must be enabled before running the crash reporting test."));
-            return;
-        }
-
-        QMessageBox confirmationDialog(this);
-
-        confirmationDialog.setWindowTitle(tr("Crash reporting test"));
-        confirmationDialog.setText(tr("This test will deliberately crash ManiVault Studio. Any unsaved work will be lost.\n\n"
-                                      "Immediately after the crash, a separate crash feedback dialog should appear. Continue?"));
-        confirmationDialog.setWindowIcon(bugIcon);
-        confirmationDialog.setIcon(QMessageBox::Warning);
-        confirmationDialog.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
-        confirmationDialog.setDefaultButton(QMessageBox::Cancel);
-
-        const auto response = confirmationDialog.exec();
-
-        if (response == QMessageBox::Yes)
-            std::abort();
-    });
-#endif
-
-	auto fileMenuAction     = menuBar()->addMenu(new FileMenu());
+    auto fileMenuAction     = menuBar()->addMenu(new FileMenu());
     auto viewMenuAction     = menuBar()->addMenu(new ViewMenu());
     auto projectsMenuAction = menuBar()->addMenu(new ProjectsMenu());
+
+#ifdef Q_OS_WIN
+    auto developerMenuAction = menuBar()->addMenu(new DeveloperMenu(this));
+#endif
+
     auto helpMenuAction     = menuBar()->addMenu(new HelpMenu());
+
+#ifdef Q_OS_WIN
+    developerMenuAction->setVisible(false);
+
+    auto enableDeveloperMenuShortcut = new QShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::ShiftModifier | Qt::Key_D), this);
+
+    enableDeveloperMenuShortcut->setContext(Qt::ApplicationShortcut);
+
+    connect(enableDeveloperMenuShortcut, &QShortcut::activated, developerMenuAction, [developerMenuAction] {
+        developerMenuAction->setVisible(true);
+    });
+#endif
     
     loadGuiTask.setSubtaskStarted("Initializing start page");
     

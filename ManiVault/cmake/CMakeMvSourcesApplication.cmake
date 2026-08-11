@@ -299,6 +299,12 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/NoProxyRectanglesFusionStyle.h
 )
 
+if(WIN32)
+    list(APPEND PRIVATE_APPLICATION_HEADERS
+        src/private/DeveloperMenu.h
+    )
+endif()
+
 if(MV_USE_ERROR_LOGGING)
 	list(APPEND PRIVATE_APPLICATION_HEADERS
 		src/private/SentryErrorLogger.h
@@ -317,6 +323,12 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/HelpMenu.cpp
     src/private/NoProxyRectanglesFusionStyle.cpp
 )
+
+if(WIN32)
+    list(APPEND PRIVATE_APPLICATION_SOURCES
+        src/private/DeveloperMenu.cpp
+    )
+endif()
 
 if(MV_USE_ERROR_LOGGING)
 	list(APPEND PRIVATE_APPLICATION_SOURCES
