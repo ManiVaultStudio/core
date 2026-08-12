@@ -7,6 +7,7 @@
 
 #include "util/Serialization.h"
 
+#include <QColorDialog>
 #include <QDebug>
 #include <QPainter>
 #include <QStyleOption>
@@ -118,8 +119,29 @@ ColorAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ColorAction* co
 
     _toolButton.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     _toolButton.setToolTip(colorAction->toolTip());
+
+#ifdef Q_OS_MACOS
+    // On macOS, ColorPickerAction UI behaves very inconsistent and chosen color is often lost.
+    // This uses the native color dialog (NSColorPanel) and integrates it into the action.
+    connect(&_toolButton, &QToolButton::clicked, this, [this, colorAction]() -> void {
+        const auto previousColor = colorAction->getColor();
+
+        QColorDialog colorDialog(previousColor, this);
+
+        connect(&colorDialog, &QColorDialog::currentColorChanged, this, [colorAction](const QColor& color) -> void {
+            if (color.isValid())
+                colorAction->setColor(color);
+        });
+
+        // Rejecting the dialog has to undo the live preview
+        if (colorDialog.exec() != QDialog::Accepted)
+            colorAction->setColor(previousColor);
+    });
+#else
     _toolButton.addAction(&_colorPickerAction);
     _toolButton.setPopupMode(QToolButton::InstantPopup);
+#endif
+
     _toolButton.setStyleSheet("QToolButton::menu-indicator { image: none; }");
 
     _layout.setContentsMargins(0, 0, 0, 0);
