@@ -203,4 +203,12 @@ void ErrorManager::reportHandledException(const QString& title, const QString& e
         errorLogger->reportHandledException(title, exceptionType, reason, severity, stackTrace, diagnosticId, where);
 }
 
+bool ErrorManager::submitUserFeedback(const QString& type, const QString& message, const QString& email)
+{
+    if (auto* errorLogger = getErrorLogger())
+        return errorLogger->submitUserFeedback(type, message, email);
+
+    return false;
+}
+
 }

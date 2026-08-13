@@ -67,10 +67,21 @@ public:
         _notificationTimer.start();
     }
 
-    /** Connects to the error logging global settings */
+    /**
+     * @brief Initializes the error logger and connects it to the global error-reporting settings.
+     */
     virtual void initialize() = 0;
 
-    /** Reports an exception that was caught and presented to the user. */
+    /**
+     * @brief Reports an exception that was caught and presented to the user.
+     * @param title User-facing title of the exception dialog.
+     * @param exceptionType Exception class or category name.
+     * @param reason Technical reason supplied by the exception.
+     * @param severity Severity assigned to the exception.
+     * @param stackTrace Structured stack trace captured for the exception.
+     * @param diagnosticId Identifier shown to the user for support correlation.
+     * @param where Optional source context in which the exception was handled.
+     */
     virtual void reportHandledException(const QString& title, const QString& exceptionType, const QString& reason, util::SeverityLevel severity, const util::StackTrace& stackTrace, const QString& diagnosticId = {}, const QString& where = {})
     {
         Q_UNUSED(title)
@@ -83,6 +94,21 @@ public:
     }
 
     /**
+     * @brief Sends standalone user feedback when the logger is available.
+     * @param type Feedback category, such as a problem report or feature request.
+     * @param message User-provided feedback description.
+     * @param email Optional email address for follow-up.
+     * @return Boolean determining whether the feedback was accepted for transmission.
+     */
+    virtual bool submitUserFeedback(const QString& type, const QString& message, const QString& email)
+    {
+        Q_UNUSED(type)
+        Q_UNUSED(message)
+        Q_UNUSED(email)
+        return false;
+    }
+
+    /**
      * Get the logger name
      * @return Logger name
      */
@@ -90,7 +116,9 @@ public:
         return _loggerName;
     }
 
-    /** Starts the error logger if the pre-flight conditions are met */
+    /**
+     * @brief Starts the error logger when the user has opted in and reporting is enabled.
+     */
     void requestStart()
     {
         if (getUserHasOptedAction().isChecked() && getEnabledAction().isChecked()) {
@@ -98,7 +126,9 @@ public:
         }
     }
 
-    /** Stops the error logger if it exists */
+    /**
+     * @brief Stops the error logger and completes its shutdown procedure.
+     */
     void requestStop()
     {
         stop();
@@ -113,7 +143,7 @@ public:
     }
 
     /**
-     * Add /p notification
+     * @brief Adds or replaces a delayed user notification.
      * @param name Name of the notification
      * @param notification Notification
      */
@@ -121,7 +151,9 @@ public:
         _notifications[name] = notification;
     }
 
-    /** Begin the initialization of the error logger */
+    /**
+     * @brief Begins initialization and connects common error-reporting setting notifications.
+     */
     virtual void beginInitialization() {
         if (!mv::errors().getLoggingUserHasOptedAction().isChecked())
             return;
@@ -159,17 +191,23 @@ public:
         });
     }
 
-    /** End the initialization of the error logger */
+    /**
+     * @brief Completes initialization and marks the logger as initialized.
+     */
     virtual void endInitialization() {
         _initialized = true;
     }
 
 private:
 
-    /** Starts the error logger */
+    /**
+     * @brief Starts the concrete error-logging backend.
+     */
     virtual void start() = 0;
 
-    /** Shuts down the error logger */
+    /**
+     * @brief Shuts down the concrete error-logging backend.
+     */
     virtual void stop() = 0;
 
     /**

@@ -3,7 +3,6 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "SentryErrorLogger.h"
-#include <ManiVaultVersion.h>
 
 #include "sentry.h"
 
@@ -13,6 +12,7 @@
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <QStandardPaths>
+#include <QUuid>
 
 using namespace mv;
 using namespace mv::gui;
@@ -24,6 +24,48 @@ namespace
     constexpr qsizetype maximumHandledExceptionsPerSession = 50;
     constexpr qint64 handledExceptionCooldownMilliseconds = 60 * 1000;
     constexpr uint64_t sentryShutdownTimeoutMilliseconds = 2000;
+    constexpr auto installationIdSettingsKey          = "ErrorReporting/AnonymousInstallationId";
+
+    /**
+     * @brief Gets a stable Sentry package name from the configured application base name.
+     * @return Lower-case, hyphen-separated package name suitable for a Sentry release.
+     */
+    QString getSentryPackageName()
+    {
+        auto packageName = Application::getBaseName().trimmed().toLower();
+
+        packageName.replace(QRegularExpression("[^a-z0-9]+"), "-");
+        packageName.remove(QRegularExpression("^-+|-+$"));
+
+        return packageName.isEmpty() ? QStringLiteral("manivault-studio") : packageName;
+    }
+
+    /**
+     * @brief Gets or creates the random identifier used for anonymous installation counts.
+     * @return Stable, lower-case UUID stored in the active application's persistent settings.
+     */
+    QString getAnonymousInstallationId()
+    {
+        const auto application = Application::current();
+
+        if (application == nullptr)
+            return {};
+
+        const auto storedInstallationId = application->getSetting(installationIdSettingsKey).toString();
+        const QUuid storedUuid(storedInstallationId);
+
+        if (!storedUuid.isNull() && storedUuid.toString(QUuid::WithoutBraces) == storedInstallationId)
+            return storedInstallationId;
+
+        const auto installationId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+
+        application->setSetting(installationIdSettingsKey, installationId);
+
+        if (application->getSetting(installationIdSettingsKey).toString() != installationId)
+            return {};
+
+        return installationId;
+    }
 
     QString sanitizeForSentry(const QString& text)
     {
@@ -92,6 +134,10 @@ void SentryErrorLogger::initialize()
     if (isInitialized())
         return;
 
+    // Create the identifier on the first launch of a Sentry-enabled build,
+    // independently of whether the user chooses to enable transmission.
+    (void)getAnonymousInstallationId();
+
     beginInitialization();
     {
     }
@@ -146,6 +192,11 @@ void SentryErrorLogger::start()
     sentry_options_set_handler_path(options, QDir(QCoreApplication::applicationDirPath()).filePath(getCrashpadHandlerExecutableName()).toUtf8());
     sentry_options_set_database_path(options, sentryDatabasePath.toUtf8());
     sentry_options_set_shutdown_timeout(options, sentryShutdownTimeoutMilliseconds);
+    // sentry-native starts its automatic session from sentry_init(), before an
+    // application-defined user can be installed. Start it explicitly after
+    // setting the anonymous installation ID so Release Health receives a
+    // stable distinct user without collecting machine-derived identifiers.
+    sentry_options_set_auto_session_tracking(options, 0);
 
     if (getShowCrashReportDialogAction().isChecked()) {
 #ifdef Q_OS_WIN
@@ -177,11 +228,11 @@ void SentryErrorLogger::start()
 #ifdef _DEBUG
     sentry_options_set_debug(options, 1);
     sentry_options_set_environment(options, "debug");
-    sentry_options_set_release(options, releaseString + "-debug");
+    sentry_options_set_release(options, releaseString);
 #else
     sentry_options_set_debug(options, 0);
     sentry_options_set_environment(options, "release");
-    sentry_options_set_release(options, releaseString + "-release");
+    sentry_options_set_release(options, releaseString);
 #endif
 
     if (sentry_init(options) != 0) {
@@ -201,6 +252,15 @@ void SentryErrorLogger::start()
     _handledExceptionSessionTimer.start();
     _handledExceptionLastSent.clear();
     _handledExceptionsSent = 0;
+
+    const auto anonymousInstallationId = getAnonymousInstallationId().toUtf8();
+
+    if (anonymousInstallationId.isEmpty()) {
+        qWarning() << "Sentry Release Health disabled: the anonymous installation ID could not be persisted";
+    } else {
+        sentry_set_user(sentry_value_new_user(anonymousInstallationId.constData(), nullptr, nullptr, nullptr));
+        sentry_start_session();
+    }
 
     qDebug() << "Sentry error logging is running, crash reports will send to: " + dsn;
 
@@ -326,14 +386,29 @@ void SentryErrorLogger::reportHandledException(const QString& title, const QStri
     sentry_capture_event(event);
 }
 
+bool SentryErrorLogger::submitUserFeedback(const QString& type, const QString& message, const QString& email)
+{
+    if (!_isRunning || message.trimmed().isEmpty())
+        return false;
+
+    const auto feedback = QString("[%1]\n%2").arg(type, message.trimmed()).toUtf8();
+    const auto contact  = email.trimmed().toUtf8();
+
+    sentry_capture_feedback(sentry_value_new_feedback(feedback.constData(), contact.isEmpty() ? nullptr : contact.constData(), nullptr, nullptr));
+    return true;
+}
+
 QString SentryErrorLogger::getReleaseString()
 {
     if (!getEnabledAction().isChecked())
         return {};
 
-    const auto suffix = QString(MV_VERSION_SUFFIX.data());
+    const auto application = Application::current();
 
-    return QString("ManiVaultStudio@%1.%2.%3%4").arg(QString::number(MV_VERSION_MAJOR), QString::number(MV_VERSION_MINOR), QString::number(MV_VERSION_PATCH), suffix.isEmpty() ? "" : QString("-%1").arg(suffix));
+    if (application == nullptr)
+        return {};
+
+    return QString("%1@%2").arg(getSentryPackageName(), QString::fromStdString(application->getVersion().getVersionString()));
 }
 
 bool SentryErrorLogger::isDsnValid() const

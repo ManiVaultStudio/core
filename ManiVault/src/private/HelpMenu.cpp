@@ -5,6 +5,7 @@
 #include "HelpMenu.h"
 #include "PluginManager.h"
 #include "CoreInterface.h"
+#include "UserFeedbackDialog.h"
 
 #include <util/Miscellaneous.h>
 #include <actions/TriggerAction.h>
@@ -22,6 +23,7 @@ using namespace mv::plugin;
 HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     QMenu(parent),
     _devDocAction(nullptr, "Developer Documentation"),
+    _sendFeedbackAction(nullptr, "Send feedback..."),
     _aboutAction(nullptr, QString("About %1").arg(Application::getBaseName())),
     _aboutQtAction(nullptr, "About Qt"),
     _aboutThirdPartiesAction(nullptr, "About third-parties"),
@@ -34,6 +36,7 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     _aboutQtAction.setMenuRole(QAction::NoRole);
 
     _releaseNotesAction.setIconByName("scroll");
+    _sendFeedbackAction.setIconByName("comment-dots");
 
     populate();
 }
@@ -52,6 +55,7 @@ void HelpMenu::populate()
     
     addAction(&mv::help().getShowLearningCenterPageAction());
     addAction(&_devDocAction);
+    addAction(&_sendFeedbackAction);
     addSeparator();
     
     QVector<QPointer<TriggerAction>> actions;
@@ -94,6 +98,7 @@ void HelpMenu::populate()
         QDesktopServices::openUrl(QUrl("https://github.com/ManiVaultStudio/PublicWiki", QUrl::TolerantMode));
     });
 
+    connect(&_sendFeedbackAction, &TriggerAction::triggered, this, &HelpMenu::sendFeedback, Qt::UniqueConnection);
     connect(&_aboutAction, &TriggerAction::triggered, this, &HelpMenu::about);
     connect(&_aboutThirdPartiesAction, &TriggerAction::triggered, this, &HelpMenu::aboutThirdParties);
 
@@ -106,6 +111,14 @@ void HelpMenu::populate()
 
         QDesktopServices::openUrl(QUrl("https://github.com/ManiVaultStudio/core/releases/", QUrl::TolerantMode));
     });
+}
+
+void HelpMenu::sendFeedback()
+{
+    auto feedbackDialog = new UserFeedbackDialog(this->parentWidget());
+
+    feedbackDialog->setAttribute(Qt::WA_DeleteOnClose);
+    feedbackDialog->open();
 }
 
 void HelpMenu::about() const

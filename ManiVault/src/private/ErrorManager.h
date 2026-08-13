@@ -9,6 +9,14 @@
 namespace mv
 {
 
+/**
+ * @brief Manages application error handling and the configured reporting backend.
+ *
+ * Owns the global error-reporting settings, initializes the active logger and
+ * forwards handled exceptions and standalone feedback when reporting is allowed.
+ *
+ * @author Thomas Kroes
+ */
 class ErrorManager : public mv::AbstractErrorManager
 {
     Q_OBJECT
@@ -21,16 +29,24 @@ public:
      */
     ErrorManager(QObject* parent);
 
-    /** Resets the manager when destructed. */
+    /**
+     * @brief Shuts down error reporting and destroys the manager.
+     */
     ~ErrorManager() override;
 
-    /** Performs error manager startup initialization. */
+    /**
+     * @brief Initializes settings, consent handling and the configured logger.
+     */
     void initialize() override;
 
-    /** Resets the contents of the error manager. */
+    /**
+     * @brief Stops the configured logger and resets the manager.
+     */
     void reset() override;
 
-    /** Shows the error logging consent dialog. */
+    /**
+     * @brief Shows the error-reporting consent dialog.
+     */
     void showErrorLoggingConsentDialog() override;
 
     /**
@@ -64,8 +80,26 @@ public:
      */
     util::StackTrace getDebugStackTrace() const override;
 
-    /** Forwards a caught exception to the configured error logger. */
-    void reportHandledException(const QString& title, const QString& exceptionType, const QString& reason, util::SeverityLevel severity, const util::StackTrace& stackTrace, const QString& diagnosticId = {},const QString& where = {}) override;
+    /**
+     * @brief Forwards a caught exception to the configured error logger.
+     * @param title User-facing title of the exception dialog.
+     * @param exceptionType Exception class or category name.
+     * @param reason Technical reason supplied by the exception.
+     * @param severity Severity assigned to the exception.
+     * @param stackTrace Structured stack trace captured for the exception.
+     * @param diagnosticId Identifier shown to the user for support correlation.
+     * @param where Optional source context in which the exception was handled.
+     */
+    void reportHandledException(const QString& title, const QString& exceptionType, const QString& reason, util::SeverityLevel severity, const util::StackTrace& stackTrace, const QString& diagnosticId = {}, const QString& where = {}) override;
+
+    /**
+     * @brief Forwards standalone user feedback to the configured error logger.
+     * @param type Feedback category, such as a problem report or feature request.
+     * @param message User-provided feedback description.
+     * @param email Optional email address for follow-up.
+     * @return Boolean determining whether the feedback was accepted for transmission.
+     */
+    bool submitUserFeedback(const QString& type, const QString& message, const QString& email) override;
 
 public: // Action getters
 

@@ -45,7 +45,9 @@ public:
     {
     }
 
-    /** Show the error logging consent dialog */
+    /**
+     * @brief Shows the error-reporting consent dialog.
+     */
     virtual void showErrorLoggingConsentDialog() = 0;
 
     /**
@@ -84,7 +86,16 @@ public:
         return {};
     }
 
-    /** Reports an eligible caught exception to the active error logger, when available. */
+    /**
+     * @brief Reports an eligible caught exception to the active error logger.
+     * @param title User-facing title of the exception dialog.
+     * @param exceptionType Exception class or category name.
+     * @param reason Technical reason supplied by the exception.
+     * @param severity Severity assigned to the exception.
+     * @param stackTrace Structured stack trace captured for the exception.
+     * @param diagnosticId Identifier shown to the user for support correlation.
+     * @param where Optional source context in which the exception was handled.
+     */
     virtual void reportHandledException(const QString& title, const QString& exceptionType, const QString& reason, util::SeverityLevel severity, const util::StackTrace& stackTrace, const QString& diagnosticId = {}, const QString& where = {})
     {
         Q_UNUSED(title)
@@ -94,6 +105,21 @@ public:
         Q_UNUSED(stackTrace)
         Q_UNUSED(diagnosticId)
         Q_UNUSED(where)
+    }
+
+    /**
+     * @brief Sends a standalone problem report or feature request to the active error logger.
+     * @param type Feedback category, such as a problem report or feature request.
+     * @param message User-provided feedback description.
+     * @param email Optional email address for follow-up.
+     * @return Boolean determining whether the feedback was accepted for transmission.
+     */
+    virtual bool submitUserFeedback(const QString& type, const QString& message, const QString& email)
+    {
+        Q_UNUSED(type)
+        Q_UNUSED(message)
+        Q_UNUSED(email)
+        return false;
     }
 
 protected:

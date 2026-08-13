@@ -27,7 +27,9 @@ class CrashReportDialog : public QDialog
 
 public:
 
-    /** Crash user-supplied additional information */
+    /**
+     * @brief Stores the choices and optional information supplied by the user.
+     */
     struct CrashUserInfo
     {
         bool        _submitFeedback;    /** Whether the user chose to submit optional feedback */
@@ -39,32 +41,43 @@ public:
 public:
 
     /**
-     * Construct with pointer to \p parent widget
+     * @brief Constructs a crash feedback dialog for a reported Sentry event.
+     * @param eventId Sentry event identifier associated with the crash.
      * @param parent Pointer to parent widget (maybe nullptr)
      */
     explicit CrashReportDialog(const QString& eventId, QWidget* parent = nullptr);
 
-    /** Get preferred size */
+    /**
+     * @brief Gets the preferred dialog size.
+     * @return Preferred dialog size in device-independent pixels.
+     */
     QSize sizeHint() const override {
         return { 640, 480 };
     }
 
-    /** Get minimum size hint*/
+    /**
+     * @brief Gets the minimum dialog size.
+     * @return Minimum dialog size in device-independent pixels.
+     */
     QSize minimumSizeHint() const override {
         return sizeHint();
     }
 
     /**
-     * Get crash info provided by the user
-     * @return Crash info
+     * @brief Gets the crash information and actions selected by the user.
+     * @return User-supplied crash information.
      */
     CrashUserInfo getCrashUserInfo() const;
 
-    /** For initializing icons etc. */
+    /**
+     * @brief Initializes the standalone Font Awesome icons used by the dialog.
+     */
     static void initialize();
 
 private:
-    /** Updates feedback submission availability from the current input. */
+    /**
+     * @brief Updates feedback submission availability from the current input.
+     */
     void updateSubmitButton();
 
 private:
