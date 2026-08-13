@@ -60,7 +60,7 @@ ProjectManager::ProjectManager(QObject* parent) :
     _pluginManagerAction(nullptr, "Plugin Browser..."),
     _showStartPageAction(nullptr, "Start Page...", true),
     _backToProjectAction(nullptr, "Back to project"),
-    _projectsListModel(StandardItemModel::PopulationMode::AutomaticSynchronous, this)
+    _projectsListModel(StandardItemModel::PopulationMode::AutomaticSynchronous)
 {
     //_newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     //_newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -238,7 +238,7 @@ ProjectManager::ProjectManager(QObject* parent) :
 
 ProjectManager::~ProjectManager()
 {
-    reset();
+    //reset();
 }
 
 void ProjectManager::initialize()

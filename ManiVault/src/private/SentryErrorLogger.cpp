@@ -27,20 +27,6 @@ namespace
     constexpr auto installationIdSettingsKey          = "ErrorReporting/AnonymousInstallationId";
 
     /**
-     * @brief Gets a stable Sentry package name from the configured application base name.
-     * @return Lower-case, hyphen-separated package name suitable for a Sentry release.
-     */
-    QString getSentryPackageName()
-    {
-        auto packageName = Application::getBaseName().trimmed().toLower();
-
-        packageName.replace(QRegularExpression("[^a-z0-9]+"), "-");
-        packageName.remove(QRegularExpression("^-+|-+$"));
-
-        return packageName.isEmpty() ? QStringLiteral("manivault-studio") : packageName;
-    }
-
-    /**
      * @brief Gets or creates the random identifier used for anonymous installation counts.
      * @return Stable, lower-case UUID stored in the active application's persistent settings.
      */
@@ -228,11 +214,11 @@ void SentryErrorLogger::start()
 #ifdef _DEBUG
     sentry_options_set_debug(options, 1);
     sentry_options_set_environment(options, "debug");
-    sentry_options_set_release(options, releaseString);
+    sentry_options_set_release(options, releaseString + "-debug");
 #else
     sentry_options_set_debug(options, 0);
     sentry_options_set_environment(options, "release");
-    sentry_options_set_release(options, releaseString);
+    sentry_options_set_release(options, releaseString + "-release");
 #endif
 
     if (sentry_init(options) != 0) {
@@ -408,7 +394,7 @@ QString SentryErrorLogger::getReleaseString()
     if (application == nullptr)
         return {};
 
-    return QString("%1@%2").arg(getSentryPackageName(), QString::fromStdString(application->getVersion().getVersionString()));
+    return QString("ManiVaultStudio@%1").arg(QString::fromStdString(application->getVersion().getVersionString()));
 }
 
 bool SentryErrorLogger::isDsnValid() const
