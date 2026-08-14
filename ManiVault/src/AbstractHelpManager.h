@@ -16,8 +16,16 @@
 #include "models/LearningCenterTutorialsModel.h"
 
 #include <QObject>
+#include <QPointer>
 
 namespace mv {
+
+class Task;
+
+namespace detail {
+    class ParallelPhantomTestSuite;
+    void postTaskNotification(QPointer<Task> task);
+}
 
 /**
  * Abstract help manager class
@@ -125,6 +133,9 @@ public:
     virtual void initializeNotifications(QWidget* parentWidget) = 0;
 
 protected:
+
+    friend class detail::ParallelPhantomTestSuite;
+    friend void detail::postTaskNotification(QPointer<Task> task);
 
     /**
      * Add toaster notification for \p task in the main window

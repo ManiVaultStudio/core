@@ -336,6 +336,7 @@ set(PRIVATE_WORKFLOW_HEADERS
     src/private/ProjectSaveWorkflowPlan.h
     src/private/ProjectPublishWorkflowPlan.h
     src/private/ProjectPublishContext.h
+    src/private/ParallelPhantomTestSuite.h
     src/private/TaskflowWorkflowPlanExecutor.h
     src/private/Taskflow.h
 )
@@ -345,6 +346,7 @@ set(PRIVATE_WORKFLOW_SOURCES
     src/private/ProjectSaveWorkflowPlan.cpp
     src/private/ProjectPublishWorkflowPlan.cpp
     src/private/ProjectPublishContext.cpp
+    src/private/ParallelPhantomTestSuite.cpp
     src/private/TaskflowWorkflowPlanExecutor.cpp
 )
 

@@ -82,7 +82,7 @@ SampleScopePlugin::SampleScopePlugin(const PluginFactory* factory) :
             const auto updateViewWidget = [this]() -> void {
                 _freezeViewAction.setVisible(false);
 
-                _sampleScopeWidget.setViewWidget(_viewPluginSamplerAction->getViewWidget());
+                _sampleScopeWidget.setViewWidget(const_cast<QWidget*>(_viewPluginSamplerAction->getViewWidget()));
             };
 
             if (_viewPluginSamplerAction->getViewGeneratorType() == ViewPluginSamplerAction::ViewGeneratorType::Widget)

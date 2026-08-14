@@ -9,24 +9,26 @@
 
 #include <QAction>
 #include <QBuffer>
-#include <QResource>
 #include <QEventLoop>
+#include <QFileInfo>
+#include <QImageReader>
+#include <QJsonDocument>
 #include <QLayout>
 #include <QLayoutItem>
 #include <QPainter>
 #include <QPixmap>
-#include <QJsonDocument>
+#include <QRegularExpression>
+#include <QResource>
 #include <QString>
-#include <QTimer>
+#include <QStringDecoder>
 #include <QTcpSocket>
+#include <QTimer>
+#include <QToolTip>
 #include <QUrl>
 #include <QVariant>
-#include <QRegularExpression>
-#include <QFileInfo>
-#include <QToolTip>
 
-#include <exception>
 #include <algorithm>
+#include <exception>
 
 namespace mv::util
 {

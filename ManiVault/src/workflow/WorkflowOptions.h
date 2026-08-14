@@ -7,6 +7,7 @@
 #include "ManiVaultGlobals.h"
 #include "WorkflowParallelizationOptions.h"
 #include "WorkflowBatchingOptions.h"
+#include "WorkflowCancellationOptions.h"
 #include "WorkflowReportingOptions.h"
 #include "WorkflowProfilingOptions.h"
 
@@ -25,10 +26,11 @@ namespace mv::workflow
  */
 struct CORE_EXPORT WorkflowOptions
 {
-    WorkflowParallelizationOptions  execution;      /**< Parallelization options for workflow jobs. */
-    WorkflowBatchingOptions         batching;       /**< Batch-size options for serialization work. */
-    WorkflowReportingOptions        reporting;      /**< Reporting, notification, and result-dialog options. */
-    WorkflowProfilingOptions        profiling;      /**< Profiling and trace sink options. */
+    WorkflowParallelizationOptions  execution;      /**< Parallelization options for workflow jobs */
+	WorkflowBatchingOptions         batching;       /**< Batch-size options for serialization work */
+    WorkflowCancellationOptions     cancellation;   /**< Cooperative cancellation options */
+    WorkflowReportingOptions        reporting;      /**< Reporting, notification, and result-dialog options */
+    WorkflowProfilingOptions        profiling;      /**< Profiling and trace sink options */
 };
 
 /** Optional workflow execution options. */

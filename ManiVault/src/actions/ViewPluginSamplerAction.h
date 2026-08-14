@@ -307,30 +307,30 @@ signals:
     void canViewChanged(bool canView);
 
 private:
-    plugin::ViewPlugin*             _viewPlugin;                                /** Pointer to view plugin for which to show the tooltips */
-    bool                            _isInitialized;                             /** Boolean determining whether the sampler is initialized or not */
-    PixelSelectionAction*           _pixelSelectionAction;                      /** Pointer to pixel selection tool to use */
-    PixelSelectionAction*           _samplerPixelSelectionAction;               /** Pointer to sampler pixel selection tool to use */
-    ViewGeneratorType               _viewGeneratorType;                         /** Type of view generator */
-    HtmlViewGeneratorFunction       _htmlViewGeneratorFunction;                 /** HTML view generator function which is called periodically when the mouse moves in the view (should return an HTML formatted string) */
-    WidgetViewGeneratorFunction     _widgetViewGeneratorFunction;               /** Widget view generator function (the sampler action does not take ownership of the widget) */
-    ToggleAction                    _enabledAction;                             /** Action to toggle computation on/off */
-    ToggleAction                    _highlightFocusedElementsAction;            /** Action to toggle focus elements highlighting */
-    VerticalGroupAction             _settingsAction;                            /** Additional vertical group action for settings */
-    ToggleAction                    _restrictNumberOfElementsAction;            /** Action to setEnabled the restriction of the maximum number of elements in the focus region */
-    IntegralAction                  _maximumNumberOfElementsAction;             /** Action to restrict the maximum number of elements in the focus region */
-    IntegralAction                  _lazyUpdateIntervalAction;                  /** Action to control the view update timer interval */
-    OptionAction                    _samplingModeAction;                        /** Action to control the sampling mode */
-    OptionAction                    _viewingModeAction;                         /** Action to control the viewing mode */
-    SampleContext                   _sampleContext;                             /** Context for the tooltip */
-    QTimer                          _sampleContextLazyUpdateTimer;              /** Lazily (periodically) updates the sample context tooltip string */
-    bool                            _sampleContextDirty;                        /** Indicates that the sample context is dirty */
-    QString                         _viewString;                                /** Generated HTML-formatted view string */
-    QPointer<QWidget>               _viewWidget;                                /** Pointer to the generated view widget */
-    std::unique_ptr<OverlayWidget>  _toolTipOverlayWidget;                      /** Overlay widget for the tooltip */
-    QLabel                          _toolTipLabel;                              /** The text label which contains the actual tooltip text */
-    TriggerAction                   _openSampleScopeWindow;                     /** Opens a sample scope window */
-    plugin::ViewPlugin*             _sampleScopePlugin;                         /** Pointer to sample scope plugin (maybe nullptr) */
+    plugin::ViewPlugin*             _viewPlugin;                                        /** Pointer to view plugin for which to show the tooltips */
+    bool                            _isInitialized;                                     /** Boolean determining whether the sampler is initialized or not */
+    PixelSelectionAction*           _pixelSelectionAction;                              /** Pointer to pixel selection tool to use */
+    PixelSelectionAction*           _samplerPixelSelectionAction;                       /** Pointer to sampler pixel selection tool to use */
+    ViewGeneratorType               _viewGeneratorType = ViewGeneratorType::HTML;       /** Type of view generator */
+    HtmlViewGeneratorFunction       _htmlViewGeneratorFunction;                         /** HTML view generator function which is called periodically when the mouse moves in the view (should return an HTML formatted string) */
+    WidgetViewGeneratorFunction     _widgetViewGeneratorFunction;                       /** Widget view generator function (the sampler action does not take ownership of the widget) */
+    ToggleAction                    _enabledAction;                                     /** Action to toggle computation on/off */
+    ToggleAction                    _highlightFocusedElementsAction;                    /** Action to toggle focus elements highlighting */
+    VerticalGroupAction             _settingsAction;                                    /** Additional vertical group action for settings */
+    ToggleAction                    _restrictNumberOfElementsAction;                    /** Action to setEnabled the restriction of the maximum number of elements in the focus region */
+    IntegralAction                  _maximumNumberOfElementsAction;                     /** Action to restrict the maximum number of elements in the focus region */
+    IntegralAction                  _lazyUpdateIntervalAction;                          /** Action to control the view update timer interval */
+    OptionAction                    _samplingModeAction;                                /** Action to control the sampling mode */
+    OptionAction                    _viewingModeAction;                                 /** Action to control the viewing mode */
+    SampleContext                   _sampleContext;                                     /** Context for the tooltip */
+    QTimer                          _sampleContextLazyUpdateTimer;                      /** Lazily (periodically) updates the sample context tooltip string */
+    bool                            _sampleContextDirty = false;                        /** Indicates that the sample context is dirty */
+    QString                         _viewString;                                        /** Generated HTML-formatted view string */
+    QPointer<QWidget>               _viewWidget;                                        /** Pointer to the generated view widget */
+    std::unique_ptr<OverlayWidget>  _toolTipOverlayWidget;                              /** Overlay widget for the tooltip */
+    QLabel                          _toolTipLabel;                                      /** The text label which contains the actual tooltip text */
+    TriggerAction                   _openSampleScopeWindow;                             /** Opens a sample scope window */
+    plugin::ViewPlugin*             _sampleScopePlugin;                                 /** Pointer to sample scope plugin (maybe nullptr) */
 };
 
 }
