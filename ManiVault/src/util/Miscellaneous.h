@@ -14,10 +14,6 @@
 #include <QWidget>
 #include <QPixmap>
 #include <QByteArray>
-#include <QBuffer>
-#include <QImageReader>
-#include <QRegularExpression>
-#include <QStringDecoder>
 
 #include <algorithm>
 
