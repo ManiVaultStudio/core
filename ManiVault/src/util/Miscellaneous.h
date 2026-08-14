@@ -14,10 +14,6 @@
 #include <QWidget>
 #include <QPixmap>
 #include <QByteArray>
-#include <QBuffer>
-#include <QImageReader>
-#include <QRegularExpression>
-#include <QStringDecoder>
 
 #include <algorithm>
 
@@ -287,9 +283,10 @@ inline auto isLikelyUtf16 = [](const QByteArray& byteArray) {
     if (byteArray.size() < 2)
         return false;
     
-    return static_cast<uchar>(byteArray[0]) == 0xFF && static_cast<uchar>(byteArray[1]) == 0xFE
-        || static_cast<uchar>(byteArray[0]) == 0xFE && static_cast<uchar>(byteArray[1]) == 0xFF
-        || (byteArray[0] == 0x00 && byteArray[1] == '{') || (byteArray[0] == '{' && byteArray[1] == 0x00);
+    return (static_cast<uchar>(byteArray[0]) == 0xFF && static_cast<uchar>(byteArray[1]) == 0xFE)
+        || (static_cast<uchar>(byteArray[0]) == 0xFE && static_cast<uchar>(byteArray[1]) == 0xFF)
+        || (byteArray[0] == 0x00 && byteArray[1] == '{') 
+        || (byteArray[0] == '{' && byteArray[1] == 0x00);
 };
 
 /**

@@ -152,7 +152,7 @@ public:
             auto rolesString = _roles.isEmpty() ? "" : QString("(%1)").arg(_roles.join(", "));
 
             if (!_roles.isEmpty()) {
-                int lastCommaIndex = rolesString.lastIndexOf(',');
+                const qsizetype lastCommaIndex = rolesString.lastIndexOf(',');
 
                 if (lastCommaIndex != -1)
                     rolesString.replace(lastCommaIndex, 1, " & ");
