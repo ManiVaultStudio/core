@@ -353,7 +353,7 @@ void ProjectsModelProject::determineDownloadSize()
             if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
                 throw std::runtime_error("Future is cancelled or did not finish");
 
-            QMetaObject::invokeMethod(qApp, [this, future]() {
+            QMetaObject::invokeMethod(this, [this, future]() {
                 _serverDownloadSize = future.result();
 
                 emit downloadSizeDetermined(_serverDownloadSize);
@@ -398,7 +398,7 @@ void ProjectsModelProject::determineLastModified()
             if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
                 throw std::runtime_error("Future is cancelled or did not finish");
 
-            QMetaObject::invokeMethod(qApp, [this, future]() {
+            QMetaObject::invokeMethod(this, [this, future]() {
                 _serverLastModified = future.result();
 
                 emit lastModifiedDetermined(_serverLastModified);

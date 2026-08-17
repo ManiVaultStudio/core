@@ -4,6 +4,7 @@
 
 #include "ErrorManager.h"
 #include "ErrorLoggingConsentDialog.h"
+#include "AbstractErrorLogger.h"
 
 #include <QRegularExpression>
 
@@ -30,7 +31,8 @@ ErrorManager::ErrorManager(QObject* parent) :
     _loggingUserHasOptedAction(this, "User has opted", false),
     _loggingEnabledAction(this, "Toggle error reporting", false),
     _loggingDsnAction(this, "Sentry DSN", "https://211289c773dcc267b1bb536b6c3a23f7@lkebsentry.nl/2"),
-    _loggingShowCrashReportDialogAction(this, "Show crash report dialog", true)
+    _loggingReportHandledExceptionsAction(this, "Report handled exceptions", false),
+    _loggingShowCrashReportDialogAction(this, "Ask for feedback after a crash", true)
 {
     _loggingAskConsentDialogAction.setToolTip("Show the error logging consent dialog");
     _loggingAskConsentDialogAction.setDefaultWidgetFlags(TriggerAction::IconText);
@@ -46,14 +48,23 @@ ErrorManager::ErrorManager(QObject* parent) :
 //#endif
     
     _loggingDsnAction.setSettingsPrefix(QString("%1Logging/DSN").arg(getSettingsPrefix()));
-    _loggingDsnAction.setToolTip("The Sentry error logging data source name");
-    _loggingDsnAction.getValidator().setRegularExpression(QRegularExpression(R"(^https?://[a-f0-9]{32}@[a-z0-9\.-]+(:\d+)?/[\d]+$)"));
+    _loggingDsnAction.setToolTip("The Sentry Data Source Name (DSN). Hosted and self-hosted HTTP(S) DSNs with optional ports and path prefixes are supported.");
+
+    // Current Sentry DSNs do not require a 32-character hexadecimal public
+    // key or a numeric project identifier. Keep this structural validator in
+    // line with sentry-native: scheme, public key, optional secret, host and
+    // optional port/path prefix, followed by a non-empty project identifier.
+    _loggingDsnAction.getValidator().setRegularExpression(QRegularExpression(R"(^https?://[A-Z0-9._~%-]+(?::[A-Z0-9._~%-]+)?@(?:\[[0-9A-F:.]+\]|[A-Z0-9.-]+)(?::[0-9]{1,5})?/(?:[A-Z0-9._~!$&'()*+,;=:@%-]+/)*[A-Z0-9._~!$&'()*+,;=:@%-]+/?$)", QRegularExpression::CaseInsensitiveOption));
+
+    _loggingReportHandledExceptionsAction.setSettingsPrefix(QString("%1Logging/ReportHandledExceptions").arg(getSettingsPrefix()));
+    _loggingReportHandledExceptionsAction.setToolTip("Send handled error- and fatal-level exceptions shown in an exception dialog to Sentry. Informational and warning-level exceptions remain local.");
 
     _loggingShowCrashReportDialogAction.setSettingsPrefix(QString("%1Logging/ShowCrashReportDialog").arg(getSettingsPrefix()));
-    _loggingShowCrashReportDialogAction.setToolTip("Show the crash report dialog prior to sending an error report");
+    _loggingShowCrashReportDialogAction.setToolTip("Ask for optional feedback on the next launch after a crash");
 
     const auto allowErrorReportingChanged = [this]() -> void {
         _loggingShowCrashReportDialogAction.setEnabled(_loggingEnabledAction.isChecked());
+        _loggingReportHandledExceptionsAction.setEnabled(_loggingEnabledAction.isChecked());
         _loggingDsnAction.setEnabled(_loggingEnabledAction.isChecked());
     };
 
@@ -85,6 +96,7 @@ void ErrorManager::initialize()
         errorLoggingSettingsAction.addAction(&getLoggingAskConsentDialogAction());
         errorLoggingSettingsAction.addAction(&getLoggingEnabledAction());
         errorLoggingSettingsAction.addAction(&getLoggingDsnAction());
+        errorLoggingSettingsAction.addAction(&getLoggingReportHandledExceptionsAction());
         errorLoggingSettingsAction.addAction(&getLoggingShowCrashReportDialogAction());
 
 #ifdef MV_USE_ERROR_LOGGING
@@ -119,7 +131,7 @@ void ErrorManager::reset()
 
 void ErrorManager::showErrorLoggingConsentDialog()
 {
-#ifdef ERROR_LOGGING
+#ifdef MV_USE_ERROR_LOGGING
     ErrorLoggingConsentDialog errorLoggingConsentDialog;
     errorLoggingConsentDialog.exec();
 #endif
@@ -170,6 +182,33 @@ util::StackTrace ErrorManager::getDebugStackTrace() const
 #endif
 
     return stackTrace;
+}
+
+void ErrorManager::reportHandledException(const QString& title, const QString& exceptionType, const QString& reason, util::SeverityLevel severity, const util::StackTrace& stackTrace, const QString& diagnosticId, const QString& where)
+{
+    if (!getLoggingReportHandledExceptionsAction().isChecked())
+        return;
+
+    switch (severity) {
+        case util::SeverityLevel::Info:
+        case util::SeverityLevel::Warning:
+            return;
+
+        case util::SeverityLevel::Error:
+        case util::SeverityLevel::Fatal:
+            break;
+    }
+
+    if (auto* errorLogger = getErrorLogger())
+        errorLogger->reportHandledException(title, exceptionType, reason, severity, stackTrace, diagnosticId, where);
+}
+
+bool ErrorManager::submitUserFeedback(const QString& type, const QString& message, const QString& email)
+{
+    if (auto* errorLogger = getErrorLogger())
+        return errorLogger->submitUserFeedback(type, message, email);
+
+    return false;
 }
 
 }
