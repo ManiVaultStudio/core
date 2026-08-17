@@ -175,7 +175,15 @@ void SentryErrorLogger::start()
     }
     
     sentry_options_set_dsn(options, dsn.toUtf8());
-    sentry_options_set_handler_path(options, QDir(QCoreApplication::applicationDirPath()).filePath(getCrashpadHandlerExecutableName()).toUtf8());
+
+    const auto crashpadHandlerPath = QDir(QCoreApplication::applicationDirPath()).filePath(getCrashpadHandlerExecutableName());
+
+#ifdef Q_OS_WIN
+    sentry_options_set_handler_pathw(options, reinterpret_cast<const wchar_t*>(crashpadHandlerPath.utf16()));
+#else
+    sentry_options_set_handler_path(options, crashpadHandlerPath.toUtf8());
+#endif
+
     sentry_options_set_database_path(options, sentryDatabasePath.toUtf8());
     sentry_options_set_shutdown_timeout(options, sentryShutdownTimeoutMilliseconds);
     // sentry-native starts its automatic session from sentry_init(), before an
@@ -194,7 +202,11 @@ void SentryErrorLogger::start()
         const auto crashReporterInfo = QFileInfo(crashReporterPath);
 
         if (crashReporterInfo.exists() && crashReporterInfo.isFile()) {
+#ifdef Q_OS_WIN
+            sentry_options_set_external_crash_reporter_pathw(options, reinterpret_cast<const wchar_t*>(crashReporterPath.utf16()));
+#else
             sentry_options_set_external_crash_reporter_path(options, crashReporterPath.toUtf8());
+#endif
         } else {
             qWarning() << "Cannot enable Sentry crash feedback: the external crash reporter was not found at" << crashReporterPath
                        << "Technical crash reports will still be sent automatically.";

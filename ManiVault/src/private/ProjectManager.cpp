@@ -238,7 +238,7 @@ ProjectManager::ProjectManager(QObject* parent) :
 
 ProjectManager::~ProjectManager()
 {
-    //reset();
+    reset();
 }
 
 void ProjectManager::initialize()

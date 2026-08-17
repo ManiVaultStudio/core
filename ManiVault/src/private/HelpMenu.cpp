@@ -55,7 +55,9 @@ void HelpMenu::populate()
     
     addAction(&mv::help().getShowLearningCenterPageAction());
     addAction(&_devDocAction);
+#ifdef MV_USE_ERROR_LOGGING
     addAction(&_sendFeedbackAction);
+#endif
     addSeparator();
     
     QVector<QPointer<TriggerAction>> actions;
@@ -98,7 +100,9 @@ void HelpMenu::populate()
         QDesktopServices::openUrl(QUrl("https://github.com/ManiVaultStudio/PublicWiki", QUrl::TolerantMode));
     });
 
+#ifdef MV_USE_ERROR_LOGGING
     connect(&_sendFeedbackAction, &TriggerAction::triggered, this, &HelpMenu::sendFeedback, Qt::UniqueConnection);
+#endif
     connect(&_aboutAction, &TriggerAction::triggered, this, &HelpMenu::about);
     connect(&_aboutThirdPartiesAction, &TriggerAction::triggered, this, &HelpMenu::aboutThirdParties);
 
