@@ -31,12 +31,12 @@ uniform bool 	hasSizes;          		/** Whether a point size buffer is used */
 uniform bool 	hasOpacities;			/** Whether an opacity buffer is used */
 
 // Selection visualization
-uniform int	selectionDisplayMode;		/** Type of selection display (e.g. outline, override) */
+uniform int		selectionDisplayMode;		/** Type of selection display (e.g. outline, override) */
 uniform float 	selectionOutlineScale;     	/** Selection outline scale */
-uniform float 	selectionOutlineOpacity;     	/** Selection outline opacity */
+uniform float 	selectionOutlineOpacity;	/** Selection outline opacity */
 uniform vec3  	selectionOutlineColor;		/** Selection outline color */
 uniform bool 	selectionHaloEnabled; 		/** Whether selection halo is enabled */
-uniform float 	selectionHaloScale;		/** Selection halo scale */
+uniform float 	selectionHaloScale;			/** Selection halo scale */
 
 // Focus visualization
 uniform vec3  	focusRegionColor;			/** Focus region color */
@@ -45,10 +45,16 @@ uniform vec3  	focusOutlineColor;			/** Focus outline color */
 uniform float 	focusOutlineScale;     		/** Focus outline scale */
 uniform float 	focusOutlineOpacity;		/** Focus outline opacity */
 
-uniform bool 	randomizedDepthEnabled;		/** Whether to randomize the z-order */
+#define Z_ORDER_INSERTION  0
+#define Z_ORDER_DIMENSION  1
+#define Z_ORDER_RANDOMIZED 2
+
+uniform int   zOrderMode;                  	/** How point depth is determined */
+uniform bool  hasZOrderScalars;            	/** Whether a z-order scalar buffer is used */
+uniform vec3  zOrderScalarsRange;			/** Minimum, maximum and span of the z-order scalars */
 
 // Miscellaneous
-uniform float 	windowAspectRatio;			/** Window aspect ratio (width / height) */
+uniform float 	windowAspectRatio;					/** Window aspect ratio (width / height) */
 
 layout(location = 0) in vec2    vertex;         	/** Vertex input, always a [-1, 1] quad */
 layout(location = 1) in vec2    position;       	/** 2-Dimensional positions of points */
@@ -60,6 +66,7 @@ layout(location = 6) in float   size;           	/** Point size */
 layout(location = 7) in float   opacity;        	/** Point opacity */
 layout(location = 8) in float   scalar2;        	/** Point scalar (color channel 2) */
 layout(location = 9) in float   scalar3;        	/** Point scalar (color channel 3) */
+layout(location = 10) in float  zOrderScalar;    	/** Point scalar used for z ordering */
 
 // Output variables
 smooth out vec2  vTexCoord;
@@ -149,8 +156,15 @@ void main()
 //	if (pointSizeAbsolute)
 //		finalPos = (mvp * vec4(position + scaledVertex, 0.0, 1.0)).xy;
 		
-	// Compute random depth
-	float depth = randomizedDepthEnabled ? random(vec2(gl_InstanceID, 0)) : 0;
+	// Compute point depth for the selected z-ordering mode
+    float depth = 0.0;
+
+    if (zOrderMode == Z_ORDER_DIMENSION && hasZOrderScalars) {
+        float normalizedZOrder = clamp((zOrderScalar - zOrderScalarsRange.x) / zOrderScalarsRange.z, 0.0, 1.0);
+        depth = mix(-0.999999, 0.999999, normalizedZOrder);
+    }
+    else if (zOrderMode == Z_ORDER_RANDOMIZED)
+        depth = random(vec2(gl_InstanceID, 0));
 	
 	// Set the final position
     gl_Position = vec4(finalPos, depth, 1.0); // Convert to NDC [-1,1]

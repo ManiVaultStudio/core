@@ -29,6 +29,13 @@ namespace mv
             Outline, Override
         };
 
+        /** Determines how point depth is assigned during rendering. */
+        enum class PointZOrderMode {
+            InsertionOrder,     /** All points have equal depth; draw/insertion order determines visibility */
+            Dimension,          /** Point depth is derived from a scalar data channel */
+            Randomized          /** Point depth is generated deterministically from the point index */
+        };
+
         struct CORE_EXPORT PointArrayObject : private QOpenGLFunctions_3_3_Core
         {
         public:
@@ -42,9 +49,10 @@ namespace mv
             BufferObject _colorScalarBuffer3;
             BufferObject _sizeScalarBuffer;
             BufferObject _opacityScalarBuffer;
+            BufferObject _zOrderScalarBuffer;
             BufferObject _colorBuffer;
 
-            PointArrayObject() : QOpenGLFunctions_3_3_Core(), _handle(0), _colorScalarsRange(0, 1, 1), _colorScalarsRange2(0, 1, 1), _colorScalarsRange3(0, 1, 1) {}
+            PointArrayObject() : QOpenGLFunctions_3_3_Core(), _handle(0), _colorScalarsRange(0, 1, 1), _colorScalarsRange2(0, 1, 1), _colorScalarsRange3(0, 1, 1), _zOrderScalarsRange(0, 1, 1) {}
             void init();
             void setPositions(const std::vector<Vector2f>& positions);
             void setHighlights(const std::vector<char>& highlights);
@@ -54,6 +62,7 @@ namespace mv
             void setScalars3(const std::vector<float>& scalars, bool adjustColorMapRange);
             void setSizeScalars(const std::vector<float>& scalars);
             void setOpacityScalars(const std::vector<float>& scalars);
+            void setZOrderScalars(const std::vector<float>& scalars);
             void setColors(const std::vector<Vector3f>& colors);
 
             const std::vector<Vector2f>& getPositions() const { return _positions; }
@@ -64,6 +73,7 @@ namespace mv
             const std::vector<float>& getScalars3() const { return _colorScalars3; }
             const std::vector<float>& getSizeScalars() const { return _sizeScalars; }
             const std::vector<float>& getOpacityScalars() const { return _opacityScalars; }
+            const std::vector<float>& getZOrderScalars() const { return _zOrderScalars; }
             const std::vector<Vector3f>& getColors() const { return _colors; }
 
             void enableAttribute(uint index, bool enable);
@@ -75,6 +85,7 @@ namespace mv
             bool hasColorScalars3() const { return !_colorScalars3.empty(); }
             bool hasSizeScalars() const { return !_sizeScalars.empty(); }
             bool hasOpacityScalars() const { return !_opacityScalars.empty(); }
+            bool hasZOrderScalars() const { return !_zOrderScalars.empty(); }
             bool hasColors() const { return !_colors.empty(); }
 
             Vector3f getColorMapRange() const {
@@ -91,6 +102,10 @@ namespace mv
 
             Vector3f getColorMapRange3() const {
                 return _colorScalarsRange3;
+            }
+
+            Vector3f getZOrderScalarsRange() const {
+                return _zOrderScalarsRange;
             }
 
             void draw();
@@ -110,6 +125,7 @@ namespace mv
             const uint ATTRIBUTE_SCALARS_OPACITY    = 7;
             const uint ATTRIBUTE_SCALARS_COLOR2     = 8;
             const uint ATTRIBUTE_SCALARS_COLOR3     = 9;
+            const uint ATTRIBUTE_SCALARS_Z_ORDER    = 10;
 
             /* Point attributes */
             std::vector<Vector2f>   _positions;
@@ -123,11 +139,13 @@ namespace mv
             std::vector<float>  _colorScalars3;     /** Point color scalar channel 3 (RGB coloring) */
             std::vector<float>  _sizeScalars;       /** Point size scalar channel */
             std::vector<float>  _opacityScalars;    /** Point opacity scalar channel */
+            std::vector<float>  _zOrderScalars;     /** Point z-order scalar channel */
 
             /** Scalar ranges */
             Vector3f    _colorScalarsRange;     /** Scalar range of the point color scalars (channel 1) */
             Vector3f    _colorScalarsRange2;    /** Scalar range of the point color scalars (channel 2) */
             Vector3f    _colorScalarsRange3;    /** Scalar range of the point color scalars (channel 3) */
+            Vector3f    _zOrderScalarsRange;    /** Scalar range of the point z-order scalars */
 
             bool _dirtyPositions        = false;
             bool _dirtyHighlights       = false;
@@ -137,6 +155,7 @@ namespace mv
             bool _dirtyColorScalars3    = false;
             bool _dirtySizeScalars      = false;
             bool _dirtyOpacityScalars   = false;
+            bool _dirtyZOrderScalars    = false;
             bool _dirtyColors           = false;
 
             BufferObject _quadBufferObject;
@@ -179,6 +198,7 @@ namespace mv
             void setColorChannel3Scalars(const std::vector<float>& scalars, bool adjustColorMapRange = true);
             void setSizeChannelScalars(const std::vector<float>& scalars);
             void setOpacityChannelScalars(const std::vector<float>& scalars);
+            void setZOrderChannelScalars(const std::vector<float>& scalars);
             void setColors(const std::vector<Vector3f>& colors);
 
             PointEffect getScalarEffect() const;
@@ -219,6 +239,9 @@ namespace mv
             bool getRandomizedDepthEnabled() const;
             void setRandomizedDepthEnabled(bool randomizedDepth);
 
+            PointZOrderMode getZOrderMode() const;
+            void setZOrderMode(PointZOrderMode zOrderMode);
+
             void init() override;
             void render() override;
             void destroy() override;
@@ -240,7 +263,7 @@ namespace mv
             bool                        _selectionHaloEnabled               = false;
 
             /* Depth control */
-            bool                        _randomizedDepthEnabled             = true;
+            PointZOrderMode             _zOrderMode                        = PointZOrderMode::InsertionOrder;
 
             /* Rendering variables */
             ShaderProgram               _shader = {};
