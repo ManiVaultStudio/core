@@ -149,7 +149,7 @@ void AbstractHeadsUpDisplayModel::addHeadsUpDisplayItem(HeadsUpDisplayItemShared
         const auto parentIndex = headsUpDisplayItem->getParent() ? QPersistentModelIndex(indexFromHeadsUpDisplayItem(headsUpDisplayItem->getParent())) : QPersistentModelIndex();
 
         if (parentIndex.isValid()) {
-            if (auto parentItem = dynamic_cast<Item*>(itemFromIndex(parentIndex.sibling(0, 0))))
+            if (auto parentItem = dynamic_cast<Item*>(itemFromIndex(parentIndex.sibling(parentIndex.row(), 0))))
                 parentItem->appendRow(Row(headsUpDisplayItem));
             else
                 throw std::runtime_error("Parent index is not a valid item");
