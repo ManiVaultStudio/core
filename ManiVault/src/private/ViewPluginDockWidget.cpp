@@ -171,10 +171,8 @@ void ViewPluginDockWidget::restoreViewPluginState()
         return;
 
     //_progressTask.setRunningIndeterminate();
-    {
-        _viewPlugin->fromVariantMap(_viewPluginMap);
-        //_dockManager.centralWidget()->setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
-    }
+    _viewPlugin->fromVariantMap(_viewPluginMap);
+    //_dockManager.centralWidget()->setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
     //_progressTask.setFinished();
 }
 

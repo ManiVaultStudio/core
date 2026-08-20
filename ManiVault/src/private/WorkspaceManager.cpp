@@ -565,7 +565,7 @@ UniqueWorkflowPlan WorkspaceManager::fromVariantMapWorkflow(QVariantMap variantM
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
 
-    plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+    plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         getCurrentWorkspace()->fromVariantMap(variantMap);
 
         variantMapMustContain(variantMap, "DockManagers");
@@ -578,11 +578,44 @@ UniqueWorkflowPlan WorkspaceManager::fromVariantMapWorkflow(QVariantMap variantM
         _mainDockManager->fromVariantMap(dockingManagersMap["Main"].toMap());
         _viewPluginsDockManager->fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
 
+        const auto restoreViewPluginState = [&executionContext](ViewPluginDockWidget* viewPluginDockWidget) {
+            const auto viewPlugin = viewPluginDockWidget->getViewPlugin();
+
+            try {
+                viewPluginDockWidget->restoreViewPluginState();
+            }
+            catch (const std::exception& exception) {
+                const auto guiName = viewPlugin ? viewPlugin->getGuiName() : QStringLiteral("Unknown");
+                const auto id      = viewPlugin ? viewPlugin->getId() : QString{};
+
+                executionContext->warning(
+                    QString("Unable to restore state for view plugin '%1' (%2): %3").arg(guiName, id, exception.what()),
+                    {},
+                    {
+                        { "ViewPluginGuiName", guiName },
+                        { "ViewPluginId", id },
+                        { "Exception", exception.what() }
+                    });
+            }
+            catch (...) {
+                const auto guiName = viewPlugin ? viewPlugin->getGuiName() : QStringLiteral("Unknown");
+                const auto id      = viewPlugin ? viewPlugin->getId() : QString{};
+
+                executionContext->warning(
+                    QString("Unable to restore state for view plugin '%1' (%2): Unknown error").arg(guiName, id),
+                    {},
+                    {
+                        { "ViewPluginGuiName", guiName },
+                        { "ViewPluginId", id }
+                    });
+            }
+        };
+
         for (auto viewPluginDockWidget : _mainDockManager->getViewPluginDockWidgets(true))
-            viewPluginDockWidget->restoreViewPluginState();
+            restoreViewPluginState(viewPluginDockWidget);
 
         for (auto viewPluginDockWidget : _viewPluginsDockManager->getViewPluginDockWidgets(true))
-            viewPluginDockWidget->restoreViewPluginState();
+            restoreViewPluginState(viewPluginDockWidget);
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     return plan;
