@@ -96,6 +96,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
 
     _headsUpDisplayAction.setCheckable(true);
     _headsUpDisplayAction.setChecked(true);
+    _headsUpDisplayAction.setText("Heads-up display");
     _headsUpDisplayAction.setToolTip("Show or hide the heads-up display");
     _headsUpDisplayAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
     _headsUpDisplayAction.setConnectionPermissionsToForceNone();
