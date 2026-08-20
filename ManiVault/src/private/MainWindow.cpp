@@ -307,15 +307,19 @@ void MainWindow::initialize()
         });
     
     const auto updateMenuVisibility = [fileMenuAction, projectsMenuAction]() -> void {
-        const auto projectIsReadOnly = projects().getCurrentProject()->getReadOnlyAction().isChecked();
+        const auto projectIsReadOnly = projects().hasProject() && projects().getCurrentProject()->getReadOnlyAction().isChecked();
     
-        //fileMenuAction->setVisible(!projectIsReadOnly);
+        fileMenuAction->setVisible(!projectIsReadOnly);
         projectsMenuAction->setVisible(projectIsReadOnly ? projects().getCurrentProject()->getAllowProjectSwitchingAction().isChecked() : true);
-        };
+    };
     
     connect(&projects(), &AbstractProjectManager::projectCreated, this, [this, updateMenuVisibility]() -> void {
         connect(&projects().getCurrentProject()->getReadOnlyAction(), &ToggleAction::toggled, this, updateMenuVisibility);
-        });
+        updateMenuVisibility();
+    });
+
+    connect(&projects(), &AbstractProjectManager::projectOpened, this, updateMenuVisibility);
+    connect(&projects(), &AbstractProjectManager::projectDestroyed, this, updateMenuVisibility);
     
     loadGuiTask.setFinished();
     
