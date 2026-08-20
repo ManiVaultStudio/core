@@ -102,6 +102,7 @@ void ViewPluginDockWidget::initialize()
         if (_viewPlugin->getFactory()->getReadmeMarkdownUrl().isValid())
             _settingsMenu.addAction(&const_cast<PluginFactory*>(_viewPlugin->getFactory())->getPluginMetadata().getTriggerReadmeAction());
 
+        _settingsMenu.addAction(&_viewPlugin->getHeadsUpDisplayAction());
         _settingsMenu.addAction(&_viewPlugin->getScreenshotAction());
 
         if (!_viewPlugin->isSystemViewPlugin())
