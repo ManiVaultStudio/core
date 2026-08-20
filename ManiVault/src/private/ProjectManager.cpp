@@ -799,60 +799,80 @@ void ProjectManager::publishProject(QString filePath /*= ""*/)
         if (!hasProject())
             return;
 
+        if (QFileInfo(filePath).isDir())
+            throw std::runtime_error("Project file path may not be a directory");
+
+        const auto parameters = getProjectPublishParameters(filePath);
+
+        if (!parameters.isValid())
+            return;
+
+        filePath = parameters.filePath;
+
         emit projectAboutToBePublished(*_project);
-        {
-            if (QFileInfo(filePath).isDir())
-                throw std::runtime_error("Project file path may not be a directory");
+        setState(State::PublishingProject);
 
-            setState(State::PublishingProject);
+        auto currentProject = getCurrentProject();
+        auto workspaceLockingAction = &workspaces().getCurrentWorkspace()->getLockingAction();
+        auto& readOnlyAction = currentProject->getReadOnlyAction();
+        auto& statusBarOverrideAction = currentProject->getOverrideApplicationStatusBarAction();
 
-            const auto stateGuard = qScopeGuard([this]() { setState(State::Idle); });
+        const auto workspaceWasLocked = workspaceLockingAction->isLocked();
 
-            QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "PublishProject"));
-
-            setTemporaryDirPath(TemporaryDirType::Publish, temporaryDirectory.path());
-
-            const auto temporaryDirectoryPath = temporaryDirectory.path();
-
-            _project->getAllowedPluginsAction().addStrings(mv::plugins().getUsedPluginKinds());
-            _project->getOverrideApplicationStatusBarAction().cacheState();
-            _project->getOverrideApplicationStatusBarAction().setChecked(true);
-
-            const auto parameters = getProjectPublishParameters(filePath);
-
-            if (parameters.isValid())
-                filePath = parameters.filePath;
-            else
-                return;
-
-            Application::requestOverrideCursor(Qt::WaitCursor);
-
-            auto& workspaceLockingAction = workspaces().getCurrentWorkspace()->getLockingAction();
-
-            const auto cacheWorkspaceLocked = workspaceLockingAction.isLocked();
-
-            workspaceLockingAction.setLocked(true);
-            {
-                auto& readOnlyAction            = getCurrentProject()->getReadOnlyAction();
-
-                QSignalBlocker readOnlyActionSignalBlocker(&readOnlyAction);
-
-                readOnlyAction.cacheState();
-                readOnlyAction.setChecked(true);
-
-                saveProject(filePath);
-
-                readOnlyAction.restoreState();
-            }
-            workspaceLockingAction.setLocked(cacheWorkspaceLocked);
-
-            _project->getProjectMetaAction().getApplicationVersionAction().setVersion(Application::current()->getVersion());
-
+        const auto restoreProjectState = [this, currentProject, workspaceLockingAction, workspaceWasLocked]() {
+            currentProject->getReadOnlyAction().restoreState("publishProject");
+            currentProject->getOverrideApplicationStatusBarAction().restoreState("publishProject");
+            workspaceLockingAction->setLocked(workspaceWasLocked);
+            unsetTemporaryDirPath(TemporaryDirType::Save);
             unsetTemporaryDirPath(TemporaryDirType::Publish);
+            setState(State::Idle);
+        };
 
-            Application::restoreOverrideCursor();
+        auto setupGuard = qScopeGuard(restoreProjectState);
+
+        currentProject->getAllowedPluginsAction().addStrings(mv::plugins().getUsedPluginKinds());
+        statusBarOverrideAction.cacheState("publishProject");
+        statusBarOverrideAction.setChecked(true);
+        readOnlyAction.cacheState("publishProject");
+        {
+            const QSignalBlocker blocker(&readOnlyAction);
+            readOnlyAction.setChecked(true);
         }
-        emit projectPublished(*_project);
+        workspaceLockingAction->setLocked(true);
+        auto workflowPlan = createProjectSaveWorkflowPlan(filePath);
+        const auto temporaryDirectoryPath = workflowPlan->getWorkflowContextAs<ProjectSaveContext>()->getTemporaryDirectoryPath();
+
+        // The serialization layer still resolves blobs through the save directory.
+        // Also expose the directory as the publish directory for publish-specific clients.
+        setTemporaryDirPath(TemporaryDirType::Save, temporaryDirectoryPath);
+        setTemporaryDirPath(TemporaryDirType::Publish, temporaryDirectoryPath);
+
+        auto future = Application::getWorkflowPlanExecutor().execute(std::move(workflowPlan), nullptr, WorkflowOptions({
+            .execution = {
+                .parallel = parameters.parallel,
+                .maxWorkerThreadCount = parameters.maxParallelThreads
+            },
+            .reporting = {
+                .progress             = true,
+                .finishedNotification = true,
+                .maxLoggingDepth      = parameters.maxLoggingDepth,
+                .resultDetails = {
+                    .operationName = "Publish project",
+                    .subjectName   = QFileInfo(filePath).fileName()
+                }
+            }
+        }));
+
+        future.onFinished(this, [this, currentProject, restoreProjectState](SharedWorkflowResult result) {
+            restoreProjectState();
+
+            if (result && !result->hasErrors() && !result->hasCriticalErrors()) {
+                currentProject->getProjectMetaAction().getApplicationVersionAction().setVersion(Application::current()->getVersion());
+                emit projectPublished(*currentProject);
+            }
+        });
+
+        setupGuard.dismiss();
     }
     catch (std::exception& e)
     {
@@ -1298,7 +1318,15 @@ AbstractProjectManager::ProjectSaveParameters ProjectManager::getProjectSavePara
 
 AbstractProjectManager::ProjectPublishParameters ProjectManager::getProjectPublishParameters(const QString& filePath) const
 {
-    ProjectPublishParameters parameters;
+    ProjectPublishParameters parameters {
+        true,
+        static_cast<std::uint32_t>(std::max(1, QThread::idealThreadCount() - 1))
+    };
+
+    if (!filePath.isEmpty()) {
+        parameters.filePath = filePath;
+        return parameters;
+    }
 
     FileSaveDialog fileDialog;
 
