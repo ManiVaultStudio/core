@@ -72,9 +72,9 @@ UniqueWorkflowPlan Serializable::fromVariantMapWorkflow(QVariantMap variantMap)
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1::fromVariantMap").arg(getSerializationName()));
 
     plan->addSequentialStage("Load", {
-        WorkflowPlan::Job("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        WorkflowPlan::Job("Load", [this, variantMap = std::move(variantMap)](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
             fromVariantMap(variantMap);
-        })
+        }, WorkflowPlan::JobThreadAffinity::GuiThread)
     });
 
     return plan;
