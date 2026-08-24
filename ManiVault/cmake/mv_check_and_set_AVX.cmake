@@ -5,7 +5,7 @@
 #  mv_check_and_set_AVX(${TARGET} ${USE_AVX})
 #  mv_check_and_set_AVX(${TARGET} ${USE_AVX} 1)    # optional argument, only use AVX (not AVX2 even if available)
 
-macro(mv_check_and_set_AVX target use_avx)
+function(mv_check_and_set_AVX target use_avx)
 
     if(NOT use_avx)
         return()
@@ -13,7 +13,7 @@ macro(mv_check_and_set_AVX target use_avx)
 
 	# Early return if not an x86 platform
     if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "(x86|AMD64|amd64|i386|i686)")
-	message( STATUS "Cannot set AVX for ${target}, as the system is not x86 but ${CMAKE_SYSTEM_PROCESSOR}")
+        message( STATUS "Cannot set AVX for ${target}, as the system is not x86 but ${CMAKE_SYSTEM_PROCESSOR}")
         return()
     endif()
 
@@ -41,4 +41,4 @@ macro(mv_check_and_set_AVX target use_avx)
 		target_compile_options(${target} PRIVATE ${AXV_CompileOption})
 	endif()
 
-endmacro()
+endfunction()
