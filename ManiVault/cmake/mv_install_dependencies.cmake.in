@@ -1,13 +1,20 @@
 install(CODE [[
 
     if(WIN32)
-        set(PRE_EXCLUDE "Qt6.*" "api-ms.*" "ext-ms.*" "hvsi.*" "pdmutilities.*" "wpaxholder.*" "dxgi.*" "^uxtheme.*" "d3d11.*" "winmm.*" "wldp.*")
-        set(POST_EXCLUDE ".*[\\/]system32[\\/].*\\.dll" ".*[\\/]Qt6.*\\.dll" ".*[\\/]MV_Public.*\\.dll" ".*[\\/]PointData.*\\.dll" ".*[\\/]ClusterData.*\\.dll" ".*[\\/]ColorData.*\\.dll" ".*[\\/]ImageData.*\\.dll" ".*[\\/]TextData.*\\.dll")
+        set(PRE_EXCLUDE "qt6.*" "api-ms.*" "ext-ms.*" "hvsi.*" "pdmutilities.*" 
+            "wpaxholder.*" "dxgi.*" "uxtheme.*" "d3d11.*" "winmm.*" "wldp.*" 
+            "mv_public.*" "pointdata.*" "clusterdata.*" "colordata.*" "imagedata.*" "textdata.*"
+        )
+        set(POST_EXCLUDE ".*[\\/]system32[\\/].*\\.dll")
     elseif(APPLE)
-        set(PRE_EXCLUDE "libQt6.*" "Qt.*" "libomp.dylib" "libPointData.*" "libMV_Public.*" "libClusterData.*" "libColorData.*" "libImageData.*" "libTextData.*")
+        set(PRE_EXCLUDE "libQt6.*" "Qt.*" "libomp.dylib" "libPointData.*" "libMV_Public.*" 
+            "libClusterData.*" "libColorData.*" "libImageData.*" "libTextData.*"
+        )
         set(POST_EXCLUDE "macos/lib")
     else()
-        set(PRE_EXCLUDE "libQt6.*" "libMV_Public.*" "libPointData.*" "libClusterData.*" "libColorData.*" "libImageData.*" "libTextData.*")
+        set(PRE_EXCLUDE "libQt6.*" "libMV_Public.*" "libPointData.*" "libClusterData.*" 
+            "libColorData.*" "libImageData.*" "libTextData.*"
+        )
         set(POST_EXCLUDE "x86_64-linux-gnu")
     endif()
 
