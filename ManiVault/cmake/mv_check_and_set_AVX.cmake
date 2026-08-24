@@ -11,6 +11,12 @@ macro(mv_check_and_set_AVX target use_avx)
         return()
     endif()
 
+	# Early return if not an x86 platform
+    if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "(x86|AMD64|amd64|i386|i686)")
+	message( STATUS "Cannot set AVX for ${target}, as the system is not x86 but ${CMAKE_SYSTEM_PROCESSOR}")
+        return()
+    endif()
+
 	# Use cmake hardware checks to see whether AVX should be activated
 	include(CheckCXXCompilerFlag)
 
