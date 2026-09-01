@@ -21,6 +21,13 @@
 
 namespace mv::util {
 
+/** Location used to store encoded blob payloads during project serialization. */
+enum class BlobStorageLocation
+{
+    FileInProject,         /** Store each encoded block as a file in the project archive. */
+    InlineInProjectJson    /** Store each encoded block inline in the project JSON. */
+};
+
 /** Result produced by encoding a single data block. */
 struct EncodeBlockResult
 {
@@ -78,9 +85,10 @@ using DecodeBlockJobs = QVector<DecodeBlockJob>;
  *
  * @param bytes Source byte buffer.
  * @param numberOfBytes Number of bytes in the source buffer.
+ * @param storageLocation Location used to store the encoded blob payloads.
  * @return Serialized blob variant map.
  */
-CORE_EXPORT QVariantMap bytesToBlobVariantMap(const char* bytes, std::uint64_t numberOfBytes);
+CORE_EXPORT QVariantMap bytesToBlobVariantMap(const char* bytes, std::uint64_t numberOfBytes, BlobStorageLocation storageLocation = BlobStorageLocation::FileInProject);
 
 /**
  * Create a workflow that serializes a raw byte buffer into a blob variant map.
@@ -90,9 +98,10 @@ CORE_EXPORT QVariantMap bytesToBlobVariantMap(const char* bytes, std::uint64_t n
  *
  * @param bytes Source byte buffer.
  * @param numberOfBytes Number of bytes in the source buffer.
+ * @param storageLocation Location used to store the encoded blob payloads.
  * @return Workflow that produces a blob variant map.
  */
-CORE_EXPORT workflow::UniqueWorkflowPlan bytesToBlobVariantMapWorkflow(const char* bytes, std::uint64_t numberOfBytes);
+CORE_EXPORT workflow::UniqueWorkflowPlan bytesToBlobVariantMapWorkflow(const char* bytes, std::uint64_t numberOfBytes, BlobStorageLocation storageLocation = BlobStorageLocation::FileInProject);
 
 /**
  * Populate a destination buffer from a serialized blob variant map.
