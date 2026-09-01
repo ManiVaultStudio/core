@@ -299,7 +299,7 @@ public: // Serialization
 
     std::vector<unsigned int>  indices;
     QSharedPointer<InfoAction> _infoAction;    /** Shared pointer to info action */
-    mv::EventListener          _eventListener; /** Listen to HDPS events */
+    mv::EventListener          _eventListener; /** Listen to ManiVault core events */
 
     friend class mv::legacy::ClustersLegacySerializer;
 };
