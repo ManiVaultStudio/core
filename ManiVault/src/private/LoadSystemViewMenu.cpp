@@ -25,6 +25,7 @@ LoadSystemViewMenu::LoadSystemViewMenu(QWidget *parent /*= nullptr*/, ads::CDock
 {
     setTitle("System views");
     setToolTip("Manage system view plugins");
+    setToolTipsVisible(true);
     //setEnabled(mayProducePlugins());
     setIcon(StyledIcon("gears"));
 
@@ -33,6 +34,9 @@ LoadSystemViewMenu::LoadSystemViewMenu(QWidget *parent /*= nullptr*/, ads::CDock
     _loadViewsDockedMenus.insert(gui::DockAreaFlag::Top, QSharedPointer<QMenu>(new QMenu(gui::dockAreaMap.key(gui::DockAreaFlag::Top), this)));
     _loadViewsDockedMenus.insert(gui::DockAreaFlag::Bottom, QSharedPointer<QMenu>(new QMenu(gui::dockAreaMap.key(gui::DockAreaFlag::Bottom), this)));
     _loadViewsDockedMenus.insert(gui::DockAreaFlag::Center, QSharedPointer<QMenu>(new QMenu(gui::dockAreaMap.key(gui::DockAreaFlag::Center), this)));
+
+    for (auto& loadViewsDockedMenu : _loadViewsDockedMenus)
+        loadViewsDockedMenu->setToolTipsVisible(true);
 
     populate();
 }
@@ -97,6 +101,7 @@ QVector<QPointer<TriggerAction>> LoadSystemViewMenu::getLoadSystemViewsActions(m
         auto action = new TriggerAction(this, viewPluginFactory->getKind());
 
         action->setIcon(pluginTriggerAction->icon());
+        action->setToolTip(pluginTriggerAction->toolTip());
         action->setEnabled(pluginTriggerAction->isEnabled());
 
         connect(pluginTriggerAction, &PluginTriggerAction::enabledChanged, action, [action, pluginTriggerAction](bool enabled) -> void {
