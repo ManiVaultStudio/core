@@ -60,7 +60,7 @@ ProjectManager::ProjectManager(QObject* parent) :
     _pluginManagerAction(nullptr, "Plugin Browser..."),
     _showStartPageAction(nullptr, "Start Page...", true),
     _backToProjectAction(nullptr, "Back to project"),
-    _projectsListModel(StandardItemModel::PopulationMode::AutomaticSynchronous, this)
+    _projectsListModel(StandardItemModel::PopulationMode::AutomaticSynchronous)
 {
     //_newBlankProjectAction.setShortcut(QKeySequence("Ctrl+B"));
     //_newBlankProjectAction.setShortcutContext(Qt::ApplicationShortcut);
@@ -394,7 +394,10 @@ void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly 
             }
         }));
         
-        future.onFinished(this, [this](SharedWorkflowResult result) {
+        future.onFinished(this, [this, allowEditOfPublishedProject = parameters.allowEditOfPublishedProject](SharedWorkflowResult result) {
+            if (allowEditOfPublishedProject)
+                _project->getReadOnlyAction().setChecked(false);
+
             setState(State::Idle);
             emit projectOpened(*_project);
         });
@@ -1188,6 +1191,7 @@ AbstractProjectManager::ProjectOpenParameters ProjectManager::getProjectOpenPara
 	        throw std::runtime_error("Only one file may be selected");
 
         parameters.filePath            = fileDialog.selectedFiles().first();
+        parameters.allowEditOfPublishedProject = disableReadOnlyAction.isEnabled() && disableReadOnlyAction.isChecked();
         parameters.parallel            = parallelToggleAction.isChecked();
         parameters.maxParallelThreads  = maximumNumberOfThreadsAction.getValue();
         parameters.maxLoggingDepth      = maxLoggingDepthAction.getValue();

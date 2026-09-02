@@ -34,6 +34,11 @@ const gui::StringAction& ErrorLoggingSettingsAction::getDsnAction() const
     return mv::errors().getLoggingDsnAction();
 }
 
+const gui::ToggleAction& ErrorLoggingSettingsAction::getReportHandledExceptionsAction() const
+{
+    return mv::errors().getLoggingReportHandledExceptionsAction();
+}
+
 const gui::ToggleAction& ErrorLoggingSettingsAction::getShowCrashReportDialogAction() const
 {
     return mv::errors().getLoggingShowCrashReportDialogAction();

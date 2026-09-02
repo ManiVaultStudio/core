@@ -94,6 +94,13 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _samplerAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu, false);
     _samplerAction.setConnectionPermissionsToForceNone();
 
+    _headsUpDisplayAction.setCheckable(true);
+    _headsUpDisplayAction.setChecked(true);
+    _headsUpDisplayAction.setText("Heads-up display");
+    _headsUpDisplayAction.setToolTip("Show or hide the heads-up display");
+    _headsUpDisplayAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::HiddenInActionContextMenu);
+    _headsUpDisplayAction.setConnectionPermissionsToForceNone();
+
     connect(&_editorAction, &TriggerAction::triggered, this, [this]() -> void {
         auto* viewPluginEditorDialog = new ViewPluginEditorDialog(nullptr, this);
         connect(viewPluginEditorDialog, &ViewPluginEditorDialog::finished, viewPluginEditorDialog, &ViewPluginEditorDialog::deleteLater);
@@ -326,7 +333,15 @@ void ViewPlugin::addOverlayAction(WidgetAction* overlayAction, const Qt::Alignme
     if (overlayAction == nullptr)
         return;
 
-    _actionsWidgets.push_back({ overlayAction, new ActionOverlayWidget(&_widget, overlayAction, alignment) });
+    auto actionOverlayWidget = new ActionOverlayWidget(&_widget, overlayAction, alignment);
+
+    _actionsWidgets.push_back({ overlayAction, actionOverlayWidget });
+
+    if (overlayAction->isCheckable()) {
+        actionOverlayWidget->setVisible(overlayAction->isChecked());
+
+        connect(overlayAction, &QAction::toggled, actionOverlayWidget, &QWidget::setVisible);
+    }
 
     connect(overlayAction, &WidgetAction::destroyed, this, [this, overlayAction]() -> void {
         removeOverlayAction(overlayAction);

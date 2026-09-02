@@ -7,6 +7,7 @@
 #include "AbstractManager.h"
 
 #include "util/StackFrame.h"
+#include "util/SeverityLevel.h"
 
 #include "actions/ToggleAction.h"
 #include "actions/StringAction.h"
@@ -44,7 +45,9 @@ public:
     {
     }
 
-    /** Show the error logging consent dialog */
+    /**
+     * @brief Shows the error-reporting consent dialog.
+     */
     virtual void showErrorLoggingConsentDialog() = 0;
 
     /**
@@ -83,6 +86,42 @@ public:
         return {};
     }
 
+    /**
+     * @brief Reports an eligible caught exception to the active error logger.
+     * @param title User-facing title of the exception dialog.
+     * @param exceptionType Exception class or category name.
+     * @param reason Technical reason supplied by the exception.
+     * @param severity Severity assigned to the exception.
+     * @param stackTrace Structured stack trace captured for the exception.
+     * @param diagnosticId Identifier shown to the user for support correlation.
+     * @param where Optional source context in which the exception was handled.
+     */
+    virtual void reportHandledException(const QString& title, const QString& exceptionType, const QString& reason, util::SeverityLevel severity, const util::StackTrace& stackTrace, const QString& diagnosticId = {}, const QString& where = {})
+    {
+        Q_UNUSED(title)
+        Q_UNUSED(exceptionType)
+        Q_UNUSED(reason)
+        Q_UNUSED(severity)
+        Q_UNUSED(stackTrace)
+        Q_UNUSED(diagnosticId)
+        Q_UNUSED(where)
+    }
+
+    /**
+     * @brief Sends a standalone problem report or feature request to the active error logger.
+     * @param type Feedback category, such as a problem report or feature request.
+     * @param message User-provided feedback description.
+     * @param email Optional email address for follow-up.
+     * @return Boolean determining whether the feedback was accepted for transmission.
+     */
+    virtual bool submitUserFeedback(const QString& type, const QString& message, const QString& email)
+    {
+        Q_UNUSED(type)
+        Q_UNUSED(message)
+        Q_UNUSED(email)
+        return false;
+    }
+
 protected:
 
     /**
@@ -109,6 +148,7 @@ public: // Const action getters
     virtual const gui::ToggleAction& getLoggingUserHasOptedAction()  const { return const_cast<AbstractErrorManager*>(this)->getLoggingUserHasOptedAction(); };                     /** Get action for user has opted */
     virtual const gui::ToggleAction& getLoggingEnabledAction()  const { return const_cast<AbstractErrorManager*>(this)->getLoggingEnabledAction(); };                               /** Get action for logging enabled */
     virtual const gui::StringAction& getLoggingDsnAction()  const { return const_cast<AbstractErrorManager*>(this)->getLoggingDsnAction(); };                                       /** Get action for logging data source name (DSN) */
+    virtual const gui::ToggleAction& getLoggingReportHandledExceptionsAction() const { return const_cast<AbstractErrorManager*>(this)->getLoggingReportHandledExceptionsAction(); } /** Get action for reporting handled exceptions */
     virtual const gui::ToggleAction& getLoggingShowCrashReportDialogAction()  const { return const_cast<AbstractErrorManager*>(this)->getLoggingShowCrashReportDialogAction(); };   /** Get action for showing a crash report dialog when the application fails */
 
 protected: // Non-const action getters
@@ -117,6 +157,7 @@ protected: // Non-const action getters
     virtual gui::ToggleAction& getLoggingUserHasOptedAction() = 0;              /** Get action for user has opted */
     virtual gui::ToggleAction& getLoggingEnabledAction() = 0;                   /** Get action for logging enabled */
     virtual gui::StringAction& getLoggingDsnAction() = 0;                       /** Get action for logging data source name (DSN) */
+    virtual gui::ToggleAction& getLoggingReportHandledExceptionsAction() = 0;   /** Get action for reporting handled exceptions */
     virtual gui::ToggleAction& getLoggingShowCrashReportDialogAction() = 0;     /** Get action for showing a crash report dialog when the application fails */
 
 private:

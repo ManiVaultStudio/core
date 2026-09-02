@@ -296,8 +296,15 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/LoadedViewsMenu.h
     src/private/ProjectsMenu.h
     src/private/HelpMenu.h
+    src/private/UserFeedbackDialog.h
     src/private/NoProxyRectanglesFusionStyle.h
 )
+
+if(WIN32)
+    list(APPEND PRIVATE_APPLICATION_HEADERS
+        src/private/DeveloperMenu.h
+    )
+endif()
 
 if(MV_USE_ERROR_LOGGING)
 	list(APPEND PRIVATE_APPLICATION_HEADERS
@@ -315,8 +322,15 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/LoadedViewsMenu.cpp
     src/private/ProjectsMenu.cpp
     src/private/HelpMenu.cpp
+    src/private/UserFeedbackDialog.cpp
     src/private/NoProxyRectanglesFusionStyle.cpp
 )
+
+if(WIN32)
+    list(APPEND PRIVATE_APPLICATION_SOURCES
+        src/private/DeveloperMenu.cpp
+    )
+endif()
 
 if(MV_USE_ERROR_LOGGING)
 	list(APPEND PRIVATE_APPLICATION_SOURCES

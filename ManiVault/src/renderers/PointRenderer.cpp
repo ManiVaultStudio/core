@@ -4,6 +4,7 @@
 
 #include "PointRenderer.h"
 
+#include <algorithm>
 #include <limits>
 
 namespace mv
@@ -101,6 +102,13 @@ namespace mv
 
             glVertexAttribPointer(ATTRIBUTE_SCALARS_OPACITY, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
             glVertexAttribDivisor(ATTRIBUTE_SCALARS_OPACITY, 1);
+
+            // Scalar buffer for z ordering, disabled by default
+            _zOrderScalarBuffer.create();
+            _zOrderScalarBuffer.bind();
+
+            glVertexAttribPointer(ATTRIBUTE_SCALARS_Z_ORDER, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+            glVertexAttribDivisor(ATTRIBUTE_SCALARS_Z_ORDER, 1);
         }
 
         void PointArrayObject::setPositions(const std::vector<Vector2f>& positions)
@@ -222,6 +230,26 @@ namespace mv
             _dirtyOpacityScalars = true;
         }
 
+        void PointArrayObject::setZOrderScalars(const std::vector<float>& scalars)
+        {
+            _zOrderScalarsRange = Vector3f(0, 1, 1);
+
+            if (!scalars.empty()) {
+                _zOrderScalarsRange.x = std::numeric_limits<float>::max();
+                _zOrderScalarsRange.y = -std::numeric_limits<float>::max();
+
+                for (const auto scalar : scalars) {
+                    _zOrderScalarsRange.x = std::min(_zOrderScalarsRange.x, scalar);
+                    _zOrderScalarsRange.y = std::max(_zOrderScalarsRange.y, scalar);
+                }
+
+                _zOrderScalarsRange.z = std::max(_zOrderScalarsRange.y - _zOrderScalarsRange.x, 1e-07f);
+            }
+
+            _zOrderScalars = scalars;
+            _dirtyZOrderScalars = true;
+        }
+
         void PointArrayObject::setColors(const std::vector<Vector3f>& colors)
         {
             _colors = colors;
@@ -330,6 +358,16 @@ namespace mv
                 _dirtyOpacityScalars = false;
             }
 
+            if (_dirtyZOrderScalars)
+            {
+                _zOrderScalarBuffer.bind();
+                _zOrderScalarBuffer.setData(_zOrderScalars);
+
+                enableAttribute(ATTRIBUTE_SCALARS_Z_ORDER, !_zOrderScalars.empty());
+
+                _dirtyZOrderScalars = false;
+            }
+
             // Before calling glDrawArraysInstanced, check if _positions is non-empty, to
             // prevent a crash on some (older) computers, see ManiVault core pull request #42,
             // "Fix issue #34: Crash when opening scatterplot plugin", March 2020.
@@ -433,6 +471,11 @@ namespace mv
         void PointRenderer::setOpacityChannelScalars(const std::vector<float>& scalars)
         {
             _gpuPoints.setOpacityScalars(scalars);
+        }
+
+        void PointRenderer::setZOrderChannelScalars(const std::vector<float>& scalars)
+        {
+            _gpuPoints.setZOrderScalars(scalars);
         }
 
         void PointRenderer::setColors(const std::vector<Vector3f>& colors)
@@ -549,12 +592,22 @@ namespace mv
 
         bool PointRenderer::getRandomizedDepthEnabled() const
         {
-            return _randomizedDepthEnabled;
+            return _zOrderMode == PointZOrderMode::Randomized;
         }
 
         void PointRenderer::setRandomizedDepthEnabled(bool randomizedDepth)
         {
-            _randomizedDepthEnabled = randomizedDepth;
+            _zOrderMode = randomizedDepth ? PointZOrderMode::Randomized : PointZOrderMode::InsertionOrder;
+        }
+
+        PointZOrderMode PointRenderer::getZOrderMode() const
+        {
+            return _zOrderMode;
+        }
+
+        void PointRenderer::setZOrderMode(PointZOrderMode zOrderMode)
+        {
+            _zOrderMode = zOrderMode;
         }
 
         void PointRenderer::initView()
@@ -597,7 +650,8 @@ namespace mv
                 _shader.uniform1i("selectionOutlineOverrideColor", _selectionOutlineOverrideColor);
                 _shader.uniform1f("selectionOutlineOpacity", _selectionOutlineOpacity);
                 _shader.uniform1i("selectionHaloEnabled", _selectionHaloEnabled);
-                _shader.uniform1i("randomizedDepthEnabled", _randomizedDepthEnabled);
+                _shader.uniform1i("zOrderMode", static_cast<std::int32_t>(_zOrderMode));
+                _shader.uniform1i("hasZOrderScalars", _gpuPoints.hasZOrderScalars());
                 _shader.uniform1i("hasHighlights", _gpuPoints.hasHighlights());
                 _shader.uniform1i("hasFocusHighlights", _gpuPoints.hasFocusHighlights());
                 _shader.uniform1i("hasScalars", _gpuPoints.hasColorScalars());
@@ -616,6 +670,9 @@ namespace mv
 
                 if (_gpuPoints.hasColorScalars3())
                     _shader.uniform3f("colorMapRange3", _gpuPoints.getColorMapRange3());
+
+                if (_gpuPoints.hasZOrderScalars())
+                    _shader.uniform3f("zOrderScalarsRange", _gpuPoints.getZOrderScalarsRange());
 
                 // Color space for RGB coloring (0 = RGB; placeholder for future HSL/LAB)
                 _shader.uniform1i("colorSpace", 0);

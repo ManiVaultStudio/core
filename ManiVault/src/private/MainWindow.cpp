@@ -11,7 +11,10 @@
 #include "ViewMenu.h"
 #include "ProjectsMenu.h"
 #include "HelpMenu.h"
-#include "ParallelPhantomTestSuite.h"
+
+#ifdef Q_OS_WIN
+    #include "DeveloperMenu.h"
+#endif
 
 #include <Application.h>
 #include <CoreInterface.h>
@@ -177,18 +180,27 @@ void MainWindow::initialize()
         Application::current()->getConfigurationAction().getConfigureAction().trigger();
     });
 
-    auto parallelPhantomTestShortcut = new QShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::ShiftModifier | Qt::Key_P), this);
-
-    parallelPhantomTestShortcut->setContext(Qt::ApplicationShortcut);
-
-    connect(parallelPhantomTestShortcut, &QShortcut::activated, this, [this] {
-        mv::detail::ParallelPhantomTestSuite::showMenu(this);
-    });
-
-	auto fileMenuAction     = menuBar()->addMenu(new FileMenu());
+    auto fileMenuAction     = menuBar()->addMenu(new FileMenu());
     auto viewMenuAction     = menuBar()->addMenu(new ViewMenu());
     auto projectsMenuAction = menuBar()->addMenu(new ProjectsMenu());
+
+#ifdef Q_OS_WIN
+    auto developerMenuAction = menuBar()->addMenu(new DeveloperMenu(this));
+#endif
+
     auto helpMenuAction     = menuBar()->addMenu(new HelpMenu());
+
+#ifdef Q_OS_WIN
+    developerMenuAction->setVisible(false);
+
+    auto enableDeveloperMenuShortcut = new QShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::ShiftModifier | Qt::Key_D), this);
+
+    enableDeveloperMenuShortcut->setContext(Qt::ApplicationShortcut);
+
+    connect(enableDeveloperMenuShortcut, &QShortcut::activated, developerMenuAction, [developerMenuAction] {
+        developerMenuAction->setVisible(true);
+    });
+#endif
     
     loadGuiTask.setSubtaskStarted("Initializing start page");
     
