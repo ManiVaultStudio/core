@@ -155,12 +155,16 @@ CPMAddPackage(
 )
 
 # Layout: Qt Advanced docking system
+set(MV_ADS_OPTIONS "BUILD_EXAMPLES OFF")
+if(EMSCRIPTEN)
+    list(APPEND MV_ADS_OPTIONS "BUILD_STATIC ON")
+endif()
+
 CPMAddPackage(
   NAME              advanced_docking
   GITHUB_REPOSITORY githubuser0xFFFF/Qt-Advanced-Docking-System
   GIT_TAG           5.0.0
-  OPTIONS 
-    "BUILD_EXAMPLES OFF"
+  OPTIONS           ${MV_ADS_OPTIONS}
 )
 
 set_target_properties(qtadvanceddocking-qt6 PROPERTIES 
@@ -419,7 +423,11 @@ endif()
 # -----------------------------------------------------------------------------
 # Target MV_EXE
 # -----------------------------------------------------------------------------
-add_executable(${MV_EXE} MACOSX_BUNDLE WIN32)
+if(EMSCRIPTEN)
+    qt_add_executable(${MV_EXE})
+else()
+    add_executable(${MV_EXE} MACOSX_BUNDLE WIN32)
+endif()
 
 set_target_properties(${MV_EXE} PROPERTIES
     AUTOMOC ON

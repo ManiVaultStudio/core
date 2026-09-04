@@ -27,7 +27,9 @@
 #include <QProxyStyle>
 #include <QStyleFactory>
 #include <QSurfaceFormat>
+#ifndef __EMSCRIPTEN__
 #include <QQuickWindow>
+#endif
 #include <QCommandLineParser>
 #include <QTemporaryDir>
 #include <QFileInfo>
@@ -75,7 +77,9 @@ int main(int argc, char *argv[])
     QSurfaceFormat::setDefaultFormat(format);
 #endif
 
+#ifndef __EMSCRIPTEN__
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+#endif
 
     qDebug() << "Starting" << Application::applicationName();
 
