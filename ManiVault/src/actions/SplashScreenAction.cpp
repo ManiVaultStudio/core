@@ -146,7 +146,10 @@ SplashScreenAction::SplashScreenAction(QObject* parent, bool mayClose /*= false*
 
         _simulateStartupTask.setProgress(progress);
 
-        _splashScreenWidget->update();
+#ifndef __EMSCRIPTEN__
+        if (!_splashScreenWidget.isNull())
+            _splashScreenWidget->update();
+#endif
 
 		QCoreApplication::processEvents();
 

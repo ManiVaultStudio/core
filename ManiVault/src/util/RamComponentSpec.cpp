@@ -98,6 +98,9 @@ std::uint64_t RamComponentSpec::getTotalSystemRAMBytes()
     size_t len = sizeof(mem);
     sysctlbyname("hw.memsize", &mem, &len, nullptr, 0);
     return mem;
+#elif defined(Q_OS_WASM)
+    // Browsers do not expose the host's physical RAM to WebAssembly.
+    return 0;
 #elif defined(Q_OS_UNIX)
     struct sysinfo info;
     sysinfo(&info);

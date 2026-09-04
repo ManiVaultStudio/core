@@ -11,8 +11,6 @@
 
 #include <QAbstractTextDocumentLayout>
 
-using namespace mv::gui;
-
 /**
  * Get youTube thumbnail for \p videoId with \p quality
  * @param videoId Globally unique identifier of the video

@@ -40,6 +40,11 @@ bool showFileInFolder(const QString& path)
         return false;
     }
 
+#ifdef Q_OS_WASM
+    Q_UNUSED(path)
+    return false;
+#else
+
     // Based upon: How to "Reveal in Finder" or "Show in Explorer" with Qt
     // https://stackoverflow.com/questions/3490336/how-to-reveal-in-finder-or-show-in-explorer-with-qt
     enum class Os { Windows, Mac, Other };
@@ -86,6 +91,7 @@ bool showFileInFolder(const QString& path)
     }
     QDesktopServices::openUrl(QUrl::fromLocalFile(info.path()));
     return true;
+#endif
 }
 
 }

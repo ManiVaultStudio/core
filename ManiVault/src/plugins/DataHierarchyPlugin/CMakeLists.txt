@@ -42,6 +42,7 @@ source_group(Aux FILES ${AUX})
 
 if(EMSCRIPTEN)
     add_library(${DATAHIERARCHYPLUGIN} STATIC ${DATAHIERARCHY_SOURCES})
+    target_compile_definitions(${DATAHIERARCHYPLUGIN} PRIVATE QT_STATICPLUGIN)
 else()
     add_library(${DATAHIERARCHYPLUGIN} SHARED ${DATAHIERARCHY_SOURCES})
 endif()
@@ -55,6 +56,7 @@ target_compile_features(${DATAHIERARCHYPLUGIN} PRIVATE cxx_std_${MV_CXX_STANDARD
 
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::Core)
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::Widgets)
+target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::Network)
 if(NOT EMSCRIPTEN)
     target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::WebEngineWidgets)
 endif()

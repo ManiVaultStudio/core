@@ -76,7 +76,7 @@ include(DownloadFontAwesome)
 # -----------------------------------------------------------------------------
 
 # Qt
-set(MV_QT_COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets Concurrent)
+set(MV_QT_COMPONENTS Core Gui Widgets Network OpenGL OpenGLWidgets Concurrent)
 if(NOT EMSCRIPTEN)
     list(APPEND MV_QT_COMPONENTS WebEngineWidgets)
 endif()
@@ -174,6 +174,46 @@ CPMAddPackage(
   GIT_TAG           5.0.0
   OPTIONS           ${MV_ADS_OPTIONS}
 )
+
+if(EMSCRIPTEN)
+    # ADS treats every Q_OS_UNIX target as X11 and includes xcb headers. Wasm
+    # is Unix-like to Qt but has no window-system/XCB integration. Patch the
+    # fetched 5.0.0 sources until upstream recognizes Q_OS_WASM itself.
+    file(GLOB MV_ADS_PLATFORM_SOURCES
+        "${advanced_docking_SOURCE_DIR}/src/*.cpp"
+        "${advanced_docking_SOURCE_DIR}/src/*.h"
+    )
+    foreach(MV_ADS_SOURCE IN LISTS MV_ADS_PLATFORM_SOURCES)
+        file(READ "${MV_ADS_SOURCE}" MV_ADS_SOURCE_CONTENT)
+        string(REGEX REPLACE
+            "defined\\(Q_OS_UNIX\\) && !defined\\(Q_OS_MACOS\\)( && !defined\\(Q_OS_WASM\\))*"
+            "defined(Q_OS_UNIX) && !defined(Q_OS_MACOS) && !defined(Q_OS_WASM)"
+            MV_ADS_PATCHED_CONTENT
+            "${MV_ADS_SOURCE_CONTENT}"
+        )
+        if(NOT MV_ADS_PATCHED_CONTENT STREQUAL MV_ADS_SOURCE_CONTENT)
+            file(WRITE "${MV_ADS_SOURCE}" "${MV_ADS_PATCHED_CONTENT}")
+        endif()
+    endforeach()
+
+    # ADS also lists its platform-specific Linux implementation directly.
+    get_target_property(MV_ADS_TARGET_SOURCES qtadvanceddocking-qt6 SOURCES)
+    list(FILTER MV_ADS_TARGET_SOURCES EXCLUDE REGEX "(^|[/\\\\])linux[/\\\\]")
+    set_property(TARGET qtadvanceddocking-qt6 PROPERTY SOURCES ${MV_ADS_TARGET_SOURCES})
+    target_sources(qtadvanceddocking-qt6 PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/private/WasmAdvancedDockingCompat.cpp"
+    )
+
+    # The ADS CMake project also links xcb for every Unix-like target. Remove
+    # that dependency from both the target and its static link interface.
+    get_target_property(MV_ADS_LINK_LIBRARIES qtadvanceddocking-qt6 LINK_LIBRARIES)
+    list(REMOVE_ITEM MV_ADS_LINK_LIBRARIES xcb X11::xcb)
+    set_property(TARGET qtadvanceddocking-qt6 PROPERTY LINK_LIBRARIES ${MV_ADS_LINK_LIBRARIES})
+
+    get_target_property(MV_ADS_INTERFACE_LINK_LIBRARIES qtadvanceddocking-qt6 INTERFACE_LINK_LIBRARIES)
+    list(REMOVE_ITEM MV_ADS_INTERFACE_LINK_LIBRARIES xcb X11::xcb)
+    set_property(TARGET qtadvanceddocking-qt6 PROPERTY INTERFACE_LINK_LIBRARIES ${MV_ADS_INTERFACE_LINK_LIBRARIES})
+endif()
 
 set_target_properties(qtadvanceddocking-qt6 PROPERTIES 
     PROJECT_LABEL "qtadvanceddocking" 
@@ -362,6 +402,36 @@ if(EMSCRIPTEN)
     )
     list(REMOVE_ITEM PUBLIC_SOURCES ${MV_WEBENGINE_PUBLIC_FILES})
     list(REMOVE_ITEM PUBLIC_HEADERS ${MV_WEBENGINE_PUBLIC_FILES})
+
+    # WebGL exposes an OpenGL ES interface; Qt's desktop-only versioned 3.3
+    # function wrappers are not available. They are not needed by the shell or
+    # DataHierarchy milestone and will be ported with the scatterplot milestone.
+    set(MV_DESKTOP_OPENGL_PUBLIC_FILES
+        src/widgets/OpenGLWidget.cpp
+        src/widgets/OpenGLWidget.h
+        src/renderers/PointRenderer.cpp
+        src/renderers/PointRenderer.h
+        src/renderers/DensityRenderer.cpp
+        src/renderers/DensityRenderer.h
+        src/renderers/Renderer.h
+        src/renderers/Renderer2D.cpp
+        src/renderers/Renderer2D.h
+        src/renderers/Navigator2D.cpp
+        src/renderers/Navigator2D.h
+        src/graphics/BufferObject.cpp
+        src/graphics/BufferObject.h
+        src/graphics/Framebuffer.h
+        src/graphics/OffscreenBuffer.h
+        src/graphics/Shader.cpp
+        src/graphics/Shader.h
+        src/graphics/Texture.h
+        src/util/DensityComputation.cpp
+        src/util/DensityComputation.h
+        src/util/MeanShift.cpp
+        src/util/MeanShift.h
+    )
+    list(REMOVE_ITEM PUBLIC_SOURCES ${MV_DESKTOP_OPENGL_PUBLIC_FILES})
+    list(REMOVE_ITEM PUBLIC_HEADERS ${MV_DESKTOP_OPENGL_PUBLIC_FILES})
 endif()
 
 # -----------------------------------------------------------------------------
@@ -412,6 +482,7 @@ target_compile_options(${MV_PUBLIC_LIB}
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Core)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Gui)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Widgets)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Network)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
 if(NOT EMSCRIPTEN)
@@ -483,6 +554,7 @@ endif()
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Core)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Gui)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Widgets)
+target_link_libraries(${MV_EXE} PRIVATE Qt6::Network)
 if(NOT EMSCRIPTEN)
     target_link_libraries(${MV_EXE} PRIVATE Qt6::WebEngineWidgets)
 endif()
