@@ -110,6 +110,14 @@ set_target_properties(zlibstatic PROPERTIES
     C_EXTENSIONS ${CMAKE_C_EXTENSIONS}
 )
 
+# QuaZip's Emscripten path expects the legacy zlib variables instead of the
+# imported target used on desktop platforms.
+if(EMSCRIPTEN)
+    set(ZLIB_LIBRARY zlibstatic)
+    set(ZLIB_INCLUDE ${zlib_SOURCE_DIR})
+    set(ZCONF_INCLUDE ${zlib_BINARY_DIR})
+endif()
+
 # File compression: QuaZip
 CPMAddPackage(
   NAME              quazip
