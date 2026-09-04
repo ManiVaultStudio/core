@@ -32,14 +32,21 @@
 #include <QTemporaryDir>
 #include <QFileInfo>
 
+#ifdef __EMSCRIPTEN__
+#include <QtPlugin>
+Q_IMPORT_PLUGIN(DataHierarchyPluginFactory)
+#endif
+
 using namespace mv;
 using namespace mv::util;
 using namespace mv::gui;
 
 int main(int argc, char *argv[])
 {
+#ifndef __EMSCRIPTEN__
     // Necessary to instantiate QWebEngine from a plugin
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);
+#endif
 
     // Temporary application to be able to query application dir path
     auto tempApp = QSharedPointer<QCoreApplication>(new QCoreApplication(argc, argv));
@@ -87,9 +94,15 @@ int main(int argc, char *argv[])
 
     workflow::AbstractWorkflowPlanExecutor::installNotificationLinkHandler();
 
+#ifdef __EMSCRIPTEN__
+    // WorkspaceManager needs a top-level widget while the core managers are
+    // initialized. On desktop the splash screen fulfills that role.
+    MainWindow mainWindow;
+#else
     auto& splashScreenAction = application.getConfigurationAction().getBrandingConfigurationAction().getSplashScreenAction();
 
     splashScreenAction.getOpenAction().trigger();
+#endif
 
     if (settings().getTemporaryDirectoriesSettingsAction().getRemoveStaleTemporaryDirsAtStartupAction().isChecked()) {
         application.getTemporaryDirs().getTask().setParentTask(&application.getStartupTask());
@@ -109,7 +122,9 @@ int main(int argc, char *argv[])
     core.initialize();
     application.initialize();
 
+#ifndef __EMSCRIPTEN__
     HardwareSpec::updateSystemHardwareSpecs();
+#endif
 
     auto& loadGuiTask = application.getStartupTask().getLoadGuiTask();
 
@@ -124,12 +139,20 @@ int main(int argc, char *argv[])
     
     ModalTask::getGlobalHandler()->setEnabled(true);
 
+#ifndef __EMSCRIPTEN__
     MainWindow mainWindow;
+#endif
 
     loadGuiTask.setSubtaskStarted("Create main window");
 
     mainWindow.show();
     mainWindow.initialize();
+
+#ifdef __EMSCRIPTEN__
+    // Create a project/workspace and show the statically linked proof plugin.
+    mv::projects().newBlankProject();
+    mv::plugins().requestViewPlugin(QStringLiteral("Data hierarchy"));
+#endif
 
     loadGuiTask.setSubtaskFinished("Create main window");
 

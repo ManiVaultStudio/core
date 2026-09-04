@@ -9,7 +9,9 @@
 #include "util/Miscellaneous.h"
 #include "util/StandardPaths.h"
 
+#ifndef __EMSCRIPTEN__
 #include "widgets/SplashScreenWidget.h"
+#endif
 
 #include <QBuffer>
 #include <QClipboard>
@@ -253,6 +255,9 @@ void SplashScreenAction::setProjectMetaAction(ProjectMetaAction* projectMetaActi
 
 void SplashScreenAction::showSplashScreenWidget()
 {
+#ifdef __EMSCRIPTEN__
+    return;
+#else
     if (!getEnabledAction().isChecked())
         return;
 
@@ -265,10 +270,14 @@ void SplashScreenAction::showSplashScreenWidget()
     }
         
     _splashScreenWidget->showAnimated();
+#endif
 }
 
 void SplashScreenAction::closeSplashScreenWidget() 
 {
+#ifdef __EMSCRIPTEN__
+    return;
+#else
     const auto closeDelayMs = 1500 + _alerts.count() * 1000;
 
     QTimer::singleShot(closeDelayMs, [this]() -> void {
@@ -279,6 +288,7 @@ void SplashScreenAction::closeSplashScreenWidget()
 
         _splashScreenWidget.clear();
     });
+#endif
 }
 
 bool SplashScreenAction::shouldDisplayProjectInfo() const

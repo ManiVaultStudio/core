@@ -5,7 +5,9 @@
 #include "LearningPageVideoStyledItemDelegate.h"
 #include "LearningPageVideoWidget.h"
 
+#ifndef __EMSCRIPTEN__
 #include <widgets/YouTubeVideoDialog.h>
+#endif
 
 #include <QAbstractTextDocumentLayout>
 

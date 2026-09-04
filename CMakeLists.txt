@@ -23,6 +23,15 @@ option(MV_UNITY_BUILD "Combine target source files into batches for faster compi
 option(MV_WARNINGS_AS_ERRORS "Treat warnings as errors when using MSVC" ON)
 option(MV_ENABLE_CPPTRACE "Enable cpptrace stack traces" ON)
 
+# WebAssembly is a deliberately small feasibility target. Native builds keep
+# their existing defaults and deployment behavior.
+if(EMSCRIPTEN)
+    set(MV_USE_AVX OFF CACHE BOOL "Use AVX if available - by default OFF" FORCE)
+    set(MV_USE_ERROR_LOGGING OFF CACHE BOOL "Use error logging with Sentry" FORCE)
+    set(MV_ENABLE_CPPTRACE OFF CACHE BOOL "Enable cpptrace stack traces" FORCE)
+    set(MV_PRECOMPILE_HEADERS OFF CACHE BOOL "Precompile several headers for faster compilation" FORCE)
+endif()
+
 # defines MV_VERSION
 include(ManiVault/cmake/Utils.cmake)
 mv_set_version()

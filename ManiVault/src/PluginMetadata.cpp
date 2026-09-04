@@ -7,9 +7,10 @@
 
 #include "Application.h"
 
+#ifndef __EMSCRIPTEN__
 #include "widgets/MarkdownDialog.h"
-
 #include "widgets/PluginAboutDialog.h"
+#endif
 #include "widgets/PluginShortcutsDialog.h"
 
 #include <QDesktopServices>
@@ -34,10 +35,14 @@ PluginMetadata::PluginMetadata(const PluginFactory& pluginFactory) :
         if (!_pluginFactory.getReadmeMarkdownUrl().isValid())
             return;
 
+#ifdef __EMSCRIPTEN__
+        QDesktopServices::openUrl(_pluginFactory.getReadmeMarkdownUrl());
+#else
         MarkdownDialog markdownDialog(_pluginFactory.getReadmeMarkdownUrl());
 
         markdownDialog.setWindowTitle(QString("%1").arg(_pluginFactory.getKind()));
         markdownDialog.exec();
+#endif
     });
 
     _visitRepositoryAction.setToolTip("Browse to the Github repository");
@@ -51,9 +56,15 @@ PluginMetadata::PluginMetadata(const PluginFactory& pluginFactory) :
     _viewAboutAction.setIconByName("info");
 
     connect(&_viewAboutAction, &TriggerAction::triggered, this, [this]() -> void {
+#ifdef __EMSCRIPTEN__
+        // The rich Markdown dialog uses Qt WebEngine, which Qt for WebAssembly
+        // does not provide. The metadata remains available to plugin models.
+        return;
+#else
         PluginAboutDialog pluginAboutDialog(_pluginFactory.getPluginMetadata());
 
         pluginAboutDialog.exec();
+#endif
     });
 
     connect(&_viewShortcutsAction, &TriggerAction::triggered, this, [this]() -> void {

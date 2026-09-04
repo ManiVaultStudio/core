@@ -40,15 +40,24 @@ source_group(Actions FILES ${ACTIONS})
 source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})
 
-add_library(${DATAHIERARCHYPLUGIN} SHARED ${DATAHIERARCHY_SOURCES})
+if(EMSCRIPTEN)
+    add_library(${DATAHIERARCHYPLUGIN} STATIC ${DATAHIERARCHY_SOURCES})
+else()
+    add_library(${DATAHIERARCHYPLUGIN} SHARED ${DATAHIERARCHY_SOURCES})
+endif()
 
-target_include_directories(${DATAHIERARCHYPLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
+target_include_directories(${DATAHIERARCHYPLUGIN} PRIVATE
+    "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/"
+    $<$<BOOL:${EMSCRIPTEN}>:${CMAKE_CURRENT_SOURCE_DIR}/../../../src>
+)
 
 target_compile_features(${DATAHIERARCHYPLUGIN} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::Core)
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::Widgets)
-target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::WebEngineWidgets)
+if(NOT EMSCRIPTEN)
+    target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::WebEngineWidgets)
+endif()
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use AVX if enabled and available
@@ -59,17 +68,19 @@ set_target_properties(${DATAHIERARCHYPLUGIN} PROPERTIES
     UNITY_BUILD ${MV_UNITY_BUILD}
 )
 
-install(TARGETS ${DATAHIERARCHYPLUGIN}
-    RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
-    LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
-)
+if(NOT EMSCRIPTEN)
+    install(TARGETS ${DATAHIERARCHYPLUGIN}
+        RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
+        LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
+    )
 
-add_custom_command(TARGET ${DATAHIERARCHYPLUGIN} POST_BUILD
-    COMMAND ${CMAKE_COMMAND}
-    --install ${CMAKE_CURRENT_BINARY_DIR}
-    --config $<CONFIGURATION>
-    --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
-)
+    add_custom_command(TARGET ${DATAHIERARCHYPLUGIN} POST_BUILD
+        COMMAND ${CMAKE_COMMAND}
+        --install ${CMAKE_CURRENT_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
+    )
+endif()
 
 mv_handle_plugin_config(${DATAHIERARCHYPLUGIN})
 

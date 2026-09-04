@@ -107,6 +107,94 @@ void PluginManager::loadPluginFactories()
     
     _pluginFactories.clear();
 
+#ifdef __EMSCRIPTEN__
+    const auto registerPluginFactory = [this](QObject* instance, const QJsonObject& pluginMetaData, const QString& source) -> bool {
+        const auto pluginKind = pluginMetaData.value("name").toString();
+        QString version;
+        const auto versionValue = pluginMetaData.value("version");
+
+        if (versionValue.isString())
+            version = versionValue.toString();
+        else if (versionValue.isObject())
+            version = versionValue.toObject().value("plugin").toString();
+
+        auto* pluginFactory = dynamic_cast<PluginFactory*>(instance);
+        if (!pluginFactory) {
+            qWarning() << "Failed to load plugin factory from" << source;
+            return false;
+        }
+
+        if (pluginKind.isEmpty()) {
+            qWarning() << "Plugin has no name in its metadata:" << source;
+            return false;
+        }
+
+        _pluginFactories[pluginKind] = pluginFactory;
+        pluginFactory->setKind(pluginKind);
+        pluginFactory->getPluginMetadata().getVersion().setContext(QString("%1 plugin").arg(pluginKind).toStdString());
+        pluginFactory->getPluginMetadata().getVersion().initialize(version);
+        pluginFactory->initialize();
+
+        if (!qobject_cast<AnalysisPluginFactory*>(pluginFactory) &&
+            !qobject_cast<RawDataFactory*>(pluginFactory) &&
+            !qobject_cast<LoaderPluginFactory*>(pluginFactory) &&
+            !qobject_cast<WriterPluginFactory*>(pluginFactory) &&
+            !qobject_cast<ViewPluginFactory*>(pluginFactory) &&
+            !qobject_cast<TransformationPluginFactory*>(pluginFactory)) {
+            qWarning() << "Plugin" << pluginKind << "does not implement a supported ManiVault plugin interface";
+            _pluginFactories.remove(pluginKind);
+            return false;
+        }
+
+        return true;
+    };
+
+    // Qt registers Q_IMPORT_PLUGIN targets before main(). Dynamic libraries are
+    // intentionally unsupported in the initial WebAssembly prototype. Resolve
+    // metadata dependencies here so adding PointData and views later remains
+    // deterministic.
+    auto pendingPlugins = QPluginLoader::staticPlugins();
+    QSet<QString> resolvedPluginKinds;
+    bool madeProgress = true;
+
+    while (!pendingPlugins.isEmpty() && madeProgress) {
+        madeProgress = false;
+
+        for (qsizetype index = pendingPlugins.size() - 1; index >= 0; --index) {
+            const auto& staticPlugin = pendingPlugins.at(index);
+            const auto pluginMetaData = staticPlugin.metaData().value("MetaData").toObject();
+            const auto pluginKind = pluginMetaData.value("name").toString();
+
+            // Ignore statically linked Qt infrastructure plugins.
+            if (pluginKind.isEmpty()) {
+                pendingPlugins.removeAt(index);
+                continue;
+            }
+
+            bool dependenciesResolved = true;
+            for (const auto& dependency : pluginMetaData.value("dependencies").toArray())
+                dependenciesResolved &= resolvedPluginKinds.contains(dependency.toString());
+
+            if (!dependenciesResolved)
+                continue;
+
+            if (registerPluginFactory(staticPlugin.instance(), pluginMetaData,
+                                      QStringLiteral("statically linked Qt plugin")))
+                resolvedPluginKinds.insert(pluginKind);
+
+            pendingPlugins.removeAt(index);
+            madeProgress = true;
+        }
+    }
+
+    for (const auto& unresolvedPlugin : std::as_const(pendingPlugins))
+        qWarning() << "Static plugin has unresolved dependencies:"
+                   << unresolvedPlugin.metaData().value("MetaData").toObject().value("name").toString();
+
+    emit pluginFactoriesLoaded();
+    return;
+#endif
+
     auto getPluginDependencyDir = [](const QDir& dir, const QString& name) -> std::pair<QDir, bool> {
         QDir dependenciesDir = dir;
 

@@ -74,8 +74,10 @@ class StackedWidget : public QStackedWidget
 MainWindow::MainWindow(QWidget* parent /*= nullptr*/) :
     QMainWindow(parent)
 {
+#ifndef __EMSCRIPTEN__
     // Delay execution till the event loop has started, otherwise we cannot quit the application
     QTimer::singleShot(1000, this, &MainWindow::checkGraphicsCapabilities);
+#endif
 
     restoreWindowGeometryFromSettings();
 

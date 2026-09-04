@@ -76,7 +76,11 @@ include(DownloadFontAwesome)
 # -----------------------------------------------------------------------------
 
 # Qt
-find_package(Qt6 6.8 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets Concurrent REQUIRED)
+set(MV_QT_COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets Concurrent)
+if(NOT EMSCRIPTEN)
+    list(APPEND MV_QT_COMPONENTS WebEngineWidgets)
+endif()
+find_package(Qt6 6.8 COMPONENTS ${MV_QT_COMPONENTS} REQUIRED)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
@@ -327,10 +331,35 @@ include(CMakeMvSourcesApplication)    # defines MAIN_SOURCES, PRIVATE_SOURCES an
 include(CMakeMvSourcesPublic)         # defines PUBLIC_SOURCES, PUBLIC_HEADERS and PRECOMPILE_HEADERS
 include(CMakeMvSourcesResources)      # defines RESOURCE_FILES, MAIN_APP_ICON_RESOURCE and MAIN_STYLES
 
+if(EMSCRIPTEN)
+    # These public widgets are thin WebEngine wrappers. The initial browser
+    # target omits them while retaining the rest of the Qt Widgets UI.
+    set(MV_WEBENGINE_PUBLIC_FILES
+        src/widgets/MarkdownDialog.cpp
+        src/widgets/MarkdownDialog.h
+        src/widgets/PluginAboutDialog.cpp
+        src/widgets/PluginAboutDialog.h
+        src/widgets/SplashScreenWidget.cpp
+        src/widgets/SplashScreenWidget.h
+        src/widgets/WebWidget.cpp
+        src/widgets/WebWidget.h
+        src/widgets/YouTubeVideoDialog.cpp
+        src/widgets/YouTubeVideoDialog.h
+        src/util/CustomAssetsUrlSchemeHandler.cpp
+        src/util/CustomAssetsUrlSchemeHandler.h
+    )
+    list(REMOVE_ITEM PUBLIC_SOURCES ${MV_WEBENGINE_PUBLIC_FILES})
+    list(REMOVE_ITEM PUBLIC_HEADERS ${MV_WEBENGINE_PUBLIC_FILES})
+endif()
+
 # -----------------------------------------------------------------------------
 # Target MV_PUBLIC_LIB
 # -----------------------------------------------------------------------------
-add_library(${MV_PUBLIC_LIB} SHARED)
+if(EMSCRIPTEN)
+    add_library(${MV_PUBLIC_LIB} STATIC)
+else()
+    add_library(${MV_PUBLIC_LIB} SHARED)
+endif()
 
 add_library(ManiVault::Core ALIAS ${MV_PUBLIC_LIB})
 
@@ -356,11 +385,12 @@ target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${valijson_SOURCE_DIR}/incl
 
 target_compile_features(${MV_PUBLIC_LIB} PUBLIC cxx_std_${MV_CXX_STANDARD})
 
-target_compile_definitions(${MV_PUBLIC_LIB} 
-    PRIVATE 
-        MV_SHARED_EXPORT
-        VALIJSON_USE_EXCEPTIONS=1
-)
+target_compile_definitions(${MV_PUBLIC_LIB} PRIVATE VALIJSON_USE_EXCEPTIONS=1)
+if(EMSCRIPTEN)
+    target_compile_definitions(${MV_PUBLIC_LIB} PUBLIC MV_STATIC=1)
+else()
+    target_compile_definitions(${MV_PUBLIC_LIB} PRIVATE MV_SHARED_EXPORT)
+endif()
 
 target_compile_options(${MV_PUBLIC_LIB} 
     PRIVATE
@@ -372,7 +402,9 @@ target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Gui)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Widgets)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
-target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
+if(NOT EMSCRIPTEN)
+    target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
+endif()
 target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Concurrent)
 
 # Use AVX if enabled and available
@@ -428,10 +460,16 @@ target_link_options(${MV_EXE}
         $<$<CXX_COMPILER_ID:MSVC>:/SUBSYSTEM:CONSOLE>
 )
 
+if(EMSCRIPTEN)
+    target_link_options(${MV_EXE} PRIVATE "SHELL:-sALLOW_MEMORY_GROWTH=1")
+endif()
+
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Core)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Gui)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Widgets)
-target_link_libraries(${MV_EXE} PRIVATE Qt6::WebEngineWidgets)
+if(NOT EMSCRIPTEN)
+    target_link_libraries(${MV_EXE} PRIVATE Qt6::WebEngineWidgets)
+endif()
 target_link_libraries(${MV_EXE} PRIVATE Qt6::Concurrent)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
@@ -507,13 +545,18 @@ endif()
 # -----------------------------------------------------------------------------
 
 # System plugins
-add_subdirectory(src/plugins/DataHierarchyPlugin)
-add_subdirectory(src/plugins/DataPropertiesPlugin)
-add_subdirectory(src/plugins/SharedParametersPlugin)
-add_subdirectory(src/plugins/LoggingPlugin)
-add_subdirectory(src/plugins/TasksPlugin)
-add_subdirectory(src/plugins/SampleScopePlugin)
-add_subdirectory(src/plugins/TutorialPlugin)
+if(EMSCRIPTEN)
+    add_subdirectory(src/plugins/DataHierarchyPlugin)
+    target_link_libraries(${MV_EXE} PRIVATE DataHierarchyPlugin)
+else()
+    add_subdirectory(src/plugins/DataHierarchyPlugin)
+    add_subdirectory(src/plugins/DataPropertiesPlugin)
+    add_subdirectory(src/plugins/SharedParametersPlugin)
+    add_subdirectory(src/plugins/LoggingPlugin)
+    add_subdirectory(src/plugins/TasksPlugin)
+    add_subdirectory(src/plugins/SampleScopePlugin)
+    add_subdirectory(src/plugins/TutorialPlugin)
+endif()
 
 set(MV_SYSTEM_PLUGINS
     DataHierarchyPlugin 
@@ -525,6 +568,10 @@ set(MV_SYSTEM_PLUGINS
     TutorialPlugin
 )
 
+if(EMSCRIPTEN)
+    set(MV_SYSTEM_PLUGINS DataHierarchyPlugin)
+endif()
+
 foreach(system_plugin_target IN LISTS MV_SYSTEM_PLUGINS)
     target_compile_options(${system_plugin_target}
         PRIVATE
@@ -532,12 +579,14 @@ foreach(system_plugin_target IN LISTS MV_SYSTEM_PLUGINS)
     )
 endforeach()
 
-# Data plugins
-add_subdirectory(src/plugins/PointData)
-add_subdirectory(src/plugins/ColorData)
-add_subdirectory(src/plugins/TextData)
-add_subdirectory(src/plugins/ClusterData)
-add_subdirectory(src/plugins/ImageData)
+# Data plugins are the next WebAssembly milestone. Keep the initial link small.
+if(NOT EMSCRIPTEN)
+    add_subdirectory(src/plugins/PointData)
+    add_subdirectory(src/plugins/ColorData)
+    add_subdirectory(src/plugins/TextData)
+    add_subdirectory(src/plugins/ClusterData)
+    add_subdirectory(src/plugins/ImageData)
+endif()
 
 set(MV_DATA_PLUGINS
     PointData 
@@ -548,6 +597,9 @@ set(MV_DATA_PLUGINS
 )
 
 foreach(data_plugin_target IN LISTS MV_DATA_PLUGINS)
+    if(NOT TARGET ${data_plugin_target})
+        continue()
+    endif()
     target_compile_options(${data_plugin_target}
         PRIVATE
             $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
@@ -557,6 +609,8 @@ endforeach()
 # -----------------------------------------------------------------------------
 # Installation
 # -----------------------------------------------------------------------------
+
+if(NOT EMSCRIPTEN)
 
 # Install the ManiVault executable 
 if(APPLE)
@@ -855,6 +909,8 @@ if(${MV_USE_ERROR_LOGGING})
 endif()
 
 add_custom_command(TARGET ${MV_EXE} POST_BUILD ${INSTALL_LICENSE_COMMANDS})
+
+endif()
 
 # -----------------------------------------------------------------------------
 # Miscellaneous

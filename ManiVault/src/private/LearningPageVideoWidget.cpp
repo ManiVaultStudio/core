@@ -210,7 +210,9 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
 
     connect(&_playIconItem, &GraphicsIconItem::clicked, this, [this]() -> void {
 #ifdef USE_YOUTUBE_DIALOG
+#ifndef __EMSCRIPTEN__
         YouTubeVideoDialog::play(_index.sibling(_index.row(), static_cast<int>(HelpManagerVideosModel::Column::Resource)).data().toString());
+#endif
 #else
         QDesktopServices::openUrl(QString("https://www.youtube.com/watch?v=%1").arg(_index.sibling(_index.row(), static_cast<int>(LearningCenterVideosModel::Column::Resource)).data().toString()));
 #endif
