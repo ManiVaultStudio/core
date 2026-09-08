@@ -134,11 +134,10 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
     _webEngineView.setPage(new Page(profile, &_webEngineView));
     _webEngineView.page()->setWebChannel(&_webChannel);
 
-    connect(_webEngineView.page(), &QWebEnginePage::renderProcessTerminated, this,
-        [this](QWebEnginePage::RenderProcessTerminationStatus terminationStatus, int exitCode) {
-            if (terminationStatus != QWebEnginePage::NormalTerminationStatus)
-                emit webEngineRenderProcessTerminated(terminationStatus, exitCode);
-        });
+    connect(_webEngineView.page(), &QWebEnginePage::renderProcessTerminated, this, [this](QWebEnginePage::RenderProcessTerminationStatus terminationStatus, int exitCode) {
+        if (terminationStatus != QWebEnginePage::NormalTerminationStatus)
+            emit webEngineRenderProcessTerminated(terminationStatus, exitCode);
+    });
 }
 
 SplashScreenWidget::~SplashScreenWidget()

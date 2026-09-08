@@ -259,8 +259,7 @@ void SplashScreenAction::showSplashScreenWidget()
     if (_splashScreenWidget.isNull()) {
         _splashScreenWidget = new SplashScreenWidget(*this, nullptr);
 
-        connect(_splashScreenWidget, &SplashScreenWidget::webEngineRenderProcessTerminated, this,
-            &SplashScreenAction::webEngineRenderProcessTerminated);
+        connect(_splashScreenWidget, &SplashScreenWidget::webEngineRenderProcessTerminated, this, &SplashScreenAction::webEngineRenderProcessTerminated);
 
         connect(_splashScreenWidget, &QWidget::destroyed, this, [this]() -> void {
             _splashScreenWidget.clear();
