@@ -11,6 +11,7 @@
 #include "private/ZstdBlobCodec.h"
 #include "private/ZstdBlobCodecFactory.h"
 #include "private/TaskflowWorkflowPlanExecutor.h"
+#include "actions/SplashScreenAction.h"
 
 #include <Application.h>
 #include <ManiVaultVersion.h>
@@ -20,6 +21,7 @@
 #include <util/HardwareSpec.h>
 #include <util/StandardPaths.h>
 #include <util/BlobCodec.h>
+#include <util/StyledIcon.h>
 
 #include <ModalTask.h>
 #include <ModalTaskHandler.h>
@@ -31,6 +33,50 @@
 #include <QCommandLineParser>
 #include <QTemporaryDir>
 #include <QFileInfo>
+#include <QProcess>
+#include <QTimer>
+#include <QWebEnginePage>
+
+namespace {
+
+constexpr auto softwareWebEngineFallbackArgument = "--webengine-software-fallback";
+
+bool hasSoftwareWebEngineFallbackArgument(int argc, char* argv[])
+{
+    for (int index = 0; index < argc; ++index) {
+        if (QString::fromLocal8Bit(argv[index]) == QString::fromLatin1(softwareWebEngineFallbackArgument))
+            return true;
+    }
+
+    return false;
+}
+
+void enableSoftwareWebEngineFallback()
+{
+    const QByteArray existingFlags = qgetenv("QTWEBENGINE_CHROMIUM_FLAGS");
+    const QByteArray disableGpuFlag = "--disable-gpu";
+
+    if (existingFlags.split(' ').contains(disableGpuFlag))
+        return;
+
+    QByteArray flags = existingFlags.trimmed();
+    if (!flags.isEmpty())
+        flags += ' ';
+    flags += disableGpuFlag;
+    qputenv("QTWEBENGINE_CHROMIUM_FLAGS", flags);
+}
+
+bool restartWithSoftwareWebEngineFallback(const QStringList& arguments)
+{
+    auto restartedArguments = arguments;
+    if (!restartedArguments.contains(QString::fromLatin1(softwareWebEngineFallbackArgument)))
+        restartedArguments << QString::fromLatin1(softwareWebEngineFallbackArgument);
+
+    return QProcess::startDetached(QCoreApplication::applicationFilePath(), restartedArguments,
+        QCoreApplication::applicationDirPath());
+}
+
+}
 
 using namespace mv;
 using namespace mv::util;
@@ -38,6 +84,11 @@ using namespace mv::gui;
 
 int main(int argc, char *argv[])
 {
+    const bool softwareWebEngineFallback = hasSoftwareWebEngineFallbackArgument(argc, argv);
+
+    if (softwareWebEngineFallback)
+        enableSoftwareWebEngineFallback();
+
     // Necessary to instantiate QWebEngine from a plugin
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);
 
@@ -89,6 +140,25 @@ int main(int argc, char *argv[])
 
     auto& splashScreenAction = application.getConfigurationAction().getBrandingConfigurationAction().getSplashScreenAction();
 
+    bool webEngineFallbackRestartRequested = false;
+    QObject::connect(&splashScreenAction, &SplashScreenAction::webEngineRenderProcessTerminated,
+        &application, [&](QWebEnginePage::RenderProcessTerminationStatus terminationStatus, int exitCode) {
+            if (softwareWebEngineFallback || webEngineFallbackRestartRequested)
+                return;
+
+            webEngineFallbackRestartRequested = true;
+            qWarning() << "Qt WebEngine renderer terminated during startup; restarting with GPU disabled"
+                       << terminationStatus << exitCode;
+
+            if (!restartWithSoftwareWebEngineFallback(application.arguments())) {
+                qWarning() << "Unable to restart ManiVault with the Qt WebEngine software fallback";
+                webEngineFallbackRestartRequested = false;
+                return;
+            }
+
+            QCoreApplication::exit(0);
+        });
+
     splashScreenAction.getOpenAction().trigger();
 
     if (settings().getTemporaryDirectoriesSettingsAction().getRemoveStaleTemporaryDirsAtStartupAction().isChecked()) {
@@ -130,6 +200,17 @@ int main(int argc, char *argv[])
 
     mainWindow.show();
     mainWindow.initialize();
+
+    if (softwareWebEngineFallback) {
+        QTimer::singleShot(1500, &application, []() {
+            mv::help().addNotification(
+                "Web content compatibility mode",
+                "ManiVault detected a graphics compatibility issue while initializing embedded web content and restarted successfully. "
+                "Hardware acceleration has been disabled for <b>embedded web content only</b>; ManiVault's main rendering remains hardware accelerated. "
+                "Updating your graphics driver may resolve the problem so hardware acceleration can be restored in a future session.",
+                util::StyledIcon("circle-exclamation"));
+        });
+    }
 
     loadGuiTask.setSubtaskFinished("Create main window");
 

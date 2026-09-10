@@ -25,6 +25,8 @@
     #define SPLASH_SCREEN_WIDGET_VERBOSE
 #endif
 
+//#define TEST_WEBENGINE_COMPATIBILITY
+
 using namespace mv::util;
 
 namespace mv::gui {
@@ -131,6 +133,11 @@ SplashScreenWidget::SplashScreenWidget(SplashScreenAction& splashScreenAction, Q
 
     _webEngineView.setPage(new Page(profile, &_webEngineView));
     _webEngineView.page()->setWebChannel(&_webChannel);
+
+    connect(_webEngineView.page(), &QWebEnginePage::renderProcessTerminated, this, [this](QWebEnginePage::RenderProcessTerminationStatus terminationStatus, int exitCode) {
+        if (terminationStatus != QWebEnginePage::NormalTerminationStatus)
+            emit webEngineRenderProcessTerminated(terminationStatus, exitCode);
+    });
 }
 
 SplashScreenWidget::~SplashScreenWidget()
@@ -141,6 +148,12 @@ SplashScreenWidget::~SplashScreenWidget()
 void SplashScreenWidget::showEvent(QShowEvent* event)
 {
     QWidget::showEvent(event);
+
+#ifdef TEST_WEBENGINE_COMPATIBILITY
+    QTimer::singleShot(100, this, [this]() {
+        _webEngineView.setUrl(QUrl("chrome://crash"));
+	});
+#endif
 
     if (_initialized)
         return;

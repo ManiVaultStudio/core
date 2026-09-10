@@ -14,6 +14,7 @@
 #include "Task.h"
 
 #include <QTimer>
+#include <QWebEnginePage>
 
 namespace mv {
     class ProjectMetaAction;
@@ -169,6 +170,9 @@ public:
      * @param projectMetaAction Pointer to project meta action
      */
     void setProjectMetaAction(ProjectMetaAction* projectMetaAction);
+
+signals:
+    void webEngineRenderProcessTerminated(QWebEnginePage::RenderProcessTerminationStatus terminationStatus, int exitCode);
 
 protected:
 

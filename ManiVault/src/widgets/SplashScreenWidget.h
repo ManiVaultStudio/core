@@ -30,6 +30,11 @@ class SplashScreenAction;
  */
 class CORE_EXPORT SplashScreenWidget : public QWidget
 {
+    Q_OBJECT
+
+signals:
+    void webEngineRenderProcessTerminated(QWebEnginePage::RenderProcessTerminationStatus terminationStatus, int exitCode);
+
 public:
 
     /**
