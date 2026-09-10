@@ -5,32 +5,40 @@
 #  mv_check_and_set_AVX(${TARGET} ${USE_AVX})
 #  mv_check_and_set_AVX(${TARGET} ${USE_AVX} 1)    # optional argument, only use AVX (not AVX2 even if available)
 
-macro(mv_check_and_set_AVX target useavx)
+function(mv_check_and_set_AVX target use_avx)
 
-	if(${useavx})
-		# Use cmake hardware checks to see whether AVX should be activated
-		include(CheckCXXCompilerFlag)
+    if(NOT use_avx)
+        return()
+    endif()
 
-		if(MSVC)
-			set(AXV_CompileOption "/arch:AVX")
-			set(AXV2_CompileOption "/arch:AVX2")
-		else()
-			set(AXV_CompileOption "-mavx")
-			set(AXV2_CompileOption "-mavx2")
-		endif()
-		
-		if(NOT DEFINED COMPILER_OPT_AVX_SUPPORTED OR NOT DEFINED COMPILER_OPT_AVX2_SUPPORTED)
-			check_cxx_compiler_flag(${AXV_CompileOption} COMPILER_OPT_AVX_SUPPORTED)
-			check_cxx_compiler_flag(${AXV2_CompileOption} COMPILER_OPT_AVX2_SUPPORTED)
-		endif()
+	# Early return if not an x86 platform
+    if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "(x86|AMD64|amd64|i386|i686)")
+        message( STATUS "Cannot set AVX for ${target}, as the system is not x86 but ${CMAKE_SYSTEM_PROCESSOR}")
+        return()
+    endif()
 
-		if(${COMPILER_OPT_AVX2_SUPPORTED} AND ${ARGC} EQUAL 2)
-			message( STATUS "Use AXV2 for ${target}")
-			target_compile_options(${target} PRIVATE ${AXV2_CompileOption})
-		elseif(${COMPILER_OPT_AVX_SUPPORTED})
-			message( STATUS "Use AXV for ${target}")
-			target_compile_options(${target} PRIVATE ${AXV_CompileOption})
-		endif()
+	# Use cmake hardware checks to see whether AVX should be activated
+	include(CheckCXXCompilerFlag)
+
+	if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+		set(AXV_CompileOption "/arch:AVX")
+		set(AXV2_CompileOption "/arch:AVX2")
+	else()
+		set(AXV_CompileOption "-mavx")
+		set(AXV2_CompileOption "-mavx2")
+	endif()
+	
+	if(NOT DEFINED COMPILER_OPT_AVX_SUPPORTED OR NOT DEFINED COMPILER_OPT_AVX2_SUPPORTED)
+		check_cxx_compiler_flag(${AXV_CompileOption} COMPILER_OPT_AVX_SUPPORTED)
+		check_cxx_compiler_flag(${AXV2_CompileOption} COMPILER_OPT_AVX2_SUPPORTED)
 	endif()
 
-endmacro()
+	if(${COMPILER_OPT_AVX2_SUPPORTED} AND ${ARGC} EQUAL 2)
+		message( STATUS "Use AXV2 for ${target}")
+		target_compile_options(${target} PRIVATE ${AXV2_CompileOption})
+	elseif(${COMPILER_OPT_AVX_SUPPORTED})
+		message( STATUS "Use AXV for ${target}")
+		target_compile_options(${target} PRIVATE ${AXV_CompileOption})
+	endif()
+
+endfunction()

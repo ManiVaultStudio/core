@@ -101,7 +101,8 @@ public:
     /** Parameters for opening a project */
     struct ProjectOpenParameters : ProjectOperationParameters
     {
-        QString filePath = "";  /** File path of the project to open (choose file path when empty) */
+        QString filePath                    = "";     /** File path of the project to open (choose file path when empty) */
+        bool    allowEditOfPublishedProject = false;  /** Whether to disable read-only mode after opening a published project */
 
         /**
          * Determine whether the parameters are valid

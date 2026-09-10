@@ -9,7 +9,7 @@
 #include <QTableView>
 #include <QHeaderView>
 #include <QTime>
-#include <QAbstractEventDispatcher>
+#include <QTimer>
 #include <QVBoxLayout>
 
 #include <deque>
@@ -45,10 +45,6 @@ DimensionsPickerAction::DimensionsPickerAction(QObject* parent, const QString& t
 
     updateSummary();
 
-    _summaryUpdateAwakeConnection = connect(QAbstractEventDispatcher::instance(), &QAbstractEventDispatcher::awake,[this] {
-        updateSummary();
-    });
-
     /*
     const auto updateReadOnly = [this]() -> void {
         const auto enable = !isReadOnly();
@@ -73,7 +69,6 @@ DimensionsPickerAction::DimensionsPickerAction(QObject* parent, const QString& t
 
 DimensionsPickerAction::~DimensionsPickerAction()
 {
-    disconnect(_summaryUpdateAwakeConnection);
 }
 
 void DimensionsPickerAction::fromVariantMap(const QVariantMap& variantMap)
@@ -151,8 +146,15 @@ void DimensionsPickerAction::setDimensions(const std::uint32_t numDimensions, co
     updateSlider();
 
     connect(_itemModel.get(), &QAbstractItemModel::dataChanged, this, [this](const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles) -> void {
+        scheduleSummaryUpdate();
         emit selectedDimensionsChanged(getSelectedDimensions());
     });
+
+    connect(_proxyModel.get(), &QAbstractItemModel::rowsInserted, this, &DimensionsPickerAction::scheduleSummaryUpdate);
+    connect(_proxyModel.get(), &QAbstractItemModel::rowsRemoved, this, &DimensionsPickerAction::scheduleSummaryUpdate);
+    connect(_proxyModel.get(), &QAbstractItemModel::modelReset, this, &DimensionsPickerAction::scheduleSummaryUpdate);
+
+    scheduleSummaryUpdate();
 
     emit proxyModelChanged(_proxyModel.get());
 }
@@ -530,6 +532,19 @@ void DimensionsPickerAction::updateSummary()
     const auto numberOfVisibleDimensions    = (_proxyModel == nullptr) ? 0 : _proxyModel->rowCount();
 
     _summaryAction.setString(tr("%1 available, %2 visible, %3 selected").arg(numberOfDimensions).arg(numberOfVisibleDimensions).arg(holder.getNumberOfSelectedDimensions()));
+}
+
+void DimensionsPickerAction::scheduleSummaryUpdate()
+{
+    if (_summaryUpdatePending)
+        return;
+
+    _summaryUpdatePending = true;
+
+    QTimer::singleShot(0, this, [this]() {
+        _summaryUpdatePending = false;
+        updateSummary();
+    });
 }
 
 void DimensionsPickerAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)

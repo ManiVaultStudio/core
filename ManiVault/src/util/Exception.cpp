@@ -23,6 +23,9 @@
 #include <QVBoxLayout>
 #include <QHeaderView>
 #include <QTreeWidget>
+#include <QUuid>
+
+#include <typeinfo>
 
 namespace mv::util {
 
@@ -75,14 +78,16 @@ namespace
      * @brief Copies an exception report to the clipboard.
      * @param title Title of the exception.
      * @param reason Reason for the exception.
+     * @param diagnosticId Reference ID associated with the exception.
      * @param stackTrace Stack trace associated with the exception.
      */
-    void copyExceptionReportToClipboard(const QString& title, const QString& reason, const StackTrace& stackTrace)
+    void copyExceptionReportToClipboard(const QString& title, const QString& reason, const QString& diagnosticId, const StackTrace& stackTrace)
     {
         QString report;
 
         report += title + "\n\n";
         report += reason + "\n\n";
+        report += "Reference ID: " + diagnosticId + "\n\n";
 
         const auto stackTraceLines = stackTraceToStringList(stackTrace);
 
@@ -100,10 +105,11 @@ namespace
      * @brief Displays an exception dialog with details and stack trace.
      * @param title Title of the exception dialog.
      * @param reason Reason for the exception.
+     * @param diagnosticId Reference ID associated with the exception.
      * @param stackTrace Stack trace associated with the exception.
      * @param parent Parent widget for the dialog.
      */
-    void exceptionDialog(const QString& title, const QString& reason, const StackTrace& stackTrace, QWidget* parent)
+    void exceptionDialog(const QString& title, const QString& reason, const QString& diagnosticId, const StackTrace& stackTrace, QWidget* parent)
     {
         QDialog dialog(parent);
 
@@ -124,6 +130,14 @@ namespace
         reasonLabel.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
         layout.addWidget(&reasonLabel);
+
+        QLabel referenceLabel(QString("Reference ID: <code>%1</code>").arg(diagnosticId.toHtmlEscaped()), &dialog);
+
+        referenceLabel.setTextFormat(Qt::RichText);
+        referenceLabel.setTextInteractionFlags(Qt::TextSelectableByMouse);
+        referenceLabel.setToolTip("Include this reference ID when reporting the problem");
+
+        layout.addWidget(&referenceLabel);
 
         if (!stackTrace.isEmpty()) {
             auto detailsWidget  = new QWidget(&dialog);
@@ -214,7 +228,7 @@ namespace
         buttons.addButton(QDialogButtonBox::Ok);
 
         QObject::connect(copyReportButton, &QPushButton::clicked, &dialog, [&] {
-            copyExceptionReportToClipboard(title, reason, stackTrace);
+            copyExceptionReportToClipboard(title, reason, diagnosticId, stackTrace);
         });
 
         QObject::connect(&buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
@@ -228,11 +242,14 @@ namespace
 
 void exceptionMessageBox(const QString& title, const QString& reason, QWidget* parent)
 {
-    const auto stackTrace = mv::errors().getDebugStackTrace();
+    const auto diagnosticId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    const auto stackTrace   = mv::errors().getDebugStackTrace();
 
-    exceptionDialog(title, reason, stackTrace, parent);
+    mv::errors().reportHandledException(title, "UnknownException", reason, SeverityLevel::Error, stackTrace, diagnosticId);
 
-    qDebug() << title << reason;
+    exceptionDialog(title, reason, diagnosticId, stackTrace, parent);
+
+    qDebug() << title << reason << "Reference ID:" << diagnosticId;
 
     for (const auto& frame : stackTrace)
         qDebug() << stackFrameToString(frame);
@@ -245,16 +262,30 @@ void exceptionMessageBox(const QString& title, QWidget* parent)
 
 void exceptionMessageBox(const QString& title, const std::exception& exception, QWidget* parent)
 {
-    exceptionMessageBox(title, exception.what(), parent);
+    const auto reason     = QString::fromUtf8(exception.what());
+    const auto diagnosticId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    const auto stackTrace = mv::errors().getDebugStackTrace();
+
+    mv::errors().reportHandledException(title, QString::fromLatin1(typeid(exception).name()), reason, SeverityLevel::Error, stackTrace, diagnosticId);
+
+    exceptionDialog(title, reason, diagnosticId, stackTrace, parent);
+
+    qDebug() << title << reason << "Reference ID:" << diagnosticId;
+
+    for (const auto& frame : stackTrace)
+        qDebug() << stackFrameToString(frame);
 }
 
 void exceptionMessageBox(const QString& title, const ManiVaultException& exception, QWidget* parent)
 {
-    const auto stackTrace = exception.getStackTrace();
+    const auto diagnosticId = exception.getDiagnosticId().toString(QUuid::WithoutBraces);
+    const auto stackTrace   = exception.getStackTrace();
 
-    exceptionDialog(title, exception.getMessage(), stackTrace, parent);
+    mv::errors().reportHandledException(title, "ManiVaultException", exception.getWhat(), exception.getSeverity(), stackTrace, diagnosticId, exception.getWhere());
 
-    qDebug() << title << exception.getMessage();
+    exceptionDialog(title, exception.getMessage(), diagnosticId, stackTrace, parent);
+
+    qDebug() << title << exception.getMessage() << "Reference ID:" << diagnosticId;
 
     for (const auto& frame : stackTrace)
         qDebug() << stackFrameToString(frame);

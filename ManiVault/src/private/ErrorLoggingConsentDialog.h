@@ -26,8 +26,8 @@ class ErrorLoggingConsentDialog : public QDialog
 public:
 
     /**
-     * Construct with pointer to \p parent widget
-     * @param parent Pointer to parent widget (maybe nullptr)
+     * @brief Constructs the error-reporting consent dialog.
+     * @param parent Pointer to the parent widget (maybe nullptr).
      */
     explicit ErrorLoggingConsentDialog(QWidget* parent = nullptr);
 

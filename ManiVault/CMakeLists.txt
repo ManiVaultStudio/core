@@ -449,6 +449,28 @@ if(${MV_USE_ERROR_LOGGING})
         
         add_dependencies(${MV_EXE} crashpad_handler)
     endif()
+
+    if(NOT APPLE)
+        set(MV_CRASH_REPORTER MV_CrashReporter)
+
+        add_executable(${MV_CRASH_REPORTER} WIN32
+            src/private/CrashReporterMain.cpp
+            src/private/CrashReportDialog.cpp
+            src/private/CrashReportDialog.h
+            ${RESOURCE_FILES}
+        )
+
+        set_target_properties(${MV_CRASH_REPORTER} PROPERTIES
+            AUTOMOC ON
+            OUTPUT_NAME "ManiVault Crash Reporter"
+        )
+
+        target_include_directories(${MV_CRASH_REPORTER} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+        target_compile_features(${MV_CRASH_REPORTER} PRIVATE cxx_std_${MV_CXX_STANDARD})
+        target_link_libraries(${MV_CRASH_REPORTER} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets ${MV_PUBLIC_LIB} sentry)
+
+        add_dependencies(${MV_EXE} ${MV_CRASH_REPORTER})
+    endif()
 endif()
 
 if(MV_ENABLE_CPPTRACE)
@@ -582,6 +604,12 @@ else()
     install(TARGETS ${MV_EXE}
         RUNTIME DESTINATION . COMPONENT MV_EXECUTABLE
     )
+
+    if(MV_USE_ERROR_LOGGING)
+        install(TARGETS ${MV_CRASH_REPORTER}
+            RUNTIME DESTINATION . COMPONENT MV_EXECUTABLE
+        )
+    endif()
 endif()
 
 # Install public headers

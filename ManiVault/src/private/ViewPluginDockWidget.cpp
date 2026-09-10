@@ -102,6 +102,7 @@ void ViewPluginDockWidget::initialize()
         if (_viewPlugin->getFactory()->getReadmeMarkdownUrl().isValid())
             _settingsMenu.addAction(&const_cast<PluginFactory*>(_viewPlugin->getFactory())->getPluginMetadata().getTriggerReadmeAction());
 
+        _settingsMenu.addAction(&_viewPlugin->getHeadsUpDisplayAction());
         _settingsMenu.addAction(&_viewPlugin->getScreenshotAction());
 
         if (!_viewPlugin->isSystemViewPlugin())
@@ -170,10 +171,8 @@ void ViewPluginDockWidget::restoreViewPluginState()
         return;
 
     //_progressTask.setRunningIndeterminate();
-    {
-        _viewPlugin->fromVariantMap(_viewPluginMap);
-        //_dockManager.centralWidget()->setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
-    }
+    _viewPlugin->fromVariantMap(_viewPluginMap);
+    //_dockManager.centralWidget()->setWidget(&_viewPlugin->getWidget(), eInsertMode::ForceNoScrollArea);
     //_progressTask.setFinished();
 }
 

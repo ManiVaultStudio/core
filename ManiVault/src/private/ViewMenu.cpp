@@ -27,6 +27,7 @@ ViewMenu::ViewMenu(QWidget *parent /*= nullptr*/, const Options& options /*= Opt
 {
     setTitle("View");
     setToolTip("Manage view plugins");
+    setToolTipsVisible(true);
     
     // the menu needs to be updated, e.g. for when new view actions are opened
     connect(this, &QMenu::aboutToShow, this, &ViewMenu::populate);
@@ -40,6 +41,9 @@ ViewMenu::ViewMenu(QWidget *parent /*= nullptr*/, const Options& options /*= Opt
     _loadViewsDockedMenus.insert(gui::DockAreaFlag::Top,    QSharedPointer<QMenu>(new QMenu(gui::dockAreaMap.key(gui::DockAreaFlag::Top), this)));
     _loadViewsDockedMenus.insert(gui::DockAreaFlag::Bottom, QSharedPointer<QMenu>(new QMenu(gui::dockAreaMap.key(gui::DockAreaFlag::Bottom), this)));
     _loadViewsDockedMenus.insert(gui::DockAreaFlag::Center, QSharedPointer<QMenu>(new QMenu(gui::dockAreaMap.key(gui::DockAreaFlag::Center), this)));
+
+    for (auto& loadViewsDockedMenu : _loadViewsDockedMenus)
+        loadViewsDockedMenu->setToolTipsVisible(true);
 
     populate();
 

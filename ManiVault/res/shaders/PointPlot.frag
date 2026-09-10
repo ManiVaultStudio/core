@@ -70,6 +70,7 @@ void main()
 		discard;
 		
 	bool isSelectionHighlighted	= vHighlight == 1;
+	bool isSelectionExcluded	= vHighlight < 0;
 	bool isFocusHighlighted 	= vFocusHighlight == 1;
 	bool isHighlighted			= isSelectionHighlighted || isFocusHighlighted;
     float len 					= length(vTexCoord);	
@@ -125,6 +126,9 @@ void main()
 		color = vec3(vScalar, vScalar2, vScalar3);
 	}
 
+	if (isSelectionExcluded)
+		color = vec3(0.5);
+
 	float opacity = 1.0;
 	
 	switch (selectionDisplayMode) {
@@ -142,7 +146,7 @@ void main()
 				if (selectionHaloEnabled)
 					opacity *= 1.0 - smoothstep(selectionOutlineStart, 1.0, len);
 			} else {
-				opacity *= a * vOpacity;
+				opacity *= a * (isSelectionExcluded ? 1.0 : vOpacity);
 			}		
 			
 			fragColor = vec4(color, opacity);
@@ -154,7 +158,7 @@ void main()
 			if (isHighlighted)
 				fragColor = vec4(selectionOutlineColor, a);
 			else
-				fragColor = vec4(color, a * vOpacity);
+				fragColor = vec4(color, a * (isSelectionExcluded ? 1.0 : vOpacity));
 				
 			break;
 		}

@@ -191,7 +191,6 @@ void AbstractProjectsModel::addProject(ProjectsModelProjectSharedPtr project, co
         {
             updateTags();
 
-            project->setParent(this);
             project->updateMetadata();
 
             if (parentIndex.isValid()) {
@@ -280,7 +279,7 @@ void AbstractProjectsModel::addDsn(const QUrl& dsn)
                     if (watcher->future().isCanceled() || watcher->future().isFinished() == false)
                         throw std::runtime_error("Future is cancelled or did not finish");
 
-                    QMetaObject::invokeMethod(qApp, [this, future, data, dsnIndex, dsn]() {
+                    QMetaObject::invokeMethod(this, [this, future, data, dsnIndex, dsn]() {
                         purge();
                         populateFromJsonByteArray(data, dsnIndex, dsn.toString());
                     });

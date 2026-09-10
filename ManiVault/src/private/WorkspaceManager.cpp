@@ -15,8 +15,11 @@
 
 #include "actions/StringsAction.h"
 
+#include "exception/ManiVaultException.h"
+
 #include "util/Serialization.h"
 #include "util/Icon.h"
+#include "util/Miscellaneous.h"
 
 #include "workflow/WorkflowRuntimeScoped.h"
 
@@ -29,6 +32,7 @@
 #include <QEventLoop>
 
 #include <exception>
+#include <typeinfo>
 
 #ifdef _DEBUG
     //#define WORKSPACE_MANAGER_VERBOSE
@@ -565,7 +569,7 @@ UniqueWorkflowPlan WorkspaceManager::fromVariantMapWorkflow(QVariantMap variantM
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(QString("%1 (%2)").arg(__FUNCTION__).arg(getSerializationName()));
 
-    plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+    plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         getCurrentWorkspace()->fromVariantMap(variantMap);
 
         variantMapMustContain(variantMap, "DockManagers");
@@ -578,11 +582,74 @@ UniqueWorkflowPlan WorkspaceManager::fromVariantMapWorkflow(QVariantMap variantM
         _mainDockManager->fromVariantMap(dockingManagersMap["Main"].toMap());
         _viewPluginsDockManager->fromVariantMap(dockingManagersMap["ViewPlugins"].toMap());
 
+        const auto restoreViewPluginState = [&executionContext](ViewPluginDockWidget* viewPluginDockWidget) {
+            const auto viewPlugin = viewPluginDockWidget->getViewPlugin();
+            const auto guiName    = viewPlugin ? viewPlugin->getGuiName() : QStringLiteral("Unknown");
+            const auto kind       = viewPlugin ? viewPlugin->getKind() : QStringLiteral("Unknown");
+            const auto id         = viewPlugin ? viewPlugin->getId() : QString{};
+
+            const auto addViewPluginDetails = [&guiName, &kind, &id](QVariantMap details) {
+                details["ViewPluginGuiName"] = guiName;
+                details["ViewPluginKind"]    = kind;
+                details["ViewPluginId"]      = id;
+
+                return details;
+            };
+
+            try {
+                viewPluginDockWidget->restoreViewPluginState();
+            }
+            catch (const ManiVaultException& exception) {
+                auto details = addViewPluginDetails(exception.getDetails());
+
+                details["ExceptionType"]    = QStringLiteral("ManiVaultException");
+                details["ExceptionMessage"] = exception.getMessage();
+                details["ExceptionWhat"]    = exception.getWhat();
+                details["ExceptionWhere"]   = exception.getWhere();
+
+                executionContext->warning(
+                    QString("Unable to restore state for view plugin '%1' (%2): %3").arg(guiName, id, exception.getWhat()),
+                    exception.getWhere(),
+                    std::move(details));
+            }
+            catch (const std::exception& exception) {
+                const auto stackTrace = mv::errors().getDebugStackTrace();
+                const auto diagnosticId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+                auto details = addViewPluginDetails({
+                    { "DiagnosticId", diagnosticId },
+                    { "ExceptionType", QString::fromLatin1(typeid(exception).name()) },
+                    { "ExceptionWhat", QString::fromUtf8(exception.what()) },
+                    { "StackTrace", stackTraceToVariantList(stackTrace) },
+                    { "StackTraceSummary", stackTraceFunctionList(stackTrace) }
+                });
+
+                executionContext->warning(
+                    QString("Unable to restore state for view plugin '%1' (%2): %3").arg(guiName, id, exception.what()),
+                    QStringLiteral("ViewPluginDockWidget::restoreViewPluginState"),
+                    std::move(details));
+            }
+            catch (...) {
+                const auto stackTrace = mv::errors().getDebugStackTrace();
+                const auto diagnosticId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+                auto details = addViewPluginDetails({
+                    { "DiagnosticId", diagnosticId },
+                    { "ExceptionType", QStringLiteral("Unknown exception") },
+                    { "StackTrace", stackTraceToVariantList(stackTrace) },
+                    { "StackTraceSummary", stackTraceFunctionList(stackTrace) }
+                });
+
+                executionContext->warning(
+                    QString("Unable to restore state for view plugin '%1' (%2): Unknown error").arg(guiName, id),
+                    QStringLiteral("ViewPluginDockWidget::restoreViewPluginState"),
+                    std::move(details));
+            }
+        };
+
         for (auto viewPluginDockWidget : _mainDockManager->getViewPluginDockWidgets(true))
-            viewPluginDockWidget->restoreViewPluginState();
+            restoreViewPluginState(viewPluginDockWidget);
 
         for (auto viewPluginDockWidget : _viewPluginsDockManager->getViewPluginDockWidgets(true))
-            viewPluginDockWidget->restoreViewPluginState();
+            restoreViewPluginState(viewPluginDockWidget);
     }, WorkflowPlan::JobThreadAffinity::GuiThread);
 
     return plan;

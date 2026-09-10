@@ -248,8 +248,18 @@ void HelpManager::addNotificationLinkHandler(const QString& route, const Notific
 void HelpManager::handleNotificationLink(const QUrl& url)
 {
     qDebug() << "Handling notification link with URL:" << url;
-    if (url.scheme() != "app")
+
+    if (url.scheme() == "http" || url.scheme() == "https") {
+        if (!QDesktopServices::openUrl(url))
+            qWarning() << "Unable to open external notification link:" << url;
+
         return;
+    }
+
+    if (url.scheme() != "app") {
+        qWarning() << "Ignoring notification link with unsupported URL scheme:" << url;
+        return;
+    }
 
     const QString route = url.host() + url.path();
     // app://open/reporting -> "open/reporting"

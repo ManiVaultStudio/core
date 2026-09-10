@@ -57,6 +57,7 @@ PluginTriggerAction::PluginTriggerAction(const PluginTriggerAction& pluginTrigge
     PluginTriggerAction::setText(title);
     setToolTip(pluginTriggerAction.toolTip());
     setIcon(pluginTriggerAction.icon());
+    setEnabled(pluginTriggerAction.isEnabled());
 
     connect(this, &TriggerAction::triggered, this, &PluginTriggerAction::requestPlugin);
 }

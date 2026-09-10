@@ -28,12 +28,12 @@ namespace
 {
 
 /**
- * Encode a single raw data block and store the encoded payload on disk.
+ * Encode a single raw data block and store the encoded payload at the requested location.
  *
  * The function encodes the byte range described by `job._offset` and
  * `job._size` from the source buffer `job._data`. The encoded payload is
- * written to a uniquely named file inside `saveDir`, using the file extension
- * provided by the block codec.
+ * stored either in a uniquely named file inside `saveDir` or as base64 data in
+ * the returned block map.
  *
  * The returned result contains a block variant map with the metadata required
  * to decode the block later, including offset, decoded size, compressed size,
@@ -41,11 +41,12 @@ namespace
  *
  * @param job Encode job describing the source buffer, byte range, and codec.
  * @param saveDir Directory where the encoded block file should be written.
+ * @param storageLocation Location used to store the encoded block payload.
  * @return Encode result containing the serialized block descriptor.
  *
  * @throws ManiVaultException If the block cannot be encoded.
  */
-EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& saveDir)
+EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& saveDir, BlobStorageLocation storageLocation)
 {
     EncodeBlockResult result;
 
@@ -61,15 +62,29 @@ EncodeBlockResult encodeBlock(const EncodeBlockJob& job, const QString& saveDir)
         blockVariantMap["Offset"]   = QVariant::fromValue(job._offset);
         blockVariantMap["Size"]     = QVariant::fromValue(job._size);
 
-        const auto fileName = QUuid::createUuid().toString(QUuid::WithoutBraces) + job._codec->getFileExtension();
-        const auto filePath = QDir::cleanPath(saveDir + QDir::separator() + fileName);
+        switch (storageLocation) {
+            case BlobStorageLocation::FileInProject: {
+                const auto fileName = QUuid::createUuid().toString(QUuid::WithoutBraces) + job._codec->getFileExtension();
+                const auto filePath = QDir::cleanPath(saveDir + QDir::separator() + fileName);
 
-        std::uint64_t numberOfEncodedBytes = 0;
+                std::uint64_t numberOfEncodedBytes = 0;
 
-        job._codec->encodeToFile(job._data + job._offset, static_cast<qsizetype>(job._size), filePath, &numberOfEncodedBytes);
+                job._codec->encodeToFile(job._data + job._offset, static_cast<qsizetype>(job._size), filePath, &numberOfEncodedBytes);
 
-        blockVariantMap["CompressedSize"]   = QVariant::fromValue<std::uint64_t>(numberOfEncodedBytes);
-        blockVariantMap["URI"]              = fileName;
+                blockVariantMap["CompressedSize"] = QVariant::fromValue(numberOfEncodedBytes);
+                blockVariantMap["URI"]            = fileName;
+                break;
+            }
+            case BlobStorageLocation::InlineInProjectJson: {
+                const auto encodedData = job._codec->encode(job._data + job._offset, static_cast<qsizetype>(job._size));
+
+                blockVariantMap["CompressedSize"] = QVariant::fromValue(static_cast<std::uint64_t>(encodedData.size()));
+                blockVariantMap["Data"]           = QString::fromLatin1(encodedData.toBase64());
+                break;
+            }
+            default:
+                throw std::invalid_argument("Unsupported blob storage location");
+        }
 
         result._block = std::move(blockVariantMap);
     }
@@ -606,7 +621,7 @@ std::uint64_t getRawBlockObjectSize(const QVariantMap& map)
 
 }
 
-QVariantMap bytesToBlobVariantMap(const char* bytes, std::uint64_t numberOfBytes)
+QVariantMap bytesToBlobVariantMap(const char* bytes, std::uint64_t numberOfBytes, BlobStorageLocation storageLocation)
 {
     try {
         if (!mv::projects().hasProject())
@@ -623,7 +638,7 @@ QVariantMap bytesToBlobVariantMap(const char* bytes, std::uint64_t numberOfBytes
         const auto saveDir = QDir::cleanPath(projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Save));
 
         for (auto& job : jobs)
-            job._result = encodeBlock(job, saveDir);
+            job._result = encodeBlock(job, saveDir, storageLocation);
 
         return makeBlobVariantMap(numberOfBytes, blockSizeInBytes, createCodec()->getName(), jobs);
     }
@@ -637,7 +652,7 @@ QVariantMap bytesToBlobVariantMap(const char* bytes, std::uint64_t numberOfBytes
     }
 }
 
-UniqueWorkflowPlan bytesToBlobVariantMapWorkflow(const char* bytes, std::uint64_t numberOfBytes)
+UniqueWorkflowPlan bytesToBlobVariantMapWorkflow(const char* bytes, std::uint64_t numberOfBytes, BlobStorageLocation storageLocation)
 {
     try {
         if (!bytes && numberOfBytes > 0)
@@ -664,10 +679,10 @@ UniqueWorkflowPlan bytesToBlobVariantMapWorkflow(const char* bytes, std::uint64_
         encodeJobs.reserve(encodeBlockJobs->size());
 
         for (qsizetype i = 0; i < encodeBlockJobs->size(); ++i) {
-            encodeJobs.emplace_back(QString("Encode block %1").arg(i), [encodeBlockJobs, i, saveDir](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+            encodeJobs.emplace_back(QString("Encode block %1").arg(i), [encodeBlockJobs, i, saveDir, storageLocation](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
                 auto& encodeBlockJob = (*encodeBlockJobs)[i];
 
-                encodeBlockJob._result = encodeBlock(encodeBlockJob, saveDir);
+                encodeBlockJob._result = encodeBlock(encodeBlockJob, saveDir, storageLocation);
             }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
         }
 

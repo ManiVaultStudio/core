@@ -170,11 +170,19 @@ void ViewPluginHeadsUpDisplayAction::removeAllHeadsUpDisplayItems()
 void ViewPluginHeadsUpDisplayAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
+
+    // Before the HUD became toggleable, WidgetAction serialized IsChecked as
+    // false. Treat projects without an explicit HUD visibility value as visible.
+    setChecked(variantMap.value("Visible", true).toBool());
 }
 
 QVariantMap ViewPluginHeadsUpDisplayAction::toVariantMap() const
 {
-    return WidgetAction::toVariantMap();
+    auto variantMap = WidgetAction::toVariantMap();
+
+    variantMap.insert("Visible", isChecked());
+
+    return variantMap;
 }
 
 }

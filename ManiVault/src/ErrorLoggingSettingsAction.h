@@ -32,11 +32,41 @@ public:
 
 public: // Action getters
 
-    const gui::TriggerAction& getLoggingAskConsentDialogAction() const;     /** Get action for asking the user for consent to log errors */
-    const gui::ToggleAction& getUserHasOptedAction() const;                 /** Get action for user has opted */  
-    const gui::ToggleAction& getEnabledAction() const;                      /** Get action for logging enabled */
-    const gui::StringAction& getDsnAction() const;                          /** Get action for logging data source name (DSN) */
-    const gui::ToggleAction& getShowCrashReportDialogAction() const;        /** Get action for showing a crash report dialog when the application fails */
+    /**
+     * @brief Gets the action that opens the error-reporting consent dialog.
+     * @return Consent-dialog trigger action.
+     */
+    const gui::TriggerAction& getLoggingAskConsentDialogAction() const;
+
+    /**
+     * @brief Gets the action that stores whether the user opted into reporting.
+     * @return User consent toggle action.
+     */
+    const gui::ToggleAction& getUserHasOptedAction() const;
+
+    /**
+     * @brief Gets the action that enables or disables error reporting.
+     * @return Error-reporting enabled toggle action.
+     */
+    const gui::ToggleAction& getEnabledAction() const;
+
+    /**
+     * @brief Gets the configured Sentry Data Source Name action.
+     * @return Sentry DSN string action.
+     */
+    const gui::StringAction& getDsnAction() const;
+
+    /**
+     * @brief Gets the action controlling handled-exception reporting.
+     * @return Handled-exception reporting toggle action.
+     */
+    const gui::ToggleAction& getReportHandledExceptionsAction() const;
+
+    /**
+     * @brief Gets the action controlling whether crash feedback is requested.
+     * @return Crash-feedback dialog toggle action.
+     */
+    const gui::ToggleAction& getShowCrashReportDialogAction() const;
 };
 
 }

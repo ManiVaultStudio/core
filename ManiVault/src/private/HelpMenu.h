@@ -37,6 +37,11 @@ public:
 
 private slots:
 
+    /**
+     * @brief Opens the standalone problem-report and feature-request dialog.
+     */
+    void sendFeedback();
+
     /** Display ManiVault About Messagebox
      * Invoked when trigger _aboutAction is clicked in the help menu
      */
@@ -56,6 +61,7 @@ private:
 
 private:
     mv::gui::TriggerAction  _devDocAction;              /** Menu entry for ManiVault About Messagebox */
+    mv::gui::TriggerAction  _sendFeedbackAction;        /** Opens the problem and feature-request feedback dialog */
     mv::gui::TriggerAction  _aboutAction;               /** Menu entry for ManiVault About Messagebox */
     mv::gui::TriggerAction  _aboutQtAction;             /** Menu entry for Qt About Messagebox */
     mv::gui::TriggerAction  _aboutThirdPartiesAction;   /** Menu entry for Third Party About Messagebox */

@@ -242,6 +242,9 @@ protected:
     /** Update the dimension selection summary */
     void updateSummary();
 
+    /** Schedule a deferred dimension selection summary update */
+    void scheduleSummaryUpdate();
+
 protected: // Linking
 
     /**
@@ -287,7 +290,7 @@ protected:
     mv::gui::DimensionsPickerFilterAction                   _filterAction;                      /** Filter action */
     mv::gui::DimensionsPickerSelectAction                   _selectAction;                      /** Select action */
     mv::gui::DimensionsPickerMiscellaneousAction            _miscellaneousAction;               /** Miscellaneous settings action */
-    QMetaObject::Connection                                 _summaryUpdateAwakeConnection;      /** Update summary view when idle */
+    bool                                                     _summaryUpdatePending{ false };      /** Whether a deferred summary update is pending */
 
     friend class Widget;
     friend class mv::AbstractActionsManager;
