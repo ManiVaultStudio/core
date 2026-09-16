@@ -140,6 +140,8 @@ void HelpMenu::aboutThirdParties() const
       "&bull; nlohmann json (MIT license): <a href=\"https://%{json}/\">%{json}</a> <br>"
       "&bull; valijson (BSD-2-Clause license): <a href=\"https://%{valijson}/\">%{valijson}</a> <br>"
       "&bull; biovault_bfloat16 (Apache-2.0): <a href=\"https://%{bfloat16}/\">%{bfloat16}</a> <br>"
+      "&bull; Zstandard (BSD License): <a href=\"https://%{zstd}/\">%{zstd}</a> <br>"
+      "&bull; Taskflow (MIT license): <a href=\"https://%{taskflow}/\">%{taskflow}</a> <br>"
 #ifdef MV_USE_ERROR_LOGGING
       "&bull; sentry (MIT license): <a href=\"https://%{sentry}/\">%{sentry}</a> <br>"
 #endif
@@ -151,6 +153,8 @@ void HelpMenu::aboutThirdParties() const
     message.replace("%{json}", "json.nlohmann.me");
     message.replace("%{valijson}", "github.com/tristanpenman/valijson");
     message.replace("%{bfloat16}", "github.com/biovault/biovault_bfloat16");
+    message.replace("%{zstd}", "github.com/facebook/zstd");
+    message.replace("%{taskflow}", "github.com/taskflow/taskflow");
   #ifdef MV_USE_ERROR_LOGGING
     message.replace("%{sentry}", "sentry.io");
   #endif
