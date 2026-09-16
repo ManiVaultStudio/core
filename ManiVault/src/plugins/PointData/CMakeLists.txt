@@ -92,11 +92,21 @@ source_group(Actions FILES ${ACTIONS_SOURCES})
 source_group(BFloat FILES ${BFLOAT_HEADER})
 source_group(Aux FILES ${POINT_DATA_AUX})
 
-add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINT_DATA_AUX})
+if(EMSCRIPTEN)
+    add_library(${POINTDATA} STATIC ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINT_DATA_AUX})
+    target_compile_definitions(${POINTDATA} PRIVATE QT_STATICPLUGIN)
+else()
+    add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINT_DATA_AUX})
+endif()
 
 add_library(ManiVault::${POINTDATA} ALIAS ${POINTDATA})
 
 target_include_directories(${POINTDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
+if(EMSCRIPTEN)
+    # Use the in-tree core interfaces while the Wasm build is assembled; the
+    # install tree is populated only after the executable is linked.
+    target_include_directories(${POINTDATA} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../../src")
+endif()
 target_include_directories(${POINTDATA} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/)
 
 target_compile_features(${POINTDATA} PUBLIC cxx_std_${MV_CXX_STANDARD})
@@ -111,13 +121,15 @@ file(GLOB EXPORT_HEADER_FILE_NAME
 list(APPEND POINTS_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAME})
 
 target_link_libraries(${POINTDATA} PRIVATE Qt6::Widgets)
-target_link_libraries(${POINTDATA} PRIVATE Qt6::WebEngineWidgets)
+if(NOT EMSCRIPTEN)
+    target_link_libraries(${POINTDATA} PRIVATE Qt6::WebEngineWidgets)
+endif()
 target_link_libraries(${POINTDATA} PRIVATE ${MV_PUBLIC_LIB})
 
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${POINTDATA} ${MV_USE_AVX})
 
-if(UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE AND NOT EMSCRIPTEN)
    find_package(TBB REQUIRED)
    target_link_libraries(${POINTDATA} PRIVATE TBB::tbb)
 endif()

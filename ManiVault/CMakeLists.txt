@@ -119,6 +119,7 @@ if(EMSCRIPTEN)
 endif()
 
 # File compression: QuaZip
+if(NOT EMSCRIPTEN)
 CPMAddPackage(
   NAME              quazip
   GITHUB_REPOSITORY stachenov/quazip
@@ -139,6 +140,7 @@ set_target_properties(QuaZip PROPERTIES
 )
 
 # Serialization: JSON
+endif()
 CPMAddPackage(
   NAME              nlohmann_json
   GITHUB_REPOSITORY	nlohmann/json
@@ -562,7 +564,9 @@ target_link_libraries(${MV_EXE} PRIVATE Qt6::Concurrent)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGL)
 target_link_libraries(${MV_EXE} PRIVATE Qt6::OpenGLWidgets)
 target_link_libraries(${MV_EXE} PRIVATE qtadvanceddocking-qt6)
-target_link_libraries(${MV_EXE} PRIVATE QuaZip)
+if(NOT EMSCRIPTEN)
+    target_link_libraries(${MV_EXE} PRIVATE QuaZip)
+endif()
 target_link_libraries(${MV_EXE} PRIVATE Taskflow)
 target_link_libraries(${MV_EXE} PRIVATE libzstd_static)
 
@@ -632,6 +636,8 @@ endif()
 # Plugin projects
 # -----------------------------------------------------------------------------
 
+set(MV_SCATTERPLOT_SOURCE_DIR "" CACHE PATH "Optional Scatterplot plugin source directory for the Wasm prototype")
+
 # System plugins
 if(EMSCRIPTEN)
     add_subdirectory(src/plugins/DataHierarchyPlugin)
@@ -668,12 +674,21 @@ foreach(system_plugin_target IN LISTS MV_SYSTEM_PLUGINS)
 endforeach()
 
 # Data plugins are the next WebAssembly milestone. Keep the initial link small.
-if(NOT EMSCRIPTEN)
+if(EMSCRIPTEN)
+    add_subdirectory(src/plugins/PointData)
+    target_link_libraries(${MV_EXE} PRIVATE PointData)
+elseif(NOT EMSCRIPTEN)
     add_subdirectory(src/plugins/PointData)
     add_subdirectory(src/plugins/ColorData)
     add_subdirectory(src/plugins/TextData)
     add_subdirectory(src/plugins/ClusterData)
     add_subdirectory(src/plugins/ImageData)
+endif()
+
+if(EMSCRIPTEN AND MV_SCATTERPLOT_SOURCE_DIR)
+    add_subdirectory("${MV_SCATTERPLOT_SOURCE_DIR}" "${CMAKE_BINARY_DIR}/ScatterplotPlugin")
+    target_link_libraries(${MV_EXE} PRIVATE ScatterplotPlugin)
+    target_compile_definitions(${MV_EXE} PRIVATE MV_WASM_SCATTERPLOT_PLUGIN=1)
 endif()
 
 set(MV_DATA_PLUGINS

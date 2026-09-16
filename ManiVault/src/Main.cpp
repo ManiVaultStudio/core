@@ -37,6 +37,10 @@
 #ifdef __EMSCRIPTEN__
 #include <QtPlugin>
 Q_IMPORT_PLUGIN(DataHierarchyPluginFactory)
+Q_IMPORT_PLUGIN(PointDataFactory)
+#ifdef MV_WASM_SCATTERPLOT_PLUGIN
+Q_IMPORT_PLUGIN(ScatterplotPluginFactory)
+#endif
 #endif
 
 using namespace mv;
@@ -156,6 +160,9 @@ int main(int argc, char *argv[])
     // Create a project/workspace and show the statically linked proof plugin.
     mv::projects().newBlankProject();
     mv::plugins().requestViewPlugin(QStringLiteral("Data hierarchy"));
+#ifdef MV_WASM_SCATTERPLOT_PLUGIN
+    mv::plugins().requestViewPlugin(QStringLiteral("Scatterplot View"));
+#endif
 #endif
 
     loadGuiTask.setSubtaskFinished("Create main window");
