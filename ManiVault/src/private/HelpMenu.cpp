@@ -132,29 +132,33 @@ void HelpMenu::about() const
 
 void HelpMenu::aboutThirdParties() const
 {
-    const QString message = QMessageBox::tr(
-        "<p>ManiVault uses several third party libraries: </p>"
-        "&bull; Qt-Advanced-Docking-System (LGPL v2.1): <a href=\"https://%1/\">%1</a> <br>"
-        "&bull; Quazip (LGPL v2.1): <a href=\"https://%2/\">%2</a> <br>"
-        "&bull; zlib (zlib license): <a href=\"https://%3/\">%3</a> <br>"
-        "&bull; nlohmann json (MIT license): <a href=\"https://%4/\">%4</a> <br>"
-        "&bull; valijson (BSD-2-Clause license): <a href=\"https://%5/\">%5</a> <br>"
-        "&bull; biovault_bfloat16 (Apache-2.0): <a href=\"https://%6/\">%6</a> <br>"
-        "&bull; Qt ((L)GPL): <a href=\"https://%7/\">%7</a> "
+    QString message = QMessageBox::tr(
+      "<p>ManiVault uses several third party libraries: </p>"
+      "&bull; Qt-Advanced-Docking-System (LGPL v2.1): <a href=\"https://%{qads}/\">%{qads}</a> <br>"
+      "&bull; Quazip (LGPL v2.1): <a href=\"https://%{quazip}/\">%{quazip}</a> <br>"
+      "&bull; zlib (zlib license): <a href=\"https://%{zlib}/\">%{zlib}</a> <br>"
+      "&bull; nlohmann json (MIT license): <a href=\"https://%{json}/\">%{json}</a> <br>"
+      "&bull; valijson (BSD-2-Clause license): <a href=\"https://%{valijson}/\">%{valijson}</a> <br>"
+      "&bull; biovault_bfloat16 (Apache-2.0): <a href=\"https://%{bfloat16}/\">%{bfloat16}</a> <br>"
+      "&bull; Zstandard (BSD License): <a href=\"https://%{zstd}/\">%{zstd}</a> <br>"
+      "&bull; Taskflow (MIT license): <a href=\"https://%{taskflow}/\">%{taskflow}</a> <br>"
 #ifdef MV_USE_ERROR_LOGGING
-        "<br> &bull; sentry (MIT license): <a href=\"https://%8/\">%8</a>"
+      "&bull; sentry (MIT license): <a href=\"https://%{sentry}/\">%{sentry}</a> <br>"
 #endif
-    ).arg(QStringLiteral("github.com/githubuser0xFFFF/Qt-Advanced-Docking-System"),
-          QStringLiteral("github.com/stachenov/quazip"),
-          QStringLiteral("zlib.net"),
-          QStringLiteral("json.nlohmann.me"),
-          QStringLiteral("github.com/tristanpenman/valijson"),
-          QStringLiteral("github.com/biovault/biovault_bfloat16"),
-          QStringLiteral("qt.io")
-#ifdef MV_USE_ERROR_LOGGING
-         ,QStringLiteral("sentry.io")
-#endif
-    );
+      "&bull; Qt ((L)GPL): <a href=\"https://%{qt}/\">%{qt}</a> ");
+
+    message.replace("%{qads}", "github.com/githubuser0xFFFF/Qt-Advanced-Docking-System");
+    message.replace("%{quazip}", "github.com/stachenov/quazip");
+    message.replace("%{zlib}", "zlib.net");
+    message.replace("%{json}", "json.nlohmann.me");
+    message.replace("%{valijson}", "github.com/tristanpenman/valijson");
+    message.replace("%{bfloat16}", "github.com/biovault/biovault_bfloat16");
+    message.replace("%{zstd}", "github.com/facebook/zstd");
+    message.replace("%{taskflow}", "github.com/taskflow/taskflow");
+  #ifdef MV_USE_ERROR_LOGGING
+    message.replace("%{sentry}", "sentry.io");
+  #endif
+    message.replace("%{qt}", "qt.io");
 
     auto msgBox = new QMessageBox(this->parentWidget());
 
