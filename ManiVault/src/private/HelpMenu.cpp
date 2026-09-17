@@ -185,7 +185,7 @@ void HelpMenu::aboutThirdParties() const
     const auto headingColor = dialog.palette().color(QPalette::WindowText).name();
     const auto headerColor = dialog.palette().color(QPalette::Mid).name();
 
-    const auto updateText = [filterModel, textBrowser, headingColor, headerColor]() {
+    const auto updateText = [filterModel, textBrowser, scopeComboBox, headingColor, headerColor]() {
         QString coreText;
         QString pluginText;
 
@@ -194,7 +194,7 @@ void HelpMenu::aboutThirdParties() const
             const auto license = usage.license.license.toHtmlEscaped();
             const auto url = usage.license.url.toHtmlEscaped();
             const auto dependency = url.isEmpty() ? name : QString("<a href=\"%1\">%2</a>").arg(url, name);
-            const auto usedBy = usage.isCore && usage.availablePlugins.isEmpty() ? QString("ManiVault Core") : usage.availablePlugins.join(", ").toHtmlEscaped();
+            const auto usedBy = usage.isCore ? QString() : usage.availablePlugins.join(", ").toHtmlEscaped();
 
             return QString("<tr><td style=\"padding: 2px 0; vertical-align: top\" width=\"38%\"><b>%1</b></td><td style=\"padding: 2px 0; vertical-align: top\" width=\"24%\">%2</td><td style=\"padding: 2px 0; vertical-align: top\">%3</td></tr>").arg(dependency, license, usedBy);
         };
@@ -210,14 +210,14 @@ void HelpMenu::aboutThirdParties() const
         }
 
         const auto formatSection = [headingColor, headerColor](const QString& title, const QString& rows, bool firstSection, bool includeColumnHeaders) {
-            const auto titlePadding = firstSection ? "2px" : "16px";
+            const auto titlePadding = firstSection ? "10px" : "16px";
             const auto columnHeaders = includeColumnHeaders ? QString(
                 "<tr style=\"color: %1\"><th align=\"left\" style=\"padding-bottom: 4px\" width=\"38%\">Dependency</th>"
                 "<th align=\"left\" style=\"padding-bottom: 4px\" width=\"24%\">License</th>"
                 "<th align=\"left\" style=\"padding-bottom: 4px\">Used by</th></tr>").arg(headerColor) : QString();
 
             return QString(
-                "<tr><td colspan=\"3\" style=\"color: %1; font-size: 1.1em; font-weight: bold; padding-top: %2; padding-bottom: 8px\">%3</td></tr>"
+                "<tr><td colspan=\"3\" style=\"color: %1; font-size: 1.2em; font-weight: bold; padding-top: %2; padding-bottom: 8px\">%3</td></tr>"
                 "%4%5")
                 .arg(headingColor, titlePadding, title, columnHeaders, rows);
         };
@@ -228,8 +228,11 @@ void HelpMenu::aboutThirdParties() const
 
             if (!coreText.isEmpty())
                 text += formatSection("Core", coreText, true, true);
-            if (!pluginText.isEmpty())
-                text += formatSection("Plugins", pluginText, coreText.isEmpty(), coreText.isEmpty());
+            if (!pluginText.isEmpty()) {
+                const auto pluginState = static_cast<ThirdPartyLicensesFilterModel::PluginState>(scopeComboBox->currentData().toInt());
+                const auto pluginTitle = pluginState == ThirdPartyLicensesFilterModel::PluginState::LoadedOnly ? "Plugins (loaded only)" : "Plugins (all available)";
+                text += formatSection(pluginTitle, pluginText, coreText.isEmpty(), true);
+            }
 
             text += "</table>";
         }
