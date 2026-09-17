@@ -21,7 +21,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QRegularExpression>
-#include <QTableView>
+#include <QTextBrowser>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QStringLiteral>
@@ -147,6 +147,7 @@ void HelpMenu::aboutThirdParties() const
 {
     QDialog dialog(this->parentWidget());
     dialog.setWindowTitle(tr("Third-party licenses"));
+    dialog.setWindowIcon(StyledIcon("certificate"));
     dialog.resize(900, 500);
 
     auto layout = new QVBoxLayout(&dialog);
@@ -175,30 +176,90 @@ void HelpMenu::aboutThirdParties() const
     auto filterModel = new ThirdPartyLicensesFilterModel(&dialog);
     filterModel->setSourceModel(const_cast<ThirdPartyLicensesListModel*>(&mv::help().getThirdPartyLicensesModel()));
 
-    auto tableView = new QTableView(&dialog);
-    tableView->setModel(filterModel);
-    tableView->setSortingEnabled(true);
-    tableView->sortByColumn(static_cast<int>(AbstractThirdPartyLicensesModel::Column::Name), Qt::AscendingOrder);
-    tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    tableView->setSelectionMode(QAbstractItemView::SingleSelection);
-    tableView->setAlternatingRowColors(true);
-    tableView->horizontalHeader()->setStretchLastSection(true);
-    tableView->horizontalHeader()->setSectionResizeMode(static_cast<int>(AbstractThirdPartyLicensesModel::Column::Name), QHeaderView::ResizeToContents);
-    tableView->horizontalHeader()->setSectionResizeMode(static_cast<int>(AbstractThirdPartyLicensesModel::Column::License), QHeaderView::ResizeToContents);
-    tableView->horizontalHeader()->setSectionResizeMode(static_cast<int>(AbstractThirdPartyLicensesModel::Column::Core), QHeaderView::ResizeToContents);
-    layout->addWidget(tableView, 1);
+    auto textBrowser = new QTextBrowser(&dialog);
+    textBrowser->setOpenExternalLinks(true);
+    textBrowser->setOpenLinks(true);
+    textBrowser->setStyleSheet("QTextBrowser { background-color: transparent; }");
+    layout->addWidget(textBrowser, 1);
+
+    const auto headingColor = dialog.palette().color(QPalette::WindowText).name();
+    const auto headerColor = dialog.palette().color(QPalette::Mid).name();
+
+    const auto updateText = [filterModel, textBrowser, headingColor, headerColor]() {
+        QString coreText;
+        QString pluginText;
+
+        const auto formatLicense = [](const ThirdPartyLicenseUsage& usage) {
+            const auto name = usage.license.name.toHtmlEscaped();
+            const auto license = usage.license.license.toHtmlEscaped();
+            const auto url = usage.license.url.toHtmlEscaped();
+            const auto dependency = url.isEmpty() ? name : QString("<a href=\"%1\">%2</a>").arg(url, name);
+            const auto usedBy = usage.isCore && usage.availablePlugins.isEmpty() ? QString("ManiVault Core") : usage.availablePlugins.join(", ").toHtmlEscaped();
+
+            return QString("<tr><td style=\"padding: 2px 0; vertical-align: top\" width=\"38%\"><b>%1</b></td><td style=\"padding: 2px 0; vertical-align: top\" width=\"24%\">%2</td><td style=\"padding: 2px 0; vertical-align: top\">%3</td></tr>").arg(dependency, license, usedBy);
+        };
+
+        for (int row = 0; row < filterModel->rowCount(); ++row) {
+            const auto usage = filterModel->data(filterModel->index(row, 0), Qt::UserRole + 1).value<ThirdPartyLicenseUsage>();
+
+            if (usage.isCore)
+                coreText += formatLicense(usage);
+
+            if (!usage.availablePlugins.isEmpty())
+                pluginText += formatLicense(usage);
+        }
+
+        const auto formatSection = [headingColor, headerColor](const QString& title, const QString& rows, bool firstSection, bool includeColumnHeaders) {
+            const auto titlePadding = firstSection ? "2px" : "16px";
+            const auto columnHeaders = includeColumnHeaders ? QString(
+                "<tr style=\"color: %1\"><th align=\"left\" style=\"padding-bottom: 4px\" width=\"38%\">Dependency</th>"
+                "<th align=\"left\" style=\"padding-bottom: 4px\" width=\"24%\">License</th>"
+                "<th align=\"left\" style=\"padding-bottom: 4px\">Used by</th></tr>").arg(headerColor) : QString();
+
+            return QString(
+                "<tr><td colspan=\"3\" style=\"color: %1; font-size: 1.1em; font-weight: bold; padding-top: %2; padding-bottom: 8px\">%3</td></tr>"
+                "%4%5")
+                .arg(headingColor, titlePadding, title, columnHeaders, rows);
+        };
+
+        QString text;
+        if (!coreText.isEmpty() || !pluginText.isEmpty()) {
+            text = "<table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">";
+
+            if (!coreText.isEmpty())
+                text += formatSection("Core", coreText, true, true);
+            if (!pluginText.isEmpty())
+                text += formatSection("Plugins", pluginText, coreText.isEmpty(), coreText.isEmpty());
+
+            text += "</table>";
+        }
+        if (text.isEmpty())
+            text = "<p>No third-party licenses match the current filters.</p>";
+
+        textBrowser->setHtml(text);
+    };
+
+    updateText();
 
     auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Close, &dialog);
     layout->addWidget(dialogButtonBox);
 
-    connect(filterEdit, &QLineEdit::textChanged, &dialog, [filterModel](const QString& text) {
+    connect(filterEdit, &QLineEdit::textChanged, &dialog, [filterModel, updateText](const QString& text) {
         filterModel->setFilterRegularExpression(QRegularExpression(QRegularExpression::escape(text), QRegularExpression::CaseInsensitiveOption));
+        updateText();
     });
-    connect(scopeComboBox, qOverload<int>(&QComboBox::currentIndexChanged), &dialog, [filterModel, scopeComboBox](int) {
+    connect(scopeComboBox, qOverload<int>(&QComboBox::currentIndexChanged), &dialog, [filterModel, scopeComboBox, updateText](int) {
         filterModel->setPluginState(static_cast<ThirdPartyLicensesFilterModel::PluginState>(scopeComboBox->currentData().toInt()));
+        updateText();
     });
-    connect(showCoreCheckBox, &QCheckBox::toggled, filterModel, &ThirdPartyLicensesFilterModel::setShowCoreLicenses);
-    connect(showPluginsCheckBox, &QCheckBox::toggled, filterModel, &ThirdPartyLicensesFilterModel::setShowPluginLicenses);
+    connect(showCoreCheckBox, &QCheckBox::toggled, &dialog, [filterModel, updateText](bool show) {
+        filterModel->setShowCoreLicenses(show);
+        updateText();
+    });
+    connect(showPluginsCheckBox, &QCheckBox::toggled, &dialog, [filterModel, updateText](bool show) {
+        filterModel->setShowPluginLicenses(show);
+        updateText();
+    });
     connect(dialogButtonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
 
     dialog.exec();
