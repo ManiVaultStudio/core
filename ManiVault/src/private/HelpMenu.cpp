@@ -46,6 +46,7 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     setToolTip("ManiVault help");
 
     _aboutThirdPartiesAction.setMenuRole(QAction::NoRole);
+    _aboutThirdPartiesAction.setIconByName("file-contract");
     _aboutQtAction.setMenuRole(QAction::NoRole);
 
     _releaseNotesAction.setIconByName("scroll");
@@ -146,23 +147,26 @@ void HelpMenu::about() const
 void HelpMenu::aboutThirdParties() const
 {
     QDialog dialog(this->parentWidget());
+
     dialog.setWindowTitle(tr("Third-party licenses"));
-    dialog.setWindowIcon(StyledIcon("certificate"));
-    dialog.resize(900, 500);
+    dialog.setWindowIcon(StyledIcon("file-contract"));
+    dialog.resize(750, 500);
 
-    auto layout = new QVBoxLayout(&dialog);
-    auto filterLayout = new QHBoxLayout();
+    auto layout         = new QVBoxLayout(&dialog);
+    auto filterLayout   = new QHBoxLayout();
+    auto filterLabel    = new QLabel(tr("Filter:"), &dialog);
+    auto filterEdit     = new QLineEdit(&dialog);
 
-    auto filterLabel = new QLabel(tr("Filter:"), &dialog);
-    auto filterEdit = new QLineEdit(&dialog);
     filterEdit->setPlaceholderText(tr("Search dependencies and licenses"));
 
     auto scopeComboBox = new QComboBox(&dialog);
+
     scopeComboBox->addItem(tr("All available plugins"), static_cast<int>(ThirdPartyLicensesFilterModel::PluginState::AllAvailable));
     scopeComboBox->addItem(tr("Loaded plugins only"), static_cast<int>(ThirdPartyLicensesFilterModel::PluginState::LoadedOnly));
 
-    auto showCoreCheckBox = new QCheckBox(tr("Core"), &dialog);
-    auto showPluginsCheckBox = new QCheckBox(tr("Plugins"), &dialog);
+    auto showCoreCheckBox       = new QCheckBox(tr("Core"), &dialog);
+    auto showPluginsCheckBox    = new QCheckBox(tr("Plugins"), &dialog);
+
     showCoreCheckBox->setChecked(true);
     showPluginsCheckBox->setChecked(true);
 
@@ -171,32 +175,35 @@ void HelpMenu::aboutThirdParties() const
     filterLayout->addWidget(scopeComboBox);
     filterLayout->addWidget(showCoreCheckBox);
     filterLayout->addWidget(showPluginsCheckBox);
+
     layout->addLayout(filterLayout);
 
     auto filterModel = new ThirdPartyLicensesFilterModel(&dialog);
+
     filterModel->setSourceModel(const_cast<ThirdPartyLicensesListModel*>(&mv::help().getThirdPartyLicensesModel()));
 
     auto textBrowser = new QTextBrowser(&dialog);
+
     textBrowser->setOpenExternalLinks(true);
     textBrowser->setOpenLinks(true);
     textBrowser->setStyleSheet("QTextBrowser { background-color: transparent; }");
     layout->addWidget(textBrowser, 1);
 
     const auto headingColor = dialog.palette().color(QPalette::WindowText).name();
-    const auto headerColor = dialog.palette().color(QPalette::Mid).name();
+    const auto headerColor  = dialog.palette().color(QPalette::Mid).name();
 
     const auto updateText = [filterModel, textBrowser, scopeComboBox, headingColor, headerColor]() {
         QString coreText;
         QString pluginText;
 
         const auto formatLicense = [](const ThirdPartyLicenseUsage& usage) {
-            const auto name = usage.license.name.toHtmlEscaped();
-            const auto license = usage.license.license.toHtmlEscaped();
-            const auto url = usage.license.url.toHtmlEscaped();
-            const auto dependency = url.isEmpty() ? name : QString("<a href=\"%1\">%2</a>").arg(url, name);
-            const auto usedBy = usage.isCore ? QString() : usage.availablePlugins.join(", ").toHtmlEscaped();
+            const auto name         = usage.license.name.toHtmlEscaped();
+            const auto license      = usage.license.license.toHtmlEscaped();
+            const auto url          = usage.license.url.toHtmlEscaped();
+            const auto dependency   = url.isEmpty() ? name : QString("<a href=\"%1\">%2</a>").arg(url, name);
+            const auto usedBy       = usage.isCore ? QString() : usage.availablePlugins.join(", ").toHtmlEscaped();
 
-            return QString("<tr><td style=\"padding: 2px 0; vertical-align: top\" width=\"38%\"><b>%1</b></td><td style=\"padding: 2px 0; vertical-align: top\" width=\"24%\">%2</td><td style=\"padding: 2px 0; vertical-align: top\">%3</td></tr>").arg(dependency, license, usedBy);
+            return QString("<tr><td style=\"padding: 2px 0; vertical-align: top\" width=\"28%\"><b>%1</b></td><td style=\"padding: 2px 0; vertical-align: top\" width=\"24%\">%2</td><td style=\"padding: 2px 0; vertical-align: top\">%3</td></tr>").arg(dependency, license, usedBy);
         };
 
         for (int row = 0; row < filterModel->rowCount(); ++row) {
@@ -210,14 +217,14 @@ void HelpMenu::aboutThirdParties() const
         }
 
         const auto formatSection = [headingColor, headerColor](const QString& title, const QString& rows, bool firstSection, bool includeColumnHeaders) {
-            const auto titlePadding = firstSection ? "10px" : "16px";
-            const auto columnHeaders = includeColumnHeaders ? QString(
-                "<tr style=\"color: %1\"><th align=\"left\" style=\"padding-bottom: 4px\" width=\"38%\">Dependency</th>"
+            const auto titlePadding     = firstSection ? "10px" : "16px";
+            const auto columnHeaders    = includeColumnHeaders ? QString(
+                "<tr style=\"color: %1\"><th align=\"left\" style=\"padding-bottom: 4px\" width=\"28%\">Dependency</th>"
                 "<th align=\"left\" style=\"padding-bottom: 4px\" width=\"24%\">License</th>"
                 "<th align=\"left\" style=\"padding-bottom: 4px\">Used by</th></tr>").arg(headerColor) : QString();
 
             return QString(
-                "<tr><td colspan=\"3\" style=\"color: %1; font-size: 1.2em; font-weight: bold; padding-top: %2; padding-bottom: 8px\">%3</td></tr>"
+                "<tr><td colspan=\"3\" style=\"color: %1; font-size: 1.3em; font-weight: bold; padding-top: %2; padding-bottom: 8px\">%3</td></tr>"
                 "%4%5")
                 .arg(headingColor, titlePadding, title, columnHeaders, rows);
         };
@@ -227,11 +234,12 @@ void HelpMenu::aboutThirdParties() const
             text = "<table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">";
 
             if (!coreText.isEmpty())
-                text += formatSection("Core", coreText, true, true);
+                text += formatSection("Core", coreText, true, false);
+
             if (!pluginText.isEmpty()) {
                 const auto pluginState = static_cast<ThirdPartyLicensesFilterModel::PluginState>(scopeComboBox->currentData().toInt());
                 const auto pluginTitle = pluginState == ThirdPartyLicensesFilterModel::PluginState::LoadedOnly ? "Plugins (loaded only)" : "Plugins (all available)";
-                text += formatSection(pluginTitle, pluginText, coreText.isEmpty(), true);
+                text += formatSection(pluginTitle, pluginText, coreText.isEmpty(), coreText.isEmpty());
             }
 
             text += "</table>";
@@ -245,24 +253,29 @@ void HelpMenu::aboutThirdParties() const
     updateText();
 
     auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Close, &dialog);
+
     layout->addWidget(dialogButtonBox);
 
     connect(filterEdit, &QLineEdit::textChanged, &dialog, [filterModel, updateText](const QString& text) {
         filterModel->setFilterRegularExpression(QRegularExpression(QRegularExpression::escape(text), QRegularExpression::CaseInsensitiveOption));
         updateText();
     });
+
     connect(scopeComboBox, qOverload<int>(&QComboBox::currentIndexChanged), &dialog, [filterModel, scopeComboBox, updateText](int) {
         filterModel->setPluginState(static_cast<ThirdPartyLicensesFilterModel::PluginState>(scopeComboBox->currentData().toInt()));
         updateText();
     });
+
     connect(showCoreCheckBox, &QCheckBox::toggled, &dialog, [filterModel, updateText](bool show) {
         filterModel->setShowCoreLicenses(show);
         updateText();
     });
+
     connect(showPluginsCheckBox, &QCheckBox::toggled, &dialog, [filterModel, updateText](bool show) {
         filterModel->setShowPluginLicenses(show);
         updateText();
     });
+
     connect(dialogButtonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
 
     dialog.exec();
