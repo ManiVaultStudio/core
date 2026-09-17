@@ -334,6 +334,12 @@ public: // Miscellaneous
      */
     const PluginMetadata& getPluginMetadata() const;
 
+    /**
+     * Get third-party dependency licenses (facade for the PluginMetadata class)
+     * @return Third-party dependency licenses used by the plugin
+     */
+    ThirdPartyLicenses getThirdPartyLicenses() const;
+
 public: // Action getters
 
     gui::StringsAction& getTutorialsDsnsAction()  { return _tutorialsDsnsAction; }

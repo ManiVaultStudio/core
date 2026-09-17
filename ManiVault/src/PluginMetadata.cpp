@@ -246,6 +246,28 @@ bool PluginMetadata::hasLicenseText() const
     return !_licenseText.isEmpty();
 }
 
+ThirdPartyLicenses PluginMetadata::getThirdPartyLicenses() const
+{
+    return _thirdPartyLicenses;
+}
+
+void PluginMetadata::setThirdPartyLicenses(const ThirdPartyLicenses& thirdPartyLicenses)
+{
+    if (thirdPartyLicenses == _thirdPartyLicenses)
+        return;
+
+    const auto previousThirdPartyLicenses = _thirdPartyLicenses;
+
+    _thirdPartyLicenses = thirdPartyLicenses;
+
+    emit thirdPartyLicensesChanged(previousThirdPartyLicenses, _thirdPartyLicenses);
+}
+
+bool PluginMetadata::hasThirdPartyLicenses() const
+{
+    return !_thirdPartyLicenses.empty();
+}
+
 QString PluginMetadata::getAboutMarkdown() const
 {
     if (!_aboutMarkdown.isEmpty())
