@@ -222,6 +222,7 @@ void PluginManager::loadPluginFactories()
         _pluginFactories[pluginKind] = pluginFactory;
         _pluginFactories[pluginKind]->setKind(pluginKind);
 
+        // Copy optional third-party license metadata into the factory metadata so public models can aggregate it.
         const auto thirdPartyLicensesValue = pluginMetaData.value("thirdPartyLicenses");
 
         if (thirdPartyLicensesValue.isArray())
