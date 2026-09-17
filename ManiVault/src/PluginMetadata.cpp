@@ -263,6 +263,34 @@ void PluginMetadata::setThirdPartyLicenses(const ThirdPartyLicenses& thirdPartyL
     emit thirdPartyLicensesChanged(previousThirdPartyLicenses, _thirdPartyLicenses);
 }
 
+void PluginMetadata::addThirdPartyLicense(const ThirdPartyLicense& thirdPartyLicense)
+{
+    if (std::find(_thirdPartyLicenses.begin(), _thirdPartyLicenses.end(), thirdPartyLicense) != _thirdPartyLicenses.end())
+        return;
+
+    auto updatedThirdPartyLicenses = _thirdPartyLicenses;
+
+    updatedThirdPartyLicenses.push_back(thirdPartyLicense);
+
+    setThirdPartyLicenses(updatedThirdPartyLicenses);
+}
+
+bool PluginMetadata::removeThirdPartyLicense(const ThirdPartyLicense& thirdPartyLicense)
+{
+    const auto it = std::find(_thirdPartyLicenses.begin(), _thirdPartyLicenses.end(), thirdPartyLicense);
+
+    if (it == _thirdPartyLicenses.end())
+        return false;
+
+    auto updatedThirdPartyLicenses = _thirdPartyLicenses;
+
+    updatedThirdPartyLicenses.erase(updatedThirdPartyLicenses.begin() + std::distance(_thirdPartyLicenses.begin(), it));
+
+    setThirdPartyLicenses(updatedThirdPartyLicenses);
+
+    return true;
+}
+
 bool PluginMetadata::hasThirdPartyLicenses() const
 {
     return !_thirdPartyLicenses.empty();

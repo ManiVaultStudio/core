@@ -389,6 +389,19 @@ public: // Third-party licenses
     void setThirdPartyLicenses(const ThirdPartyLicenses& thirdPartyLicenses);
 
     /**
+     * Add a third-party dependency license
+     * @param thirdPartyLicense Third-party dependency license to add
+     */
+    void addThirdPartyLicense(const ThirdPartyLicense& thirdPartyLicense);
+
+    /**
+     * Remove a third-party dependency license
+     * @param thirdPartyLicense Third-party dependency license to remove
+     * @return Whether a matching license was removed
+     */
+    bool removeThirdPartyLicense(const ThirdPartyLicense& thirdPartyLicense);
+
+    /**
      * Get whether the plugin has third-party dependency licenses
      * @return Boolean determining whether third-party dependency licenses are available
      */
