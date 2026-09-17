@@ -9,8 +9,21 @@
 
 #include <util/Miscellaneous.h>
 #include <actions/TriggerAction.h>
+#include <models/AbstractThirdPartyLicensesModel.h>
+#include <models/ThirdPartyLicensesFilterModel.h>
 
 #include <QMessageBox> 
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QHeaderView>
+#include <QLabel>
+#include <QLineEdit>
+#include <QRegularExpression>
+#include <QTableView>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QStringLiteral>
 #include <QOperatingSystemVersion>
 #include <QDesktopServices>
@@ -132,41 +145,61 @@ void HelpMenu::about() const
 
 void HelpMenu::aboutThirdParties() const
 {
-    QString message = QMessageBox::tr(
-      "<p>ManiVault uses several third party libraries: </p>"
-      "&bull; Qt-Advanced-Docking-System (LGPL v2.1): <a href=\"https://%{qads}/\">%{qads}</a> <br>"
-      "&bull; Quazip (LGPL v2.1): <a href=\"https://%{quazip}/\">%{quazip}</a> <br>"
-      "&bull; zlib (zlib license): <a href=\"https://%{zlib}/\">%{zlib}</a> <br>"
-      "&bull; nlohmann json (MIT license): <a href=\"https://%{json}/\">%{json}</a> <br>"
-      "&bull; valijson (BSD-2-Clause license): <a href=\"https://%{valijson}/\">%{valijson}</a> <br>"
-      "&bull; biovault_bfloat16 (Apache-2.0): <a href=\"https://%{bfloat16}/\">%{bfloat16}</a> <br>"
-      "&bull; Zstandard (BSD License): <a href=\"https://%{zstd}/\">%{zstd}</a> <br>"
-      "&bull; Taskflow (MIT license): <a href=\"https://%{taskflow}/\">%{taskflow}</a> <br>"
-#ifdef MV_USE_ERROR_LOGGING
-      "&bull; sentry (MIT license): <a href=\"https://%{sentry}/\">%{sentry}</a> <br>"
-#endif
-      "&bull; Qt ((L)GPL): <a href=\"https://%{qt}/\">%{qt}</a> ");
+    QDialog dialog(this->parentWidget());
+    dialog.setWindowTitle(tr("Third-party licenses"));
+    dialog.resize(900, 500);
 
-    message.replace("%{qads}", "github.com/githubuser0xFFFF/Qt-Advanced-Docking-System");
-    message.replace("%{quazip}", "github.com/stachenov/quazip");
-    message.replace("%{zlib}", "zlib.net");
-    message.replace("%{json}", "json.nlohmann.me");
-    message.replace("%{valijson}", "github.com/tristanpenman/valijson");
-    message.replace("%{bfloat16}", "github.com/biovault/biovault_bfloat16");
-    message.replace("%{zstd}", "github.com/facebook/zstd");
-    message.replace("%{taskflow}", "github.com/taskflow/taskflow");
-  #ifdef MV_USE_ERROR_LOGGING
-    message.replace("%{sentry}", "sentry.io");
-  #endif
-    message.replace("%{qt}", "qt.io");
+    auto layout = new QVBoxLayout(&dialog);
+    auto filterLayout = new QHBoxLayout();
 
-    auto msgBox = new QMessageBox(this->parentWidget());
+    auto filterLabel = new QLabel(tr("Filter:"), &dialog);
+    auto filterEdit = new QLineEdit(&dialog);
+    filterEdit->setPlaceholderText(tr("Search dependencies and licenses"));
 
-    msgBox->setAttribute(Qt::WA_DeleteOnClose);
-    msgBox->setWindowTitle(tr("About Third Parties"));
-    msgBox->setText(message);
-    msgBox->setIconPixmap(QApplication::windowIcon().pixmap(QSize(64, 64)));
-    msgBox->setAttribute(Qt::WA_DeleteOnClose);
+    auto scopeComboBox = new QComboBox(&dialog);
+    scopeComboBox->addItem(tr("All available plugins"), static_cast<int>(ThirdPartyLicensesFilterModel::PluginState::AllAvailable));
+    scopeComboBox->addItem(tr("Loaded plugins only"), static_cast<int>(ThirdPartyLicensesFilterModel::PluginState::LoadedOnly));
 
-    msgBox->open();
+    auto showCoreCheckBox = new QCheckBox(tr("Core"), &dialog);
+    auto showPluginsCheckBox = new QCheckBox(tr("Plugins"), &dialog);
+    showCoreCheckBox->setChecked(true);
+    showPluginsCheckBox->setChecked(true);
+
+    filterLayout->addWidget(filterLabel);
+    filterLayout->addWidget(filterEdit, 1);
+    filterLayout->addWidget(scopeComboBox);
+    filterLayout->addWidget(showCoreCheckBox);
+    filterLayout->addWidget(showPluginsCheckBox);
+    layout->addLayout(filterLayout);
+
+    auto filterModel = new ThirdPartyLicensesFilterModel(&dialog);
+    filterModel->setSourceModel(const_cast<ThirdPartyLicensesListModel*>(&mv::help().getThirdPartyLicensesModel()));
+
+    auto tableView = new QTableView(&dialog);
+    tableView->setModel(filterModel);
+    tableView->setSortingEnabled(true);
+    tableView->sortByColumn(static_cast<int>(AbstractThirdPartyLicensesModel::Column::Name), Qt::AscendingOrder);
+    tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    tableView->setSelectionMode(QAbstractItemView::SingleSelection);
+    tableView->setAlternatingRowColors(true);
+    tableView->horizontalHeader()->setStretchLastSection(true);
+    tableView->horizontalHeader()->setSectionResizeMode(static_cast<int>(AbstractThirdPartyLicensesModel::Column::Name), QHeaderView::ResizeToContents);
+    tableView->horizontalHeader()->setSectionResizeMode(static_cast<int>(AbstractThirdPartyLicensesModel::Column::License), QHeaderView::ResizeToContents);
+    tableView->horizontalHeader()->setSectionResizeMode(static_cast<int>(AbstractThirdPartyLicensesModel::Column::Core), QHeaderView::ResizeToContents);
+    layout->addWidget(tableView, 1);
+
+    auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Close, &dialog);
+    layout->addWidget(dialogButtonBox);
+
+    connect(filterEdit, &QLineEdit::textChanged, &dialog, [filterModel](const QString& text) {
+        filterModel->setFilterRegularExpression(QRegularExpression(QRegularExpression::escape(text), QRegularExpression::CaseInsensitiveOption));
+    });
+    connect(scopeComboBox, qOverload<int>(&QComboBox::currentIndexChanged), &dialog, [filterModel, scopeComboBox](int) {
+        filterModel->setPluginState(static_cast<ThirdPartyLicensesFilterModel::PluginState>(scopeComboBox->currentData().toInt()));
+    });
+    connect(showCoreCheckBox, &QCheckBox::toggled, filterModel, &ThirdPartyLicensesFilterModel::setShowCoreLicenses);
+    connect(showPluginsCheckBox, &QCheckBox::toggled, filterModel, &ThirdPartyLicensesFilterModel::setShowPluginLicenses);
+    connect(dialogButtonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    dialog.exec();
 }
