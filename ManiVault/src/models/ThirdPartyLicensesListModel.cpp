@@ -4,6 +4,13 @@
 
 #include "CoreInterface.h"
 #include "PluginFactory.h"
+#include "util/JSON.h"
+
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonParseError>
 
 namespace mv {
 
@@ -28,23 +35,67 @@ void addUsage(ThirdPartyLicenseUsages& usages, const plugin::ThirdPartyLicense& 
         match->loadedPlugins.append(loadedPlugin);
 }
 
-/** Return the third-party dependencies currently documented by ManiVault Core. */
+/** Load the third-party dependencies documented by ManiVault Core. */
 plugin::ThirdPartyLicenses getCoreThirdPartyLicenses()
 {
-    return {
-        { "Qt-Advanced-Docking-System", "LGPL-2.1", "https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System" },
-        { "QuaZip", "LGPL-2.1", "https://github.com/stachenov/quazip" },
-        { "zlib", "zlib", "https://zlib.net" },
-        { "nlohmann json", "MIT", "https://json.nlohmann.me" },
-        { "valijson", "BSD-2-Clause", "https://github.com/tristanpenman/valijson" },
-        { "biovault_bfloat16", "Apache-2.0", "https://github.com/biovault/biovault_bfloat16" },
-        { "Zstandard", "BSD", "https://github.com/facebook/zstd" },
-        { "Taskflow", "MIT", "https://github.com/taskflow/taskflow" },
-#ifdef MV_USE_ERROR_LOGGING
-        { "sentry", "MIT", "https://sentry.io" },
+    QFile licenseFile(":/JSON/ThirdPartyLicenses");
+
+    if (!licenseFile.open(QIODevice::ReadOnly)) {
+        qWarning() << "Unable to open Core third-party licenses resource" << licenseFile.fileName();
+        return {};
+    }
+
+    QJsonParseError parseError;
+    const auto document = QJsonDocument::fromJson(licenseFile.readAll(), &parseError);
+
+    if (parseError.error != QJsonParseError::NoError || !document.isObject()) {
+        qWarning() << "Unable to parse Core third-party licenses resource:" << parseError.errorString();
+        return {};
+    }
+
+    const auto licensesValue = document.object().value("thirdPartyLicenses");
+
+    if (!licensesValue.isArray()) {
+        qWarning() << "Core third-party licenses resource does not contain a thirdPartyLicenses array";
+        return {};
+    }
+
+    try {
+        const auto licensesJson = QJsonDocument(licensesValue.toArray()).toJson(QJsonDocument::Compact).toStdString();
+        util::validateJson(licensesJson, ":/JSON/ThirdPartyLicenses", util::loadJsonFromResource(":/JSON/thirdparty.licenses.schema.json"), "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/thirdparty.licenses.schema.json");
+    }
+    catch (const std::exception& exception) {
+        qWarning() << "Core third-party licenses resource failed schema validation:" << exception.what();
+        return {};
+    }
+
+    plugin::ThirdPartyLicenses licenses;
+
+    for (const auto& licenseValue : licensesValue.toArray()) {
+        if (!licenseValue.isObject()) {
+            qWarning() << "Ignoring non-object Core third-party license entry";
+            continue;
+        }
+
+        const auto licenseObject = licenseValue.toObject();
+        const auto name = licenseObject.value("name").toString();
+        const auto license = licenseObject.value("license").toString();
+        const auto url = licenseObject.value("url").toString();
+
+        if (name.isEmpty() || license.isEmpty()) {
+            qWarning() << "Ignoring Core third-party license entry without a name or license";
+            continue;
+        }
+
+#ifndef MV_USE_ERROR_LOGGING
+        if (name == "sentry")
+            continue;
 #endif
-        { "Qt", "LGPL", "https://qt.io" }
-    };
+
+        licenses.push_back({ name, license, url });
+    }
+
+    return licenses;
 }
 
 }
