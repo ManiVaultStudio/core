@@ -14,12 +14,17 @@
 
 #include <QMessageBox> 
 #include <QCheckBox>
-#include <QComboBox>
+#include <QClipboard>
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <QGuiApplication>
 #include <QHeaderView>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPushButton>
 #include <QRegularExpression>
 #include <QTextBrowser>
 #include <QVBoxLayout>
@@ -159,11 +164,6 @@ void HelpMenu::aboutThirdParties() const
 
     filterEdit->setPlaceholderText(tr("Search dependencies and licenses"));
 
-    auto scopeComboBox = new QComboBox(&dialog);
-
-    scopeComboBox->addItem(tr("All available plugins"), static_cast<int>(ThirdPartyLicensesFilterModel::PluginState::AllAvailable));
-    scopeComboBox->addItem(tr("Loaded plugins only"), static_cast<int>(ThirdPartyLicensesFilterModel::PluginState::LoadedOnly));
-
     auto showCoreCheckBox       = new QCheckBox(tr("Core"), &dialog);
     auto showPluginsCheckBox    = new QCheckBox(tr("Plugins"), &dialog);
 
@@ -172,7 +172,6 @@ void HelpMenu::aboutThirdParties() const
 
     filterLayout->addWidget(filterLabel);
     filterLayout->addWidget(filterEdit, 1);
-    filterLayout->addWidget(scopeComboBox);
     filterLayout->addWidget(showCoreCheckBox);
     filterLayout->addWidget(showPluginsCheckBox);
 
@@ -181,6 +180,7 @@ void HelpMenu::aboutThirdParties() const
     auto filterModel = new ThirdPartyLicensesFilterModel(&dialog);
 
     filterModel->setSourceModel(const_cast<ThirdPartyLicensesListModel*>(&mv::help().getThirdPartyLicensesModel()));
+    filterModel->setPluginState(ThirdPartyLicensesFilterModel::PluginState::AllAvailable);
 
     auto textBrowser = new QTextBrowser(&dialog);
 
@@ -192,7 +192,16 @@ void HelpMenu::aboutThirdParties() const
     const auto headingColor = dialog.palette().color(QPalette::WindowText).name();
     const auto headerColor  = dialog.palette().color(QPalette::Mid).name();
 
-    const auto updateText = [filterModel, textBrowser, scopeComboBox, headingColor, headerColor]() {
+    const auto getVisibleUsages = [filterModel]() {
+        ThirdPartyLicenseUsages usages;
+
+        for (int row = 0; row < filterModel->rowCount(); ++row)
+            usages.push_back(filterModel->data(filterModel->index(row, 0), Qt::UserRole + 1).value<ThirdPartyLicenseUsage>());
+
+        return usages;
+    };
+
+    const auto updateText = [filterModel, textBrowser, headingColor, headerColor, getVisibleUsages]() {
         QString coreText;
         QString pluginText;
 
@@ -206,8 +215,7 @@ void HelpMenu::aboutThirdParties() const
             return QString("<tr><td style=\"padding: 2px 0; vertical-align: top\" width=\"28%\"><b>%1</b></td><td style=\"padding: 2px 0; vertical-align: top\" width=\"24%\">%2</td><td style=\"padding: 2px 0; vertical-align: top\">%3</td></tr>").arg(dependency, license, usedBy);
         };
 
-        for (int row = 0; row < filterModel->rowCount(); ++row) {
-            const auto usage = filterModel->data(filterModel->index(row, 0), Qt::UserRole + 1).value<ThirdPartyLicenseUsage>();
+        for (const auto& usage : getVisibleUsages()) {
 
             if (usage.isCore)
                 coreText += formatLicense(usage);
@@ -237,9 +245,7 @@ void HelpMenu::aboutThirdParties() const
                 text += formatSection("Core", coreText, true, false);
 
             if (!pluginText.isEmpty()) {
-                const auto pluginState = static_cast<ThirdPartyLicensesFilterModel::PluginState>(scopeComboBox->currentData().toInt());
-                const auto pluginTitle = pluginState == ThirdPartyLicensesFilterModel::PluginState::LoadedOnly ? "Plugins (loaded only)" : "Plugins (all available)";
-                text += formatSection(pluginTitle, pluginText, coreText.isEmpty(), coreText.isEmpty());
+                text += formatSection("Plugins (all available)", pluginText, coreText.isEmpty(), coreText.isEmpty());
             }
 
             text += "</table>";
@@ -253,16 +259,12 @@ void HelpMenu::aboutThirdParties() const
     updateText();
 
     auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Close, &dialog);
+    auto copyJsonButton = dialogButtonBox->addButton(tr("Copy JSON"), QDialogButtonBox::ActionRole);
 
     layout->addWidget(dialogButtonBox);
 
     connect(filterEdit, &QLineEdit::textChanged, &dialog, [filterModel, updateText](const QString& text) {
         filterModel->setFilterRegularExpression(QRegularExpression(QRegularExpression::escape(text), QRegularExpression::CaseInsensitiveOption));
-        updateText();
-    });
-
-    connect(scopeComboBox, qOverload<int>(&QComboBox::currentIndexChanged), &dialog, [filterModel, scopeComboBox, updateText](int) {
-        filterModel->setPluginState(static_cast<ThirdPartyLicensesFilterModel::PluginState>(scopeComboBox->currentData().toInt()));
         updateText();
     });
 
@@ -274,6 +276,44 @@ void HelpMenu::aboutThirdParties() const
     connect(showPluginsCheckBox, &QCheckBox::toggled, &dialog, [filterModel, updateText](bool show) {
         filterModel->setShowPluginLicenses(show);
         updateText();
+    });
+
+    connect(copyJsonButton, &QPushButton::clicked, &dialog, [getVisibleUsages]() {
+        QJsonArray coreLicenses;
+        QJsonArray availablePluginLicenses;
+        QJsonArray loadedPluginLicenses;
+
+        const auto toJson = [](const ThirdPartyLicenseUsage& usage, const QStringList& usedByPlugins = {}) {
+            auto license = QJsonObject {
+                {"name", usage.license.name},
+                {"license", usage.license.license},
+                {"url", usage.license.url}
+            };
+
+            if (!usedByPlugins.isEmpty())
+                license.insert("usedByPlugins", QJsonArray::fromStringList(usedByPlugins));
+
+            return license;
+        };
+
+        for (const auto& usage : getVisibleUsages()) {
+            if (usage.isCore)
+                coreLicenses.append(toJson(usage));
+
+            if (!usage.availablePlugins.isEmpty())
+                availablePluginLicenses.append(toJson(usage, usage.availablePlugins));
+
+            if (!usage.loadedPlugins.isEmpty())
+                loadedPluginLicenses.append(toJson(usage, usage.loadedPlugins));
+        }
+
+        QJsonArray sections {
+            QJsonObject {{"core", coreLicenses}},
+            QJsonObject {{"availablePlugins", availablePluginLicenses}},
+            QJsonObject {{"loadedPlugins", loadedPluginLicenses}}
+        };
+
+        QGuiApplication::clipboard()->setText(QJsonDocument(sections).toJson(QJsonDocument::Indented));
     });
 
     connect(dialogButtonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
