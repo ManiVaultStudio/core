@@ -9,6 +9,7 @@
 #include "DataHierarchyItem.h"
 #include "event/Event.h"
 #include "PointData/PointData.h"
+#include "TextData/TextData.h"
 
 #include "Application.h"
 
@@ -312,16 +313,25 @@ void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
         return;
 
     // Get reference to input dataset
-    auto points             = getDataHierarchyItem().getParent()->getDataset<Points>();
-    auto selection          = points->getSelection<Points>();
-    auto selectionIndices   = selection->indices;
+    auto dataset = getDataHierarchyItem().getParent()->getDataset();
+    auto selectionIndices = dataset->getSelectionIndices();
 
     selectionIndices.clear();
     selectionIndices.reserve(indices.size());
 
     std::vector<std::uint32_t> globalIndices;
 
-    points->getGlobalIndices(globalIndices);
+    if (dataset->getRawDataKind() == "Points")
+    {
+        auto points = getDataHierarchyItem().getParent()->getDataset<Points>();
+        points->getGlobalIndices(globalIndices);
+    }
+    else if (dataset->getRawDataKind() == "Text")
+    {
+        auto text = getDataHierarchyItem().getParent()->getDataset<Text>();
+        globalIndices.resize(text->getNumRows());
+        std::iota(globalIndices.begin(), globalIndices.end(), 0);
+    }
 
     // Append point indices per cluster
     for (auto clusterSelectionIndex : getSelection<Clusters>()->indices) {
@@ -333,9 +343,9 @@ void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
     std::sort(selectionIndices.begin(), selectionIndices.end());
     selectionIndices.erase(unique(selectionIndices.begin(), selectionIndices.end()), selectionIndices.end());
 
-    points->setSelectionIndices(selectionIndices);
+    dataset->setSelectionIndices(selectionIndices);
 
-    events().notifyDatasetDataSelectionChanged(points);
+    events().notifyDatasetDataSelectionChanged(dataset);
 }
 
 QStringList Clusters::getSelectionNames() const

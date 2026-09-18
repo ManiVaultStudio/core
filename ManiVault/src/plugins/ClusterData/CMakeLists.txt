@@ -103,6 +103,7 @@ target_link_libraries(${CLUSTERDATA} PRIVATE Qt6::Widgets)
 target_link_libraries(${CLUSTERDATA} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${CLUSTERDATA} PRIVATE ${MV_PUBLIC_LIB})
 target_link_libraries(${CLUSTERDATA} PRIVATE PointData)
+target_link_libraries(${CLUSTERDATA} PRIVATE TextData)
 
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${CLUSTERDATA} ${MV_USE_AVX})
