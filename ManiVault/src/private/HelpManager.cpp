@@ -339,6 +339,11 @@ const LearningCenterTutorialsModel& HelpManager::getTutorialsModel() const
     return _tutorialsModel;
 }
 
+const ThirdPartyLicensesListModel& HelpManager::getThirdPartyLicensesModel() const
+{
+    return _thirdPartyLicensesModel;
+}
+
 QMenu* HelpManager::getTutorialsMenu() const
 {
     auto tutorialsMenu = new QMenu("Tutorials");

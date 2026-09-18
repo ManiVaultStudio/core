@@ -9,8 +9,27 @@
 
 #include <util/Miscellaneous.h>
 #include <actions/TriggerAction.h>
+#include <models/AbstractThirdPartyLicensesModel.h>
+#include <models/ThirdPartyLicensesFilterModel.h>
 
 #include <QMessageBox> 
+#include <QCheckBox>
+#include <QClipboard>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QGuiApplication>
+#include <QHeaderView>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QRegularExpression>
+#include <QTextBrowser>
+#include <QTimer>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QStringLiteral>
 #include <QOperatingSystemVersion>
 #include <QDesktopServices>
@@ -26,13 +45,14 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     _sendFeedbackAction(nullptr, "Send feedback..."),
     _aboutAction(nullptr, QString("About %1").arg(Application::getBaseName())),
     _aboutQtAction(nullptr, "About Qt"),
-    _aboutThirdPartiesAction(nullptr, "About third-parties"),
+    _aboutThirdPartiesAction(nullptr, "About third-parties..."),
     _releaseNotesAction(nullptr, "Release notes")
 {
     setTitle("Help");
     setToolTip("ManiVault help");
 
     _aboutThirdPartiesAction.setMenuRole(QAction::NoRole);
+    _aboutThirdPartiesAction.setIconByName("file-contract");
     _aboutQtAction.setMenuRole(QAction::NoRole);
 
     _releaseNotesAction.setIconByName("scroll");
@@ -132,41 +152,181 @@ void HelpMenu::about() const
 
 void HelpMenu::aboutThirdParties() const
 {
-    QString message = QMessageBox::tr(
-      "<p>ManiVault uses several third party libraries: </p>"
-      "&bull; Qt-Advanced-Docking-System (LGPL v2.1): <a href=\"https://%{qads}/\">%{qads}</a> <br>"
-      "&bull; Quazip (LGPL v2.1): <a href=\"https://%{quazip}/\">%{quazip}</a> <br>"
-      "&bull; zlib (zlib license): <a href=\"https://%{zlib}/\">%{zlib}</a> <br>"
-      "&bull; nlohmann json (MIT license): <a href=\"https://%{json}/\">%{json}</a> <br>"
-      "&bull; valijson (BSD-2-Clause license): <a href=\"https://%{valijson}/\">%{valijson}</a> <br>"
-      "&bull; biovault_bfloat16 (Apache-2.0): <a href=\"https://%{bfloat16}/\">%{bfloat16}</a> <br>"
-      "&bull; Zstandard (BSD License): <a href=\"https://%{zstd}/\">%{zstd}</a> <br>"
-      "&bull; Taskflow (MIT license): <a href=\"https://%{taskflow}/\">%{taskflow}</a> <br>"
-#ifdef MV_USE_ERROR_LOGGING
-      "&bull; sentry (MIT license): <a href=\"https://%{sentry}/\">%{sentry}</a> <br>"
-#endif
-      "&bull; Qt ((L)GPL): <a href=\"https://%{qt}/\">%{qt}</a> ");
+    QDialog dialog(this->parentWidget());
 
-    message.replace("%{qads}", "github.com/githubuser0xFFFF/Qt-Advanced-Docking-System");
-    message.replace("%{quazip}", "github.com/stachenov/quazip");
-    message.replace("%{zlib}", "zlib.net");
-    message.replace("%{json}", "json.nlohmann.me");
-    message.replace("%{valijson}", "github.com/tristanpenman/valijson");
-    message.replace("%{bfloat16}", "github.com/biovault/biovault_bfloat16");
-    message.replace("%{zstd}", "github.com/facebook/zstd");
-    message.replace("%{taskflow}", "github.com/taskflow/taskflow");
-  #ifdef MV_USE_ERROR_LOGGING
-    message.replace("%{sentry}", "sentry.io");
-  #endif
-    message.replace("%{qt}", "qt.io");
+    dialog.setWindowTitle(tr("Third-party licenses"));
+    dialog.setWindowIcon(StyledIcon("file-contract"));
+    dialog.resize(750, 500);
 
-    auto msgBox = new QMessageBox(this->parentWidget());
+    auto layout         = new QVBoxLayout(&dialog);
+    auto filterLayout   = new QHBoxLayout();
+    auto filterLabel    = new QLabel(tr("Filter:"), &dialog);
+    auto filterEdit     = new QLineEdit(&dialog);
 
-    msgBox->setAttribute(Qt::WA_DeleteOnClose);
-    msgBox->setWindowTitle(tr("About Third Parties"));
-    msgBox->setText(message);
-    msgBox->setIconPixmap(QApplication::windowIcon().pixmap(QSize(64, 64)));
-    msgBox->setAttribute(Qt::WA_DeleteOnClose);
+    filterEdit->setPlaceholderText(tr("Search dependencies and licenses"));
 
-    msgBox->open();
+    auto showCoreCheckBox       = new QCheckBox(tr("Core"), &dialog);
+    auto showPluginsCheckBox    = new QCheckBox(tr("Plugins"), &dialog);
+
+    showCoreCheckBox->setChecked(true);
+    showPluginsCheckBox->setChecked(true);
+
+    filterLayout->addWidget(filterLabel);
+    filterLayout->addWidget(filterEdit, 1);
+    filterLayout->addWidget(showCoreCheckBox);
+    filterLayout->addWidget(showPluginsCheckBox);
+
+    layout->addLayout(filterLayout);
+
+    auto filterModel = new ThirdPartyLicensesFilterModel(&dialog);
+
+    filterModel->setSourceModel(const_cast<ThirdPartyLicensesListModel*>(&mv::help().getThirdPartyLicensesModel()));
+    filterModel->setPluginState(ThirdPartyLicensesFilterModel::PluginState::AllAvailable);
+
+    auto textBrowser = new QTextBrowser(&dialog);
+
+    textBrowser->setOpenExternalLinks(true);
+    textBrowser->setOpenLinks(true);
+    textBrowser->setStyleSheet("QTextBrowser { background-color: transparent; }");
+    layout->addWidget(textBrowser, 1);
+
+    const auto headingColor = dialog.palette().color(QPalette::WindowText).name();
+    const auto headerColor  = dialog.palette().color(QPalette::Mid).name();
+
+    const auto getVisibleUsages = [filterModel]() {
+        ThirdPartyLicenseUsages usages;
+
+        for (int row = 0; row < filterModel->rowCount(); ++row)
+            usages.push_back(filterModel->data(filterModel->index(row, 0), Qt::UserRole + 1).value<ThirdPartyLicenseUsage>());
+
+        return usages;
+    };
+
+    const auto updateText = [filterModel, textBrowser, headingColor, headerColor, getVisibleUsages]() {
+        QString coreText;
+        QString pluginText;
+
+        const auto formatLicense = [](const ThirdPartyLicenseUsage& usage) {
+            const auto name         = usage.license.name.toHtmlEscaped();
+            const auto license      = usage.license.license.toHtmlEscaped();
+            const auto url          = usage.license.url.toHtmlEscaped();
+            const auto dependency   = url.isEmpty() ? name : QString("<a href=\"%1\">%2</a>").arg(url, name);
+            const auto usedBy       = usage.isCore ? QString() : usage.availablePlugins.join(", ").toHtmlEscaped();
+
+            return QString("<tr><td style=\"padding: 2px 0; vertical-align: top\" width=\"28%\"><b>%1</b></td><td style=\"padding: 2px 0; vertical-align: top\" width=\"24%\">%2</td><td style=\"padding: 2px 0; vertical-align: top\">%3</td></tr>").arg(dependency, license, usedBy);
+        };
+
+        for (const auto& usage : getVisibleUsages()) {
+
+            if (usage.isCore)
+                coreText += formatLicense(usage);
+
+            if (!usage.availablePlugins.isEmpty())
+                pluginText += formatLicense(usage);
+        }
+
+        const auto formatSection = [headingColor, headerColor](const QString& title, const QString& rows, bool firstSection, bool includeColumnHeaders) {
+            const auto titlePadding     = firstSection ? "10px" : "16px";
+            const auto columnHeaders    = includeColumnHeaders ? QString(
+                "<tr style=\"color: %1\"><th align=\"left\" style=\"padding-bottom: 4px\" width=\"28%\">Dependency</th>"
+                "<th align=\"left\" style=\"padding-bottom: 4px\" width=\"24%\">License</th>"
+                "<th align=\"left\" style=\"padding-bottom: 4px\">Used by</th></tr>").arg(headerColor) : QString();
+
+            return QString(
+                "<tr><td colspan=\"3\" style=\"color: %1; font-size: 1.3em; font-weight: bold; padding-top: %2; padding-bottom: 8px\">%3</td></tr>"
+                "%4%5")
+                .arg(headingColor, titlePadding, title, columnHeaders, rows);
+        };
+
+        QString text;
+        if (!coreText.isEmpty() || !pluginText.isEmpty()) {
+            text = "<table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">";
+
+            if (!coreText.isEmpty())
+                text += formatSection("Core", coreText, true, false);
+
+            if (!pluginText.isEmpty()) {
+                text += formatSection("Plugins (all available)", pluginText, coreText.isEmpty(), coreText.isEmpty());
+            }
+
+            text += "</table>";
+        }
+        if (text.isEmpty())
+            text = "<p>No third-party licenses match the current filters.</p>";
+
+        textBrowser->setHtml(text);
+    };
+
+    updateText();
+
+    auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Close, &dialog);
+    auto copyJsonButton = dialogButtonBox->addButton(QString(), QDialogButtonBox::ActionRole);
+    copyJsonButton->setIcon(StyledIcon("copy"));
+    copyJsonButton->setToolTip(tr("Copy visible license data as JSON"));
+
+    layout->addWidget(dialogButtonBox);
+
+    connect(filterEdit, &QLineEdit::textChanged, &dialog, [filterModel, updateText](const QString& text) {
+        filterModel->setFilterRegularExpression(QRegularExpression(QRegularExpression::escape(text), QRegularExpression::CaseInsensitiveOption));
+        updateText();
+    });
+
+    connect(showCoreCheckBox, &QCheckBox::toggled, &dialog, [filterModel, updateText](bool show) {
+        filterModel->setShowCoreLicenses(show);
+        updateText();
+    });
+
+    connect(showPluginsCheckBox, &QCheckBox::toggled, &dialog, [filterModel, updateText](bool show) {
+        filterModel->setShowPluginLicenses(show);
+        updateText();
+    });
+
+    connect(copyJsonButton, &QPushButton::clicked, &dialog, [copyJsonButton, getVisibleUsages]() {
+        QJsonArray coreLicenses;
+        QJsonArray availablePluginLicenses;
+        QJsonArray loadedPluginLicenses;
+
+        const auto toJson = [](const ThirdPartyLicenseUsage& usage, const QStringList& usedByPlugins = {}) {
+            auto license = QJsonObject {
+                {"name", usage.license.name},
+                {"license", usage.license.license},
+                {"url", usage.license.url}
+            };
+
+            if (!usedByPlugins.isEmpty())
+                license.insert("usedByPlugins", QJsonArray::fromStringList(usedByPlugins));
+
+            return license;
+        };
+
+        for (const auto& usage : getVisibleUsages()) {
+            if (usage.isCore)
+                coreLicenses.append(toJson(usage));
+
+            if (!usage.availablePlugins.isEmpty())
+                availablePluginLicenses.append(toJson(usage, usage.availablePlugins));
+
+            if (!usage.loadedPlugins.isEmpty())
+                loadedPluginLicenses.append(toJson(usage, usage.loadedPlugins));
+        }
+
+        QJsonArray sections {
+            QJsonObject {{"core", coreLicenses}},
+            QJsonObject {{"availablePlugins", availablePluginLicenses}},
+            QJsonObject {{"loadedPlugins", loadedPluginLicenses}}
+        };
+
+        QGuiApplication::clipboard()->setText(QJsonDocument(sections).toJson(QJsonDocument::Indented));
+
+        copyJsonButton->setIcon(StyledIcon("check"));
+        mv::help().addNotification("Third-party licenses", "License data copied as JSON.", StyledIcon("check"), util::Notification::DurationType::Fixed);
+
+        QTimer::singleShot(4000, copyJsonButton, [copyJsonButton]() {
+            copyJsonButton->setIcon(StyledIcon("copy"));
+        });
+    });
+
+    connect(dialogButtonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    dialog.exec();
 }

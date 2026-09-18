@@ -6,9 +6,11 @@
 
 #include "Application.h"
 
+#include <QApplication>
 #include <QMainWindow>
 #include <QEvent>
 #include <QTimer>
+#include <QWindow>
 
 namespace mv::util
 {
@@ -22,7 +24,18 @@ void Notifications::showMessage(const QString& title, const QString& description
 {
     if (Application::getMainWindow()) {
         const auto createNotification = [this, title, description, icon, durationType]() -> Notification* {
-            return new Notification(title, description, icon, _notifications.isEmpty() ? nullptr : _notifications.last(), durationType, Application::getMainWindow());
+            auto notification = new Notification(title, description, icon, _notifications.isEmpty() ? nullptr : _notifications.last(), durationType, nullptr);
+            const auto activeWindow = QApplication::activeWindow();
+            const auto transientParent = activeWindow ? activeWindow : Application::getMainWindow();
+
+            if (transientParent && transientParent->windowHandle()) {
+                notification->winId();
+
+                if (auto notificationWindow = notification->windowHandle())
+                    notificationWindow->setTransientParent(transientParent->windowHandle());
+            }
+
+            return notification;
         };
 
         if (delayMs > 0) {
@@ -39,7 +52,18 @@ void Notifications::showMessage(const QString& title, const QString& description
 void Notifications::showTask(QPointer<Task> task)
 {
     if (auto mainWindow = Application::getMainWindow()) {
-        addNotification(new Notification(task, _notifications.isEmpty() ? nullptr : _notifications.last(), mainWindow));
+        auto notification = new Notification(task, _notifications.isEmpty() ? nullptr : _notifications.last(), nullptr);
+        const auto activeWindow = QApplication::activeWindow();
+        const auto transientParent = activeWindow ? activeWindow : mainWindow;
+
+        if (transientParent && transientParent->windowHandle()) {
+            notification->winId();
+
+            if (auto notificationWindow = notification->windowHandle())
+                notificationWindow->setTransientParent(transientParent->windowHandle());
+        }
+
+        addNotification(notification);
     }
 }
 

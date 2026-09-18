@@ -12,6 +12,7 @@
 
 #include <models/TasksListModel.h>
 #include <models/TasksFilterModel.h>
+#include <models/ThirdPartyLicensesListModel.h>
 
 namespace mv
 {
@@ -83,6 +84,12 @@ public:
     const LearningCenterTutorialsModel& getTutorialsModel() const override;
 
     /**
+     * @brief Returns the aggregated third-party license model.
+     * @return Third-party license model.
+     */
+    const ThirdPartyLicensesListModel& getThirdPartyLicensesModel() const override;
+
+    /**
      * @brief Returns the tutorials menu.
      * @return Tutorials menu.
      */
@@ -144,6 +151,7 @@ private:
     gui::TriggerAction                      _toLearningCenterAction;        /**< Opens the learning center */
     LearningCenterVideosModel               _videosModel;                   /**< Videos model */
     LearningCenterTutorialsModel            _tutorialsModel;                /**< Tutorials model */
+    ThirdPartyLicensesListModel             _thirdPartyLicensesModel;       /**< Aggregated third-party licenses model */
     util::Notifications                     _notifications;                 /**< Notifications manager */
     mv::TasksListModel                      _tasksModel;                    /**< Tasks list model */
     mv::TasksFilterModel                    _tasksFilterModel;              /**< Filter model for tasks */
