@@ -45,7 +45,7 @@ HelpMenu::HelpMenu(QWidget* parent /*= nullptr*/) :
     _sendFeedbackAction(nullptr, "Send feedback..."),
     _aboutAction(nullptr, QString("About %1").arg(Application::getBaseName())),
     _aboutQtAction(nullptr, "About Qt"),
-    _aboutThirdPartiesAction(nullptr, "About third-parties"),
+    _aboutThirdPartiesAction(nullptr, "About third-parties..."),
     _releaseNotesAction(nullptr, "Release notes")
 {
     setTitle("Help");
@@ -260,8 +260,9 @@ void HelpMenu::aboutThirdParties() const
     updateText();
 
     auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Close, &dialog);
-    auto copyJsonButton = dialogButtonBox->addButton(tr("Copy JSON"), QDialogButtonBox::ActionRole);
+    auto copyJsonButton = dialogButtonBox->addButton(QString(), QDialogButtonBox::ActionRole);
     copyJsonButton->setIcon(StyledIcon("copy"));
+    copyJsonButton->setToolTip(tr("Copy visible license data as JSON"));
 
     layout->addWidget(dialogButtonBox);
 
