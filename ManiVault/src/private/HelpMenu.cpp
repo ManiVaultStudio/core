@@ -27,6 +27,7 @@
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QTextBrowser>
+#include <QTimer>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QStringLiteral>
@@ -260,6 +261,7 @@ void HelpMenu::aboutThirdParties() const
 
     auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Close, &dialog);
     auto copyJsonButton = dialogButtonBox->addButton(tr("Copy JSON"), QDialogButtonBox::ActionRole);
+    copyJsonButton->setIcon(StyledIcon("copy"));
 
     layout->addWidget(dialogButtonBox);
 
@@ -278,7 +280,7 @@ void HelpMenu::aboutThirdParties() const
         updateText();
     });
 
-    connect(copyJsonButton, &QPushButton::clicked, &dialog, [getVisibleUsages]() {
+    connect(copyJsonButton, &QPushButton::clicked, &dialog, [copyJsonButton, getVisibleUsages]() {
         QJsonArray coreLicenses;
         QJsonArray availablePluginLicenses;
         QJsonArray loadedPluginLicenses;
@@ -314,6 +316,13 @@ void HelpMenu::aboutThirdParties() const
         };
 
         QGuiApplication::clipboard()->setText(QJsonDocument(sections).toJson(QJsonDocument::Indented));
+
+        copyJsonButton->setIcon(StyledIcon("check"));
+        mv::help().addNotification("Third-party licenses", "License data copied as JSON.", StyledIcon("check"), util::Notification::DurationType::Fixed);
+
+        QTimer::singleShot(4000, copyJsonButton, [copyJsonButton]() {
+            copyJsonButton->setIcon(StyledIcon("copy"));
+        });
     });
 
     connect(dialogButtonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);

@@ -138,6 +138,7 @@ Notification::Notification(const QString& title, const QString& description, con
 {
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus);
     setWindowModality(Qt::NonModal);
+    setFocusPolicy(Qt::NoFocus);
     setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_ShowWithoutActivating);
     
@@ -157,6 +158,8 @@ Notification::Notification(const QString& title, const QString& description, con
     auto mainLayout                 = new QVBoxLayout();
     auto notificationWidget         = new NotificationWidget();
     auto closePushButton            = new QToolButton(this);
+
+    closePushButton->setFocusPolicy(Qt::NoFocus);
 
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
@@ -472,12 +475,13 @@ void Notification::updatePosition()
             _previousNotification->updateGeometry();
             _previousNotification->adjustSize();
 
-            move(QPoint(parentWidget()->mapToGlobal(QPoint(spacing, 0)).x(), _previousNotification->pos().y() - height() - spacing));
+            const auto previousPosition = _previousNotification->mapToGlobal(QPoint(0, 0));
+            move(QPoint(mainWindow->mapToGlobal(QPoint(spacing, 0)).x(), previousPosition.y() - height() - spacing));
         }
         else {
             const auto statusBarHeight = mainWindow->statusBar()->isVisible() ? mainWindow->statusBar()->height() : 0;
 
-            move(parentWidget()->mapToGlobal(QPoint(spacing, mainWindow->height() - statusBarHeight - height() - spacing)));
+            move(mainWindow->mapToGlobal(QPoint(spacing, mainWindow->height() - statusBarHeight - height() - spacing)));
         }
 
         if (_nextNotification)
