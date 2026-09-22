@@ -65,7 +65,7 @@ public:
             return dynamic_cast<TaskHandlerType*>(task->getHandler()) && task->getStatus() == status;
         });
 
-        return tasks;
+        return tasksByHandlerType;
     }
 
 protected:
