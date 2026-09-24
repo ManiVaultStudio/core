@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ManiVault workspace",
+  "type": "object",
+  "required": [
+    "Workspace"
+  ],
+  "properties": {
+    "Workspace": {
+      "type": "object",
+      "required": [
+        "ID",
+        "Locking",
+        "Title",
+        "Description",
+        "Tags",
+        "Comments",
+        "DockManagers"
+      ],
+      "properties": {
+        "ID": {
+          "type": "string"
+        },
+        "Locking": {
+          "type": "object"
+        },
+        "Title": {
+          "type": "object"
+        },
+        "Description": {
+          "type": "object"
+        },
+        "Tags": {
+          "type": "object"
+        },
+        "Comments": {
+          "type": "object"
+        },
+        "DockManagers": {
+          "type": "object",
+          "required": [
+            "Main",
+            "ViewPlugins"
+          ],
+          "properties": {
+            "Main": {
+              "type": "object"
+            },
+            "ViewPlugins": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    }
+  }
+}

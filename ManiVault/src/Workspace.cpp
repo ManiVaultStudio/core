@@ -9,6 +9,7 @@
 #include "CoreInterface.h"
 
 #include "util/Serialization.h"
+#include "util/JSON.h"
 
 #include <QBuffer>
 
@@ -52,6 +53,14 @@ Workspace::Workspace(const QString& filePath, QObject* parent /*= nullptr*/) :
             throw std::runtime_error("Unable to open file for reading");
 
         QByteArray workspaceByteArray = workspaceJsonFile.readAll();
+
+        validateJson(
+            workspaceByteArray.toStdString(),
+            getFilePath().toStdString(),
+            loadJsonFromResource(":/JSON/WorkspaceSchema"),
+            "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/workspace.schema.json",
+            true
+        );
 
         QJsonDocument jsonDocument = QJsonDocument::fromJson(workspaceByteArray);
 

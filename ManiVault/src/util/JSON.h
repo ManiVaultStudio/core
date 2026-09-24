@@ -30,7 +30,8 @@ CORE_EXPORT std::string loadJsonFromResource(const std::string& resourcePath);
  * @param jsonLocation Location of the JSON file
  * @param jsonSchemaString JSON schema content string
  * @param publicJsonSchemaLocation Location of the public JSON schema
+ * @param throwOnFailure Whether parse and schema failures should be propagated after logging
  */
-CORE_EXPORT void validateJson(const std::string& jsonString, const std::string& jsonLocation, const std::string& jsonSchemaString, const std::string& publicJsonSchemaLocation);
+CORE_EXPORT void validateJson(const std::string& jsonString, const std::string& jsonLocation, const std::string& jsonSchemaString, const std::string& publicJsonSchemaLocation, bool throwOnFailure = false);
 
 }

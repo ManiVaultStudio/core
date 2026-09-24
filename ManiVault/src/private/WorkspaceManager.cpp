@@ -18,6 +18,7 @@
 #include "exception/ManiVaultException.h"
 
 #include "util/Serialization.h"
+#include "util/JSON.h"
 #include "util/Icon.h"
 #include "util/Miscellaneous.h"
 
@@ -337,6 +338,21 @@ workflow::UniqueWorkflowPlan WorkspaceManager::loadWorkspaceWorkflowPlan(QString
 
             Application::current()->setSetting("Workspaces/WorkingDirectory", QFileInfo(finalFilePath).absolutePath());
         }
+
+        QFile workspaceJsonFile(finalFilePath);
+
+        if (!workspaceJsonFile.open(QIODevice::ReadOnly))
+            throw std::runtime_error("Unable to open workspace file for validation");
+
+        const auto workspaceJson = workspaceJsonFile.readAll();
+
+        validateJson(
+            workspaceJson.toStdString(),
+            finalFilePath.toStdString(),
+            loadJsonFromResource(":/JSON/WorkspaceSchema"),
+            "https://github.com/ManiVaultStudio/core/tree/master/ManiVault/res/json/workspace.schema.json",
+            true
+        );
 
         setWorkspaceFilePath(finalFilePath);
 

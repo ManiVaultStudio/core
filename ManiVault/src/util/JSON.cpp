@@ -48,7 +48,7 @@ std::string loadJsonFromResource(const std::string& resourcePath) {
     return file.readAll().toStdString();
 }
 
-void validateJson(const std::string& jsonString, const std::string& jsonLocation, const std::string& jsonSchemaString, const std::string& publicJsonSchemaLocation /*= ""*/)
+void validateJson(const std::string& jsonString, const std::string& jsonLocation, const std::string& jsonSchemaString, const std::string& publicJsonSchemaLocation /*= ""*/, bool throwOnFailure /*= false*/)
 {
     try {
         if (jsonString.empty())
@@ -103,10 +103,15 @@ void validateJson(const std::string& jsonString, const std::string& jsonLocation
                 }
                 std::cerr << std::endl;
             }
+
+            if (throwOnFailure)
+                throw std::runtime_error("JSON document " + jsonLocation + " failed schema validation");
         }
     }
     catch (const std::exception& e) {
         qCritical() << "Unable to validate JSON at: " << jsonLocation << e.what() << "\n";
+        if (throwOnFailure)
+            throw;
     }
 }
 
