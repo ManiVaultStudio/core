@@ -136,7 +136,7 @@ Notification::Notification(const QString& title, const QString& description, con
     _closing(false),
     _taskAction(nullptr, "Task")
 {
-    setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus);
+    setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus | Qt::WindowStaysOnTopHint);
     setWindowModality(Qt::NonModal);
     setFocusPolicy(Qt::NoFocus);
     setAttribute(Qt::WA_TranslucentBackground);
