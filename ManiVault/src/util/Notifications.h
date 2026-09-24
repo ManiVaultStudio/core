@@ -11,6 +11,8 @@
 #include <QObject>
 #include <QUrl>
 
+class QWindow;
+
 namespace mv::util
 {
 /**
@@ -81,6 +83,9 @@ private:
      */
     void updateAllPositions();
 
+    /** Synchronizes notification transient parents with the active application window. */
+    void updateTransientParents();
+
 signals:
 
     /**
@@ -91,6 +96,7 @@ signals:
 
 private:
     QVector<Notification*>  _notifications;     /**< Currently visible notifications in stack order */
+    QWindow*                _trackedTransientParent = nullptr; /**< Current transient parent tracked for lifetime changes */
 };
 
 }
