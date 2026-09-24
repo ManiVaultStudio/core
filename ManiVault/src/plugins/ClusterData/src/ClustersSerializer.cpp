@@ -107,17 +107,21 @@ UniqueWorkflowPlan ClustersSerializer::fromVariantMapWorkflow(const QVariantMap&
 
     WorkflowPlan::Jobs dataJobs;
 
-    dataJobs.emplace_back("Read metadata", WorkflowPlan::NestedWorkflowFunction([metadataMap, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
-        context->metadataBytes.resize(metadataMap["Size"].toULongLong());
+    const quint64 metadataSize = metadataMap["Size"].toULongLong();
+
+    dataJobs.emplace_back("Read metadata", WorkflowPlan::NestedWorkflowFunction([metadataMap, metadataSize, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        throwIfTooLargeForQSizeType(metadataSize, "Cluster metadata blob too large");
+        context->metadataBytes.resize(static_cast<qsizetype>(metadataSize));
 
         return populateBytesFromBlobMapWorkflow(metadataMap, context->metadataBytes.data(), context->metadataBytes.size(), executionContext->getOptions());
     }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
 
-    const auto indicesSize = indicesMap["Size"].toULongLong();
+    const quint64 indicesSize = indicesMap["Size"].toULongLong();
 
     if (indicesSize > 0) {
 	    dataJobs.emplace_back("Read indices", WorkflowPlan::NestedWorkflowFunction([indicesMap, indicesSize, context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
-	        context->indicesBytes.resize(indicesSize);
+	        throwIfTooLargeForQSizeType(indicesSize, "Cluster indices blob too large");
+	        context->indicesBytes.resize(static_cast<qsizetype>(indicesSize));
 
 	        return populateBytesFromBlobMapWorkflow(indicesMap, context->indicesBytes.data(), context->indicesBytes.size(), executionContext->getOptions());
 	    }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Atomic);
