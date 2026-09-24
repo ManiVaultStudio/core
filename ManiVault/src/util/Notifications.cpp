@@ -52,11 +52,6 @@ void Notifications::setupMainWindowSynchronization()
         mainWindow->removeEventFilter(this);
         mainWindow->installEventFilter(this);
 
-        connect(qApp, &QApplication::focusWindowChanged, this, [this](QWindow*) {
-            updateTransientParents();
-        }, Qt::UniqueConnection);
-
-        updateTransientParents();
     }
 }
 
@@ -85,64 +80,15 @@ void Notifications::addNotification(Notification* notification)
     });
 
     _notifications.append(notification);
-    updateTransientParents();
     notification->updatePosition();
     notification->show();
+    notification->raise();
 }
 
 void Notifications::updateAllPositions()
 {
-    updateTransientParents();
-
     for (auto repositionNotification : _notifications)
         repositionNotification->updatePosition();
-}
-
-void Notifications::updateTransientParents()
-{
-    auto* mainWindow = Application::getMainWindow();
-    auto* transientParent = QApplication::activeWindow();
-    auto* mainWindowHandle = mainWindow ? mainWindow->windowHandle() : nullptr;
-
-    if (!transientParent || !transientParent->windowHandle())
-        transientParent = mainWindow;
-
-    auto* transientParentHandle = transientParent ? transientParent->windowHandle() : nullptr;
-
-    if (transientParentHandle) {
-        for (auto notification : _notifications) {
-            if (notification->windowHandle() == transientParentHandle) {
-                transientParentHandle = mainWindowHandle;
-                break;
-            }
-        }
-    }
-
-    for (auto notification : _notifications) {
-        notification->winId();
-
-        if (auto* notificationWindow = notification->windowHandle()) {
-            if (notificationWindow->transientParent() != transientParentHandle)
-                notificationWindow->setTransientParent(transientParentHandle);
-        }
-    }
-
-    if (transientParentHandle && _trackedTransientParent != transientParentHandle) {
-        _trackedTransientParent = transientParentHandle;
-        auto* trackedTransientParent = transientParentHandle;
-
-        connect(trackedTransientParent, &QObject::destroyed, this, [this, trackedTransientParent]() {
-            if (_trackedTransientParent == trackedTransientParent) {
-                _trackedTransientParent = nullptr;
-                updateTransientParents();
-            }
-        });
-
-        connect(trackedTransientParent, &QWindow::visibilityChanged, this, [this, trackedTransientParent](QWindow::Visibility visibility) {
-            if (_trackedTransientParent == trackedTransientParent && visibility == QWindow::Hidden)
-                updateTransientParents();
-        });
-    }
 }
 
 }
