@@ -176,6 +176,9 @@ public:
      */
     static SecureNetworkAccessManager& sharedManager();
 
+    /** Configure common request policy and an identifiable application User-Agent. */
+    static void configureRequest(QNetworkRequest& request);
+
     /** 
      * Download file to byte array asynchronously
      * @param url URL of the file to download
@@ -248,11 +251,7 @@ private:
 
             QNetworkRequest request(url);
 
-            request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-
-#if QT_VERSION >= QT_VERSION_CHECK(6,7,0)
-            request.setMaximumRedirectsAllowed(maximumNumberOfRedirectsAllowed);
-#endif
+            configureRequest(request);
 
             auto reply = sharedManager().get(request);
 
@@ -372,17 +371,15 @@ private:
             });
 
             // Complete
-            connect(reply, &QNetworkReply::finished, reply, [reply, state, task, promise, finishOnce, openIfNeeded]() mutable {
+            connect(reply, &QNetworkReply::finished, reply, [reply, state, task, promise, finishOnce, openIfNeeded, url]() mutable {
 
                 // Guard network reply access
                 auto safeReply = QPointer<QNetworkReply>(reply);
 
-                if (!openIfNeeded(safeReply))
-                    return;
-
                 const QVariant statusVar = safeReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
 
-                const auto urlDisplayString = reply->url().toDisplayString().toHtmlEscaped();
+                const auto effectiveUrl = safeReply ? safeReply->url() : url;
+                const auto urlDisplayString = effectiveUrl.toDisplayString().toHtmlEscaped();
 
                 if (statusVar.isValid()) {
                     const int status = statusVar.toInt();
@@ -391,7 +388,16 @@ private:
                         state->sink->cancel();
 
                         const auto reason       = safeReply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
-                        const auto errorString  = QStringLiteral("HTTP %1 %2").arg(status).arg(reason);
+                        const auto errorString  = effectiveUrl == url
+                            ? QStringLiteral("HTTP %1 %2").arg(status).arg(reason)
+                            : QStringLiteral("HTTP %1 %2 (requested %3, received from %4)")
+                                .arg(status)
+                                .arg(reason)
+                                .arg(url.toDisplayString())
+                                .arg(effectiveUrl.toDisplayString());
+
+                        qWarning() << "Download request failed:" << url << "effective URL:" << effectiveUrl
+                                   << "status:" << status << reason;
 
                         if (task)
                             task->setAborted();
@@ -407,6 +413,9 @@ private:
                         return;
                     }
                 }
+
+                if (!openIfNeeded(safeReply))
+                    return;
 
                 if (safeReply->error() == QNetworkReply::NoError) {
                     QString errorString;
