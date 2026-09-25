@@ -26,6 +26,15 @@ namespace mv::util {
 
 namespace
 {
+    QString maniVaultUserAgent()
+    {
+        const auto applicationVersion = QCoreApplication::applicationVersion().trimmed();
+
+        return applicationVersion.isEmpty()
+            ? QStringLiteral("ManiVaultStudio (+https://manivault.studio/)")
+            : QStringLiteral("ManiVaultStudio/%1 (+https://manivault.studio/)").arg(applicationVersion);
+    }
+
     /** Single regex handling both filename* (RFC 5987) and filename= (quoted or token) */
     const QRegularExpression kReStarOrPlain(R"re((?:^|;)\s*filename\*\s*=\s*([^;]+)|(?:^|;)\s*filename\s*=\s*(?:"([^"]*)"|([^\s;]*)))re", QRegularExpression::CaseInsensitiveOption);
 
@@ -223,6 +232,13 @@ SecureNetworkAccessManager& FileDownloader::sharedManager()
     return *instance;
 }
 
+void FileDownloader::configureRequest(QNetworkRequest& request)
+{
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    request.setMaximumRedirectsAllowed(maximumNumberOfRedirectsAllowed);
+    request.setHeader(QNetworkRequest::UserAgentHeader, maniVaultUserAgent());
+}
+
 QFuture<QByteArray> FileDownloader::downloadToByteArrayAsync(const QUrl& url, Task* task /*= nullptr*/)
 {
     return downloadWithSinkAsync<ByteArraySink>(url, QString{}, task, true);
@@ -241,8 +257,7 @@ QFuture<std::uint64_t> FileDownloader::getDownloadSizeAsync(const QUrl& url)
     QMetaObject::invokeMethod(qApp, [promise = std::move(promise), url]() mutable {
         QNetworkRequest request(url);
 
-        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-        request.setMaximumRedirectsAllowed(maximumNumberOfRedirectsAllowed);
+        configureRequest(request);
 
         auto reply = sharedManager().head(request);
 
@@ -280,8 +295,7 @@ QFuture<QDateTime> FileDownloader::getLastModifiedAsync(const QUrl& url)
     QMetaObject::invokeMethod(qApp, [promise = std::move(promise), url]() mutable {
         QNetworkRequest request(url);
 
-        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-        request.setMaximumRedirectsAllowed(maximumNumberOfRedirectsAllowed);
+        configureRequest(request);
 
         auto reply = sharedManager().head(request);
 
@@ -346,8 +360,7 @@ QFuture<QString> FileDownloader::getFinalFileNameAsync(const QUrl& url)
 
         QNetworkRequest headRequest(url);
 
-        headRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-        headRequest.setMaximumRedirectsAllowed(maximumNumberOfRedirectsAllowed);
+        configureRequest(headRequest);
 
         auto headReply = sharedManager().head(headRequest);
 
@@ -387,8 +400,7 @@ QFuture<QString> FileDownloader::getFinalFileNameAsync(const QUrl& url)
             // Fallback: GET with Range to encourage Content-Disposition
             QNetworkRequest getRequest(effectiveUrl);
 
-            getRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-            getRequest.setMaximumRedirectsAllowed(maximumNumberOfRedirectsAllowed);
+            configureRequest(getRequest);
             getRequest.setRawHeader("Range", "bytes=0-0");
 
             auto getReply = sharedManager().get(getRequest);
