@@ -580,20 +580,22 @@ if(APPLE)
     # -always-overwrite
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
 
-    install(CODE "
-        message(\"**** MacOS bundle install ****\")
+    set(MACDEPLOY_SCRIPT_TEMPLATE [=[
+            message("**** MacOS bundle install ****")
 
         # Check if the Frameworks folder exists to determine if macdeployqt already ran
-        if(EXISTS \"${BUNDLE_DIR}/Contents/Frameworks/QtCore.framework\")
-            message(\"**** Skipping macdeployqt, bundle already deployed. ****\")
+        if(EXISTS "${BUNDLE_DIR}/Contents/Frameworks/QtCore.framework")
+            message("**** Skipping macdeployqt, bundle already deployed. ****")
         else()
-            message(\"**** Running macdeployqt for \"${BUNDLE_DIR}\" ****\")
-            execute_process(COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -no-strip RESULT_VARIABLE retval)
+            message("**** Running macdeployqt for \"${BUNDLE_DIR}\" ****")
+            execute_process(COMMAND ${MACDEPLOYQT_EXECUTABLE} "${BUNDLE_DIR}" -no-strip RESULT_VARIABLE retval)
             if(NOT retval EQUAL 0)
-                message(FATAL_ERROR \"macdeployqt failed\")
+                message(FATAL_ERROR "macdeployqt failed")
             endif()
         endif()
-    " COMPONENT MACOS_BUNDLE)
+    ]=])
+    string(CONFIGURE ${MACDEPLOY_SCRIPT_TEMPLATE} MACDEPLOY_SCRIPT)
+    install(CODE ${MACDEPLOY_SCRIPT} COMPONENT MACOS_BUNDLE)
       
     install(CODE "execute_process(
             COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt6_DIR} \"${BUNDLE_DIR}\"
