@@ -14,6 +14,7 @@
 
 #include "models/LearningCenterVideosModel.h"
 #include "models/LearningCenterTutorialsModel.h"
+#include "models/ThirdPartyLicensesListModel.h"
 
 #include <QObject>
 #include <QPointer>
@@ -96,6 +97,12 @@ public:
      * @return Const reference to tutorials model
      */
     virtual const LearningCenterTutorialsModel& getTutorialsModel() const = 0;
+
+    /**
+     * Get aggregated third-party license model
+     * @return Const reference to the third-party license model
+     */
+    virtual const ThirdPartyLicensesListModel& getThirdPartyLicensesModel() const = 0;
 
     /**
      * Get tutorials menu (e.g. for use in the main menu)

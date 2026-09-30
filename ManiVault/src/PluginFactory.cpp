@@ -236,6 +236,11 @@ const PluginMetadata& PluginFactory::getPluginMetadata() const
     return const_cast<PluginFactory*>(this)->getPluginMetadata();
 }
 
+ThirdPartyLicenses PluginFactory::getThirdPartyLicenses() const
+{
+    return getPluginMetadata().getThirdPartyLicenses();
+}
+
 QUrl PluginFactory::getReadmeMarkdownUrl() const
 {
     const auto githubRepositoryUrl = getRepositoryUrl();

@@ -1,0 +1,27 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Third-party license array",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "required": [
+            "name",
+            "license",
+            "url"
+        ],
+        "properties": {
+            "name": {
+                "type": "string",
+                "minLength": 1
+            },
+            "license": {
+                "type": "string",
+                "minLength": 1
+            },
+            "url": {
+                "type": "string"
+            }
+        },
+        "additionalProperties": false
+    }
+}

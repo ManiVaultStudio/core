@@ -6,9 +6,11 @@
 
 #include "Application.h"
 
+#include <QApplication>
 #include <QMainWindow>
 #include <QEvent>
 #include <QTimer>
+#include <QWindow>
 
 namespace mv::util
 {
@@ -22,7 +24,7 @@ void Notifications::showMessage(const QString& title, const QString& description
 {
     if (Application::getMainWindow()) {
         const auto createNotification = [this, title, description, icon, durationType]() -> Notification* {
-            return new Notification(title, description, icon, _notifications.isEmpty() ? nullptr : _notifications.last(), durationType, Application::getMainWindow());
+            return new Notification(title, description, icon, _notifications.isEmpty() ? nullptr : _notifications.last(), durationType, nullptr);
         };
 
         if (delayMs > 0) {
@@ -38,8 +40,9 @@ void Notifications::showMessage(const QString& title, const QString& description
 
 void Notifications::showTask(QPointer<Task> task)
 {
-    if (auto mainWindow = Application::getMainWindow()) {
-        addNotification(new Notification(task, _notifications.isEmpty() ? nullptr : _notifications.last(), mainWindow));
+    if (Application::getMainWindow()) {
+        auto notification = new Notification(task, _notifications.isEmpty() ? nullptr : _notifications.last(), nullptr);
+        addNotification(notification);
     }
 }
 
@@ -48,6 +51,7 @@ void Notifications::setupMainWindowSynchronization()
     if (auto mainWindow = Application::getMainWindow()) {
         mainWindow->removeEventFilter(this);
         mainWindow->installEventFilter(this);
+
     }
 }
 
@@ -75,10 +79,10 @@ void Notifications::addNotification(Notification* notification)
         updateAllPositions();
     });
 
+    _notifications.append(notification);
     notification->updatePosition();
     notification->show();
-
-    _notifications.append(notification);
+    notification->raise();
 }
 
 void Notifications::updateAllPositions()

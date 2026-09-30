@@ -246,6 +246,56 @@ bool PluginMetadata::hasLicenseText() const
     return !_licenseText.isEmpty();
 }
 
+ThirdPartyLicenses PluginMetadata::getThirdPartyLicenses() const
+{
+    return _thirdPartyLicenses;
+}
+
+void PluginMetadata::setThirdPartyLicenses(const ThirdPartyLicenses& thirdPartyLicenses)
+{
+    if (thirdPartyLicenses == _thirdPartyLicenses)
+        return;
+
+    const auto previousThirdPartyLicenses = _thirdPartyLicenses;
+
+    _thirdPartyLicenses = thirdPartyLicenses;
+
+    emit thirdPartyLicensesChanged(previousThirdPartyLicenses, _thirdPartyLicenses);
+}
+
+void PluginMetadata::addThirdPartyLicense(const ThirdPartyLicense& thirdPartyLicense)
+{
+    if (std::find(_thirdPartyLicenses.begin(), _thirdPartyLicenses.end(), thirdPartyLicense) != _thirdPartyLicenses.end())
+        return;
+
+    auto updatedThirdPartyLicenses = _thirdPartyLicenses;
+
+    updatedThirdPartyLicenses.push_back(thirdPartyLicense);
+
+    setThirdPartyLicenses(updatedThirdPartyLicenses);
+}
+
+bool PluginMetadata::removeThirdPartyLicense(const ThirdPartyLicense& thirdPartyLicense)
+{
+    const auto it = std::find(_thirdPartyLicenses.begin(), _thirdPartyLicenses.end(), thirdPartyLicense);
+
+    if (it == _thirdPartyLicenses.end())
+        return false;
+
+    auto updatedThirdPartyLicenses = _thirdPartyLicenses;
+
+    updatedThirdPartyLicenses.erase(updatedThirdPartyLicenses.begin() + std::distance(_thirdPartyLicenses.begin(), it));
+
+    setThirdPartyLicenses(updatedThirdPartyLicenses);
+
+    return true;
+}
+
+bool PluginMetadata::hasThirdPartyLicenses() const
+{
+    return !_thirdPartyLicenses.empty();
+}
+
 QString PluginMetadata::getAboutMarkdown() const
 {
     if (!_aboutMarkdown.isEmpty())

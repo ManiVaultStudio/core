@@ -22,6 +22,7 @@
 
 #include <QDebug>
 #include <QJsonArray>
+#include <QJsonObject>
 #include <QJsonValue>
 #include <QPluginLoader>
 #include <QSet>
@@ -220,6 +221,33 @@ void PluginManager::loadPluginFactories()
         // Loading of the plugin succeeded so cast it to its original class
         _pluginFactories[pluginKind] = pluginFactory;
         _pluginFactories[pluginKind]->setKind(pluginKind);
+
+        // Copy optional third-party license metadata into the factory metadata so public models can aggregate it.
+        const auto thirdPartyLicensesValue = pluginMetaData.value("thirdPartyLicenses");
+
+        if (thirdPartyLicensesValue.isArray())
+        {
+            for (const auto& thirdPartyLicenseValue : thirdPartyLicensesValue.toArray())
+            {
+                if (!thirdPartyLicenseValue.isObject())
+                {
+                    qWarning() << "Ignoring malformed third-party license entry for plugin:" << pluginKind;
+                    continue;
+                }
+
+                const auto thirdPartyLicenseObject  = thirdPartyLicenseValue.toObject();
+                const auto name                     = thirdPartyLicenseObject.value("name").toString();
+
+                if (name.isEmpty())
+                {
+                    qWarning() << "Ignoring third-party license entry without a name for plugin:" << pluginKind;
+                    continue;
+                }
+
+                _pluginFactories[pluginKind]->getPluginMetadata().addThirdPartyLicense({ name, thirdPartyLicenseObject.value("license").toString(), thirdPartyLicenseObject.value("url").toString() });
+            }
+        }
+
         _pluginFactories[pluginKind]->getPluginMetadata().getVersion().setContext(QString("%1 plugin").arg(pluginKind).toStdString());
         _pluginFactories[pluginKind]->getPluginMetadata().getVersion().initialize(version);
         _pluginFactories[pluginKind]->initialize();

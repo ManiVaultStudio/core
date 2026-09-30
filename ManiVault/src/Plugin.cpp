@@ -61,6 +61,11 @@ const mv::plugin::PluginFactory* Plugin::getFactory() const
     return _factory;
 }
 
+ThirdPartyLicenses Plugin::getThirdPartyLicenses() const
+{
+    return _factory->getThirdPartyLicenses();
+}
+
 QString Plugin::getName() const
 {
     return _name;

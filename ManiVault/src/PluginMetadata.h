@@ -18,6 +18,24 @@ namespace mv::plugin
 
 class PluginFactory;
 
+/** Third-party dependency license information. */
+struct CORE_EXPORT ThirdPartyLicense
+{
+    QString name;       /** Name of the third-party dependency */
+    QString license;    /** License identifier or name */
+    QString url;        /** URL with additional license or dependency information */
+
+    bool operator==(const ThirdPartyLicense& rhs) const {
+        return name == rhs.name && license == rhs.license && url == rhs.url;
+    }
+
+    bool operator!=(const ThirdPartyLicense& rhs) const {
+        return !(*this == rhs);
+    }
+};
+
+using ThirdPartyLicenses = std::vector<ThirdPartyLicense>;
+
 /**
  * Plugin metadata plugin class
  *
@@ -356,6 +374,39 @@ public: // License text
      */
     bool hasLicenseText() const;
 
+public: // Third-party licenses
+
+    /**
+     * Get third-party dependency licenses
+     * @return Third-party dependency licenses used by the plugin
+     */
+    ThirdPartyLicenses getThirdPartyLicenses() const;
+
+    /**
+     * Set third-party dependency licenses
+     * @param thirdPartyLicenses Third-party dependency licenses used by the plugin
+     */
+    void setThirdPartyLicenses(const ThirdPartyLicenses& thirdPartyLicenses);
+
+    /**
+     * Add a third-party dependency license
+     * @param thirdPartyLicense Third-party dependency license to add
+     */
+    void addThirdPartyLicense(const ThirdPartyLicense& thirdPartyLicense);
+
+    /**
+     * Remove a third-party dependency license
+     * @param thirdPartyLicense Third-party dependency license to remove
+     * @return Whether a matching license was removed
+     */
+    bool removeThirdPartyLicense(const ThirdPartyLicense& thirdPartyLicense);
+
+    /**
+     * Get whether the plugin has third-party dependency licenses
+     * @return Boolean determining whether third-party dependency licenses are available
+     */
+    bool hasThirdPartyLicenses() const;
+
 public: // About markdown
 
     /**
@@ -457,6 +508,13 @@ signals:
     void licenseTextChanged(const QString& previousLicenseText, const QString& currentLicenseText);
 
     /**
+     * Signals that the third-party dependency licenses changed
+     * @param previousThirdPartyLicenses Previous third-party dependency licenses
+     * @param currentThirdPartyLicenses Current third-party dependency licenses
+     */
+    void thirdPartyLicensesChanged(const ThirdPartyLicenses& previousThirdPartyLicenses, const ThirdPartyLicenses& currentThirdPartyLicenses);
+
+    /**
      * Signals that the about text in Markdown format changed from \p previousAboutMarkdown to \p currentAboutMarkdown
      * @param previousAboutMarkdown Previous about text in Markdown format
      * @param currentAboutMarkdown Current about text in Markdown format
@@ -479,6 +537,7 @@ private:
     Authors                 _authors;                   /** Authors that created and maintain the plugin (used in auto-generated about Markdown) */
     QString                 _copyrightHolder;           /** Copyright holder (used in auto-generated about Markdown) */
     QString                 _licenseText;               /** License text (used in auto-generated about Markdown) */
+    ThirdPartyLicenses      _thirdPartyLicenses;         /** Third-party dependency licenses */
     QString                 _aboutMarkdown;             /** About text in Markdown format. When set, it overrides the standardized about Markdown generated from summary, authors and copyright notice. */
 };
 

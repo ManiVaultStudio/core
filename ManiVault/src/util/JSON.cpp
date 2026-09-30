@@ -57,13 +57,21 @@ void validateJson(const std::string& jsonString, const std::string& jsonLocation
         if (jsonSchemaString.empty())
             throw std::runtime_error("JSON schema is empty");
 
-        if (!isValidJson(jsonString))
-            throw std::runtime_error("Input content is not properly JSON formatted");
+        nlohmann::json jsonDocument, jsonSchemaDocument;
 
-        if (!isValidJson(jsonSchemaString))
-            throw std::runtime_error("Schema content is not properly JSON formatted");
+        try {
+            jsonDocument = nlohmann::json::parse(jsonString);
+        }
+        catch (const nlohmann::json::parse_error& e) {
+            throw std::runtime_error(std::string("Input content is not properly JSON formatted: ") + e.what());
+        }
 
-        nlohmann::json jsonDocument = nlohmann::json::parse(jsonString), jsonSchemaDocument = nlohmann::json::parse(jsonSchemaString);
+        try {
+            jsonSchemaDocument = nlohmann::json::parse(jsonSchemaString);
+        }
+        catch (const nlohmann::json::parse_error& e) {
+            throw std::runtime_error(std::string("Schema content is not properly JSON formatted: ") + e.what());
+        }
 
         valijson::Schema schema;
         valijson::adapters::NlohmannJsonAdapter schemaAdapter(jsonSchemaDocument);

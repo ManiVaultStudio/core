@@ -59,6 +59,12 @@ public:
      */
     const PluginFactory* getFactory() const;
 
+    /**
+     * Get third-party dependency licenses (facade for the PluginFactory class)
+     * @return Third-party dependency licenses used by the plugin
+     */
+    ThirdPartyLicenses getThirdPartyLicenses() const;
+
     /** Returns the unique name of this plugin */
     QString getName() const;
 

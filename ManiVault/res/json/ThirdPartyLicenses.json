@@ -1,0 +1,54 @@
+{
+    "thirdPartyLicenses": [
+        {
+            "name": "Qt-Advanced-Docking-System",
+            "license": "LGPL-2.1",
+            "url": "https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System"
+        },
+        {
+            "name": "QuaZip",
+            "license": "LGPL-2.1",
+            "url": "https://github.com/stachenov/quazip"
+        },
+        {
+            "name": "zlib",
+            "license": "zlib",
+            "url": "https://zlib.net"
+        },
+        {
+            "name": "nlohmann json",
+            "license": "MIT",
+            "url": "https://json.nlohmann.me"
+        },
+        {
+            "name": "valijson",
+            "license": "BSD-2-Clause",
+            "url": "https://github.com/tristanpenman/valijson"
+        },
+        {
+            "name": "biovault_bfloat16",
+            "license": "Apache-2.0",
+            "url": "https://github.com/biovault/biovault_bfloat16"
+        },
+        {
+            "name": "Zstandard",
+            "license": "BSD",
+            "url": "https://github.com/facebook/zstd"
+        },
+        {
+            "name": "Taskflow",
+            "license": "MIT",
+            "url": "https://github.com/taskflow/taskflow"
+        },
+        {
+            "name": "sentry",
+            "license": "MIT",
+            "url": "https://sentry.io"
+        },
+        {
+            "name": "Qt",
+            "license": "LGPL",
+            "url": "https://qt.io"
+        }
+    ]
+}
