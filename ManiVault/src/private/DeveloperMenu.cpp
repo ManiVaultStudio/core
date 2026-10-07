@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #include "DeveloperMenu.h"
+#include "GifRecorder.h"
 #include "ParallelPhantomTestSuite.h"
 
 #include <CoreInterface.h>
@@ -11,6 +12,7 @@
 #include <util/StyledIcon.h>
 
 #include <QDir>
+#include <QFileDialog>
 #include <QMessageBox>
 
 #include <cstdlib>
@@ -22,6 +24,23 @@ DeveloperMenu::DeveloperMenu(QWidget* parent /*= nullptr*/) :
 {
     setTitle("Dev");
     setToolTip("Development and integration test tools");
+
+    _gifRecorder = std::make_unique<GifRecorder>(parentWidget(), this);
+    auto gifRecordingMenu = addMenu(util::StyledIcon("video"), tr("Behavioral testing"));
+    _gifRecordingAction = gifRecordingMenu->addAction(util::StyledIcon("record-vinyl"), tr("Start GIF recording…"));
+    _gifRecordingAction->setToolTip(tr("Capture the ManiVault Studio main window as an animated GIF"));
+    connect(_gifRecordingAction, &QAction::triggered, this, &DeveloperMenu::toggleGifRecording);
+    connect(_gifRecorder.get(), &GifRecorder::recordingStarted, this, [this] {
+        mv::help().addNotification(tr("GIF recording started"), tr("The ManiVault Studio main window is being recorded at 8 FPS."), util::StyledIcon("circle-dot"));
+    });
+    connect(_gifRecorder.get(), &GifRecorder::recordingFinished, this, [this](const QString& path, int frameCount, qint64 durationMs, qint64 fileSize) {
+        _gifRecordingAction->setText(tr("Start GIF recording…"));
+        mv::help().addNotification(tr("GIF recording saved"), tr("Saved %1 (%2 frames, %3 ms, %4 bytes).").arg(path).arg(frameCount).arg(durationMs).arg(fileSize), util::StyledIcon("check"));
+    });
+    connect(_gifRecorder.get(), &GifRecorder::recordingFailed, this, [this](const QString& error) {
+        _gifRecordingAction->setText(tr("Start GIF recording…"));
+        mv::help().addNotification(tr("GIF recording failed"), error, util::StyledIcon("circle-exclamation"));
+    });
 
     auto workflowTestingMenu = addMenu(util::StyledIcon("diagram-project"), tr("Workflow testing"));
 
@@ -47,6 +66,33 @@ DeveloperMenu::DeveloperMenu(QWidget* parent /*= nullptr*/) :
         testFatalCrash();
     });
 #endif
+}
+
+DeveloperMenu::~DeveloperMenu() = default;
+
+void DeveloperMenu::toggleGifRecording()
+{
+    if (_gifRecorder->isRecording()) {
+        QString error;
+        if (_gifRecorder->stop(error))
+            _gifRecordingAction->setText(tr("Encoding GIF recording…"));
+        return;
+    }
+
+    if (_gifRecorder->state() != GifRecorder::State::Idle)
+        return;
+
+    auto outputPath = QFileDialog::getSaveFileName(parentWidget(), tr("Save GIF recording"), QString(), tr("Animated GIF (*.gif)"));
+    if (outputPath.isEmpty())
+        return;
+    if (!outputPath.endsWith(QStringLiteral(".gif"), Qt::CaseInsensitive))
+        outputPath += QStringLiteral(".gif");
+
+    QString error;
+    if (!_gifRecorder->start(outputPath, error))
+        mv::help().addNotification(tr("GIF recording failed"), error, util::StyledIcon("circle-exclamation"));
+    else
+        _gifRecordingAction->setText(tr("Stop GIF recording"));
 }
 
 void DeveloperMenu::testHandledException()

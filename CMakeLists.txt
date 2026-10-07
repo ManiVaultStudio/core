@@ -15,7 +15,7 @@ endif()
 file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
 
 # Other user-facing options
-option(MV_USE_GTEST "Use GoogleTest" OFF)
+option(MV_BUILD_TESTING "Build ManiVault tests" OFF)
 option(MV_USE_AVX "Use AVX if available - by default OFF" OFF)
 option(MV_USE_ERROR_LOGGING "Use error logging with Sentry" OFF)
 option(MV_PRECOMPILE_HEADERS "Precompile several headers for faster compilation" ON)
@@ -38,10 +38,8 @@ message(STATUS "  Install dir: ${MV_INSTALL_DIR}")
 # Tests
 # -----------------------------------------------------------------------------
 
-if (MV_USE_GTEST)
-    message(WARNING "MV_USE_GTEST: currently no test are available")
-    #enable_testing()
-    #add_subdirectory(external/googletest)
+if (MV_BUILD_TESTING)
+    enable_testing()
 endif()
 
 # -----------------------------------------------------------------------------

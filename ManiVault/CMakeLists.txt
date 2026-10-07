@@ -481,6 +481,10 @@ endif()
 
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
 
+if (MV_BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
+
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${MV_EXE} ${MV_USE_AVX})
 
@@ -846,6 +850,8 @@ list(APPEND INSTALL_LICENSE_COMMANDS
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${zstd_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zstd/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/taskflow
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Taskflow_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/taskflow/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/msf_gif
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/external/msf_gif/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/msf_gif/LICENSE
 )
 
 if(${MV_USE_ERROR_LOGGING})

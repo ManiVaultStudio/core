@@ -6,12 +6,17 @@
 
 #include <QMenu>
 
+#include <memory>
+
+class GifRecorder;
+
 /** Menu containing development and integration test tools. */
 class DeveloperMenu : public QMenu
 {
 public:
     /** Constructs the developer menu with an optional parent widget. */
     DeveloperMenu(QWidget* parent = nullptr);
+    ~DeveloperMenu() override;
 
 private:
     /** Runs the safe handled-exception reporting test. */
@@ -19,4 +24,10 @@ private:
 
     /** Runs the destructive fatal-crash reporting test after confirmation. */
     void testFatalCrash();
+
+    /** Starts or stops the developer-only main-window GIF recorder. */
+    void toggleGifRecording();
+
+    std::unique_ptr<GifRecorder> _gifRecorder;             /**< Developer-only GIF recorder. */
+    QAction*                     _gifRecordingAction = nullptr; /**< Start/stop recording action. */
 };
