@@ -41,6 +41,11 @@
             "url": "https://github.com/taskflow/taskflow"
         },
         {
+            "name": "msf_gif",
+            "license": "MIT",
+            "url": "https://github.com/notnullnotvoid/msf_gif"
+        },
+        {
             "name": "sentry",
             "license": "MIT",
             "url": "https://sentry.io"

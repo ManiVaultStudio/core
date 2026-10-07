@@ -1,6 +1,12 @@
 build/
+.codex-mv-test/
 external/
-ManiVault/external/
+!ManiVault/external/
+ManiVault/external/*
+!ManiVault/external/msf_gif/
+!ManiVault/external/msf_gif/msf_gif.h
+!ManiVault/external/msf_gif/LICENSE
+!ManiVault/external/msf_gif/README.md
 *.log
 *.dir
 Doxygen/
