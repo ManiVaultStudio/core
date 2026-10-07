@@ -126,7 +126,11 @@ include(DownloadFontAwesome)
 # -----------------------------------------------------------------------------
 # Dependencies
 # -----------------------------------------------------------------------------
+
 function(get_vcpkg_copyright PKG_NAME OUT_VAR)
+    # the PKG_NAME parameter must correspond to the vcpkg package-name 
+    # not necessarily the repo name which may contain underscores or 
+    # illegal characters in vcpkg naming.
     set(_path "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/share/${PKG_NAME}/copyright")
     if(EXISTS "${_path}")
         set(${OUT_VAR} "${_path}" PARENT_SCOPE)
