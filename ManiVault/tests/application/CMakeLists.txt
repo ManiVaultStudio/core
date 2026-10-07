@@ -3,6 +3,9 @@ add_executable(MV_Application_GifEncoderTest
     ../../src/private/GifEncoder.cpp
 )
 
+source_group("Tests/Application" FILES GifEncoderTest.cpp)
+source_group("Tests/Application/Implementation" FILES ../../src/private/GifEncoder.cpp)
+
 target_include_directories(MV_Application_GifEncoderTest PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../../src/private
 )

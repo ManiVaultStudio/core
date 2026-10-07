@@ -1,4 +1,5 @@
 build/
+.codex-mv-test/
 external/
 !ManiVault/external/
 ManiVault/external/*
