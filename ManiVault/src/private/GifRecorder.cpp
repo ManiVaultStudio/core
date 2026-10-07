@@ -91,7 +91,7 @@ void GifRecorder::captureFrame()
 
     if (QDateTime::currentMSecsSinceEpoch() - _startTimeMs >= MaximumDurationMs) {
         QString ignoredError;
-        stop(ignoredError);
+        [[maybe_unused]] auto result = stop(ignoredError);
         return;
     }
 
@@ -119,7 +119,7 @@ void GifRecorder::captureFrame()
 
     if (QDateTime::currentMSecsSinceEpoch() - _startTimeMs >= MaximumDurationMs) {
         QString ignoredError;
-        stop(ignoredError);
+        [[maybe_unused]] auto result = stop(ignoredError);
     }
 }
 
