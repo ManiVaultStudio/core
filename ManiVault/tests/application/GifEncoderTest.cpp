@@ -55,9 +55,28 @@ bool rejectsFramesWithUnexpectedDimensions()
         && require(encoder.finish(error).isEmpty(), "failed encoder produced output");
 }
 
+bool rejectsInvalidFramesAndResetsAfterEmptyFinish()
+{
+    GifEncoder encoder;
+    QString error;
+    if (!require(encoder.begin(QSize(8, 8), error), error.toLocal8Bit().constData()))
+        return false;
+
+    const auto wrongFormat = QImage(QSize(8, 8), QImage::Format_RGB32);
+    const auto validFrame = frame(QSize(8, 8), Qt::yellow);
+
+    return require(!encoder.addFrame(wrongFormat, 12, error), "non-RGBA frame was accepted")
+        && require(encoder.frameCount() == 0, "invalid frame changed the frame count")
+        && require(!encoder.addFrame(validFrame, 0, error), "zero-duration frame was accepted")
+        && require(encoder.frameCount() == 0, "invalid duration changed the frame count")
+        && require(encoder.finish(error).isEmpty(), "encoder without valid frames produced output")
+        && require(encoder.begin(QSize(8, 8), error), "encoder could not be reused after empty finish");
+}
+
 int main()
 {
     return rejectsInvalidDimensionsAndEmptyInput()
         && producesAnimatedGifFromSyntheticFrames()
-        && rejectsFramesWithUnexpectedDimensions() ? 0 : 1;
+        && rejectsFramesWithUnexpectedDimensions()
+        && rejectsInvalidFramesAndResetsAfterEmptyFinish() ? 0 : 1;
 }

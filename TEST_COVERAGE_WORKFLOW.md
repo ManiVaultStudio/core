@@ -29,10 +29,10 @@ codex/core-test-coverage-2026-W41
 ## Current campaign
 
 - Week: 2026-W41
-- Branch: `master` temporarily contains the initial uncommitted coverage changes; create the weekly branch before committing or pushing them
-- Planned branch: `codex/core-test-coverage-2026-W41`
+- Branch: `codex/core-test-coverage-2026-W41`
+- Planned branch: none; current weekly branch is active
 - Pull request: not opened
-- Status: initial setup; awaiting branch creation and human review
+- Status: collecting changes; one focused test improvement is ready for review
 
 ## Daily work
 
