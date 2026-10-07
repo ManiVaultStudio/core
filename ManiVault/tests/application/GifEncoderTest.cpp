@@ -28,6 +28,16 @@ bool rejectsInvalidDimensionsAndEmptyInput()
         && require(encoder.finish(error).isEmpty(), "empty encoder produced output");
 }
 
+bool rejectsOversizedAndDuplicateBegins()
+{
+    GifEncoder encoder;
+    QString error;
+    return require(!encoder.begin(QSize(65536, 1), error), "oversized dimensions were accepted")
+        && require(encoder.begin(QSize(8, 8), error), error.toLocal8Bit().constData())
+        && require(!encoder.begin(QSize(8, 8), error), "duplicate encoder start was accepted")
+        && require(encoder.finish(error).isEmpty(), "encoder without frames produced output");
+}
+
 bool producesAnimatedGifFromSyntheticFrames()
 {
     GifEncoder encoder;
@@ -76,6 +86,7 @@ bool rejectsInvalidFramesAndResetsAfterEmptyFinish()
 int main()
 {
     return rejectsInvalidDimensionsAndEmptyInput()
+        && rejectsOversizedAndDuplicateBegins()
         && producesAnimatedGifFromSyntheticFrames()
         && rejectsFramesWithUnexpectedDimensions()
         && rejectsInvalidFramesAndResetsAfterEmptyFinish() ? 0 : 1;

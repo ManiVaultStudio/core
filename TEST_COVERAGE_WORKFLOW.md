@@ -31,8 +31,8 @@ codex/core-test-coverage-2026-W41
 - Week: 2026-W41
 - Branch: `codex/core-test-coverage-2026-W41`
 - Planned branch: none; current weekly branch is active
-- Pull request: not opened
-- Status: collecting changes; one focused test improvement is ready for review
+- Pull request: https://github.com/ManiVaultStudio/core/pull/1361
+- Status: collecting changes; the weekly pull request is open for review
 
 ## Daily work
 
