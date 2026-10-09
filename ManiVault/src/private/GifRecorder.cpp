@@ -14,6 +14,7 @@
 #include <QWidget>
 
 #include <algorithm>
+#include <utility>
 
 namespace {
 // QScreen::grabWindow uses the native compositor path, which includes OpenGL-backed
@@ -21,11 +22,14 @@ namespace {
 // those ticks are skipped and the recording reports failure if no frame was obtained.
 constexpr int FramesPerSecond = 8;
 constexpr int FrameIntervalMs = 1000 / FramesPerSecond;
-constexpr int MaximumDurationMs = 30 * 1000;
 constexpr int MaximumWidth = 1280;
 }
 
-GifRecorder::GifRecorder(QWidget* window, QObject* parent) : QObject(parent), _window(window)
+GifRecorder::GifRecorder(QWidget* window, QObject* parent, FrameProvider frameProvider, int maximumDurationMs) :
+    QObject(parent),
+    _window(window),
+    _frameProvider(std::move(frameProvider)),
+    _maximumDurationMs(maximumDurationMs)
 {
     _timer.setInterval(FrameIntervalMs);
     connect(&_timer, &QTimer::timeout, this, &GifRecorder::captureFrame);
@@ -43,7 +47,7 @@ bool GifRecorder::start(const QString& outputPath, QString& error)
         error = QStringLiteral("A GIF recording is already in progress.");
         return false;
     }
-    if (!_window || outputPath.isEmpty()) {
+    if ((!_window && !_frameProvider) || outputPath.isEmpty()) {
         error = QStringLiteral("The recording window or output path is unavailable.");
         return false;
     }
@@ -89,25 +93,33 @@ void GifRecorder::captureFrame()
     if (_state != State::Recording)
         return;
 
-    if (QDateTime::currentMSecsSinceEpoch() - _startTimeMs >= MaximumDurationMs) {
+    if (QDateTime::currentMSecsSinceEpoch() - _startTimeMs >= _maximumDurationMs) {
         QString ignoredError;
         [[maybe_unused]] auto result = stop(ignoredError);
         return;
     }
 
-    if (!_window || _window->isMinimized())
-        return;
+    QImage frame;
+    if (_frameProvider) {
+        frame = _frameProvider();
+    }
+    else {
+        if (!_window || _window->isMinimized())
+            return;
 
-    auto* windowHandle = _window->windowHandle();
-    auto* screen = windowHandle && windowHandle->screen() ? windowHandle->screen() : _window->screen();
-    if (!screen)
-        return;
+        auto* windowHandle = _window->windowHandle();
+        auto* screen = windowHandle && windowHandle->screen() ? windowHandle->screen() : _window->screen();
+        if (!screen)
+            return;
 
-    const auto pixmap = screen->grabWindow(_window->winId());
-    if (pixmap.isNull())
-        return;
+        const auto pixmap = screen->grabWindow(_window->winId());
+        if (pixmap.isNull())
+            return;
 
-    auto frame = normalizeFrame(pixmap.toImage().convertToFormat(QImage::Format_RGBA8888));
+        frame = pixmap.toImage().convertToFormat(QImage::Format_RGBA8888);
+    }
+
+    frame = normalizeFrame(frame);
     if (frame.isNull())
         return;
 
@@ -117,7 +129,7 @@ void GifRecorder::captureFrame()
         frame = frame.scaled(_frameSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     _frames.push_back(frame);
 
-    if (QDateTime::currentMSecsSinceEpoch() - _startTimeMs >= MaximumDurationMs) {
+    if (QDateTime::currentMSecsSinceEpoch() - _startTimeMs >= _maximumDurationMs) {
         QString ignoredError;
         [[maybe_unused]] auto result = stop(ignoredError);
     }

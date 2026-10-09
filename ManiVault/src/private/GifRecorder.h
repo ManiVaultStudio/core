@@ -9,6 +9,8 @@
 #include <QString>
 #include <QTimer>
 
+#include <functional>
+
 template<typename T> class QFutureWatcher;
 class QWidget;
 
@@ -31,6 +33,8 @@ class GifRecorder : public QObject
     Q_OBJECT
 
 public:
+    using FrameProvider = std::function<QImage()>;
+
     /** Current phase of the recording lifecycle. */
     enum class State {
         Idle,       /**< No recording or export is active. */
@@ -44,7 +48,7 @@ public:
      * @param window Main-window widget whose native window will be captured.
      * @param parent Optional QObject parent.
      */
-    explicit GifRecorder(QWidget* window, QObject* parent = nullptr);
+    explicit GifRecorder(QWidget* window, QObject* parent = nullptr, FrameProvider frameProvider = {}, int maximumDurationMs = 30 * 1000);
 
     /** Stops the capture timer and releases recorder-owned resources. */
     ~GifRecorder() override;
@@ -112,6 +116,8 @@ private:
     QImage normalizeFrame(const QImage& image) const;
 
     QPointer<QWidget>           _window;                 /**< Native window capture target. */
+    FrameProvider               _frameProvider;          /**< Optional injectable frame source. */
+    int                         _maximumDurationMs;      /**< Maximum recording duration. */
     QTimer                      _timer;                  /**< Fixed-rate capture timer. */
     QFutureWatcher<QString>*    _watcher = nullptr;      /**< Asynchronous export watcher. */
     State                       _state = State::Idle;    /**< Current lifecycle state. */

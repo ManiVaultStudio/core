@@ -6,6 +6,15 @@
 
 ## Completed
 
+- [x] `ManiVault/src/private/GifRecorder.cpp`: add deterministic application-level lifecycle coverage
+  - Completed: 2026-10-09
+  - Scope: `application-specific`
+  - User impact: `low`
+  - Fan-out: `narrow`
+  - Tests: `cmake -S D:\DevBundle\core_testing\source -B D:\DevBundle\core_testing\build -DMV_BUILD_TESTING=ON`; `cmake --build D:\DevBundle\core_testing\build\core --config Debug --target ManiVault/tests/application/MV_Application_GifRecorderTest`; `ctest --test-dir D:\DevBundle\core_testing\build\core -C Debug -R '^MV_Application_GifRecorderTest$' --output-on-failure` (passed: 1/1)
+  - Coverage: not measured
+  - Notes: added an injectable frame provider and configurable duration while preserving the production constructor defaults; no display server or real window is required
+
 - [x] `ManiVault/src/util/BlobCodec.cpp`: test public blob codec type serialization and case-insensitive parsing
   - Completed: 2026-10-09
   - Scope: `public-core`
@@ -53,6 +62,10 @@
   - Notes: exercises observable ColorScheme state without changing production code
 
 ## Deferred
+
+- `ManiVault/src/private/GifRecorder.cpp`: inject startup, capture-provider and encoder failures independently
+  - Deferred because the current recorder owns native window capture and asynchronous encoder execution directly; adding failure injection would require a broader abstraction than this time-box allows.
+  - Follow-up: consider an internal encoder/finalization seam if these failure paths become a priority.
 
 - `ManiVault/src/util/BlobCodec.cpp`: test rejection of unknown codec strings
   - Deferred because constructing `ManiVaultException` requires initialized global error-manager state that is unavailable in the standalone public test executable.
