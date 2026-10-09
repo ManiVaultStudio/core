@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: ".github/workflows"
+    schedule:
+      interval: "weekly"
+    allow:
+      - dependency-type: "production"
+      - dependency-type: "indirect"
+    pull-request-branch-name:
+      separator: "/"
+      prefix: "feature/dependabot"
+    cooldown:
+      default-days: 7
