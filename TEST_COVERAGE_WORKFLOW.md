@@ -29,10 +29,10 @@ feature/core-test-coverage-2026-W41
 ## Current campaign
 
 - Week: 2026-W41
-- Branch: `feature/core-test-coverage-2026-W41`
-- Planned branch: none; current weekly branch is active
-- Pull request: https://github.com/ManiVaultStudio/core/pull/1361
-- Status: collecting changes; the weekly pull request is open for review
+- Branch: `feature/core-test-coverage-2026-W41-followup`
+- Planned branch: none; current follow-up branch is active
+- Pull request: https://github.com/ManiVaultStudio/core/pull/1363
+- Status: collecting changes; the follow-up pull request is open for review
 
 ## Daily work
 
@@ -42,6 +42,14 @@ feature/core-test-coverage-2026-W41
 4. Add at most one focused test improvement.
 5. Run the narrowest relevant tests and update the backlog.
 6. Report the current branch, PR state, files changed, test results, and the next human action.
+
+## Public test organization
+
+- Give each distinct public-core test category its own source file and dedicated executable/CTest target.
+- Keep related behaviors for the same component or API together in that component's executable.
+- Do not place tests for an unrelated component in an existing test file merely because that target already exists.
+- Name the source file and executable after the component or API under test, such as `ColorSchemeTest.cpp` and `MV_Public_ColorSchemeTest`.
+- Update the public test CMake registration whenever a new category requires a dedicated target.
 
 ## Weekly checkpoint
 
