@@ -7,6 +7,7 @@
 #include <QCoreApplication>
 
 #include "TutorialPlugin.h"
+#include "util/Miscellaneous.h"
 
 #include <QDebug>
 #include <QWebEngineView>
@@ -42,7 +43,8 @@ protected:
     bool acceptNavigationRequest(const QUrl& url, NavigationType type, bool isMainFrame) override
     {
         if (type == QWebEnginePage::NavigationTypeLinkClicked) {
-            QDesktopServices::openUrl(url);
+            if (isSafeExternalUrl(url))
+                QDesktopServices::openUrl(url);
 
             return false;
         }

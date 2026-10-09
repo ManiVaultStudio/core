@@ -7,6 +7,7 @@
 #include "MarkdownDocument.h"
 #include "PluginMetadata.h"
 #include "InfoOverlayWidget.h"
+#include "util/Miscellaneous.h"
 
 #include <QDialog>
 #include <QHBoxLayout>
@@ -47,7 +48,9 @@ public:
     protected:
         bool acceptNavigationRequest(const QUrl& url, NavigationType type, bool isMainFrame) override {
             if (type == NavigationTypeLinkClicked) {
-                QDesktopServices::openUrl(url);
+                if (util::isSafeExternalUrl(url))
+                    QDesktopServices::openUrl(url);
+
                 return false;
             }
 
