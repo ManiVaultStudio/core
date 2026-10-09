@@ -27,4 +27,11 @@
   - Coverage: not measured
   - Notes: added the first public-core test target; covered normalized/fractional sizes and malformed input without changing production code
 
+- [x] `ManiVault/src/util/Miscellaneous.cpp`: test public `getNoBytesHumanReadable()` IEC/SI formatting
+  - Completed: 2026-10-08
+  - Tests: `ctest --test-dir D:\DevBundle\core_testing\build\core -C Debug -R '^MV_Public_ParseByteSizeTest$' --output-on-failure` (passed)
+  - Verification: 1/1 CTest tests passed
+  - Coverage: not measured
+  - Notes: covered IEC/SI unit boundaries in a utility with broad reporting fan-out without changing production code
+
 ## Deferred

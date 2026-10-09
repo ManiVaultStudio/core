@@ -29,10 +29,10 @@ feature/core-test-coverage-2026-W41
 ## Current campaign
 
 - Week: 2026-W41
-- Branch: `feature/core-test-coverage-2026-W41`
-- Planned branch: none; current weekly branch is active
-- Pull request: https://github.com/ManiVaultStudio/core/pull/1361
-- Status: collecting changes; the weekly pull request is open for review
+- Branch: `feature/core-test-coverage-2026-W41-followup`
+- Planned branch: none; current follow-up branch is active
+- Pull request: not opened
+- Status: preparing the next reviewable public-core coverage change after PR #1362 merged
 
 ## Daily work
 

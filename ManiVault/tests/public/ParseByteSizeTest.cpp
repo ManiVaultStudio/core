@@ -45,8 +45,16 @@ bool rejectsMalformedSizes()
         && require(rejectsInvalidInput("-1 MB"), "negative byte size was accepted");
 }
 
+bool formatsIECAndSISizes()
+{
+    return require(mv::util::getNoBytesHumanReadable(1023) == "1023.00 B", "IEC byte boundary was formatted incorrectly")
+        && require(mv::util::getNoBytesHumanReadable(1024) == "1.00 KiB", "IEC kilobyte value was formatted incorrectly")
+        && require(mv::util::getNoBytesHumanReadable(1'000'000, false) == "1.00 MB", "SI megabyte value was formatted incorrectly");
+}
+
 int main()
 {
     return parsesNormalizedAndFractionalSizes()
-        && rejectsMalformedSizes() ? 0 : 1;
+        && rejectsMalformedSizes()
+        && formatsIECAndSISizes() ? 0 : 1;
 }
