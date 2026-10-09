@@ -19,6 +19,55 @@ namespace mv {
 
 namespace util {
 
+namespace {
+
+/**
+ * Establish whether a path is contained by a directory after resolving the
+ * existing part of the path. A plain string-prefix check is insufficient:
+ * /tmp/archive-escape also starts with /tmp/archive.
+ */
+QString canonicalPathWithNonExistingTail(const QString& path)
+{
+    QFileInfo current(path);
+    QStringList nonExistingTail;
+
+    while (!current.exists()) {
+        nonExistingTail.prepend(current.fileName());
+
+        const auto parentPath = current.absolutePath();
+
+        if (parentPath == current.absoluteFilePath())
+            return {};
+
+        current = QFileInfo(parentPath);
+    }
+
+    auto canonicalPath = current.canonicalFilePath();
+
+    if (canonicalPath.isEmpty())
+        return {};
+
+    for (const auto& pathPart : nonExistingTail)
+        canonicalPath = QDir(canonicalPath).filePath(pathPart);
+
+    return QDir::cleanPath(canonicalPath);
+}
+
+bool isPathWithinDirectory(const QString& path, const QString& directory)
+{
+    const auto canonicalDirectory = canonicalPathWithNonExistingTail(directory);
+    const auto canonicalPath      = canonicalPathWithNonExistingTail(path);
+
+    if (canonicalDirectory.isEmpty() || canonicalPath.isEmpty())
+        return false;
+
+    const auto directoryPrefix = canonicalDirectory + QDir::separator();
+
+    return canonicalPath == canonicalDirectory || canonicalPath.startsWith(directoryPrefix);
+}
+
+}
+
 void Archiver::compressDirectory(const QString& sourceDirectory, const QString& compressedFilePath, bool recursive /*= true*/, std::int32_t compressionLevel /*= 0*/, const QString& password /*= ""*/, QDir::Filters filters /*= QDir::Filter::Files*/)
 {
     // Clean up and throw exception if error(s) occurred
@@ -76,12 +125,15 @@ void Archiver::decompress(const QString& compressedFile, const QString& destinat
 
         QDir directory(cleanDir);
 
-        // Get absolute path to directory
-        QString absoluteCleanDir = directory.absolutePath();
+        // Ensure the destination exists before resolving paths below. This
+        // also lets the containment check detect symlinks in its parent path.
+        if (!directory.exists() && !directory.mkpath(QStringLiteral(".")))
+            throw std::runtime_error("Unable to create destination directory");
 
-        // Sanity check
-        if (!absoluteCleanDir.endsWith('/'))
-            absoluteCleanDir += '/';
+        const auto canonicalDestinationDirectory = directory.canonicalPath();
+
+        if (canonicalDestinationDirectory.isEmpty())
+            throw std::runtime_error("Unable to resolve destination directory");
 
         // Exit prematurely if there is no first file
         if (!zip.goToFirstFile())
@@ -90,10 +142,13 @@ void Archiver::decompress(const QString& compressedFile, const QString& destinat
         do {
             const auto currentFileName      = zip.getCurrentFileName();
             const auto absoluteFilePath     = directory.absoluteFilePath(currentFileName);
-            const auto absoluteCleanPath    = QDir::cleanPath(absoluteFilePath);
+            const auto relativeFilePath    = directory.relativeFilePath(absoluteFilePath);
 
-            if (!absoluteCleanPath.startsWith(absoluteCleanDir))
-                continue;
+            if (relativeFilePath == QLatin1String("..")
+                || relativeFilePath.startsWith(QLatin1String("../"))
+                || relativeFilePath.startsWith(QLatin1String("..\\"))
+                || !isPathWithinDirectory(absoluteFilePath, canonicalDestinationDirectory))
+                throw std::runtime_error("Archive entry resolves outside destination directory");
 
             // Extract a single file to the target directory
             extractFile(&zip, QLatin1String(""), absoluteFilePath, password);
@@ -395,14 +450,10 @@ void Archiver::extractFile(QuaZip* zip, const QString& compressedFilePath, const
         return;
     }
 
-    if (info.isSymbolicLink()) {
-        QString target = QFile::decodeName(inFile.readAll());
-
-        if (!QFile::link(target, targetFilePath))
-            throw std::runtime_error("Unable to create symbolic link");
-
-        return;
-    }
+    // Never materialize archive-provided symbolic links. Their targets are
+    // attacker-controlled and can point outside the extraction directory.
+    if (info.isSymbolicLink())
+        throw std::runtime_error("Symbolic links are not supported in archives");
 
     QFile outFile;
 
