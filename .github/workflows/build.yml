@@ -60,17 +60,6 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Start ssh key agent
-        uses: webfactory/ssh-agent@v0.10.0
-        with:
-          ssh-private-key: ${{ secrets.RULESSUPPORT_DEPLOY_KEY }}
-
-      - name: Install SSH deploy key for rulessupport
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.RULESSUPPORT_DEPLOY_KEY }}
-          known_hosts: github.com AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
-
       - name: Windows build
         if: startsWith(runner.os, 'Windows')
         uses: ManiVaultStudio/github-actions/conan_windows_build@main
@@ -82,7 +71,6 @@ jobs:
           conan-user: ${{secrets.LKEB_UPLOAD_USER}}
           conan-password: ${{secrets.LKEB_UPLOAD_USER_PASSWORD}}
           conan-pem: ${{secrets.LKEB_UPLOAD_CERT_CHAIN}}
-          rs_ssh_key: ${{ secrets.RULESSUPPORT_DEPLOY_KEY }}
           sentry-upload: startsWith(github.ref, 'refs/heads/release/')
           sentry-url: ${{secrets.LKEB_SENTRY_URL }}
           sentry-org: ${{secrets.LKEB_SENTRY_ORG }}
