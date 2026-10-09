@@ -17,19 +17,19 @@ This file is the durable operating guide for the recurring core test coverage wo
 Use this naming convention:
 
 ```text
-codex/core-test-coverage-YYYY-Www
+feature/core-test-coverage-YYYY-Www
 ```
 
 For example:
 
 ```text
-codex/core-test-coverage-2026-W41
+feature/core-test-coverage-2026-W41
 ```
 
 ## Current campaign
 
 - Week: 2026-W41
-- Branch: `codex/core-test-coverage-2026-W41`
+- Branch: `feature/core-test-coverage-2026-W41`
 - Planned branch: none; current weekly branch is active
 - Pull request: https://github.com/ManiVaultStudio/core/pull/1361
 - Status: collecting changes; the weekly pull request is open for review
