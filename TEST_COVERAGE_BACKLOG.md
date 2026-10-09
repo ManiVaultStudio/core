@@ -34,4 +34,13 @@
   - Coverage: not measured
   - Notes: covered IEC/SI unit boundaries in a utility with broad reporting fan-out without changing production code
 
+- [x] `ManiVault/src/util/ColorScheme.h`: test public property construction and setter/getter round-trips
+  - Completed: 2026-10-09
+  - Scope: `public-core`
+  - User impact: `medium`
+  - Fan-out: `broad`
+  - Tests: `cmake --build D:\DevBundle\core_testing\build\core --config Debug --target ManiVault/tests/public/MV_Public_ParseByteSizeTest`; `ctest --test-dir D:\DevBundle\core_testing\build\core -C Debug -R '^(MV_Public_ParseByteSizeTest|MV_Application_GifEncoderTest)$' --output-on-failure` (passed: 2/2)
+  - Coverage: not measured
+  - Notes: exercises observable ColorScheme state without changing production code
+
 ## Deferred
