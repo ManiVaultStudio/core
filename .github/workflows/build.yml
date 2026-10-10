@@ -37,14 +37,14 @@ jobs:
     steps:
       - name: Checkout the source
         if: ${{ github.event_name != 'pull_request'}}
-        uses: actions/checkout@v6.1.0
+        uses: actions/checkout@v7
         with:
           submodules: recursive
           fetch-depth: 0
 
       - name: Checkout the source (pull_request version)
         if: ${{ github.event_name == 'pull_request'}}
-        uses: actions/checkout@v6.1.0
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           submodules: recursive
