@@ -7,7 +7,7 @@ jobs:
     name: Build core first
     runs-on: ubuntu-latest
     steps:
-      - uses: convictional/trigger-workflow-and-wait@v1.3.0
+      - uses: convictional/trigger-workflow-and-wait@v1.6.5
         with:
           owner: hdps
           repo: core
@@ -87,7 +87,7 @@ jobs:
         echo "Ref value: ${{ matrix.ref }}"
 
     - name: Run plugin builds
-      uses: convictional/trigger-workflow-and-wait@v1.3.0
+      uses: convictional/trigger-workflow-and-wait@v1.6.5
       with:
         owner: hdps
         repo: ${{ matrix.plugin }}
