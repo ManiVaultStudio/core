@@ -6,6 +6,15 @@
 
 ## Completed
 
+- [x] `ManiVault/src/LinkedData.cpp`: test public `SelectionMap` indexed and image-pyramid mapping behavior
+  - Completed: 2026-10-12
+  - Scope: `public-core`
+  - User impact: `high`
+  - Fan-out: `broad`
+  - Tests: `cmake --build D:\DevBundle\core_testing\build --config Debug --target core/ManiVault/tests/public/MV_Public_SelectionMapTest`; `ctest --test-dir D:\DevBundle\core_testing\build\core -C Debug -R '^MV_Public_SelectionMapTest$' --output-on-failure` (passed: 1/1); `git diff --check` (passed)
+  - Coverage: not measured
+  - Notes: added a dedicated public test executable without changing production code; project-dependent serialization was deferred because standalone tests cannot initialize the required project/compression context
+
 - [x] `ManiVault/src/DataType.h`: test public value semantics, string conversion, concatenation, and hash-based lookup
   - Completed: 2026-10-12
   - Scope: `public-core`
@@ -80,6 +89,10 @@
   - Notes: exercises observable ColorScheme state without changing production code
 
 ## Deferred
+
+- `ManiVault/src/LinkedData.cpp`: test `SelectionMap` serialization round-trips, including preservation of target image dimensions
+  - Deferred because `SelectionMap::toVariantMap()` requires an initialized project and compression context, which is unavailable in the standalone public test executable.
+  - Follow-up: add this coverage to an application-initialized test target; the current implementation also warrants reviewing whether deserialization reads `TargetImageSize` correctly.
 
 - `ManiVault/src/private/GifRecorder.cpp`: inject startup, capture-provider and encoder failures independently
   - Deferred because the current recorder owns native window capture and asynchronous encoder execution directly; adding failure injection would require a broader abstraction than this time-box allows.
