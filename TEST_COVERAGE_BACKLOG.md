@@ -6,6 +6,15 @@
 
 ## Completed
 
+- [x] `ManiVault/src/DataType.h`: test public value semantics, string conversion, concatenation, and hash-based lookup
+  - Completed: 2026-10-12
+  - Scope: `public-core`
+  - User impact: `high`
+  - Fan-out: `broad`
+  - Tests: `cmake --build D:\DevBundle\core_testing\build --config Debug --target core/ManiVault/tests/public/MV_Public_DataTypeTest`; `ctest --test-dir D:\DevBundle\core_testing\build\core -C Debug -R '^MV_Public_DataTypeTest$' --output-on-failure` (passed: 1/1); `git diff --check` (passed)
+  - Coverage: not measured
+  - Notes: added a dedicated public test executable without changing production code
+
 - [x] `ManiVault/src/util/ColorMap.cpp`: test public default/configured state and dimension reporting
   - Completed: 2026-10-12
   - Scope: `public-core`
