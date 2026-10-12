@@ -1,5 +1,5 @@
 {
-    "name": "core",
+    "name": "mv-core",
   "dependencies": [
     { 
       "name": "qt6",
