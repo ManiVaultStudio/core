@@ -1,4 +1,5 @@
 {
+    "name": "core",
   "dependencies": [
     { 
       "name": "qt6",
