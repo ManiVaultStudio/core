@@ -2,6 +2,11 @@
   "name": "mv-core",
   "version" : "1.5.0",
   "dependencies": [
+    "vcpkg-cmake",
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    },
     { 
       "name": "qt6",
       "features": [ "target-desktop" ]
