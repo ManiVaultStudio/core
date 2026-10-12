@@ -6,6 +6,15 @@
 
 ## Completed
 
+- [x] `ManiVault/src/util/ColorMap.cpp`: test public default/configured state and dimension reporting
+  - Completed: 2026-10-12
+  - Scope: `public-core`
+  - User impact: `medium`
+  - Fan-out: `moderate`
+  - Tests: `cmake -S D:\DevBundle\core_testing\source -B D:\DevBundle\core_testing\build -DMV_BUILD_TESTING=ON`; `cmake --build D:\DevBundle\core_testing\build\core --config Debug --target ManiVault/tests/public/MV_Public_ColorMapTest`; `ctest --test-dir D:\DevBundle\core_testing\build\core -C Debug -R '^MV_Public_ColorMapTest$' --output-on-failure` (passed: 1/1)
+  - Coverage: not measured
+  - Notes: covers observable ColorMap construction and dimension behavior without changing production code
+
 - [x] `ManiVault/src/private/GifRecorder.cpp`: add deterministic application-level lifecycle coverage
   - Completed: 2026-10-09
   - Scope: `application-specific`
