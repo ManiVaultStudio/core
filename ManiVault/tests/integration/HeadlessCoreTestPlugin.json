@@ -1,0 +1,13 @@
+{
+  "name": "HeadlessCoreTestPlugin",
+  "version": "1.0.0",
+  "description": "Test-only plugin for headless Core integration tests",
+  "authors": [
+    {
+      "name": "T. Kroes",
+      "email": "t.kroes@lumc.nl"
+    }
+  ],
+  "license": "LGPL-3.0-or-later",
+  "copyright": "Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)"
+}

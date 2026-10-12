@@ -19,6 +19,9 @@ QString getPluginTypeName(const Type& type)
         { Type::WRITER, "Writer" },
         { Type::TRANSFORMATION, "Transformation" },
         { Type::VIEW, "View" }
+#ifdef MV_BUILD_TESTING
+        , { Type::TEST, "Test" }
+#endif
     };
 
     return typeNames[type];
@@ -33,6 +36,9 @@ QIcon getPluginTypeIcon(const Type& type)
         { Type::WRITER, StyledIcon("file-export") },
         { Type::TRANSFORMATION, StyledIcon("shuffle") },
         { Type::VIEW, StyledIcon("eye") }
+#ifdef MV_BUILD_TESTING
+        , { Type::TEST, StyledIcon("flask") }
+#endif
     };
 
     return typeNames[type];

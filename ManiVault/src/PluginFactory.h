@@ -429,6 +429,22 @@ private:
     gui::StringsAction                      _projectsDsnsAction;                    /** Action for editing the project Data Source Names */
 };
 
+#ifdef MV_BUILD_TESTING
+/**
+ * Base factory for plugins that expose Core test scenarios.
+ *
+ * Test plugins are loaded by the application but are excluded from the
+ * standard plugin categories and user-facing plugin workflows.
+ */
+class CORE_EXPORT TestPluginFactory : public PluginFactory
+{
+    Q_OBJECT
+
+public:
+    explicit TestPluginFactory(const QString& title);
+};
+#endif
+
 }
 
 Q_DECLARE_INTERFACE(mv::plugin::PluginFactory, "ManiVault.PluginFactory")

@@ -14,6 +14,9 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QMessageBox>
+#ifdef MV_BUILD_TESTING
+#include <QVariantList>
+#endif
 
 #include <cstdlib>
 
@@ -47,6 +50,33 @@ DeveloperMenu::DeveloperMenu(QWidget* parent /*= nullptr*/) :
     workflowTestingMenu->setToolTip(tr("Run parallel workflow test scenarios"));
 
     detail::ParallelPhantomTestSuite::populateMenu(*workflowTestingMenu, parentWidget());
+
+#ifdef MV_BUILD_TESTING
+    auto coreTestingMenu = addMenu(util::StyledIcon("flask"), tr("Core test scenarios"));
+    bool hasCoreTestScenarios = false;
+
+    for (auto* factory : mv::plugins().getPluginFactoriesByType(mv::plugin::Type::TEST)) {
+        if (mv::plugins().getPluginsByFactory(factory).empty())
+            mv::plugins().requestPlugin(factory->getKind());
+    }
+
+    for (auto* plugin : mv::plugins().getPluginsByType(mv::plugin::Type::TEST)) {
+        QVariantList scenarioMetadata;
+        if (!QMetaObject::invokeMethod(plugin, "getScenarios", Qt::DirectConnection, Q_RETURN_ARG(QVariantList, scenarioMetadata)))
+            continue;
+
+        for (const auto& scenarioValue : scenarioMetadata) {
+            const auto scenario = scenarioValue.toMap();
+            auto* action = coreTestingMenu->addAction(scenario.value("title").toString());
+            action->setToolTip(scenario.value("description").toString());
+            _coreTestScenarioActions.insert(action, scenario.value("id").toString());
+            connect(action, &QAction::triggered, this, &DeveloperMenu::runCoreTestScenario);
+            hasCoreTestScenarios = true;
+        }
+    }
+
+    coreTestingMenu->setEnabled(hasCoreTestScenarios);
+#endif
 
     auto errorReportingMenu = addMenu(util::StyledIcon("bug"), tr("Error reporting testing"));
     auto handledExceptionAction = errorReportingMenu->addAction(util::StyledIcon("triangle-exclamation"), tr("Handled exception"));
@@ -94,6 +124,34 @@ void DeveloperMenu::toggleGifRecording()
     else
         _gifRecordingAction->setText(tr("Stop GIF recording"));
 }
+
+#ifdef MV_BUILD_TESTING
+void DeveloperMenu::runCoreTestScenario()
+{
+    auto* action = qobject_cast<QAction*>(sender());
+    if (action == nullptr)
+        return;
+
+    const auto scenarioId = _coreTestScenarioActions.value(action);
+
+    for (auto* plugin : mv::plugins().getPluginsByType(mv::plugin::Type::TEST)) {
+        bool passed = false;
+        if (!QMetaObject::invokeMethod(plugin, "runScenario", Qt::DirectConnection, Q_RETURN_ARG(bool, passed), Q_ARG(QString, scenarioId)))
+            continue;
+
+        if (passed) {
+            qInfo() << "Core test scenario passed:" << scenarioId;
+        }
+        else {
+            QString error;
+            QMetaObject::invokeMethod(plugin, "getLastError", Qt::DirectConnection, Q_RETURN_ARG(QString, error));
+            qWarning() << "Core test scenario failed:" << scenarioId << error;
+        }
+
+        break;
+    }
+}
+#endif
 
 void DeveloperMenu::testHandledException()
 {

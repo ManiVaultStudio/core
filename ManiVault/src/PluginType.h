@@ -33,7 +33,10 @@ namespace plugin
         LOADER, 
         WRITER, 
         TRANSFORMATION, 
-        VIEW 
+        VIEW,
+#ifdef MV_BUILD_TESTING
+        TEST
+#endif
     };
 
     struct CORE_EXPORT TypeHash

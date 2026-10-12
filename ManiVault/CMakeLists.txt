@@ -362,6 +362,10 @@ target_compile_definitions(${MV_PUBLIC_LIB}
         VALIJSON_USE_EXCEPTIONS=1
 )
 
+if(MV_BUILD_TESTING)
+    target_compile_definitions(${MV_PUBLIC_LIB} PUBLIC MV_BUILD_TESTING=1)
+endif()
+
 target_compile_options(${MV_PUBLIC_LIB} 
     PRIVATE
         $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>

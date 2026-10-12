@@ -5,6 +5,9 @@
 #pragma once
 
 #include <QMenu>
+#ifdef MV_BUILD_TESTING
+#include <QHash>
+#endif
 
 #include <memory>
 
@@ -28,6 +31,14 @@ private:
     /** Starts or stops the developer-only main-window GIF recorder. */
     void toggleGifRecording();
 
-    std::unique_ptr<GifRecorder> _gifRecorder;             /**< Developer-only GIF recorder. */
+#ifdef MV_BUILD_TESTING
+    /** Runs a selected Core test scenario. */
+    void runCoreTestScenario();
+#endif
+
+    std::unique_ptr<GifRecorder> _gifRecorder;                  /**< Developer-only GIF recorder. */
     QAction*                     _gifRecordingAction = nullptr; /**< Start/stop recording action. */
+#ifdef MV_BUILD_TESTING
+    QHash<QAction*, QString>      _coreTestScenarioActions;     /**< Core test scenario actions and ids. */
+#endif
 };

@@ -40,6 +40,10 @@
 namespace {
 
 constexpr auto softwareWebEngineFallbackArgument = "--webengine-software-fallback";
+#ifdef MV_BUILD_TESTING
+constexpr auto runCoreScenarioOption = "run-core-scenario";
+constexpr auto listCoreScenariosOption = "list-core-scenarios";
+#endif
 
 bool hasSoftwareWebEngineFallbackArgument(int argc, char* argv[])
 {
@@ -65,6 +69,58 @@ void enableSoftwareWebEngineFallback()
     flags += disableGpuFlag;
     qputenv("QTWEBENGINE_CHROMIUM_FLAGS", flags);
 }
+
+#ifdef MV_BUILD_TESTING
+bool runCoreScenario(const QString& scenarioId)
+{
+    qInfo() << "Core scenario runner started:" << scenarioId;
+    const auto testFactories = mv::plugins().getPluginFactoriesByType(mv::plugin::Type::TEST);
+    qInfo() << "Core test plugin factories found:" << testFactories.size();
+
+    for (const auto* factory : testFactories) {
+        qInfo() << "Requesting Core test plugin:" << factory->getKind();
+        auto* testPlugin = mv::plugins().requestPlugin(factory->getKind());
+        if (testPlugin == nullptr)
+            continue;
+
+        bool passed = false;
+        qInfo() << "Running Core scenario:" << scenarioId;
+        if (!QMetaObject::invokeMethod(testPlugin, "runScenario", Qt::DirectConnection, Q_RETURN_ARG(bool, passed), Q_ARG(QString, scenarioId)))
+            continue;
+
+        qInfo() << "Core scenario completed:" << scenarioId << "passed:" << passed;
+
+        if (!passed) {
+            QString error;
+            QMetaObject::invokeMethod(testPlugin, "getLastError", Qt::DirectConnection, Q_RETURN_ARG(QString, error));
+            qCritical() << "Core test scenario failed:" << scenarioId << error;
+        }
+
+        return passed;
+    }
+
+    qCritical() << "No headless Core test plugin is available";
+    return false;
+}
+
+void listCoreScenarios()
+{
+    for (const auto* factory : mv::plugins().getPluginFactoriesByType(mv::plugin::Type::TEST)) {
+        auto* testPlugin = mv::plugins().requestPlugin(factory->getKind());
+        if (testPlugin == nullptr)
+            continue;
+
+        QVariantList scenarios;
+        if (!QMetaObject::invokeMethod(testPlugin, "getScenarios", Qt::DirectConnection, Q_RETURN_ARG(QVariantList, scenarios)))
+            continue;
+
+        for (const auto& scenarioValue : scenarios) {
+            const auto scenario = scenarioValue.toMap();
+            qInfo().noquote() << QString("%1: %2").arg(scenario.value("id").toString(), scenario.value("description").toString());
+        }
+    }
+}
+#endif
 
 bool restartWithSoftwareWebEngineFallback(const QStringList& arguments)
 {
@@ -138,6 +194,7 @@ int main(int argc, char *argv[])
 
     workflow::AbstractWorkflowPlanExecutor::installNotificationLinkHandler();
 
+#ifndef MV_BUILD_TESTING
     auto& splashScreenAction = application.getConfigurationAction().getBrandingConfigurationAction().getSplashScreenAction();
 
     bool webEngineFallbackRestartRequested = false;
@@ -160,6 +217,7 @@ int main(int argc, char *argv[])
         });
 
     splashScreenAction.getOpenAction().trigger();
+#endif
 
     if (settings().getTemporaryDirectoriesSettingsAction().getRemoveStaleTemporaryDirsAtStartupAction().isChecked()) {
         application.getTemporaryDirs().getTask().setParentTask(&application.getStartupTask());
@@ -178,6 +236,24 @@ int main(int argc, char *argv[])
 
     core.initialize();
     application.initialize();
+
+#ifdef MV_BUILD_TESTING
+    qInfo() << "Core test command-line mode initialized";
+    QCommandLineParser testParser;
+    testParser.addOption({ runCoreScenarioOption, "Run one registered Core test scenario", "scenario" });
+    testParser.addOption({ listCoreScenariosOption, "List registered Core test scenarios" });
+    testParser.process(application);
+
+    if (testParser.isSet(listCoreScenariosOption)) {
+        listCoreScenarios();
+        return 0;
+    }
+
+    if (testParser.isSet(runCoreScenarioOption)) {
+        qInfo() << "Running requested Core scenario from command line";
+        return runCoreScenario(testParser.value(runCoreScenarioOption)) ? 0 : 1;
+    }
+#endif
 
     HardwareSpec::updateSystemHardwareSpecs();
 

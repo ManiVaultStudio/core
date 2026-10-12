@@ -37,6 +37,13 @@ PluginFactory::PluginFactory(Type type, const QString& title) :
     _projectsDsnsAction.setToolTip(QString("Data Source Names for %1 projects").arg(title));
 }
 
+#ifdef MV_BUILD_TESTING
+TestPluginFactory::TestPluginFactory(const QString& title) :
+    PluginFactory(Type::TEST, title)
+{
+}
+#endif
+
 QString PluginFactory::getKind() const
 {
     return _kind;

@@ -270,6 +270,11 @@ void PluginManager::loadPluginFactories()
         else if (qobject_cast<TransformationPluginFactory*>(pluginFactory))
         {
         }
+#ifdef MV_BUILD_TESTING
+        else if (qobject_cast<TestPluginFactory*>(pluginFactory))
+        {
+        }
+#endif
         else
         {
             qDebug() << "Plugin " << fileName << " does not implement any of the possible interfaces!";
@@ -471,6 +476,9 @@ plugin::Plugin* PluginManager::privateRequestPlugin(const QString& kind, Dataset
 			case plugin::Type::DATA:
 			case plugin::Type::LOADER:
 			case plugin::Type::VIEW:
+#ifdef MV_BUILD_TESTING
+			case plugin::Type::TEST:
+#endif
                 break;
         }
 
@@ -569,6 +577,9 @@ void PluginManager::addPlugin(plugin::Plugin* plugin)
             case plugin::Type::WRITER:
             case plugin::Type::VIEW:
             case plugin::Type::TRANSFORMATION:
+#ifdef MV_BUILD_TESTING
+            case plugin::Type::TEST:
+#endif
                 break;
         }
 
@@ -606,6 +617,9 @@ void PluginManager::addPlugin(plugin::Plugin* plugin)
             case plugin::Type::DATA:
             case plugin::Type::TRANSFORMATION:
             case plugin::Type::VIEW:
+#ifdef MV_BUILD_TESTING
+            case plugin::Type::TEST:
+#endif
                 break;
         }
     }
