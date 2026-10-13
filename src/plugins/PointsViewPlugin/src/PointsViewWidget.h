@@ -9,12 +9,14 @@
 class QEvent;
 template <typename T> class QFutureWatcher;
 class QLabel;
+class QPlainTextEdit;
 class QPushButton;
 class QSpinBox;
 class QTableView;
 class QTimer;
 
 namespace mv { class Task; }
+class PointData;
 
 class PointsViewWidget final : public QWidget
 {
@@ -38,14 +40,17 @@ private slots:
 private:
     QSpinBox* createIndexSpinBox(QWidget* parent) const;
     void setStatus(const QString& text);
+    void updateInspector(const PointData* pointData);
 
     QLabel* _datasetLabel;
+    QLabel* _inspectorLabel;
     QLabel* _statusLabel;
     QSpinBox* _rowTileSize;
     QSpinBox* _columnTileSize;
     QSpinBox* _cacheCapacity;
     QPushButton* _tileButton;
     QTableView* _table;
+    QPlainTextEdit* _accessLog;
     PointsTableModel* _model;
     mv::Task* _progressTask;
     QFutureWatcher<void>* _tileWatcher;

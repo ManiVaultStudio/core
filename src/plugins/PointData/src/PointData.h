@@ -255,6 +255,9 @@ public:
      */
     std::uint64_t getRawDataSize() const override;
 
+    /** Get the name of the currently stored element type. */
+    QString getElementTypeName() const { return elementTypeName(getElementTypeSpecifier()); }
+
     /**
      *Returns void pointer to the underlying array serving as element storage.
      */
@@ -266,6 +269,12 @@ public:
     TileView acquireTile(std::uint64_t tileRow, std::uint64_t tileColumn) const;
     void setTiledCacheCapacity(std::size_t capacity);
     std::size_t getTiledCacheSize() const;
+    std::size_t getTiledCacheCapacity() const;
+    std::size_t getTiledRowTileSize() const;
+    std::size_t getTiledColumnTileSize() const;
+    std::uint64_t getTiledCacheHits() const;
+    std::uint64_t getTiledCacheMisses() const;
+    std::uint64_t getTiledCacheEvictions() const;
 
     PointDataAccessView getRow(std::uint64_t row) const;
     void visitRows(std::uint64_t firstRow, std::uint64_t rowCount, const PointDataAccessVisitor& visitor) const;

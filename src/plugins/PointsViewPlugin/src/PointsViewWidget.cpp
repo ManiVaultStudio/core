@@ -8,6 +8,7 @@
 
 #include <QAbstractItemView>
 #include <QEvent>
+#include <QElapsedTimer>
 #include <QFutureWatcher>
 #include <QFormLayout>
 #include <QGroupBox>
@@ -15,6 +16,7 @@
 #include <QHeaderView>
 #include <QLabel>
 #include <QPushButton>
+#include <QPlainTextEdit>
 #include <QScrollBar>
 #include <QSpinBox>
 #include <QTableView>
@@ -27,12 +29,14 @@
 PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     QWidget(parent),
     _datasetLabel(new QLabel("No Points dataset selected", this)),
+    _inspectorLabel(new QLabel(this)),
     _statusLabel(new QLabel(this)),
     _rowTileSize(createIndexSpinBox(this)),
     _columnTileSize(createIndexSpinBox(this)),
     _cacheCapacity(createIndexSpinBox(this)),
     _tileButton(new QPushButton("Enable tiled storage", this)),
     _table(new QTableView(this)),
+    _accessLog(new QPlainTextEdit(this)),
     _model(new PointsTableModel(this)),
     _progressTask(progressTask),
     _tileWatcher(new QFutureWatcher<void>(this)),
@@ -63,11 +67,17 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _table->verticalHeader()->setDefaultSectionSize(22);
     _table->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
     _table->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    _accessLog->setReadOnly(true);
+    _accessLog->setMaximumBlockCount(12);
+    _accessLog->setMaximumHeight(110);
+    _accessLog->setPlaceholderText("Visible-range requests will appear here");
 
     auto* layout = new QVBoxLayout(this);
     layout->addWidget(_datasetLabel);
     layout->addWidget(settings);
     layout->addWidget(_table, 1);
+    layout->addWidget(_inspectorLabel);
+    layout->addWidget(_accessLog);
     layout->addWidget(_statusLabel);
 
     _table->verticalScrollBar()->installEventFilter(this);
@@ -97,6 +107,26 @@ void PointsViewWidget::setStatus(const QString& text)
     _statusLabel->setText(text);
 }
 
+void PointsViewWidget::updateInspector(const PointData* pointData)
+{
+    if (!pointData) {
+        _inspectorLabel->setText("Storage inspector: no point data");
+        return;
+    }
+
+    if (!pointData->isTiled()) {
+        _inspectorLabel->setText(QString("Storage inspector: eager | type: %1 | tiled cache unavailable")
+            .arg(pointData->getElementTypeName()));
+        return;
+    }
+
+    _inspectorLabel->setText(QString("Storage inspector: tiled | type: %1 | tile: %2 × %3 | cache: %4/%5 | hits: %6 | misses: %7 | evictions: %8")
+        .arg(pointData->getElementTypeName())
+        .arg(pointData->getTiledRowTileSize()).arg(pointData->getTiledColumnTileSize())
+        .arg(pointData->getTiledCacheSize()).arg(pointData->getTiledCacheCapacity())
+        .arg(pointData->getTiledCacheHits()).arg(pointData->getTiledCacheMisses()).arg(pointData->getTiledCacheEvictions()));
+}
+
 void PointsViewWidget::refreshSelection()
 {
     _model->clear();
@@ -104,6 +134,8 @@ void PointsViewWidget::refreshSelection()
     const auto selectedItems = mv::dataHierarchy().getSelectedItems();
     if (selectedItems.size() != 1) {
         _datasetLabel->setText("Select exactly one Points dataset");
+        _accessLog->clear();
+        updateInspector(nullptr);
         setStatus("Scroll after selecting a dataset to fetch visible values");
         return;
     }
@@ -111,6 +143,8 @@ void PointsViewWidget::refreshSelection()
     auto points = selectedItems.first()->getDataset<Points>();
     if (!points.isValid()) {
         _datasetLabel->setText("Selected dataset is not Points");
+        _accessLog->clear();
+        updateInspector(nullptr);
         setStatus("No point data selected");
         return;
     }
@@ -120,6 +154,8 @@ void PointsViewWidget::refreshSelection()
     _datasetLabel->setText(QString("%1 — %2 points × %3 dimensions (%4)")
         .arg(points->getGuiName()).arg(rawData->getNumPoints()).arg(rawData->getNumDimensions())
         .arg(rawData->isTiled() ? "tiled" : "eager"));
+    _accessLog->clear();
+    updateInspector(rawData);
     setStatus("Fetching the visible table window...");
     QTimer::singleShot(0, this, &PointsViewWidget::fetchVisibleRange);
 }
@@ -141,8 +177,11 @@ void PointsViewWidget::fetchVisibleRange()
     const auto lastColumn = _table->columnAt(std::max(0, _table->viewport()->width() - 1));
     const auto rowCount = lastRow >= firstRow ? static_cast<std::uint64_t>(lastRow - firstRow + 1) : 1;
     const auto columnCount = lastColumn >= firstColumn ? static_cast<std::uint64_t>(lastColumn - firstColumn + 1) : 1;
+    QElapsedTimer timer;
+    timer.start();
     const auto callbacks = _model->fetchRange(static_cast<std::uint64_t>(firstRow), rowCount,
         static_cast<std::uint64_t>(firstColumn), columnCount);
+    const auto elapsedMilliseconds = timer.elapsed();
 
     const auto selectedItems = mv::dataHierarchy().getSelectedItems();
     if (selectedItems.size() != 1)
@@ -151,10 +190,16 @@ void PointsViewWidget::fetchVisibleRange()
     if (!points.isValid())
         return;
 
+    auto* rawData = points->getPointData();
+    _accessLog->appendPlainText(QString("rows %1–%2, columns %3–%4 | %5 segment(s) | %6 ms")
+        .arg(firstRow).arg(firstRow + static_cast<int>(rowCount) - 1)
+        .arg(firstColumn).arg(firstColumn + static_cast<int>(columnCount) - 1)
+        .arg(callbacks).arg(elapsedMilliseconds));
+    updateInspector(rawData);
     setStatus(QString("Fetched visible rows %1–%2, columns %3–%4 in %5 access segment(s); cached tiles: %6. Drag/scroll and release to fetch again.")
         .arg(firstRow).arg(firstRow + static_cast<int>(rowCount) - 1)
         .arg(firstColumn).arg(firstColumn + static_cast<int>(columnCount) - 1)
-        .arg(callbacks).arg(points->getPointData()->getTiledCacheSize()));
+        .arg(callbacks).arg(rawData->getTiledCacheSize()));
 }
 
 void PointsViewWidget::tileSelectedData()

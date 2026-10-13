@@ -214,6 +214,42 @@ std::size_t PointData::getTiledCacheSize() const
     return _tiledStorage ? _tiledStorage->cacheSize() : 0;
 }
 
+std::size_t PointData::getTiledCacheCapacity() const
+{
+    const auto lock = lockData();
+    return _tiledStorage ? _tiledStorage->cacheCapacity() : 0;
+}
+
+std::size_t PointData::getTiledRowTileSize() const
+{
+    const auto lock = lockData();
+    return _tiledStorage ? _tiledStorage->rowTileSize() : 0;
+}
+
+std::size_t PointData::getTiledColumnTileSize() const
+{
+    const auto lock = lockData();
+    return _tiledStorage ? _tiledStorage->columnTileSize() : 0;
+}
+
+std::uint64_t PointData::getTiledCacheHits() const
+{
+    const auto lock = lockData();
+    return _tiledStorage ? _tiledStorage->cacheHits() : 0;
+}
+
+std::uint64_t PointData::getTiledCacheMisses() const
+{
+    const auto lock = lockData();
+    return _tiledStorage ? _tiledStorage->cacheMisses() : 0;
+}
+
+std::uint64_t PointData::getTiledCacheEvictions() const
+{
+    const auto lock = lockData();
+    return _tiledStorage ? _tiledStorage->cacheEvictions() : 0;
+}
+
 namespace
 {
 PointDataAccessView makeFloatAccessView(std::vector<float>&& values)

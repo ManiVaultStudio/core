@@ -123,4 +123,7 @@ void PointDataTiledStorage::materialize(char* destination) const
 void PointDataTiledStorage::setCacheCapacity(const std::size_t capacity) const { const std::lock_guard lock(_mutex); _cache.setCapacity(capacity); }
 std::size_t PointDataTiledStorage::cacheCapacity() const { const std::lock_guard lock(_mutex); return _cache.capacity(); }
 std::size_t PointDataTiledStorage::cacheSize() const { const std::lock_guard lock(_mutex); return _cache.size(); }
+std::uint64_t PointDataTiledStorage::cacheHits() const { const std::lock_guard lock(_mutex); return _cache.hits(); }
+std::uint64_t PointDataTiledStorage::cacheMisses() const { const std::lock_guard lock(_mutex); return _cache.misses(); }
+std::uint64_t PointDataTiledStorage::cacheEvictions() const { const std::lock_guard lock(_mutex); return _cache.evictions(); }
 }

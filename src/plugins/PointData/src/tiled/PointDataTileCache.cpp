@@ -9,8 +9,11 @@ PointDataTileCache::PointDataTileCache(const std::size_t capacity) : _capacity(s
 std::shared_ptr<QByteArray> PointDataTileCache::find(const std::size_t key)
 {
     const auto it = _entries.find(key);
-    if (it == _entries.end())
+    if (it == _entries.end()) {
+        ++_misses;
         return {};
+    }
+    ++_hits;
     _lru.erase(it->second.second);
     _lru.push_front(key);
     it->second.second = _lru.begin();
@@ -37,6 +40,7 @@ void PointDataTileCache::trim()
         const auto key = _lru.back();
         _lru.pop_back();
         _entries.erase(key);
+        ++_evictions;
     }
 }
 }

@@ -4,6 +4,7 @@
 
 #include <list>
 #include <memory>
+#include <cstdint>
 #include <unordered_map>
 
 namespace mv::pointdata::tiled
@@ -17,6 +18,9 @@ public:
     void setCapacity(std::size_t capacity);
     std::size_t capacity() const { return _capacity; }
     std::size_t size() const { return _entries.size(); }
+    std::uint64_t hits() const { return _hits; }
+    std::uint64_t misses() const { return _misses; }
+    std::uint64_t evictions() const { return _evictions; }
 
 private:
     using Entry = std::pair<std::shared_ptr<QByteArray>, std::list<std::size_t>::iterator>;
@@ -24,5 +28,8 @@ private:
     std::size_t _capacity;
     std::list<std::size_t> _lru;
     std::unordered_map<std::size_t, Entry> _entries;
+    std::uint64_t _hits = 0;
+    std::uint64_t _misses = 0;
+    std::uint64_t _evictions = 0;
 };
 }

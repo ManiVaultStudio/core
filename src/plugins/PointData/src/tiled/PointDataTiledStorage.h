@@ -40,6 +40,9 @@ public:
     void setCacheCapacity(std::size_t capacity) const;
     std::size_t cacheCapacity() const;
     std::size_t cacheSize() const;
+    std::uint64_t cacheHits() const;
+    std::uint64_t cacheMisses() const;
+    std::uint64_t cacheEvictions() const;
 
 private:
     QByteArray load(const TileDescriptor& descriptor) const;
