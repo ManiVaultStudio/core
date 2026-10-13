@@ -27,4 +27,11 @@
   - Coverage: not measured
   - Notes: added the first public-core test target; covered normalized/fractional sizes and malformed input without changing production code
 
+- [x] `ManiVault/src/LinkedData.cpp`: cover public `SelectionMap` indexed and image-pyramid mapping behavior
+  - Completed: 2026-10-13
+  - Tests: `ctest --test-dir D:\DevBundle\core_testing\build\core -C Debug -R '^MV_Public_SelectionMapTest$' --output-on-failure` (passed)
+  - Verification: 1/1 CTest tests passed; `git diff --check` passed
+  - Coverage: not measured
+  - Notes: added a dedicated public test executable covering indexed lookup, missing mappings, image-pyramid expansion, and image-boundary behavior without changing production code
+
 ## Deferred
