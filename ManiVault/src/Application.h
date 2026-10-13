@@ -65,14 +65,16 @@ public:
         
         /**
          * Get stale ManiVault temporary directories in the OS temporary directory
-         * Stale in this context means that the <os_temp_dir>/ManiVault.<app_session_id>.<temp_dir_id>/app.lock is not locked or missing
+         * Stale in this context means that the <os_temp_dir>/ManiVault Studio.<app_session_id>/app.lock
+         * (or legacy <os_temp_dir>/ManiVault.<app_session_id>.<temp_dir_id>/app.lock) is not locked or missing
          * and the directory can be safely removed because it is not in use by another (ManiVault) application.
          * @return List of stale ManiVault application temporary directories
          */
         QStringList getStale();
 
         /**
-         * Removes stale directories in the OS temporary directory (ManiVault.<app_session_id>.<temp_dir_id>) and which are not locked by the OS
+         * Removes stale application directories in the OS temporary directory that are not locked by the OS.
+         * Both the current ManiVault Studio.* and legacy ManiVault.* directory names are supported.
          * @stale Stale directories to remove, removes all stale when empty
          */
         void removeStale(const QStringList& stale = QStringList());
