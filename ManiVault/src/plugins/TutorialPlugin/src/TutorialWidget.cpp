@@ -7,6 +7,7 @@
 #include <QCoreApplication>
 
 #include "TutorialPlugin.h"
+#include "util/Miscellaneous.h"
 
 #include <QDebug>
 #include <QWebEngineView>
@@ -42,7 +43,8 @@ protected:
     bool acceptNavigationRequest(const QUrl& url, NavigationType type, bool isMainFrame) override
     {
         if (type == QWebEnginePage::NavigationTypeLinkClicked) {
-            QDesktopServices::openUrl(url);
+            if (isSafeExternalUrl(url))
+                QDesktopServices::openUrl(url);
 
             return false;
         }
@@ -74,7 +76,7 @@ void TutorialWidget::setHtmlText(const QString& htmlText, const QUrl& baseUrl)
 
 
         for (const auto& tag : tutorial->getTags())
-            tags << QString("<div style='display: inline; background-color: lightgrey; padding-left: 5px; padding-right: 5px; padding-top: 2px; padding-bottom: 2px; border-radius: 4px; font-size: 8pt; margin-right: 4px;'>%1</div>").arg(tag);
+            tags << QString("<div style='display: inline; background-color: lightgrey; padding-left: 5px; padding-right: 5px; padding-top: 2px; padding-bottom: 2px; border-radius: 4px; font-size: 8pt; margin-right: 4px;'>%1</div>").arg(tag.toHtmlEscaped());
 
         sanitizedHtmltext = QString(R"(
         <html>
@@ -99,7 +101,7 @@ void TutorialWidget::setHtmlText(const QString& htmlText, const QUrl& baseUrl)
                 </main>
             </body>
         </html>
-        )").arg(_tutorialPlugin->getTutorialPickerAction().getCurrentText(), tags.join(""), htmlText);
+        )").arg(_tutorialPlugin->getTutorialPickerAction().getCurrentText().toHtmlEscaped(), tags.join(""), htmlText);
 
         sanitizedHtmltext = sanitizedHtmltext.replace(QRegularExpression("This tutorial requires a starter project.*?if you need it"), "");
     }

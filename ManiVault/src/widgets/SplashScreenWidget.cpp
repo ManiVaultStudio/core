@@ -10,6 +10,7 @@
 #include "actions/SplashScreenAction.h"
 
 #include "util/CustomAssetsUrlSchemeHandler.h"
+#include "util/Miscellaneous.h"
 
 #include <QScreen>
 #include <QPainterPath>
@@ -69,7 +70,8 @@ protected:
     bool acceptNavigationRequest(const QUrl& url, NavigationType type, bool isMainFrame) override
     {
         if (type == QWebEnginePage::NavigationTypeLinkClicked) {
-            QDesktopServices::openUrl(url);
+            if (isSafeExternalUrl(url))
+                QDesktopServices::openUrl(url);
 
             return false;
         }

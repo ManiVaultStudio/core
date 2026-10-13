@@ -154,7 +154,7 @@ LearningPageVideoWidget::LearningPageVideoWidget(const QModelIndex& index, QWidg
     _propertiesTextBrowser.document()->setDocumentMargin(0);
     _propertiesTextBrowser.setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     _propertiesTextBrowser.setFixedWidth(200);
-    _propertiesTextBrowser.setHtml(QString("<p style='margin-top: 0px;'>%1</p>").arg(title));
+    _propertiesTextBrowser.setHtml(QString("<p style='margin-top: 0px;'>%1</p>").arg(title.toHtmlEscaped()));
 
     connect(_propertiesTextBrowser.document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged, this, [this]() -> void {
         _propertiesTextBrowser.setFixedHeight(static_cast<int>(_propertiesTextBrowser.document()->size().height()));

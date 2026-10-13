@@ -298,6 +298,8 @@ set(PRIVATE_APPLICATION_HEADERS
     src/private/HelpMenu.h
     src/private/UserFeedbackDialog.h
     src/private/NoProxyRectanglesFusionStyle.h
+    src/private/GifEncoder.h
+    src/private/GifRecorder.h
 )
 
 if(WIN32)
@@ -324,6 +326,8 @@ set(PRIVATE_APPLICATION_SOURCES
     src/private/HelpMenu.cpp
     src/private/UserFeedbackDialog.cpp
     src/private/NoProxyRectanglesFusionStyle.cpp
+    src/private/GifEncoder.cpp
+    src/private/GifRecorder.cpp
 )
 
 if(WIN32)

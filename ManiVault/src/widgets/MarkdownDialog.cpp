@@ -6,6 +6,7 @@
 
 #include <Application.h>
 #include <CoreInterface.h>
+#include <util/Miscellaneous.h>
 
 #include <QVBoxLayout>
 #include <QWebChannel>
@@ -79,7 +80,9 @@ MarkdownDialog::MarkdownDialog(const QUrl& markdownUrl, QWidget* parent /*= null
 bool MarkdownWebEnginePage::acceptNavigationRequest(const QUrl& url, NavigationType type, bool isMainFrame)
 {
     if (type == QWebEnginePage::NavigationTypeLinkClicked) {
-        QDesktopServices::openUrl(url);
+        if (isSafeExternalUrl(url))
+            QDesktopServices::openUrl(url);
+
         return false;
     }
 

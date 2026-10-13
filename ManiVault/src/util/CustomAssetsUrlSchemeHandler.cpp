@@ -28,14 +28,29 @@ void CustomAssetsUrlSchemeHandler::requestStarted(QWebEngineUrlRequestJob* job)
 {
     const auto url = job->requestUrl();
 
+    const QFileInfo rootInfo(_rootDir);
+
+    if (!rootInfo.exists() || !rootInfo.isDir()) {
+        job->fail(QWebEngineUrlRequestJob::UrlNotFound);
+        return;
+    }
+
 	auto assetRelative = QDir::cleanPath(url.path()); // "/logo.png"
 
 	if (assetRelative.startsWith('/'))
         assetRelative.remove(0, 1);
 
-	const auto abs          = QDir(_rootDir).absoluteFilePath(assetRelative);
-	const auto canonRoot    = QDir::cleanPath(QFileInfo(_rootDir).canonicalFilePath() + QDir::separator());
-	const auto canonAbs     = QFileInfo(abs).canonicalFilePath();
+	const auto abs              = QDir(_rootDir).absoluteFilePath(assetRelative);
+	const auto canonicalRoot   = rootInfo.canonicalFilePath();
+	const auto canonicalAsset  = QFileInfo(abs).canonicalFilePath();
+
+	if (canonicalRoot.isEmpty() || canonicalAsset.isEmpty()) {
+        job->fail(QWebEngineUrlRequestJob::UrlNotFound);
+        return;
+    }
+
+	const auto canonRoot = QDir::cleanPath(canonicalRoot + QDir::separator());
+	const auto canonAbs  = canonicalAsset;
 
 	if (!canonAbs.startsWith(canonRoot) || !QFile::exists(canonAbs)) {
 		job->fail(QWebEngineUrlRequestJob::UrlNotFound);

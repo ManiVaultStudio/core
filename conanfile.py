@@ -80,6 +80,14 @@ class HdpsCoreConan(ConanFile):
         branch_info = CoreBranchInfo(self.recipe_folder)
         self.version = branch_info.version
 
+    def _tests_enabled(self):
+        return os.environ.get("MV_BUILD_TESTING", "").lower() in (
+            "1",
+            "true",
+            "on",
+            "yes",
+        )
+
     # Remove runtime and use always default (MD/MDd)
     def configure(self):
         pass
@@ -176,6 +184,7 @@ class HdpsCoreConan(ConanFile):
         tc.cache_variables["MV_UNITY_BUILD"] = MV_UNITY_BUILD
         tc.cache_variables["MV_USE_ERROR_LOGGING"] = MV_USE_ERROR_LOGGING
         tc.cache_variables["MV_RELWITHDEBUGINFO"] = MV_RELWITHDEBUGINFO
+        tc.cache_variables["MV_BUILD_TESTING"] = "ON" if self._tests_enabled() else "OFF"
         
         try:
             tc.generate()
@@ -203,6 +212,9 @@ class HdpsCoreConan(ConanFile):
         cmake = self._configure_cmake()
         print("**** Build RELWITHDEBINFO *****")
         cmake.build(build_type="RelWithDebInfo")
+        if self._tests_enabled():
+            print("**** Test RELWITHDEBINFO *****")
+            cmake.test(build_type="RelWithDebInfo")
         print("**** Install RELWITHDEBINFO *****")
         cmake.install(build_type="RelWithDebInfo")
 

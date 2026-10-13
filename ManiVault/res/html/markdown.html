@@ -2,19 +2,19 @@
 <html lang="en">
 <meta charset="utf-8">
 <head>
-  <link rel="stylesheet" type="text/css" href="https://raw.githubusercontent.com/sindresorhus/github-markdown-css/main/github-markdown.css">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'sha256-sql4pls/EDUtugV6x+kyMdyrYdtaVYAx0ApEufxzDSA='; img-src https: data:; object-src 'none'; frame-src 'none';">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/github-markdown-css@6.6.0/github-markdown.css">
   <script src="qrc:/qtwebchannel/qwebchannel.js"></script>
 </head>
 <body>
   <div id="placeholder"></div>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script type="module">
-  import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+  import { marked } from "https://cdn.jsdelivr.net/npm/marked@18.1.0/lib/marked.esm.js";
   
 	var placeholder = document.getElementById('placeholder');
 
   var updateText = function(text) {
-      placeholder.innerHTML = marked(text);
+      placeholder.innerHTML = marked.parse(text);
   }
   
 	new QWebChannel(qt.webChannelTransport,

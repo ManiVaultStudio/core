@@ -33,6 +33,13 @@
 namespace mv::util
 {
 
+bool isSafeExternalUrl(const QUrl& url)
+{
+    const auto scheme = url.scheme().toLower();
+
+    return url.isValid() && !url.host().isEmpty() && (scheme == QStringLiteral("http") || scheme == QStringLiteral("https"));
+}
+
     struct MemoryStats
     {
         double rssMB = 0.0;        // Resident Set Size

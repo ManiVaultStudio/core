@@ -14,6 +14,7 @@
 #include <QWidget>
 #include <QPixmap>
 #include <QByteArray>
+#include <QUrl>
 
 #include <algorithm>
 
@@ -110,6 +111,13 @@ CORE_EXPORT QString getColorAsCssString(const QColor& color, bool alpha = true);
  * @return True when the URL can be reached.
  */
 CORE_EXPORT bool urlExists(const QString& urlString);
+
+/**
+ * @brief Returns whether a URL is safe to hand to the operating system as an external link.
+ * @param url URL to test.
+ * @return True only for HTTP(S) URLs with a host name.
+ */
+CORE_EXPORT bool isSafeExternalUrl(const QUrl& url);
 
 /**
  * @brief Replaces a widget layout.
