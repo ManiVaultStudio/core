@@ -33,15 +33,23 @@ PointDataTiledStorage::PointDataTiledStorage(const std::uint64_t rows, const std
 }
 
 std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromDense(const char* data, const std::uint64_t rows,
-    const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize)
+    const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize,
+    ProgressCallback progress)
 {
     auto storage = std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize);
+    const auto totalTiles = storage->_descriptors.size();
+    const auto progressInterval = std::max<std::size_t>(1, totalTiles / 100);
+    std::size_t tileIndex = 0;
     for (auto& tile : storage->_descriptors) {
         tile.residentBytes.resize(static_cast<qsizetype>(tile.rows * tile.columns * elementSize));
         for (std::uint64_t row = 0; row < tile.rows; ++row)
             std::memcpy(tile.residentBytes.data() + row * tile.columns * elementSize,
                 data + ((tile.rowOffset + row) * columns + tile.columnOffset) * elementSize,
                 tile.columns * elementSize);
+
+        ++tileIndex;
+        if (progress && (tileIndex == 1 || tileIndex == totalTiles || tileIndex % progressInterval == 0))
+            progress(static_cast<float>(tileIndex) / static_cast<float>(totalTiles));
     }
     return storage;
 }

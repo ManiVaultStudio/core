@@ -11,6 +11,8 @@ set(PLUGIN
 )
 
 set(WIDGETS
+    src/PointDataTableModel.h
+    src/PointDataTableModel.cpp
     src/PointDataViewWidget.h
     src/PointDataViewWidget.cpp
 )
@@ -31,7 +33,7 @@ target_include_directories(${POINTDATAVIEWPLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<C
 target_include_directories(${POINTDATAVIEWPLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/PointData/")
 target_compile_features(${POINTDATAVIEWPLUGIN} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
-target_link_libraries(${POINTDATAVIEWPLUGIN} PRIVATE Qt6::Core Qt6::Widgets Qt6::Network Qt6::WebEngineWidgets ${MV_PUBLIC_LIB} PointData)
+target_link_libraries(${POINTDATAVIEWPLUGIN} PRIVATE Qt6::Core Qt6::Widgets Qt6::Concurrent Qt6::Network Qt6::WebEngineWidgets ${MV_PUBLIC_LIB} PointData)
 
 mv_check_and_set_AVX(${POINTDATAVIEWPLUGIN} ${MV_USE_AVX})
 

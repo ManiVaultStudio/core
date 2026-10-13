@@ -25,6 +25,7 @@
 
 #include <array>
 #include <cassert>
+#include <functional>
 #include <mutex>
 #include <memory>
 #include <utility>
@@ -261,7 +262,7 @@ public:
     const void* getDataConstVoidPtr() const;
 
     bool isTiled() const;
-    void makeTiled(std::size_t rowTileSize, std::size_t columnTileSize);
+    void makeTiled(std::size_t rowTileSize, std::size_t columnTileSize, std::function<void(float)> progress = {});
     TileView acquireTile(std::uint64_t tileRow, std::uint64_t tileColumn) const;
     void setTiledCacheCapacity(std::size_t capacity);
     std::size_t getTiledCacheSize() const;

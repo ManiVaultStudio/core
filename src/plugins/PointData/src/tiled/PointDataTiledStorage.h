@@ -16,12 +16,14 @@ class PointDataTiledStorage
 {
 public:
     using TileLoader = std::function<QByteArray(const TileDescriptor&)>;
+    using ProgressCallback = std::function<void(float)>;
 
     PointDataTiledStorage(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize,
         std::size_t rowTileSize, std::size_t columnTileSize, TileLoader loader = {});
 
     static std::shared_ptr<PointDataTiledStorage> fromDense(const char* data, std::uint64_t rows,
-        std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize);
+        std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize,
+        ProgressCallback progress = {});
 
     std::uint64_t rows() const { return _rows; }
     std::uint64_t columns() const { return _columns; }

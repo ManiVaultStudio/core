@@ -2,39 +2,49 @@
 
 #pragma once
 
+#include "PointDataTableModel.h"
+
 #include <QWidget>
 
+class QEvent;
+template <typename T> class QFutureWatcher;
 class QLabel;
-class QLineEdit;
 class QPushButton;
 class QSpinBox;
-class QTableWidget;
+class QTableView;
+
+namespace mv { class Task; }
 
 class PointDataViewWidget final : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit PointDataViewWidget(QWidget* parent = nullptr);
+    explicit PointDataViewWidget(QWidget* parent = nullptr, mv::Task* progressTask = nullptr);
+
+signals:
+    void tiledStorageEnabled(const QString& datasetName);
+
+protected:
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
 private slots:
-    void refresh();
+    void refreshSelection();
+    void fetchVisibleRange();
     void tileSelectedData();
 
 private:
-    void setStatus(const QString& text);
     QSpinBox* createIndexSpinBox(QWidget* parent) const;
+    void setStatus(const QString& text);
 
     QLabel* _datasetLabel;
     QLabel* _statusLabel;
-    QSpinBox* _firstRow;
-    QSpinBox* _rowCount;
-    QSpinBox* _firstColumn;
-    QSpinBox* _columnCount;
     QSpinBox* _rowTileSize;
     QSpinBox* _columnTileSize;
     QSpinBox* _cacheCapacity;
-    QPushButton* _refreshButton;
     QPushButton* _tileButton;
-    QTableWidget* _table;
+    QTableView* _table;
+    PointDataTableModel* _model;
+    mv::Task* _progressTask;
+    QFutureWatcher<void>* _tileWatcher;
 };

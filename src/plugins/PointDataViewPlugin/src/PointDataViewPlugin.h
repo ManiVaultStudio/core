@@ -5,6 +5,7 @@
 #include "PointDataViewWidget.h"
 
 #include <ViewPlugin.h>
+#include <Task.h>
 
 class PointDataViewPlugin final : public mv::plugin::ViewPlugin
 {
@@ -15,6 +16,7 @@ public:
     void init() override;
 
 private:
+    mv::Task                    _tileTask;
     PointDataViewWidget _widget;
 };
 

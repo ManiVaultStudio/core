@@ -8,9 +8,14 @@ Q_PLUGIN_METADATA(IID "studio.manivault.PointDataViewPlugin")
 
 PointDataViewPlugin::PointDataViewPlugin(const mv::plugin::PluginFactory* factory) :
     ViewPlugin(factory),
-    _widget(nullptr)
+    _tileTask(this, "Enable tiled storage"),
+    _widget(nullptr, &_tileTask)
 {
     getGuiNameAction().setString("Points View");
+    setProgressTask(&_tileTask);
+    connect(&_widget, &PointDataViewWidget::tiledStorageEnabled, this, [this](const QString& datasetName) {
+        addNotification(QString("Tiled storage enabled for %1").arg(datasetName));
+    });
 }
 
 void PointDataViewPlugin::init()

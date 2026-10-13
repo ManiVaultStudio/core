@@ -4,86 +4,64 @@
 
 #include <CoreInterface.h>
 #include <PointData.h>
+#include <Task.h>
 
+#include <QAbstractItemView>
+#include <QEvent>
+#include <QFutureWatcher>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
-#include <QLineEdit>
 #include <QPushButton>
+#include <QScrollBar>
 #include <QSpinBox>
-#include <QTableWidget>
+#include <QTableView>
+#include <QTimer>
 #include <QVBoxLayout>
-#include <QAbstractItemView>
+#include <QtConcurrent>
 
 #include <algorithm>
-#include <cstdint>
-#include <vector>
 
-namespace
-{
-float valueAt(const PointDataAccessView& view, std::uint64_t row, std::uint64_t column)
-{
-    const auto* bytes = view.rowData(row) + column * view.elementSizeBytes;
-
-    switch (view.elementTypeIndex) {
-    case 0: return *reinterpret_cast<const float*>(bytes);
-    case 1: return static_cast<float>(*reinterpret_cast<const biovault::bfloat16_t*>(bytes));
-    case 2: return static_cast<float>(*reinterpret_cast<const std::int32_t*>(bytes));
-    case 3: return static_cast<float>(*reinterpret_cast<const std::uint32_t*>(bytes));
-    case 4: return static_cast<float>(*reinterpret_cast<const std::int16_t*>(bytes));
-    case 5: return static_cast<float>(*reinterpret_cast<const std::uint16_t*>(bytes));
-    case 6: return static_cast<float>(*reinterpret_cast<const std::int8_t*>(bytes));
-    case 7: return static_cast<float>(*reinterpret_cast<const std::uint8_t*>(bytes));
-    default: return 0.0f;
-    }
-}
-}
-
-PointDataViewWidget::PointDataViewWidget(QWidget* parent) :
+PointDataViewWidget::PointDataViewWidget(QWidget* parent, mv::Task* progressTask) :
     QWidget(parent),
-    _datasetLabel(new QLabel("No PointData selected", this)),
+    _datasetLabel(new QLabel("No Points dataset selected", this)),
     _statusLabel(new QLabel(this)),
-    _firstRow(createIndexSpinBox(this)),
-    _rowCount(createIndexSpinBox(this)),
-    _firstColumn(createIndexSpinBox(this)),
-    _columnCount(createIndexSpinBox(this)),
     _rowTileSize(createIndexSpinBox(this)),
     _columnTileSize(createIndexSpinBox(this)),
     _cacheCapacity(createIndexSpinBox(this)),
-    _refreshButton(new QPushButton("Read selected range", this)),
     _tileButton(new QPushButton("Enable tiled storage", this)),
-    _table(new QTableWidget(this))
+    _table(new QTableView(this)),
+    _model(new PointDataTableModel(this)),
+    _progressTask(progressTask),
+    _tileWatcher(new QFutureWatcher<void>(this))
 {
-    _rowCount->setValue(8);
-    _columnCount->setValue(8);
     _rowTileSize->setValue(256);
     _columnTileSize->setValue(8);
     _cacheCapacity->setValue(8);
 
     auto* controls = new QFormLayout();
-    controls->addRow("First row", _firstRow);
-    controls->addRow("Rows", _rowCount);
-    controls->addRow("First column", _firstColumn);
-    controls->addRow("Columns", _columnCount);
     controls->addRow("Row tile size", _rowTileSize);
     controls->addRow("Column tile size", _columnTileSize);
     controls->addRow("Tile cache capacity", _cacheCapacity);
 
     auto* actions = new QVBoxLayout();
-    actions->addWidget(_refreshButton);
     actions->addWidget(_tileButton);
     actions->addStretch(1);
 
-    auto* settings = new QGroupBox("Tile access", this);
+    auto* settings = new QGroupBox("Lazy table access", this);
     auto* settingsLayout = new QHBoxLayout(settings);
     settingsLayout->addLayout(controls, 1);
     settingsLayout->addLayout(actions);
 
+    _table->setModel(_model);
     _table->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    _table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    _table->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    _table->setAlternatingRowColors(true);
+    _table->setWordWrap(false);
+    _table->verticalHeader()->setDefaultSectionSize(22);
+    _table->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+    _table->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
 
     auto* layout = new QVBoxLayout(this);
     layout->addWidget(_datasetLabel);
@@ -91,17 +69,22 @@ PointDataViewWidget::PointDataViewWidget(QWidget* parent) :
     layout->addWidget(_table, 1);
     layout->addWidget(_statusLabel);
 
-    connect(_refreshButton, &QPushButton::clicked, this, &PointDataViewWidget::refresh);
-    connect(_tileButton, &QPushButton::clicked, this, &PointDataViewWidget::tileSelectedData);
-    connect(&mv::dataHierarchy(), &mv::AbstractDataHierarchyManager::selectedItemsChanged, this, &PointDataViewWidget::refresh);
+    _table->verticalScrollBar()->installEventFilter(this);
+    _table->horizontalScrollBar()->installEventFilter(this);
+    _table->viewport()->installEventFilter(this);
 
-    refresh();
+    connect(_tileButton, &QPushButton::clicked, this, &PointDataViewWidget::tileSelectedData);
+    connect(&mv::dataHierarchy(), &mv::AbstractDataHierarchyManager::selectedItemsChanged, this, &PointDataViewWidget::refreshSelection);
+    connect(_table->verticalScrollBar(), &QScrollBar::sliderReleased, this, &PointDataViewWidget::fetchVisibleRange);
+    connect(_table->horizontalScrollBar(), &QScrollBar::sliderReleased, this, &PointDataViewWidget::fetchVisibleRange);
+
+    refreshSelection();
 }
 
 QSpinBox* PointDataViewWidget::createIndexSpinBox(QWidget* parent) const
 {
     auto* spinBox = new QSpinBox(parent);
-    spinBox->setRange(0, 1000000000);
+    spinBox->setRange(1, 1000000000);
     return spinBox;
 }
 
@@ -110,16 +93,14 @@ void PointDataViewWidget::setStatus(const QString& text)
     _statusLabel->setText(text);
 }
 
-void PointDataViewWidget::refresh()
+void PointDataViewWidget::refreshSelection()
 {
-    _table->clear();
-    _table->setRowCount(0);
-    _table->setColumnCount(0);
+    _model->clear();
 
     const auto selectedItems = mv::dataHierarchy().getSelectedItems();
     if (selectedItems.size() != 1) {
         _datasetLabel->setText("Select exactly one Points dataset");
-        setStatus("No point data selected");
+        setStatus("Scroll after selecting a dataset to fetch visible values");
         return;
     }
 
@@ -131,30 +112,39 @@ void PointDataViewWidget::refresh()
     }
 
     auto* rawData = points->getPointData();
-    const auto rows = rawData->getNumPoints();
-    const auto columns = rawData->getNumDimensions();
+    _model->setPointData(rawData, rawData->getNumPoints(), rawData->getNumDimensions());
     _datasetLabel->setText(QString("%1 — %2 points × %3 dimensions (%4)")
-        .arg(points->getGuiName()).arg(rows).arg(columns)
+        .arg(points->getGuiName()).arg(rawData->getNumPoints()).arg(rawData->getNumDimensions())
         .arg(rawData->isTiled() ? "tiled" : "eager"));
+    setStatus("Fetching the visible table window...");
+    QTimer::singleShot(0, this, &PointDataViewWidget::fetchVisibleRange);
+}
 
-    const auto firstRow = std::min<std::uint64_t>(_firstRow->value(), rows);
-    const auto firstColumn = std::min<std::uint64_t>(_firstColumn->value(), columns);
-    const auto rowCount = std::min<std::uint64_t>(_rowCount->value(), rows - firstRow);
-    const auto columnCount = std::min<std::uint64_t>(_columnCount->value(), columns - firstColumn);
-    _table->setRowCount(static_cast<int>(rowCount));
-    _table->setColumnCount(static_cast<int>(columnCount));
+void PointDataViewWidget::fetchVisibleRange()
+{
+    if (!_model->hasPointData())
+        return;
 
-    std::size_t callbackCount = 0;
-    rawData->visitRange(firstRow, rowCount, firstColumn, columnCount, [this, &callbackCount](const PointDataAccessView& view) {
-        ++callbackCount;
-        for (std::uint64_t row = 0; row < view.rows; ++row)
-            for (std::uint64_t column = 0; column < view.columns; ++column)
-                _table->setItem(static_cast<int>(row), static_cast<int>(column),
-                    new QTableWidgetItem(QString::number(valueAt(view, row, column), 'g', 7)));
-    });
+    const auto firstRow = std::max(0, _table->rowAt(0));
+    const auto lastRow = _table->rowAt(std::max(0, _table->viewport()->height() - 1));
+    const auto firstColumn = std::max(0, _table->columnAt(0));
+    const auto lastColumn = _table->columnAt(std::max(0, _table->viewport()->width() - 1));
+    const auto rowCount = lastRow >= firstRow ? static_cast<std::uint64_t>(lastRow - firstRow + 1) : 1;
+    const auto columnCount = lastColumn >= firstColumn ? static_cast<std::uint64_t>(lastColumn - firstColumn + 1) : 1;
+    const auto callbacks = _model->fetchRange(static_cast<std::uint64_t>(firstRow), rowCount,
+        static_cast<std::uint64_t>(firstColumn), columnCount);
 
-    setStatus(QString("Read %1 × %2 values in %3 access segment(s); cached tiles: %4")
-        .arg(rowCount).arg(columnCount).arg(callbackCount).arg(rawData->getTiledCacheSize()));
+    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
+    if (selectedItems.size() != 1)
+        return;
+    auto points = selectedItems.first()->getDataset<Points>();
+    if (!points.isValid())
+        return;
+
+    setStatus(QString("Fetched visible rows %1–%2, columns %3–%4 in %5 access segment(s); cached tiles: %6. Drag/scroll and release to fetch again.")
+        .arg(firstRow).arg(firstRow + static_cast<int>(rowCount) - 1)
+        .arg(firstColumn).arg(firstColumn + static_cast<int>(columnCount) - 1)
+        .arg(callbacks).arg(points->getPointData()->getTiledCacheSize()));
 }
 
 void PointDataViewWidget::tileSelectedData()
@@ -168,8 +158,58 @@ void PointDataViewWidget::tileSelectedData()
         return;
 
     auto* rawData = points->getPointData();
-    if (!rawData->isTiled())
-        rawData->makeTiled(static_cast<std::size_t>(_rowTileSize->value()), static_cast<std::size_t>(_columnTileSize->value()));
     rawData->setTiledCacheCapacity(static_cast<std::size_t>(_cacheCapacity->value()));
-    refresh();
+
+    if (rawData->isTiled()) {
+        emit tiledStorageEnabled(points->getGuiName());
+        refreshSelection();
+        return;
+    }
+
+    const auto rowTileSize = static_cast<std::size_t>(_rowTileSize->value());
+    const auto columnTileSize = static_cast<std::size_t>(_columnTileSize->value());
+    const auto cacheCapacity = static_cast<std::size_t>(_cacheCapacity->value());
+    const auto datasetName = points->getGuiName();
+    const auto progressTask = _progressTask;
+
+    _tileButton->setEnabled(false);
+    if (progressTask) {
+        progressTask->resetProgress();
+        progressTask->setRunning();
+        progressTask->setProgressDescription("Creating point-data tiles");
+    }
+
+    connect(_tileWatcher, &QFutureWatcher<void>::finished, this, [this, datasetName, progressTask, cacheCapacity]() {
+        _tileButton->setEnabled(true);
+        if (progressTask) {
+            progressTask->setProgress(1.0f, "Point-data tiling complete");
+            progressTask->setFinished();
+        }
+
+        const auto selectedItems = mv::dataHierarchy().getSelectedItems();
+        if (selectedItems.size() == 1) {
+            auto points = selectedItems.first()->getDataset<Points>();
+            if (points.isValid())
+                points->getPointData()->setTiledCacheCapacity(cacheCapacity);
+        }
+
+        emit tiledStorageEnabled(datasetName);
+        refreshSelection();
+    });
+
+    _tileWatcher->setFuture(QtConcurrent::run([points, rowTileSize, columnTileSize, progressTask]() mutable {
+        points->getPointData()->makeTiled(rowTileSize, columnTileSize, [progressTask](const float progress) {
+            if (progressTask)
+                progressTask->setProgress(progress, "Creating point-data tiles");
+        });
+    }));
+}
+
+bool PointDataViewWidget::eventFilter(QObject* watched, QEvent* event)
+{
+    if ((watched == _table->verticalScrollBar() || watched == _table->horizontalScrollBar() || watched == _table->viewport()) &&
+        event->type() == QEvent::MouseButtonRelease)
+        QTimer::singleShot(0, this, &PointDataViewWidget::fetchVisibleRange);
+
+    return QWidget::eventFilter(watched, event);
 }

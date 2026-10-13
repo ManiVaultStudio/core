@@ -182,7 +182,7 @@ const void* PointData::getDataConstVoidPtr() const
 
 bool PointData::isTiled() const { const auto lock = lockData(); return static_cast<bool>(_tiledStorage); }
 
-void PointData::makeTiled(const std::size_t rowTileSize, const std::size_t columnTileSize)
+void PointData::makeTiled(const std::size_t rowTileSize, const std::size_t columnTileSize, std::function<void(float)> progress)
 {
     const auto lock = lockData();
     if (_isDense && !_tiledStorage && _numDimensions > 0) {
@@ -190,7 +190,7 @@ void PointData::makeTiled(const std::size_t rowTileSize, const std::size_t colum
         const auto elementSize = std::visit([](const auto& vector) { return sizeof(typename std::decay_t<decltype(vector)>::value_type); }, _variantOfVectors);
         _tiledStorage = mv::pointdata::tiled::PointDataTiledStorage::fromDense(
             static_cast<const char*>(std::visit([](const auto& vector) { return static_cast<const void*>(vector.data()); }, _variantOfVectors)),
-            rows, _numDimensions, elementSize, rowTileSize, columnTileSize);
+            rows, _numDimensions, elementSize, rowTileSize, columnTileSize, std::move(progress));
         _numRows = rows;
     }
 }
