@@ -9,12 +9,12 @@
 
 class PointData;
 
-class PointDataTableModel final : public QAbstractTableModel
+class PointsTableModel final : public QAbstractTableModel
 {
     Q_OBJECT
 
 public:
-    explicit PointDataTableModel(QObject* parent = nullptr);
+    explicit PointsTableModel(QObject* parent = nullptr);
 
     void setPointData(PointData* pointData, std::uint64_t rows, std::uint64_t columns);
     void clear();

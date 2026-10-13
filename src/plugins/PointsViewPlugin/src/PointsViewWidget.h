@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "PointDataTableModel.h"
+#include "PointsTableModel.h"
 
 #include <QWidget>
 
@@ -12,15 +12,16 @@ class QLabel;
 class QPushButton;
 class QSpinBox;
 class QTableView;
+class QTimer;
 
 namespace mv { class Task; }
 
-class PointDataViewWidget final : public QWidget
+class PointsViewWidget final : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit PointDataViewWidget(QWidget* parent = nullptr, mv::Task* progressTask = nullptr);
+    explicit PointsViewWidget(QWidget* parent = nullptr, mv::Task* progressTask = nullptr);
 
 signals:
     void tiledStorageEnabled(const QString& datasetName);
@@ -30,6 +31,7 @@ protected:
 
 private slots:
     void refreshSelection();
+    void scheduleVisibleRangeFetch();
     void fetchVisibleRange();
     void tileSelectedData();
 
@@ -44,7 +46,8 @@ private:
     QSpinBox* _cacheCapacity;
     QPushButton* _tileButton;
     QTableView* _table;
-    PointDataTableModel* _model;
+    PointsTableModel* _model;
     mv::Task* _progressTask;
     QFutureWatcher<void>* _tileWatcher;
+    QTimer* _fetchTimer;
 };

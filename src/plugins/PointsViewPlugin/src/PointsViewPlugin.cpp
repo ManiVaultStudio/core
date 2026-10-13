@@ -1,24 +1,24 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "PointDataViewPlugin.h"
+#include "PointsViewPlugin.h"
 
 #include <ManiVaultVersion.h>
 
-Q_PLUGIN_METADATA(IID "studio.manivault.PointDataViewPlugin")
+Q_PLUGIN_METADATA(IID "studio.manivault.PointsViewPlugin")
 
-PointDataViewPlugin::PointDataViewPlugin(const mv::plugin::PluginFactory* factory) :
+PointsViewPlugin::PointsViewPlugin(const mv::plugin::PluginFactory* factory) :
     ViewPlugin(factory),
     _tileTask(this, "Enable tiled storage"),
     _widget(nullptr, &_tileTask)
 {
     getGuiNameAction().setString("Points View");
     setProgressTask(&_tileTask);
-    connect(&_widget, &PointDataViewWidget::tiledStorageEnabled, this, [this](const QString& datasetName) {
+    connect(&_widget, &PointsViewWidget::tiledStorageEnabled, this, [this](const QString& datasetName) {
         addNotification(QString("Tiled storage enabled for %1").arg(datasetName));
     });
 }
 
-void PointDataViewPlugin::init()
+void PointsViewPlugin::init()
 {
     auto* layout = new QVBoxLayout();
     layout->setContentsMargins(6, 6, 6, 6);
@@ -26,7 +26,7 @@ void PointDataViewPlugin::init()
     getWidget().setLayout(layout);
 }
 
-PointDataViewPluginFactory::PointDataViewPluginFactory() :
+PointsViewPluginFactory::PointsViewPluginFactory() :
     ViewPluginFactory(true)
 {
     setIconByName("table");
@@ -36,12 +36,12 @@ PointDataViewPluginFactory::PointDataViewPluginFactory() :
     getPluginMetadata().setLicenseText("This plugin is distributed under the [LGPL v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license.");
 }
 
-QUrl PointDataViewPluginFactory::getRepositoryUrl() const
+QUrl PointsViewPluginFactory::getRepositoryUrl() const
 {
     return { "https://github.com/ManiVaultStudio/core" };
 }
 
-mv::plugin::ViewPlugin* PointDataViewPluginFactory::produce()
+mv::plugin::ViewPlugin* PointsViewPluginFactory::produce()
 {
-    return new PointDataViewPlugin(this);
+    return new PointsViewPlugin(this);
 }

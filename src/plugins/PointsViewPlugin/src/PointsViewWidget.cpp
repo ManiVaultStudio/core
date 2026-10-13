@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "PointDataViewWidget.h"
+#include "PointsViewWidget.h"
 
 #include <CoreInterface.h>
 #include <PointData.h>
@@ -24,7 +24,7 @@
 
 #include <algorithm>
 
-PointDataViewWidget::PointDataViewWidget(QWidget* parent, mv::Task* progressTask) :
+PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     QWidget(parent),
     _datasetLabel(new QLabel("No Points dataset selected", this)),
     _statusLabel(new QLabel(this)),
@@ -33,9 +33,10 @@ PointDataViewWidget::PointDataViewWidget(QWidget* parent, mv::Task* progressTask
     _cacheCapacity(createIndexSpinBox(this)),
     _tileButton(new QPushButton("Enable tiled storage", this)),
     _table(new QTableView(this)),
-    _model(new PointDataTableModel(this)),
+    _model(new PointsTableModel(this)),
     _progressTask(progressTask),
-    _tileWatcher(new QFutureWatcher<void>(this))
+    _tileWatcher(new QFutureWatcher<void>(this)),
+    _fetchTimer(new QTimer(this))
 {
     _rowTileSize->setValue(256);
     _columnTileSize->setValue(8);
@@ -72,28 +73,31 @@ PointDataViewWidget::PointDataViewWidget(QWidget* parent, mv::Task* progressTask
     _table->verticalScrollBar()->installEventFilter(this);
     _table->horizontalScrollBar()->installEventFilter(this);
     _table->viewport()->installEventFilter(this);
+    _fetchTimer->setSingleShot(true);
+    _fetchTimer->setInterval(100);
 
-    connect(_tileButton, &QPushButton::clicked, this, &PointDataViewWidget::tileSelectedData);
-    connect(&mv::dataHierarchy(), &mv::AbstractDataHierarchyManager::selectedItemsChanged, this, &PointDataViewWidget::refreshSelection);
-    connect(_table->verticalScrollBar(), &QScrollBar::sliderReleased, this, &PointDataViewWidget::fetchVisibleRange);
-    connect(_table->horizontalScrollBar(), &QScrollBar::sliderReleased, this, &PointDataViewWidget::fetchVisibleRange);
+    connect(_tileButton, &QPushButton::clicked, this, &PointsViewWidget::tileSelectedData);
+    connect(&mv::dataHierarchy(), &mv::AbstractDataHierarchyManager::selectedItemsChanged, this, &PointsViewWidget::refreshSelection);
+    connect(_fetchTimer, &QTimer::timeout, this, &PointsViewWidget::fetchVisibleRange);
+    connect(_table->verticalScrollBar(), &QScrollBar::valueChanged, this, &PointsViewWidget::scheduleVisibleRangeFetch);
+    connect(_table->horizontalScrollBar(), &QScrollBar::valueChanged, this, &PointsViewWidget::scheduleVisibleRangeFetch);
 
     refreshSelection();
 }
 
-QSpinBox* PointDataViewWidget::createIndexSpinBox(QWidget* parent) const
+QSpinBox* PointsViewWidget::createIndexSpinBox(QWidget* parent) const
 {
     auto* spinBox = new QSpinBox(parent);
     spinBox->setRange(1, 1000000000);
     return spinBox;
 }
 
-void PointDataViewWidget::setStatus(const QString& text)
+void PointsViewWidget::setStatus(const QString& text)
 {
     _statusLabel->setText(text);
 }
 
-void PointDataViewWidget::refreshSelection()
+void PointsViewWidget::refreshSelection()
 {
     _model->clear();
 
@@ -117,10 +121,16 @@ void PointDataViewWidget::refreshSelection()
         .arg(points->getGuiName()).arg(rawData->getNumPoints()).arg(rawData->getNumDimensions())
         .arg(rawData->isTiled() ? "tiled" : "eager"));
     setStatus("Fetching the visible table window...");
-    QTimer::singleShot(0, this, &PointDataViewWidget::fetchVisibleRange);
+    QTimer::singleShot(0, this, &PointsViewWidget::fetchVisibleRange);
 }
 
-void PointDataViewWidget::fetchVisibleRange()
+void PointsViewWidget::scheduleVisibleRangeFetch()
+{
+    if (_model->hasPointData())
+        _fetchTimer->start();
+}
+
+void PointsViewWidget::fetchVisibleRange()
 {
     if (!_model->hasPointData())
         return;
@@ -147,7 +157,7 @@ void PointDataViewWidget::fetchVisibleRange()
         .arg(callbacks).arg(points->getPointData()->getTiledCacheSize()));
 }
 
-void PointDataViewWidget::tileSelectedData()
+void PointsViewWidget::tileSelectedData()
 {
     const auto selectedItems = mv::dataHierarchy().getSelectedItems();
     if (selectedItems.size() != 1)
@@ -205,11 +215,11 @@ void PointDataViewWidget::tileSelectedData()
     }));
 }
 
-bool PointDataViewWidget::eventFilter(QObject* watched, QEvent* event)
+bool PointsViewWidget::eventFilter(QObject* watched, QEvent* event)
 {
     if ((watched == _table->verticalScrollBar() || watched == _table->horizontalScrollBar() || watched == _table->viewport()) &&
-        event->type() == QEvent::MouseButtonRelease)
-        QTimer::singleShot(0, this, &PointDataViewWidget::fetchVisibleRange);
+        (event->type() == QEvent::MouseButtonRelease || event->type() == QEvent::Wheel || event->type() == QEvent::KeyRelease))
+        scheduleVisibleRangeFetch();
 
     return QWidget::eventFilter(watched, event);
 }

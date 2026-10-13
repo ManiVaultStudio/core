@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "PointDataTableModel.h"
+#include "PointsTableModel.h"
 
 #include <PointData.h>
 
@@ -31,9 +31,9 @@ int toModelIndex(const std::uint64_t value)
 }
 }
 
-PointDataTableModel::PointDataTableModel(QObject* parent) : QAbstractTableModel(parent) {}
+PointsTableModel::PointsTableModel(QObject* parent) : QAbstractTableModel(parent) {}
 
-void PointDataTableModel::setPointData(PointData* pointData, const std::uint64_t rows, const std::uint64_t columns)
+void PointsTableModel::setPointData(PointData* pointData, const std::uint64_t rows, const std::uint64_t columns)
 {
     beginResetModel();
     _pointData = pointData;
@@ -44,19 +44,19 @@ void PointDataTableModel::setPointData(PointData* pointData, const std::uint64_t
     endResetModel();
 }
 
-void PointDataTableModel::clear() { setPointData(nullptr, 0, 0); }
+void PointsTableModel::clear() { setPointData(nullptr, 0, 0); }
 
-int PointDataTableModel::rowCount(const QModelIndex& parent) const
+int PointsTableModel::rowCount(const QModelIndex& parent) const
 {
     return parent.isValid() ? 0 : toModelIndex(_totalRows);
 }
 
-int PointDataTableModel::columnCount(const QModelIndex& parent) const
+int PointsTableModel::columnCount(const QModelIndex& parent) const
 {
     return parent.isValid() ? 0 : toModelIndex(_totalColumns);
 }
 
-QVariant PointDataTableModel::data(const QModelIndex& index, const int role) const
+QVariant PointsTableModel::data(const QModelIndex& index, const int role) const
 {
     if (!index.isValid() || role != Qt::DisplayRole || !_pointData)
         return {};
@@ -70,14 +70,14 @@ QVariant PointDataTableModel::data(const QModelIndex& index, const int role) con
     return QString::number(value, 'g', 7);
 }
 
-QVariant PointDataTableModel::headerData(const int section, const Qt::Orientation orientation, const int role) const
+QVariant PointsTableModel::headerData(const int section, const Qt::Orientation orientation, const int role) const
 {
     if (role != Qt::DisplayRole)
         return {};
     return orientation == Qt::Horizontal ? QVariant(QString("D%1").arg(section)) : QVariant(QString::number(section));
 }
 
-std::size_t PointDataTableModel::fetchRange(const std::uint64_t firstRow, const std::uint64_t rowCount,
+std::size_t PointsTableModel::fetchRange(const std::uint64_t firstRow, const std::uint64_t rowCount,
     const std::uint64_t firstColumn, const std::uint64_t columnCount)
 {
     if (!_pointData || firstRow >= _totalRows || firstColumn >= _totalColumns || rowCount == 0 || columnCount == 0)
@@ -121,7 +121,7 @@ std::size_t PointDataTableModel::fetchRange(const std::uint64_t firstRow, const 
     return callbackCount;
 }
 
-void PointDataTableModel::notifyRange(const std::uint64_t firstRow, const std::uint64_t rowCount,
+void PointsTableModel::notifyRange(const std::uint64_t firstRow, const std::uint64_t rowCount,
     const std::uint64_t firstColumn, const std::uint64_t columnCount)
 {
     if (rowCount == 0 || columnCount == 0)

@@ -504,7 +504,7 @@ add_subdirectory(plugins/LoggingPlugin)
 add_subdirectory(plugins/TasksPlugin)
 add_subdirectory(plugins/SampleScopePlugin)
 add_subdirectory(plugins/TutorialPlugin)
-add_subdirectory(plugins/PointDataViewPlugin)
+add_subdirectory(plugins/PointsViewPlugin)
 
 set(MV_SYSTEM_PLUGINS
     DataHierarchyPlugin 
@@ -514,7 +514,7 @@ set(MV_SYSTEM_PLUGINS
     TasksPlugin 
     SampleScopePlugin 
     TutorialPlugin
-    PointDataViewPlugin
+    PointsViewPlugin
 )
 
 foreach(system_plugin_target IN LISTS MV_SYSTEM_PLUGINS)
