@@ -195,6 +195,26 @@ void PointData::makeTiled(const std::size_t rowTileSize, const std::size_t colum
     }
 }
 
+void PointData::makeTiledFromGenerator(const std::uint64_t rows, const std::uint64_t columns,
+    const ElementTypeSpecifier elementType, const std::size_t rowTileSize, const std::size_t columnTileSize,
+    TiledTileGenerator generator)
+{
+    const auto lock = lockData();
+    if (!generator || rows == 0 || columns == 0)
+        throw std::invalid_argument("Invalid tiled point-data generator settings");
+
+    setElementTypeSpecifier(elementType);
+    _numDimensions = columns;
+    _numRows = rows;
+    _isDense = true;
+    _tiledStorage = mv::pointdata::tiled::PointDataTiledStorage::fromGenerator(rows, columns,
+        std::visit([](const auto& vector) { return sizeof(typename std::decay_t<decltype(vector)>::value_type); }, _variantOfVectors),
+        rowTileSize, columnTileSize,
+        [generator = std::move(generator)](const mv::pointdata::tiled::TileDescriptor& descriptor) {
+            return generator(descriptor.rowOffset, descriptor.columnOffset, descriptor.rows, descriptor.columns);
+        });
+}
+
 PointData::TileView PointData::acquireTile(const std::uint64_t tileRow, const std::uint64_t tileColumn) const
 {
     const auto lock = lockData();
@@ -248,6 +268,25 @@ std::uint64_t PointData::getTiledCacheEvictions() const
 {
     const auto lock = lockData();
     return _tiledStorage ? _tiledStorage->cacheEvictions() : 0;
+}
+
+PointData::TiledMemoryEstimate PointData::getTiledMemoryEstimate() const
+{
+    const auto lock = lockData();
+    if (!_tiledStorage)
+        return {};
+
+    const auto estimate = _tiledStorage->memoryEstimate();
+    return { estimate.rawDataBytes, estimate.largestTileBytes, estimate.cachedTileBytes, estimate.tileCount, estimate.indexBytes };
+}
+
+PointData::TiledMemoryEstimate PointData::estimateTiledMemory(const std::uint64_t rows, const std::uint64_t columns,
+    const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize,
+    const std::size_t cacheCapacity)
+{
+    const auto estimate = mv::pointdata::tiled::PointDataTiledStorage::estimateMemory(
+        rows, columns, elementSize, rowTileSize, columnTileSize, cacheCapacity);
+    return { estimate.rawDataBytes, estimate.largestTileBytes, estimate.cachedTileBytes, estimate.tileCount, estimate.indexBytes };
 }
 
 namespace

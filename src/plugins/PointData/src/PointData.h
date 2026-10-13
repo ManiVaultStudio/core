@@ -19,6 +19,7 @@
 #include <biovault_bfloat16/biovault_bfloat16.h>
 
 #include <QDebug>
+#include <QByteArray>
 #include <QMap>
 #include <QString>
 #include <QVariantMap>
@@ -73,6 +74,8 @@ class POINTDATA_EXPORT PointData : public mv::plugin::RawData
 public:
     using TileView = mv::pointdata::tiled::TileView;
     using DataLock = std::unique_lock<std::recursive_mutex>;
+    using TiledTileGenerator = std::function<QByteArray(std::uint64_t rowOffset, std::uint64_t columnOffset,
+        std::uint64_t rows, std::uint64_t columns)>;
 
     enum class ElementTypeSpecifier
     {
@@ -266,6 +269,8 @@ public:
 
     bool isTiled() const;
     void makeTiled(std::size_t rowTileSize, std::size_t columnTileSize, std::function<void(float)> progress = {});
+    void makeTiledFromGenerator(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType,
+        std::size_t rowTileSize, std::size_t columnTileSize, TiledTileGenerator generator);
     TileView acquireTile(std::uint64_t tileRow, std::uint64_t tileColumn) const;
     void setTiledCacheCapacity(std::size_t capacity);
     std::size_t getTiledCacheSize() const;
@@ -275,6 +280,19 @@ public:
     std::uint64_t getTiledCacheHits() const;
     std::uint64_t getTiledCacheMisses() const;
     std::uint64_t getTiledCacheEvictions() const;
+
+    /** Estimate memory requirements from dataset and tiling settings without allocating the data. */
+    struct TiledMemoryEstimate
+    {
+        std::uint64_t rawDataBytes = 0;
+        std::uint64_t largestTileBytes = 0;
+        std::uint64_t cachedTileBytes = 0;
+        std::uint64_t tileCount = 0;
+        std::uint64_t indexBytes = 0;
+    };
+    TiledMemoryEstimate getTiledMemoryEstimate() const;
+    static TiledMemoryEstimate estimateTiledMemory(std::uint64_t rows, std::uint64_t columns,
+        std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, std::size_t cacheCapacity);
 
     PointDataAccessView getRow(std::uint64_t row) const;
     void visitRows(std::uint64_t firstRow, std::uint64_t rowCount, const PointDataAccessVisitor& visitor) const;

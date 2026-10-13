@@ -120,9 +120,12 @@ void PointsViewWidget::updateInspector(const PointData* pointData)
         return;
     }
 
-    _inspectorLabel->setText(QString("Storage inspector: tiled | type: %1 | tile: %2 × %3 | cache: %4/%5 | hits: %6 | misses: %7 | evictions: %8")
+    const auto estimate = pointData->getTiledMemoryEstimate();
+    _inspectorLabel->setText(QString("Storage inspector: tiled | type: %1 | tile: %2 × %3 | raw: %4 MiB | cache estimate: %5 MiB | cache: %6/%7 | hits: %8 | misses: %9 | evictions: %10")
         .arg(pointData->getElementTypeName())
         .arg(pointData->getTiledRowTileSize()).arg(pointData->getTiledColumnTileSize())
+        .arg(static_cast<double>(estimate.rawDataBytes) / (1024.0 * 1024.0), 0, 'f', 1)
+        .arg(static_cast<double>(estimate.cachedTileBytes) / (1024.0 * 1024.0), 0, 'f', 1)
         .arg(pointData->getTiledCacheSize()).arg(pointData->getTiledCacheCapacity())
         .arg(pointData->getTiledCacheHits()).arg(pointData->getTiledCacheMisses()).arg(pointData->getTiledCacheEvictions()));
 }

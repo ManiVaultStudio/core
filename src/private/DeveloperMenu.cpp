@@ -7,6 +7,7 @@
 #include "ParallelPhantomTestSuite.h"
 
 #include <CoreInterface.h>
+#include <DeveloperActionRegistry.h>
 #include <exception/ManiVaultException.h>
 #include <util/Exception.h>
 #include <util/StyledIcon.h>
@@ -47,6 +48,15 @@ DeveloperMenu::DeveloperMenu(QWidget* parent /*= nullptr*/) :
     workflowTestingMenu->setToolTip(tr("Run parallel workflow test scenarios"));
 
     detail::ParallelPhantomTestSuite::populateMenu(*workflowTestingMenu, parentWidget());
+
+    _dataSynthesisMenu = addMenu(util::StyledIcon("flask"), tr("Data synthesis"));
+    _dataSynthesisMenu->setToolTip(tr("Create synthetic datasets for development and performance testing"));
+    connect(_dataSynthesisMenu, &QMenu::aboutToShow, this, [this] {
+        if (_dataSynthesisPopulated)
+            return;
+        developer::populateMenu(*_dataSynthesisMenu, parentWidget());
+        _dataSynthesisPopulated = true;
+    });
 
     auto errorReportingMenu = addMenu(util::StyledIcon("bug"), tr("Error reporting testing"));
     auto handledExceptionAction = errorReportingMenu->addAction(util::StyledIcon("triangle-exclamation"), tr("Handled exception"));

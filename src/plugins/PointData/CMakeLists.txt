@@ -21,6 +21,7 @@ set(POINTS_SOURCES
     src/tiled/PointDataTileCache.cpp
     src/tiled/PointDataTiledStorage.cpp
     src/tiled/PointDataTiledSerialization.cpp
+    src/developer/PointDataPhantomGenerator.cpp
 )
 
 set(POINTS_HEADERS
@@ -52,6 +53,7 @@ set(POINTS_HEADERS
     src/tiled/PointDataTileCache.h
     src/tiled/PointDataTiledStorage.h
     src/tiled/PointDataTiledSerialization.h
+    src/developer/PointDataPhantomGenerator.h
 )
 
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects
