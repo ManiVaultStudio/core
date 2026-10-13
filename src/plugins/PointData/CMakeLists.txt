@@ -7,6 +7,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(POINTS_SOURCES
     src/PointData.h
+    src/PointDataAccess.h
     src/PointData.cpp
     src/PointDataLegacySerialization.h
     src/PointDataLegacySerialization.cpp
@@ -17,10 +18,14 @@ set(POINTS_SOURCES
     src/SparseMatrix.h
 	src/DimensionNamesSerializer.h
 	src/DimensionNamesSerializer.cpp
+    src/tiled/PointDataTileCache.cpp
+    src/tiled/PointDataTiledStorage.cpp
+    src/tiled/PointDataTiledSerialization.cpp
 )
 
 set(POINTS_HEADERS
     src/PointData.h
+    src/PointDataAccess.h
     src/PointDataLegacySerialization.h
     src/PointDataIterator.h
     src/PointDataRange.h
@@ -43,6 +48,10 @@ set(POINTS_HEADERS
     src/CreateSetFromSelectionAction.h
     src/SparseMatrix.h
 	src/DimensionNamesSerializer.h
+    src/tiled/PointDataTile.h
+    src/tiled/PointDataTileCache.h
+    src/tiled/PointDataTiledStorage.h
+    src/tiled/PointDataTiledSerialization.h
 )
 
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects

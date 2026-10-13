@@ -12,6 +12,7 @@
 #include "PointDataRange.h"
 #include "Set.h"
 #include "SparseMatrix.h"
+#include "PointDataAccess.h"
 
 #include "event/EventListener.h"
 
@@ -25,12 +26,19 @@
 #include <array>
 #include <cassert>
 #include <mutex>
+#include <memory>
 #include <utility>
 #include <variant>
 #include <vector>
 
 namespace mv
 {
+    namespace pointdata::tiled
+    {
+        class PointDataTiledStorage;
+        class TileView;
+    }
+
     // From "graphics/Vector2f.h"
     class Vector2f;
 
@@ -62,6 +70,7 @@ class ClusterAction;
 class POINTDATA_EXPORT PointData : public mv::plugin::RawData
 {
 public:
+    using TileView = mv::pointdata::tiled::TileView;
     using DataLock = std::unique_lock<std::recursive_mutex>;
 
     enum class ElementTypeSpecifier
@@ -251,6 +260,21 @@ public:
     void* getDataVoidPtr();
     const void* getDataConstVoidPtr() const;
 
+    bool isTiled() const;
+    void makeTiled(std::size_t rowTileSize, std::size_t columnTileSize);
+    TileView acquireTile(std::uint64_t tileRow, std::uint64_t tileColumn) const;
+    void setTiledCacheCapacity(std::size_t capacity);
+    std::size_t getTiledCacheSize() const;
+
+    PointDataAccessView getRow(std::uint64_t row) const;
+    void visitRows(std::uint64_t firstRow, std::uint64_t rowCount, const PointDataAccessVisitor& visitor) const;
+    void visitRows(const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+    void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+    void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount,
+        const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+    void visitRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn,
+        std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+
     static constexpr std::array<const char*, std::variant_size_v<VariantOfVectors>> getElementTypeNames()
     {
         return
@@ -386,6 +410,7 @@ public:
     {
         const auto dataLock = lockData();
 
+        _tiledStorage.reset();
         convertData(data, numPoints * numDimensions);
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
@@ -398,6 +423,7 @@ public:
     {
         const auto dataLock = lockData();
 
+        _tiledStorage.reset();
         convertData(inputDataContainer.data(), inputDataContainer.size());
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
@@ -410,6 +436,7 @@ public:
     {
          const auto dataLock = lockData();
 
+         _tiledStorage.reset();
          _variantOfVectors = VariantOfVectors( std::vector<T>(data, data + numPoints * numDimensions) );
          _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
@@ -427,6 +454,7 @@ public:
     {
         const auto dataLock = lockData();
 
+        _tiledStorage.reset();
         _variantOfVectors = VariantOfVectors(data);
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
@@ -439,6 +467,7 @@ public:
     {
         const auto dataLock = lockData();
 
+        _tiledStorage.reset();
         _variantOfVectors = VariantOfVectors(std::move(data));
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
     }
@@ -543,12 +572,14 @@ public: // Serialization
     mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const final;
 
 private:
+    void materializeTiled();
     mutable std::recursive_mutex _dataMutex;
 
     VariantOfVectors _variantOfVectors;
 
     /** Number of features of each data point */
     std::uint64_t _numDimensions = 1;
+    std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> _tiledStorage;
 
     std::vector<QString> _dimNames;
 
