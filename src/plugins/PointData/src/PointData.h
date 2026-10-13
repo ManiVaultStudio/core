@@ -1115,6 +1115,16 @@ public:
 
     std::vector<std::uint32_t> indices;
 
+    /**
+     * Get the dense point-data backend for experimental storage-aware access.
+     *
+     * This narrow bridge keeps the backend implementation out of consumers
+     * that only need the regular Points API while allowing developer tools and
+     * experimental views to exercise tile-oriented access.
+     */
+    PointData* getPointData() { return getRawData<PointData>(); }
+    const PointData* getPointData() const { return getRawData<PointData>(); }
+
     InfoAction*                 _infoAction;                    /** Non-owning pointer to info action */
     mv::gui::GroupAction*       _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
     DimensionsPickerAction*     _dimensionsPickerAction;        /** Non-owning pointer to dimensions picker action */
