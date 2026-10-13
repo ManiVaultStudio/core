@@ -436,15 +436,18 @@ QStringList Application::TemporaryDirs::getStale()
     auto temporaryDir = QDir(QDir::tempPath());
 
     temporaryDir.setFilter(QDir::Dirs);
-    temporaryDir.setNameFilters({ "ManiVault.*" });
+    // Support both the current application directory name and the legacy name.
+    // The exact current path check below prevents this process from removing its
+    // own directory without relying on the session id encoded in the name.
+    temporaryDir.setNameFilters({ "ManiVault Studio.*", "ManiVault.*" });
 
     const auto sessions = temporaryDir.entryList();
+    const auto currentTemporaryDirectory = QDir::cleanPath(Application::current()->getTemporaryDir().path());
 
     for (const auto& session : sessions) {
-        const auto lockInfoFilePath         = QDir::cleanPath(QDir::tempPath() + QDir::separator() + session + QDir::separator() + "app.lock");
-        const auto sessionSegments          = session.split(".");
-        const auto isCurrentApplication     = sessionSegments.count() > 2 && Application::current()->getId().startsWith(sessionSegments[1]);
         const auto staleTemporaryDirectory  = QDir::cleanPath(QDir::tempPath() + QDir::separator() + session);
+        const auto lockInfoFilePath         = QDir(staleTemporaryDirectory).filePath("app.lock");
+        const auto isCurrentApplication     = staleTemporaryDirectory == currentTemporaryDirectory;
 
         if (isCurrentApplication)
             continue;
