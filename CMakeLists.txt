@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.22)
 set(MV_MAIN "mv-main")
 PROJECT(${MV_MAIN})
 
+set(MV_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+
 # -----------------------------------------------------------------------------
 # User options
 # -----------------------------------------------------------------------------
@@ -24,7 +26,7 @@ option(MV_WARNINGS_AS_ERRORS "Treat warnings as errors when using MSVC" ON)
 option(MV_ENABLE_CPPTRACE "Enable cpptrace stack traces" ON)
 
 # defines MV_VERSION
-include(ManiVault/cmake/Utils.cmake)
+include(cmake/Utils.cmake)
 mv_set_version()
 
 message(STATUS "Building ManiVault ${MV_VERSION_FULL}")
@@ -47,4 +49,4 @@ endif()
 # -----------------------------------------------------------------------------
 
 # ManiVault core system
-add_subdirectory(ManiVault)
+add_subdirectory(src)

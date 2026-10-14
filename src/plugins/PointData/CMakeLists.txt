@@ -47,7 +47,7 @@ set(POINTS_HEADERS
 
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects
 set(BFLOAT_HEADER
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/biovault_bfloat16/biovault_bfloat16.h
+    ${MV_ROOT_DIR}/external/biovault/biovault_bfloat16/biovault_bfloat16.h
 )
 
 set(ACTIONS_SOURCES
@@ -97,7 +97,7 @@ add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINT_DAT
 add_library(ManiVault::${POINTDATA} ALIAS ${POINTDATA})
 
 target_include_directories(${POINTDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
-target_include_directories(${POINTDATA} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../external/biovault/)
+target_include_directories(${POINTDATA} PRIVATE ${MV_ROOT_DIR}/external/biovault/)
 
 target_compile_features(${POINTDATA} PUBLIC cxx_std_${MV_CXX_STANDARD})
 

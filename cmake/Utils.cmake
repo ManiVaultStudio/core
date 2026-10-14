@@ -1,7 +1,7 @@
 function(mv_set_version)
     
     # Read version number and suffix from VERSION file in top level dir
-    file(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" VERSION_CONTENTS)
+    file(READ "${MV_ROOT_DIR}/VERSION" VERSION_CONTENTS)
     
     string(REGEX MATCH "MAJOR[ \t]+([0-9]+)" _ ${VERSION_CONTENTS})
     set(MV_VERSION_MAJOR "${CMAKE_MATCH_1}")

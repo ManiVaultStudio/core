@@ -7,7 +7,7 @@ source_group("Tests/Application" FILES GifEncoderTest.cpp)
 source_group("Tests/Application/Implementation" FILES ../../src/private/GifEncoder.cpp)
 
 target_include_directories(MV_Application_GifEncoderTest PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../src/private
+    ${MV_ROOT_DIR}/src/private
 )
 
 target_link_libraries(MV_Application_GifEncoderTest PRIVATE
@@ -40,8 +40,8 @@ source_group("Tests/Application" FILES ArchiverTest.cpp)
 source_group("Tests/Application/Implementation" FILES ../../src/private/Archiver.cpp)
 
 target_include_directories(MV_Application_ArchiverTest PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../src/private
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../src
+    ${MV_ROOT_DIR}/src/private
+    ${MV_ROOT_DIR}/src
 )
 
 target_link_libraries(MV_Application_ArchiverTest PRIVATE

@@ -32,7 +32,7 @@ set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH "${MV_ROOT_DIR}/cmake")
 set(CMAKE_INSTALL_MESSAGE LAZY)
 
 # include CMakePackageConfigHelpers macro
@@ -58,7 +58,7 @@ include(GenerateExportHeader)
 include(CPM)
 
 # create a file that defines MV_VERSION_MAJOR, etc
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/ManiVaultVersion.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/ManiVaultVersion.h" @ONLY)
+configure_file("${MV_ROOT_DIR}/src/ManiVaultVersion.h.in" "${MV_ROOT_DIR}/src/ManiVaultVersion.h" @ONLY)
 
 if(${MV_USE_ERROR_LOGGING})
     # Check for size of long (used in sentry)
@@ -176,7 +176,7 @@ CPMAddPackage(
   GIT_TAG           v1.0.2
   DOWNLOAD_ONLY     YES
   EXCLUDE_FROM_ALL  YES
-  SOURCE_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/external/biovault/biovault_bfloat16/
+  SOURCE_DIR        ${MV_ROOT_DIR}/external/biovault/biovault_bfloat16/
 )
 
 CPMAddPackage(
@@ -349,7 +349,7 @@ target_sources(${MV_PUBLIC_LIB}
     ${SHADERS}
 )
 
-target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${MV_ROOT_DIR}/src")
 
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
 target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${valijson_SOURCE_DIR}/include")
@@ -406,8 +406,8 @@ target_sources(${MV_EXE}
 )
 
 target_include_directories(${MV_EXE} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}         # for resources in /res
+    ${MV_ROOT_DIR}/src
+    ${MV_ROOT_DIR}         # for resources in /res
 )
 
 target_include_directories(${MV_EXE} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
@@ -465,7 +465,7 @@ if(${MV_USE_ERROR_LOGGING})
             OUTPUT_NAME "ManiVault Crash Reporter"
         )
 
-        target_include_directories(${MV_CRASH_REPORTER} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+        target_include_directories(${MV_CRASH_REPORTER} PRIVATE ${MV_ROOT_DIR}/src)
         target_compile_features(${MV_CRASH_REPORTER} PRIVATE cxx_std_${MV_CXX_STANDARD})
         target_link_libraries(${MV_CRASH_REPORTER} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets ${MV_PUBLIC_LIB} sentry)
 
@@ -576,7 +576,7 @@ if(APPLE)
 
     # set(BUNDLE_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
     set(BUNDLE_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/ManiVault Studio.app")
-    set(WEBENGINEINSTALL_CMD "${CMAKE_CURRENT_SOURCE_DIR}/macos_webengineinstall.sh")
+    set(WEBENGINEINSTALL_CMD "${MV_ROOT_DIR}/macos_webengineinstall.sh")
     install(TARGETS ${MV_EXE}
         RUNTIME DESTINATION bin COMPONENT MACOS_BUNDLE
         BUNDLE DESTINATION . COMPONENT MACOS_BUNDLE
@@ -647,11 +647,11 @@ install(EXPORT "ManiVaultPublicExport"
 
 # Copy cmake helper files
 install(FILES 
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_install_dependencies_utils.cmake"
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_install_dependencies.cmake.in"
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_check_and_set_AVX.cmake"
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_plugin_meta_data.cmake"
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mv_project_defaults.cmake"
+        "${MV_ROOT_DIR}/cmake/mv_install_dependencies_utils.cmake"
+        "${MV_ROOT_DIR}/cmake/mv_install_dependencies.cmake.in"
+        "${MV_ROOT_DIR}/cmake/mv_check_and_set_AVX.cmake"
+        "${MV_ROOT_DIR}/cmake/mv_plugin_meta_data.cmake"
+        "${MV_ROOT_DIR}/cmake/mv_project_defaults.cmake"
         DESTINATION cmake/mv
         COMPONENT MVPUBLIC_CMAKE_HELPER
 )
@@ -679,7 +679,7 @@ write_basic_package_version_file(
 
 # create config file
 configure_package_config_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/MvCoreConfig.cmake.in"
+    "${MV_ROOT_DIR}/cmake/MvCoreConfig.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/ManiVaultConfig.cmake"
     INSTALL_DESTINATION cmake/mv
     PATH_VARS MV_INSTALL_DIR
@@ -697,7 +697,7 @@ install(FILES
 set(ManiVault_INCLUDE_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/" CACHE INTERNAL "")
 set(ManiVault_LIB_DIR "${MV_INSTALL_DIR}/$<CONFIGURATION>/lib/" CACHE INTERNAL "")
 set(ManiVault_INSTALL_DIR "${MV_INSTALL_DIR}" CACHE INTERNAL "")
-set(ManiVault_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" CACHE INTERNAL "") # this differs from config
+set(ManiVault_CMAKE_DIR "${MV_ROOT_DIR}/cmake/" CACHE INTERNAL "") # this differs from config
 set(ManiVault_VERSION "${MV_VERSION}" CACHE INTERNAL "")
 set(ManiVault_CXX_STANDARD "${MV_CXX_STANDARD}" CACHE INTERNAL "")
 
@@ -819,7 +819,7 @@ endif()
 add_custom_command(TARGET ${MV_EXE}  POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault examples"
     COMMAND ${CMAKE_COMMAND} -E $<IF:$<VERSION_LESS:${CMAKE_VERSION},3.26.0>,copy_directory,copy_directory_if_different>  # copy_directory_if_different is only available starting 3.26
-            ${CMAKE_CURRENT_SOURCE_DIR}/res/examples
+            ${MV_ROOT_DIR}/res/examples
             ${MV_INSTALL_DIR}/$<CONFIGURATION>/examples
 )
 
@@ -827,7 +827,7 @@ add_custom_command(TARGET ${MV_EXE}  POST_BUILD
 add_custom_command(TARGET ${MV_EXE} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault licenses"
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MV_ROOT_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/LICENSE
 )
 
 # Install dependency licenses
@@ -851,7 +851,7 @@ list(APPEND INSTALL_LICENSE_COMMANDS
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/taskflow
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Taskflow_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/taskflow/LICENSE
     COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/msf_gif
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/external/msf_gif/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/msf_gif/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MV_ROOT_DIR}/external/msf_gif/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/msf_gif/LICENSE
 )
 
 if(${MV_USE_ERROR_LOGGING})

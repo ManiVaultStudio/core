@@ -2,28 +2,29 @@
 # Source files for target MV_PUBLIC_LIB
 # -----------------------------------------------------------------------------
 # defines PUBLIC_SOURCES and PUBLIC_HEADERS
+# all file path are relative to ROOT/src
 
 set(PUBLIC_CORE_INTERFACE_HEADERS
-    src/CoreInterface.h
-    src/AbstractManager.h
-    src/AbstractDataManager.h
-    src/AbstractPluginManager.h
-    src/AbstractActionsManager.h
-    src/AbstractDataHierarchyManager.h
-    src/AbstractEventManager.h
-    src/AbstractWorkspaceManager.h
-    src/AbstractProjectManager.h
-    src/AbstractSettingsManager.h
-    src/AbstractTaskManager.h
-    src/AbstractHelpManager.h
-    src/AbstractErrorManager.h
-    src/AbstractErrorLogger.h
-    src/AbstractThemeManager.h
-	src/AbstractScriptingManager.h
+    CoreInterface.h
+    AbstractManager.h
+    AbstractDataManager.h
+    AbstractPluginManager.h
+    AbstractActionsManager.h
+    AbstractDataHierarchyManager.h
+    AbstractEventManager.h
+    AbstractWorkspaceManager.h
+    AbstractProjectManager.h
+    AbstractSettingsManager.h
+    AbstractTaskManager.h
+    AbstractHelpManager.h
+    AbstractErrorManager.h
+    AbstractErrorLogger.h
+    AbstractThemeManager.h
+	AbstractScriptingManager.h
 )
 
 set(PUBLIC_CORE_INTERFACE_SOURCES
-    src/CoreInterface.cpp
+    CoreInterface.cpp
 )
 
 set(PUBLIC_CORE_INTERFACE_FILES
@@ -32,13 +33,13 @@ set(PUBLIC_CORE_INTERFACE_FILES
 )
 
 set(PUBLIC_EVENT_HEADERS
-    src/event/Event.h
-    src/event/EventListener.h
+    event/Event.h
+    event/EventListener.h
 )
 
 set(PUBLIC_EVENT_SOURCES
-    src/event/Event.cpp
-    src/event/EventListener.cpp
+    event/Event.cpp
+    event/EventListener.cpp
 )
 
 set(PUBLIC_EVENT_FILES
@@ -47,39 +48,39 @@ set(PUBLIC_EVENT_FILES
 )
 
 set(PUBLIC_COLOR_MAP_ACTION_HEADERS
-    src/actions/ColorMapAction.h
-    src/actions/ColorMap1DAction.h
-    src/actions/ColorMap2DAction.h
-    src/actions/ColorMapEditor1DAction.h
-    src/actions/ColorMapEditor1DEdgesGraphicsItem.h
-    src/actions/ColorMapEditor1DHistogramGraphicsItem.h
-    src/actions/ColorMapEditor1DNode.h
-    src/actions/ColorMapEditor1DNodeGraphicsItem.h
-    src/actions/ColorMapEditor1DNodeAction.h
-    src/actions/ColorMapEditor1DScene.h
-    src/actions/ColorMapEditor1DWidget.h
-    src/actions/ColorMapViewAction.h
-    src/actions/ColorMapSettingsAction.h
-    src/actions/ColorMapSettings1DAction.h
-    src/actions/ColorMapSettings2DAction.h
+    actions/ColorMapAction.h
+    actions/ColorMap1DAction.h
+    actions/ColorMap2DAction.h
+    actions/ColorMapEditor1DAction.h
+    actions/ColorMapEditor1DEdgesGraphicsItem.h
+    actions/ColorMapEditor1DHistogramGraphicsItem.h
+    actions/ColorMapEditor1DNode.h
+    actions/ColorMapEditor1DNodeGraphicsItem.h
+    actions/ColorMapEditor1DNodeAction.h
+    actions/ColorMapEditor1DScene.h
+    actions/ColorMapEditor1DWidget.h
+    actions/ColorMapViewAction.h
+    actions/ColorMapSettingsAction.h
+    actions/ColorMapSettings1DAction.h
+    actions/ColorMapSettings2DAction.h
 )
 
 set(PUBLIC_COLOR_MAP_ACTION_SOURCES
-    src/actions/ColorMapAction.cpp
-    src/actions/ColorMap1DAction.cpp
-    src/actions/ColorMap2DAction.cpp
-    src/actions/ColorMapEditor1DAction.cpp
-    src/actions/ColorMapEditor1DEdgesGraphicsItem.cpp
-    src/actions/ColorMapEditor1DHistogramGraphicsItem.cpp
-    src/actions/ColorMapEditor1DNode.cpp
-    src/actions/ColorMapEditor1DNodeGraphicsItem.cpp
-    src/actions/ColorMapEditor1DNodeAction.cpp
-    src/actions/ColorMapEditor1DScene.cpp
-    src/actions/ColorMapEditor1DWidget.cpp
-    src/actions/ColorMapViewAction.cpp
-    src/actions/ColorMapSettingsAction.cpp
-    src/actions/ColorMapSettings1DAction.cpp
-    src/actions/ColorMapSettings2DAction.cpp
+    actions/ColorMapAction.cpp
+    actions/ColorMap1DAction.cpp
+    actions/ColorMap2DAction.cpp
+    actions/ColorMapEditor1DAction.cpp
+    actions/ColorMapEditor1DEdgesGraphicsItem.cpp
+    actions/ColorMapEditor1DHistogramGraphicsItem.cpp
+    actions/ColorMapEditor1DNode.cpp
+    actions/ColorMapEditor1DNodeGraphicsItem.cpp
+    actions/ColorMapEditor1DNodeAction.cpp
+    actions/ColorMapEditor1DScene.cpp
+    actions/ColorMapEditor1DWidget.cpp
+    actions/ColorMapViewAction.cpp
+    actions/ColorMapSettingsAction.cpp
+    actions/ColorMapSettings1DAction.cpp
+    actions/ColorMapSettings2DAction.cpp
 )
 
 set(PUBLIC_COLOR_MAP_ACTION_FILES
@@ -88,33 +89,33 @@ set(PUBLIC_COLOR_MAP_ACTION_FILES
 )
 
 set(PUBLIC_NUMERICAL_ACTIONS_HEADERS
-    src/actions/NumericalAction.h
-    src/actions/DecimalAction.h
-    src/actions/IntegralAction.h
-    src/actions/NumericalRangeAction.h
-    src/actions/DecimalRangeAction.h
-    src/actions/IntegralRangeAction.h
-    src/actions/NumericalPointAction.h
-    src/actions/DecimalPointAction.h
-    src/actions/IntegralPointAction.h
-	src/actions/RectangleAction.h
-    src/actions/IntegralRectangleAction.h
-    src/actions/DecimalRectangleAction.h
+    actions/NumericalAction.h
+    actions/DecimalAction.h
+    actions/IntegralAction.h
+    actions/NumericalRangeAction.h
+    actions/DecimalRangeAction.h
+    actions/IntegralRangeAction.h
+    actions/NumericalPointAction.h
+    actions/DecimalPointAction.h
+    actions/IntegralPointAction.h
+	actions/RectangleAction.h
+    actions/IntegralRectangleAction.h
+    actions/DecimalRectangleAction.h
 )
 
 set(PUBLIC_NUMERICAL_ACTIONS_SOURCES
-    src/actions/NumericalAction.cpp
-    src/actions/DecimalAction.cpp
-    src/actions/IntegralAction.cpp
-    src/actions/NumericalRangeAction.cpp
-    src/actions/DecimalRangeAction.cpp
-    src/actions/IntegralRangeAction.cpp
-	src/actions/NumericalPointAction.cpp
-    src/actions/DecimalPointAction.cpp
-    src/actions/IntegralPointAction.cpp
-	src/actions/RectangleAction.cpp
-    src/actions/IntegralRectangleAction.cpp
-    src/actions/DecimalRectangleAction.cpp
+    actions/NumericalAction.cpp
+    actions/DecimalAction.cpp
+    actions/IntegralAction.cpp
+    actions/NumericalRangeAction.cpp
+    actions/DecimalRangeAction.cpp
+    actions/IntegralRangeAction.cpp
+	actions/NumericalPointAction.cpp
+    actions/DecimalPointAction.cpp
+    actions/IntegralPointAction.cpp
+	actions/RectangleAction.cpp
+    actions/IntegralRectangleAction.cpp
+    actions/DecimalRectangleAction.cpp
 )
 
 set(PUBLIC_NUMERICAL_ACTIONS_FILES
@@ -123,13 +124,13 @@ set(PUBLIC_NUMERICAL_ACTIONS_FILES
 )
 
 set(PUBLIC_TEXTUAL_ACTIONS_HEADERS
-    src/actions/StringAction.h
-    src/actions/StringsAction.h
+    actions/StringAction.h
+    actions/StringsAction.h
 )
 
 set(PUBLIC_TEXTUAL_ACTIONS_SOURCES
-    src/actions/StringAction.cpp
-    src/actions/StringsAction.cpp
+    actions/StringAction.cpp
+    actions/StringsAction.cpp
 )
 
 set(PUBLIC_TEXTUAL_ACTIONS_FILES
@@ -138,33 +139,33 @@ set(PUBLIC_TEXTUAL_ACTIONS_FILES
 )
 
 set(PUBLIC_GROUPING_ACTIONS_HEADERS
-    src/actions/GroupAction.h
-    src/actions/StretchAction.h
-    src/actions/HorizontalGroupAction.h
-    src/actions/VerticalGroupAction.h
-    src/actions/GroupsAction.h
-    src/actions/GroupSectionTreeItem.h
-    src/actions/GroupWidgetTreeItem.h
-    src/actions/ToolbarAction.h
-    src/actions/HorizontalToolbarAction.h
-    src/actions/VerticalToolbarAction.h
-    src/actions/ToolbarActionItem.h
-    src/actions/ToolbarActionItemWidget.h
+    actions/GroupAction.h
+    actions/StretchAction.h
+    actions/HorizontalGroupAction.h
+    actions/VerticalGroupAction.h
+    actions/GroupsAction.h
+    actions/GroupSectionTreeItem.h
+    actions/GroupWidgetTreeItem.h
+    actions/ToolbarAction.h
+    actions/HorizontalToolbarAction.h
+    actions/VerticalToolbarAction.h
+    actions/ToolbarActionItem.h
+    actions/ToolbarActionItemWidget.h
 )
 
 set(PUBLIC_GROUPING_ACTIONS_SOURCES
-    src/actions/GroupAction.cpp
-    src/actions/StretchAction.cpp
-    src/actions/HorizontalGroupAction.cpp
-    src/actions/VerticalGroupAction.cpp
-    src/actions/GroupsAction.cpp
-    src/actions/GroupSectionTreeItem.cpp
-    src/actions/GroupWidgetTreeItem.cpp
-    src/actions/ToolbarAction.cpp
-    src/actions/HorizontalToolbarAction.cpp
-    src/actions/VerticalToolbarAction.cpp
-    src/actions/ToolbarActionItem.cpp
-    src/actions/ToolbarActionItemWidget.cpp
+    actions/GroupAction.cpp
+    actions/StretchAction.cpp
+    actions/HorizontalGroupAction.cpp
+    actions/VerticalGroupAction.cpp
+    actions/GroupsAction.cpp
+    actions/GroupSectionTreeItem.cpp
+    actions/GroupWidgetTreeItem.cpp
+    actions/ToolbarAction.cpp
+    actions/HorizontalToolbarAction.cpp
+    actions/VerticalToolbarAction.cpp
+    actions/ToolbarActionItem.cpp
+    actions/ToolbarActionItemWidget.cpp
 )
 
 set(PUBLIC_GROUPING_ACTIONS_FILES
@@ -173,13 +174,13 @@ set(PUBLIC_GROUPING_ACTIONS_FILES
 )
 
 set(PUBLIC_TRIGGER_ACTIONS_HEADERS
-    src/actions/TriggerAction.h
-    src/actions/TriggersAction.h
+    actions/TriggerAction.h
+    actions/TriggersAction.h
 )
 
 set(PUBLIC_TRIGGER_ACTIONS_SOURCES
-    src/actions/TriggerAction.cpp
-    src/actions/TriggersAction.cpp
+    actions/TriggerAction.cpp
+    actions/TriggersAction.cpp
 )
 
 set(PUBLIC_TRIGGER_ACTIONS_FILES
@@ -188,13 +189,13 @@ set(PUBLIC_TRIGGER_ACTIONS_FILES
 )
 
 set(PUBLIC_OPTION_ACTIONS_HEADERS
-    src/actions/OptionAction.h
-    src/actions/OptionsAction.h
+    actions/OptionAction.h
+    actions/OptionsAction.h
 )
 
 set(PUBLIC_OPTION_ACTIONS_SOURCES
-    src/actions/OptionAction.cpp
-    src/actions/OptionsAction.cpp
+    actions/OptionAction.cpp
+    actions/OptionsAction.cpp
 )
 
 set(PUBLIC_OPTION_ACTIONS_FILES
@@ -203,13 +204,13 @@ set(PUBLIC_OPTION_ACTIONS_FILES
 )
 
 set(PUBLIC_COLOR_ACTIONS_HEADERS
-    src/actions/ColorAction.h
-    src/actions/ColorPickerAction.h
+    actions/ColorAction.h
+    actions/ColorPickerAction.h
 )
 
 set(PUBLIC_COLOR_ACTIONS_SOURCES
-    src/actions/ColorAction.cpp
-    src/actions/ColorPickerAction.cpp
+    actions/ColorAction.cpp
+    actions/ColorPickerAction.cpp
 )
 
 set(PUBLIC_COLOR_ACTIONS_FILES
@@ -218,11 +219,11 @@ set(PUBLIC_COLOR_ACTIONS_FILES
 )
 
 set(PUBLIC_TOGGLE_ACTIONS_HEADERS
-    src/actions/ToggleAction.h
+    actions/ToggleAction.h
 )
 
 set(PUBLIC_TOGGLE_ACTIONS_SOURCES
-    src/actions/ToggleAction.cpp
+    actions/ToggleAction.cpp
 )
 
 set(PUBLIC_TOGGLE_ACTIONS_FILES
@@ -231,13 +232,13 @@ set(PUBLIC_TOGGLE_ACTIONS_FILES
 )
 
 set(PUBLIC_FILE_ACTIONS_HEADERS
-    src/actions/DirectoryPickerAction.h
-    src/actions/FilePickerAction.h
+    actions/DirectoryPickerAction.h
+    actions/FilePickerAction.h
 )
 
 set(PUBLIC_FILE_ACTIONS_SOURCES
-    src/actions/DirectoryPickerAction.cpp
-    src/actions/FilePickerAction.cpp
+    actions/DirectoryPickerAction.cpp
+    actions/FilePickerAction.cpp
 )
 
 set(PUBLIC_FILE_ACTIONS_FILES
@@ -246,15 +247,15 @@ set(PUBLIC_FILE_ACTIONS_FILES
 )
 
 set(PUBLIC_TOOLBAR_ACTIONS_HEADERS
-    src/actions/ToolbarAction.h
-    src/actions/ToolbarActionItem.h
-    src/actions/ToolbarActionItemWidget.h
+    actions/ToolbarAction.h
+    actions/ToolbarActionItem.h
+    actions/ToolbarActionItemWidget.h
 )
 
 set(PUBLIC_TOOLBAR_ACTIONS_SOURCES
-    src/actions/ToolbarAction.cpp
-    src/actions/ToolbarActionItem.cpp
-    src/actions/ToolbarActionItemWidget.cpp
+    actions/ToolbarAction.cpp
+    actions/ToolbarActionItem.cpp
+    actions/ToolbarActionItemWidget.cpp
 )
 
 set(PUBLIC_TOOLBAR_ACTIONS_FILES
@@ -263,38 +264,38 @@ set(PUBLIC_TOOLBAR_ACTIONS_FILES
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
-    src/actions/Actions.h
-    src/actions/DatasetPickerAction.h
-    src/actions/PluginPickerAction.h
-    src/actions/ImageAction.h
-    src/actions/PixelSelectionAction.h
-    src/actions/WindowLevelAction.h
-    src/actions/VariantAction.h
-    src/actions/StatusAction.h
-    src/actions/VersionAction.h
-    src/actions/TreeAction.h
-    src/actions/TableAction.h
-    src/actions/StatusBarAction.h
-    src/actions/PluginStatusBarAction.h
-    src/actions/EventAction.h
-    src/actions/CodecSettingsAction.h
+    actions/Actions.h
+    actions/DatasetPickerAction.h
+    actions/PluginPickerAction.h
+    actions/ImageAction.h
+    actions/PixelSelectionAction.h
+    actions/WindowLevelAction.h
+    actions/VariantAction.h
+    actions/StatusAction.h
+    actions/VersionAction.h
+    actions/TreeAction.h
+    actions/TableAction.h
+    actions/StatusBarAction.h
+    actions/PluginStatusBarAction.h
+    actions/EventAction.h
+    actions/CodecSettingsAction.h
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
-    src/actions/DatasetPickerAction.cpp
-    src/actions/PluginPickerAction.cpp
-    src/actions/ImageAction.cpp
-    src/actions/PixelSelectionAction.cpp
-    src/actions/WindowLevelAction.cpp
-    src/actions/VariantAction.cpp
-    src/actions/StatusAction.cpp
-    src/actions/VersionAction.cpp
-    src/actions/TreeAction.cpp
-    src/actions/TableAction.cpp
-    src/actions/StatusBarAction.cpp
-    src/actions/PluginStatusBarAction.cpp
-    src/actions/EventAction.cpp
-    src/actions/CodecSettingsAction.cpp
+    actions/DatasetPickerAction.cpp
+    actions/PluginPickerAction.cpp
+    actions/ImageAction.cpp
+    actions/PixelSelectionAction.cpp
+    actions/WindowLevelAction.cpp
+    actions/VariantAction.cpp
+    actions/StatusAction.cpp
+    actions/VersionAction.cpp
+    actions/TreeAction.cpp
+    actions/TableAction.cpp
+    actions/StatusBarAction.cpp
+    actions/PluginStatusBarAction.cpp
+    actions/EventAction.cpp
+    actions/CodecSettingsAction.cpp
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES
@@ -303,13 +304,13 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES
 )
 
 set(PUBLIC_TASK_ACTIONS_HEADERS
-    src/actions/ProgressAction.h
-    src/actions/TaskAction.h
+    actions/ProgressAction.h
+    actions/TaskAction.h
 )
 
 set(PUBLIC_TASK_ACTIONS_SOURCES
-    src/actions/ProgressAction.cpp
-    src/actions/TaskAction.cpp   
+    actions/ProgressAction.cpp
+    actions/TaskAction.cpp   
 )
 
 set(PUBLIC_TASK_ACTIONS_FILES
@@ -318,95 +319,95 @@ set(PUBLIC_TASK_ACTIONS_FILES
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_HEADERS
-    src/actions/WidgetAction.h
-    src/actions/WidgetActionWidget.h
-    src/actions/WidgetActionCollapsedWidget.h
-    src/actions/WidgetActionLabel.h
-    src/actions/WidgetActionContextMenu.h
-    src/actions/WidgetActionViewWidget.h
-    src/actions/WidgetActionMimeData.h
-    src/actions/WidgetActionHighlightWidget.h
-    src/actions/WidgetActionDrag.h
-    src/actions/TasksTreeAction.h
-    src/actions/TasksListAction.h
-    src/actions/SplashScreenAction.h
-    src/actions/RecentFilesAction.h
-    src/actions/PresetsAction.h
-    src/actions/LockingAction.h
-    src/actions/PluginTriggerPickerAction.h
-    src/actions/PluginTriggerAction.h
-	src/actions/ScriptTriggerAction.h
-    src/actions/LabelProxyAction.h
-    src/actions/ModelFilterAction.h
-    src/actions/ModelSelectionAction.h
-    src/actions/HorizontalHeaderAction.h
-    src/actions/WidgetActionBadgeOverlayWidget.h
-    src/actions/WidgetActionToolButton.h
-    src/actions/WidgetActionToolButtonMenu.h
-    src/actions/IconAction.h
-    src/actions/IconPickerAction.h
-    src/actions/ApplicationIconAction.h
-    src/actions/ViewPluginSamplerAction.h
-    src/actions/PluginLearningCenterAction.h
-    src/actions/WatchVideoAction.h
-    src/actions/PaletteAction.h
-    src/actions/PaletteColorAction.h
-    src/actions/PaletteColorRoleAction.h
-    src/actions/ColorSchemeAction.h
-    src/actions/EditColorSchemeAction.h
-    src/actions/NavigationAction.h
-    src/actions/ZoomMarginAction.h
-    src/actions/ViewPluginHeadsUpDisplayAction.h
-    src/actions/ApplicationConfigurationAction.h
-    src/actions/StartPageConfigurationAction.h
-    src/actions/BrandingConfigurationAction.h
-    src/actions/ProjectsConfigurationAction.h
+    actions/WidgetAction.h
+    actions/WidgetActionWidget.h
+    actions/WidgetActionCollapsedWidget.h
+    actions/WidgetActionLabel.h
+    actions/WidgetActionContextMenu.h
+    actions/WidgetActionViewWidget.h
+    actions/WidgetActionMimeData.h
+    actions/WidgetActionHighlightWidget.h
+    actions/WidgetActionDrag.h
+    actions/TasksTreeAction.h
+    actions/TasksListAction.h
+    actions/SplashScreenAction.h
+    actions/RecentFilesAction.h
+    actions/PresetsAction.h
+    actions/LockingAction.h
+    actions/PluginTriggerPickerAction.h
+    actions/PluginTriggerAction.h
+	actions/ScriptTriggerAction.h
+    actions/LabelProxyAction.h
+    actions/ModelFilterAction.h
+    actions/ModelSelectionAction.h
+    actions/HorizontalHeaderAction.h
+    actions/WidgetActionBadgeOverlayWidget.h
+    actions/WidgetActionToolButton.h
+    actions/WidgetActionToolButtonMenu.h
+    actions/IconAction.h
+    actions/IconPickerAction.h
+    actions/ApplicationIconAction.h
+    actions/ViewPluginSamplerAction.h
+    actions/PluginLearningCenterAction.h
+    actions/WatchVideoAction.h
+    actions/PaletteAction.h
+    actions/PaletteColorAction.h
+    actions/PaletteColorRoleAction.h
+    actions/ColorSchemeAction.h
+    actions/EditColorSchemeAction.h
+    actions/NavigationAction.h
+    actions/ZoomMarginAction.h
+    actions/ViewPluginHeadsUpDisplayAction.h
+    actions/ApplicationConfigurationAction.h
+    actions/StartPageConfigurationAction.h
+    actions/BrandingConfigurationAction.h
+    actions/ProjectsConfigurationAction.h
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_SOURCES
-    src/actions/WidgetAction.cpp
-    src/actions/WidgetActionWidget.cpp
-    src/actions/WidgetActionCollapsedWidget.cpp
-    src/actions/WidgetActionLabel.cpp
-    src/actions/WidgetActionContextMenu.cpp
-    src/actions/WidgetActionViewWidget.cpp
-    src/actions/WidgetActionMimeData.cpp
-    src/actions/WidgetActionHighlightWidget.cpp
-    src/actions/WidgetActionDrag.cpp
-    src/actions/TasksTreeAction.cpp
-    src/actions/TasksListAction.cpp
-    src/actions/SplashScreenAction.cpp
-    src/actions/RecentFilesAction.cpp
-    src/actions/PresetsAction.cpp
-    src/actions/LockingAction.cpp
-    src/actions/PluginTriggerPickerAction.cpp
-    src/actions/PluginTriggerAction.cpp
-	src/actions/ScriptTriggerAction.cpp
-    src/actions/LabelProxyAction.cpp
-	src/actions/ModelFilterAction.cpp
-	src/actions/ModelSelectionAction.cpp
-	src/actions/HorizontalHeaderAction.cpp
-    src/actions/WidgetActionBadgeOverlayWidget.cpp
-    src/actions/WidgetActionToolButton.cpp
-    src/actions/WidgetActionToolButtonMenu.cpp
-    src/actions/IconAction.cpp
-    src/actions/IconPickerAction.cpp
-    src/actions/ApplicationIconAction.cpp
-    src/actions/ViewPluginSamplerAction.cpp
-    src/actions/PluginLearningCenterAction.cpp
-    src/actions/WatchVideoAction.cpp
-    src/actions/PaletteAction.cpp
-    src/actions/PaletteColorAction.cpp
-    src/actions/PaletteColorRoleAction.cpp
-    src/actions/ColorSchemeAction.cpp
-    src/actions/EditColorSchemeAction.cpp
-    src/actions/NavigationAction.cpp
-    src/actions/ZoomMarginAction.cpp
-    src/actions/ViewPluginHeadsUpDisplayAction.cpp
-    src/actions/ApplicationConfigurationAction.cpp
-    src/actions/StartPageConfigurationAction.cpp
-    src/actions/BrandingConfigurationAction.cpp
-    src/actions/ProjectsConfigurationAction.cpp
+    actions/WidgetAction.cpp
+    actions/WidgetActionWidget.cpp
+    actions/WidgetActionCollapsedWidget.cpp
+    actions/WidgetActionLabel.cpp
+    actions/WidgetActionContextMenu.cpp
+    actions/WidgetActionViewWidget.cpp
+    actions/WidgetActionMimeData.cpp
+    actions/WidgetActionHighlightWidget.cpp
+    actions/WidgetActionDrag.cpp
+    actions/TasksTreeAction.cpp
+    actions/TasksListAction.cpp
+    actions/SplashScreenAction.cpp
+    actions/RecentFilesAction.cpp
+    actions/PresetsAction.cpp
+    actions/LockingAction.cpp
+    actions/PluginTriggerPickerAction.cpp
+    actions/PluginTriggerAction.cpp
+	actions/ScriptTriggerAction.cpp
+    actions/LabelProxyAction.cpp
+	actions/ModelFilterAction.cpp
+	actions/ModelSelectionAction.cpp
+	actions/HorizontalHeaderAction.cpp
+    actions/WidgetActionBadgeOverlayWidget.cpp
+    actions/WidgetActionToolButton.cpp
+    actions/WidgetActionToolButtonMenu.cpp
+    actions/IconAction.cpp
+    actions/IconPickerAction.cpp
+    actions/ApplicationIconAction.cpp
+    actions/ViewPluginSamplerAction.cpp
+    actions/PluginLearningCenterAction.cpp
+    actions/WatchVideoAction.cpp
+    actions/PaletteAction.cpp
+    actions/PaletteColorAction.cpp
+    actions/PaletteColorRoleAction.cpp
+    actions/ColorSchemeAction.cpp
+    actions/EditColorSchemeAction.cpp
+    actions/NavigationAction.cpp
+    actions/ZoomMarginAction.cpp
+    actions/ViewPluginHeadsUpDisplayAction.cpp
+    actions/ApplicationConfigurationAction.cpp
+    actions/StartPageConfigurationAction.cpp
+    actions/BrandingConfigurationAction.cpp
+    actions/ProjectsConfigurationAction.cpp
 )
 
 set(PUBLIC_ACTIONS_INTERNAL_FILES
@@ -415,21 +416,21 @@ set(PUBLIC_ACTIONS_INTERNAL_FILES
 )
 
 set(PUBLIC_WIDGETS_HEADERS
-    src/widgets/WebWidget.h
-    src/widgets/DropWidget.h
-    src/widgets/OpenGLWidget.h
-    src/widgets/Divider.h
-    src/widgets/ElidedLabel.h
-    src/widgets/FileDialog.h
+    widgets/WebWidget.h
+    widgets/DropWidget.h
+    widgets/OpenGLWidget.h
+    widgets/Divider.h
+    widgets/ElidedLabel.h
+    widgets/FileDialog.h
 )
 
 set(PUBLIC_WIDGETS_SOURCES
-    src/widgets/WebWidget.cpp
-    src/widgets/DropWidget.cpp
-    src/widgets/OpenGLWidget.cpp
-    src/widgets/Divider.cpp
-    src/widgets/ElidedLabel.cpp
-    src/widgets/FileDialog.cpp
+    widgets/WebWidget.cpp
+    widgets/DropWidget.cpp
+    widgets/OpenGLWidget.cpp
+    widgets/Divider.cpp
+    widgets/ElidedLabel.cpp
+    widgets/FileDialog.cpp
 )
 
 set(PUBLIC_WIDGETS_FILES
@@ -438,45 +439,45 @@ set(PUBLIC_WIDGETS_FILES
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_HEADERS
-    src/widgets/HierarchyWidget.h
-    src/widgets/InfoOverlayWidget.h
-    src/widgets/OverlayWidget.h
-    src/widgets/ActionOverlayWidget.h
-    src/widgets/InfoWidget.h
-    src/widgets/ViewPluginEditorDialog.h
-    src/widgets/ActionsWidget.h
-    src/widgets/SplashScreenWidget.h
-    src/widgets/FlowLayout.h
-	src/widgets/MarkdownDocument.h
-	src/widgets/MarkdownDialog.h
-	src/widgets/YouTubeVideoDialog.h
-	src/widgets/ViewPluginOverlayWidget.h
-	src/widgets/PluginAboutDialog.h
-	src/widgets/PluginShortcutsDialog.h
-	src/widgets/ViewPluginLearningCenterOverlayWidget.h
-	src/widgets/IconLabel.h
-	src/widgets/MultiSelectComboBox.h
+    widgets/HierarchyWidget.h
+    widgets/InfoOverlayWidget.h
+    widgets/OverlayWidget.h
+    widgets/ActionOverlayWidget.h
+    widgets/InfoWidget.h
+    widgets/ViewPluginEditorDialog.h
+    widgets/ActionsWidget.h
+    widgets/SplashScreenWidget.h
+    widgets/FlowLayout.h
+	widgets/MarkdownDocument.h
+	widgets/MarkdownDialog.h
+	widgets/YouTubeVideoDialog.h
+	widgets/ViewPluginOverlayWidget.h
+	widgets/PluginAboutDialog.h
+	widgets/PluginShortcutsDialog.h
+	widgets/ViewPluginLearningCenterOverlayWidget.h
+	widgets/IconLabel.h
+	widgets/MultiSelectComboBox.h
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_SOURCES
-    src/widgets/HierarchyWidget.cpp
-    src/widgets/InfoOverlayWidget.cpp
-    src/widgets/OverlayWidget.cpp
-    src/widgets/ActionOverlayWidget.cpp
-    src/widgets/InfoWidget.cpp
-    src/widgets/ViewPluginEditorDialog.cpp
-    src/widgets/ActionsWidget.cpp
-    src/widgets/SplashScreenWidget.cpp
-    src/widgets/FlowLayout.cpp
-	src/widgets/MarkdownDocument.cpp
-	src/widgets/MarkdownDialog.cpp
-	src/widgets/YouTubeVideoDialog.cpp
-	src/widgets/ViewPluginOverlayWidget.cpp
-	src/widgets/PluginAboutDialog.cpp
-	src/widgets/PluginShortcutsDialog.cpp
-	src/widgets/ViewPluginLearningCenterOverlayWidget.cpp
-	src/widgets/IconLabel.cpp
-	src/widgets/MultiSelectComboBox.cpp
+    widgets/HierarchyWidget.cpp
+    widgets/InfoOverlayWidget.cpp
+    widgets/OverlayWidget.cpp
+    widgets/ActionOverlayWidget.cpp
+    widgets/InfoWidget.cpp
+    widgets/ViewPluginEditorDialog.cpp
+    widgets/ActionsWidget.cpp
+    widgets/SplashScreenWidget.cpp
+    widgets/FlowLayout.cpp
+	widgets/MarkdownDocument.cpp
+	widgets/MarkdownDialog.cpp
+	widgets/YouTubeVideoDialog.cpp
+	widgets/ViewPluginOverlayWidget.cpp
+	widgets/PluginAboutDialog.cpp
+	widgets/PluginShortcutsDialog.cpp
+	widgets/ViewPluginLearningCenterOverlayWidget.cpp
+	widgets/IconLabel.cpp
+	widgets/MultiSelectComboBox.cpp
 )
 
 set(PUBLIC_WIDGETS_INTERNAL_FILES
@@ -485,18 +486,18 @@ set(PUBLIC_WIDGETS_INTERNAL_FILES
 )
 
 set(PUBLIC_RENDERERS_HEADERS
-    src/renderers/Renderer.h
-    src/renderers/PointRenderer.h
-    src/renderers/DensityRenderer.h
-    src/renderers/Renderer2D.h
-    src/renderers/Navigator2D.h
+    renderers/Renderer.h
+    renderers/PointRenderer.h
+    renderers/DensityRenderer.h
+    renderers/Renderer2D.h
+    renderers/Navigator2D.h
 )
 
 set(PUBLIC_RENDERERS_SOURCES
-    src/renderers/PointRenderer.cpp
-    src/renderers/DensityRenderer.cpp
-    src/renderers/Renderer2D.cpp
-    src/renderers/Navigator2D.cpp
+    renderers/PointRenderer.cpp
+    renderers/DensityRenderer.cpp
+    renderers/Renderer2D.cpp
+    renderers/Navigator2D.cpp
 )
 
 set(PUBLIC_RENDERERS_FILES
@@ -505,26 +506,26 @@ set(PUBLIC_RENDERERS_FILES
 )
 
 set(PUBLIC_GRAPHICS_HEADERS
-    src/graphics/BufferObject.h
-    src/graphics/Vector2f.h
-    src/graphics/Vector3f.h
-    src/graphics/Matrix3f.h
-    src/graphics/Selection.h
-    src/graphics/Texture.h
-    src/graphics/Shader.h
-    src/graphics/Framebuffer.h
-    src/graphics/OffscreenBuffer.h
-    src/graphics/Bounds.h
+    graphics/BufferObject.h
+    graphics/Vector2f.h
+    graphics/Vector3f.h
+    graphics/Matrix3f.h
+    graphics/Selection.h
+    graphics/Texture.h
+    graphics/Shader.h
+    graphics/Framebuffer.h
+    graphics/OffscreenBuffer.h
+    graphics/Bounds.h
 )
 
 set(PUBLIC_GRAPHICS_SOURCES
-    src/graphics/BufferObject.cpp
-    src/graphics/Shader.cpp
-    src/graphics/Selection.cpp
-    src/graphics/Matrix3f.cpp
-    src/graphics/Vector2f.cpp
-    src/graphics/Vector3f.cpp
-    src/graphics/Bounds.cpp
+    graphics/BufferObject.cpp
+    graphics/Shader.cpp
+    graphics/Selection.cpp
+    graphics/Matrix3f.cpp
+    graphics/Vector2f.cpp
+    graphics/Vector3f.cpp
+    graphics/Bounds.cpp
 )
 
 set(PUBLIC_GRAPHICS_FILES
@@ -533,138 +534,138 @@ set(PUBLIC_GRAPHICS_FILES
 )
 
 set(PUBLIC_UTIL_HEADERS
-    src/util/Miscellaneous.h
-    src/util/FileUtil.h
-    src/util/MeanShift.h
-    src/util/DensityComputation.h
-    src/util/Exception.h
-    src/util/Math.h
-    src/util/Timer.h
-    src/util/Icon.h
-    src/util/Interpolation.h
-    src/util/ColorMap.h
-    src/util/ColorMapFilterModel.h
-    src/util/ColorMapModel.h
-    src/util/ColorSpace.h
-    src/util/PixelSelectionTool.h
-    src/util/PixelSelection.h
-    src/util/Preset.h
-    src/util/PresetsModel.h
-    src/util/PresetsFilterModel.h
-    src/util/WidgetFader.h
-    src/util/WidgetOverlayer.h
-    src/util/Serialization.h
-    src/util/Serializable.h
-    src/util/DockArea.h
-    src/util/Logger.h
-    src/util/AbstractItemModelTester.h
-    src/util/Version.h
-    src/util/DockWidgetPermission.h
-    src/util/NumericalRange.h
-    src/util/FileDownloader.h
-    src/util/ShortcutMap.h
-    src/util/Notification.h
-    src/util/Notifications.h
-    src/util/LearningCenterVideo.h
-    src/util/LearningCenterTutorial.h
-    src/util/StyledIconCommon.h
-    src/util/StyledIcon.h
-    src/util/StyledIconEngine.h
-    src/util/Badge.h
-    src/util/ColorScheme.h
-    src/util/JSON.h
-    src/util/Script.h
-    src/util/RecentFile.h
-    src/util/Model.h
-    src/util/View.h
-    src/util/SecureNetworkAccessManager.h
-    src/util/HttpsErrorReply.h
-    src/util/HeadsUpDisplayItem.h
-    src/util/SplashScreenBridge.h
-    src/util/StandardPaths.h
-    src/util/CustomAssetsUrlSchemeHandler.h
-    src/util/BlobCodec.h
-    src/util/BlobCodecFactory.h
-    src/util/CodecRegistry.h
-    src/util/CodecActionBinding.h
-    src/util/SeverityLevel.h
-    src/util/StackFrame.h
-    src/util/PresetSerializationScope.h
+    util/Miscellaneous.h
+    util/FileUtil.h
+    util/MeanShift.h
+    util/DensityComputation.h
+    util/Exception.h
+    util/Math.h
+    util/Timer.h
+    util/Icon.h
+    util/Interpolation.h
+    util/ColorMap.h
+    util/ColorMapFilterModel.h
+    util/ColorMapModel.h
+    util/ColorSpace.h
+    util/PixelSelectionTool.h
+    util/PixelSelection.h
+    util/Preset.h
+    util/PresetsModel.h
+    util/PresetsFilterModel.h
+    util/WidgetFader.h
+    util/WidgetOverlayer.h
+    util/Serialization.h
+    util/Serializable.h
+    util/DockArea.h
+    util/Logger.h
+    util/AbstractItemModelTester.h
+    util/Version.h
+    util/DockWidgetPermission.h
+    util/NumericalRange.h
+    util/FileDownloader.h
+    util/ShortcutMap.h
+    util/Notification.h
+    util/Notifications.h
+    util/LearningCenterVideo.h
+    util/LearningCenterTutorial.h
+    util/StyledIconCommon.h
+    util/StyledIcon.h
+    util/StyledIconEngine.h
+    util/Badge.h
+    util/ColorScheme.h
+    util/JSON.h
+    util/Script.h
+    util/RecentFile.h
+    util/Model.h
+    util/View.h
+    util/SecureNetworkAccessManager.h
+    util/HttpsErrorReply.h
+    util/HeadsUpDisplayItem.h
+    util/SplashScreenBridge.h
+    util/StandardPaths.h
+    util/CustomAssetsUrlSchemeHandler.h
+    util/BlobCodec.h
+    util/BlobCodecFactory.h
+    util/CodecRegistry.h
+    util/CodecActionBinding.h
+    util/SeverityLevel.h
+    util/StackFrame.h
+    util/PresetSerializationScope.h
 )
 
 if(APPLE)
 set(PUBLIC_UTIL_HEADERS
     ${PUBLIC_UTIL_HEADERS}
-    src/util/MacThemeHelper.h
+    util/MacThemeHelper.h
 )
-    set_source_files_properties(src/ApplicationSettingsAction.cpp src/util/MacThemeHelper.mm PROPERTIES
+    set_source_files_properties(ApplicationSettingsAction.cpp util/MacThemeHelper.mm PROPERTIES
       SKIP_UNITY_BUILD_INCLUSION ON
     )
 endif()
 
 set(PUBLIC_UTIL_SOURCES
-    src/util/Miscellaneous.cpp
-    src/util/FileUtil.cpp
-    src/util/MeanShift.cpp
-    src/util/DensityComputation.cpp
-    src/util/Exception.cpp
-    src/util/Math.cpp
-    src/util/Timer.cpp
-    src/util/Icon.cpp
-    src/util/Interpolation.cpp
-    src/util/ColorMap.cpp
-    src/util/ColorMapFilterModel.cpp
-    src/util/ColorMapModel.cpp
-    src/util/ColorSpace.cpp
-    src/util/PixelSelectionTool.cpp
-    src/util/PixelSelection.cpp
-    src/util/Preset.cpp
-    src/util/PresetsModel.cpp
-    src/util/PresetsFilterModel.cpp
-    src/util/WidgetFader.cpp
-    src/util/WidgetOverlayer.cpp
-    src/util/Serialization.cpp
-    src/util/Serializable.cpp
-    src/util/DockArea.cpp
-    src/util/Logger.cpp
-    src/util/AbstractItemModelTester.cpp
-    src/util/Version.cpp
-    src/util/DockWidgetPermission.cpp
-    src/util/NumericalRange.cpp
-    src/util/FileDownloader.cpp
-    src/util/ShortcutMap.cpp
-    src/util/Notification.cpp
-    src/util/Notifications.cpp
-    src/util/LearningCenterVideo.cpp
-    src/util/LearningCenterTutorial.cpp
-    src/util/StyledIconCommon.cpp
-    src/util/StyledIcon.cpp
-    src/util/StyledIconEngine.cpp
-    src/util/Badge.cpp
-    src/util/ColorScheme.cpp
-    src/util/JSON.cpp
-    src/util/Script.cpp
-    src/util/RecentFile.cpp
-	src/util/Model.cpp
-	src/util/View.cpp
-	src/util/SecureNetworkAccessManager.cpp
-	src/util/HttpsErrorReply.cpp
-	src/util/HeadsUpDisplayItem.cpp
-	src/util/SplashScreenBridge.cpp
-	src/util/StandardPaths.cpp
-	src/util/CustomAssetsUrlSchemeHandler.cpp
-	src/util/BlobCodec.cpp
-    src/util/BlobCodecFactory.cpp
-    src/util/CodecRegistry.cpp
-    src/util/CodecActionBinding.cpp
-    src/util/SeverityLevel.cpp
-    src/util/PresetSerializationScope.cpp
+    util/Miscellaneous.cpp
+    util/FileUtil.cpp
+    util/MeanShift.cpp
+    util/DensityComputation.cpp
+    util/Exception.cpp
+    util/Math.cpp
+    util/Timer.cpp
+    util/Icon.cpp
+    util/Interpolation.cpp
+    util/ColorMap.cpp
+    util/ColorMapFilterModel.cpp
+    util/ColorMapModel.cpp
+    util/ColorSpace.cpp
+    util/PixelSelectionTool.cpp
+    util/PixelSelection.cpp
+    util/Preset.cpp
+    util/PresetsModel.cpp
+    util/PresetsFilterModel.cpp
+    util/WidgetFader.cpp
+    util/WidgetOverlayer.cpp
+    util/Serialization.cpp
+    util/Serializable.cpp
+    util/DockArea.cpp
+    util/Logger.cpp
+    util/AbstractItemModelTester.cpp
+    util/Version.cpp
+    util/DockWidgetPermission.cpp
+    util/NumericalRange.cpp
+    util/FileDownloader.cpp
+    util/ShortcutMap.cpp
+    util/Notification.cpp
+    util/Notifications.cpp
+    util/LearningCenterVideo.cpp
+    util/LearningCenterTutorial.cpp
+    util/StyledIconCommon.cpp
+    util/StyledIcon.cpp
+    util/StyledIconEngine.cpp
+    util/Badge.cpp
+    util/ColorScheme.cpp
+    util/JSON.cpp
+    util/Script.cpp
+    util/RecentFile.cpp
+	util/Model.cpp
+	util/View.cpp
+	util/SecureNetworkAccessManager.cpp
+	util/HttpsErrorReply.cpp
+	util/HeadsUpDisplayItem.cpp
+	util/SplashScreenBridge.cpp
+	util/StandardPaths.cpp
+	util/CustomAssetsUrlSchemeHandler.cpp
+	util/BlobCodec.cpp
+    util/BlobCodecFactory.cpp
+    util/CodecRegistry.cpp
+    util/CodecActionBinding.cpp
+    util/SeverityLevel.cpp
+    util/PresetSerializationScope.cpp
 )
 
 if(APPLE)
 set(PUBLIC_UTIL_SOURCES
     ${PUBLIC_UTIL_SOURCES}
-    src/util/MacThemeHelper.mm
+    util/MacThemeHelper.mm
 )
 endif()
 
@@ -674,73 +675,73 @@ set(PUBLIC_UTIL_FILES
 )
 
 set(PUBLIC_WORKFLOW_HEADERS
-    src/workflow/AbstractWorkflowPlanExecutor.h
-    src/workflow/WorkflowExecutionContext.h
-    src/workflow/WorkflowContextBase.h
-    src/workflow/WorkflowResultBase.h
-    src/workflow/WorkflowJobResult.h
-    src/workflow/WorkflowStageResult.h
-    src/workflow/WorkflowResult.h
-    src/workflow/WorkflowMessage.h
-    src/workflow/WorkflowReportNode.h
-    src/workflow/WorkflowProgressNode.h
-    src/workflow/WorkflowExecutionState.h
-    src/workflow/WorkflowResultFuture.h
-    src/workflow/WorkflowGuiThreadDispatcher.h
-    src/workflow/WorkflowPlan.h
-    src/workflow/WorkflowMetric.h
-    src/workflow/WorkflowExecutionMetrics.h
-    src/workflow/WorkflowResultRegistry.h
-    src/workflow/WorkflowResultDialog.h
-    src/workflow/WorkflowConsoleFormatter.h
-    src/workflow/WorkflowExecutionLifecycleScope.h
-    src/workflow/WorkflowStageSummary.h
-    src/workflow/WorkflowExecutionNodeType.h
-    src/workflow/WorkflowConsoleDashboard.h
-    src/workflow/WorkflowConsoleDashboardScope.h
-    src/workflow/WorkflowRuntimeScoped.h
-    src/workflow/WorkflowContextVariantMap.h
-    src/workflow/WorkflowHandle.h
-    src/workflow/WorkflowContextVariantMap.h
-    src/workflow/WorkflowBatchingOptions.h
-    src/workflow/WorkflowMessageDetailsDelegate.h
-    src/workflow/WorkflowReportingOptions.h
-    src/workflow/WorkflowProfilingOptions.h
-    src/workflow/WorkflowParallelizationOptions.h
-    src/workflow/WorkflowCancellationOptions.h
-    src/workflow/WorkflowOptions.h
-    src/workflow/WorkflowResultDetailsOptions.h
+    workflow/AbstractWorkflowPlanExecutor.h
+    workflow/WorkflowExecutionContext.h
+    workflow/WorkflowContextBase.h
+    workflow/WorkflowResultBase.h
+    workflow/WorkflowJobResult.h
+    workflow/WorkflowStageResult.h
+    workflow/WorkflowResult.h
+    workflow/WorkflowMessage.h
+    workflow/WorkflowReportNode.h
+    workflow/WorkflowProgressNode.h
+    workflow/WorkflowExecutionState.h
+    workflow/WorkflowResultFuture.h
+    workflow/WorkflowGuiThreadDispatcher.h
+    workflow/WorkflowPlan.h
+    workflow/WorkflowMetric.h
+    workflow/WorkflowExecutionMetrics.h
+    workflow/WorkflowResultRegistry.h
+    workflow/WorkflowResultDialog.h
+    workflow/WorkflowConsoleFormatter.h
+    workflow/WorkflowExecutionLifecycleScope.h
+    workflow/WorkflowStageSummary.h
+    workflow/WorkflowExecutionNodeType.h
+    workflow/WorkflowConsoleDashboard.h
+    workflow/WorkflowConsoleDashboardScope.h
+    workflow/WorkflowRuntimeScoped.h
+    workflow/WorkflowContextVariantMap.h
+    workflow/WorkflowHandle.h
+    workflow/WorkflowContextVariantMap.h
+    workflow/WorkflowBatchingOptions.h
+    workflow/WorkflowMessageDetailsDelegate.h
+    workflow/WorkflowReportingOptions.h
+    workflow/WorkflowProfilingOptions.h
+    workflow/WorkflowParallelizationOptions.h
+    workflow/WorkflowCancellationOptions.h
+    workflow/WorkflowOptions.h
+    workflow/WorkflowResultDetailsOptions.h
 )
 
 set(PUBLIC_WORKFLOW_SOURCES
-    src/workflow/AbstractWorkflowPlanExecutor.cpp    
-    src/workflow/WorkflowJobResult.cpp
-    src/workflow/WorkflowStageResult.cpp
-    src/workflow/WorkflowResult.cpp
-    src/workflow/WorkflowExecutionContext.cpp
-    src/workflow/WorkflowReportNode.cpp
-    src/workflow/WorkflowProgressNode.cpp
-    src/workflow/WorkflowExecutionState.cpp
-    src/workflow/WorkflowResultFuture.cpp
-    src/workflow/WorkflowPlan.cpp
-    src/workflow/WorkflowGuiThreadDispatcher.cpp
-    src/workflow/WorkflowMetric.cpp
-    src/workflow/WorkflowExecutionMetrics.cpp
-    src/workflow/WorkflowResultRegistry.cpp
-    src/workflow/WorkflowResultDialog.cpp
-    src/workflow/WorkflowConsoleFormatter.cpp
-    src/workflow/WorkflowExecutionLifecycleScope.cpp
-    src/workflow/WorkflowStageSummary.cpp
-    src/workflow/WorkflowExecutionNodeType.cpp
-    src/workflow/WorkflowConsoleDashboard.cpp
-    src/workflow/WorkflowConsoleDashboardScope.cpp
-    src/workflow/WorkflowRuntimeScoped.cpp
-    src/workflow/WorkflowContextVariantMap.cpp
-    src/workflow/WorkflowHandle.cpp
-    src/workflow/WorkflowContextVariantMap.cpp
-    src/workflow/WorkflowBatchingOptions.cpp
-    src/workflow/WorkflowResultBase.cpp
-    src/workflow/WorkflowMessageDetailsDelegate.cpp
+    workflow/AbstractWorkflowPlanExecutor.cpp    
+    workflow/WorkflowJobResult.cpp
+    workflow/WorkflowStageResult.cpp
+    workflow/WorkflowResult.cpp
+    workflow/WorkflowExecutionContext.cpp
+    workflow/WorkflowReportNode.cpp
+    workflow/WorkflowProgressNode.cpp
+    workflow/WorkflowExecutionState.cpp
+    workflow/WorkflowResultFuture.cpp
+    workflow/WorkflowPlan.cpp
+    workflow/WorkflowGuiThreadDispatcher.cpp
+    workflow/WorkflowMetric.cpp
+    workflow/WorkflowExecutionMetrics.cpp
+    workflow/WorkflowResultRegistry.cpp
+    workflow/WorkflowResultDialog.cpp
+    workflow/WorkflowConsoleFormatter.cpp
+    workflow/WorkflowExecutionLifecycleScope.cpp
+    workflow/WorkflowStageSummary.cpp
+    workflow/WorkflowExecutionNodeType.cpp
+    workflow/WorkflowConsoleDashboard.cpp
+    workflow/WorkflowConsoleDashboardScope.cpp
+    workflow/WorkflowRuntimeScoped.cpp
+    workflow/WorkflowContextVariantMap.cpp
+    workflow/WorkflowHandle.cpp
+    workflow/WorkflowContextVariantMap.cpp
+    workflow/WorkflowBatchingOptions.cpp
+    workflow/WorkflowResultBase.cpp
+    workflow/WorkflowMessageDetailsDelegate.cpp
 )
 
 set(PUBLIC_WORKFLOW_FILES
@@ -749,13 +750,13 @@ set(PUBLIC_WORKFLOW_FILES
 )
 
 set(PUBLIC_PARALLEL_HEADERS
-    src/parallel/Parallel.h
-    src/parallel/ParallelExecutionChain.h
+    parallel/Parallel.h
+    parallel/ParallelExecutionChain.h
 )
 
 set(PUBLIC_PARALLEL_SOURCES
-    src/parallel/Parallel.cpp
-    src/parallel/ParallelExecutionChain.cpp
+    parallel/Parallel.cpp
+    parallel/ParallelExecutionChain.cpp
 )
 
 set(PUBLIC_PARALLEL_FILES
@@ -764,21 +765,21 @@ set(PUBLIC_PARALLEL_FILES
 )
 
 set(PUBLIC_HARDWARE_SPEC_UTIL_HEADERS
-	src/util/HardwareComponentSpec.h
-	src/util/DisplayComponentSpec.h
-	src/util/CpuComponentSpec.h
-	src/util/RamComponentSpec.h
-	src/util/StorageComponentSpec.h
-	src/util/HardwareSpec.h
+	util/HardwareComponentSpec.h
+	util/DisplayComponentSpec.h
+	util/CpuComponentSpec.h
+	util/RamComponentSpec.h
+	util/StorageComponentSpec.h
+	util/HardwareSpec.h
 )
 
 set(PUBLIC_HARDWARE_SPEC_UTIL_SOURCES
-	src/util/HardwareComponentSpec.cpp
-	src/util/DisplayComponentSpec.cpp
-	src/util/CpuComponentSpec.cpp
-	src/util/RamComponentSpec.cpp
-	src/util/StorageComponentSpec.cpp
-	src/util/HardwareSpec.cpp
+	util/HardwareComponentSpec.cpp
+	util/DisplayComponentSpec.cpp
+	util/CpuComponentSpec.cpp
+	util/RamComponentSpec.cpp
+	util/StorageComponentSpec.cpp
+	util/HardwareSpec.cpp
 )
 
 set(PUBLIC_HARDWARE_SPEC_UTIL_FILES
@@ -787,13 +788,13 @@ set(PUBLIC_HARDWARE_SPEC_UTIL_FILES
 )
 
 set(PUBLIC_APPLICATION_HEADERS
-    src/Application.h
-    src/ApplicationStartupTask.h
+    Application.h
+    ApplicationStartupTask.h
 )
 
 set(PUBLIC_APPLICATION_SOURCES
-    src/Application.cpp
-    src/ApplicationStartupTask.cpp
+    Application.cpp
+    ApplicationStartupTask.cpp
 )
 
 set(PUBLIC_APPLICATION_FILES
@@ -802,15 +803,15 @@ set(PUBLIC_APPLICATION_FILES
 )
 
 set(PUBLIC_PROJECT_HEADERS
-    src/Project.h
-    src/ProjectMetaAction.h
-    src/ProjectCompressionAction.h
+    Project.h
+    ProjectMetaAction.h
+    ProjectCompressionAction.h
 )
 
 set(PUBLIC_PROJECT_SOURCES
-    src/Project.cpp
-    src/ProjectMetaAction.cpp
-    src/ProjectCompressionAction.cpp
+    Project.cpp
+    ProjectMetaAction.cpp
+    ProjectCompressionAction.cpp
 )
 
 set(PUBLIC_PROJECT_FILES
@@ -819,11 +820,11 @@ set(PUBLIC_PROJECT_FILES
 )
 
 set(PUBLIC_WORKSPACE_HEADERS
-    src/Workspace.h
+    Workspace.h
 )
 
 set(PUBLIC_WORKSPACE_SOURCES
-    src/Workspace.cpp
+    Workspace.cpp
 )
 
 set(PUBLIC_WORKSPACE_FILES
@@ -832,27 +833,27 @@ set(PUBLIC_WORKSPACE_FILES
 )
 
 set(PUBLIC_DATASET_HEADERS
-    src/DataType.h
-    src/RawData.h
-    src/Set.h
-    src/SetLegacySerialization.h
-    src/LinkedData.h
-    src/SelectionGroup.h
-    src/Dataset.h
-    src/DatasetPrivate.h
-    src/DatasetsMimeData.h
-    src/PropertiesSerializer.h
+    DataType.h
+    RawData.h
+    Set.h
+    SetLegacySerialization.h
+    LinkedData.h
+    SelectionGroup.h
+    Dataset.h
+    DatasetPrivate.h
+    DatasetsMimeData.h
+    PropertiesSerializer.h
 )
 
 set(PUBLIC_DATASET_SOURCES
-    src/Set.cpp
-    src/SetLegacySerialization.cpp
-    src/LinkedData.cpp
-    src/SelectionGroup.cpp
-    src/Dataset.cpp
-    src/DatasetPrivate.cpp
-    src/DatasetsMimeData.cpp
-    src/PropertiesSerializer.cpp
+    Set.cpp
+    SetLegacySerialization.cpp
+    LinkedData.cpp
+    SelectionGroup.cpp
+    Dataset.cpp
+    DatasetPrivate.cpp
+    DatasetsMimeData.cpp
+    PropertiesSerializer.cpp
 )
 
 set(PUBLIC_DATASET_FILES
@@ -861,29 +862,29 @@ set(PUBLIC_DATASET_FILES
 )
 
 set(PUBLIC_PLUGIN_HEADERS
-    src/Plugin.h
-    src/PluginType.h
-    src/PluginFactory.h
-    src/PluginMetadata.h
-    src/LoaderPlugin.h
-    src/WriterPlugin.h
-    src/AnalysisPlugin.h
-    src/TransformationPlugin.h
-    src/ViewPlugin.h
-    src/PluginShortcuts.h
+    Plugin.h
+    PluginType.h
+    PluginFactory.h
+    PluginMetadata.h
+    LoaderPlugin.h
+    WriterPlugin.h
+    AnalysisPlugin.h
+    TransformationPlugin.h
+    ViewPlugin.h
+    PluginShortcuts.h
 )
 
 set(PUBLIC_PLUGIN_SOURCES
-    src/Plugin.cpp
-    src/PluginType.cpp
-    src/PluginFactory.cpp
-    src/PluginMetadata.cpp
-    src/LoaderPlugin.cpp
-    src/WriterPlugin.cpp
-    src/AnalysisPlugin.cpp
-    src/TransformationPlugin.cpp
-    src/ViewPlugin.cpp
-    src/PluginShortcuts.cpp
+    Plugin.cpp
+    PluginType.cpp
+    PluginFactory.cpp
+    PluginMetadata.cpp
+    LoaderPlugin.cpp
+    WriterPlugin.cpp
+    AnalysisPlugin.cpp
+    TransformationPlugin.cpp
+    ViewPlugin.cpp
+    PluginShortcuts.cpp
 )
 
 list(APPEND PUBLIC_PLUGIN_FILES
@@ -892,11 +893,11 @@ list(APPEND PUBLIC_PLUGIN_FILES
 )
 
 set(PUBLIC_DATA_HIERARCHY_HEADERS
-    src/DataHierarchyItem.h
+    DataHierarchyItem.h
 )
 
 set(PUBLIC_DATA_HIERARCHY_SOURCES
-    src/DataHierarchyItem.cpp
+    DataHierarchyItem.cpp
 )
 
 list(APPEND PUBLIC_DATA_HIERARCHY_FILES
@@ -905,17 +906,17 @@ list(APPEND PUBLIC_DATA_HIERARCHY_FILES
 )
 
 set(PUBLIC_COMMON_MODEL_HEADERS
-    src/models/StandardItemModel.h
-    src/models/SortFilterProxyModel.h
-    src/models/NumberOfRowsAction.h
-    src/models/TextOnlyProxyModel.h
+    models/StandardItemModel.h
+    models/SortFilterProxyModel.h
+    models/NumberOfRowsAction.h
+    models/TextOnlyProxyModel.h
 )
 
 set(PUBLIC_COMMON_MODEL_SOURCES
-    src/models/StandardItemModel.cpp
-    src/models/SortFilterProxyModel.cpp
-    src/models/NumberOfRowsAction.cpp
-    src/models/TextOnlyProxyModel.cpp
+    models/StandardItemModel.cpp
+    models/SortFilterProxyModel.cpp
+    models/NumberOfRowsAction.cpp
+    models/TextOnlyProxyModel.cpp
 )
 
 set(PUBLIC_COMMON_MODEL_FILES
@@ -924,17 +925,17 @@ set(PUBLIC_COMMON_MODEL_FILES
 )
 
 set(PUBLIC_ACTIONS_MODEL_HEADERS
-    src/models/AbstractActionsModel.h
-    src/models/ActionsListModel.h
-    src/models/ActionsHierarchyModel.h
-    src/models/ActionsFilterModel.h
+    models/AbstractActionsModel.h
+    models/ActionsListModel.h
+    models/ActionsHierarchyModel.h
+    models/ActionsFilterModel.h
 )
 
 set(PUBLIC_ACTIONS_MODEL_SOURCES
-    src/models/AbstractActionsModel.cpp
-    src/models/ActionsListModel.cpp
-    src/models/ActionsHierarchyModel.cpp
-    src/models/ActionsFilterModel.cpp
+    models/AbstractActionsModel.cpp
+    models/ActionsListModel.cpp
+    models/ActionsHierarchyModel.cpp
+    models/ActionsFilterModel.cpp
 )
 
 set(PUBLIC_ACTIONS_MODEL_FILES
@@ -943,17 +944,17 @@ set(PUBLIC_ACTIONS_MODEL_FILES
 )
 
 set(PUBLIC_DATA_HIERARCHY_MODEL_HEADERS
-    src/models/AbstractDataHierarchyModel.h
-    src/models/DataHierarchyTreeModel.h
-    src/models/DataHierarchyListModel.h
-    src/models/DataHierarchyFilterModel.h
+    models/AbstractDataHierarchyModel.h
+    models/DataHierarchyTreeModel.h
+    models/DataHierarchyListModel.h
+    models/DataHierarchyFilterModel.h
 )
 
 set(PUBLIC_DATA_HIERARCHY_MODEL_SOURCES
-    src/models/AbstractDataHierarchyModel.cpp
-    src/models/DataHierarchyTreeModel.cpp
-    src/models/DataHierarchyListModel.cpp
-    src/models/DataHierarchyFilterModel.cpp
+    models/AbstractDataHierarchyModel.cpp
+    models/DataHierarchyTreeModel.cpp
+    models/DataHierarchyListModel.cpp
+    models/DataHierarchyFilterModel.cpp
 )
 
 set(PUBLIC_DATA_HIERARCHY_MODEL_FILES
@@ -962,13 +963,13 @@ set(PUBLIC_DATA_HIERARCHY_MODEL_FILES
 )
 
 set(PUBLIC_RAW_DATA_MODEL_HEADERS
-    src/models/RawDataModel.h
-    src/models/RawDataFilterModel.h
+    models/RawDataModel.h
+    models/RawDataFilterModel.h
 )
 
 set(PUBLIC_RAW_DATA_MODEL_SOURCES
-    src/models/RawDataModel.cpp
-    src/models/RawDataFilterModel.cpp
+    models/RawDataModel.cpp
+    models/RawDataFilterModel.cpp
 )
 
 set(PUBLIC_RAW_DATA_MODEL_FILES
@@ -977,13 +978,13 @@ set(PUBLIC_RAW_DATA_MODEL_FILES
 )
 
 set(PUBLIC_SELECTIONS_MODEL_HEADERS
-    src/models/SelectionsModel.h
-    src/models/SelectionsFilterModel.h
+    models/SelectionsModel.h
+    models/SelectionsFilterModel.h
 )
 
 set(PUBLIC_SELECTIONS_MODEL_SOURCES
-    src/models/SelectionsModel.cpp
-    src/models/SelectionsFilterModel.cpp
+    models/SelectionsModel.cpp
+    models/SelectionsFilterModel.cpp
 )
 
 set(PUBLIC_SELECTIONS_MODEL_FILES
@@ -992,13 +993,13 @@ set(PUBLIC_SELECTIONS_MODEL_FILES
 )
 
 set(PUBLIC_LOGGING_MODEL_HEADERS
-    src/models/LoggingModel.h
-    src/models/LoggingFilterModel.h
+    models/LoggingModel.h
+    models/LoggingFilterModel.h
 )
 
 set(PUBLIC_LOGGING_MODEL_SOURCES
-    src/models/LoggingModel.cpp
-    src/models/LoggingFilterModel.cpp
+    models/LoggingModel.cpp
+    models/LoggingFilterModel.cpp
 )
 
 set(PUBLIC_LOGGING_MODEL_FILES
@@ -1007,17 +1008,17 @@ set(PUBLIC_LOGGING_MODEL_FILES
 )
 
 set(PUBLIC_TASKS_MODEL_HEADERS
-    src/models/AbstractTasksModel.h
-    src/models/TasksTreeModel.h
-    src/models/TasksListModel.h
-    src/models/TasksFilterModel.h
+    models/AbstractTasksModel.h
+    models/TasksTreeModel.h
+    models/TasksListModel.h
+    models/TasksFilterModel.h
 )
 
 set(PUBLIC_TASKS_MODEL_SOURCES
-    src/models/AbstractTasksModel.cpp
-    src/models/TasksTreeModel.cpp
-    src/models/TasksListModel.cpp
-    src/models/TasksFilterModel.cpp
+    models/AbstractTasksModel.cpp
+    models/TasksTreeModel.cpp
+    models/TasksListModel.cpp
+    models/TasksFilterModel.cpp
 )
 
 set(PUBLIC_TASKS_MODEL_FILES
@@ -1026,17 +1027,17 @@ set(PUBLIC_TASKS_MODEL_FILES
 )
 
 set(PUBLIC_PLUGINS_MODEL_HEADERS
-    src/models/AbstractPluginsModel.h
-    src/models/PluginsTreeModel.h
-    src/models/PluginsListModel.h
-    src/models/PluginsFilterModel.h
+    models/AbstractPluginsModel.h
+    models/PluginsTreeModel.h
+    models/PluginsListModel.h
+    models/PluginsFilterModel.h
 )
 
 set(PUBLIC_PLUGINS_MODEL_SOURCES
-    src/models/AbstractPluginsModel.cpp
-    src/models/PluginsTreeModel.cpp
-    src/models/PluginsListModel.cpp
-    src/models/PluginsFilterModel.cpp
+    models/AbstractPluginsModel.cpp
+    models/PluginsTreeModel.cpp
+    models/PluginsListModel.cpp
+    models/PluginsFilterModel.cpp
 )
 
 set(PUBLIC_PLUGINS_MODEL_FILES
@@ -1045,15 +1046,15 @@ set(PUBLIC_PLUGINS_MODEL_FILES
 )
 
 set(PUBLIC_THIRD_PARTY_LICENSES_MODEL_HEADERS
-    src/models/AbstractThirdPartyLicensesModel.h
-    src/models/ThirdPartyLicensesListModel.h
-    src/models/ThirdPartyLicensesFilterModel.h
+    models/AbstractThirdPartyLicensesModel.h
+    models/ThirdPartyLicensesListModel.h
+    models/ThirdPartyLicensesFilterModel.h
 )
 
 set(PUBLIC_THIRD_PARTY_LICENSES_MODEL_SOURCES
-    src/models/AbstractThirdPartyLicensesModel.cpp
-    src/models/ThirdPartyLicensesListModel.cpp
-    src/models/ThirdPartyLicensesFilterModel.cpp
+    models/AbstractThirdPartyLicensesModel.cpp
+    models/ThirdPartyLicensesListModel.cpp
+    models/ThirdPartyLicensesFilterModel.cpp
 )
 
 set(PUBLIC_THIRD_PARTY_LICENSES_MODEL_FILES
@@ -1062,17 +1063,17 @@ set(PUBLIC_THIRD_PARTY_LICENSES_MODEL_FILES
 )
 
 set(PUBLIC_PLUGIN_FACTORIES_MODEL_HEADERS
-    src/models/AbstractPluginFactoriesModel.h
-    src/models/PluginFactoriesListModel.h
-    src/models/PluginFactoriesTreeModel.h
-    src/models/PluginFactoriesFilterModel.h
+    models/AbstractPluginFactoriesModel.h
+    models/PluginFactoriesListModel.h
+    models/PluginFactoriesTreeModel.h
+    models/PluginFactoriesFilterModel.h
 )
 
 set(PUBLIC_PLUGIN_FACTORIES_MODEL_SOURCES
-    src/models/AbstractPluginFactoriesModel.cpp
-    src/models/PluginFactoriesListModel.cpp
-    src/models/PluginFactoriesTreeModel.cpp
-    src/models/PluginFactoriesFilterModel.cpp
+    models/AbstractPluginFactoriesModel.cpp
+    models/PluginFactoriesListModel.cpp
+    models/PluginFactoriesTreeModel.cpp
+    models/PluginFactoriesFilterModel.cpp
 )
 
 set(PUBLIC_PLUGIN_FACTORIES_MODEL_FILES
@@ -1081,11 +1082,11 @@ set(PUBLIC_PLUGIN_FACTORIES_MODEL_FILES
 )
 
 set(PUBLIC_MISCELLANEOUS_MODEL_HEADERS
-    src/models/CheckableStringListModel.h
+    models/CheckableStringListModel.h
 )
 
 set(PUBLIC_MISCELLANEOUS_MODEL_SOURCES
-    src/models/CheckableStringListModel.cpp
+    models/CheckableStringListModel.cpp
 )
 
 set(PUBLIC_MISCELLANEOUS_MODEL_FILES
@@ -1094,15 +1095,15 @@ set(PUBLIC_MISCELLANEOUS_MODEL_FILES
 )
 
 set(PUBLIC_DATASETS_MODEL_HEADERS
-    src/models/AbstractDatasetsModel.h
-    src/models/DatasetsListModel.h
-    src/models/DatasetsFilterModel.h
+    models/AbstractDatasetsModel.h
+    models/DatasetsListModel.h
+    models/DatasetsFilterModel.h
 )
 
 set(PUBLIC_DATASETS_MODEL_SOURCES
-    src/models/AbstractDatasetsModel.cpp
-    src/models/DatasetsListModel.cpp
-    src/models/DatasetsFilterModel.cpp
+    models/AbstractDatasetsModel.cpp
+    models/DatasetsListModel.cpp
+    models/DatasetsFilterModel.cpp
 )
 
 set(PUBLIC_DATASETS_MODEL_FILES
@@ -1111,13 +1112,13 @@ set(PUBLIC_DATASETS_MODEL_FILES
 )
 
 set(PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_HEADERS
-    src/models/LearningCenterVideosModel.h
-	src/models/LearningCenterVideosFilterModel.h
+    models/LearningCenterVideosModel.h
+	models/LearningCenterVideosFilterModel.h
 )
 
 set(PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_SOURCES
-    src/models/LearningCenterVideosModel.cpp
-	src/models/LearningCenterVideosFilterModel.cpp
+    models/LearningCenterVideosModel.cpp
+	models/LearningCenterVideosFilterModel.cpp
 )
 
 set(PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_FILES
@@ -1126,13 +1127,13 @@ set(PUBLIC_LEARNING_CENTER_VIDEOS_MODEL_FILES
 )
 
 set(PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_HEADERS
-    src/models/LearningCenterTutorialsModel.h
-	src/models/LearningCenterTutorialsFilterModel.h
+    models/LearningCenterTutorialsModel.h
+	models/LearningCenterTutorialsFilterModel.h
 )
 
 set(PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_SOURCES
-    src/models/LearningCenterTutorialsModel.cpp
-	src/models/LearningCenterTutorialsFilterModel.cpp
+    models/LearningCenterTutorialsModel.cpp
+	models/LearningCenterTutorialsFilterModel.cpp
 )
 
 set(PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES
@@ -1141,21 +1142,21 @@ set(PUBLIC_LEARNING_CENTER_TUTORIALS_MODEL_FILES
 )
 
 set(PUBLIC_PROJECTS_MODEL_HEADERS
-    src/models/AbstractProjectsModel.h
-    src/models/ProjectsListModel.h
-    src/models/ProjectsTreeModel.h
-	src/models/ProjectsFilterModel.h
-	src/models/ProjectsModelProject.h
-	src/models/ProjectsModelVisibilityController.h
+    models/AbstractProjectsModel.h
+    models/ProjectsListModel.h
+    models/ProjectsTreeModel.h
+	models/ProjectsFilterModel.h
+	models/ProjectsModelProject.h
+	models/ProjectsModelVisibilityController.h
 )
 
 set(PUBLIC_PROJECTS_MODEL_SOURCES
-    src/models/AbstractProjectsModel.cpp
-    src/models/ProjectsListModel.cpp
-    src/models/ProjectsTreeModel.cpp
-	src/models/ProjectsFilterModel.cpp
-	src/models/ProjectsModelProject.cpp
-	src/models/ProjectsModelVisibilityController.cpp
+    models/AbstractProjectsModel.cpp
+    models/ProjectsListModel.cpp
+    models/ProjectsTreeModel.cpp
+	models/ProjectsFilterModel.cpp
+	models/ProjectsModelProject.cpp
+	models/ProjectsModelVisibilityController.cpp
 )
 
 set(PUBLIC_PROJECTS_MODEL_FILES
@@ -1164,15 +1165,15 @@ set(PUBLIC_PROJECTS_MODEL_FILES
 )
 
 set(PUBLIC_HARDWARE_SPEC_MODEL_HEADERS
-    src/models/AbstractHardwareSpecModel.h
-    src/models/HardwareSpecTreeModel.h
-	src/models/HardwareSpecFilterModel.h
+    models/AbstractHardwareSpecModel.h
+    models/HardwareSpecTreeModel.h
+	models/HardwareSpecFilterModel.h
 )
 
 set(PUBLIC_HARDWARE_SPEC_MODEL_SOURCES
-    src/models/AbstractHardwareSpecModel.cpp
-    src/models/HardwareSpecTreeModel.cpp
-	src/models/HardwareSpecFilterModel.cpp
+    models/AbstractHardwareSpecModel.cpp
+    models/HardwareSpecTreeModel.cpp
+	models/HardwareSpecFilterModel.cpp
 )
 
 set(PUBLIC_HARDWARE_SPEC_MODEL_FILES
@@ -1181,15 +1182,15 @@ set(PUBLIC_HARDWARE_SPEC_MODEL_FILES
 )
 
 set(PUBLIC_COLOR_SCHEMES_MODEL_HEADERS
-    src/models/AbstractColorSchemesModel.h
-	src/models/ColorSchemesListModel.h
-    src/models/ColorSchemesFilterModel.h
+    models/AbstractColorSchemesModel.h
+	models/ColorSchemesListModel.h
+    models/ColorSchemesFilterModel.h
 )
 
 set(PUBLIC_COLOR_SCHEMES_MODEL_SOURCES
-    src/models/AbstractColorSchemesModel.cpp
-	src/models/ColorSchemesListModel.cpp
-    src/models/ColorSchemesFilterModel.cpp
+    models/AbstractColorSchemesModel.cpp
+	models/ColorSchemesListModel.cpp
+    models/ColorSchemesFilterModel.cpp
 )
 
 set(PUBLIC_COLOR_SCHEMES_MODEL_FILES
@@ -1198,17 +1199,17 @@ set(PUBLIC_COLOR_SCHEMES_MODEL_FILES
 )
 
 set(PUBLIC_SCRIPTS_MODEL_HEADERS
-    src/models/AbstractScriptsModel.h
-    src/models/ScriptsListModel.h
-    src/models/ScriptsTreeModel.h
-    src/models/ScriptsFilterModel.h
+    models/AbstractScriptsModel.h
+    models/ScriptsListModel.h
+    models/ScriptsTreeModel.h
+    models/ScriptsFilterModel.h
 )
 
 set(PUBLIC_SCRIPTS_MODEL_SOURCES
-    src/models/AbstractScriptsModel.cpp
-    src/models/ScriptsListModel.cpp
-    src/models/ScriptsTreeModel.cpp
-    src/models/ScriptsFilterModel.cpp
+    models/AbstractScriptsModel.cpp
+    models/ScriptsListModel.cpp
+    models/ScriptsTreeModel.cpp
+    models/ScriptsFilterModel.cpp
 )
 
 set(PUBLIC_SCRIPTS_MODEL_FILES
@@ -1217,15 +1218,15 @@ set(PUBLIC_SCRIPTS_MODEL_FILES
 )
 
 set(PUBLIC_RECENT_FILES_MODEL_HEADERS
-    src/models/AbstractRecentFilesModel.h
-    src/models/RecentFilesListModel.h
-    src/models/RecentFilesFilterModel.h
+    models/AbstractRecentFilesModel.h
+    models/RecentFilesListModel.h
+    models/RecentFilesFilterModel.h
 )
 
 set(PUBLIC_RECENT_FILES_MODEL_SOURCES
-	src/models/AbstractRecentFilesModel.cpp
-    src/models/RecentFilesListModel.cpp
-    src/models/RecentFilesFilterModel.cpp
+	models/AbstractRecentFilesModel.cpp
+    models/RecentFilesListModel.cpp
+    models/RecentFilesFilterModel.cpp
 )
 
 set(PUBLIC_RECENT_FILES_MODEL_FILES
@@ -1234,15 +1235,15 @@ set(PUBLIC_RECENT_FILES_MODEL_FILES
 )
 
 set(PUBLIC_HUD_MODEL_HEADERS
-    src/models/AbstractHeadsUpDisplayModel.h
-    src/models/HeadsUpDisplayTreeModel.h
-    src/models/HeadsUpDisplayFilterModel.h
+    models/AbstractHeadsUpDisplayModel.h
+    models/HeadsUpDisplayTreeModel.h
+    models/HeadsUpDisplayFilterModel.h
 )
 
 set(PUBLIC_HUD_MODEL_SOURCES
-    src/models/AbstractHeadsUpDisplayModel.cpp
-    src/models/HeadsUpDisplayTreeModel.cpp
-    src/models/HeadsUpDisplayFilterModel.cpp
+    models/AbstractHeadsUpDisplayModel.cpp
+    models/HeadsUpDisplayTreeModel.cpp
+    models/HeadsUpDisplayFilterModel.cpp
 )
 
 set(PUBLIC_HUD_MODEL_FILES
@@ -1251,17 +1252,17 @@ set(PUBLIC_HUD_MODEL_FILES
 )
 
 set(PUBLIC_WORKFLOW_MESSAGES_MODEL_HEADERS
-    src/models/AbstractWorkflowMessagesModel.h
-    src/models/WorkflowMessagesListModel.h
-    src/models/WorkflowMessagesTreeModel.h
-    src/models/WorkflowMessagesFilterModel.h
+    models/AbstractWorkflowMessagesModel.h
+    models/WorkflowMessagesListModel.h
+    models/WorkflowMessagesTreeModel.h
+    models/WorkflowMessagesFilterModel.h
 )
 
 set(PUBLIC_WORKFLOW_MESSAGES_MODEL_SOURCES
-    src/models/AbstractWorkflowMessagesModel.cpp
-    src/models/WorkflowMessagesListModel.cpp
-    src/models/WorkflowMessagesTreeModel.cpp
-    src/models/WorkflowMessagesFilterModel.cpp
+    models/AbstractWorkflowMessagesModel.cpp
+    models/WorkflowMessagesListModel.cpp
+    models/WorkflowMessagesTreeModel.cpp
+    models/WorkflowMessagesFilterModel.cpp
 )
 
 set(PUBLIC_WORKFLOW_MESSAGES_MODEL_FILES
@@ -1270,25 +1271,25 @@ set(PUBLIC_WORKFLOW_MESSAGES_MODEL_FILES
 )
 
 set(PUBLIC_GLOBAL_SETTINGS_HEADERS
-    src/GlobalSettingsGroupAction.h
-    src/ParametersSettingsAction.h
-    src/MiscellaneousSettingsAction.h
-    src/TasksSettingsAction.h
-    src/AppearanceSettingsAction.h
-    src/TemporaryDirectoriesSettingsAction.h
-	src/ErrorLoggingSettingsAction.h
-    src/PluginGlobalSettingsGroupAction.h
+    GlobalSettingsGroupAction.h
+    ParametersSettingsAction.h
+    MiscellaneousSettingsAction.h
+    TasksSettingsAction.h
+    AppearanceSettingsAction.h
+    TemporaryDirectoriesSettingsAction.h
+	ErrorLoggingSettingsAction.h
+    PluginGlobalSettingsGroupAction.h
 )
 
 set(PUBLIC_GLOBAL_SETTINGS_SOURCES
-    src/GlobalSettingsGroupAction.cpp
-    src/ParametersSettingsAction.cpp
-    src/MiscellaneousSettingsAction.cpp
-    src/TasksSettingsAction.cpp
-    src/AppearanceSettingsAction.cpp
-    src/TemporaryDirectoriesSettingsAction.cpp
-    src/ErrorLoggingSettingsAction.cpp
-    src/PluginGlobalSettingsGroupAction.cpp
+    GlobalSettingsGroupAction.cpp
+    ParametersSettingsAction.cpp
+    MiscellaneousSettingsAction.cpp
+    TasksSettingsAction.cpp
+    AppearanceSettingsAction.cpp
+    TemporaryDirectoriesSettingsAction.cpp
+    ErrorLoggingSettingsAction.cpp
+    PluginGlobalSettingsGroupAction.cpp
 )
 
 set(PUBLIC_GLOBAL_SETTINGS_FILES
@@ -1297,39 +1298,39 @@ set(PUBLIC_GLOBAL_SETTINGS_FILES
 )
 
 set(PUBLIC_TASK_HEADERS
-    src/Task.h
-    src/TaskTesterRunner.h
-    src/AbstractTaskHandler.h
-    src/AbstractTaskTester.h
-    src/ModalTask.h
-    src/ModalTaskTester.h
-    src/ModalTaskHandler.h
-    src/BackgroundTask.h
-    src/BackgroundTaskTester.h
-    src/BackgroundTaskHandler.h
-    src/ForegroundTask.h
-    src/ForegroundTaskTester.h
-    src/ForegroundTaskHandler.h
-    src/DatasetTask.h
-    src/DatasetTaskHandler.h
+    Task.h
+    TaskTesterRunner.h
+    AbstractTaskHandler.h
+    AbstractTaskTester.h
+    ModalTask.h
+    ModalTaskTester.h
+    ModalTaskHandler.h
+    BackgroundTask.h
+    BackgroundTaskTester.h
+    BackgroundTaskHandler.h
+    ForegroundTask.h
+    ForegroundTaskTester.h
+    ForegroundTaskHandler.h
+    DatasetTask.h
+    DatasetTaskHandler.h
 )
 
 set(PUBLIC_TASK_SOURCES
-    src/Task.cpp
-    src/TaskTesterRunner.cpp
-    src/AbstractTaskHandler.cpp
-    src/AbstractTaskTester.cpp
-    src/ModalTask.cpp
-    src/ModalTaskTester.cpp
-    src/ModalTaskHandler.cpp
-    src/BackgroundTask.cpp
-    src/BackgroundTaskTester.cpp
-    src/BackgroundTaskHandler.cpp
-    src/ForegroundTask.cpp
-    src/ForegroundTaskTester.cpp
-    src/ForegroundTaskHandler.cpp
-    src/DatasetTask.cpp
-    src/DatasetTaskHandler.cpp
+    Task.cpp
+    TaskTesterRunner.cpp
+    AbstractTaskHandler.cpp
+    AbstractTaskTester.cpp
+    ModalTask.cpp
+    ModalTaskTester.cpp
+    ModalTaskHandler.cpp
+    BackgroundTask.cpp
+    BackgroundTaskTester.cpp
+    BackgroundTaskHandler.cpp
+    ForegroundTask.cpp
+    ForegroundTaskTester.cpp
+    ForegroundTaskHandler.cpp
+    DatasetTask.cpp
+    DatasetTaskHandler.cpp
 )
 
 set(PUBLIC_TASK_FILES
@@ -1338,11 +1339,11 @@ set(PUBLIC_TASK_FILES
 )
 
 set(PUBLIC_EXCEPTION_HEADERS
-    src/exception/ManiVaultException.h
+    exception/ManiVaultException.h
 )
 
 set(PUBLIC_EXCEPTION_SOURCES
-    src/exception/ManiVaultException.cpp
+    exception/ManiVaultException.cpp
 )
     
 set(PUBLIC_EXCEPTION_FILES
@@ -1352,11 +1353,11 @@ set(PUBLIC_EXCEPTION_FILES
 
 # Automatically generated during cmake config
 set(PUBLIC_VERSION_HEADERS
-    src/ManiVaultVersion.h
+    ManiVaultVersion.h
 )
 
 set(PUBLIC_GLOBALS_HEADERS
-    src/ManiVaultGlobals.h
+    ManiVaultGlobals.h
 )
 
 set(PUBLIC_HEADERS
@@ -1476,13 +1477,13 @@ set(PUBLIC_SOURCES
 )
 
 set(PRECOMPILE_HEADERS
-    src/actions/Actions.h
-    src/event/EventListener.h
-    src/AbstractManager.h
-    src/Task.h
-    src/BackgroundTask.h
-    src/ForegroundTask.h
-    src/ModalTask.h
+    actions/Actions.h
+    event/EventListener.h
+    AbstractManager.h
+    Task.h
+    BackgroundTask.h
+    ForegroundTask.h
+    ModalTask.h
     ${PUBLIC_UTIL_HEADERS}
 )
 
