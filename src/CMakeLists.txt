@@ -22,18 +22,6 @@ set(MV_PUBLIC_LIB Core)                      # A public shared library used by p
 # -----------------------------------------------------------------------------
 # CMake Settings
 # -----------------------------------------------------------------------------
-set(MV_CXX_STANDARD 20)
-
-set(CMAKE_CXX_STANDARD ${MV_CXX_STANDARD})
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-set(CMAKE_C_STANDARD 17)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS OFF)
-
-set(CMAKE_MODULE_PATH "${MV_ROOT_DIR}/cmake")
-set(CMAKE_INSTALL_MESSAGE LAZY)
 
 # include CMakePackageConfigHelpers macro
 include(CMakePackageConfigHelpers)
@@ -482,10 +470,6 @@ endif()
 
 
 target_link_libraries(${MV_EXE} PRIVATE ${MV_PUBLIC_LIB})
-
-if (MV_BUILD_TESTING)
-    add_subdirectory(tests)
-endif()
 
 # Use AVX if enabled and available
 mv_check_and_set_AVX(${MV_EXE} ${MV_USE_AVX})

@@ -3,7 +3,22 @@ cmake_minimum_required(VERSION 3.22)
 set(MV_MAIN "mv-main")
 PROJECT(${MV_MAIN})
 
+# -----------------------------------------------------------------------------
+# CMake Settings
+# -----------------------------------------------------------------------------
 set(MV_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+set(MV_CXX_STANDARD 20)
+
+set(CMAKE_CXX_STANDARD ${MV_CXX_STANDARD})
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
+
+set(CMAKE_MODULE_PATH "${MV_ROOT_DIR}/cmake")
+set(CMAKE_INSTALL_MESSAGE LAZY)
 
 # -----------------------------------------------------------------------------
 # User options
@@ -37,16 +52,16 @@ message(STATUS "  Using sentry for error logging: ${MV_USE_ERROR_LOGGING}")
 message(STATUS "  Install dir: ${MV_INSTALL_DIR}")
 
 # -----------------------------------------------------------------------------
+# ManiVault core application, library and system plugins
+# -----------------------------------------------------------------------------
+
+add_subdirectory(src)
+
+# -----------------------------------------------------------------------------
 # Tests
 # -----------------------------------------------------------------------------
 
 if (MV_BUILD_TESTING)
     enable_testing()
+    add_subdirectory(tests)
 endif()
-
-# -----------------------------------------------------------------------------
-# Main project
-# -----------------------------------------------------------------------------
-
-# ManiVault core system
-add_subdirectory(src)
