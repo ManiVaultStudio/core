@@ -344,7 +344,7 @@ set_target_properties(${MV_PUBLIC_LIB} PROPERTIES
 
 target_sources(${MV_PUBLIC_LIB}
     PRIVATE
-    src/.editorconfig
+    .editorconfig
     ${PUBLIC_SOURCES}
     ${SHADERS}
 )
@@ -382,6 +382,8 @@ if(MV_PRECOMPILE_HEADERS)
     target_precompile_headers(${MV_PUBLIC_LIB} PRIVATE 
         ${PRECOMPILE_HEADERS}
     )
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(${MV_PUBLIC_LIB} PRIVATE /bigobj)
 endif()
 
 # -----------------------------------------------------------------------------
@@ -397,7 +399,7 @@ set_target_properties(${MV_EXE} PROPERTIES
 
 target_sources(${MV_EXE}
     PRIVATE
-    src/.editorconfig
+    .editorconfig
     ${MAIN_SOURCES}
     ${MAIN_STYLES}
     ${PRIVATE_SOURCES}
@@ -407,7 +409,7 @@ target_sources(${MV_EXE}
 
 target_include_directories(${MV_EXE} PRIVATE
     ${MV_ROOT_DIR}/src
-    ${MV_ROOT_DIR}         # for resources in /res
+    ${MV_ROOT_DIR}/res
 )
 
 target_include_directories(${MV_EXE} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
@@ -454,9 +456,9 @@ if(${MV_USE_ERROR_LOGGING})
         set(MV_CRASH_REPORTER MV_CrashReporter)
 
         add_executable(${MV_CRASH_REPORTER} WIN32
-            src/private/CrashReporterMain.cpp
-            src/private/CrashReportDialog.cpp
-            src/private/CrashReportDialog.h
+            private/CrashReporterMain.cpp
+            private/CrashReportDialog.cpp
+            private/CrashReportDialog.h
             ${RESOURCE_FILES}
         )
 
@@ -511,13 +513,13 @@ endif()
 # -----------------------------------------------------------------------------
 
 # System plugins
-add_subdirectory(src/plugins/DataHierarchyPlugin)
-add_subdirectory(src/plugins/DataPropertiesPlugin)
-add_subdirectory(src/plugins/SharedParametersPlugin)
-add_subdirectory(src/plugins/LoggingPlugin)
-add_subdirectory(src/plugins/TasksPlugin)
-add_subdirectory(src/plugins/SampleScopePlugin)
-add_subdirectory(src/plugins/TutorialPlugin)
+add_subdirectory(plugins/DataHierarchyPlugin)
+add_subdirectory(plugins/DataPropertiesPlugin)
+add_subdirectory(plugins/SharedParametersPlugin)
+add_subdirectory(plugins/LoggingPlugin)
+add_subdirectory(plugins/TasksPlugin)
+add_subdirectory(plugins/SampleScopePlugin)
+add_subdirectory(plugins/TutorialPlugin)
 
 set(MV_SYSTEM_PLUGINS
     DataHierarchyPlugin 
@@ -537,11 +539,11 @@ foreach(system_plugin_target IN LISTS MV_SYSTEM_PLUGINS)
 endforeach()
 
 # Data plugins
-add_subdirectory(src/plugins/PointData)
-add_subdirectory(src/plugins/ColorData)
-add_subdirectory(src/plugins/TextData)
-add_subdirectory(src/plugins/ClusterData)
-add_subdirectory(src/plugins/ImageData)
+add_subdirectory(plugins/PointData)
+add_subdirectory(plugins/ColorData)
+add_subdirectory(plugins/TextData)
+add_subdirectory(plugins/ClusterData)
+add_subdirectory(plugins/ImageData)
 
 set(MV_DATA_PLUGINS
     PointData 
@@ -616,16 +618,13 @@ else()
     endif()
 endif()
 
-# Install public headers
+# Install public headers with preserved folder structure
 foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
-    # Remove the "src" prefix of the header get the remaining subdirectory
-    string(REGEX REPLACE "^src/(.*/).*" "\\1" STRIPPED_PUBLIC_HEADER ${PUBLIC_HEADER})
+    string(REGEX REPLACE "^(.*/).*" "\\1" STRIPPED_PUBLIC_HEADER "${PUBLIC_HEADER}")
     if("${STRIPPED_PUBLIC_HEADER}" STREQUAL "${PUBLIC_HEADER}")
         set(STRIPPED_PUBLIC_HEADER "")
     endif()
-    set(HEADER_DEST "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${STRIPPED_PUBLIC_HEADER}")
-
-    # Install the header file while preserving the folder structure
+    set(HEADER_DEST "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${STRIPPED_PUBLIC_HEADER}")    
     install(FILES ${PUBLIC_HEADER} DESTINATION ${HEADER_DEST} COMPONENT MVPUBLIC_HEADERS)
 endforeach()
 
