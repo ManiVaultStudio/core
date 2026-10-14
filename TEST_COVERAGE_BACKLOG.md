@@ -34,4 +34,11 @@
   - Coverage: not measured
   - Notes: added a dedicated public test executable covering indexed lookup, missing mappings, image-pyramid expansion, and image-boundary behavior without changing production code
 
+- [x] `ManiVault/src/DataType.h`: cover public value semantics, concatenation, and hash lookup for `DataType`
+  - Completed: 2026-10-14
+  - Tests: `ctest --test-dir D:\DevBundle\core_testing\build\core -C Debug -R '^MV_Public_DataTypeTest$' --output-on-failure` (passed); `ctest --test-dir D:\DevBundle\core_testing\build\core -C Debug -L public --output-on-failure` (passed)
+  - Verification: 3/3 public CTest tests passed; `git diff --check` passed
+  - Coverage: not measured
+  - Notes: added a dedicated public test executable; production code unchanged
+
 ## Deferred

@@ -58,3 +58,33 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         VS_DEBUGGER_ENVIRONMENT "PATH=${QT_DIR}/../../../bin"
     )
 endif()
+
+add_executable(MV_Public_DataTypeTest
+    DataTypeTest.cpp
+)
+
+target_include_directories(MV_Public_DataTypeTest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../src
+)
+
+target_link_libraries(MV_Public_DataTypeTest PRIVATE
+    ManiVault::Core
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets
+)
+
+target_compile_features(MV_Public_DataTypeTest PRIVATE cxx_std_${MV_CXX_STANDARD})
+set_target_properties(MV_Public_DataTypeTest PROPERTIES FOLDER "Tests/Public")
+
+add_test(NAME MV_Public_DataTypeTest COMMAND MV_Public_DataTypeTest)
+set_tests_properties(MV_Public_DataTypeTest PROPERTIES
+    LABELS "unit;public"
+    ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Core>;PATH=path_list_prepend:${QT_DIR}/../../../bin"
+)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set_property(TARGET MV_Public_DataTypeTest PROPERTY
+        VS_DEBUGGER_ENVIRONMENT "PATH=${QT_DIR}/../../../bin"
+    )
+endif()
