@@ -68,11 +68,30 @@ class ClusterAction;
 // Raw Data
 // =============================================================================
 
+/**
+ * @brief Dense point-data storage and access interface.
+ *
+ * PointData is the storage-neutral entry point for datasets whose values are
+ * arranged as rows of points and columns of dimensions. It retains the
+ * established eager vector representation for compatibility with existing
+ * consumers, while also providing an experimental tiled representation for
+ * datasets that are too large to load and decode as one contiguous buffer.
+ *
+ * The tiled functionality is deliberately exposed through this class without
+ * making the tiled implementation part of the public header. This keeps the
+ * common PointData include lightweight and allows other storage backends to
+ * implement the same row, column, range, and visitor APIs in the future.
+ * Tiled storage is currently read-only; legacy raw-pointer and mutation APIs
+ * materialize tiled data when a contiguous eager buffer is required.
+ *
+ * @author Thomas Kroes
+ */
 class POINTDATA_EXPORT PointData : public mv::plugin::RawData
 {
 public:
     using TileView = mv::pointdata::tiled::TileView;
     using DataLock = std::unique_lock<std::recursive_mutex>;
+    /** Generates the row-major bytes for one requested tile. */
     using TiledTileGenerator = std::function<QByteArray(std::uint64_t rowOffset, std::uint64_t columnOffset,
         std::uint64_t rows, std::uint64_t columns)>;
 
@@ -266,17 +285,40 @@ public:
     void* getDataVoidPtr();
     const void* getDataConstVoidPtr() const;
 
+    /** Returns whether the point data currently uses tiled storage. */
     bool isTiled() const;
+
+    /** Converts dense point data to read-only rectangular tiled storage. */
     void makeTiled(std::size_t rowTileSize, std::size_t columnTileSize, std::function<void(float)> progress = {});
+
+    /** Creates read-only tiled storage whose tile bytes are generated on demand. */
     void makeTiledFromGenerator(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, std::size_t rowTileSize, std::size_t columnTileSize, TiledTileGenerator generator);
+
+    /** Loads or retrieves a tile and returns a lifetime-safe read-only view. */
     TileView acquireTile(std::uint64_t tileRow, std::uint64_t tileColumn) const;
+
+    /** Sets the maximum number of loaded tile payloads retained in memory. */
     void setTiledCacheCapacity(std::size_t capacity);
+
+    /** Returns the number of currently cached tile payloads. */
     std::size_t getTiledCacheSize() const;
+
+    /** Returns the maximum number of cached tile payloads. */
     std::size_t getTiledCacheCapacity() const;
+
+    /** Returns the configured number of rows per tile. */
     std::size_t getTiledRowTileSize() const;
+
+    /** Returns the configured number of columns per tile. */
     std::size_t getTiledColumnTileSize() const;
+
+    /** Returns the number of tile-cache hits. */
     std::uint64_t getTiledCacheHits() const;
+
+    /** Returns the number of tile-cache misses. */
     std::uint64_t getTiledCacheMisses() const;
+
+    /** Returns the number of tile-cache evictions. */
     std::uint64_t getTiledCacheEvictions() const;
 
     /** Estimate memory requirements from dataset and tiling settings without allocating the data. */
@@ -288,14 +330,28 @@ public:
         std::uint64_t tileCount = 0;
         std::uint64_t indexBytes = 0;
     };
+    /** Returns a memory estimate for the current tiled storage. */
     TiledMemoryEstimate getTiledMemoryEstimate() const;
+
+    /** Estimates tiled memory usage without allocating point data. */
     static TiledMemoryEstimate estimateTiledMemory(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, std::size_t cacheCapacity);
 
+    /** Returns one row as a storage-neutral read-only view. */
     PointDataAccessView getRow(std::uint64_t row) const;
+
+    /** Visits a contiguous range of rows in row-major order. */
     void visitRows(std::uint64_t firstRow, std::uint64_t rowCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits selected rows in the order given by rowIds. */
     void visitRows(const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a contiguous column range for every row. */
     void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a contiguous column range for selected rows. */
     void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a rectangular row and column range. */
     void visitRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
 
     static constexpr std::array<const char*, std::variant_size_v<VariantOfVectors>> getElementTypeNames()

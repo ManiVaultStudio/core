@@ -22,14 +22,27 @@ class Task;
 
 class PointData;
 
+/**
+ * @brief Interactive table view for inspecting point data and tiled access.
+ *
+ * The widget is a diagnostic consumer of the storage-neutral PointData access
+ * API. It fetches only the visible row and column window after table
+ * navigation, exposes tile-cache statistics, and can enable tiled storage on
+ * the selected dataset. This makes the plugin useful both as a basic point
+ * data browser and as a manual test surface for lazy loading behavior.
+ *
+ * @author Thomas Kroes
+ */
 class PointsViewWidget final : public QWidget
 {
     Q_OBJECT
 
 public:
+    /** Constructs the points view and optionally associates a progress task. */
     explicit PointsViewWidget(QWidget* parent = nullptr, mv::Task* progressTask = nullptr);
 
 signals:
+    /** Emitted after the selected dataset has been converted to tiled storage. */
     void tiledStorageEnabled(const QString& datasetName);
 
 protected:

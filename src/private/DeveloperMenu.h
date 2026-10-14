@@ -10,7 +10,16 @@
 
 class GifRecorder;
 
-/** Menu containing development and integration test tools. */
+/**
+ * @brief Menu containing development and integration test tools.
+ *
+ * DeveloperMenu provides a stable host for diagnostics and experimental
+ * workflows that should not be part of the regular end-user interface. Some
+ * menus are populated lazily when opened so optional test features do not add
+ * startup work or dependencies to the main window.
+ *
+ * @author Thomas Kroes
+ */
 class DeveloperMenu : public QMenu
 {
 public:
