@@ -3,8 +3,9 @@
 #include "PointDataTile.h"
 #include "PointDataTileCache.h"
 
-#include <QVariantMap>
+#include <QByteArray>
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -28,38 +29,77 @@ public:
         std::uint64_t indexBytes = 0;
     };
 
-    PointDataTiledStorage(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize,
-        std::size_t rowTileSize, std::size_t columnTileSize, TileLoader loader = {});
+    PointDataTiledStorage(
+        std::uint64_t rows,
+        std::uint64_t columns,
+        std::size_t elementSize,
+        std::size_t rowTileSize,
+        std::size_t columnTileSize,
+        TileLoader loader = {});
 
-    static std::shared_ptr<PointDataTiledStorage> fromDense(const char* data, std::uint64_t rows,
-        std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize,
+    static std::shared_ptr<PointDataTiledStorage> fromDense(
+        const char* data,
+        std::uint64_t rows,
+        std::uint64_t columns,
+        std::size_t elementSize,
+        std::size_t rowTileSize,
+        std::size_t columnTileSize,
         ProgressCallback progress = {});
 
     /** Create a read-only tiled storage whose tiles are generated only when accessed. */
-    static std::shared_ptr<PointDataTiledStorage> fromGenerator(std::uint64_t rows, std::uint64_t columns,
-        std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileGenerator generator);
+    static std::shared_ptr<PointDataTiledStorage> fromGenerator(
+        std::uint64_t rows,
+        std::uint64_t columns,
+        std::size_t elementSize,
+        std::size_t rowTileSize,
+        std::size_t columnTileSize,
+        TileGenerator generator);
 
     std::uint64_t rows() const { return _rows; }
+
     std::uint64_t columns() const { return _columns; }
+
     std::size_t elementSize() const { return _elementSize; }
+
     std::size_t rowTileSize() const { return _rowTileSize; }
+
     std::size_t columnTileSize() const { return _columnTileSize; }
+
     std::uint64_t tileRowCount() const;
+
     std::uint64_t tileColumnCount() const;
+
     TileView acquire(std::uint64_t tileRow, std::uint64_t tileColumn) const;
+
     float valueAt(std::uint64_t flatIndex, std::uint32_t typeIndex) const;
+
     void materialize(char* destination) const;
+
     std::vector<TileDescriptor>& descriptors() { return _descriptors; }
+
     const std::vector<TileDescriptor>& descriptors() const { return _descriptors; }
+
     void setCacheCapacity(std::size_t capacity) const;
+
     std::size_t cacheCapacity() const;
+
     std::size_t cacheSize() const;
+
     std::uint64_t cacheHits() const;
+
     std::uint64_t cacheMisses() const;
+
     std::uint64_t cacheEvictions() const;
+
     MemoryEstimate memoryEstimate() const;
-    static MemoryEstimate estimateMemory(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize,
-        std::size_t rowTileSize, std::size_t columnTileSize, std::size_t cacheCapacity);
+
+    static MemoryEstimate estimateMemory(
+        std::uint64_t rows,
+        std::uint64_t columns,
+        std::size_t elementSize,
+        std::size_t rowTileSize,
+        std::size_t columnTileSize,
+        std::size_t cacheCapacity);
 
 private:
     QByteArray load(const TileDescriptor& descriptor) const;

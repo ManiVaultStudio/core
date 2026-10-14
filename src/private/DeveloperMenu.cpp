@@ -49,11 +49,16 @@ DeveloperMenu::DeveloperMenu(QWidget* parent /*= nullptr*/) :
 
     detail::ParallelPhantomTestSuite::populateMenu(*workflowTestingMenu, parentWidget());
 
-    _dataSynthesisMenu = addMenu(util::StyledIcon("flask"), tr("Data synthesis"));
+    _dataSynthesisMenu = addMenu(
+        util::StyledIcon("flask"),
+        tr("Data synthesis"));
+
     _dataSynthesisMenu->setToolTip(tr("Create synthetic datasets for development and performance testing"));
+
     connect(_dataSynthesisMenu, &QMenu::aboutToShow, this, [this] {
         if (_dataSynthesisPopulated)
             return;
+
         developer::populateMenu(*_dataSynthesisMenu, parentWidget());
         _dataSynthesisPopulated = true;
     });

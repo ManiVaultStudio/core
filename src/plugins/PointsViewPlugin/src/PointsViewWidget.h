@@ -15,7 +15,11 @@ class QSpinBox;
 class QTableView;
 class QTimer;
 
-namespace mv { class Task; }
+namespace mv
+{
+class Task;
+}
+
 class PointData;
 
 class PointsViewWidget final : public QWidget

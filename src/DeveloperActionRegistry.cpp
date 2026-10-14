@@ -11,12 +11,14 @@ namespace
 QHash<QString, MenuPopulator>& populators()
 {
     static QHash<QString, MenuPopulator> value;
+
     return value;
 }
 
 QMutex& mutex()
 {
     static QMutex value;
+
     return value;
 }
 }
@@ -27,6 +29,7 @@ void registerMenuPopulator(const QString& id, MenuPopulator populator)
         return;
 
     QMutexLocker locker(&mutex());
+
     populators().insert(id, std::move(populator));
 }
 
@@ -39,6 +42,8 @@ void populateMenu(QMenu& menu, QWidget* owner)
     }
 
     for (const auto& populator : copy)
+    {
         populator(menu, owner);
+    }
 }
 }

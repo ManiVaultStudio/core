@@ -11,24 +11,23 @@
 #include "LinkedData.h"
 #include "PointDataRange.h"
 #include "Set.h"
-#include "SparseMatrix.h"
 #include "PointDataAccess.h"
+#include "SparseMatrix.h"
 
 #include "event/EventListener.h"
 
 #include <biovault_bfloat16/biovault_bfloat16.h>
 
-#include <QDebug>
 #include <QByteArray>
+#include <QDebug>
 #include <QMap>
 #include <QString>
 #include <QVariantMap>
 
 #include <array>
 #include <cassert>
-#include <functional>
-#include <mutex>
 #include <memory>
+#include <mutex>
 #include <utility>
 #include <variant>
 #include <vector>

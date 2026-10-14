@@ -16,7 +16,11 @@ struct PointDataAccessView
     std::uint32_t elementSizeBytes = 0;
     std::shared_ptr<const void> lifetime;
 
-    explicit operator bool() const { return data != nullptr && rows != 0 && columns != 0; }
+    explicit operator bool() const
+    {
+        return data != nullptr && rows != 0 && columns != 0;
+    }
+
     const char* rowData(const std::uint64_t row) const
     {
         return static_cast<const char*>(data) + row * rowStrideBytes;

@@ -9,6 +9,7 @@
 namespace mv::pointdata::tiled
 {
 class PointDataTiledStorage;
+
 struct TileDescriptor
 {
     std::uint64_t rowOffset = 0;
@@ -22,16 +23,55 @@ struct TileDescriptor
 class TileView
 {
 public:
-    bool isValid() const { return static_cast<bool>(_bytes); }
-    explicit operator bool() const { return isValid(); }
-    const void* data() const { return _bytes ? _bytes->constData() : nullptr; }
-    std::size_t sizeInBytes() const { return _bytes ? static_cast<std::size_t>(_bytes->size()) : 0; }
-    std::uint64_t rowOffset() const { return _rowOffset; }
-    std::uint64_t columnOffset() const { return _columnOffset; }
-    std::uint64_t rows() const { return _rows; }
-    std::uint64_t columns() const { return _columns; }
-    std::size_t elementSize() const { return _elementSize; }
-    std::shared_ptr<const void> lifetimeToken() const { return _bytes; }
+    bool isValid() const
+    {
+        return static_cast<bool>(_bytes);
+    }
+
+    explicit operator bool() const
+    {
+        return isValid();
+    }
+
+    const void* data() const
+    {
+        return _bytes ? _bytes->constData() : nullptr;
+    }
+
+    std::size_t sizeInBytes() const
+    {
+        return _bytes ? static_cast<std::size_t>(_bytes->size()) : 0;
+    }
+
+    std::uint64_t rowOffset() const
+    {
+        return _rowOffset;
+    }
+
+    std::uint64_t columnOffset() const
+    {
+        return _columnOffset;
+    }
+
+    std::uint64_t rows() const
+    {
+        return _rows;
+    }
+
+    std::uint64_t columns() const
+    {
+        return _columns;
+    }
+
+    std::size_t elementSize() const
+    {
+        return _elementSize;
+    }
+
+    std::shared_ptr<const void> lifetimeToken() const
+    {
+        return _bytes;
+    }
 
 private:
     friend class PointDataTiledStorage;

@@ -16,7 +16,7 @@ public:
     void init() override;
 
 private:
-    mv::Task                    _tileTask;
+    mv::Task         _tileTask;
     PointsViewWidget _widget;
 };
 

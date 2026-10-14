@@ -123,11 +123,15 @@ void PointsViewWidget::updateInspector(const PointData* pointData)
     const auto estimate = pointData->getTiledMemoryEstimate();
     _inspectorLabel->setText(QString("Storage inspector: tiled | type: %1 | tile: %2 × %3 | raw: %4 MiB | cache estimate: %5 MiB | cache: %6/%7 | hits: %8 | misses: %9 | evictions: %10")
         .arg(pointData->getElementTypeName())
-        .arg(pointData->getTiledRowTileSize()).arg(pointData->getTiledColumnTileSize())
+        .arg(pointData->getTiledRowTileSize())
+        .arg(pointData->getTiledColumnTileSize())
         .arg(static_cast<double>(estimate.rawDataBytes) / (1024.0 * 1024.0), 0, 'f', 1)
         .arg(static_cast<double>(estimate.cachedTileBytes) / (1024.0 * 1024.0), 0, 'f', 1)
-        .arg(pointData->getTiledCacheSize()).arg(pointData->getTiledCacheCapacity())
-        .arg(pointData->getTiledCacheHits()).arg(pointData->getTiledCacheMisses()).arg(pointData->getTiledCacheEvictions()));
+        .arg(pointData->getTiledCacheSize())
+        .arg(pointData->getTiledCacheCapacity())
+        .arg(pointData->getTiledCacheHits())
+        .arg(pointData->getTiledCacheMisses())
+        .arg(pointData->getTiledCacheEvictions()));
 }
 
 void PointsViewWidget::refreshSelection()
@@ -155,7 +159,9 @@ void PointsViewWidget::refreshSelection()
     auto* rawData = points->getPointData();
     _model->setPointData(rawData, rawData->getNumPoints(), rawData->getNumDimensions());
     _datasetLabel->setText(QString("%1 — %2 points × %3 dimensions (%4)")
-        .arg(points->getGuiName()).arg(rawData->getNumPoints()).arg(rawData->getNumDimensions())
+        .arg(points->getGuiName())
+        .arg(rawData->getNumPoints())
+        .arg(rawData->getNumDimensions())
         .arg(rawData->isTiled() ? "tiled" : "eager"));
     _accessLog->clear();
     updateInspector(rawData);
@@ -178,12 +184,19 @@ void PointsViewWidget::fetchVisibleRange()
     const auto lastRow = _table->rowAt(std::max(0, _table->viewport()->height() - 1));
     const auto firstColumn = std::max(0, _table->columnAt(0));
     const auto lastColumn = _table->columnAt(std::max(0, _table->viewport()->width() - 1));
-    const auto rowCount = lastRow >= firstRow ? static_cast<std::uint64_t>(lastRow - firstRow + 1) : 1;
-    const auto columnCount = lastColumn >= firstColumn ? static_cast<std::uint64_t>(lastColumn - firstColumn + 1) : 1;
+    const auto rowCount = lastRow >= firstRow
+        ? static_cast<std::uint64_t>(lastRow - firstRow + 1)
+        : 1;
+    const auto columnCount = lastColumn >= firstColumn
+        ? static_cast<std::uint64_t>(lastColumn - firstColumn + 1)
+        : 1;
     QElapsedTimer timer;
     timer.start();
-    const auto callbacks = _model->fetchRange(static_cast<std::uint64_t>(firstRow), rowCount,
-        static_cast<std::uint64_t>(firstColumn), columnCount);
+    const auto callbacks = _model->fetchRange(
+        static_cast<std::uint64_t>(firstRow),
+        rowCount,
+        static_cast<std::uint64_t>(firstColumn),
+        columnCount);
     const auto elapsedMilliseconds = timer.elapsed();
 
     const auto selectedItems = mv::dataHierarchy().getSelectedItems();
@@ -195,14 +208,20 @@ void PointsViewWidget::fetchVisibleRange()
 
     auto* rawData = points->getPointData();
     _accessLog->appendPlainText(QString("rows %1–%2, columns %3–%4 | %5 segment(s) | %6 ms")
-        .arg(firstRow).arg(firstRow + static_cast<int>(rowCount) - 1)
-        .arg(firstColumn).arg(firstColumn + static_cast<int>(columnCount) - 1)
-        .arg(callbacks).arg(elapsedMilliseconds));
+        .arg(firstRow)
+        .arg(firstRow + static_cast<int>(rowCount) - 1)
+        .arg(firstColumn)
+        .arg(firstColumn + static_cast<int>(columnCount) - 1)
+        .arg(callbacks)
+        .arg(elapsedMilliseconds));
     updateInspector(rawData);
     setStatus(QString("Fetched visible rows %1–%2, columns %3–%4 in %5 access segment(s); cached tiles: %6. Drag/scroll and release to fetch again.")
-        .arg(firstRow).arg(firstRow + static_cast<int>(rowCount) - 1)
-        .arg(firstColumn).arg(firstColumn + static_cast<int>(columnCount) - 1)
-        .arg(callbacks).arg(rawData->getTiledCacheSize()));
+        .arg(firstRow)
+        .arg(firstRow + static_cast<int>(rowCount) - 1)
+        .arg(firstColumn)
+        .arg(firstColumn + static_cast<int>(columnCount) - 1)
+        .arg(callbacks)
+        .arg(rawData->getTiledCacheSize()));
 }
 
 void PointsViewWidget::tileSelectedData()

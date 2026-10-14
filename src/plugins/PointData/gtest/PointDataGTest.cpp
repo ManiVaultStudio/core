@@ -26,7 +26,13 @@ GTEST_TEST(PointData, hasOneDimensionByDefault)
 GTEST_TEST(PointData, supportsRectangularTiledReadsAndBoundaryTiles)
 {
     PointData points{};
-    const std::vector<float> values{ 0, 1, 2, 3, 10, 11, 12, 13, 20, 21, 22, 23, 30, 31, 32, 33, 40, 41, 42, 43 };
+    const std::vector<float> values{
+        0, 1, 2, 3,
+        10, 11, 12, 13,
+        20, 21, 22, 23,
+        30, 31, 32, 33,
+        40, 41, 42, 43
+    };
     points.setData(values, 4);
     points.makeTiled(2, 3);
 
@@ -73,7 +79,13 @@ GTEST_TEST(PointData, legacyRawPointerAccessMaterializesTiledData)
 GTEST_TEST(PointData, accessVisitorsSupportRowsColumnsAndRanges)
 {
     PointData points{};
-    points.setData(std::vector<float>{ 0, 1, 2, 3, 10, 11, 12, 13, 20, 21, 22, 23 }, 4);
+    points.setData(
+        std::vector<float>{
+            0, 1, 2, 3,
+            10, 11, 12, 13,
+            20, 21, 22, 23
+        },
+        4);
     points.makeTiled(2, 2);
 
     const auto row = points.getRow(1);
@@ -84,6 +96,7 @@ GTEST_TEST(PointData, accessVisitorsSupportRowsColumnsAndRanges)
     std::vector<float> rangeValues;
     points.visitRange(1, 2, 1, 2, [&rangeValues](const PointDataAccessView& view) {
         const auto* values = static_cast<const float*>(view.data);
+
         for (std::uint64_t column = 0; column < view.columns; ++column)
             rangeValues.push_back(values[column]);
     });
@@ -97,10 +110,15 @@ GTEST_TEST(PointData, accessVisitorsSupportRowsColumnsAndRanges)
     ASSERT_EQ(columnSegments, 3U);
 
     std::vector<float> selectedColumnValues;
-    points.visitColumns(1, 2, std::vector<std::uint64_t>{ 2, 0 }, [&selectedColumnValues](const PointDataAccessView& view) {
+    points.visitColumns(
+        1,
+        2,
+        std::vector<std::uint64_t>{ 2, 0 },
+        [&selectedColumnValues](const PointDataAccessView& view) {
         const auto* values = static_cast<const float*>(view.data);
+
         for (std::uint64_t column = 0; column < view.columns; ++column)
             selectedColumnValues.push_back(values[column]);
-    });
+        });
     ASSERT_EQ((std::vector<float>{ 21, 22, 1, 2 }), selectedColumnValues);
 }
