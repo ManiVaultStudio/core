@@ -13,13 +13,13 @@ QVariantMap PointDataTiledSerialization::toVariantMap(const PointDataTiledStorag
     // Version 2 is an indexed tile representation. Tile payloads are explicitly
     // stored as external project blobs; the project JSON contains only metadata
     // and the per-tile blob index. Version 1 remains readable below.
-    result["Version"]        = 2;
-    result["Storage"]        = "IndexedTileBlobs";
-    result["RowTileSize"]    = QVariant::fromValue(static_cast<qulonglong>(storage.rowTileSize()));
+    result["Version"]         = 2;
+    result["Storage"]         = "IndexedTileBlobs";
+    result["RowTileSize"]     = QVariant::fromValue(static_cast<qulonglong>(storage.rowTileSize()));
     result["ColumnTileSize"] = QVariant::fromValue(static_cast<qulonglong>(storage.columnTileSize()));
-    result["ElementSize"]    = QVariant::fromValue(static_cast<qulonglong>(storage.elementSize()));
-    result["RawDataBytes"]   = QVariant::fromValue(static_cast<qulonglong>(storage.memoryEstimate().rawDataBytes));
-    result["TileCount"]      = QVariant::fromValue(static_cast<qulonglong>(storage.memoryEstimate().tileCount));
+    result["ElementSize"]     = QVariant::fromValue(static_cast<qulonglong>(storage.elementSize()));
+    result["RawDataBytes"]    = QVariant::fromValue(static_cast<qulonglong>(storage.memoryEstimate().rawDataBytes));
+    result["TileCount"]       = QVariant::fromValue(static_cast<qulonglong>(storage.memoryEstimate().tileCount));
 
     QVariantList tiles;
     tiles.reserve(static_cast<qsizetype>(storage.descriptors().size()));
@@ -29,10 +29,10 @@ QVariantMap PointDataTiledSerialization::toVariantMap(const PointDataTiledStorag
         const auto& descriptor = storage.descriptors()[tileIndex];
 
         QVariantMap tile;
-        tile["RowOffset"]    = QVariant::fromValue(static_cast<qulonglong>(descriptor.rowOffset));
+        tile["RowOffset"]     = QVariant::fromValue(static_cast<qulonglong>(descriptor.rowOffset));
         tile["ColumnOffset"] = QVariant::fromValue(static_cast<qulonglong>(descriptor.columnOffset));
-        tile["Rows"]         = QVariant::fromValue(static_cast<qulonglong>(descriptor.rows));
-        tile["Columns"]      = QVariant::fromValue(static_cast<qulonglong>(descriptor.columns));
+        tile["Rows"]          = QVariant::fromValue(static_cast<qulonglong>(descriptor.rows));
+        tile["Columns"]       = QVariant::fromValue(static_cast<qulonglong>(descriptor.columns));
 
         if (!descriptor.blob.isEmpty())
         {
@@ -40,14 +40,9 @@ QVariantMap PointDataTiledSerialization::toVariantMap(const PointDataTiledStorag
         }
         else
         {
-            const auto tileView = storage.acquire(
-                tileIndex / storage.tileColumnCount(),
-                tileIndex % storage.tileColumnCount());
+            const auto tileView = storage.acquire(tileIndex / storage.tileColumnCount(), tileIndex % storage.tileColumnCount());
 
-            tile["Raw"] = mv::util::bytesToBlobVariantMap(
-                static_cast<const char*>(tileView.data()),
-                tileView.sizeInBytes(),
-                mv::util::BlobStorageLocation::FileInProject);
+            tile["Raw"] = mv::util::bytesToBlobVariantMap(static_cast<const char*>(tileView.data()), tileView.sizeInBytes(), mv::util::BlobStorageLocation::FileInProject);
         }
 
         tiles.push_back(tile);
@@ -58,25 +53,15 @@ QVariantMap PointDataTiledSerialization::toVariantMap(const PointDataTiledStorag
     return result;
 }
 
-std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantMap(
-    const QVariantMap& map,
-    const std::uint64_t rows,
-    const std::uint64_t columns,
-    const std::size_t elementSize)
+std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantMap(const QVariantMap& map, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize)
 {
     const auto rowTileSize    = map.value("RowTileSize").toULongLong();
     const auto columnTileSize = map.value("ColumnTileSize").toULongLong();
     const auto tileMaps       = map.value("Tiles").toList();
 
-    auto storage = std::make_shared<PointDataTiledStorage>(
-        rows,
-        columns,
-        elementSize,
-        rowTileSize,
-        columnTileSize,
-        [](const TileDescriptor& descriptor) {
-            return mv::util::bytesFromBlobVariantMap(descriptor.blob);
-        });
+    auto storage = std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize, [](const TileDescriptor& descriptor) {
+        return mv::util::bytesFromBlobVariantMap(descriptor.blob);
+    });
 
     auto& descriptors = storage->descriptors();
 

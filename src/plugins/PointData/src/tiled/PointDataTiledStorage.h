@@ -29,31 +29,12 @@ public:
         std::uint64_t indexBytes = 0;
     };
 
-    PointDataTiledStorage(
-        std::uint64_t rows,
-        std::uint64_t columns,
-        std::size_t elementSize,
-        std::size_t rowTileSize,
-        std::size_t columnTileSize,
-        TileLoader loader = {});
+    PointDataTiledStorage(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileLoader loader = {});
 
-    static std::shared_ptr<PointDataTiledStorage> fromDense(
-        const char* data,
-        std::uint64_t rows,
-        std::uint64_t columns,
-        std::size_t elementSize,
-        std::size_t rowTileSize,
-        std::size_t columnTileSize,
-        ProgressCallback progress = {});
+    static std::shared_ptr<PointDataTiledStorage> fromDense(const char* data, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, ProgressCallback progress = {});
 
     /** Create a read-only tiled storage whose tiles are generated only when accessed. */
-    static std::shared_ptr<PointDataTiledStorage> fromGenerator(
-        std::uint64_t rows,
-        std::uint64_t columns,
-        std::size_t elementSize,
-        std::size_t rowTileSize,
-        std::size_t columnTileSize,
-        TileGenerator generator);
+    static std::shared_ptr<PointDataTiledStorage> fromGenerator(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileGenerator generator);
 
     std::uint64_t rows() const { return _rows; }
 
@@ -93,13 +74,7 @@ public:
 
     MemoryEstimate memoryEstimate() const;
 
-    static MemoryEstimate estimateMemory(
-        std::uint64_t rows,
-        std::uint64_t columns,
-        std::size_t elementSize,
-        std::size_t rowTileSize,
-        std::size_t columnTileSize,
-        std::size_t cacheCapacity);
+    static MemoryEstimate estimateMemory(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, std::size_t cacheCapacity);
 
 private:
     QByteArray load(const TileDescriptor& descriptor) const;

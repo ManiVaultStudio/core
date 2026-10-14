@@ -15,15 +15,32 @@ float valueAt(const PointDataAccessView& view, const std::uint64_t row, const st
 
     switch (view.elementTypeIndex)
     {
-    case 0: return *reinterpret_cast<const float*>(bytes);
-    case 1: return static_cast<float>(*reinterpret_cast<const biovault::bfloat16_t*>(bytes));
-    case 2: return static_cast<float>(*reinterpret_cast<const std::int32_t*>(bytes));
-    case 3: return static_cast<float>(*reinterpret_cast<const std::uint32_t*>(bytes));
-    case 4: return static_cast<float>(*reinterpret_cast<const std::int16_t*>(bytes));
-    case 5: return static_cast<float>(*reinterpret_cast<const std::uint16_t*>(bytes));
-    case 6: return static_cast<float>(*reinterpret_cast<const std::int8_t*>(bytes));
-    case 7: return static_cast<float>(*reinterpret_cast<const std::uint8_t*>(bytes));
-    default: return 0.0f;
+        case 0:
+            return *reinterpret_cast<const float*>(bytes);
+
+        case 1:
+            return static_cast<float>(*reinterpret_cast<const biovault::bfloat16_t*>(bytes));
+
+        case 2:
+            return static_cast<float>(*reinterpret_cast<const std::int32_t*>(bytes));
+
+        case 3:
+            return static_cast<float>(*reinterpret_cast<const std::uint32_t*>(bytes));
+
+        case 4:
+            return static_cast<float>(*reinterpret_cast<const std::int16_t*>(bytes));
+
+        case 5:
+            return static_cast<float>(*reinterpret_cast<const std::uint16_t*>(bytes));
+
+        case 6:
+            return static_cast<float>(*reinterpret_cast<const std::int8_t*>(bytes));
+
+        case 7:
+            return static_cast<float>(*reinterpret_cast<const std::uint8_t*>(bytes));
+
+        default:
+            return 0.0f;
     }
 }
 
@@ -40,10 +57,7 @@ PointsTableModel::PointsTableModel(QObject* parent) :
 {
 }
 
-void PointsTableModel::setPointData(
-    PointData* pointData,
-    const std::uint64_t rows,
-    const std::uint64_t columns)
+void PointsTableModel::setPointData(PointData* pointData, const std::uint64_t rows, const std::uint64_t columns)
 {
     beginResetModel();
 
@@ -90,10 +104,7 @@ QVariant PointsTableModel::data(const QModelIndex& index, const int role) const
     return QString::number(value, 'g', 7);
 }
 
-QVariant PointsTableModel::headerData(
-    const int section,
-    const Qt::Orientation orientation,
-    const int role) const
+QVariant PointsTableModel::headerData(const int section, const Qt::Orientation orientation, const int role) const
 {
     if (role != Qt::DisplayRole)
         return {};
@@ -103,11 +114,7 @@ QVariant PointsTableModel::headerData(
         : QVariant(QString::number(section));
 }
 
-std::size_t PointsTableModel::fetchRange(
-    const std::uint64_t firstRow,
-    const std::uint64_t rowCount,
-    const std::uint64_t firstColumn,
-    const std::uint64_t columnCount)
+std::size_t PointsTableModel::fetchRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount)
 {
     if (!_pointData || firstRow >= _totalRows || firstColumn >= _totalColumns || rowCount == 0 || columnCount == 0)
         return 0;
@@ -147,10 +154,7 @@ std::size_t PointsTableModel::fetchRange(
 
                     if (targetRow < _loadedRowCount && targetColumn < _loadedColumnCount)
                     {
-                        _values[static_cast<std::size_t>(targetRow * _loadedColumnCount + targetColumn)] = valueAt(
-                            view,
-                            row,
-                            column);
+                        _values[static_cast<std::size_t>(targetRow * _loadedColumnCount + targetColumn)] = valueAt(view, row, column);
                     }
                 }
             }
@@ -170,17 +174,10 @@ std::size_t PointsTableModel::fetchRange(
     return callbackCount;
 }
 
-void PointsTableModel::notifyRange(
-    const std::uint64_t firstRow,
-    const std::uint64_t rowCount,
-    const std::uint64_t firstColumn,
-    const std::uint64_t columnCount)
+void PointsTableModel::notifyRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount)
 {
     if (rowCount == 0 || columnCount == 0)
         return;
 
-    emit dataChanged(
-        index(toModelIndex(firstRow), toModelIndex(firstColumn)),
-        index(toModelIndex(firstRow + rowCount - 1), toModelIndex(firstColumn + columnCount - 1)),
-        { Qt::DisplayRole });
+    emit dataChanged(index(toModelIndex(firstRow), toModelIndex(firstColumn)), index(toModelIndex(firstRow + rowCount - 1), toModelIndex(firstColumn + columnCount - 1)), { Qt::DisplayRole });
 }

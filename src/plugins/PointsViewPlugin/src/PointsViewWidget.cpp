@@ -192,11 +192,7 @@ void PointsViewWidget::fetchVisibleRange()
         : 1;
     QElapsedTimer timer;
     timer.start();
-    const auto callbacks = _model->fetchRange(
-        static_cast<std::uint64_t>(firstRow),
-        rowCount,
-        static_cast<std::uint64_t>(firstColumn),
-        columnCount);
+    const auto callbacks = _model->fetchRange(static_cast<std::uint64_t>(firstRow), rowCount, static_cast<std::uint64_t>(firstColumn), columnCount);
     const auto elapsedMilliseconds = timer.elapsed();
 
     const auto selectedItems = mv::dataHierarchy().getSelectedItems();

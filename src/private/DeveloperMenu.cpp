@@ -39,21 +39,17 @@ DeveloperMenu::DeveloperMenu(QWidget* parent /*= nullptr*/) :
         mv::help().addNotification(tr("GIF recording started"), tr("The ManiVault Studio main window is being recorded at 8 FPS."), util::StyledIcon("circle-dot"));
     });
 
-    connect(_gifRecorder.get(), &GifRecorder::recordingFinished, this,
-        [this](const QString& path, int frameCount, qint64 durationMs, qint64 fileSize) {
-            _gifRecordingAction->setText(tr("Start GIF recording…"));
+    connect(_gifRecorder.get(), &GifRecorder::recordingFinished, this, [this](const QString& path, int frameCount, qint64 durationMs, qint64 fileSize) {
+        _gifRecordingAction->setText(tr("Start GIF recording…"));
 
-            mv::help().addNotification(tr("GIF recording saved"),
-                tr("Saved %1 (%2 frames, %3 ms, %4 bytes).")
-                    .arg(path).arg(frameCount).arg(durationMs).arg(fileSize), util::StyledIcon("check"));
-        });
+        mv::help().addNotification(tr("GIF recording saved"), tr("Saved %1 (%2 frames, %3 ms, %4 bytes).").arg(path).arg(frameCount).arg(durationMs).arg(fileSize), util::StyledIcon("check"));
+    });
 
-    connect(_gifRecorder.get(), &GifRecorder::recordingFailed, this,
-        [this](const QString& error) {
-            _gifRecordingAction->setText(tr("Start GIF recording…"));
+    connect(_gifRecorder.get(), &GifRecorder::recordingFailed, this, [this](const QString& error) {
+        _gifRecordingAction->setText(tr("Start GIF recording…"));
 
-            mv::help().addNotification(tr("GIF recording failed"), error, util::StyledIcon("circle-exclamation"));
-        });
+        mv::help().addNotification(tr("GIF recording failed"), error, util::StyledIcon("circle-exclamation"));
+    });
 
     auto workflowTestingMenu = addMenu(util::StyledIcon("diagram-project"), tr("Workflow testing"));
 

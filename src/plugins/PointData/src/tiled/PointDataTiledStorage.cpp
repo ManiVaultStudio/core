@@ -18,13 +18,7 @@ std::size_t typeSize(const std::uint32_t typeIndex)
 }
 }
 
-PointDataTiledStorage::PointDataTiledStorage(
-    const std::uint64_t rows,
-    const std::uint64_t columns,
-    const std::size_t elementSize,
-    const std::size_t rowTileSize,
-    const std::size_t columnTileSize,
-    TileLoader loader) :
+PointDataTiledStorage::PointDataTiledStorage(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, TileLoader loader) :
     _rows(rows),
     _columns(columns),
     _elementSize(elementSize),
@@ -34,20 +28,18 @@ PointDataTiledStorage::PointDataTiledStorage(
 {
     if (rowTileSize == 0 || columnTileSize == 0 || elementSize == 0)
         throw std::invalid_argument("Invalid tiled point-data geometry");
+
     for (std::uint64_t row = 0; row < rows; row += rowTileSize)
+    {
         for (std::uint64_t column = 0; column < columns; column += columnTileSize)
+        {
             _descriptors.push_back({ row, column, std::min<std::uint64_t>(rowTileSize, rows - row),
                 std::min<std::uint64_t>(columnTileSize, columns - column), {}, {} });
+        }
+    }
 }
 
-std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromDense(
-    const char* data,
-    const std::uint64_t rows,
-    const std::uint64_t columns,
-    const std::size_t elementSize,
-    const std::size_t rowTileSize,
-    const std::size_t columnTileSize,
-    ProgressCallback progress)
+std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromDense(const char* data, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, ProgressCallback progress)
 {
     auto storage = std::make_shared<PointDataTiledStorage>(
         rows,
@@ -56,11 +48,12 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromDense(
         rowTileSize,
         columnTileSize);
 
-    const auto totalTiles = storage->_descriptors.size();
+    const auto totalTiles       = storage->_descriptors.size();
     const auto progressInterval = std::max<std::size_t>(1, totalTiles / 100);
-    std::size_t tileIndex = 0;
+    std::size_t tileIndex       = 0;
 
-    for (auto& tile : storage->_descriptors) {
+    for (auto& tile : storage->_descriptors)
+    {
         tile.residentBytes.resize(static_cast<qsizetype>(tile.rows * tile.columns * elementSize));
 
         for (std::uint64_t row = 0; row < tile.rows; ++row)
@@ -76,16 +69,11 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromDense(
         if (progress && (tileIndex == 1 || tileIndex == totalTiles || tileIndex % progressInterval == 0))
             progress(static_cast<float>(tileIndex) / static_cast<float>(totalTiles));
     }
+
     return storage;
 }
 
-std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromGenerator(
-    const std::uint64_t rows,
-    const std::uint64_t columns,
-    const std::size_t elementSize,
-    const std::size_t rowTileSize,
-    const std::size_t columnTileSize,
-    TileGenerator generator)
+std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromGenerator(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, TileGenerator generator)
 {
     if (!generator)
         throw std::invalid_argument("Tile generator is empty");
@@ -136,40 +124,59 @@ TileView PointDataTiledStorage::acquire(const std::uint64_t tileRow, const std::
     const auto& descriptor = _descriptors.at(index);
 
     TileView view;
-    view._bytes = bytes;
-    view._rowOffset = descriptor.rowOffset;
+    view._bytes        = bytes;
+    view._rowOffset    = descriptor.rowOffset;
     view._columnOffset = descriptor.columnOffset;
-    view._rows = descriptor.rows;
-    view._columns = descriptor.columns;
-    view._elementSize = _elementSize;
+    view._rows         = descriptor.rows;
+    view._columns      = descriptor.columns;
+    view._elementSize  = _elementSize;
+
     return view;
 }
 
 float PointDataTiledStorage::valueAt(const std::uint64_t flatIndex, const std::uint32_t typeIndex) const
 {
-    const auto row = flatIndex / _columns;
+    const auto row    = flatIndex / _columns;
     const auto column = flatIndex % _columns;
-    const auto tile = acquire(row / _rowTileSize, column / _columnTileSize);
-    const auto offset = ((row - tile.rowOffset()) * tile.columns() + column - tile.columnOffset())
-        * _elementSize;
+    const auto tile   = acquire(row / _rowTileSize, column / _columnTileSize);
+    const auto offset = ((row - tile.rowOffset()) * tile.columns() + column - tile.columnOffset()) * _elementSize;
     const auto* bytes = static_cast<const char*>(tile.data()) + offset;
 
-    switch (typeIndex) {
-    case 0: return *reinterpret_cast<const float*>(bytes);
-    case 1: return static_cast<float>(*reinterpret_cast<const biovault::bfloat16_t*>(bytes));
-    case 2: return static_cast<float>(*reinterpret_cast<const std::int32_t*>(bytes));
-    case 3: return static_cast<float>(*reinterpret_cast<const std::uint32_t*>(bytes));
-    case 4: return static_cast<float>(*reinterpret_cast<const std::int16_t*>(bytes));
-    case 5: return static_cast<float>(*reinterpret_cast<const std::uint16_t*>(bytes));
-    case 6: return static_cast<float>(*reinterpret_cast<const std::int8_t*>(bytes));
-    case 7: return static_cast<float>(*reinterpret_cast<const std::uint8_t*>(bytes));
-    default: return 0.0f;
+    switch (typeIndex)
+    {
+        case 0:
+            return *reinterpret_cast<const float*>(bytes);
+
+        case 1:
+            return static_cast<float>(*reinterpret_cast<const biovault::bfloat16_t*>(bytes));
+
+        case 2:
+            return static_cast<float>(*reinterpret_cast<const std::int32_t*>(bytes));
+
+        case 3:
+            return static_cast<float>(*reinterpret_cast<const std::uint32_t*>(bytes));
+
+        case 4:
+            return static_cast<float>(*reinterpret_cast<const std::int16_t*>(bytes));
+
+        case 5:
+            return static_cast<float>(*reinterpret_cast<const std::uint16_t*>(bytes));
+
+        case 6:
+            return static_cast<float>(*reinterpret_cast<const std::int8_t*>(bytes));
+
+        case 7:
+            return static_cast<float>(*reinterpret_cast<const std::uint8_t*>(bytes));
+
+        default:
+            return 0.0f;
     }
 }
 
 void PointDataTiledStorage::materialize(char* destination) const
 {
     for (std::uint64_t tileRow = 0; tileRow < tileRowCount(); ++tileRow)
+    {
         for (std::uint64_t tileColumn = 0; tileColumn < tileColumnCount(); ++tileColumn)
         {
             const auto tile = acquire(tileRow, tileColumn);
@@ -182,6 +189,7 @@ void PointDataTiledStorage::materialize(char* destination) const
                     tile.columns() * _elementSize);
             }
         }
+    }
 }
 
 void PointDataTiledStorage::setCacheCapacity(const std::size_t capacity) const
@@ -226,37 +234,33 @@ std::uint64_t PointDataTiledStorage::cacheEvictions() const
     return _cache.evictions();
 }
 
-PointDataTiledStorage::MemoryEstimate PointDataTiledStorage::estimateMemory(const std::uint64_t rows,
-    const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize,
-    const std::size_t columnTileSize, const std::size_t cacheCapacity)
+PointDataTiledStorage::MemoryEstimate PointDataTiledStorage::estimateMemory(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, const std::size_t cacheCapacity)
 {
     MemoryEstimate estimate;
+
     if (elementSize == 0 || rowTileSize == 0 || columnTileSize == 0)
         return estimate;
 
-    const auto tileRows = (rows + rowTileSize - 1) / rowTileSize;
+    const auto tileRows    = (rows + rowTileSize - 1) / rowTileSize;
     const auto tileColumns = (columns + columnTileSize - 1) / columnTileSize;
-    estimate.tileCount = tileRows * tileColumns;
-    estimate.rawDataBytes = rows * columns * elementSize;
+
+    estimate.tileCount        = tileRows * tileColumns;
+    estimate.rawDataBytes     = rows * columns * elementSize;
     estimate.largestTileBytes = static_cast<std::uint64_t>(rowTileSize) * columnTileSize * elementSize;
-    const auto residentTiles = std::min<std::uint64_t>(
-        estimate.tileCount,
-        std::max<std::size_t>(1, cacheCapacity));
-    estimate.cachedTileBytes = residentTiles * estimate.largestTileBytes;
+
+    const auto residentTiles = std::min<std::uint64_t>(estimate.tileCount, std::max<std::size_t>(1, cacheCapacity));
+
+    estimate.cachedTileBytes  = residentTiles * estimate.largestTileBytes;
+
     // This is an intentionally conservative planning estimate for the resident descriptor/index.
-    estimate.indexBytes = estimate.tileCount * static_cast<std::uint64_t>(sizeof(TileDescriptor));
+    estimate.indexBytes       = estimate.tileCount * static_cast<std::uint64_t>(sizeof(TileDescriptor));
+
     return estimate;
 }
 
 PointDataTiledStorage::MemoryEstimate PointDataTiledStorage::memoryEstimate() const
 {
     const std::lock_guard lock(_mutex);
-    return estimateMemory(
-        _rows,
-        _columns,
-        _elementSize,
-        _rowTileSize,
-        _columnTileSize,
-        _cache.capacity());
+    return estimateMemory(_rows, _columns, _elementSize, _rowTileSize, _columnTileSize, _cache.capacity());
 }
 }

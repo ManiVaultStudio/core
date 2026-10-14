@@ -24,8 +24,7 @@ std::vector<float> makeValues(const std::uint64_t rows, const std::uint64_t colu
 GTEST_TEST(PointData, supportsRectangularTiledReadsAndBoundaryTiles)
 {
     const auto values = makeValues(5, 4);
-    const auto storage = PointDataTiledStorage::fromDense(
-        reinterpret_cast<const char*>(values.data()), 5, 4, sizeof(float), 2, 3);
+    const auto storage = PointDataTiledStorage::fromDense(reinterpret_cast<const char*>(values.data()), 5, 4, sizeof(float), 2, 3);
 
     ASSERT_EQ(storage->tileRowCount(), 3U);
     ASSERT_EQ(storage->tileColumnCount(), 2U);
@@ -43,8 +42,7 @@ GTEST_TEST(PointData, supportsRectangularTiledReadsAndBoundaryTiles)
 GTEST_TEST(PointData, tileCacheEvictionPreservesActiveViews)
 {
     const auto values = makeValues(6, 4);
-    const auto storage = PointDataTiledStorage::fromDense(
-        reinterpret_cast<const char*>(values.data()), 6, 4, sizeof(float), 2, 2);
+    const auto storage = PointDataTiledStorage::fromDense(reinterpret_cast<const char*>(values.data()), 6, 4, sizeof(float), 2, 2);
     storage->setCacheCapacity(1);
 
     const auto first = storage->acquire(0, 0);
@@ -59,8 +57,7 @@ GTEST_TEST(PointData, tileCacheEvictionPreservesActiveViews)
 GTEST_TEST(PointData, materializesTilesInRowMajorOrder)
 {
     const auto values = makeValues(5, 4);
-    const auto storage = PointDataTiledStorage::fromDense(
-        reinterpret_cast<const char*>(values.data()), 5, 4, sizeof(float), 2, 3);
+    const auto storage = PointDataTiledStorage::fromDense(reinterpret_cast<const char*>(values.data()), 5, 4, sizeof(float), 2, 3);
     std::vector<float> materialized(values.size());
 
     storage->materialize(reinterpret_cast<char*>(materialized.data()));
@@ -71,24 +68,21 @@ GTEST_TEST(PointData, materializesTilesInRowMajorOrder)
 GTEST_TEST(PointData, generatorLoadsTilesSelectively)
 {
     std::size_t loadCount = 0;
-    const auto storage = PointDataTiledStorage::fromGenerator(
-        5,
-        4,
-        sizeof(float),
-        2,
-        2,
-        [&loadCount](const auto& descriptor) {
-            ++loadCount;
-            QByteArray bytes(static_cast<qsizetype>(descriptor.rows * descriptor.columns * sizeof(float)), '\0');
-            auto* values = reinterpret_cast<float*>(bytes.data());
+    const auto storage = PointDataTiledStorage::fromGenerator(5, 4, sizeof(float), 2, 2, [&loadCount](const auto& descriptor) {
+        ++loadCount;
+        QByteArray bytes(static_cast<qsizetype>(descriptor.rows * descriptor.columns * sizeof(float)), '\0');
+        auto* values = reinterpret_cast<float*>(bytes.data());
 
-            for (std::uint64_t row = 0; row < descriptor.rows; ++row)
-                for (std::uint64_t column = 0; column < descriptor.columns; ++column)
-                    values[row * descriptor.columns + column] = static_cast<float>(
-                        (descriptor.rowOffset + row) * 4 + descriptor.columnOffset + column);
+        for (std::uint64_t row = 0; row < descriptor.rows; ++row)
+        {
+            for (std::uint64_t column = 0; column < descriptor.columns; ++column)
+            {
+                values[row * descriptor.columns + column] = static_cast<float>((descriptor.rowOffset + row) * 4 + descriptor.columnOffset + column);
+            }
+        }
 
-            return bytes;
-        });
+        return bytes;
+    });
 
     ASSERT_EQ(loadCount, 0U);
     ASSERT_FLOAT_EQ(storage->valueAt(9, 0), 9.0f);

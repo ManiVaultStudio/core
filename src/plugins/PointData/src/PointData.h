@@ -268,8 +268,7 @@ public:
 
     bool isTiled() const;
     void makeTiled(std::size_t rowTileSize, std::size_t columnTileSize, std::function<void(float)> progress = {});
-    void makeTiledFromGenerator(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType,
-        std::size_t rowTileSize, std::size_t columnTileSize, TiledTileGenerator generator);
+    void makeTiledFromGenerator(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, std::size_t rowTileSize, std::size_t columnTileSize, TiledTileGenerator generator);
     TileView acquireTile(std::uint64_t tileRow, std::uint64_t tileColumn) const;
     void setTiledCacheCapacity(std::size_t capacity);
     std::size_t getTiledCacheSize() const;
@@ -290,17 +289,14 @@ public:
         std::uint64_t indexBytes = 0;
     };
     TiledMemoryEstimate getTiledMemoryEstimate() const;
-    static TiledMemoryEstimate estimateTiledMemory(std::uint64_t rows, std::uint64_t columns,
-        std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, std::size_t cacheCapacity);
+    static TiledMemoryEstimate estimateTiledMemory(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, std::size_t cacheCapacity);
 
     PointDataAccessView getRow(std::uint64_t row) const;
     void visitRows(std::uint64_t firstRow, std::uint64_t rowCount, const PointDataAccessVisitor& visitor) const;
     void visitRows(const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
     void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
-    void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount,
-        const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
-    void visitRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn,
-        std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+    void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+    void visitRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
 
     static constexpr std::array<const char*, std::variant_size_v<VariantOfVectors>> getElementTypeNames()
     {

@@ -45,7 +45,8 @@ void PointDataTileCache::setCapacity(const std::size_t capacity)
 
 void PointDataTileCache::trim()
 {
-    while (_entries.size() > _capacity) {
+    while (_entries.size() > _capacity)
+    {
         const auto key = _lru.back();
         _lru.pop_back();
         _entries.erase(key);

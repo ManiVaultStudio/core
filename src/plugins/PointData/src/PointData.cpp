@@ -82,24 +82,32 @@ PointData::ElementTypeSpecifier PointData::elementTypeSpecifier(const QString& t
 
 QString PointData::elementTypeName(const ElementTypeSpecifier elementTypeSpecifier)
 {
-    switch (elementTypeSpecifier) 
+    switch (elementTypeSpecifier)
     {
         case ElementTypeSpecifier::float32:
             return "float32";
+
         case ElementTypeSpecifier::bfloat16:
             return "bfloat16";
+
         case ElementTypeSpecifier::int32:
             return "int32";
+
         case ElementTypeSpecifier::uint32:
             return "uint32";
+
         case ElementTypeSpecifier::int16:
             return "int16";
+
         case ElementTypeSpecifier::uint16:
             return "uint16";
+
         case ElementTypeSpecifier::int8:
             return "int8";
+
         case ElementTypeSpecifier::uint8:
             return "uint8";
+
         default:
             return "unknown";
     }
@@ -187,10 +195,7 @@ bool PointData::isTiled() const
     return static_cast<bool>(_tiledStorage);
 }
 
-void PointData::makeTiled(
-    const std::size_t rowTileSize,
-    const std::size_t columnTileSize,
-    std::function<void(float)> progress)
+void PointData::makeTiled(const std::size_t rowTileSize, const std::size_t columnTileSize, std::function<void(float)> progress)
 {
     const auto lock = lockData();
 
@@ -221,13 +226,7 @@ void PointData::makeTiled(
     }
 }
 
-void PointData::makeTiledFromGenerator(
-    const std::uint64_t rows,
-    const std::uint64_t columns,
-    const ElementTypeSpecifier elementType,
-    const std::size_t rowTileSize,
-    const std::size_t columnTileSize,
-    TiledTileGenerator generator)
+void PointData::makeTiledFromGenerator(const std::uint64_t rows, const std::uint64_t columns, const ElementTypeSpecifier elementType, const std::size_t rowTileSize, const std::size_t columnTileSize, TiledTileGenerator generator)
 {
     const auto lock = lockData();
 
@@ -238,19 +237,13 @@ void PointData::makeTiledFromGenerator(
     _numDimensions = columns;
     _numRows = rows;
     _isDense = true;
-    _tiledStorage = mv::pointdata::tiled::PointDataTiledStorage::fromGenerator(
-        rows,
-        columns,
-        std::visit(
-            [](const auto& vector) {
-                return sizeof(typename std::decay_t<decltype(vector)>::value_type);
-            },
-            _variantOfVectors),
-        rowTileSize,
-        columnTileSize,
-        [generator = std::move(generator)](const mv::pointdata::tiled::TileDescriptor& descriptor) {
+    _tiledStorage = mv::pointdata::tiled::PointDataTiledStorage::fromGenerator(rows, columns, std::visit(
+        [](const auto& vector) {
+            return sizeof(typename std::decay_t<decltype(vector)>::value_type);
+        },
+        _variantOfVectors), rowTileSize, columnTileSize, [generator = std::move(generator)](const mv::pointdata::tiled::TileDescriptor& descriptor) {
             return generator(descriptor.rowOffset, descriptor.columnOffset, descriptor.rows, descriptor.columns);
-        });
+    });
 }
 
 PointData::TileView PointData::acquireTile(const std::uint64_t tileRow, const std::uint64_t tileColumn) const
@@ -334,21 +327,9 @@ PointData::TiledMemoryEstimate PointData::getTiledMemoryEstimate() const
     };
 }
 
-PointData::TiledMemoryEstimate PointData::estimateTiledMemory(
-    const std::uint64_t rows,
-    const std::uint64_t columns,
-    const std::size_t elementSize,
-    const std::size_t rowTileSize,
-    const std::size_t columnTileSize,
-    const std::size_t cacheCapacity)
+PointData::TiledMemoryEstimate PointData::estimateTiledMemory(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, const std::size_t cacheCapacity)
 {
-    const auto estimate = mv::pointdata::tiled::PointDataTiledStorage::estimateMemory(
-        rows,
-        columns,
-        elementSize,
-        rowTileSize,
-        columnTileSize,
-        cacheCapacity);
+    const auto estimate = mv::pointdata::tiled::PointDataTiledStorage::estimateMemory(rows, columns, elementSize, rowTileSize, columnTileSize, cacheCapacity);
 
     return {
         estimate.rawDataBytes,
@@ -407,51 +388,41 @@ PointDataAccessView PointData::getRow(const std::uint64_t row) const
 
     for (std::uint64_t column = 0; column < _numDimensions; ++column)
     {
-        values[static_cast<std::size_t>(column)] = getValueAt(
-            static_cast<std::size_t>(row * _numDimensions + column));
+        values[static_cast<std::size_t>(column)] = getValueAt(static_cast<std::size_t>(row * _numDimensions + column));
     }
 
     return makeFloatAccessView(std::move(values));
 }
 
-void PointData::visitRows(
-    const std::uint64_t firstRow,
-    const std::uint64_t rowCount,
-    const PointDataAccessVisitor& visitor) const
+void PointData::visitRows(const std::uint64_t firstRow, const std::uint64_t rowCount, const PointDataAccessVisitor& visitor) const
 {
     if (firstRow > getNumPoints() || rowCount > getNumPoints() - firstRow)
         throw std::out_of_range("Point-data row range is out of bounds");
+
     for (std::uint64_t row = firstRow; row < firstRow + rowCount; ++row)
         visitRange(row, 1, 0, _numDimensions, visitor);
 }
 
-void PointData::visitRows(
-    const std::vector<std::uint64_t>& rowIds,
-    const PointDataAccessVisitor& visitor) const
+void PointData::visitRows(const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
 {
     for (const auto row : rowIds)
         visitRows(row, 1, visitor);
 }
 
-void PointData::visitColumns(
-    const std::uint64_t firstColumn,
-    const std::uint64_t columnCount,
-    const PointDataAccessVisitor& visitor) const
+void PointData::visitColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
 {
     if (firstColumn > _numDimensions || columnCount > _numDimensions - firstColumn)
         throw std::out_of_range("Point-data column range is out of bounds");
+
     for (std::uint64_t row = 0; row < getNumPoints(); ++row)
         visitRange(row, 1, firstColumn, columnCount, visitor);
 }
 
-void PointData::visitColumns(
-    const std::uint64_t firstColumn,
-    const std::uint64_t columnCount,
-    const std::vector<std::uint64_t>& rowIds,
-    const PointDataAccessVisitor& visitor) const
+void PointData::visitColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
 {
     if (firstColumn > _numDimensions || columnCount > _numDimensions - firstColumn)
         throw std::out_of_range("Point-data column range is out of bounds");
+
     for (const auto row : rowIds)
     {
         if (row >= getNumPoints())
@@ -460,12 +431,7 @@ void PointData::visitColumns(
     }
 }
 
-void PointData::visitRange(
-    const std::uint64_t firstRow,
-    const std::uint64_t rowCount,
-    const std::uint64_t firstColumn,
-    const std::uint64_t columnCount,
-    const PointDataAccessVisitor& visitor) const
+void PointData::visitRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
 {
     if (!visitor || firstRow > getNumPoints() || rowCount > getNumPoints() - firstRow ||
         firstColumn > _numDimensions || columnCount > _numDimensions - firstColumn)
@@ -482,8 +448,7 @@ void PointData::visitRange(
 
             for (std::uint64_t column = 0; column < columnCount; ++column)
             {
-                values[static_cast<std::size_t>(column)] = getValueAt(
-                    static_cast<std::size_t>(row * _numDimensions + firstColumn + column));
+                values[static_cast<std::size_t>(column)] = getValueAt(static_cast<std::size_t>(row * _numDimensions + firstColumn + column));
             }
 
             visitor(makeFloatAccessView(std::move(values)));
@@ -498,9 +463,7 @@ void PointData::visitRange(
 
         while (column < endColumn)
         {
-            const auto tile = _tiledStorage->acquire(
-                row / _tiledStorage->rowTileSize(),
-                column / _tiledStorage->columnTileSize());
+            const auto tile = _tiledStorage->acquire(row / _tiledStorage->rowTileSize(), column / _tiledStorage->columnTileSize());
             const auto segmentEnd = std::min(endColumn, tile.columnOffset() + tile.columns());
 
             visitor(makeTileAccessView(
