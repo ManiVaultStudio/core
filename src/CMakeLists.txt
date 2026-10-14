@@ -64,11 +64,22 @@ include(DownloadFontAwesome)
 # -----------------------------------------------------------------------------
 
 # Qt
-find_package(Qt6 6.8 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets Concurrent REQUIRED)
+find_package(Qt6 6.8 COMPONENTS Core Widgets Network OpenGL OpenGLWidgets WebEngineWidgets Concurrent REQUIRED)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
 message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
+
+if(MV_BUILD_TESTING)
+    CPMAddPackage(
+        NAME              googletest
+        GITHUB_REPOSITORY google/googletest
+        GIT_TAG           v1.15.2
+        OPTIONS
+            "INSTALL_GTEST OFF"
+            "gtest_force_shared_crt ON"
+    )
+endif()
 
 # File compression: zlib
 CPMAddPackage(

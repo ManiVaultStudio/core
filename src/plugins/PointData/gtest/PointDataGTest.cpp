@@ -1,124 +1,109 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later 
-// A corresponding LICENSE file is located in the root directory of this source tree 
-// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// A corresponding LICENSE file is located in the root directory of this source tree
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
-// The file to be tested:
-#include <PointData.h>
+#include <tiled/PointDataTiledStorage.h>
 
-// GoogleTest header file:
 #include <gtest/gtest.h>
 
 #include <numeric>
 #include <vector>
 
+using mv::pointdata::tiled::PointDataTiledStorage;
 
-GTEST_TEST(PointData, hasZeroPointsByDefault)
+namespace
 {
-    ASSERT_EQ(PointData{}.getNumPoints(), 0);
+std::vector<float> makeValues(const std::uint64_t rows, const std::uint64_t columns)
+{
+    std::vector<float> values(rows * columns);
+    std::iota(values.begin(), values.end(), 0.0f);
+    return values;
 }
-
-
-GTEST_TEST(PointData, hasOneDimensionByDefault)
-{
-    ASSERT_EQ(PointData{}.getNumDimensions(), 1);
 }
 
 GTEST_TEST(PointData, supportsRectangularTiledReadsAndBoundaryTiles)
 {
-    PointData points{};
-    const std::vector<float> values{
-        0, 1, 2, 3,
-        10, 11, 12, 13,
-        20, 21, 22, 23,
-        30, 31, 32, 33,
-        40, 41, 42, 43
-    };
-    points.setData(values, 4);
-    points.makeTiled(2, 3);
+    const auto values = makeValues(5, 4);
+    const auto storage = PointDataTiledStorage::fromDense(
+        reinterpret_cast<const char*>(values.data()), 5, 4, sizeof(float), 2, 3);
 
-    ASSERT_TRUE(points.isTiled());
-    ASSERT_EQ(points.getValueAt(0), 0.0f);
-    ASSERT_EQ(points.getValueAt(7), 13.0f);
-    ASSERT_EQ(points.getValueAt(19), 43.0f);
+    ASSERT_EQ(storage->tileRowCount(), 3U);
+    ASSERT_EQ(storage->tileColumnCount(), 2U);
+    ASSERT_EQ(storage->descriptors().back().rows, 1U);
+    ASSERT_EQ(storage->descriptors().back().columns, 1U);
+    ASSERT_FLOAT_EQ(storage->valueAt(19, 0), 19.0f);
 
-    const auto boundaryTile = points.acquireTile(2, 1);
+    const auto boundaryTile = storage->acquire(2, 1);
     ASSERT_TRUE(boundaryTile);
     ASSERT_EQ(boundaryTile.rows(), 1U);
     ASSERT_EQ(boundaryTile.columns(), 1U);
-    ASSERT_EQ(*static_cast<const float*>(boundaryTile.data()), 43.0f);
+    ASSERT_FLOAT_EQ(*static_cast<const float*>(boundaryTile.data()), 19.0f);
 }
 
 GTEST_TEST(PointData, tileCacheEvictionPreservesActiveViews)
 {
-    PointData points{};
-    std::vector<float> values(24);
-    std::iota(values.begin(), values.end(), 0.0f);
-    points.setData(values, 4);
-    points.makeTiled(2, 2);
-    points.setTiledCacheCapacity(1);
+    const auto values = makeValues(6, 4);
+    const auto storage = PointDataTiledStorage::fromDense(
+        reinterpret_cast<const char*>(values.data()), 6, 4, sizeof(float), 2, 2);
+    storage->setCacheCapacity(1);
 
-    const auto first = points.acquireTile(0, 0);
-    const auto second = points.acquireTile(0, 1);
-    ASSERT_EQ(points.getTiledCacheSize(), 1U);
-    ASSERT_EQ(*static_cast<const float*>(first.data()), 0.0f);
-    ASSERT_EQ(*static_cast<const float*>(second.data()), 2.0f);
+    const auto first = storage->acquire(0, 0);
+    const auto second = storage->acquire(0, 1);
+
+    ASSERT_EQ(storage->cacheSize(), 1U);
+    ASSERT_FLOAT_EQ(*static_cast<const float*>(first.data()), 0.0f);
+    ASSERT_FLOAT_EQ(*static_cast<const float*>(second.data()), 2.0f);
+    ASSERT_GE(storage->cacheEvictions(), 1U);
 }
 
-GTEST_TEST(PointData, legacyRawPointerAccessMaterializesTiledData)
+GTEST_TEST(PointData, materializesTilesInRowMajorOrder)
 {
-    PointData points{};
-    const std::vector<float> values{ 1, 2, 3, 4, 5, 6 };
-    points.setData(values, 3);
-    points.makeTiled(1, 2);
+    const auto values = makeValues(5, 4);
+    const auto storage = PointDataTiledStorage::fromDense(
+        reinterpret_cast<const char*>(values.data()), 5, 4, sizeof(float), 2, 3);
+    std::vector<float> materialized(values.size());
 
-    const auto* data = static_cast<const float*>(points.getDataConstVoidPtr());
-    ASSERT_FALSE(points.isTiled());
-    ASSERT_EQ(std::vector<float>(data, data + values.size()), values);
+    storage->materialize(reinterpret_cast<char*>(materialized.data()));
+
+    ASSERT_EQ(materialized, values);
 }
 
-GTEST_TEST(PointData, accessVisitorsSupportRowsColumnsAndRanges)
+GTEST_TEST(PointData, generatorLoadsTilesSelectively)
 {
-    PointData points{};
-    points.setData(
-        std::vector<float>{
-            0, 1, 2, 3,
-            10, 11, 12, 13,
-            20, 21, 22, 23
-        },
-        4);
-    points.makeTiled(2, 2);
-
-    const auto row = points.getRow(1);
-    ASSERT_TRUE(row);
-    ASSERT_EQ(row.columns, 4U);
-    ASSERT_EQ(static_cast<const float*>(row.data)[3], 13.0f);
-
-    std::vector<float> rangeValues;
-    points.visitRange(1, 2, 1, 2, [&rangeValues](const PointDataAccessView& view) {
-        const auto* values = static_cast<const float*>(view.data);
-
-        for (std::uint64_t column = 0; column < view.columns; ++column)
-            rangeValues.push_back(values[column]);
-    });
-    ASSERT_EQ((std::vector<float>{ 11, 12, 21, 22 }), rangeValues);
-
-    std::size_t columnSegments = 0;
-    points.visitColumns(2, 1, [&columnSegments](const PointDataAccessView& view) {
-        ++columnSegments;
-        ASSERT_EQ(view.columns, 1U);
-    });
-    ASSERT_EQ(columnSegments, 3U);
-
-    std::vector<float> selectedColumnValues;
-    points.visitColumns(
-        1,
+    std::size_t loadCount = 0;
+    const auto storage = PointDataTiledStorage::fromGenerator(
+        5,
+        4,
+        sizeof(float),
         2,
-        std::vector<std::uint64_t>{ 2, 0 },
-        [&selectedColumnValues](const PointDataAccessView& view) {
-        const auto* values = static_cast<const float*>(view.data);
+        2,
+        [&loadCount](const auto& descriptor) {
+            ++loadCount;
+            QByteArray bytes(static_cast<qsizetype>(descriptor.rows * descriptor.columns * sizeof(float)), '\0');
+            auto* values = reinterpret_cast<float*>(bytes.data());
 
-        for (std::uint64_t column = 0; column < view.columns; ++column)
-            selectedColumnValues.push_back(values[column]);
+            for (std::uint64_t row = 0; row < descriptor.rows; ++row)
+                for (std::uint64_t column = 0; column < descriptor.columns; ++column)
+                    values[row * descriptor.columns + column] = static_cast<float>(
+                        (descriptor.rowOffset + row) * 4 + descriptor.columnOffset + column);
+
+            return bytes;
         });
-    ASSERT_EQ((std::vector<float>{ 21, 22, 1, 2 }), selectedColumnValues);
+
+    ASSERT_EQ(loadCount, 0U);
+    ASSERT_FLOAT_EQ(storage->valueAt(9, 0), 9.0f);
+    ASSERT_EQ(loadCount, 1U);
+    ASSERT_FLOAT_EQ(storage->valueAt(9, 0), 9.0f);
+    ASSERT_EQ(loadCount, 1U);
+}
+
+GTEST_TEST(PointData, reportsTileGeometryAndMemoryEstimate)
+{
+    const auto estimate = PointDataTiledStorage::estimateMemory(5, 4, sizeof(float), 2, 3, 2);
+
+    ASSERT_EQ(estimate.rawDataBytes, 5U * 4U * sizeof(float));
+    ASSERT_EQ(estimate.tileCount, 6U);
+    ASSERT_EQ(estimate.largestTileBytes, 2U * 3U * sizeof(float));
+    ASSERT_EQ(estimate.cachedTileBytes, 2U * estimate.largestTileBytes);
+    ASSERT_GT(estimate.indexBytes, 0U);
 }

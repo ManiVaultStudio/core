@@ -160,7 +160,6 @@ add_custom_command(TARGET ${POINTDATA} POST_BUILD
 
 mv_handle_plugin_config(${POINTDATA})
 
-# Currentlt, no tests are available
-#if (MV_USE_GTEST)
-#    add_subdirectory(gtest)
-#endif()
+if(MV_BUILD_TESTING)
+    add_subdirectory(gtest)
+endif()
