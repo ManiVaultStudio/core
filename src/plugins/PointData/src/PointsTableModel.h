@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "pointdata_export.h"
+
 #include <QAbstractTableModel>
 
 #include <cstdint>
@@ -20,7 +22,7 @@ class Points;
  *
  * @author Thomas Kroes
  */
-class PointsTableModel final : public QAbstractTableModel
+class POINTDATA_EXPORT PointsTableModel final : public QAbstractTableModel
 {
     Q_OBJECT
 

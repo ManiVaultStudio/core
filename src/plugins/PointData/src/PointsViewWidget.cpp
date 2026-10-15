@@ -3,7 +3,7 @@
 #include "PointsViewWidget.h"
 
 #include <CoreInterface.h>
-#include <PointData.h>
+#include "PointData.h"
 #include <Task.h>
 
 #include <QAbstractItemView>
@@ -152,7 +152,7 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _facadeGroupAction.setConfigurationFlag(mv::gui::WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _facadeGroupAction.setConfigurationFlag(mv::gui::WidgetAction::ConfigurationFlag::NoLabelInGroup);
     _facadeGroupAction.setPopupSizeHint(QSize(280, 0));
-    _facadeInfoAction.setString("Facade access provides storage-independent row and column retrieval.\n\nUse the single, range, ID-list, and row-column range actions below to exercise the Points facade.\n\nExamples are implemented in ManiVault/src/plugins/PointsViewPlugin/src/PointsViewWidget.cpp: fetchVisibleRange() demonstrates table access, while getRow(), getRowRange(), getRows(), getColumn(), getColumnRange(), getColumns(), getColumnsForRows(), and getRange() demonstrate the individual facade calls. displayQuery() shows how returned views are displayed.");
+    _facadeInfoAction.setString("Facade access provides storage-independent row and column retrieval.\n\nUse the single, range, ID-list, and row-column range actions below to exercise the Points facade.\n\nExamples are implemented in ManiVault/src/plugins/PointData/src/PointsViewWidget.cpp: fetchVisibleRange() demonstrates table access, while getRow(), getRowRange(), getRows(), getColumn(), getColumnRange(), getColumns(), getColumnsForRows(), and getRange() demonstrate the individual facade calls. displayQuery() shows how returned views are displayed.");
     _facadeInfoAction.setDefaultWidgetFlags(mv::gui::StringAction::TextEdit);
     _getRowGroupAction.setShowLabels(false);
     _getRowRangeGroupAction.setShowLabels(false);

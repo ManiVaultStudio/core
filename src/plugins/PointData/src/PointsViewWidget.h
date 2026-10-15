@@ -3,8 +3,9 @@
 #pragma once
 
 #include "PointsTableModel.h"
+#include "pointdata_export.h"
 
-#include <PointDataAccess.h>
+#include "PointDataAccess.h"
 
 #include <actions/StringAction.h>
 #include <actions/HorizontalGroupAction.h>
@@ -46,7 +47,7 @@ class Points;
  *
  * @author Thomas Kroes
  */
-class PointsViewWidget final : public QWidget
+class POINTDATA_EXPORT PointsViewWidget final : public QWidget
 {
     Q_OBJECT
 

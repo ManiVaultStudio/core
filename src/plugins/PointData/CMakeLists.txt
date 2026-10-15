@@ -24,6 +24,13 @@ set(POINTS_SOURCES
     src/developer/PointDataPhantomGenerator.cpp
 )
 
+set(POINTS_VIEW_WIDGETS
+    src/PointsTableModel.h
+    src/PointsTableModel.cpp
+    src/PointsViewWidget.h
+    src/PointsViewWidget.cpp
+)
+
 set(POINTS_HEADERS
     src/PointData.h
     src/PointDataAccess.h
@@ -49,6 +56,8 @@ set(POINTS_HEADERS
     src/CreateSetFromSelectionAction.h
     src/SparseMatrix.h
     src/DimensionNamesSerializer.h
+    src/PointsTableModel.h
+    src/PointsViewWidget.h
     src/tiled/PointDataTile.h
     src/tiled/PointDataTileCache.h
     src/tiled/PointDataTiledStorage.h
@@ -100,10 +109,11 @@ set(POINT_DATA_AUX
 
 source_group(Plugin FILES ${POINTS_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
+source_group(Widgets FILES ${POINTS_VIEW_WIDGETS})
 source_group(BFloat FILES ${BFLOAT_HEADER})
 source_group(Aux FILES ${POINT_DATA_AUX})
 
-add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINT_DATA_AUX})
+add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINTS_VIEW_WIDGETS} ${POINT_DATA_AUX})
 
 add_library(ManiVault::${POINTDATA} ALIAS ${POINTDATA})
 
@@ -121,7 +131,7 @@ file(GLOB EXPORT_HEADER_FILE_NAME
     RELATIVE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/*_export.h)
 list(APPEND POINTS_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAME})
 
-target_link_libraries(${POINTDATA} PRIVATE Qt6::Widgets)
+target_link_libraries(${POINTDATA} PRIVATE Qt6::Concurrent Qt6::Widgets)
 target_link_libraries(${POINTDATA} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${POINTDATA} PRIVATE ${MV_PUBLIC_LIB})
 

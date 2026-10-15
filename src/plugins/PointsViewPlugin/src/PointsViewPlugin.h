@@ -2,10 +2,9 @@
 
 #pragma once
 
-#include "PointsViewWidget.h"
-
 #include <ViewPlugin.h>
 #include <Task.h>
+#include <PointsViewWidget.h>
 
 /**
  * @brief View plugin that presents point data in a lazy-fetching table.

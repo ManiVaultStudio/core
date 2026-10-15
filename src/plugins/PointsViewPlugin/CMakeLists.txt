@@ -10,21 +10,13 @@ set(PLUGIN
     src/PointsViewPlugin.cpp
 )
 
-set(WIDGETS
-    src/PointsTableModel.h
-    src/PointsTableModel.cpp
-    src/PointsViewWidget.h
-    src/PointsViewWidget.cpp
-)
-
 set(AUX
     PluginInfo.json
 )
 
-set(POINTS_VIEW_SOURCES ${PLUGIN} ${WIDGETS} ${AUX})
+set(POINTS_VIEW_SOURCES ${PLUGIN} ${AUX})
 
 source_group(Plugin FILES ${PLUGIN})
-source_group(Widgets FILES ${WIDGETS})
 source_group(Aux FILES ${AUX})
 
 add_library(${POINTSVIEWPLUGIN} SHARED ${POINTS_VIEW_SOURCES})
@@ -33,7 +25,7 @@ target_include_directories(${POINTSVIEWPLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONF
 target_include_directories(${POINTSVIEWPLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/PointData/")
 target_compile_features(${POINTSVIEWPLUGIN} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
-target_link_libraries(${POINTSVIEWPLUGIN} PRIVATE Qt6::Core Qt6::Widgets Qt6::Concurrent Qt6::Network Qt6::WebEngineWidgets ${MV_PUBLIC_LIB} PointData)
+target_link_libraries(${POINTSVIEWPLUGIN} PRIVATE Qt6::Core Qt6::Widgets Qt6::Network Qt6::WebEngineWidgets ${MV_PUBLIC_LIB} PointData)
 
 mv_check_and_set_AVX(${POINTSVIEWPLUGIN} ${MV_USE_AVX})
 
