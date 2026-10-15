@@ -21,6 +21,7 @@
 #include <QSpinBox>
 #include <QTableView>
 #include <QTimer>
+#include <QTextEdit>
 #include <QVBoxLayout>
 #include <QtConcurrent>
 
@@ -82,15 +83,20 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _progressTask(progressTask),
     _tileWatcher(new QFutureWatcher<void>(this)),
     _fetchTimer(new QTimer(this)),
+    _filterTimer(new QTimer(this)),
     _filterGroupAction(this, "Point-data filters"),
+    _facadeInfoAction(this, "Facade access information"),
     _facadeGroupAction(this, "Facade access"),
     _getRowGroupAction(&_facadeGroupAction, "Single row"),
     _getRowRangeGroupAction(&_facadeGroupAction, "Row range"),
     _getRowsGroupAction(&_facadeGroupAction, "Rows"),
+    _getColumnGroupAction(&_facadeGroupAction, "Single column"),
     _getColumnRangeGroupAction(&_facadeGroupAction, "Column range"),
     _getColumnsGroupAction(&_facadeGroupAction, "Columns"),
+    _getColumnsForRowsGroupAction(&_facadeGroupAction, "Columns for rows"),
     _getRangeGroupAction(&_facadeGroupAction, "Row-column range"),
     _rowIdAction(&_getRowGroupAction, "Row ID", 0, 1000000000, 0),
+    _columnIdAction(&_getColumnGroupAction, "Column ID", 0, 1000000000, 0),
     _rowStartAction(&_getRowRangeGroupAction, "Row start", 0, 1000000000, 0),
     _rowEndAction(&_getRowRangeGroupAction, "Row end", 0, 1000000000, 0),
     _columnStartAction(&_getColumnRangeGroupAction, "Column start", 0, 1000000000, 0),
@@ -99,19 +105,21 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _rangeRowEndAction(&_getRangeGroupAction, "Row end", 0, 1000000000, 0),
     _rangeColumnStartAction(&_getRangeGroupAction, "Column start", 0, 1000000000, 0),
     _rangeColumnEndAction(&_getRangeGroupAction, "Column end", 0, 1000000000, 0),
-    _columnsForRowsStartAction(&_getColumnsGroupAction, "Column start", 0, 1000000000, 0),
-    _columnsForRowsEndAction(&_getColumnsGroupAction, "Column end", 0, 1000000000, 0),
+    _columnsForRowsStartAction(&_getColumnsForRowsGroupAction, "Column start", 0, 1000000000, 0),
+    _columnsForRowsEndAction(&_getColumnsForRowsGroupAction, "Column end", 0, 1000000000, 0),
     _rowIdsAction(&_getRowsGroupAction, "IDs"),
-    _columnRowIdsAction(&_getColumnsGroupAction, "Rows"),
+    _columnIdsAction(&_getColumnsGroupAction, "Column IDs"),
+    _columnRowIdsAction(&_getColumnsForRowsGroupAction, "Row IDs"),
     _getRowAction(&_getRowGroupAction, "Get row"),
     _getRowRangeAction(&_getRowRangeGroupAction, "Get row range"),
     _getRowsAction(&_getRowsGroupAction, "Get rows"),
+    _getColumnAction(&_getColumnGroupAction, "Get column"),
     _getColumnRangeAction(&_getColumnRangeGroupAction, "Get column range"),
     _getColumnsAction(&_getColumnsGroupAction, "Get columns"),
+    _getColumnsForRowsAction(&_getColumnsForRowsGroupAction, "Get columns for rows"),
     _getRangeAction(&_getRangeGroupAction, "Get range"),
     _rowFilterAction(this, "Rows"),
     _columnFilterAction(this, "Columns"),
-    _applyFiltersAction(this, "Apply filters"),
     _liveTableAction(this, "Show live table", true)
 {
     _rowTileSize->setValue(256);
@@ -138,19 +146,33 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _filterGroupAction.setShowLabels(true);
     _filterGroupAction.addAction(&_rowFilterAction);
     _filterGroupAction.addAction(&_columnFilterAction);
-    _filterGroupAction.addAction(&_applyFiltersAction);
-    _filterGroupAction.addAction(&_liveTableAction, mv::gui::ToggleAction::PushButtonText);
+    _filterGroupAction.addAction(&_liveTableAction, mv::gui::ToggleAction::PushButtonIcon);
+    _facadeGroupAction.setIconByName("table-columns");
     _facadeGroupAction.setShowLabels(true);
     _facadeGroupAction.setConfigurationFlag(mv::gui::WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _facadeGroupAction.setConfigurationFlag(mv::gui::WidgetAction::ConfigurationFlag::NoLabelInGroup);
-    _facadeGroupAction.setPopupSizeHint(QSize(400, 0));
+    _facadeGroupAction.setPopupSizeHint(QSize(280, 0));
+    _facadeInfoAction.setString("Facade access provides storage-independent row and column retrieval.\n\nUse the single, range, ID-list, and row-column range actions below to exercise the Points facade.\n\nExamples are implemented in ManiVault/src/plugins/PointsViewPlugin/src/PointsViewWidget.cpp: fetchVisibleRange() demonstrates table access, while getRow(), getRowRange(), getRows(), getColumn(), getColumnRange(), getColumns(), getColumnsForRows(), and getRange() demonstrate the individual facade calls. displayQuery() shows how returned views are displayed.");
+    _facadeInfoAction.setDefaultWidgetFlags(mv::gui::StringAction::TextEdit);
     _getRowGroupAction.setShowLabels(false);
     _getRowRangeGroupAction.setShowLabels(false);
     _getRowsGroupAction.setShowLabels(false);
+    _getColumnGroupAction.setShowLabels(false);
     _getColumnRangeGroupAction.setShowLabels(false);
     _getColumnsGroupAction.setShowLabels(false);
+    _getColumnsForRowsGroupAction.setShowLabels(false);
     _getRangeGroupAction.setShowLabels(false);
+    const auto configureIntegralWidget = [](mv::gui::WidgetAction* action, QWidget* widget) {
+        action->setStretch(0);
+        widget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+        widget->setFixedWidth(40);
+
+        if (auto* spinBox = widget->findChild<QSpinBox*>("SpinBox"))
+            spinBox->setFixedWidth(40);
+    };
+
     _rowIdAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
+    _columnIdAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
     _rowStartAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
     _rowEndAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
     _columnStartAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
@@ -162,6 +184,7 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _columnsForRowsStartAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
     _columnsForRowsEndAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
     _rowIdAction.setPrefix("ID: ");
+    _columnIdAction.setPrefix("ID: ");
     _rowStartAction.setPrefix("Start: ");
     _rowEndAction.setPrefix("End: ");
     _rangeRowStartAction.setPrefix("Row start: ");
@@ -175,35 +198,53 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _getRowAction.setIconByName("sync");
     _getRowRangeAction.setIconByName("sync");
     _getRowsAction.setIconByName("sync");
+    _getColumnAction.setIconByName("sync");
     _getColumnRangeAction.setIconByName("sync");
     _getColumnsAction.setIconByName("sync");
+    _getColumnsForRowsAction.setIconByName("sync");
     _getRangeAction.setIconByName("sync");
+    _liveTableAction.setIconByName("eye");
     _rowIdsAction.setPlaceHolderString("e.g. 1, 3, 10-20");
-    _columnRowIdsAction.setPlaceHolderString("Rows; e.g. 1, 3, 10-20");
-    _getRowGroupAction.addAction(&_rowIdAction);
+    _columnIdsAction.setPlaceHolderString("e.g. 1, 3, 10-20");
+    _columnRowIdsAction.setPlaceHolderString("Row IDs; e.g. 1, 3, 10-20");
+    _getRowGroupAction.addAction(&_rowIdAction, -1, configureIntegralWidget);
     _getRowGroupAction.addAction(&_getRowAction, mv::gui::TriggerAction::Icon);
-    _getRowRangeGroupAction.addAction(&_rowStartAction);
-    _getRowRangeGroupAction.addAction(&_rowEndAction);
+    _getRowRangeGroupAction.addAction(&_rowStartAction, -1, configureIntegralWidget);
+    _getRowRangeGroupAction.addAction(&_rowEndAction, -1, configureIntegralWidget);
     _getRowRangeGroupAction.addAction(&_getRowRangeAction, mv::gui::TriggerAction::Icon);
     _getRowsGroupAction.addAction(&_rowIdsAction);
     _getRowsGroupAction.addAction(&_getRowsAction, mv::gui::TriggerAction::Icon);
-    _getColumnRangeGroupAction.addAction(&_columnStartAction);
-    _getColumnRangeGroupAction.addAction(&_columnEndAction);
+    _getColumnGroupAction.addAction(&_columnIdAction, -1, configureIntegralWidget);
+    _getColumnGroupAction.addAction(&_getColumnAction, mv::gui::TriggerAction::Icon);
+    _getColumnRangeGroupAction.addAction(&_columnStartAction, -1, configureIntegralWidget);
+    _getColumnRangeGroupAction.addAction(&_columnEndAction, -1, configureIntegralWidget);
     _getColumnRangeGroupAction.addAction(&_getColumnRangeAction, mv::gui::TriggerAction::Icon);
-    _getColumnsGroupAction.addAction(&_columnsForRowsStartAction);
-    _getColumnsGroupAction.addAction(&_columnsForRowsEndAction);
-    _getColumnsGroupAction.addAction(&_columnRowIdsAction);
+    _getColumnsGroupAction.addAction(&_columnIdsAction);
     _getColumnsGroupAction.addAction(&_getColumnsAction, mv::gui::TriggerAction::Icon);
-    _getRangeGroupAction.addAction(&_rangeRowStartAction);
-    _getRangeGroupAction.addAction(&_rangeRowEndAction);
-    _getRangeGroupAction.addAction(&_rangeColumnStartAction);
-    _getRangeGroupAction.addAction(&_rangeColumnEndAction);
+    _getColumnsForRowsGroupAction.addAction(&_columnsForRowsStartAction, -1, configureIntegralWidget);
+    _getColumnsForRowsGroupAction.addAction(&_columnsForRowsEndAction, -1, configureIntegralWidget);
+    _getColumnsForRowsGroupAction.addAction(&_columnRowIdsAction);
+    _getColumnsForRowsGroupAction.addAction(&_getColumnsForRowsAction, mv::gui::TriggerAction::Icon);
+    _getRangeGroupAction.addAction(&_rangeRowStartAction, -1, configureIntegralWidget);
+    _getRangeGroupAction.addAction(&_rangeRowEndAction, -1, configureIntegralWidget);
+    _getRangeGroupAction.addAction(&_rangeColumnStartAction, -1, configureIntegralWidget);
+    _getRangeGroupAction.addAction(&_rangeColumnEndAction, -1, configureIntegralWidget);
     _getRangeGroupAction.addAction(&_getRangeAction, mv::gui::TriggerAction::Icon);
+    const auto configureFacadeInfoWidget = [](mv::gui::WidgetAction*, QWidget* widget) {
+        if (auto* textEdit = widget->findChild<QTextEdit*>("TextEdit")) {
+            textEdit->setReadOnly(true);
+            textEdit->setMinimumHeight(120);
+        }
+    };
+
+    _facadeGroupAction.addAction(&_facadeInfoAction, mv::gui::StringAction::TextEdit, configureFacadeInfoWidget);
     _facadeGroupAction.addAction(&_getRowGroupAction);
     _facadeGroupAction.addAction(&_getRowRangeGroupAction);
     _facadeGroupAction.addAction(&_getRowsGroupAction);
+    _facadeGroupAction.addAction(&_getColumnGroupAction);
     _facadeGroupAction.addAction(&_getColumnRangeGroupAction);
     _facadeGroupAction.addAction(&_getColumnsGroupAction);
+    _facadeGroupAction.addAction(&_getColumnsForRowsGroupAction);
     _facadeGroupAction.addAction(&_getRangeGroupAction);
     _filterGroupAction.addAction(&_facadeGroupAction);
 
@@ -233,23 +274,49 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _table->viewport()->installEventFilter(this);
     _fetchTimer->setSingleShot(true);
     _fetchTimer->setInterval(100);
+    _filterTimer->setSingleShot(true);
+    _filterTimer->setInterval(350);
 
     connect(_tileButton, &QPushButton::clicked, this, &PointsViewWidget::tileSelectedData);
     connect(&_rowFilterAction, &mv::gui::StringAction::stringChanged, this, [this] {
         updateUiState();
+        _filterTimer->stop();
+
+        QString error;
+        const auto maximumRow = _model->totalRows() > 0 ? _model->totalRows() - 1 : 0;
+        const auto maximumColumn = _model->totalColumns() > 0 ? _model->totalColumns() - 1 : 0;
+        const auto rowIds = parseFilter(_rowFilterAction.getString(), maximumRow, error);
+        const auto columnIds = parseFilter(_columnFilterAction.getString(), maximumColumn, error);
+
+        if (_model->hasPointData() && !_liveTableAction.isChecked() && error.isEmpty() && !rowIds.empty() && (_columnFilterAction.getString().trimmed().isEmpty() || !columnIds.empty()))
+            _filterTimer->start();
     });
     connect(&_columnFilterAction, &mv::gui::StringAction::stringChanged, this, [this] {
         updateUiState();
+        _filterTimer->stop();
+
+        QString error;
+        const auto maximumRow = _model->totalRows() > 0 ? _model->totalRows() - 1 : 0;
+        const auto maximumColumn = _model->totalColumns() > 0 ? _model->totalColumns() - 1 : 0;
+        const auto rowIds = parseFilter(_rowFilterAction.getString(), maximumRow, error);
+        const auto columnIds = parseFilter(_columnFilterAction.getString(), maximumColumn, error);
+
+        if (_model->hasPointData() && !_liveTableAction.isChecked() && error.isEmpty() && !rowIds.empty() && (_columnFilterAction.getString().trimmed().isEmpty() || !columnIds.empty()))
+            _filterTimer->start();
     });
-    connect(&_applyFiltersAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::applyFilters);
+
+    connect(_filterTimer, &QTimer::timeout, this, &PointsViewWidget::applyFilters);
     connect(&_liveTableAction, &mv::gui::ToggleAction::toggled, this, &PointsViewWidget::showLiveTable);
     connect(&_getRowAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getRow);
     connect(&_getRowRangeAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getRowRange);
     connect(&_getRowsAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getRows);
+    connect(&_getColumnAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getColumn);
     connect(&_getColumnRangeAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getColumnRange);
     connect(&_getColumnsAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getColumns);
+    connect(&_getColumnsForRowsAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getColumnsForRows);
     connect(&_getRangeAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getRange);
     connect(&_rowIdAction, &mv::gui::IntegralAction::valueChanged, this, &PointsViewWidget::updateFacadeActionState);
+    connect(&_columnIdAction, &mv::gui::IntegralAction::valueChanged, this, &PointsViewWidget::updateFacadeActionState);
     connect(&_rowStartAction, &mv::gui::IntegralAction::valueChanged, this, &PointsViewWidget::updateFacadeActionState);
     connect(&_rowEndAction, &mv::gui::IntegralAction::valueChanged, this, &PointsViewWidget::updateFacadeActionState);
     connect(&_columnStartAction, &mv::gui::IntegralAction::valueChanged, this, &PointsViewWidget::updateFacadeActionState);
@@ -261,6 +328,9 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     connect(&_columnsForRowsStartAction, &mv::gui::IntegralAction::valueChanged, this, &PointsViewWidget::updateFacadeActionState);
     connect(&_columnsForRowsEndAction, &mv::gui::IntegralAction::valueChanged, this, &PointsViewWidget::updateFacadeActionState);
     connect(&_rowIdsAction, &mv::gui::StringAction::stringChanged, this, [this] {
+        updateFacadeActionState();
+    });
+    connect(&_columnIdsAction, &mv::gui::StringAction::stringChanged, this, [this] {
         updateFacadeActionState();
     });
     connect(&_columnRowIdsAction, &mv::gui::StringAction::stringChanged, this, [this] {
@@ -293,17 +363,6 @@ void PointsViewWidget::updateUiState()
     const auto tableEnabled    = hasPointData && !_tilingInProgress;
     const auto liveTable       = _liveTableAction.isChecked();
 
-    auto filtersAreValid = false;
-    if (controlsEnabled && !liveTable && !_rowFilterAction.getString().trimmed().isEmpty())
-    {
-        QString error;
-        const auto maximumRow = _model->totalRows() > 0 ? _model->totalRows() - 1 : 0;
-        const auto maximumColumn = _model->totalColumns() > 0 ? _model->totalColumns() - 1 : 0;
-        const auto rowIds = parseFilter(_rowFilterAction.getString(), maximumRow, error);
-        const auto columnIds = parseFilter(_columnFilterAction.getString(), maximumColumn, error);
-        filtersAreValid = error.isEmpty() && !rowIds.empty() && (_columnFilterAction.getString().trimmed().isEmpty() || !columnIds.empty());
-    }
-
     _rowTileSize->setEnabled(controlsEnabled && !_model->isQueryResult());
     _columnTileSize->setEnabled(controlsEnabled && !_model->isQueryResult());
     _cacheCapacity->setEnabled(controlsEnabled);
@@ -312,7 +371,6 @@ void PointsViewWidget::updateUiState()
 
     _rowFilterAction.setEnabled(controlsEnabled && !liveTable);
     _columnFilterAction.setEnabled(controlsEnabled && !liveTable);
-    _applyFiltersAction.setEnabled(filtersAreValid);
     _liveTableAction.setEnabled(controlsEnabled);
     _facadeGroupAction.setEnabled(controlsEnabled);
     updateFacadeActionState();
@@ -327,8 +385,10 @@ void PointsViewWidget::updateFacadeActionState()
         _getRowAction.setEnabled(false);
         _getRowRangeAction.setEnabled(false);
         _getRowsAction.setEnabled(false);
+        _getColumnAction.setEnabled(false);
         _getColumnRangeAction.setEnabled(false);
         _getColumnsAction.setEnabled(false);
+        _getColumnsForRowsAction.setEnabled(false);
         _getRangeAction.setEnabled(false);
         return;
     }
@@ -336,6 +396,7 @@ void PointsViewWidget::updateFacadeActionState()
     const auto pointCount           = points->getNumPoints();
     const auto dimensionCount       = points->getNumDimensions();
     const auto rowId                = static_cast<std::uint64_t>(_rowIdAction.getValue());
+    const auto columnId             = static_cast<std::uint64_t>(_columnIdAction.getValue());
     const auto rowStart             = static_cast<std::uint64_t>(_rowStartAction.getValue());
     const auto rowEnd               = static_cast<std::uint64_t>(_rowEndAction.getValue());
     const auto columnStart          = static_cast<std::uint64_t>(_columnStartAction.getValue());
@@ -348,15 +409,19 @@ void PointsViewWidget::updateFacadeActionState()
     const auto columnsForRowsEnd    = static_cast<std::uint64_t>(_columnsForRowsEndAction.getValue());
 
     QString rowIdsError;
+    QString columnIdsError;
     QString columnRowsError;
     const auto rowIds       = pointCount > 0 ? parseFilter(_rowIdsAction.getString(), pointCount - 1, rowIdsError) : std::vector<std::uint64_t>();
+    const auto columnIds    = dimensionCount > 0 ? parseFilter(_columnIdsAction.getString(), dimensionCount - 1, columnIdsError) : std::vector<std::uint64_t>();
     const auto columnRowIds = pointCount > 0 ? parseFilter(_columnRowIdsAction.getString(), pointCount - 1, columnRowsError) : std::vector<std::uint64_t>();
 
     _getRowAction.setEnabled(pointCount > 0 && rowId < pointCount);
     _getRowRangeAction.setEnabled(pointCount > 0 && rowStart <= rowEnd && rowEnd < pointCount);
     _getRowsAction.setEnabled(!rowIds.empty() && rowIdsError.isEmpty());
+    _getColumnAction.setEnabled(dimensionCount > 0 && columnId < dimensionCount);
     _getColumnRangeAction.setEnabled(dimensionCount > 0 && columnStart <= columnEnd && columnEnd < dimensionCount);
-    _getColumnsAction.setEnabled(dimensionCount > 0 && !columnRowIds.empty() && columnRowsError.isEmpty() && columnsForRowsStart <= columnsForRowsEnd && columnsForRowsEnd < dimensionCount);
+    _getColumnsAction.setEnabled(!columnIds.empty() && columnIdsError.isEmpty());
+    _getColumnsForRowsAction.setEnabled(dimensionCount > 0 && !columnRowIds.empty() && columnRowsError.isEmpty() && columnsForRowsStart <= columnsForRowsEnd && columnsForRowsEnd < dimensionCount);
     _getRangeAction.setEnabled(pointCount > 0 && dimensionCount > 0 && rangeRowStart <= rangeRowEnd && rangeRowEnd < pointCount && rangeColumnStart <= rangeColumnEnd && rangeColumnEnd < dimensionCount);
 }
 
@@ -668,6 +733,8 @@ void PointsViewWidget::applyFilters()
 
 void PointsViewWidget::showLiveTable(const bool live)
 {
+    _filterTimer->stop();
+
     if (live)
     {
         updateUiState();
@@ -758,6 +825,32 @@ void PointsViewWidget::getRows()
     });
 }
 
+void PointsViewWidget::getColumn()
+{
+    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
+
+    if (selectedItems.size() != 1)
+        return;
+
+    const auto points = selectedItems.first()->getDataset<Points>();
+
+    const auto column = static_cast<std::uint64_t>(_columnIdAction.getValue());
+
+    if (!points.isValid() || column >= points->getNumDimensions())
+    {
+        setStatus("The requested column is outside the selected point dataset");
+        return;
+    }
+
+    std::vector<std::uint64_t> rowIds(points->getNumPoints());
+    std::iota(rowIds.begin(), rowIds.end(), 0);
+    std::vector<std::uint64_t> columnIds{ column };
+
+    displayQuery(rowIds, columnIds, [points, column](const PointDataAccessVisitor& visitor) {
+        points->visitColumns(column, 1, visitor);
+    });
+}
+
 void PointsViewWidget::getColumnRange()
 {
     const auto selectedItems = mv::dataHierarchy().getSelectedItems();
@@ -787,6 +880,32 @@ void PointsViewWidget::getColumnRange()
 }
 
 void PointsViewWidget::getColumns()
+{
+    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
+
+    if (selectedItems.size() != 1)
+        return;
+
+    const auto points = selectedItems.first()->getDataset<Points>();
+
+    QString error;
+    const auto columnIds = points.isValid() ? parseFilter(_columnIdsAction.getString(), points->getNumDimensions() - 1, error) : std::vector<std::uint64_t>();
+
+    if (!points.isValid() || columnIds.empty() || !error.isEmpty())
+    {
+        setStatus(error.isEmpty() ? "The requested column list is invalid" : error);
+        return;
+    }
+
+    std::vector<std::uint64_t> rowIds(points->getNumPoints());
+    std::iota(rowIds.begin(), rowIds.end(), 0);
+
+    displayQuery(rowIds, columnIds, [points, columnIds](const PointDataAccessVisitor& visitor) {
+        points->visitColumns(columnIds, visitor);
+    });
+}
+
+void PointsViewWidget::getColumnsForRows()
 {
     const auto selectedItems = mv::dataHierarchy().getSelectedItems();
 

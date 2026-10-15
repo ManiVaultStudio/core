@@ -348,8 +348,14 @@ public:
     /** Visits a contiguous column range for every row. */
     void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
 
+    /** Visits selected columns for every row in columnIds order. */
+    void visitColumns(const std::vector<std::uint64_t>& columnIds, const PointDataAccessVisitor& visitor) const;
+
     /** Visits a contiguous column range for selected rows. */
     void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits selected columns for selected rows. */
+    void visitColumns(const std::vector<std::uint64_t>& columnIds, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
 
     /** Visits a rectangular row and column range. */
     void visitRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
@@ -1059,6 +1065,9 @@ public:
 
     /** Visits a contiguous column range for every logical row. */
     void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits selected logical columns in columnIds order. */
+    void visitColumns(const std::vector<std::uint64_t>& columnIds, const PointDataAccessVisitor& visitor) const;
 
     /** Visits a contiguous column range for selected logical rows. */
     void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;

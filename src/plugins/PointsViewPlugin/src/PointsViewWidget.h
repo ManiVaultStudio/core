@@ -71,8 +71,10 @@ private slots:
     void getRow();
     void getRowRange();
     void getRows();
+    void getColumn();
     void getColumnRange();
     void getColumns();
+    void getColumnsForRows();
     void getRange();
 
 private:
@@ -97,16 +99,21 @@ private:
     mv::Task* _progressTask;
     QFutureWatcher<void>* _tileWatcher;
     QTimer* _fetchTimer;
+    QTimer* _filterTimer;
     bool _tilingInProgress = false;
     mv::gui::HorizontalGroupAction _filterGroupAction;
+    mv::gui::StringAction          _facadeInfoAction;
     mv::gui::VerticalGroupAction _facadeGroupAction;
     mv::gui::HorizontalGroupAction _getRowGroupAction;
     mv::gui::HorizontalGroupAction _getRowRangeGroupAction;
     mv::gui::HorizontalGroupAction _getRowsGroupAction;
+    mv::gui::HorizontalGroupAction _getColumnGroupAction;
     mv::gui::HorizontalGroupAction _getColumnRangeGroupAction;
     mv::gui::HorizontalGroupAction _getColumnsGroupAction;
+    mv::gui::HorizontalGroupAction _getColumnsForRowsGroupAction;
     mv::gui::HorizontalGroupAction _getRangeGroupAction;
     mv::gui::IntegralAction _rowIdAction;
+    mv::gui::IntegralAction _columnIdAction;
     mv::gui::IntegralAction _rowStartAction;
     mv::gui::IntegralAction _rowEndAction;
     mv::gui::IntegralAction _columnStartAction;
@@ -118,15 +125,17 @@ private:
     mv::gui::IntegralAction _columnsForRowsStartAction;
     mv::gui::IntegralAction _columnsForRowsEndAction;
     mv::gui::StringAction _rowIdsAction;
+    mv::gui::StringAction _columnIdsAction;
     mv::gui::StringAction _columnRowIdsAction;
     mv::gui::TriggerAction _getRowAction;
     mv::gui::TriggerAction _getRowRangeAction;
     mv::gui::TriggerAction _getRowsAction;
+    mv::gui::TriggerAction _getColumnAction;
     mv::gui::TriggerAction _getColumnRangeAction;
     mv::gui::TriggerAction _getColumnsAction;
+    mv::gui::TriggerAction _getColumnsForRowsAction;
     mv::gui::TriggerAction _getRangeAction;
     mv::gui::StringAction _rowFilterAction;
     mv::gui::StringAction _columnFilterAction;
-    mv::gui::TriggerAction _applyFiltersAction;
     mv::gui::ToggleAction _liveTableAction;
 };

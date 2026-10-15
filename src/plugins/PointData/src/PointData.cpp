@@ -418,6 +418,14 @@ void PointData::visitColumns(const std::uint64_t firstColumn, const std::uint64_
         visitRange(row, 1, firstColumn, columnCount, visitor);
 }
 
+void PointData::visitColumns(const std::vector<std::uint64_t>& columnIds, const PointDataAccessVisitor& visitor) const
+{
+    std::vector<std::uint64_t> rowIds(getNumPoints());
+    std::iota(rowIds.begin(), rowIds.end(), 0);
+
+    visitColumns(columnIds, rowIds, visitor);
+}
+
 void PointData::visitColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
 {
     if (firstColumn > _numDimensions || columnCount > _numDimensions - firstColumn)
@@ -428,6 +436,36 @@ void PointData::visitColumns(const std::uint64_t firstColumn, const std::uint64_
         if (row >= getNumPoints())
             throw std::out_of_range("Point-data row ID is out of bounds");
         visitRange(row, 1, firstColumn, columnCount, visitor);
+    }
+}
+
+void PointData::visitColumns(const std::vector<std::uint64_t>& columnIds, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
+{
+    if (!visitor)
+        throw std::invalid_argument("Point-data visitor is invalid");
+
+    for (const auto column : columnIds)
+    {
+        if (column >= getNumDimensions())
+            throw std::out_of_range("Point-data column ID is out of bounds");
+    }
+
+    for (const auto row : rowIds)
+    {
+        if (row >= getNumPoints())
+            throw std::out_of_range("Point-data row ID is out of bounds");
+
+        for (std::size_t index = 0; index < columnIds.size();)
+        {
+            const auto firstColumn = columnIds[index];
+            auto end = index + 1;
+
+            while (end < columnIds.size() && columnIds[end] == columnIds[end - 1] + 1)
+                ++end;
+
+            visitRange(row, 1, firstColumn, end - index, visitor);
+            index = end;
+        }
     }
 }
 
@@ -1597,6 +1635,38 @@ void Points::visitRows(const std::vector<std::uint64_t>& rowIds, const PointData
 void Points::visitColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
 {
     visitRange(0, getNumPoints(), firstColumn, columnCount, visitor);
+}
+
+void Points::visitColumns(const std::vector<std::uint64_t>& columnIds, const PointDataAccessVisitor& visitor) const
+{
+    for (const auto column : columnIds)
+    {
+        if (column >= getNumDimensions())
+            throw std::out_of_range("Point-data column ID is out of bounds");
+    }
+
+    if (isProxy())
+    {
+        for (const auto& proxyMember : getProxyMembers())
+            mv::Dataset<Points>(proxyMember)->visitColumns(columnIds, visitor);
+
+        return;
+    }
+
+    const auto* rawPointData = getRawData<PointData>();
+    if (isFull())
+    {
+        rawPointData->visitColumns(columnIds, visitor);
+        return;
+    }
+
+    std::vector<std::uint64_t> rowIds;
+    rowIds.reserve(static_cast<std::size_t>(getNumPoints()));
+
+    for (std::uint64_t row = 0; row < getNumPoints(); ++row)
+        rowIds.push_back(indices[static_cast<std::size_t>(row)]);
+
+    rawPointData->visitColumns(columnIds, rowIds, visitor);
 }
 
 void Points::visitColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
