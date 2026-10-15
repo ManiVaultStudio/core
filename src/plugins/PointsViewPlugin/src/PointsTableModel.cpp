@@ -106,8 +106,7 @@ QVariant PointsTableModel::data(const QModelIndex& index, const int role) const
         || column < _loadedFirstColumn || column >= _loadedFirstColumn + _loadedColumnCount)
         return QStringLiteral("…");
 
-    const auto value = _values[static_cast<std::size_t>(
-        (row - _loadedFirstRow) * _loadedColumnCount + column - _loadedFirstColumn)];
+    const auto value = _values[static_cast<std::size_t>((row - _loadedFirstRow) * _loadedColumnCount + column - _loadedFirstColumn)];
 
     return QString::number(value, 'g', 7);
 }

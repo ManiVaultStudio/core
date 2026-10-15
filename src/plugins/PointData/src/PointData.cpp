@@ -716,7 +716,9 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 
             executionContext->setOutput(outputMap);
         });
-    } else {
+    }
+    else
+    {
         plan->addSequentialStage("Build map", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
             const auto dataLock = lockData();
             QVariantMap outputMap;
@@ -818,8 +820,7 @@ void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, 
     }
 }
 
-
-void PointData::extractDataForDimension(std::vector<float> &result, const int dimensionIndex, const std::vector<std::uint32_t> &indices) const
+void PointData::extractDataForDimension(std::vector<float>& result, const int dimensionIndex, const std::vector<std::uint32_t>& indices) const
 {
     CheckDimensionIndex(dimensionIndex);
 
@@ -832,15 +833,15 @@ void PointData::extractDataForDimension(std::vector<float> &result, const int di
         return;
     }
 
-    std::visit(
-        [&result, this, dimensionIndex,
-         indices](const auto &vec) {
-          const auto resultSize = result.size();
+    std::visit([&result, this, dimensionIndex, indices](const auto& vec)
+        {
+            const auto resultSize = result.size();
 
-          for (std::size_t i{}; i < resultSize; ++i) {
-            const auto n = std::size_t{indices[i]} * _numDimensions;
-            result[i] = vec[n + dimensionIndex];
-          }
+            for (std::size_t i{}; i < resultSize; ++i)
+            {
+                const auto n = std::size_t{ indices[i] } * _numDimensions;
+                result[i] = vec[n + dimensionIndex];
+            }
         },
         _variantOfVectors);
 }

@@ -25,13 +25,13 @@
  */
 struct PointDataAccessView
 {
-    const void* data = nullptr;
-    std::uint64_t rows = 0;
-    std::uint64_t columns = 0;
-    std::uint64_t rowStrideBytes = 0;
-    std::uint32_t elementTypeIndex = 0;
-    std::uint32_t elementSizeBytes = 0;
-    std::shared_ptr<const void> lifetime;
+    const void*                  data             = nullptr; /**< Beginning of the read-only row-major byte range. */
+    std::uint64_t                rows             = 0;       /**< Number of rows in the view. */
+    std::uint64_t                columns          = 0;       /**< Number of columns in the view. */
+    std::uint64_t                rowStrideBytes   = 0;       /**< Number of bytes between consecutive rows. */
+    std::uint32_t                elementTypeIndex = 0;       /**< PointData element-type index used to interpret each value. */
+    std::uint32_t                elementSizeBytes = 0;       /**< Size of one value in bytes. */
+    std::shared_ptr<const void> lifetime;                    /**< Ownership token that keeps the backing payload alive. */
 
     /** Returns whether the view contains a non-empty value range. */
     explicit operator bool() const

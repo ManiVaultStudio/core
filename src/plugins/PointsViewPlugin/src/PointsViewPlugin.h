@@ -27,8 +27,8 @@ public:
     void init() override;
 
 private:
-    mv::Task         _tileTask;
-    PointsViewWidget _widget;
+    mv::Task         _tileTask; /**< Progress task used while creating tiled storage. */
+    PointsViewWidget _widget;   /**< Embedded diagnostic table and facade-access view. */
 };
 
 /**

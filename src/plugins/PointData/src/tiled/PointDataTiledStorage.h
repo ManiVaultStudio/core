@@ -116,14 +116,14 @@ public:
 
 private:
     QByteArray load(const TileDescriptor& descriptor) const;
-    std::uint64_t _rows;
-    std::uint64_t _columns;
-    std::size_t _elementSize;
-    std::size_t _rowTileSize;
-    std::size_t _columnTileSize;
-    std::vector<TileDescriptor> _descriptors;
-    TileLoader _loader;
+    std::uint64_t                 _rows;
+    std::uint64_t                 _columns;
+    std::size_t                   _elementSize;
+    std::size_t                   _rowTileSize;
+    std::size_t                   _columnTileSize;
+    std::vector<TileDescriptor>   _descriptors;
+    TileLoader                    _loader;
     mutable std::recursive_mutex _mutex;
-    mutable PointDataTileCache _cache;
+    mutable PointDataTileCache    _cache;
 };
 }

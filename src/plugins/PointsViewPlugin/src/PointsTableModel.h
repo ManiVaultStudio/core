@@ -78,16 +78,16 @@ public:
 private:
     void notifyRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount);
 
-    Points* _points = nullptr;
-    std::uint64_t _totalRows = 0;
-    std::uint64_t _totalColumns = 0;
-    std::uint64_t _loadedFirstRow = 0;
-    std::uint64_t _loadedRowCount = 0;
-    std::uint64_t _loadedFirstColumn = 0;
-    std::uint64_t _loadedColumnCount = 0;
-    std::vector<float> _values;
-    bool _queryResult = false;
+    Points*                    _points            = nullptr;
+    std::uint64_t              _totalRows         = 0;
+    std::uint64_t              _totalColumns      = 0;
+    std::uint64_t              _loadedFirstRow    = 0;
+    std::uint64_t              _loadedRowCount    = 0;
+    std::uint64_t              _loadedFirstColumn = 0;
+    std::uint64_t              _loadedColumnCount = 0;
+    std::vector<float>         _values;
+    bool                       _queryResult       = false;
     std::vector<std::uint64_t> _queryRowIds;
     std::vector<std::uint64_t> _queryColumnIds;
-    QString _lastError;
+    QString                    _lastError;
 };

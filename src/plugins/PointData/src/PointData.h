@@ -688,7 +688,7 @@ private:
     std::vector<QString> _dimNames;
 
 private: // Sparse data, experimental
-    std::uint64_t _numRows = 0;
+    std::uint64_t                    _numRows    = 0;
     SparseMatrix<size_t, size_t, float> _sparseData = {};
 
     bool _isDense = true;

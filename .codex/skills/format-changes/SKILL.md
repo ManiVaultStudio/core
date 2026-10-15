@@ -39,6 +39,9 @@ do not answer a local layout question.
   opening line; indent the lambda body normally.
 - Align related declarations or assignments locally. Do not force alignment
   across unrelated statements or logical sections.
+- Align related structure and class data members locally, including member
+  initializers and aligned inline documentation when present. Keep one member
+  group visually consistent without forcing alignment across unrelated groups.
 - Use empty lines to separate setup, validation, processing, and reporting.
   Leave an empty line after an early exception or validation guard before the
   main loop or operation.
@@ -62,6 +65,8 @@ Before handing off the change, inspect the changed lines for:
 - one-line signatures;
 - compact, understandable calls and lambda openings;
 - aligned related assignments;
+- aligned related structure and class members, including their initializers
+  and inline documentation where applicable;
 - useful empty lines between logical sections;
 - braces around multi-line and nested `for` loops;
 - indented and separated switch cases;

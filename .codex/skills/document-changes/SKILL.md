@@ -35,11 +35,15 @@ edited.
 4. Review the implementation before describing behavior. Document what the
    class is for, why it exists, the problem it solves, ownership and lifetime
    rules, important limits, and compatibility behavior.
-5. Add parameter, return-value, lifetime, thread-safety, read-only, caching,
+5. Document public and non-obvious structure/class data members when their
+   purpose, units, defaults, ownership, lifetime, serialization role, or
+   invariants are not self-evident. Keep member documentation adjacent to the
+   declaration and aligned with related members in the surrounding style.
+6. Add parameter, return-value, lifetime, thread-safety, read-only, caching,
    serialization, and failure details when they are non-obvious or relevant.
-6. Keep comments concise enough to remain useful. Do not restate the function
+7. Keep comments concise enough to remain useful. Do not restate the function
    name, obvious C++ syntax, or implementation line by line.
-7. Check the diff for accuracy and run `git diff --check`. Build or test the
+8. Check the diff for accuracy and run `git diff --check`. Build or test the
    narrowest affected target when documentation edits touch declarations or
    require compiler validation.
 
@@ -62,6 +66,10 @@ data or workflow it exposes without documenting incidental widget construction.
 ## API documentation
 
 - Document public APIs in the public header.
+- Document public and non-obvious struct/class members in the header, using
+  concise adjacent Doxygen comments or inline documentation as appropriate.
+  Explain what a member represents and, where relevant, its default, units,
+  ownership, lifetime, serialization meaning, or invariant.
 - Describe non-obvious preconditions, bounds, empty-input behavior, and
   exceptions or error reporting.
 - Explain whether returned pointers, views, references, callbacks, or leases
@@ -101,5 +109,7 @@ Before handing off the change, verify:
   are documented;
 - wording matches nearby core documentation and the author format is correct;
 - comments describe actual behavior rather than intended future behavior;
+- public and non-obvious structure/class members are documented and related
+  member declarations are neatly aligned;
 - no unrelated formatting churn was introduced;
 - `git diff --check` passes.

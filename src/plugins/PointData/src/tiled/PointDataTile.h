@@ -105,10 +105,10 @@ public:
 private:
     friend class PointDataTiledStorage;
     std::shared_ptr<const QByteArray> _bytes;
-    std::uint64_t _rowOffset = 0;
-    std::uint64_t _columnOffset = 0;
-    std::uint64_t _rows = 0;
-    std::uint64_t _columns = 0;
-    std::size_t _elementSize = 0;
+    std::uint64_t                    _rowOffset    = 0;
+    std::uint64_t                    _columnOffset = 0;
+    std::uint64_t                    _rows         = 0;
+    std::uint64_t                    _columns      = 0;
+    std::size_t                      _elementSize  = 0;
 };
 }
