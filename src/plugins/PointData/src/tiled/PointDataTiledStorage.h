@@ -38,20 +38,20 @@ public:
 
     struct MemoryEstimate
     {
-        std::uint64_t rawDataBytes = 0;
-        std::uint64_t largestTileBytes = 0;
-        std::uint64_t cachedTileBytes = 0;
-        std::uint64_t tileCount = 0;
-        std::uint64_t indexBytes = 0;
+        std::uint64_t rawDataBytes      = 0; /**< Logical dense matrix size. */
+        std::uint64_t largestTileBytes = 0; /**< Payload size of the largest possible tile. */
+        std::uint64_t cachedTileBytes  = 0; /**< Conservative payload size for the configured cache. */
+        std::uint64_t tileCount         = 0; /**< Number of row/column tiles. */
+        std::uint64_t indexBytes        = 0; /**< Conservative resident descriptor/index size. */
     };
 
-    /** Creates tiled storage with optional lazy tile loading. */
+    /** Creates tiled storage with optional lazy tile loading and a resident tile index. */
     PointDataTiledStorage(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileLoader loader = {});
 
-    /** Creates tiled storage by copying a dense row-major matrix into tiles. */
+    /** Creates tiled storage by copying a dense row-major matrix into resident tile payloads. */
     static std::shared_ptr<PointDataTiledStorage> fromDense(const char* data, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, ProgressCallback progress = {});
 
-    /** Create a read-only tiled storage whose tiles are generated only when accessed. */
+    /** Creates read-only tiled storage whose tiles are generated only when accessed. */
     static std::shared_ptr<PointDataTiledStorage> fromGenerator(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileGenerator generator);
 
     /** Returns the number of rows in the matrix. */
@@ -84,7 +84,7 @@ public:
     /** Materializes the complete tiled matrix into a row-major destination buffer. */
     void materialize(char* destination) const;
 
-    /** Returns the mutable tile descriptor index used by serialization. */
+    /** Returns the mutable tile descriptor index used by serialization and lazy blob assignment. */
     std::vector<TileDescriptor>& descriptors() { return _descriptors; }
 
     /** Returns the read-only tile descriptor index. */
@@ -108,7 +108,7 @@ public:
     /** Returns the number of cache evictions. */
     std::uint64_t cacheEvictions() const;
 
-    /** Estimates raw data, resident tile, and descriptor/index memory usage. */
+    /** Estimates logical data, resident tile, cache, and descriptor/index memory usage. */
     MemoryEstimate memoryEstimate() const;
 
     /** Estimates memory usage without constructing a storage instance. */

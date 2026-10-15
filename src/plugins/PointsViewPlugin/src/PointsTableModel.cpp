@@ -142,8 +142,8 @@ std::size_t PointsTableModel::fetchRange(const std::uint64_t firstRow, const std
     const auto oldFirstColumn = _loadedFirstColumn;
     const auto oldColumnCount = _loadedColumnCount;
 
-    _loadedFirstRow = firstRow;
-    _loadedRowCount = boundedRowCount;
+    _loadedFirstRow    = firstRow;
+    _loadedRowCount    = boundedRowCount;
     _loadedFirstColumn = firstColumn;
     _loadedColumnCount = boundedColumnCount;
     _values.assign(static_cast<std::size_t>(boundedRowCount * boundedColumnCount), 0.0f);
@@ -154,36 +154,31 @@ std::size_t PointsTableModel::fetchRange(const std::uint64_t firstRow, const std
 
     try
     {
-        _points->visitRange(
-            firstRow,
-            boundedRowCount,
-            firstColumn,
-            boundedColumnCount,
-            [this, &destinationRow, &destinationColumn, &callbackCount](const PointDataAccessView& view) {
-                ++callbackCount;
+        _points->visitRange(firstRow, boundedRowCount, firstColumn, boundedColumnCount, [this, &destinationRow, &destinationColumn, &callbackCount](const PointDataAccessView& view) {
+            ++callbackCount;
 
-                for (std::uint64_t row = 0; row < view.rows; ++row)
+            for (std::uint64_t row = 0; row < view.rows; ++row)
+            {
+                for (std::uint64_t column = 0; column < view.columns; ++column)
                 {
-                    for (std::uint64_t column = 0; column < view.columns; ++column)
-                    {
-                        const auto targetRow    = destinationRow + row;
-                        const auto targetColumn = destinationColumn + column;
+                    const auto targetRow    = destinationRow + row;
+                    const auto targetColumn = destinationColumn + column;
 
-                        if (targetRow < _loadedRowCount && targetColumn < _loadedColumnCount)
-                        {
-                            _values[static_cast<std::size_t>(targetRow * _loadedColumnCount + targetColumn)] = valueAt(view, row, column);
-                        }
+                    if (targetRow < _loadedRowCount && targetColumn < _loadedColumnCount)
+                    {
+                        _values[static_cast<std::size_t>(targetRow * _loadedColumnCount + targetColumn)] = valueAt(view, row, column);
                     }
                 }
+            }
 
-                destinationColumn += view.columns;
+            destinationColumn += view.columns;
 
-                if (destinationColumn >= _loadedColumnCount)
-                {
-                    destinationColumn = 0;
-                    destinationRow += view.rows;
-                }
-            });
+            if (destinationColumn >= _loadedColumnCount)
+            {
+                destinationColumn = 0;
+                destinationRow += view.rows;
+            }
+        });
     }
     catch (const std::exception& exception)
     {

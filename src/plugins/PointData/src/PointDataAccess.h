@@ -8,9 +8,18 @@
 /**
  * @brief Read-only storage-neutral view over point-data values.
  *
- * The view can refer to eager point data, a tiled payload, or a temporary
- * buffer. The lifetime token keeps the referenced storage alive while the
- * view is being consumed.
+ * PointDataAccessView is the common value-passing type used by the row,
+ * column, and range visitor APIs. It can refer to eager point data, a tiled
+ * payload, or a temporary conversion buffer without exposing the backing
+ * storage implementation to consumers. The view describes a row-major
+ * rectangle and includes the element representation needed to interpret its
+ * bytes.
+ *
+ * The lifetime token is intentionally separate from the data pointer. A
+ * visitor may retain a copy of the view while it processes the callback, and
+ * the token keeps the referenced tile or temporary buffer alive for that
+ * period. The view is read-only; mutation must go through the existing
+ * PointData mutation APIs, which may materialize tiled storage.
  *
  * @author Thomas Kroes
  */

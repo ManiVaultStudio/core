@@ -78,9 +78,7 @@ QByteArray makeTile(const Points::ElementTypeSpecifier type, const Population po
         return sizeof(float);
     }();
 
-    QByteArray bytes(
-        static_cast<qsizetype>(rows * columns * elementSize),
-        Qt::Uninitialized);
+    QByteArray bytes(static_cast<qsizetype>(rows * columns * elementSize), Qt::Uninitialized);
     std::mt19937_64 random(rowOffset * 0x9e3779b97f4a7c15ULL + columnOffset + 17);
     std::uniform_real_distribution<float> unit(0.0f, 1.0f);
 
@@ -141,6 +139,17 @@ QByteArray makeTile(const Points::ElementTypeSpecifier type, const Population po
     return bytes;
 }
 
+/**
+ * @brief Collects settings for a developer-generated phantom dataset.
+ *
+ * The dialog keeps dataset dimensions, element representation, population
+ * strategy, tile geometry, and cache capacity together so the developer menu
+ * can create repeatable large-data scenarios without embedding configuration
+ * in the generator callback. Its estimate is informational and describes the
+ * logical and resident tiled footprint before any tile is requested.
+ *
+ * @author Thomas Kroes
+ */
 class PhantomDialog final : public QDialog
 {
 public:
@@ -150,10 +159,10 @@ public:
         setWindowTitle(tr("Create phantom points dataset"));
         auto* form = new QFormLayout(this);
 
-        _name         = new QLineEdit("Phantom points", this);
-        _rows         = makeSpin(1, std::numeric_limits<int>::max(), 1000000);
-        _columns      = makeSpin(1, 100000, 32);
-        _rowTileSize   = makeSpin(1, 1000000, 4096);
+        _name           = new QLineEdit("Phantom points", this);
+        _rows           = makeSpin(1, std::numeric_limits<int>::max(), 1000000);
+        _columns        = makeSpin(1, 100000, 32);
+        _rowTileSize    = makeSpin(1, 1000000, 4096);
         _columnTileSize = makeSpin(1, 100000, 32);
         _cacheCapacity  = makeSpin(1, 100000, 8);
         _type           = new QComboBox(this);
@@ -163,12 +172,12 @@ public:
             typeNames.push_back(QString::fromLatin1(typeName));
         }
         _type->addItems(typeNames);
-        _population = new QComboBox(this);
+        _population    = new QComboBox(this);
         _population->addItem("Deterministic", static_cast<int>(Population::Deterministic));
         _population->addItem("Random floats", static_cast<int>(Population::RandomFloat));
         _population->addItem("Random zeros and ones", static_cast<int>(Population::RandomZeroOne));
         _population->addItem("All zeros", static_cast<int>(Population::Zero));
-        _estimate = new QLabel(this);
+        _estimate      = new QLabel(this);
         _estimate->setWordWrap(true);
 
         form->addRow("Dataset name", _name);
@@ -272,11 +281,9 @@ void PointDataPhantomGenerator::populateMenu(QMenu& menu, QWidget* owner)
         const auto type = dialog.type();
         const auto population = dialog.population();
         auto dataset = mv::data().createDataset<Points>("Points", dialog.name());
-        dataset->makeTiledFromGenerator(dialog.rows(), dialog.columns(), type, dialog.rowTileSize(), dialog.columnTileSize(),
-            [type, population](const std::uint64_t rowOffset, const std::uint64_t columnOffset,
-                const std::uint64_t rows, const std::uint64_t columns) {
-                return makeTile(type, population, rowOffset, columnOffset, rows, columns);
-            });
+        dataset->makeTiledFromGenerator(dialog.rows(), dialog.columns(), type, dialog.rowTileSize(), dialog.columnTileSize(), [type, population](const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t rows, const std::uint64_t columns) {
+            return makeTile(type, population, rowOffset, columnOffset, rows, columns);
+        });
         dataset->setTiledCacheCapacity(dialog.cacheCapacity());
 
         const auto estimate = dataset->getTiledMemoryEstimate();

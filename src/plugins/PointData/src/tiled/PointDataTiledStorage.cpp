@@ -33,20 +33,14 @@ PointDataTiledStorage::PointDataTiledStorage(const std::uint64_t rows, const std
     {
         for (std::uint64_t column = 0; column < columns; column += columnTileSize)
         {
-            _descriptors.push_back({ row, column, std::min<std::uint64_t>(rowTileSize, rows - row),
-                std::min<std::uint64_t>(columnTileSize, columns - column), {}, {} });
+            _descriptors.push_back({ row, column, std::min<std::uint64_t>(rowTileSize, rows - row), std::min<std::uint64_t>(columnTileSize, columns - column), {}, {} });
         }
     }
 }
 
 std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromDense(const char* data, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, ProgressCallback progress)
 {
-    auto storage = std::make_shared<PointDataTiledStorage>(
-        rows,
-        columns,
-        elementSize,
-        rowTileSize,
-        columnTileSize);
+    auto storage = std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize);
 
     const auto totalTiles       = storage->_descriptors.size();
     const auto progressInterval = std::max<std::size_t>(1, totalTiles / 100);
@@ -78,13 +72,7 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromGenerator(cons
     if (!generator)
         throw std::invalid_argument("Tile generator is empty");
 
-    return std::make_shared<PointDataTiledStorage>(
-        rows,
-        columns,
-        elementSize,
-        rowTileSize,
-        columnTileSize,
-        std::move(generator));
+    return std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize, std::move(generator));
 }
 
 std::uint64_t PointDataTiledStorage::tileRowCount() const

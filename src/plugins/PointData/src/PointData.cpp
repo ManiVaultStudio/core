@@ -203,24 +203,10 @@ void PointData::makeTiled(const std::size_t rowTileSize, const std::size_t colum
     {
         const auto rows = static_cast<std::uint64_t>(getSizeOfVector() / _numDimensions);
 
-        const auto elementSize = std::visit(
-            [](const auto& vector) {
-                return sizeof(typename std::decay_t<decltype(vector)>::value_type);
-            },
-            _variantOfVectors);
+        const auto elementSize = std::visit([](const auto& vector) { return sizeof(typename std::decay_t<decltype(vector)>::value_type); }, _variantOfVectors);
+        const auto* data = static_cast<const char*>(std::visit([](const auto& vector) { return static_cast<const void*>(vector.data()); }, _variantOfVectors));
 
-        _tiledStorage = mv::pointdata::tiled::PointDataTiledStorage::fromDense(
-            static_cast<const char*>(std::visit(
-                [](const auto& vector) {
-                    return static_cast<const void*>(vector.data());
-                },
-                _variantOfVectors)),
-            rows,
-            _numDimensions,
-            elementSize,
-            rowTileSize,
-            columnTileSize,
-            std::move(progress));
+        _tiledStorage = mv::pointdata::tiled::PointDataTiledStorage::fromDense(data, rows, _numDimensions, elementSize, rowTileSize, columnTileSize, std::move(progress));
 
         _numRows = rows;
     }
@@ -237,12 +223,9 @@ void PointData::makeTiledFromGenerator(const std::uint64_t rows, const std::uint
     _numDimensions = columns;
     _numRows = rows;
     _isDense = true;
-    _tiledStorage = mv::pointdata::tiled::PointDataTiledStorage::fromGenerator(rows, columns, std::visit(
-        [](const auto& vector) {
-            return sizeof(typename std::decay_t<decltype(vector)>::value_type);
-        },
-        _variantOfVectors), rowTileSize, columnTileSize, [generator = std::move(generator)](const mv::pointdata::tiled::TileDescriptor& descriptor) {
-            return generator(descriptor.rowOffset, descriptor.columnOffset, descriptor.rows, descriptor.columns);
+    const auto elementSize = std::visit([](const auto& vector) { return sizeof(typename std::decay_t<decltype(vector)>::value_type); }, _variantOfVectors);
+    _tiledStorage = mv::pointdata::tiled::PointDataTiledStorage::fromGenerator(rows, columns, elementSize, rowTileSize, columnTileSize, [generator = std::move(generator)](const mv::pointdata::tiled::TileDescriptor& descriptor) {
+        return generator(descriptor.rowOffset, descriptor.columnOffset, descriptor.rows, descriptor.columns);
     });
 }
 
@@ -344,9 +327,7 @@ namespace
 {
 PointDataAccessView makeFloatAccessView(std::vector<float>&& values)
 {
-    auto bytes = std::make_shared<QByteArray>(
-        reinterpret_cast<const char*>(values.data()),
-        static_cast<qsizetype>(values.size() * sizeof(float)));
+    auto bytes = std::make_shared<QByteArray>(reinterpret_cast<const char*>(values.data()), static_cast<qsizetype>(values.size() * sizeof(float)));
     PointDataAccessView view;
     view.data = bytes->constData();
     view.rows = 1;
@@ -358,12 +339,7 @@ PointDataAccessView makeFloatAccessView(std::vector<float>&& values)
     return view;
 }
 
-PointDataAccessView makeTileAccessView(const mv::pointdata::tiled::TileView& tile,
-    const std::uint64_t rowOffset,
-    const std::uint64_t columnOffset,
-    const std::uint64_t rows,
-    const std::uint64_t columns,
-    const std::uint32_t typeIndex)
+PointDataAccessView makeTileAccessView(const mv::pointdata::tiled::TileView& tile, const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t rows, const std::uint64_t columns, const std::uint32_t typeIndex)
 {
     PointDataAccessView view;
     view.data = static_cast<const char*>(tile.data())
@@ -504,13 +480,8 @@ void PointData::visitRange(const std::uint64_t firstRow, const std::uint64_t row
             const auto tile = _tiledStorage->acquire(row / _tiledStorage->rowTileSize(), column / _tiledStorage->columnTileSize());
             const auto segmentEnd = std::min(endColumn, tile.columnOffset() + tile.columns());
 
-            visitor(makeTileAccessView(
-                tile,
-                row - tile.rowOffset(),
-                column - tile.columnOffset(),
-                1,
-                segmentEnd - column,
-                typeIndex));
+            const auto view = makeTileAccessView(tile, row - tile.rowOffset(), column - tile.columnOffset(), 1, segmentEnd - column, typeIndex);
+            visitor(view);
 
             column = segmentEnd;
         }
@@ -522,14 +493,10 @@ void PointData::materializeTiled()
     if (!_tiledStorage)
         return;
 
-    resizeVector(static_cast<std::size_t>(
-        _tiledStorage->rows() * _tiledStorage->columns()));
+    resizeVector(static_cast<std::size_t>(_tiledStorage->rows() * _tiledStorage->columns()));
 
-    _tiledStorage->materialize(static_cast<char*>(std::visit(
-        [](auto& vector) {
-            return static_cast<void*>(vector.data());
-        },
-        _variantOfVectors)));
+    auto* destination = static_cast<char*>(std::visit([](auto& vector) { return static_cast<void*>(vector.data()); }, _variantOfVectors));
+    _tiledStorage->materialize(destination);
 
     _tiledStorage.reset();
 }
@@ -565,44 +532,40 @@ void PointData::setDimensionNames(const std::vector<QString>& dimNames)
 float PointData::getValueAt(const std::size_t index) const
 {
     // Intentionally not locking here.
-   //
-   // This is a fine-grained legacy accessor and is frequently used from
-   // parallel loops. Callers must ensure that the underlying point-data
-   // storage is not modified concurrently.
-   //
-   // Use lockData() / the bulk-access APIs when synchronized access is
-   // required.
+    //
+    // This is a fine-grained legacy accessor and is frequently used from
+    // parallel loops. Callers must ensure that the underlying point-data
+    // storage is not modified concurrently.
+    //
+    // Use lockData() / the bulk-access APIs when synchronized access is
+    // required.
 
-     if (_tiledStorage)
-         return _tiledStorage->valueAt(index, static_cast<std::uint32_t>(getElementTypeSpecifier()));
+    if (_tiledStorage)
+        return _tiledStorage->valueAt(index, static_cast<std::uint32_t>(getElementTypeSpecifier()));
 
-     return std::visit([index](const auto& vec)
-        {
-            return static_cast<float>(vec[index]);
-        },
-        _variantOfVectors);
+    return std::visit([index](const auto& vec) {
+        return static_cast<float>(vec[index]);
+    }, _variantOfVectors);
 }
 
 void PointData::setValueAt(const std::size_t index, const float newValue)
 {
     // Intentionally not locking here.
-   //
-   // This is a fine-grained legacy setter and is frequently used from
-   // parallel loops. Callers must ensure that the underlying point-data
-   // storage is not modified concurrently.
-   //
-   // Use lockData() / the bulk-access APIs when synchronized access is
-   // required.
+    //
+    // This is a fine-grained legacy setter and is frequently used from
+    // parallel loops. Callers must ensure that the underlying point-data
+    // storage is not modified concurrently.
+    //
+    // Use lockData() / the bulk-access APIs when synchronized access is
+    // required.
 
     if (_tiledStorage)
         materializeTiled();
 
-    std::visit([index, newValue](auto& vec)
-        {
-            using value_type = typename std::remove_reference_t<decltype(vec)>::value_type;
-            vec[index] = static_cast<value_type>(newValue);
-        },
-        _variantOfVectors);
+    std::visit([index, newValue](auto& vec) {
+        using value_type = typename std::remove_reference_t<decltype(vec)>::value_type;
+        vec[index] = static_cast<value_type>(newValue);
+    }, _variantOfVectors);
 }
 
 UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
@@ -642,22 +605,14 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
             setElementTypeSpecifier(elementType);
             _numRows = variantMap["NumberOfPoints"].toULongLong();
 
-            _tiledStorage = mv::pointdata::tiled::PointDataTiledSerialization::fromVariantMap(
-                dataMap["Tiled"].toMap(),
-                _numRows,
-                _numDimensions,
-                std::visit(
-                    [](const auto& vector) {
-                        return sizeof(typename std::decay_t<decltype(vector)>::value_type);
-                    },
-                    _variantOfVectors));
+            const auto elementSize = std::visit([](const auto& vector) { return sizeof(typename std::decay_t<decltype(vector)>::value_type); }, _variantOfVectors);
+            _tiledStorage = mv::pointdata::tiled::PointDataTiledSerialization::fromVariantMap(dataMap["Tiled"].toMap(), _numRows, _numDimensions, elementSize);
         }
         else if (dataMap.contains("Raw") && dataMap["Raw"].canConvert<QVariantMap>())
         {
             variantMapMustContain(dataMap, "NumberOfElements");
 
-            const auto numberOfElements = static_cast<std::size_t>(
-                dataMap["NumberOfElements"].toULongLong());
+            const auto numberOfElements = static_cast<std::size_t>(dataMap["NumberOfElements"].toULongLong());
 
             const auto elementTypeIndex = dataMap.contains("TypeName")
                 ? elementTypeSpecifier(dataMap.value("TypeName").toString())
@@ -701,9 +656,7 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 
     if (isTiled)
     {
-        plan->addSequentialStage("Build tiled point data map", [this](
-            const WorkflowPlan::Job&,
-            const SharedWorkflowExecutionContext& executionContext) {
+        plan->addSequentialStage("Build tiled point data map", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
             const auto dataLock = lockData();
             QVariantMap outputMap;
 
@@ -746,7 +699,8 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
             const auto expectedBytes = getRawDataSize();
             const auto blobTotalSize = rawMap["Size"].toULongLong();
 
-            if (blobTotalSize != expectedBytes) {
+            if (blobTotalSize != expectedBytes)
+            {
                 throw ManiVaultException(
                     SeverityLevel::Error,
                     "PointData blob size does not match declared point-data dimensions",
@@ -798,7 +752,8 @@ void PointData::extractFullDataForDimension(std::vector<float>& result, const in
 
     result.resize(getNumPoints());
 
-    if (_tiledStorage) {
+    if (_tiledStorage)
+    {
         for (std::size_t i = 0; i < result.size(); ++i)
             result[i] = getValueAt(i * _numDimensions + static_cast<std::size_t>(dimensionIndex));
         return;
@@ -828,8 +783,10 @@ void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, 
 
         result.resize(getNumPoints());
 
-        if (_tiledStorage) {
-            for (std::size_t i = 0; i < result.size(); ++i) {
+        if (_tiledStorage)
+        {
+            for (std::size_t i = 0; i < result.size(); ++i)
+            {
                 const auto n = i * _numDimensions;
                 result[i].set(getValueAt(n + dimensionIndex1), getValueAt(n + dimensionIndex2));
             }
@@ -868,7 +825,8 @@ void PointData::extractDataForDimension(std::vector<float> &result, const int di
 
     result.resize(indices.size());
 
-    if (_tiledStorage) {
+    if (_tiledStorage)
+    {
         for (std::size_t i = 0; i < result.size(); ++i)
             result[i] = getValueAt(static_cast<std::size_t>(indices[i]) * _numDimensions + static_cast<std::size_t>(dimensionIndex));
         return;
@@ -896,8 +854,10 @@ void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, cons
 
     result.resize(indices.size());
 
-    if (_tiledStorage) {
-        for (std::size_t i = 0; i < result.size(); ++i) {
+    if (_tiledStorage)
+    {
+        for (std::size_t i = 0; i < result.size(); ++i)
+        {
             const auto n = static_cast<std::size_t>(indices[i]) * _numDimensions;
             result[i].set(getValueAt(n + dimensionIndex1), getValueAt(n + dimensionIndex2));
         }

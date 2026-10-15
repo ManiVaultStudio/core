@@ -23,12 +23,12 @@ class PointDataTiledStorage;
  */
 struct TileDescriptor
 {
-    std::uint64_t rowOffset = 0;
-    std::uint64_t columnOffset = 0;
-    std::uint64_t rows = 0;
-    std::uint64_t columns = 0;
-    QVariantMap blob;
-    QByteArray residentBytes;
+    std::uint64_t rowOffset    = 0; /**< Global row offset. */
+    std::uint64_t columnOffset = 0; /**< Global column offset. */
+    std::uint64_t rows         = 0; /**< Number of rows in this tile. */
+    std::uint64_t columns      = 0; /**< Number of columns in this tile. */
+    QVariantMap blob;               /**< Serialized blob metadata and block index. */
+    QByteArray residentBytes;       /**< Optional in-memory payload for eager/generated tiles. */
 };
 
 /**

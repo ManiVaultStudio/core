@@ -27,12 +27,9 @@ DeveloperMenu::DeveloperMenu(QWidget* parent /*= nullptr*/) :
     setToolTip("Development and integration test tools");
 
     _gifRecorder = std::make_unique<GifRecorder>(parentWidget(), this);
-
     auto gifRecordingMenu = addMenu(util::StyledIcon("video"), tr("Behavioral testing"));
-
     _gifRecordingAction = gifRecordingMenu->addAction(util::StyledIcon("record-vinyl"), tr("Start GIF recording…"));
     _gifRecordingAction->setToolTip(tr("Capture the ManiVault Studio main window as an animated GIF"));
-
     connect(_gifRecordingAction, &QAction::triggered, this, &DeveloperMenu::toggleGifRecording);
 
     connect(_gifRecorder.get(), &GifRecorder::recordingStarted, this, [this] {
@@ -41,20 +38,16 @@ DeveloperMenu::DeveloperMenu(QWidget* parent /*= nullptr*/) :
 
     connect(_gifRecorder.get(), &GifRecorder::recordingFinished, this, [this](const QString& path, int frameCount, qint64 durationMs, qint64 fileSize) {
         _gifRecordingAction->setText(tr("Start GIF recording…"));
-
         mv::help().addNotification(tr("GIF recording saved"), tr("Saved %1 (%2 frames, %3 ms, %4 bytes).").arg(path).arg(frameCount).arg(durationMs).arg(fileSize), util::StyledIcon("check"));
     });
 
     connect(_gifRecorder.get(), &GifRecorder::recordingFailed, this, [this](const QString& error) {
         _gifRecordingAction->setText(tr("Start GIF recording…"));
-
         mv::help().addNotification(tr("GIF recording failed"), error, util::StyledIcon("circle-exclamation"));
     });
 
     auto workflowTestingMenu = addMenu(util::StyledIcon("diagram-project"), tr("Workflow testing"));
-
     workflowTestingMenu->setToolTip(tr("Run parallel workflow test scenarios"));
-
     detail::ParallelPhantomTestSuite::populateMenu(*workflowTestingMenu, parentWidget());
 
     _dataSynthesisMenu = addMenu(util::StyledIcon("flask"), tr("Data synthesis"));
@@ -69,7 +62,6 @@ DeveloperMenu::DeveloperMenu(QWidget* parent /*= nullptr*/) :
     });
 
     auto errorReportingMenu = addMenu(util::StyledIcon("bug"), tr("Error reporting testing"));
-
     auto handledExceptionAction = errorReportingMenu->addAction(util::StyledIcon("triangle-exclamation"), tr("Handled exception"));
     handledExceptionAction->setToolTip(tr("Create a safe handled exception and show the normal exception dialog"));
 
@@ -91,7 +83,8 @@ DeveloperMenu::~DeveloperMenu() = default;
 
 void DeveloperMenu::toggleGifRecording()
 {
-    if (_gifRecorder->isRecording()) {
+    if (_gifRecorder->isRecording())
+    {
         QString error;
 
         if (_gifRecorder->stop(error))
@@ -125,7 +118,8 @@ void DeveloperMenu::toggleGifRecording()
 
 void DeveloperMenu::testHandledException()
 {
-    try {
+    try
+    {
         const auto technicalReason = QString(
             "Simulated handled exception containing privacy test values: home=%1, temp=%2, "
             "email=test.user@example.com, url=https://test-user:test-password@example.com/private.")
@@ -138,7 +132,8 @@ void DeveloperMenu::testHandledException()
             QString("Handled exception simulator at %1").arg(QDir::homePath()),
             { { "test_only", true } });
     }
-    catch (const ManiVaultException& exception) {
+    catch (const ManiVaultException& exception)
+    {
         util::exceptionMessageBox(tr("Handled exception reporting test"), exception, parentWidget());
     }
 }
@@ -148,8 +143,8 @@ void DeveloperMenu::testFatalCrash()
 #ifdef MV_USE_ERROR_LOGGING
     const auto& errorManager = mv::errors();
 
-    if (!errorManager.getLoggingUserHasOptedAction().isChecked()
-        || !errorManager.getLoggingEnabledAction().isChecked()) {
+    if (!errorManager.getLoggingUserHasOptedAction().isChecked() || !errorManager.getLoggingEnabledAction().isChecked())
+    {
         QMessageBox::information(parentWidget(), tr("Crash reporting test"), tr("Sentry error reporting must be enabled before running the crash reporting test."));
 
         return;
@@ -159,9 +154,7 @@ void DeveloperMenu::testFatalCrash()
 
     confirmationDialog.setWindowIcon(util::StyledIcon("bug"));
     confirmationDialog.setWindowTitle(tr("Crash reporting test"));
-    confirmationDialog.setText(
-        tr("This test will deliberately crash ManiVault Studio. Any unsaved work will be lost.\n\n"
-           "Immediately after the crash, a separate crash feedback dialog should appear. Continue?"));
+    confirmationDialog.setText(tr("This test will deliberately crash ManiVault Studio. Any unsaved work will be lost.\n\nImmediately after the crash, a separate crash feedback dialog should appear. Continue?"));
     confirmationDialog.setIcon(QMessageBox::Warning);
     confirmationDialog.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
     confirmationDialog.setDefaultButton(QMessageBox::Cancel);

@@ -25,10 +25,20 @@ class PointDataTiledStorage;
 class PointDataTiledSerialization
 {
 public:
-    /** Converts tiled storage metadata and payloads to a project variant map. */
+    /**
+     * Converts tiled storage metadata and payloads to a project variant map.
+     *
+     * Each tile is represented by independent blob metadata so project
+     * loading can retain the tile index without decoding the complete matrix.
+     */
     static QVariantMap toVariantMap(const PointDataTiledStorage& storage);
 
-    /** Reconstructs tiled storage while retaining serialized tile payloads for lazy loading. */
+    /**
+     * Reconstructs tiled storage while retaining serialized tile payloads for
+     * lazy loading. The map is additive to the legacy eager point-data format;
+     * callers provide the matrix geometry and element size from the enclosing
+     * point-data metadata.
+     */
     static std::shared_ptr<PointDataTiledStorage> fromVariantMap(const QVariantMap& map, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize);
 };
 }

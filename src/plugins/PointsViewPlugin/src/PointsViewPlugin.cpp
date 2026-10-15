@@ -32,8 +32,7 @@ PointsViewPluginFactory::PointsViewPluginFactory() :
     setIconByName("table");
     getPluginMetadata().setDescription("Inspect point data through tile-oriented access APIs");
     getPluginMetadata().setSummary("A developer view for exercising and visualizing dense point-data tile access.");
-    getPluginMetadata().setCopyrightHolder(
-        { "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
+    getPluginMetadata().setCopyrightHolder({ "BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)" });
     getPluginMetadata().setLicenseText("This plugin is distributed under the [LGPL v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license.");
 }
 

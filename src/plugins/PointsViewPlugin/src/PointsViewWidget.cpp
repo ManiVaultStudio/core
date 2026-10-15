@@ -231,7 +231,8 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _getRangeGroupAction.addAction(&_rangeColumnEndAction, -1, configureIntegralWidget);
     _getRangeGroupAction.addAction(&_getRangeAction, mv::gui::TriggerAction::Icon);
     const auto configureFacadeInfoWidget = [](mv::gui::WidgetAction*, QWidget* widget) {
-        if (auto* textEdit = widget->findChild<QTextEdit*>("TextEdit")) {
+        if (auto* textEdit = widget->findChild<QTextEdit*>("TextEdit"))
+        {
             textEdit->setReadOnly(true);
             textEdit->setMinimumHeight(120);
         }
@@ -427,12 +428,14 @@ void PointsViewWidget::updateFacadeActionState()
 
 void PointsViewWidget::updateInspector(const Points* points)
 {
-    if (!points) {
+    if (!points)
+    {
         _inspectorLabel->setText("Storage inspector: no point data");
         return;
     }
 
-    if (!points->isTiled()) {
+    if (!points->isTiled())
+    {
         _inspectorLabel->setText(QString("Storage inspector: eager | type: %1 | tiled cache unavailable")
             .arg(points->getElementTypeName()));
         return;
@@ -458,7 +461,8 @@ void PointsViewWidget::refreshSelection()
     updateUiState();
 
     const auto selectedItems = mv::dataHierarchy().getSelectedItems();
-    if (selectedItems.size() != 1) {
+    if (selectedItems.size() != 1)
+    {
         _datasetLabel->setText("Select exactly one Points dataset");
         _accessLog->clear();
         updateInspector(nullptr);
@@ -467,7 +471,8 @@ void PointsViewWidget::refreshSelection()
     }
 
     auto points = selectedItems.first()->getDataset<Points>();
-    if (!points.isValid()) {
+    if (!points.isValid())
+    {
         _datasetLabel->setText("Selected dataset is not Points");
         _accessLog->clear();
         updateInspector(nullptr);
@@ -505,11 +510,11 @@ void PointsViewWidget::fetchVisibleRange()
         return;
     }
 
-    const auto firstRow = std::max(0, _table->rowAt(0));
-    const auto lastRow = _table->rowAt(std::max(0, _table->viewport()->height() - 1));
+    const auto firstRow    = std::max(0, _table->rowAt(0));
+    const auto lastRow     = _table->rowAt(std::max(0, _table->viewport()->height() - 1));
     const auto firstColumn = std::max(0, _table->columnAt(0));
-    const auto lastColumn = _table->columnAt(std::max(0, _table->viewport()->width() - 1));
-    const auto rowCount = lastRow >= firstRow
+    const auto lastColumn  = _table->columnAt(std::max(0, _table->viewport()->width() - 1));
+    const auto rowCount    = lastRow >= firstRow
         ? static_cast<std::uint64_t>(lastRow - firstRow + 1)
         : 1;
     const auto columnCount = lastColumn >= firstColumn
