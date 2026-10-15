@@ -29,6 +29,11 @@ target_include_directories(${COLORDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATI
 
 target_compile_features(${COLORDATA} PUBLIC cxx_std_${MV_CXX_STANDARD})
 
+target_compile_options(${COLORDATA}
+        PRIVATE
+            $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
+    )
+
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
 generate_export_header(${COLORDATA})
