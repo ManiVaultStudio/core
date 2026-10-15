@@ -1087,7 +1087,7 @@ public:
     InfoAction*                 _infoAction;                    /** Non-owning pointer to info action */
     mv::gui::GroupAction*       _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
     DimensionsPickerAction*     _dimensionsPickerAction;        /** Non-owning pointer to dimensions picker action */
-    mv::EventListener           _eventListener;                 /** Listen to HDPS events */
+    mv::EventListener           _eventListener;                 /** Listen to ManiVault core events */
 
     friend class mv::legacy::PointsLegacySerializer;
 };
