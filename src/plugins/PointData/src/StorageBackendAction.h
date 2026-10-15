@@ -39,7 +39,7 @@ public:
 private:
     void updateBackendType();
 
-    mv::Dataset<Points>          _points;             /**< Points dataset whose backend is displayed. */
-    mv::gui::OptionAction       _backendTypeAction;  /**< Read-only storage backend selector. */
-    mv::gui::TriggerAction      _configureAction;    /**< Trigger reserved for backend configuration. */
+    mv::Dataset<Points>         _points;            /**< Points dataset whose backend is displayed. */
+    mv::gui::OptionAction       _backendTypeAction; /**< Read-only storage backend selector. */
+    mv::gui::TriggerAction      _configureAction;   /**< Trigger reserved for backend configuration. */
 };

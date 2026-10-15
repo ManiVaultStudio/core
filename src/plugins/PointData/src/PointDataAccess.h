@@ -39,7 +39,12 @@ struct PointDataAccessView
         return data != nullptr && rows != 0 && columns != 0;
     }
 
-    /** Returns a pointer to the first byte of the specified row. */
+    /**
+     * Returns a pointer to the first byte of the specified row.
+     *
+     * The caller must provide a row smaller than rows and retain the view, or
+     * its lifetime token, for as long as the returned pointer is used.
+     */
     const char* rowData(const std::uint64_t row) const
     {
         return static_cast<const char*>(data) + row * rowStrideBytes;

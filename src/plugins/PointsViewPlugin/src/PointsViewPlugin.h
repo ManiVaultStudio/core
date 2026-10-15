@@ -2,16 +2,21 @@
 
 #pragma once
 
+#include <actions/DatasetPickerAction.h>
+#include <actions/HorizontalGroupAction.h>
+#include <actions/ToggleAction.h>
+
 #include <ViewPlugin.h>
 #include <PointsViewWidget.h>
 
 /**
  * @brief View plugin that presents point data in a lazy-fetching table.
  *
- * The plugin provides a small, intentionally focused consumer for the new
- * point-data access functions. Keeping this experiment in a view plugin
- * allows the storage API to be exercised with real datasets without coupling
- * the core data hierarchy to a particular table implementation.
+ * The plugin provides a focused consumer for the point-data access functions.
+ * It can follow the data hierarchy, use an explicit Points dataset selected
+ * through the picker, or accept one dropped onto the view. Keeping selection
+ * policy in the plugin allows the reusable table widget to remain dataset-bound
+ * and independent of global hierarchy state.
  *
  * @author Thomas Kroes
  */
@@ -25,9 +30,14 @@ public:
     void init() override;
 
 private:
+    void updateDatasetSelection();
     void refreshSelection();
+    void setPickedPoints(const mv::Dataset<Points>& points);
 
-    PointsViewWidget _widget; /**< Embedded diagnostic table and facade-access view. */
+    mv::gui::HorizontalGroupAction _datasetSourceGroupAction;     /**< Dataset picker and hierarchy-selection controls. */
+    mv::gui::ToggleAction          _useHierarchySelectionAction; /**< Whether to follow the data hierarchy selection. */
+    mv::gui::DatasetPickerAction   _datasetPickerAction;         /**< Current point-dataset picker. */
+    PointsViewWidget               _widget;                      /**< Embedded diagnostic table and point-data query view. */
 };
 
 /**

@@ -78,15 +78,15 @@ private:
     static std::vector<std::uint64_t> parseFilter(const QString& filter, std::uint64_t maximum, QString& error);
     void displayQuery(const std::vector<std::uint64_t>& rowIds, const std::vector<std::uint64_t>& columnIds, const std::function<void(const PointDataAccessVisitor&)>& request);
 
-    mv::Dataset<Points>             _points;
-    bool                            _showDatasetControls;
-    QLabel*                         _datasetLabel;
-    QTableView*                     _table;
-    PointsTableModel*               _model;
-    QTimer*                         _fetchTimer;
-    QTimer*                         _filterTimer;
-    mv::gui::HorizontalGroupAction  _filterGroupAction;
-    mv::gui::VerticalGroupAction    _facadeGroupAction;
+    mv::Dataset<Points>             _points;                    /**< Dataset currently displayed by the table. */
+    bool                            _showDatasetControls;       /**< Whether standalone dataset controls are shown. */
+    QLabel*                         _datasetLabel;              /**< Optional dataset summary shown above the table. */
+    QTableView*                     _table;                     /**< Table view displaying the fetched window. */
+    PointsTableModel*               _model;                     /**< Model storing logical dimensions and fetched values. */
+    QTimer*                         _fetchTimer;                /**< Coalesces visible-range requests. */
+    QTimer*                         _filterTimer;               /**< Debounces filter-driven requests. */
+    mv::gui::HorizontalGroupAction  _filterGroupAction;          /**< Row, column, and live-table controls. */
+    mv::gui::VerticalGroupAction    _facadeGroupAction;         /**< Point-data query actions. */
     mv::gui::HorizontalGroupAction  _getRowGroupAction;
     mv::gui::HorizontalGroupAction  _getRowRangeGroupAction;
     mv::gui::HorizontalGroupAction  _getRowsGroupAction;
@@ -121,5 +121,5 @@ private:
     mv::gui::StringAction           _rowFilterAction;
     mv::gui::StringAction           _columnFilterAction;
     mv::gui::ToggleAction           _liveTableAction;
-    mv::gui::TriggerAction          _openInPointsViewAction;
+    mv::gui::TriggerAction          _openInPointsViewAction;    /**< Opens the standalone Points View plugin when embedded. */
 };

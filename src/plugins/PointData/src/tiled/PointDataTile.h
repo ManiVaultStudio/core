@@ -104,11 +104,11 @@ public:
 
 private:
     friend class PointDataTiledStorage;
-    std::shared_ptr<const QByteArray> _bytes;
-    std::uint64_t                    _rowOffset    = 0;
-    std::uint64_t                    _columnOffset = 0;
-    std::uint64_t                    _rows         = 0;
-    std::uint64_t                    _columns      = 0;
-    std::size_t                      _elementSize  = 0;
+    std::shared_ptr<const QByteArray> _bytes;        /**< Shared tile payload that provides the lease guarantee. */
+    std::uint64_t                     _rowOffset    = 0; /**< Global row offset of the tile. */
+    std::uint64_t                     _columnOffset = 0; /**< Global column offset of the tile. */
+    std::uint64_t                     _rows         = 0; /**< Number of rows in the tile. */
+    std::uint64_t                     _columns      = 0; /**< Number of columns in the tile. */
+    std::size_t                       _elementSize  = 0; /**< Size of one tile element in bytes. */
 };
 }

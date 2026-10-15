@@ -68,11 +68,11 @@ public:
 private:
     using Entry = std::pair<std::shared_ptr<QByteArray>, std::list<std::size_t>::iterator>;
     void trim();
-    std::size_t _capacity;
-    std::list<std::size_t> _lru;
-    std::unordered_map<std::size_t, Entry> _entries;
-    std::uint64_t _hits = 0;
-    std::uint64_t _misses = 0;
-    std::uint64_t _evictions = 0;
+    std::size_t                         _capacity;  /**< Maximum number of resident payloads. */
+    std::list<std::size_t>               _lru;       /**< Keys ordered from least to most recently used. */
+    std::unordered_map<std::size_t, Entry> _entries; /**< Payloads and their positions in the LRU list. */
+    std::uint64_t                        _hits      = 0; /**< Number of successful lookups. */
+    std::uint64_t                        _misses    = 0; /**< Number of unsuccessful lookups. */
+    std::uint64_t                        _evictions = 0; /**< Number of payloads removed by capacity trimming. */
 };
 }

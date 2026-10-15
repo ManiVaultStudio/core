@@ -32,8 +32,13 @@ namespace mv::pointdata::tiled
 class PointDataTiledStorage
 {
 public:
+    /** Loads serialized bytes for a descriptor when a tile misses the cache. */
     using TileLoader = std::function<QByteArray(const TileDescriptor&)>;
+
+    /** Generates row-major bytes for a descriptor on first tile access. */
     using TileGenerator = std::function<QByteArray(const TileDescriptor&)>;
+
+    /** Reports conversion or generation progress in the range [0, 1]. */
     using ProgressCallback = std::function<void(float)>;
 
     struct MemoryEstimate
@@ -45,7 +50,16 @@ public:
         std::uint64_t indexBytes        = 0; /**< Conservative resident descriptor/index size. */
     };
 
-    /** Creates tiled storage with optional lazy tile loading and a resident tile index. */
+    /**
+     * Creates tiled storage with optional lazy tile loading and a resident tile index.
+     *
+     * @param rows Logical matrix row count.
+     * @param columns Logical matrix column count.
+     * @param elementSize Size of one matrix element in bytes.
+     * @param rowTileSize Maximum number of rows in a tile.
+     * @param columnTileSize Maximum number of columns in a tile.
+     * @param loader Callback used to obtain bytes for a descriptor on a cache miss.
+     */
     PointDataTiledStorage(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileLoader loader = {});
 
     /** Creates tiled storage by copying a dense row-major matrix into resident tile payloads. */
@@ -116,14 +130,14 @@ public:
 
 private:
     QByteArray load(const TileDescriptor& descriptor) const;
-    std::uint64_t                 _rows;
-    std::uint64_t                 _columns;
-    std::size_t                   _elementSize;
-    std::size_t                   _rowTileSize;
-    std::size_t                   _columnTileSize;
-    std::vector<TileDescriptor>   _descriptors;
-    TileLoader                    _loader;
-    mutable std::recursive_mutex _mutex;
-    mutable PointDataTileCache    _cache;
+    std::uint64_t                  _rows;          /**< Logical matrix row count. */
+    std::uint64_t                  _columns;       /**< Logical matrix column count. */
+    std::size_t                    _elementSize;   /**< Size of one matrix element in bytes. */
+    std::size_t                    _rowTileSize;   /**< Configured maximum rows per tile. */
+    std::size_t                    _columnTileSize; /**< Configured maximum columns per tile. */
+    std::vector<TileDescriptor>    _descriptors;   /**< Resident row/column tile index. */
+    TileLoader                     _loader;        /**< Optional callback that decodes or generates tile bytes. */
+    mutable std::recursive_mutex   _mutex;         /**< Serializes cache and lazy-load access. */
+    mutable PointDataTileCache     _cache;         /**< Bounded cache of loaded tile payloads. */
 };
 }

@@ -37,7 +37,12 @@ protected:
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
-    /** Constructs a point-data view action for points. */
+    /**
+     * Constructs a point-data view action for points.
+     *
+     * The dataset handle is retained by the action and passed to each widget
+     * instance. The action does not own the dataset implementation.
+     */
     PointsViewAction(QObject* parent, const mv::Dataset<Points>& points);
 
     /** Returns the point-data source displayed by the embedded view. */
