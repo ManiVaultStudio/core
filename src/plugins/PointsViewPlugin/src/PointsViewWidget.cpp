@@ -82,6 +82,7 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _progressTask(progressTask),
     _tileWatcher(new QFutureWatcher<void>(this)),
     _fetchTimer(new QTimer(this)),
+    _filterGroupAction(this, "Point-data filters"),
     _rowFilterAction(this, "Rows"),
     _columnFilterAction(this, "Columns"),
     _applyFiltersAction(this, "Apply filters"),
@@ -108,12 +109,11 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _rowFilterAction.setPlaceHolderString("Required; e.g. 1, 3, 10-20");
     _columnFilterAction.setPlaceHolderString("Optional = all columns; e.g. 0-4, 8");
 
-    auto* queryGroup = new QGroupBox("Point-data filters", this);
-    auto* queryLayout = new QHBoxLayout(queryGroup);
-    queryLayout->addWidget(_rowFilterAction.createWidget(queryGroup));
-    queryLayout->addWidget(_columnFilterAction.createWidget(queryGroup));
-    queryLayout->addWidget(_applyFiltersAction.createWidget(queryGroup));
-    queryLayout->addWidget(_liveTableAction.createWidget(queryGroup, mv::gui::ToggleAction::CheckBox));
+    _filterGroupAction.setShowLabels(true);
+    _filterGroupAction.addAction(&_rowFilterAction);
+    _filterGroupAction.addAction(&_columnFilterAction);
+    _filterGroupAction.addAction(&_applyFiltersAction);
+    _filterGroupAction.addAction(&_liveTableAction, mv::gui::ToggleAction::PushButtonText);
 
     _table->setModel(_model);
     _table->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -130,7 +130,7 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     auto* layout = new QVBoxLayout(this);
     layout->addWidget(_datasetLabel);
     layout->addWidget(settings);
-    layout->addWidget(queryGroup);
+    layout->addWidget(_filterGroupAction.createWidget(this));
     layout->addWidget(_table, 1);
     layout->addWidget(_inspectorLabel);
     layout->addWidget(_accessLog);

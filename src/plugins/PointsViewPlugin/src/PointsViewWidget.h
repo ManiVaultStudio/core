@@ -7,6 +7,7 @@
 #include <PointDataAccess.h>
 
 #include <actions/StringAction.h>
+#include <actions/HorizontalGroupAction.h>
 #include <actions/ToggleAction.h>
 #include <actions/TriggerAction.h>
 
@@ -88,6 +89,7 @@ private:
     QFutureWatcher<void>* _tileWatcher;
     QTimer* _fetchTimer;
     bool _tilingInProgress = false;
+    mv::gui::HorizontalGroupAction _filterGroupAction;
     mv::gui::StringAction _rowFilterAction;
     mv::gui::StringAction _columnFilterAction;
     mv::gui::TriggerAction _applyFiltersAction;
