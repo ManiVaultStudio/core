@@ -26,6 +26,8 @@ public:
     void init() override;
 
 private:
+    void refreshSelection();
+
     mv::Task         _tileTask; /**< Progress task used while creating tiled storage. */
     PointsViewWidget _widget;   /**< Embedded diagnostic table and facade-access view. */
 };

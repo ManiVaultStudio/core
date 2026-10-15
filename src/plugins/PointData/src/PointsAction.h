@@ -4,7 +4,10 @@
 
 #include "pointdata_export.h"
 
+#include <Dataset.h>
 #include <actions/GroupAction.h>
+
+class Points;
 
 /**
  * @brief Point-data action section containing the interactive points view.
@@ -39,5 +42,11 @@ protected:
 
 public:
     /** Constructs the point-data action section. */
-    explicit PointsAction(QObject* parent);
+    PointsAction(QObject* parent, const mv::Dataset<Points>& points);
+
+    /** Returns the point-data source displayed by the embedded widget. */
+    const mv::Dataset<Points>& getPoints() const;
+
+private:
+    mv::Dataset<Points> _points; /**< Point-data source displayed by the action. */
 };

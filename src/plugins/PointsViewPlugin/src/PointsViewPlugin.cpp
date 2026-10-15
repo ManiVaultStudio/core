@@ -2,7 +2,9 @@
 
 #include "PointsViewPlugin.h"
 
+#include <CoreInterface.h>
 #include <ManiVaultVersion.h>
+#include <PointData.h>
 
 Q_PLUGIN_METADATA(IID "studio.manivault.PointsViewPlugin")
 
@@ -13,9 +15,20 @@ PointsViewPlugin::PointsViewPlugin(const mv::plugin::PluginFactory* factory) :
 {
     getGuiNameAction().setString("Points View");
     setProgressTask(&_tileTask);
+    connect(&mv::dataHierarchy(), &mv::AbstractDataHierarchyManager::selectedItemsChanged, this, &PointsViewPlugin::refreshSelection);
     connect(&_widget, &PointsViewWidget::tiledStorageEnabled, this, [this](const QString& datasetName) {
         addNotification(QString("Tiled storage enabled for %1").arg(datasetName));
     });
+
+    refreshSelection();
+}
+
+void PointsViewPlugin::refreshSelection()
+{
+    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
+    const auto points = selectedItems.size() == 1 ? selectedItems.first()->getDataset<Points>() : mv::Dataset<Points>();
+
+    _widget.setPoints(points);
 }
 
 void PointsViewPlugin::init()

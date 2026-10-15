@@ -336,12 +336,16 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     connect(&_columnRowIdsAction, &mv::gui::StringAction::stringChanged, this, [this] {
         updateFacadeActionState();
     });
-    connect(&mv::dataHierarchy(), &mv::AbstractDataHierarchyManager::selectedItemsChanged, this, &PointsViewWidget::refreshSelection);
     connect(_fetchTimer, &QTimer::timeout, this, &PointsViewWidget::fetchVisibleRange);
     connect(_table->verticalScrollBar(), &QScrollBar::valueChanged, this, &PointsViewWidget::scheduleVisibleRangeFetch);
     connect(_table->horizontalScrollBar(), &QScrollBar::valueChanged, this, &PointsViewWidget::scheduleVisibleRangeFetch);
 
-    refreshSelection();
+}
+
+void PointsViewWidget::setPoints(const mv::Dataset<Points>& points)
+{
+    _points = points;
+    refreshPoints();
 }
 
 QSpinBox* PointsViewWidget::createIndexSpinBox(QWidget* parent) const
@@ -378,9 +382,7 @@ void PointsViewWidget::updateUiState()
 
 void PointsViewWidget::updateFacadeActionState()
 {
-    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
-    const auto points = selectedItems.size() == 1 ? selectedItems.first()->getDataset<Points>() : mv::Dataset<Points>();
-    if (!points.isValid() || _tilingInProgress)
+    if (!_points.isValid() || _tilingInProgress)
     {
         _getRowAction.setEnabled(false);
         _getRowRangeAction.setEnabled(false);
@@ -393,8 +395,8 @@ void PointsViewWidget::updateFacadeActionState()
         return;
     }
 
-    const auto pointCount           = points->getNumPoints();
-    const auto dimensionCount       = points->getNumDimensions();
+    const auto pointCount           = _points->getNumPoints();
+    const auto dimensionCount       = _points->getNumDimensions();
     const auto rowId                = static_cast<std::uint64_t>(_rowIdAction.getValue());
     const auto columnId             = static_cast<std::uint64_t>(_columnIdAction.getValue());
     const auto rowStart             = static_cast<std::uint64_t>(_rowStartAction.getValue());
@@ -454,13 +456,12 @@ void PointsViewWidget::updateInspector(const Points* points)
         .arg(points->getTiledCacheEvictions()));
 }
 
-void PointsViewWidget::refreshSelection()
+void PointsViewWidget::refreshPoints()
 {
     _model->clear();
     updateUiState();
 
-    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
-    if (selectedItems.size() != 1)
+    if (!_points.isValid())
     {
         _datasetLabel->setText("Select exactly one Points dataset");
         _accessLog->clear();
@@ -469,25 +470,15 @@ void PointsViewWidget::refreshSelection()
         return;
     }
 
-    auto points = selectedItems.first()->getDataset<Points>();
-    if (!points.isValid())
-    {
-        _datasetLabel->setText("Selected dataset is not Points");
-        _accessLog->clear();
-        updateInspector(nullptr);
-        setStatus("No point data selected");
-        return;
-    }
-
-    _model->setPoints(points.get(), points->getNumPoints(), points->getNumDimensions());
+    _model->setPoints(_points.get(), _points->getNumPoints(), _points->getNumDimensions());
     updateUiState();
     _datasetLabel->setText(QString("%1 — %2 points × %3 dimensions (%4)")
-        .arg(points->getGuiName())
-        .arg(points->getNumPoints())
-        .arg(points->getNumDimensions())
-        .arg(points->isTiled() ? "tiled" : "eager"));
+        .arg(_points->getGuiName())
+        .arg(_points->getNumPoints())
+        .arg(_points->getNumDimensions())
+        .arg(_points->isTiled() ? "tiled" : "eager"));
     _accessLog->clear();
-    updateInspector(points.get());
+    updateInspector(_points.get());
     setStatus("Fetching the visible table window...");
     QTimer::singleShot(0, this, &PointsViewWidget::fetchVisibleRange);
 }
@@ -530,11 +521,7 @@ void PointsViewWidget::fetchVisibleRange()
         return;
     }
 
-    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
-    if (selectedItems.size() != 1)
-        return;
-    auto points = selectedItems.first()->getDataset<Points>();
-    if (!points.isValid())
+    if (!_points.isValid())
     {
         return;
     }
@@ -546,14 +533,14 @@ void PointsViewWidget::fetchVisibleRange()
         .arg(firstColumn + static_cast<int>(columnCount) - 1)
         .arg(callbacks)
         .arg(elapsedMilliseconds));
-    updateInspector(points.get());
+    updateInspector(_points.get());
     setStatus(QString("Fetched visible rows %1–%2, columns %3–%4 in %5 access segment(s); cached tiles: %6. Drag/scroll and release to fetch again.")
         .arg(firstRow)
         .arg(firstRow + static_cast<int>(rowCount) - 1)
         .arg(firstColumn)
         .arg(firstColumn + static_cast<int>(columnCount) - 1)
         .arg(callbacks)
-        .arg(points->getTiledCacheSize()));
+        .arg(_points->getTiledCacheSize()));
 }
 
 std::vector<std::uint64_t> PointsViewWidget::parseFilter(const QString& filter, const std::uint64_t maximum, QString& error)
@@ -650,17 +637,12 @@ void PointsViewWidget::displayQuery(const std::vector<std::uint64_t>& rowIds, co
 
 void PointsViewWidget::applyFilters()
 {
-    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
-    if (selectedItems.size() != 1)
-        return;
-
-    const auto points = selectedItems.first()->getDataset<Points>();
-    if (!points.isValid())
+    if (!_points.isValid())
         return;
 
     QString error;
-    const auto maximumRow    = points->getNumPoints() > 0 ? points->getNumPoints() - 1 : 0;
-    const auto maximumColumn = points->getNumDimensions() > 0 ? points->getNumDimensions() - 1 : 0;
+    const auto maximumRow    = _points->getNumPoints() > 0 ? _points->getNumPoints() - 1 : 0;
+    const auto maximumColumn = _points->getNumDimensions() > 0 ? _points->getNumDimensions() - 1 : 0;
     auto rowIds    = parseFilter(_rowFilterAction.getString(), maximumRow, error);
     if (!error.isEmpty())
     {
@@ -683,7 +665,7 @@ void PointsViewWidget::applyFilters()
 
     if (_columnFilterAction.getString().trimmed().isEmpty())
     {
-        columnIds.resize(static_cast<std::size_t>(points->getNumDimensions()));
+        columnIds.resize(static_cast<std::size_t>(_points->getNumDimensions()));
         std::iota(columnIds.begin(), columnIds.end(), 0);
     }
 
@@ -693,6 +675,8 @@ void PointsViewWidget::applyFilters()
     const auto contiguousColumns = std::adjacent_find(columnIds.begin(), columnIds.end(), [](const auto first, const auto second) {
         return second != first + 1;
     }) == columnIds.end();
+
+    auto points = _points;
 
     displayQuery(rowIds, columnIds, [points, rowIds, columnIds, contiguousRows, contiguousColumns](const PointDataAccessVisitor& visitor) {
         if (contiguousRows && contiguousColumns)
@@ -742,7 +726,7 @@ void PointsViewWidget::showLiveTable(const bool live)
     if (live)
     {
         updateUiState();
-        refreshSelection();
+        refreshPoints();
     }
     else
     {
@@ -752,12 +736,7 @@ void PointsViewWidget::showLiveTable(const bool live)
 
 void PointsViewWidget::getRow()
 {
-    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
-
-    if (selectedItems.size() != 1)
-        return;
-
-    const auto points = selectedItems.first()->getDataset<Points>();
+    auto points = _points;
 
     if (!points.isValid() || _rowIdAction.getValue() >= points->getNumPoints())
     {
@@ -777,12 +756,7 @@ void PointsViewWidget::getRow()
 
 void PointsViewWidget::getRowRange()
 {
-    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
-
-    if (selectedItems.size() != 1)
-        return;
-
-    const auto points = selectedItems.first()->getDataset<Points>();
+    const auto points = _points;
 
     const auto firstRow = static_cast<std::uint64_t>(_rowStartAction.getValue());
     const auto lastRow  = static_cast<std::uint64_t>(_rowEndAction.getValue());
@@ -805,12 +779,7 @@ void PointsViewWidget::getRowRange()
 
 void PointsViewWidget::getRows()
 {
-    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
-
-    if (selectedItems.size() != 1)
-        return;
-
-    const auto points = selectedItems.first()->getDataset<Points>();
+    const auto points = _points;
 
     QString error;
     const auto rowIds = points.isValid() ? parseFilter(_rowIdsAction.getString(), points->getNumPoints() - 1, error) : std::vector<std::uint64_t>();
@@ -831,12 +800,7 @@ void PointsViewWidget::getRows()
 
 void PointsViewWidget::getColumn()
 {
-    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
-
-    if (selectedItems.size() != 1)
-        return;
-
-    const auto points = selectedItems.first()->getDataset<Points>();
+    const auto points = _points;
 
     const auto column = static_cast<std::uint64_t>(_columnIdAction.getValue());
 
@@ -857,12 +821,7 @@ void PointsViewWidget::getColumn()
 
 void PointsViewWidget::getColumnRange()
 {
-    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
-
-    if (selectedItems.size() != 1)
-        return;
-
-    const auto points = selectedItems.first()->getDataset<Points>();
+    const auto points = _points;
 
     const auto firstColumn = static_cast<std::uint64_t>(_columnStartAction.getValue());
     const auto lastColumn  = static_cast<std::uint64_t>(_columnEndAction.getValue());
@@ -885,12 +844,7 @@ void PointsViewWidget::getColumnRange()
 
 void PointsViewWidget::getColumns()
 {
-    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
-
-    if (selectedItems.size() != 1)
-        return;
-
-    const auto points = selectedItems.first()->getDataset<Points>();
+    const auto points = _points;
 
     QString error;
     const auto columnIds = points.isValid() ? parseFilter(_columnIdsAction.getString(), points->getNumDimensions() - 1, error) : std::vector<std::uint64_t>();
@@ -911,12 +865,7 @@ void PointsViewWidget::getColumns()
 
 void PointsViewWidget::getColumnsForRows()
 {
-    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
-
-    if (selectedItems.size() != 1)
-        return;
-
-    const auto points = selectedItems.first()->getDataset<Points>();
+    const auto points = _points;
 
     const auto firstColumn = static_cast<std::uint64_t>(_columnsForRowsStartAction.getValue());
     const auto lastColumn  = static_cast<std::uint64_t>(_columnsForRowsEndAction.getValue());
@@ -940,12 +889,7 @@ void PointsViewWidget::getColumnsForRows()
 
 void PointsViewWidget::getRange()
 {
-    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
-
-    if (selectedItems.size() != 1)
-        return;
-
-    const auto points = selectedItems.first()->getDataset<Points>();
+    const auto points = _points;
 
     const auto firstRow    = static_cast<std::uint64_t>(_rangeRowStartAction.getValue());
     const auto lastRow     = static_cast<std::uint64_t>(_rangeRowEndAction.getValue());
@@ -970,12 +914,7 @@ void PointsViewWidget::getRange()
 
 void PointsViewWidget::tileSelectedData()
 {
-    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
-
-    if (selectedItems.size() != 1)
-        return;
-
-    auto points = selectedItems.first()->getDataset<Points>();
+    auto points = _points;
 
     if (!points.isValid())
     {
@@ -987,7 +926,7 @@ void PointsViewWidget::tileSelectedData()
     if (points->isTiled())
     {
         emit tiledStorageEnabled(points->getGuiName());
-        refreshSelection();
+        refreshPoints();
         return;
     }
 
@@ -1015,16 +954,11 @@ void PointsViewWidget::tileSelectedData()
             progressTask->setFinished();
         }
 
-        const auto selectedItems = mv::dataHierarchy().getSelectedItems();
-        if (selectedItems.size() == 1)
-        {
-            auto points = selectedItems.first()->getDataset<Points>();
-            if (points.isValid())
-                points->setTiledCacheCapacity(cacheCapacity);
-        }
+        if (_points.isValid())
+            _points->setTiledCacheCapacity(cacheCapacity);
 
         emit tiledStorageEnabled(datasetName);
-        refreshSelection();
+        refreshPoints();
     });
 
     _tileWatcher->setFuture(QtConcurrent::run([points, rowTileSize, columnTileSize, progressTask]() mutable {

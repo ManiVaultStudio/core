@@ -7,6 +7,8 @@
 
 #include "PointDataAccess.h"
 
+#include <Dataset.h>
+
 #include <actions/StringAction.h>
 #include <actions/HorizontalGroupAction.h>
 #include <actions/IntegralAction.h>
@@ -55,6 +57,9 @@ public:
     /** Constructs the points view and optionally associates a progress task. */
     explicit PointsViewWidget(QWidget* parent = nullptr, mv::Task* progressTask = nullptr);
 
+    /** Sets the point-data source displayed by the widget. */
+    void setPoints(const mv::Dataset<Points>& points);
+
 signals:
     /** Emitted after the selected dataset has been converted to tiled storage. */
     void tiledStorageEnabled(const QString& datasetName);
@@ -63,7 +68,6 @@ protected:
     bool eventFilter(QObject* watched, QEvent* event) override;
 
 private slots:
-    void refreshSelection();
     void scheduleVisibleRangeFetch();
     void fetchVisibleRange();
     void tileSelectedData();
@@ -79,6 +83,7 @@ private slots:
     void getRange();
 
 private:
+    void refreshPoints();
     QSpinBox* createIndexSpinBox(QWidget* parent) const;
     void setStatus(const QString& text);
     void updateUiState();
@@ -87,6 +92,7 @@ private:
     static std::vector<std::uint64_t> parseFilter(const QString& filter, std::uint64_t maximum, QString& error);
     void displayQuery(const std::vector<std::uint64_t>& rowIds, const std::vector<std::uint64_t>& columnIds, const std::function<void(const PointDataAccessVisitor&)>& request);
 
+    mv::Dataset<Points>             _points;
     QLabel*                         _datasetLabel;
     QLabel*                         _inspectorLabel;
     QLabel*                         _statusLabel;

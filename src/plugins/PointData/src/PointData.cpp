@@ -894,7 +894,7 @@ void Points::init()
     DatasetImpl::init();
 
     _infoAction = new InfoAction(this, *this);
-    _pointsAction = new PointsAction(this);
+    _pointsAction = new PointsAction(this, getSmartPointer());
 
     const auto updateDimensionsPickerAction = [this]() -> void {
         _dimensionsPickerAction->setPointsDataset(*this);
