@@ -13,7 +13,6 @@
 #include <QSpinBox>
 #include <QTableView>
 #include <QTimer>
-#include <QTextEdit>
 #include <QVBoxLayout>
 #include <algorithm>
 #include <limits>
@@ -67,8 +66,7 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
     _fetchTimer(new QTimer(this)),
     _filterTimer(new QTimer(this)),
     _filterGroupAction(this, "Point-data filters"),
-    _facadeInfoAction(this, "Facade access information"),
-    _facadeGroupAction(this, "Facade access"),
+    _facadeGroupAction(this, "Point-data queries"),
     _getRowGroupAction(&_facadeGroupAction, "Single row"),
     _getRowRangeGroupAction(&_facadeGroupAction, "Row range"),
     _getRowsGroupAction(&_facadeGroupAction, "Rows"),
@@ -115,13 +113,12 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
     _filterGroupAction.addAction(&_rowFilterAction);
     _filterGroupAction.addAction(&_columnFilterAction);
     _filterGroupAction.addAction(&_liveTableAction, mv::gui::ToggleAction::CheckBox);
-    _facadeGroupAction.setIconByName("table-columns");
+    _facadeGroupAction.setIconByName("magnifying-glass");
     _facadeGroupAction.setShowLabels(true);
     _facadeGroupAction.setConfigurationFlag(mv::gui::WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _facadeGroupAction.setConfigurationFlag(mv::gui::WidgetAction::ConfigurationFlag::NoLabelInGroup);
     _facadeGroupAction.setPopupSizeHint(QSize(280, 0));
-    _facadeInfoAction.setString("Facade access provides storage-independent row and column retrieval.\n\nUse the single, range, ID-list, and row-column range actions below to exercise the Points facade.\n\nExamples are implemented in ManiVault/src/plugins/PointData/src/PointsViewWidget.cpp: fetchVisibleRange() demonstrates table access, while getRow(), getRowRange(), getRows(), getColumn(), getColumnRange(), getColumns(), getColumnsForRows(), and getRange() demonstrate the individual facade calls. displayQuery() shows how returned views are displayed.");
-    _facadeInfoAction.setDefaultWidgetFlags(mv::gui::StringAction::TextEdit);
+    _facadeGroupAction.setToolTip("Point-data queries provide storage-independent row and column retrieval.\n\nUse the single, range, ID-list, and row-column range actions below to exercise the Points facade.\n\nExamples are implemented in ManiVault/src/plugins/PointData/src/PointsViewWidget.cpp: fetchVisibleRange() demonstrates table access, while getRow(), getRowRange(), getRows(), getColumn(), getColumnRange(), getColumns(), getColumnsForRows(), and getRange() demonstrate the individual facade calls. displayQuery() shows how returned views are displayed.");
     _getRowGroupAction.setShowLabels(false);
     _getRowRangeGroupAction.setShowLabels(false);
     _getRowsGroupAction.setShowLabels(false);
@@ -163,14 +160,30 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
     _rangeColumnEndAction.setPrefix("Column end: ");
     _columnsForRowsStartAction.setPrefix("Start: ");
     _columnsForRowsEndAction.setPrefix("End: ");
-    _getRowAction.setIconByName("sync");
-    _getRowRangeAction.setIconByName("sync");
-    _getRowsAction.setIconByName("sync");
-    _getColumnAction.setIconByName("sync");
-    _getColumnRangeAction.setIconByName("sync");
-    _getColumnsAction.setIconByName("sync");
-    _getColumnsForRowsAction.setIconByName("sync");
-    _getRangeAction.setIconByName("sync");
+    _getRowAction.setIconByName("download");
+    _getRowRangeAction.setIconByName("download");
+    _getRowsAction.setIconByName("download");
+    _getColumnAction.setIconByName("download");
+    _getColumnRangeAction.setIconByName("download");
+    _getColumnsAction.setIconByName("download");
+    _getColumnsForRowsAction.setIconByName("download");
+    _getRangeAction.setIconByName("download");
+    _getRowGroupAction.setToolTip("Points::getRow(row)");
+    _getRowRangeGroupAction.setToolTip("Points::visitRows(firstRow, rowCount)");
+    _getRowsGroupAction.setToolTip("Points::visitRows(rowIds)");
+    _getColumnGroupAction.setToolTip("Points::visitColumns(firstColumn, columnCount)");
+    _getColumnRangeGroupAction.setToolTip("Points::visitColumns(firstColumn, columnCount)");
+    _getColumnsGroupAction.setToolTip("Points::visitColumns(columnIds)");
+    _getColumnsForRowsGroupAction.setToolTip("Points::visitColumns(firstColumn, columnCount, rowIds)");
+    _getRangeGroupAction.setToolTip("Points::visitRange(firstRow, rowCount, firstColumn, columnCount)");
+    _getRowAction.setToolTip("Points::getRow(row)");
+    _getRowRangeAction.setToolTip("Points::visitRows(firstRow, rowCount)");
+    _getRowsAction.setToolTip("Points::visitRows(rowIds)");
+    _getColumnAction.setToolTip("Points::visitColumns(firstColumn, columnCount)");
+    _getColumnRangeAction.setToolTip("Points::visitColumns(firstColumn, columnCount)");
+    _getColumnsAction.setToolTip("Points::visitColumns(columnIds)");
+    _getColumnsForRowsAction.setToolTip("Points::visitColumns(firstColumn, columnCount, rowIds)");
+    _getRangeAction.setToolTip("Points::visitRange(firstRow, rowCount, firstColumn, columnCount)");
     _rowIdsAction.setPlaceHolderString("e.g. 1, 3, 10-20");
     _columnIdsAction.setPlaceHolderString("e.g. 1, 3, 10-20");
     _columnRowIdsAction.setPlaceHolderString("Row IDs; e.g. 1, 3, 10-20");
@@ -197,15 +210,6 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
     _getRangeGroupAction.addAction(&_rangeColumnStartAction, -1, configureIntegralWidget);
     _getRangeGroupAction.addAction(&_rangeColumnEndAction, -1, configureIntegralWidget);
     _getRangeGroupAction.addAction(&_getRangeAction, mv::gui::TriggerAction::Icon);
-    const auto configureFacadeInfoWidget = [](mv::gui::WidgetAction*, QWidget* widget) {
-        if (auto* textEdit = widget->findChild<QTextEdit*>("TextEdit"))
-        {
-            textEdit->setReadOnly(true);
-            textEdit->setMinimumHeight(120);
-        }
-    };
-
-    _facadeGroupAction.addAction(&_facadeInfoAction, mv::gui::StringAction::TextEdit, configureFacadeInfoWidget);
     _facadeGroupAction.addAction(&_getRowGroupAction);
     _facadeGroupAction.addAction(&_getRowRangeGroupAction);
     _facadeGroupAction.addAction(&_getRowsGroupAction);

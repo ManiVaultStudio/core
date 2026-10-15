@@ -86,7 +86,6 @@ private:
     QTimer*                         _fetchTimer;
     QTimer*                         _filterTimer;
     mv::gui::HorizontalGroupAction  _filterGroupAction;
-    mv::gui::StringAction           _facadeInfoAction;
     mv::gui::VerticalGroupAction    _facadeGroupAction;
     mv::gui::HorizontalGroupAction  _getRowGroupAction;
     mv::gui::HorizontalGroupAction  _getRowRangeGroupAction;
