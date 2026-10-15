@@ -27,7 +27,7 @@ void PointsViewPlugin::init()
 }
 
 PointsViewPluginFactory::PointsViewPluginFactory() :
-    ViewPluginFactory(true)
+    ViewPluginFactory(false)
 {
     setIconByName("table");
     getPluginMetadata().setDescription("Inspect point data through tile-oriented access APIs");
