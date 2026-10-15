@@ -83,6 +83,32 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _tileWatcher(new QFutureWatcher<void>(this)),
     _fetchTimer(new QTimer(this)),
     _filterGroupAction(this, "Point-data filters"),
+    _facadeGroupAction(this, "Facade access"),
+    _getRowGroupAction(&_facadeGroupAction, "Get row"),
+    _getRowRangeGroupAction(&_facadeGroupAction, "Get row range"),
+    _getRowsGroupAction(&_facadeGroupAction, "Get rows"),
+    _getColumnRangeGroupAction(&_facadeGroupAction, "Get column range"),
+    _getColumnsGroupAction(&_facadeGroupAction, "Get columns"),
+    _getRangeGroupAction(&_facadeGroupAction, "Get range"),
+    _rowIdAction(&_getRowGroupAction, "Row ID", 0, 1000000000, 0),
+    _rowStartAction(&_getRowRangeGroupAction, "Row start", 0, 1000000000, 0),
+    _rowEndAction(&_getRowRangeGroupAction, "Row end", 0, 1000000000, 0),
+    _columnStartAction(&_getColumnRangeGroupAction, "Column start", 0, 1000000000, 0),
+    _columnEndAction(&_getColumnRangeGroupAction, "Column end", 0, 1000000000, 0),
+    _rangeRowStartAction(&_getRangeGroupAction, "Row start", 0, 1000000000, 0),
+    _rangeRowEndAction(&_getRangeGroupAction, "Row end", 0, 1000000000, 0),
+    _rangeColumnStartAction(&_getRangeGroupAction, "Column start", 0, 1000000000, 0),
+    _rangeColumnEndAction(&_getRangeGroupAction, "Column end", 0, 1000000000, 0),
+    _columnsForRowsStartAction(&_getColumnsGroupAction, "Column start", 0, 1000000000, 0),
+    _columnsForRowsEndAction(&_getColumnsGroupAction, "Column end", 0, 1000000000, 0),
+    _rowIdsAction(&_getRowsGroupAction, "Row IDs"),
+    _columnRowIdsAction(&_getColumnsGroupAction, "Row IDs"),
+    _getRowAction(&_getRowGroupAction, "Get row"),
+    _getRowRangeAction(&_getRowRangeGroupAction, "Get row range"),
+    _getRowsAction(&_getRowsGroupAction, "Get rows"),
+    _getColumnRangeAction(&_getColumnRangeGroupAction, "Get column range"),
+    _getColumnsAction(&_getColumnsGroupAction, "Get columns"),
+    _getRangeAction(&_getRangeGroupAction, "Get range"),
     _rowFilterAction(this, "Rows"),
     _columnFilterAction(this, "Columns"),
     _applyFiltersAction(this, "Apply filters"),
@@ -114,6 +140,53 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _filterGroupAction.addAction(&_columnFilterAction);
     _filterGroupAction.addAction(&_applyFiltersAction);
     _filterGroupAction.addAction(&_liveTableAction, mv::gui::ToggleAction::PushButtonText);
+    _facadeGroupAction.setShowLabels(false);
+    _facadeGroupAction.setConfigurationFlag(mv::gui::WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _getRowGroupAction.setShowLabels(false);
+    _getRowRangeGroupAction.setShowLabels(false);
+    _getRowsGroupAction.setShowLabels(false);
+    _getColumnRangeGroupAction.setShowLabels(false);
+    _getColumnsGroupAction.setShowLabels(false);
+    _getRangeGroupAction.setShowLabels(false);
+    _rowIdAction.setPrefix("Row");
+    _rowStartAction.setPrefix("Start");
+    _rowEndAction.setPrefix("End");
+    _columnStartAction.setPrefix("Start");
+    _columnEndAction.setPrefix("End");
+    _rangeRowStartAction.setPrefix("Rows from");
+    _rangeRowEndAction.setPrefix("to");
+    _rangeColumnStartAction.setPrefix("Columns from");
+    _rangeColumnEndAction.setPrefix("to");
+    _columnsForRowsStartAction.setPrefix("Columns from");
+    _columnsForRowsEndAction.setPrefix("to");
+    _rowIdsAction.setPlaceHolderString("e.g. 1, 3, 10-20");
+    _columnRowIdsAction.setPlaceHolderString("Rows; e.g. 1, 3, 10-20");
+    _getRowGroupAction.addAction(&_rowIdAction);
+    _getRowGroupAction.addAction(&_getRowAction, mv::gui::TriggerAction::Text);
+    _getRowRangeGroupAction.addAction(&_rowStartAction);
+    _getRowRangeGroupAction.addAction(&_rowEndAction);
+    _getRowRangeGroupAction.addAction(&_getRowRangeAction, mv::gui::TriggerAction::Text);
+    _getRowsGroupAction.addAction(&_rowIdsAction);
+    _getRowsGroupAction.addAction(&_getRowsAction, mv::gui::TriggerAction::Text);
+    _getColumnRangeGroupAction.addAction(&_columnStartAction);
+    _getColumnRangeGroupAction.addAction(&_columnEndAction);
+    _getColumnRangeGroupAction.addAction(&_getColumnRangeAction, mv::gui::TriggerAction::Text);
+    _getColumnsGroupAction.addAction(&_columnsForRowsStartAction);
+    _getColumnsGroupAction.addAction(&_columnsForRowsEndAction);
+    _getColumnsGroupAction.addAction(&_columnRowIdsAction);
+    _getColumnsGroupAction.addAction(&_getColumnsAction, mv::gui::TriggerAction::Text);
+    _getRangeGroupAction.addAction(&_rangeRowStartAction);
+    _getRangeGroupAction.addAction(&_rangeRowEndAction);
+    _getRangeGroupAction.addAction(&_rangeColumnStartAction);
+    _getRangeGroupAction.addAction(&_rangeColumnEndAction);
+    _getRangeGroupAction.addAction(&_getRangeAction, mv::gui::TriggerAction::Text);
+    _facadeGroupAction.addAction(&_getRowGroupAction);
+    _facadeGroupAction.addAction(&_getRowRangeGroupAction);
+    _facadeGroupAction.addAction(&_getRowsGroupAction);
+    _facadeGroupAction.addAction(&_getColumnRangeGroupAction);
+    _facadeGroupAction.addAction(&_getColumnsGroupAction);
+    _facadeGroupAction.addAction(&_getRangeGroupAction);
+    _filterGroupAction.addAction(&_facadeGroupAction);
 
     _table->setModel(_model);
     _table->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -151,6 +224,12 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     });
     connect(&_applyFiltersAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::applyFilters);
     connect(&_liveTableAction, &mv::gui::ToggleAction::toggled, this, &PointsViewWidget::showLiveTable);
+    connect(&_getRowAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getRow);
+    connect(&_getRowRangeAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getRowRange);
+    connect(&_getRowsAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getRows);
+    connect(&_getColumnRangeAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getColumnRange);
+    connect(&_getColumnsAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getColumns);
+    connect(&_getRangeAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getRange);
     connect(&mv::dataHierarchy(), &mv::AbstractDataHierarchyManager::selectedItemsChanged, this, &PointsViewWidget::refreshSelection);
     connect(_fetchTimer, &QTimer::timeout, this, &PointsViewWidget::fetchVisibleRange);
     connect(_table->verticalScrollBar(), &QScrollBar::valueChanged, this, &PointsViewWidget::scheduleVisibleRangeFetch);
@@ -199,6 +278,7 @@ void PointsViewWidget::updateUiState()
     _columnFilterAction.setEnabled(controlsEnabled && !liveTable);
     _applyFiltersAction.setEnabled(filtersAreValid);
     _liveTableAction.setEnabled(controlsEnabled);
+    _facadeGroupAction.setEnabled(controlsEnabled);
 }
 
 void PointsViewWidget::updateInspector(const Points* points)
@@ -516,6 +596,148 @@ void PointsViewWidget::showLiveTable(const bool live)
     {
         updateUiState();
     }
+}
+
+void PointsViewWidget::getRow()
+{
+    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
+    if (selectedItems.size() != 1)
+        return;
+
+    const auto points = selectedItems.first()->getDataset<Points>();
+    if (!points.isValid() || _rowIdAction.getValue() >= points->getNumPoints())
+    {
+        setStatus("The requested row is outside the selected point dataset");
+        return;
+    }
+
+    const auto row = static_cast<std::uint64_t>(_rowIdAction.getValue());
+    std::vector<std::uint64_t> rowIds{ row };
+    std::vector<std::uint64_t> columnIds(points->getNumDimensions());
+    std::iota(columnIds.begin(), columnIds.end(), 0);
+    displayQuery(rowIds, columnIds, [points, row](const PointDataAccessVisitor& visitor) {
+        visitor(points->getRow(row));
+    });
+}
+
+void PointsViewWidget::getRowRange()
+{
+    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
+    if (selectedItems.size() != 1)
+        return;
+
+    const auto points = selectedItems.first()->getDataset<Points>();
+    const auto firstRow = static_cast<std::uint64_t>(_rowStartAction.getValue());
+    const auto lastRow = static_cast<std::uint64_t>(_rowEndAction.getValue());
+    if (!points.isValid() || firstRow > lastRow || lastRow >= points->getNumPoints())
+    {
+        setStatus("The requested row range is invalid");
+        return;
+    }
+
+    std::vector<std::uint64_t> rowIds(lastRow - firstRow + 1);
+    std::iota(rowIds.begin(), rowIds.end(), firstRow);
+    std::vector<std::uint64_t> columnIds(points->getNumDimensions());
+    std::iota(columnIds.begin(), columnIds.end(), 0);
+    displayQuery(rowIds, columnIds, [points, firstRow, rowIds](const PointDataAccessVisitor& visitor) {
+        points->visitRows(firstRow, rowIds.size(), visitor);
+    });
+}
+
+void PointsViewWidget::getRows()
+{
+    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
+    if (selectedItems.size() != 1)
+        return;
+
+    const auto points = selectedItems.first()->getDataset<Points>();
+    QString error;
+    const auto rowIds = points.isValid() ? parseFilter(_rowIdsAction.getString(), points->getNumPoints() - 1, error) : std::vector<std::uint64_t>();
+    if (!points.isValid() || rowIds.empty() || !error.isEmpty())
+    {
+        setStatus(error.isEmpty() ? "The requested row list is invalid" : error);
+        return;
+    }
+
+    std::vector<std::uint64_t> columnIds(points->getNumDimensions());
+    std::iota(columnIds.begin(), columnIds.end(), 0);
+    displayQuery(rowIds, columnIds, [points, rowIds](const PointDataAccessVisitor& visitor) {
+        points->visitRows(rowIds, visitor);
+    });
+}
+
+void PointsViewWidget::getColumnRange()
+{
+    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
+    if (selectedItems.size() != 1)
+        return;
+
+    const auto points = selectedItems.first()->getDataset<Points>();
+    const auto firstColumn = static_cast<std::uint64_t>(_columnStartAction.getValue());
+    const auto lastColumn = static_cast<std::uint64_t>(_columnEndAction.getValue());
+    if (!points.isValid() || firstColumn > lastColumn || lastColumn >= points->getNumDimensions())
+    {
+        setStatus("The requested column range is invalid");
+        return;
+    }
+
+    std::vector<std::uint64_t> rowIds(points->getNumPoints());
+    std::iota(rowIds.begin(), rowIds.end(), 0);
+    std::vector<std::uint64_t> columnIds(lastColumn - firstColumn + 1);
+    std::iota(columnIds.begin(), columnIds.end(), firstColumn);
+    displayQuery(rowIds, columnIds, [points, firstColumn, columnIds](const PointDataAccessVisitor& visitor) {
+        points->visitColumns(firstColumn, columnIds.size(), visitor);
+    });
+}
+
+void PointsViewWidget::getColumns()
+{
+    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
+    if (selectedItems.size() != 1)
+        return;
+
+    const auto points = selectedItems.first()->getDataset<Points>();
+    const auto firstColumn = static_cast<std::uint64_t>(_columnsForRowsStartAction.getValue());
+    const auto lastColumn = static_cast<std::uint64_t>(_columnsForRowsEndAction.getValue());
+    QString error;
+    const auto rowIds = points.isValid() ? parseFilter(_columnRowIdsAction.getString(), points->getNumPoints() - 1, error) : std::vector<std::uint64_t>();
+    if (!points.isValid() || rowIds.empty() || !error.isEmpty() || firstColumn > lastColumn || lastColumn >= points->getNumDimensions())
+    {
+        setStatus(error.isEmpty() ? "The requested columns-for-rows range is invalid" : error);
+        return;
+    }
+
+    std::vector<std::uint64_t> columnIds(lastColumn - firstColumn + 1);
+    std::iota(columnIds.begin(), columnIds.end(), firstColumn);
+    displayQuery(rowIds, columnIds, [points, firstColumn, columnIds, rowIds](const PointDataAccessVisitor& visitor) {
+        points->visitColumns(firstColumn, columnIds.size(), rowIds, visitor);
+    });
+}
+
+void PointsViewWidget::getRange()
+{
+    const auto selectedItems = mv::dataHierarchy().getSelectedItems();
+    if (selectedItems.size() != 1)
+        return;
+
+    const auto points = selectedItems.first()->getDataset<Points>();
+    const auto firstRow = static_cast<std::uint64_t>(_rangeRowStartAction.getValue());
+    const auto lastRow = static_cast<std::uint64_t>(_rangeRowEndAction.getValue());
+    const auto firstColumn = static_cast<std::uint64_t>(_rangeColumnStartAction.getValue());
+    const auto lastColumn = static_cast<std::uint64_t>(_rangeColumnEndAction.getValue());
+    if (!points.isValid() || firstRow > lastRow || lastRow >= points->getNumPoints() || firstColumn > lastColumn || lastColumn >= points->getNumDimensions())
+    {
+        setStatus("The requested point-data range is invalid");
+        return;
+    }
+
+    std::vector<std::uint64_t> rowIds(lastRow - firstRow + 1);
+    std::iota(rowIds.begin(), rowIds.end(), firstRow);
+    std::vector<std::uint64_t> columnIds(lastColumn - firstColumn + 1);
+    std::iota(columnIds.begin(), columnIds.end(), firstColumn);
+    displayQuery(rowIds, columnIds, [points, firstRow, firstColumn, rowIds, columnIds](const PointDataAccessVisitor& visitor) {
+        points->visitRange(firstRow, rowIds.size(), firstColumn, columnIds.size(), visitor);
+    });
 }
 
 void PointsViewWidget::tileSelectedData()

@@ -8,8 +8,10 @@
 
 #include <actions/StringAction.h>
 #include <actions/HorizontalGroupAction.h>
+#include <actions/IntegralAction.h>
 #include <actions/ToggleAction.h>
 #include <actions/TriggerAction.h>
+#include <actions/VerticalGroupAction.h>
 
 #include <QWidget>
 
@@ -66,6 +68,12 @@ private slots:
     void tileSelectedData();
     void applyFilters();
     void showLiveTable(bool live);
+    void getRow();
+    void getRowRange();
+    void getRows();
+    void getColumnRange();
+    void getColumns();
+    void getRange();
 
 private:
     QSpinBox* createIndexSpinBox(QWidget* parent) const;
@@ -90,6 +98,32 @@ private:
     QTimer* _fetchTimer;
     bool _tilingInProgress = false;
     mv::gui::HorizontalGroupAction _filterGroupAction;
+    mv::gui::VerticalGroupAction _facadeGroupAction;
+    mv::gui::HorizontalGroupAction _getRowGroupAction;
+    mv::gui::HorizontalGroupAction _getRowRangeGroupAction;
+    mv::gui::HorizontalGroupAction _getRowsGroupAction;
+    mv::gui::HorizontalGroupAction _getColumnRangeGroupAction;
+    mv::gui::HorizontalGroupAction _getColumnsGroupAction;
+    mv::gui::HorizontalGroupAction _getRangeGroupAction;
+    mv::gui::IntegralAction _rowIdAction;
+    mv::gui::IntegralAction _rowStartAction;
+    mv::gui::IntegralAction _rowEndAction;
+    mv::gui::IntegralAction _columnStartAction;
+    mv::gui::IntegralAction _columnEndAction;
+    mv::gui::IntegralAction _rangeRowStartAction;
+    mv::gui::IntegralAction _rangeRowEndAction;
+    mv::gui::IntegralAction _rangeColumnStartAction;
+    mv::gui::IntegralAction _rangeColumnEndAction;
+    mv::gui::IntegralAction _columnsForRowsStartAction;
+    mv::gui::IntegralAction _columnsForRowsEndAction;
+    mv::gui::StringAction _rowIdsAction;
+    mv::gui::StringAction _columnRowIdsAction;
+    mv::gui::TriggerAction _getRowAction;
+    mv::gui::TriggerAction _getRowRangeAction;
+    mv::gui::TriggerAction _getRowsAction;
+    mv::gui::TriggerAction _getColumnRangeAction;
+    mv::gui::TriggerAction _getColumnsAction;
+    mv::gui::TriggerAction _getRangeAction;
     mv::gui::StringAction _rowFilterAction;
     mv::gui::StringAction _columnFilterAction;
     mv::gui::TriggerAction _applyFiltersAction;
