@@ -61,6 +61,7 @@ namespace mv
 const mv::DataType PointType = mv::DataType(QString("Points"));
 
 class InfoAction;
+class PointsAction;
 class DimensionsPickerAction;
 class ClusterAction;
 
@@ -1253,6 +1254,7 @@ public: // Index transformation
 public: // Action getters
 
     InfoAction& getInfoAction();
+    PointsAction& getPointsAction();
     mv::gui::GroupAction& getDimensionsPickerGroupAction();
     DimensionsPickerAction& getDimensionsPickerAction();
 
@@ -1327,6 +1329,7 @@ public:
     std::vector<std::uint32_t> indices;
 
     InfoAction*                 _infoAction;                    /** Non-owning pointer to info action */
+    PointsAction*               _pointsAction;                   /** Non-owning pointer to points action */
     mv::gui::GroupAction*       _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
     DimensionsPickerAction*     _dimensionsPickerAction;        /** Non-owning pointer to dimensions picker action */
     mv::EventListener           _eventListener;                 /** Listen to HDPS events */

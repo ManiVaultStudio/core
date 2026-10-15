@@ -146,7 +146,7 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _filterGroupAction.setShowLabels(true);
     _filterGroupAction.addAction(&_rowFilterAction);
     _filterGroupAction.addAction(&_columnFilterAction);
-    _filterGroupAction.addAction(&_liveTableAction, mv::gui::ToggleAction::PushButtonIcon);
+    _filterGroupAction.addAction(&_liveTableAction, mv::gui::ToggleAction::CheckBox);
     _facadeGroupAction.setIconByName("table-columns");
     _facadeGroupAction.setShowLabels(true);
     _facadeGroupAction.setConfigurationFlag(mv::gui::WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
@@ -203,7 +203,6 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _getColumnsAction.setIconByName("sync");
     _getColumnsForRowsAction.setIconByName("sync");
     _getRangeAction.setIconByName("sync");
-    _liveTableAction.setIconByName("eye");
     _rowIdsAction.setPlaceHolderString("e.g. 1, 3, 10-20");
     _columnIdsAction.setPlaceHolderString("e.g. 1, 3, 10-20");
     _columnRowIdsAction.setPlaceHolderString("Row IDs; e.g. 1, 3, 10-20");

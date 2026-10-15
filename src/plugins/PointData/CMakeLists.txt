@@ -18,6 +18,7 @@ set(POINTS_SOURCES
     src/SparseMatrix.h
     src/DimensionNamesSerializer.h
     src/DimensionNamesSerializer.cpp
+    src/PointsAction.cpp
     src/tiled/PointDataTileCache.cpp
     src/tiled/PointDataTiledStorage.cpp
     src/tiled/PointDataTiledSerialization.cpp
@@ -56,6 +57,7 @@ set(POINTS_HEADERS
     src/CreateSetFromSelectionAction.h
     src/SparseMatrix.h
     src/DimensionNamesSerializer.h
+    src/PointsAction.h
     src/PointsTableModel.h
     src/PointsViewWidget.h
     src/tiled/PointDataTile.h

@@ -7,6 +7,7 @@
 
 #include "DimensionsPickerAction.h"
 #include "InfoAction.h"
+#include "PointsAction.h"
 #include "DimensionNamesSerializer.h"
 #include "tiled/PointDataTiledStorage.h"
 #include "tiled/PointDataTiledSerialization.h"
@@ -882,6 +883,7 @@ void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, cons
 Points::Points(QString dataName, bool mayUnderive /*= true*/, const QString& guid /*= ""*/) :
     DatasetImpl(dataName, mayUnderive, guid),
     _infoAction(nullptr),
+    _pointsAction(nullptr),
     _dimensionsPickerGroupAction(nullptr),
     _dimensionsPickerAction(nullptr)
 {
@@ -892,6 +894,7 @@ void Points::init()
     DatasetImpl::init();
 
     _infoAction = new InfoAction(this, *this);
+    _pointsAction = new PointsAction(this);
 
     const auto updateDimensionsPickerAction = [this]() -> void {
         _dimensionsPickerAction->setPointsDataset(*this);
@@ -1306,6 +1309,11 @@ void Points::getLocalSelectionIndices(std::vector<std::uint32_t>& localSelection
 InfoAction& Points::getInfoAction()
 {
     return *_infoAction;
+}
+
+PointsAction& Points::getPointsAction()
+{
+    return *_pointsAction;
 }
 
 mv::gui::GroupAction& Points::getDimensionsPickerGroupAction()
