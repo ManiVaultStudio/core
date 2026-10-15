@@ -30,7 +30,7 @@ PointsAction::Widget::Widget(QWidget* parent, PointsAction* pointsAction) :
     auto* layout = new QVBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    auto* pointsViewWidget = new PointsViewWidget(this);
+    auto* pointsViewWidget = new PointsViewWidget(this, nullptr, false);
     pointsViewWidget->setPoints(pointsAction->getPoints());
     layout->addWidget(pointsViewWidget);
 

@@ -12,6 +12,7 @@
 #include <actions/StringAction.h>
 #include <actions/HorizontalGroupAction.h>
 #include <actions/IntegralAction.h>
+#include <actions/TriggerAction.h>
 #include <actions/ToggleAction.h>
 #include <actions/TriggerAction.h>
 #include <actions/VerticalGroupAction.h>
@@ -25,7 +26,6 @@
 class QEvent;
 template <typename T> class QFutureWatcher;
 class QLabel;
-class QPlainTextEdit;
 class QPushButton;
 class QSpinBox;
 class QTableView;
@@ -55,7 +55,7 @@ class POINTDATA_EXPORT PointsViewWidget final : public QWidget
 
 public:
     /** Constructs the points view and optionally associates a progress task. */
-    explicit PointsViewWidget(QWidget* parent = nullptr, mv::Task* progressTask = nullptr);
+    explicit PointsViewWidget(QWidget* parent = nullptr, mv::Task* progressTask = nullptr, bool showDatasetControls = true);
 
     /** Sets the point-data source displayed by the widget. */
     void setPoints(const mv::Dataset<Points>& points);
@@ -93,6 +93,7 @@ private:
     void displayQuery(const std::vector<std::uint64_t>& rowIds, const std::vector<std::uint64_t>& columnIds, const std::function<void(const PointDataAccessVisitor&)>& request);
 
     mv::Dataset<Points>             _points;
+    bool                            _showDatasetControls;
     QLabel*                         _datasetLabel;
     QLabel*                         _inspectorLabel;
     QLabel*                         _statusLabel;
@@ -101,7 +102,6 @@ private:
     QSpinBox*                       _cacheCapacity;
     QPushButton*                    _tileButton;
     QTableView*                     _table;
-    QPlainTextEdit*                 _accessLog;
     PointsTableModel*               _model;
     mv::Task*                       _progressTask;
     QFutureWatcher<void>*           _tileWatcher;
@@ -145,4 +145,5 @@ private:
     mv::gui::StringAction           _rowFilterAction;
     mv::gui::StringAction           _columnFilterAction;
     mv::gui::ToggleAction           _liveTableAction;
+    mv::gui::TriggerAction          _openInPointsViewAction;
 };

@@ -8,7 +8,6 @@
 
 #include <QAbstractItemView>
 #include <QEvent>
-#include <QElapsedTimer>
 #include <QFutureWatcher>
 #include <QFormLayout>
 #include <QGroupBox>
@@ -16,7 +15,6 @@
 #include <QHeaderView>
 #include <QLabel>
 #include <QPushButton>
-#include <QPlainTextEdit>
 #include <QScrollBar>
 #include <QSpinBox>
 #include <QTableView>
@@ -68,17 +66,17 @@ float valueAt(const PointDataAccessView& view, const std::uint64_t row, const st
 }
 }
 
-PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
+PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask, const bool showDatasetControls) :
     QWidget(parent),
-    _datasetLabel(new QLabel("No Points dataset selected", this)),
+    _showDatasetControls(showDatasetControls),
+    _datasetLabel(showDatasetControls ? new QLabel("No Points dataset selected", this) : nullptr),
     _inspectorLabel(new QLabel(this)),
     _statusLabel(new QLabel(this)),
-    _rowTileSize(createIndexSpinBox(this)),
-    _columnTileSize(createIndexSpinBox(this)),
-    _cacheCapacity(createIndexSpinBox(this)),
-    _tileButton(new QPushButton("Enable tiled storage", this)),
+    _rowTileSize(showDatasetControls ? createIndexSpinBox(this) : nullptr),
+    _columnTileSize(showDatasetControls ? createIndexSpinBox(this) : nullptr),
+    _cacheCapacity(showDatasetControls ? createIndexSpinBox(this) : nullptr),
+    _tileButton(showDatasetControls ? new QPushButton("Enable tiled storage", this) : nullptr),
     _table(new QTableView(this)),
-    _accessLog(new QPlainTextEdit(this)),
     _model(new PointsTableModel(this)),
     _progressTask(progressTask),
     _tileWatcher(new QFutureWatcher<void>(this)),
@@ -120,28 +118,37 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _getRangeAction(&_getRangeGroupAction, "Get range"),
     _rowFilterAction(this, "Rows"),
     _columnFilterAction(this, "Columns"),
-    _liveTableAction(this, "Show live table", true)
+    _liveTableAction(this, "Show live table", true),
+    _openInPointsViewAction(this, "Open in Points View")
 {
-    _rowTileSize->setValue(256);
-    _columnTileSize->setValue(8);
-    _cacheCapacity->setValue(8);
+    QGroupBox* settings = nullptr;
 
-    auto* controls = new QFormLayout();
-    controls->addRow("Row tile size", _rowTileSize);
-    controls->addRow("Column tile size", _columnTileSize);
-    controls->addRow("Tile cache capacity", _cacheCapacity);
+    if (_showDatasetControls)
+    {
+        _rowTileSize->setValue(256);
+        _columnTileSize->setValue(8);
+        _cacheCapacity->setValue(8);
 
-    auto* actions = new QVBoxLayout();
-    actions->addWidget(_tileButton);
-    actions->addStretch(1);
+        auto* controls = new QFormLayout();
+        controls->addRow("Row tile size", _rowTileSize);
+        controls->addRow("Column tile size", _columnTileSize);
+        controls->addRow("Tile cache capacity", _cacheCapacity);
 
-    auto* settings = new QGroupBox("Lazy table access", this);
-    auto* settingsLayout = new QHBoxLayout(settings);
-    settingsLayout->addLayout(controls, 1);
-    settingsLayout->addLayout(actions);
+        auto* actions = new QVBoxLayout();
+        actions->addWidget(_tileButton);
+        actions->addStretch(1);
+
+        settings = new QGroupBox("Lazy table access", this);
+        auto* settingsLayout = new QHBoxLayout(settings);
+        settingsLayout->addLayout(controls, 1);
+        settingsLayout->addLayout(actions);
+    }
 
     _rowFilterAction.setPlaceHolderString("Required; e.g. 1, 3, 10-20");
     _columnFilterAction.setPlaceHolderString("Optional = all columns; e.g. 0-4, 8");
+    _rowFilterAction.setDefaultWidgetFlags(mv::gui::StringAction::LineEdit);
+    _columnFilterAction.setDefaultWidgetFlags(mv::gui::StringAction::LineEdit);
+    _openInPointsViewAction.setIconByName("external-link");
 
     _filterGroupAction.setShowLabels(true);
     _filterGroupAction.addAction(&_rowFilterAction);
@@ -255,19 +262,23 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _table->verticalHeader()->setDefaultSectionSize(22);
     _table->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
     _table->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    _accessLog->setReadOnly(true);
-    _accessLog->setMaximumBlockCount(12);
-    _accessLog->setMaximumHeight(110);
-    _accessLog->setPlaceholderText("Visible-range requests will appear here");
-
     auto* layout = new QVBoxLayout(this);
-    layout->addWidget(_datasetLabel);
-    layout->addWidget(settings);
+    if (_datasetLabel)
+        layout->addWidget(_datasetLabel);
+
+    if (settings)
+        layout->addWidget(settings);
+
     layout->addWidget(_filterGroupAction.createWidget(this));
     layout->addWidget(_table, 1);
-    layout->addWidget(_inspectorLabel);
-    layout->addWidget(_accessLog);
-    layout->addWidget(_statusLabel);
+
+    if (_showDatasetControls)
+    {
+        layout->addWidget(_inspectorLabel);
+        layout->addWidget(_statusLabel);
+    }
+    else
+        layout->addWidget(_openInPointsViewAction.createWidget(this));
 
     _table->verticalScrollBar()->installEventFilter(this);
     _table->horizontalScrollBar()->installEventFilter(this);
@@ -277,7 +288,8 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _filterTimer->setSingleShot(true);
     _filterTimer->setInterval(350);
 
-    connect(_tileButton, &QPushButton::clicked, this, &PointsViewWidget::tileSelectedData);
+    if (_tileButton)
+        connect(_tileButton, &QPushButton::clicked, this, &PointsViewWidget::tileSelectedData);
     connect(&_rowFilterAction, &mv::gui::StringAction::stringChanged, this, [this] {
         updateUiState();
         _filterTimer->stop();
@@ -307,6 +319,10 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
 
     connect(_filterTimer, &QTimer::timeout, this, &PointsViewWidget::applyFilters);
     connect(&_liveTableAction, &mv::gui::ToggleAction::toggled, this, &PointsViewWidget::showLiveTable);
+    connect(&_openInPointsViewAction, &mv::gui::TriggerAction::triggered, this, [this] {
+        if (_points.isValid())
+            mv::plugins().requestViewPluginFloated("Points View", { _points });
+    });
     connect(&_getRowAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getRow);
     connect(&_getRowRangeAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getRowRange);
     connect(&_getRowsAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getRows);
@@ -367,11 +383,15 @@ void PointsViewWidget::updateUiState()
     const auto tableEnabled    = hasPointData && !_tilingInProgress;
     const auto liveTable       = _liveTableAction.isChecked();
 
-    _rowTileSize->setEnabled(controlsEnabled && !_model->isQueryResult());
-    _columnTileSize->setEnabled(controlsEnabled && !_model->isQueryResult());
-    _cacheCapacity->setEnabled(controlsEnabled);
-    _tileButton->setEnabled(controlsEnabled);
+    if (_showDatasetControls)
+    {
+        _rowTileSize->setEnabled(controlsEnabled && !_model->isQueryResult());
+        _columnTileSize->setEnabled(controlsEnabled && !_model->isQueryResult());
+        _cacheCapacity->setEnabled(controlsEnabled);
+        _tileButton->setEnabled(controlsEnabled);
+    }
     _table->setEnabled(tableEnabled);
+    _openInPointsViewAction.setEnabled(hasPointData && !_showDatasetControls);
 
     _rowFilterAction.setEnabled(controlsEnabled && !liveTable);
     _columnFilterAction.setEnabled(controlsEnabled && !liveTable);
@@ -463,8 +483,8 @@ void PointsViewWidget::refreshPoints()
 
     if (!_points.isValid())
     {
-        _datasetLabel->setText("Select exactly one Points dataset");
-        _accessLog->clear();
+        if (_datasetLabel)
+            _datasetLabel->setText("Select exactly one Points dataset");
         updateInspector(nullptr);
         setStatus("Scroll after selecting a dataset to fetch visible values");
         return;
@@ -472,12 +492,12 @@ void PointsViewWidget::refreshPoints()
 
     _model->setPoints(_points.get(), _points->getNumPoints(), _points->getNumDimensions());
     updateUiState();
-    _datasetLabel->setText(QString("%1 — %2 points × %3 dimensions (%4)")
-        .arg(_points->getGuiName())
-        .arg(_points->getNumPoints())
-        .arg(_points->getNumDimensions())
-        .arg(_points->isTiled() ? "tiled" : "eager"));
-    _accessLog->clear();
+    if (_datasetLabel)
+        _datasetLabel->setText(QString("%1 — %2 points × %3 dimensions (%4)")
+            .arg(_points->getGuiName())
+            .arg(_points->getNumPoints())
+            .arg(_points->getNumDimensions())
+            .arg(_points->isTiled() ? "tiled" : "eager"));
     updateInspector(_points.get());
     setStatus("Fetching the visible table window...");
     QTimer::singleShot(0, this, &PointsViewWidget::fetchVisibleRange);
@@ -510,10 +530,7 @@ void PointsViewWidget::fetchVisibleRange()
     const auto columnCount = lastColumn >= firstColumn
         ? static_cast<std::uint64_t>(lastColumn - firstColumn + 1)
         : 1;
-    QElapsedTimer timer;
-    timer.start();
     const auto callbacks = _model->fetchRange(static_cast<std::uint64_t>(firstRow), rowCount, static_cast<std::uint64_t>(firstColumn), columnCount);
-    const auto elapsedMilliseconds = timer.elapsed();
 
     if (!_model->getLastError().isEmpty())
     {
@@ -526,13 +543,6 @@ void PointsViewWidget::fetchVisibleRange()
         return;
     }
 
-    _accessLog->appendPlainText(QString("rows %1–%2, columns %3–%4 | %5 segment(s) | %6 ms")
-        .arg(firstRow)
-        .arg(firstRow + static_cast<int>(rowCount) - 1)
-        .arg(firstColumn)
-        .arg(firstColumn + static_cast<int>(columnCount) - 1)
-        .arg(callbacks)
-        .arg(elapsedMilliseconds));
     updateInspector(_points.get());
     setStatus(QString("Fetched visible rows %1–%2, columns %3–%4 in %5 access segment(s); cached tiles: %6. Drag/scroll and release to fetch again.")
         .arg(firstRow)
