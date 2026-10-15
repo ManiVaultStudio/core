@@ -9,9 +9,6 @@
 #include <QAbstractItemView>
 #include <QEvent>
 #include <QFutureWatcher>
-#include <QFormLayout>
-#include <QGroupBox>
-#include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
 #include <QPushButton>
@@ -70,8 +67,8 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask, cons
     QWidget(parent),
     _showDatasetControls(showDatasetControls),
     _datasetLabel(showDatasetControls ? new QLabel("No Points dataset selected", this) : nullptr),
-    _inspectorLabel(new QLabel(this)),
-    _statusLabel(new QLabel(this)),
+    _inspectorLabel(showDatasetControls ? new QLabel(this) : nullptr),
+    _statusLabel(showDatasetControls ? new QLabel(this) : nullptr),
     _rowTileSize(showDatasetControls ? createIndexSpinBox(this) : nullptr),
     _columnTileSize(showDatasetControls ? createIndexSpinBox(this) : nullptr),
     _cacheCapacity(showDatasetControls ? createIndexSpinBox(this) : nullptr),
@@ -121,29 +118,6 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask, cons
     _liveTableAction(this, "Show live table", true),
     _openInPointsViewAction(this, "Open in Points View")
 {
-    QGroupBox* settings = nullptr;
-
-    if (_showDatasetControls)
-    {
-        _rowTileSize->setValue(256);
-        _columnTileSize->setValue(8);
-        _cacheCapacity->setValue(8);
-
-        auto* controls = new QFormLayout();
-        controls->addRow("Row tile size", _rowTileSize);
-        controls->addRow("Column tile size", _columnTileSize);
-        controls->addRow("Tile cache capacity", _cacheCapacity);
-
-        auto* actions = new QVBoxLayout();
-        actions->addWidget(_tileButton);
-        actions->addStretch(1);
-
-        settings = new QGroupBox("Lazy table access", this);
-        auto* settingsLayout = new QHBoxLayout(settings);
-        settingsLayout->addLayout(controls, 1);
-        settingsLayout->addLayout(actions);
-    }
-
     _rowFilterAction.setPlaceHolderString("Required; e.g. 1, 3, 10-20");
     _columnFilterAction.setPlaceHolderString("Optional = all columns; e.g. 0-4, 8");
     _rowFilterAction.setDefaultWidgetFlags(mv::gui::StringAction::LineEdit);
@@ -266,9 +240,6 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask, cons
     if (_datasetLabel)
         layout->addWidget(_datasetLabel);
 
-    if (settings)
-        layout->addWidget(settings);
-
     layout->addWidget(_filterGroupAction.createWidget(this));
     layout->addWidget(_table, 1);
 
@@ -288,8 +259,6 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask, cons
     _filterTimer->setSingleShot(true);
     _filterTimer->setInterval(350);
 
-    if (_tileButton)
-        connect(_tileButton, &QPushButton::clicked, this, &PointsViewWidget::tileSelectedData);
     connect(&_rowFilterAction, &mv::gui::StringAction::stringChanged, this, [this] {
         updateUiState();
         _filterTimer->stop();
@@ -373,7 +342,8 @@ QSpinBox* PointsViewWidget::createIndexSpinBox(QWidget* parent) const
 
 void PointsViewWidget::setStatus(const QString& text)
 {
-    _statusLabel->setText(text);
+    if (_statusLabel)
+        _statusLabel->setText(text);
 }
 
 void PointsViewWidget::updateUiState()
@@ -449,6 +419,9 @@ void PointsViewWidget::updateFacadeActionState()
 
 void PointsViewWidget::updateInspector(const Points* points)
 {
+    if (!_inspectorLabel)
+        return;
+
     if (!points)
     {
         _inspectorLabel->setText("Storage inspector: no point data");

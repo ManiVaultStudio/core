@@ -3,6 +3,8 @@
 #pragma once
 
 #include "pointdata_export.h"
+#include "PointsViewAction.h"
+#include "StorageBackendAction.h"
 
 #include <Dataset.h>
 #include <actions/GroupAction.h>
@@ -10,17 +12,16 @@
 class Points;
 
 /**
- * @brief Point-data action section containing the interactive points view.
+ * @brief Point-data action section containing the point-data view actions.
  *
- * PointsAction embeds the reusable PointsViewWidget in the PointData action
- * hierarchy. This makes the lazy table and facade-access controls available
- * next to the regular point-data information actions, while keeping the
- * widget implementation independent from the Points View plugin wrapper.
+ * PointsAction groups the storage-backend selector and the reusable
+ * point-data view action in the PointData action hierarchy. Keeping these as
+ * separate child actions lets the standard action system control their layout
+ * and keeps the embedded view implementation independent from this group.
  *
- * The action owns only the action-widget shell. Each action widget owns its
- * PointsViewWidget through the normal Qt parent-child relationship. The view
- * remains read-only with respect to point values and uses the selected data
- * hierarchy item as its data source.
+ * The action stores dataset handles in its children. Their widgets own the
+ * corresponding Qt controls, and the view remains read-only with respect to
+ * point values.
  *
  * @author Thomas Kroes
  */
@@ -28,25 +29,17 @@ class POINTDATA_EXPORT PointsAction final : public mv::gui::GroupAction
 {
     Q_OBJECT
 
-protected:
-    /** Widget implementation that embeds the reusable PointsViewWidget. */
-    class POINTDATA_EXPORT Widget final : public mv::gui::WidgetActionWidget
-    {
-    public:
-        /** Constructs the action widget and its embedded points view. */
-        Widget(QWidget* parent, PointsAction* pointsAction);
-    };
-
-    /** Creates the custom widget representation of this action. */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
-
 public:
     /** Constructs the point-data action section. */
     PointsAction(QObject* parent, const mv::Dataset<Points>& points);
 
-    /** Returns the point-data source displayed by the embedded widget. */
-    const mv::Dataset<Points>& getPoints() const;
+    /** Returns the storage backend action. */
+    StorageBackendAction& getStorageBackendAction();
+
+    /** Returns the point-data view action. */
+    PointsViewAction& getPointsViewAction();
 
 private:
-    mv::Dataset<Points> _points; /**< Point-data source displayed by the action. */
+    StorageBackendAction _storageBackendAction; /**< Storage backend selector and configuration action. */
+    PointsViewAction     _pointsViewAction;     /**< Embedded point-data view action. */
 };
