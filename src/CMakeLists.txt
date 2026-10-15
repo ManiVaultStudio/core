@@ -64,11 +64,22 @@ include(DownloadFontAwesome)
 # -----------------------------------------------------------------------------
 
 # Qt
-find_package(Qt6 6.8 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets Concurrent REQUIRED)
+find_package(Qt6 6.8 COMPONENTS Core Widgets Network OpenGL OpenGLWidgets WebEngineWidgets Concurrent REQUIRED)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
 message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
+
+if(MV_BUILD_TESTING)
+    CPMAddPackage(
+        NAME              googletest
+        GITHUB_REPOSITORY google/googletest
+        GIT_TAG           v1.15.2
+        OPTIONS
+            "INSTALL_GTEST OFF"
+            "gtest_force_shared_crt ON"
+    )
+endif()
 
 # File compression: zlib
 CPMAddPackage(
@@ -504,6 +515,7 @@ add_subdirectory(plugins/LoggingPlugin)
 add_subdirectory(plugins/TasksPlugin)
 add_subdirectory(plugins/SampleScopePlugin)
 add_subdirectory(plugins/TutorialPlugin)
+add_subdirectory(plugins/PointsViewPlugin)
 
 set(MV_SYSTEM_PLUGINS
     DataHierarchyPlugin 
@@ -513,6 +525,7 @@ set(MV_SYSTEM_PLUGINS
     TasksPlugin 
     SampleScopePlugin 
     TutorialPlugin
+    PointsViewPlugin
 )
 
 foreach(system_plugin_target IN LISTS MV_SYSTEM_PLUGINS)

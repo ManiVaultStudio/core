@@ -27,6 +27,16 @@ explicitly asks for a broad formatting change.
 - Keep short, cohesive statements together. Use empty lines to separate
   setup, validation, processing, and reporting sections.
 - Do not add empty lines between every statement in a short, related group.
+- Add an empty line after dataset or object lookup before validating the lookup.
+- Add an empty line between related setup groups when they represent different
+  concepts, such as the selected dataset, requested bounds, parsed IDs, and
+  output buffers.
+- Add an empty line before the main validation condition when all of its input
+  values have been collected above it.
+- Add an empty line between validation and the first processing loop or buffer
+  construction.
+- Keep consecutive assignments together when they form one cohesive group;
+  whitespace should clarify logical phases, not separate every assignment.
 
 ## Function signatures
 

@@ -1,0 +1,6 @@
+{
+    "name" : "Points View",
+    "version" : { "plugin" : "1.0.0" },
+    "type" : "System",
+    "dependencies" : [ "Points" ]
+}

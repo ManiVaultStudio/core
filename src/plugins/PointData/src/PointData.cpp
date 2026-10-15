@@ -8,6 +8,8 @@
 #include "DimensionsPickerAction.h"
 #include "InfoAction.h"
 #include "DimensionNamesSerializer.h"
+#include "tiled/PointDataTiledStorage.h"
+#include "tiled/PointDataTiledSerialization.h"
 
 #include <Application.h>
 
@@ -24,7 +26,9 @@
 #include <QtCore>
 
 #include <cstring>
+#include <algorithm>
 #include <set>
+#include <stdexcept>
 #include <type_traits>
 
 Q_PLUGIN_METADATA(IID "studio.manivault.PointData")
@@ -78,24 +82,32 @@ PointData::ElementTypeSpecifier PointData::elementTypeSpecifier(const QString& t
 
 QString PointData::elementTypeName(const ElementTypeSpecifier elementTypeSpecifier)
 {
-    switch (elementTypeSpecifier) 
+    switch (elementTypeSpecifier)
     {
         case ElementTypeSpecifier::float32:
             return "float32";
+
         case ElementTypeSpecifier::bfloat16:
             return "bfloat16";
+
         case ElementTypeSpecifier::int32:
             return "int32";
+
         case ElementTypeSpecifier::uint32:
             return "uint32";
+
         case ElementTypeSpecifier::int16:
             return "int16";
+
         case ElementTypeSpecifier::uint16:
             return "uint16";
+
         case ElementTypeSpecifier::int8:
             return "int8";
+
         case ElementTypeSpecifier::uint8:
             return "uint8";
+
         default:
             return "unknown";
     }
@@ -122,6 +134,8 @@ std::uint64_t PointData::getNumPoints() const
         return 0;
     }
 
+    if (_tiledStorage)
+        return _tiledStorage->rows();
     if (_isDense)
         return static_cast<std::uint64_t>(getSizeOfVector() / _numDimensions);
     else
@@ -137,7 +151,7 @@ std::uint64_t PointData::getNumDimensions() const
 std::uint64_t PointData::getNumberOfElements() const
 {
     const auto dataLock = lockData();
-    return getSizeOfVector();
+    return _tiledStorage ? _tiledStorage->rows() * _tiledStorage->columns() : getSizeOfVector();
 }
 
 
@@ -145,6 +159,8 @@ std::uint64_t PointData::getRawDataSize() const
 {
     const auto dataLock = lockData();
 
+    if (_tiledStorage)
+        return getNumberOfElements() * _tiledStorage->elementSize();
     if (_isDense)
     {
         std::uint64_t elementSize = std::visit([](auto& vec) { return vec.empty() ? 0u : sizeof(vec[0]); }, _variantOfVectors);
@@ -159,13 +175,330 @@ std::uint64_t PointData::getRawDataSize() const
 void* PointData::getDataVoidPtr()
 {
     const auto dataLock = lockData();
+    if (_tiledStorage)
+        materializeTiled();
     return std::visit([](auto& vec) { return (void*)vec.data(); }, _variantOfVectors);
 }
 
 const void* PointData::getDataConstVoidPtr() const
 {
     const auto dataLock = lockData();
+    if (_tiledStorage)
+        const_cast<PointData*>(this)->materializeTiled();
     return std::visit([](const auto& vec) { return (const void*)vec.data(); }, _variantOfVectors);
+}
+
+bool PointData::isTiled() const
+{
+    const auto lock = lockData();
+
+    return static_cast<bool>(_tiledStorage);
+}
+
+void PointData::makeTiled(const std::size_t rowTileSize, const std::size_t columnTileSize, std::function<void(float)> progress)
+{
+    const auto lock = lockData();
+
+    if (_isDense && !_tiledStorage && _numDimensions > 0)
+    {
+        const auto rows = static_cast<std::uint64_t>(getSizeOfVector() / _numDimensions);
+
+        const auto elementSize = std::visit([](const auto& vector) { return sizeof(typename std::decay_t<decltype(vector)>::value_type); }, _variantOfVectors);
+        const auto* data = static_cast<const char*>(std::visit([](const auto& vector) { return static_cast<const void*>(vector.data()); }, _variantOfVectors));
+
+        _tiledStorage = mv::pointdata::tiled::PointDataTiledStorage::fromDense(data, rows, _numDimensions, elementSize, rowTileSize, columnTileSize, std::move(progress));
+
+        _numRows = rows;
+    }
+}
+
+void PointData::makeTiledFromGenerator(const std::uint64_t rows, const std::uint64_t columns, const ElementTypeSpecifier elementType, const std::size_t rowTileSize, const std::size_t columnTileSize, TiledTileGenerator generator)
+{
+    const auto lock = lockData();
+
+    if (!generator || rows == 0 || columns == 0)
+        throw std::invalid_argument("Invalid tiled point-data generator settings");
+
+    setElementTypeSpecifier(elementType);
+    _numDimensions = columns;
+    _numRows = rows;
+    _isDense = true;
+    const auto elementSize = std::visit([](const auto& vector) { return sizeof(typename std::decay_t<decltype(vector)>::value_type); }, _variantOfVectors);
+    _tiledStorage = mv::pointdata::tiled::PointDataTiledStorage::fromGenerator(rows, columns, elementSize, rowTileSize, columnTileSize, [generator = std::move(generator)](const mv::pointdata::tiled::TileDescriptor& descriptor) {
+        return generator(descriptor.rowOffset, descriptor.columnOffset, descriptor.rows, descriptor.columns);
+    });
+}
+
+PointData::TileView PointData::acquireTile(const std::uint64_t tileRow, const std::uint64_t tileColumn) const
+{
+    const auto lock = lockData();
+
+    return _tiledStorage ? _tiledStorage->acquire(tileRow, tileColumn) : TileView{};
+}
+
+void PointData::setTiledCacheCapacity(const std::size_t capacity)
+{
+    const auto lock = lockData();
+
+    if (_tiledStorage)
+        _tiledStorage->setCacheCapacity(capacity);
+}
+
+std::size_t PointData::getTiledCacheSize() const
+{
+    const auto lock = lockData();
+
+    return _tiledStorage ? _tiledStorage->cacheSize() : 0;
+}
+
+std::size_t PointData::getTiledCacheCapacity() const
+{
+    const auto lock = lockData();
+
+    return _tiledStorage ? _tiledStorage->cacheCapacity() : 0;
+}
+
+std::size_t PointData::getTiledRowTileSize() const
+{
+    const auto lock = lockData();
+
+    return _tiledStorage ? _tiledStorage->rowTileSize() : 0;
+}
+
+std::size_t PointData::getTiledColumnTileSize() const
+{
+    const auto lock = lockData();
+
+    return _tiledStorage ? _tiledStorage->columnTileSize() : 0;
+}
+
+std::uint64_t PointData::getTiledCacheHits() const
+{
+    const auto lock = lockData();
+
+    return _tiledStorage ? _tiledStorage->cacheHits() : 0;
+}
+
+std::uint64_t PointData::getTiledCacheMisses() const
+{
+    const auto lock = lockData();
+
+    return _tiledStorage ? _tiledStorage->cacheMisses() : 0;
+}
+
+std::uint64_t PointData::getTiledCacheEvictions() const
+{
+    const auto lock = lockData();
+
+    return _tiledStorage ? _tiledStorage->cacheEvictions() : 0;
+}
+
+PointData::TiledMemoryEstimate PointData::getTiledMemoryEstimate() const
+{
+    const auto lock = lockData();
+
+    if (!_tiledStorage)
+        return {};
+
+    const auto estimate = _tiledStorage->memoryEstimate();
+    return {
+        estimate.rawDataBytes,
+        estimate.largestTileBytes,
+        estimate.cachedTileBytes,
+        estimate.tileCount,
+        estimate.indexBytes
+    };
+}
+
+PointData::TiledMemoryEstimate PointData::estimateTiledMemory(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, const std::size_t cacheCapacity)
+{
+    const auto estimate = mv::pointdata::tiled::PointDataTiledStorage::estimateMemory(rows, columns, elementSize, rowTileSize, columnTileSize, cacheCapacity);
+
+    return {
+        estimate.rawDataBytes,
+        estimate.largestTileBytes,
+        estimate.cachedTileBytes,
+        estimate.tileCount,
+        estimate.indexBytes
+    };
+}
+
+namespace
+{
+PointDataAccessView makeFloatAccessView(std::vector<float>&& values)
+{
+    auto bytes = std::make_shared<QByteArray>(reinterpret_cast<const char*>(values.data()), static_cast<qsizetype>(values.size() * sizeof(float)));
+    PointDataAccessView view;
+    view.data = bytes->constData();
+    view.rows = 1;
+    view.columns = static_cast<std::uint64_t>(values.size());
+    view.rowStrideBytes = static_cast<std::uint64_t>(bytes->size());
+    view.elementTypeIndex = static_cast<std::uint32_t>(PointData::ElementTypeSpecifier::float32);
+    view.elementSizeBytes = sizeof(float);
+    view.lifetime = std::shared_ptr<const void>(bytes, bytes->constData());
+    return view;
+}
+
+PointDataAccessView makeTileAccessView(const mv::pointdata::tiled::TileView& tile, const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t rows, const std::uint64_t columns, const std::uint32_t typeIndex)
+{
+    PointDataAccessView view;
+    view.data = static_cast<const char*>(tile.data())
+        + rowOffset * tile.columns() * tile.elementSize()
+        + columnOffset * tile.elementSize();
+    view.rows = rows;
+    view.columns = columns;
+    view.rowStrideBytes = tile.columns() * tile.elementSize();
+    view.elementTypeIndex = typeIndex;
+    view.elementSizeBytes = static_cast<std::uint32_t>(tile.elementSize());
+    view.lifetime = tile.lifetimeToken();
+    return view;
+}
+}
+
+PointDataAccessView PointData::getRow(const std::uint64_t row) const
+{
+    if (row >= getNumPoints())
+        return {};
+
+    std::vector<float> values(static_cast<std::size_t>(_numDimensions));
+
+    for (std::uint64_t column = 0; column < _numDimensions; ++column)
+    {
+        values[static_cast<std::size_t>(column)] = getValueAt(static_cast<std::size_t>(row * _numDimensions + column));
+    }
+
+    return makeFloatAccessView(std::move(values));
+}
+
+void PointData::visitRows(const std::uint64_t firstRow, const std::uint64_t rowCount, const PointDataAccessVisitor& visitor) const
+{
+    if (firstRow > getNumPoints() || rowCount > getNumPoints() - firstRow)
+        throw std::out_of_range("Point-data row range is out of bounds");
+
+    for (std::uint64_t row = firstRow; row < firstRow + rowCount; ++row)
+        visitRange(row, 1, 0, _numDimensions, visitor);
+}
+
+void PointData::visitRows(const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
+{
+    for (const auto row : rowIds)
+        visitRows(row, 1, visitor);
+}
+
+void PointData::visitColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
+{
+    if (firstColumn > _numDimensions || columnCount > _numDimensions - firstColumn)
+        throw std::out_of_range("Point-data column range is out of bounds");
+
+    for (std::uint64_t row = 0; row < getNumPoints(); ++row)
+        visitRange(row, 1, firstColumn, columnCount, visitor);
+}
+
+void PointData::visitColumns(const std::vector<std::uint64_t>& columnIds, const PointDataAccessVisitor& visitor) const
+{
+    std::vector<std::uint64_t> rowIds(getNumPoints());
+    std::iota(rowIds.begin(), rowIds.end(), 0);
+
+    visitColumns(columnIds, rowIds, visitor);
+}
+
+void PointData::visitColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
+{
+    if (firstColumn > _numDimensions || columnCount > _numDimensions - firstColumn)
+        throw std::out_of_range("Point-data column range is out of bounds");
+
+    for (const auto row : rowIds)
+    {
+        if (row >= getNumPoints())
+            throw std::out_of_range("Point-data row ID is out of bounds");
+        visitRange(row, 1, firstColumn, columnCount, visitor);
+    }
+}
+
+void PointData::visitColumns(const std::vector<std::uint64_t>& columnIds, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
+{
+    if (!visitor)
+        throw std::invalid_argument("Point-data visitor is invalid");
+
+    for (const auto column : columnIds)
+    {
+        if (column >= getNumDimensions())
+            throw std::out_of_range("Point-data column ID is out of bounds");
+    }
+
+    for (const auto row : rowIds)
+    {
+        if (row >= getNumPoints())
+            throw std::out_of_range("Point-data row ID is out of bounds");
+
+        for (std::size_t index = 0; index < columnIds.size();)
+        {
+            const auto firstColumn = columnIds[index];
+            auto end = index + 1;
+
+            while (end < columnIds.size() && columnIds[end] == columnIds[end - 1] + 1)
+                ++end;
+
+            visitRange(row, 1, firstColumn, end - index, visitor);
+            index = end;
+        }
+    }
+}
+
+void PointData::visitRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
+{
+    if (!visitor || firstRow > getNumPoints() || rowCount > getNumPoints() - firstRow ||
+        firstColumn > _numDimensions || columnCount > _numDimensions - firstColumn)
+        throw std::out_of_range("Point-data range is invalid");
+    if (rowCount == 0 || columnCount == 0)
+        return;
+
+    const auto typeIndex = static_cast<std::uint32_t>(getElementTypeSpecifier());
+    if (!_tiledStorage)
+    {
+        for (std::uint64_t row = firstRow; row < firstRow + rowCount; ++row)
+        {
+            std::vector<float> values(static_cast<std::size_t>(columnCount));
+
+            for (std::uint64_t column = 0; column < columnCount; ++column)
+            {
+                values[static_cast<std::size_t>(column)] = getValueAt(static_cast<std::size_t>(row * _numDimensions + firstColumn + column));
+            }
+
+            visitor(makeFloatAccessView(std::move(values)));
+        }
+        return;
+    }
+
+    for (std::uint64_t row = firstRow; row < firstRow + rowCount; ++row)
+    {
+        std::uint64_t column = firstColumn;
+        const auto endColumn = firstColumn + columnCount;
+
+        while (column < endColumn)
+        {
+            const auto tile = _tiledStorage->acquire(row / _tiledStorage->rowTileSize(), column / _tiledStorage->columnTileSize());
+            const auto segmentEnd = std::min(endColumn, tile.columnOffset() + tile.columns());
+
+            const auto view = makeTileAccessView(tile, row - tile.rowOffset(), column - tile.columnOffset(), 1, segmentEnd - column, typeIndex);
+            visitor(view);
+
+            column = segmentEnd;
+        }
+    }
+}
+
+void PointData::materializeTiled()
+{
+    if (!_tiledStorage)
+        return;
+
+    resizeVector(static_cast<std::size_t>(_tiledStorage->rows() * _tiledStorage->columns()));
+
+    auto* destination = static_cast<char*>(std::visit([](auto& vector) { return static_cast<void*>(vector.data()); }, _variantOfVectors));
+    _tiledStorage->materialize(destination);
+
+    _tiledStorage.reset();
 }
 
 const std::vector<QString>& PointData::getDimensionNames() const
@@ -178,6 +511,7 @@ void PointData::setData(const std::nullptr_t, const std::size_t numPoints, const
 {
     const auto dataLock = lockData();
 
+    _tiledStorage.reset();
     resizeVector(numPoints * numDimensions);
     _numDimensions = static_cast<std::uint64_t>(numDimensions);
 }
@@ -198,38 +532,40 @@ void PointData::setDimensionNames(const std::vector<QString>& dimNames)
 float PointData::getValueAt(const std::size_t index) const
 {
     // Intentionally not locking here.
-   //
-   // This is a fine-grained legacy accessor and is frequently used from
-   // parallel loops. Callers must ensure that the underlying point-data
-   // storage is not modified concurrently.
-   //
-   // Use lockData() / the bulk-access APIs when synchronized access is
-   // required.
+    //
+    // This is a fine-grained legacy accessor and is frequently used from
+    // parallel loops. Callers must ensure that the underlying point-data
+    // storage is not modified concurrently.
+    //
+    // Use lockData() / the bulk-access APIs when synchronized access is
+    // required.
 
-    return std::visit([index](const auto& vec)
-        {
-            return static_cast<float>(vec[index]);
-        },
-        _variantOfVectors);
+    if (_tiledStorage)
+        return _tiledStorage->valueAt(index, static_cast<std::uint32_t>(getElementTypeSpecifier()));
+
+    return std::visit([index](const auto& vec) {
+        return static_cast<float>(vec[index]);
+    }, _variantOfVectors);
 }
 
 void PointData::setValueAt(const std::size_t index, const float newValue)
 {
     // Intentionally not locking here.
-   //
-   // This is a fine-grained legacy setter and is frequently used from
-   // parallel loops. Callers must ensure that the underlying point-data
-   // storage is not modified concurrently.
-   //
-   // Use lockData() / the bulk-access APIs when synchronized access is
-   // required.
+    //
+    // This is a fine-grained legacy setter and is frequently used from
+    // parallel loops. Callers must ensure that the underlying point-data
+    // storage is not modified concurrently.
+    //
+    // Use lockData() / the bulk-access APIs when synchronized access is
+    // required.
 
-    std::visit([index, newValue](auto& vec)
-        {
-            using value_type = typename std::remove_reference_t<decltype(vec)>::value_type;
-            vec[index] = static_cast<value_type>(newValue);
-        },
-        _variantOfVectors);
+    if (_tiledStorage)
+        materializeTiled();
+
+    std::visit([index, newValue](auto& vec) {
+        using value_type = typename std::remove_reference_t<decltype(vec)>::value_type;
+        vec[index] = static_cast<value_type>(newValue);
+    }, _variantOfVectors);
 }
 
 UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
@@ -258,21 +594,33 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
 
         const auto dataMap  = variantMap["Data"].toMap();
         _isDense            = variantMap.value("Dense", true).toBool();
-        _numDimensions      = static_cast<std::size_t>( variantMap["NumberOfDimensions"].toULongLong());
+        _numDimensions      = static_cast<std::size_t>(variantMap["NumberOfDimensions"].toULongLong());
 
-        if (dataMap.contains("Raw") && dataMap["Raw"].canConvert<QVariantMap>()) {
-          variantMapMustContain(dataMap, "NumberOfElements");
+        if (dataMap.contains("Tiled") && dataMap["Tiled"].canConvert<QVariantMap>())
+        {
+            const auto elementType = dataMap.contains("TypeName")
+                ? elementTypeSpecifier(dataMap.value("TypeName").toString())
+                : static_cast<ElementTypeSpecifier>(dataMap.value("TypeIndex").toInt());
 
-          const auto numberOfElements = static_cast<std::size_t>(
-                dataMap["NumberOfElements"].toULongLong());
+            setElementTypeSpecifier(elementType);
+            _numRows = variantMap["NumberOfPoints"].toULongLong();
 
-            const auto elementTypeIndex = dataMap.contains("TypeName") 
-              ? elementTypeSpecifier(dataMap.value("TypeName").toString()) 
-              : static_cast<ElementTypeSpecifier>(dataMap.value("TypeIndex").toInt());
+            const auto elementSize = std::visit([](const auto& vector) { return sizeof(typename std::decay_t<decltype(vector)>::value_type); }, _variantOfVectors);
+            _tiledStorage = mv::pointdata::tiled::PointDataTiledSerialization::fromVariantMap(dataMap["Tiled"].toMap(), _numRows, _numDimensions, elementSize);
+        }
+        else if (dataMap.contains("Raw") && dataMap["Raw"].canConvert<QVariantMap>())
+        {
+            variantMapMustContain(dataMap, "NumberOfElements");
+
+            const auto numberOfElements = static_cast<std::size_t>(dataMap["NumberOfElements"].toULongLong());
+
+            const auto elementTypeIndex = dataMap.contains("TypeName")
+                ? elementTypeSpecifier(dataMap.value("TypeName").toString())
+                : static_cast<ElementTypeSpecifier>(dataMap.value("TypeIndex").toInt());
 
             setElementTypeSpecifier(elementTypeIndex);
             resizeVector(numberOfElements);
-          
+
             // Keep allocation and all writes to the exposed buffer mutually
             // exclusive. The synchronous decoder is intentional here: a
             // std::mutex lock may not be handed from this workflow worker to
@@ -291,10 +639,12 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 {
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
     bool isDense;
+    bool isTiled;
 
     {
         const auto dataLock = lockData();
         isDense = _isDense;
+        isTiled = static_cast<bool>(_tiledStorage);
     }
 
     //const auto baseSaveStage = plan->addNestedWorkflowStage("Save raw data base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
@@ -304,7 +654,22 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
     //
     //;
 
-    if (isDense) {
+    if (isTiled)
+    {
+        plan->addSequentialStage("Build tiled point data map", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            const auto dataLock = lockData();
+            QVariantMap outputMap;
+
+            outputMap["TypeIndex"] = static_cast<std::int32_t>(getElementTypeSpecifier());
+            outputMap["TypeName"]  = elementTypeName(getElementTypeSpecifier());
+            outputMap["Tiled"]     = mv::pointdata::tiled::PointDataTiledSerialization::toVariantMap(*_tiledStorage);
+            outputMap["NumberOfElements"] = QVariant::fromValue(static_cast<qulonglong>(getNumberOfElements()));
+
+            executionContext->setOutput(outputMap);
+        });
+    }
+    else if (isDense)
+    {
         const auto storeRawStage = plan->addNestedWorkflowStage("Save raw", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
             const auto dataLock = lockData();
             const auto rawMap   = bytesToBlobVariantMap(static_cast<const char*>(getDataConstVoidPtr()), getRawDataSize());
@@ -334,7 +699,8 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
             const auto expectedBytes = getRawDataSize();
             const auto blobTotalSize = rawMap["Size"].toULongLong();
 
-            if (blobTotalSize != expectedBytes) {
+            if (blobTotalSize != expectedBytes)
+            {
                 throw ManiVaultException(
                     SeverityLevel::Error,
                     "PointData blob size does not match declared point-data dimensions",
@@ -350,7 +716,9 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 
             executionContext->setOutput(outputMap);
         });
-    } else {
+    }
+    else
+    {
         plan->addSequentialStage("Build map", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
             const auto dataLock = lockData();
             QVariantMap outputMap;
@@ -386,6 +754,13 @@ void PointData::extractFullDataForDimension(std::vector<float>& result, const in
 
     result.resize(getNumPoints());
 
+    if (_tiledStorage)
+    {
+        for (std::size_t i = 0; i < result.size(); ++i)
+            result[i] = getValueAt(i * _numDimensions + static_cast<std::size_t>(dimensionIndex));
+        return;
+    }
+
     std::visit(
         [&result, this, dimensionIndex](const auto& vec)
         {
@@ -409,6 +784,16 @@ void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, 
         CheckDimensionIndex(dimensionIndex2);
 
         result.resize(getNumPoints());
+
+        if (_tiledStorage)
+        {
+            for (std::size_t i = 0; i < result.size(); ++i)
+            {
+                const auto n = i * _numDimensions;
+                result[i].set(getValueAt(n + dimensionIndex1), getValueAt(n + dimensionIndex2));
+            }
+            return;
+        }
 
         std::visit(
             [&result, this, dimensionIndex1, dimensionIndex2](const auto& vec)
@@ -435,22 +820,28 @@ void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, 
     }
 }
 
-
-void PointData::extractDataForDimension(std::vector<float> &result, const int dimensionIndex, const std::vector<std::uint32_t> &indices) const
+void PointData::extractDataForDimension(std::vector<float>& result, const int dimensionIndex, const std::vector<std::uint32_t>& indices) const
 {
     CheckDimensionIndex(dimensionIndex);
 
     result.resize(indices.size());
 
-    std::visit(
-        [&result, this, dimensionIndex,
-         indices](const auto &vec) {
-          const auto resultSize = result.size();
+    if (_tiledStorage)
+    {
+        for (std::size_t i = 0; i < result.size(); ++i)
+            result[i] = getValueAt(static_cast<std::size_t>(indices[i]) * _numDimensions + static_cast<std::size_t>(dimensionIndex));
+        return;
+    }
 
-          for (std::size_t i{}; i < resultSize; ++i) {
-            const auto n = std::size_t{indices[i]} * _numDimensions;
-            result[i] = vec[n + dimensionIndex];
-          }
+    std::visit([&result, this, dimensionIndex, indices](const auto& vec)
+        {
+            const auto resultSize = result.size();
+
+            for (std::size_t i{}; i < resultSize; ++i)
+            {
+                const auto n = std::size_t{ indices[i] } * _numDimensions;
+                result[i] = vec[n + dimensionIndex];
+            }
         },
         _variantOfVectors);
 }
@@ -463,6 +854,16 @@ void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, cons
     CheckDimensionIndex(dimensionIndex2);
 
     result.resize(indices.size());
+
+    if (_tiledStorage)
+    {
+        for (std::size_t i = 0; i < result.size(); ++i)
+        {
+            const auto n = static_cast<std::size_t>(indices[i]) * _numDimensions;
+            result[i].set(getValueAt(n + dimensionIndex1), getValueAt(n + dimensionIndex2));
+        }
+        return;
+    }
 
     std::visit(
         [&result, this, dimensionIndex1, dimensionIndex2, indices](const auto& vec)
@@ -949,6 +1350,340 @@ void Points::setDimensionNames(const std::vector<QString>& dimNames)
     getRawData<PointData>()->setDimensionNames(dimNames);
 
     mv::events().notifyDatasetDataDimensionsChanged(this);
+}
+
+QString Points::getElementTypeName() const
+{
+    if (isProxy())
+    {
+        const auto proxyMembers = getProxyMembers();
+
+        return proxyMembers.isEmpty() ? PointData::elementTypeName(ElementTypeSpecifier::float32) : mv::Dataset<Points>(proxyMembers.first())->getElementTypeName();
+    }
+
+    return getRawData<PointData>()->getElementTypeName();
+}
+
+bool Points::isTiled() const
+{
+    if (isProxy())
+    {
+        const auto proxyMembers = getProxyMembers();
+
+        if (proxyMembers.isEmpty())
+            return false;
+
+        for (const auto& proxyMember : proxyMembers)
+        {
+            if (!mv::Dataset<Points>(proxyMember)->isTiled())
+                return false;
+        }
+
+        return true;
+    }
+
+    return getRawData<PointData>()->isTiled();
+}
+
+void Points::makeTiled(const std::size_t rowTileSize, const std::size_t columnTileSize, std::function<void(float)> progress)
+{
+    if (!isProxy())
+    {
+        getRawData<PointData>()->makeTiled(rowTileSize, columnTileSize, std::move(progress));
+        return;
+    }
+
+    auto proxyMembers = getProxyMembers();
+
+    for (std::size_t memberIndex = 0; memberIndex < static_cast<std::size_t>(proxyMembers.size()); ++memberIndex)
+    {
+        auto member = mv::Dataset<Points>(proxyMembers[static_cast<qsizetype>(memberIndex)]);
+
+        member->makeTiled(rowTileSize, columnTileSize, [progress, memberIndex, memberCount = static_cast<std::size_t>(proxyMembers.size())](const float memberProgress) {
+            if (progress)
+                progress((static_cast<float>(memberIndex) + memberProgress) / static_cast<float>(memberCount));
+        });
+    }
+}
+
+void Points::makeTiledFromGenerator(const std::uint64_t rows, const std::uint64_t columns, const ElementTypeSpecifier elementType, const std::size_t rowTileSize, const std::size_t columnTileSize, TiledTileGenerator generator)
+{
+    if (isProxy())
+        throw std::invalid_argument("Cannot create generator-backed tiled storage for a proxy dataset");
+
+    getRawData<PointData>()->makeTiledFromGenerator(rows, columns, elementType, rowTileSize, columnTileSize, std::move(generator));
+}
+
+Points::TileView Points::acquireTile(const std::uint64_t tileRow, const std::uint64_t tileColumn) const
+{
+    return isProxy() ? TileView{} : getRawData<PointData>()->acquireTile(tileRow, tileColumn);
+}
+
+void Points::setTiledCacheCapacity(const std::size_t capacity)
+{
+    if (isProxy())
+    {
+        for (const auto& proxyMember : getProxyMembers())
+            mv::Dataset<Points>(proxyMember)->setTiledCacheCapacity(capacity);
+
+        return;
+    }
+
+    getRawData<PointData>()->setTiledCacheCapacity(capacity);
+}
+
+std::size_t Points::getTiledCacheSize() const
+{
+    if (isProxy())
+    {
+        std::size_t cacheSize = 0;
+
+        for (const auto& proxyMember : getProxyMembers())
+            cacheSize += mv::Dataset<Points>(proxyMember)->getTiledCacheSize();
+
+        return cacheSize;
+    }
+
+    return getRawData<PointData>()->getTiledCacheSize();
+}
+
+std::size_t Points::getTiledCacheCapacity() const
+{
+    if (isProxy())
+    {
+        const auto proxyMembers = getProxyMembers();
+
+        return proxyMembers.isEmpty() ? 0 : mv::Dataset<Points>(proxyMembers.first())->getTiledCacheCapacity();
+    }
+
+    return getRawData<PointData>()->getTiledCacheCapacity();
+}
+
+std::size_t Points::getTiledRowTileSize() const
+{
+    if (isProxy())
+    {
+        const auto proxyMembers = getProxyMembers();
+
+        return proxyMembers.isEmpty() ? 0 : mv::Dataset<Points>(proxyMembers.first())->getTiledRowTileSize();
+    }
+
+    return getRawData<PointData>()->getTiledRowTileSize();
+}
+
+std::size_t Points::getTiledColumnTileSize() const
+{
+    if (isProxy())
+    {
+        const auto proxyMembers = getProxyMembers();
+
+        return proxyMembers.isEmpty() ? 0 : mv::Dataset<Points>(proxyMembers.first())->getTiledColumnTileSize();
+    }
+
+    return getRawData<PointData>()->getTiledColumnTileSize();
+}
+
+std::uint64_t Points::getTiledCacheHits() const
+{
+    if (isProxy())
+    {
+        std::uint64_t cacheHits = 0;
+
+        for (const auto& proxyMember : getProxyMembers())
+            cacheHits += mv::Dataset<Points>(proxyMember)->getTiledCacheHits();
+
+        return cacheHits;
+    }
+
+    return getRawData<PointData>()->getTiledCacheHits();
+}
+
+std::uint64_t Points::getTiledCacheMisses() const
+{
+    if (isProxy())
+    {
+        std::uint64_t cacheMisses = 0;
+
+        for (const auto& proxyMember : getProxyMembers())
+            cacheMisses += mv::Dataset<Points>(proxyMember)->getTiledCacheMisses();
+
+        return cacheMisses;
+    }
+
+    return getRawData<PointData>()->getTiledCacheMisses();
+}
+
+std::uint64_t Points::getTiledCacheEvictions() const
+{
+    if (isProxy())
+    {
+        std::uint64_t cacheEvictions = 0;
+
+        for (const auto& proxyMember : getProxyMembers())
+            cacheEvictions += mv::Dataset<Points>(proxyMember)->getTiledCacheEvictions();
+
+        return cacheEvictions;
+    }
+
+    return getRawData<PointData>()->getTiledCacheEvictions();
+}
+
+Points::TiledMemoryEstimate Points::getTiledMemoryEstimate() const
+{
+    if (isProxy())
+    {
+        TiledMemoryEstimate estimate;
+
+        for (const auto& proxyMember : getProxyMembers())
+        {
+            const auto memberEstimate = mv::Dataset<Points>(proxyMember)->getTiledMemoryEstimate();
+
+            estimate.rawDataBytes += memberEstimate.rawDataBytes;
+            estimate.largestTileBytes = std::max(estimate.largestTileBytes, memberEstimate.largestTileBytes);
+            estimate.cachedTileBytes += memberEstimate.cachedTileBytes;
+            estimate.tileCount += memberEstimate.tileCount;
+            estimate.indexBytes += memberEstimate.indexBytes;
+        }
+
+        return estimate;
+    }
+
+    return getRawData<PointData>()->getTiledMemoryEstimate();
+}
+
+Points::TiledMemoryEstimate Points::estimateTiledMemory(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, const std::size_t cacheCapacity)
+{
+    return PointData::estimateTiledMemory(rows, columns, elementSize, rowTileSize, columnTileSize, cacheCapacity);
+}
+
+PointDataAccessView Points::getRow(const std::uint64_t row) const
+{
+    if (row >= getNumPoints())
+        return {};
+
+    if (isProxy())
+    {
+        auto rowOffset = row;
+
+        for (const auto& proxyMember : getProxyMembers())
+        {
+            const auto member = mv::Dataset<Points>(proxyMember);
+            const auto memberRowCount = member->getNumPoints();
+
+            if (rowOffset < memberRowCount)
+                return member->getRow(rowOffset);
+
+            rowOffset -= memberRowCount;
+        }
+
+        return {};
+    }
+
+    return isFull() ? getRawData<PointData>()->getRow(row) : getRawData<PointData>()->getRow(indices[static_cast<std::size_t>(row)]);
+}
+
+void Points::visitRows(const std::uint64_t firstRow, const std::uint64_t rowCount, const PointDataAccessVisitor& visitor) const
+{
+    visitRange(firstRow, rowCount, 0, getNumDimensions(), visitor);
+}
+
+void Points::visitRows(const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
+{
+    for (const auto row : rowIds)
+        visitRange(row, 1, 0, getNumDimensions(), visitor);
+}
+
+void Points::visitColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
+{
+    visitRange(0, getNumPoints(), firstColumn, columnCount, visitor);
+}
+
+void Points::visitColumns(const std::vector<std::uint64_t>& columnIds, const PointDataAccessVisitor& visitor) const
+{
+    for (const auto column : columnIds)
+    {
+        if (column >= getNumDimensions())
+            throw std::out_of_range("Point-data column ID is out of bounds");
+    }
+
+    if (isProxy())
+    {
+        for (const auto& proxyMember : getProxyMembers())
+            mv::Dataset<Points>(proxyMember)->visitColumns(columnIds, visitor);
+
+        return;
+    }
+
+    const auto* rawPointData = getRawData<PointData>();
+    if (isFull())
+    {
+        rawPointData->visitColumns(columnIds, visitor);
+        return;
+    }
+
+    std::vector<std::uint64_t> rowIds;
+    rowIds.reserve(static_cast<std::size_t>(getNumPoints()));
+
+    for (std::uint64_t row = 0; row < getNumPoints(); ++row)
+        rowIds.push_back(indices[static_cast<std::size_t>(row)]);
+
+    rawPointData->visitColumns(columnIds, rowIds, visitor);
+}
+
+void Points::visitColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
+{
+    for (const auto row : rowIds)
+        visitRange(row, 1, firstColumn, columnCount, visitor);
+}
+
+void Points::visitRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
+{
+    if (!visitor || firstRow > getNumPoints() || rowCount > getNumPoints() - firstRow || firstColumn > getNumDimensions() || columnCount > getNumDimensions() - firstColumn)
+        throw std::out_of_range("Point-data range is invalid");
+
+    if (rowCount == 0 || columnCount == 0)
+        return;
+
+    if (isProxy())
+    {
+        std::uint64_t proxyRowOffset = 0;
+        const auto requestedEnd = firstRow + rowCount;
+
+        for (const auto& proxyMember : getProxyMembers())
+        {
+            const auto member = mv::Dataset<Points>(proxyMember);
+            const auto memberRowCount = member->getNumPoints();
+            const auto memberEnd = proxyRowOffset + memberRowCount;
+            const auto overlapBegin = std::max(firstRow, proxyRowOffset);
+            const auto overlapEnd = std::min(requestedEnd, memberEnd);
+
+            if (overlapBegin < overlapEnd)
+                member->visitRange(overlapBegin - proxyRowOffset, overlapEnd - overlapBegin, firstColumn, columnCount, visitor);
+
+            proxyRowOffset = memberEnd;
+
+            if (proxyRowOffset >= requestedEnd)
+                break;
+        }
+
+        return;
+    }
+
+    const auto* rawPointData = getRawData<PointData>();
+
+    if (isFull())
+    {
+        rawPointData->visitRange(firstRow, rowCount, firstColumn, columnCount, visitor);
+        return;
+    }
+
+    std::vector<std::uint64_t> rowIds;
+    rowIds.reserve(static_cast<std::size_t>(rowCount));
+
+    for (std::uint64_t row = firstRow; row < firstRow + rowCount; ++row)
+        rowIds.push_back(indices[static_cast<std::size_t>(row)]);
+
+    rawPointData->visitColumns(firstColumn, columnCount, rowIds, visitor);
 }
 
 float Points::getValueAt(const std::size_t index) const
