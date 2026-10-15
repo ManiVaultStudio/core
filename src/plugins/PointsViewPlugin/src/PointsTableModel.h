@@ -55,6 +55,21 @@ public:
     /** Fetches a rectangular window and emits a data-change notification for it. */
     std::size_t fetchRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount);
 
+    /** Replaces the visible table with an explicitly fetched query result. */
+    void setQueryResult(const std::vector<std::uint64_t>& rowIds, const std::vector<std::uint64_t>& columnIds, const std::vector<float>& values);
+
+    /** Returns whether the model currently displays an explicit query result. */
+    bool isQueryResult() const
+    {
+        return _queryResult;
+    }
+
+    /** Returns the most recent tile-access error, if any. */
+    QString getLastError() const
+    {
+        return _lastError;
+    }
+
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
@@ -71,4 +86,8 @@ private:
     std::uint64_t _loadedFirstColumn = 0;
     std::uint64_t _loadedColumnCount = 0;
     std::vector<float> _values;
+    bool _queryResult = false;
+    std::vector<std::uint64_t> _queryRowIds;
+    std::vector<std::uint64_t> _queryColumnIds;
+    QString _lastError;
 };

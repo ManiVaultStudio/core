@@ -4,7 +4,17 @@
 
 #include "PointsTableModel.h"
 
+#include <PointDataAccess.h>
+
+#include <actions/StringAction.h>
+#include <actions/ToggleAction.h>
+#include <actions/TriggerAction.h>
+
 #include <QWidget>
+
+#include <cstdint>
+#include <functional>
+#include <vector>
 
 class QEvent;
 template <typename T> class QFutureWatcher;
@@ -53,11 +63,15 @@ private slots:
     void scheduleVisibleRangeFetch();
     void fetchVisibleRange();
     void tileSelectedData();
+    void applyFilters();
+    void showLiveTable(bool live);
 
 private:
     QSpinBox* createIndexSpinBox(QWidget* parent) const;
     void setStatus(const QString& text);
     void updateInspector(const Points* points);
+    static std::vector<std::uint64_t> parseFilter(const QString& filter, std::uint64_t maximum, QString& error);
+    void displayQuery(const std::vector<std::uint64_t>& rowIds, const std::vector<std::uint64_t>& columnIds, const std::function<void(const PointDataAccessVisitor&)>& request);
 
     QLabel* _datasetLabel;
     QLabel* _inspectorLabel;
@@ -72,4 +86,8 @@ private:
     mv::Task* _progressTask;
     QFutureWatcher<void>* _tileWatcher;
     QTimer* _fetchTimer;
+    mv::gui::StringAction _rowFilterAction;
+    mv::gui::StringAction _columnFilterAction;
+    mv::gui::TriggerAction _applyFiltersAction;
+    mv::gui::ToggleAction _liveTableAction;
 };

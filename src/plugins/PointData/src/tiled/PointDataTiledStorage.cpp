@@ -118,6 +118,12 @@ TileView PointDataTiledStorage::acquire(const std::uint64_t tileRow, const std::
     if (!bytes)
     {
         bytes = std::make_shared<QByteArray>(load(_descriptors.at(index)));
+
+        const auto& descriptor = _descriptors.at(index);
+        const auto expectedSize = descriptor.rows * descriptor.columns * _elementSize;
+        if (bytes->size() != static_cast<qsizetype>(expectedSize))
+            throw std::runtime_error("Decoded tiled point-data payload has an unexpected size");
+
         _cache.insert(index, bytes);
     }
 

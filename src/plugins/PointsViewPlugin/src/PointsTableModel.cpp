@@ -5,6 +5,7 @@
 #include <PointData.h>
 
 #include <algorithm>
+#include <exception>
 #include <limits>
 
 namespace
@@ -67,6 +68,10 @@ void PointsTableModel::setPoints(Points* points, const std::uint64_t rows, const
     _loadedFirstRow = _loadedRowCount = _loadedFirstColumn = _loadedColumnCount = 0;
 
     _values.clear();
+    _queryResult = false;
+    _queryRowIds.clear();
+    _queryColumnIds.clear();
+    _lastError.clear();
 
     endResetModel();
 }
@@ -78,12 +83,12 @@ void PointsTableModel::clear()
 
 int PointsTableModel::rowCount(const QModelIndex& parent) const
 {
-    return parent.isValid() ? 0 : toModelIndex(_totalRows);
+    return parent.isValid() ? 0 : toModelIndex(_queryResult ? _queryRowIds.size() : _totalRows);
 }
 
 int PointsTableModel::columnCount(const QModelIndex& parent) const
 {
-    return parent.isValid() ? 0 : toModelIndex(_totalColumns);
+    return parent.isValid() ? 0 : toModelIndex(_queryResult ? _queryColumnIds.size() : _totalColumns);
 }
 
 QVariant PointsTableModel::data(const QModelIndex& index, const int role) const
@@ -93,6 +98,9 @@ QVariant PointsTableModel::data(const QModelIndex& index, const int role) const
 
     const auto row    = static_cast<std::uint64_t>(index.row());
     const auto column = static_cast<std::uint64_t>(index.column());
+
+    if (_queryResult)
+        return QString::number(_values[static_cast<std::size_t>(row * _queryColumnIds.size() + column)], 'g', 7);
 
     if (row < _loadedFirstRow || row >= _loadedFirstRow + _loadedRowCount
         || column < _loadedFirstColumn || column >= _loadedFirstColumn + _loadedColumnCount)
@@ -109,13 +117,20 @@ QVariant PointsTableModel::headerData(const int section, const Qt::Orientation o
     if (role != Qt::DisplayRole)
         return {};
 
-    return orientation == Qt::Horizontal
-        ? QVariant(QString("D%1").arg(section))
-        : QVariant(QString::number(section));
+    if (_queryResult)
+    {
+        const auto ids = orientation == Qt::Horizontal ? &_queryColumnIds : &_queryRowIds;
+
+        return section < static_cast<int>(ids->size()) ? QVariant(QString::number(ids->at(static_cast<std::size_t>(section)))) : QVariant();
+    }
+
+    return orientation == Qt::Horizontal ? QVariant(QString("D%1").arg(section)) : QVariant(QString::number(section));
 }
 
 std::size_t PointsTableModel::fetchRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount)
 {
+    _lastError.clear();
+
     if (!_points || firstRow >= _totalRows || firstColumn >= _totalColumns || rowCount == 0 || columnCount == 0)
         return 0;
 
@@ -137,41 +152,72 @@ std::size_t PointsTableModel::fetchRange(const std::uint64_t firstRow, const std
     std::uint64_t destinationColumn = 0;
     std::size_t callbackCount       = 0;
 
-    _points->visitRange(
-        firstRow,
-        boundedRowCount,
-        firstColumn,
-        boundedColumnCount,
-        [this, &destinationRow, &destinationColumn, &callbackCount](const PointDataAccessView& view) {
-            ++callbackCount;
+    try
+    {
+        _points->visitRange(
+            firstRow,
+            boundedRowCount,
+            firstColumn,
+            boundedColumnCount,
+            [this, &destinationRow, &destinationColumn, &callbackCount](const PointDataAccessView& view) {
+                ++callbackCount;
 
-            for (std::uint64_t row = 0; row < view.rows; ++row)
-            {
-                for (std::uint64_t column = 0; column < view.columns; ++column)
+                for (std::uint64_t row = 0; row < view.rows; ++row)
                 {
-                    const auto targetRow    = destinationRow + row;
-                    const auto targetColumn = destinationColumn + column;
-
-                    if (targetRow < _loadedRowCount && targetColumn < _loadedColumnCount)
+                    for (std::uint64_t column = 0; column < view.columns; ++column)
                     {
-                        _values[static_cast<std::size_t>(targetRow * _loadedColumnCount + targetColumn)] = valueAt(view, row, column);
+                        const auto targetRow    = destinationRow + row;
+                        const auto targetColumn = destinationColumn + column;
+
+                        if (targetRow < _loadedRowCount && targetColumn < _loadedColumnCount)
+                        {
+                            _values[static_cast<std::size_t>(targetRow * _loadedColumnCount + targetColumn)] = valueAt(view, row, column);
+                        }
                     }
                 }
-            }
 
-            destinationColumn += view.columns;
+                destinationColumn += view.columns;
 
-            if (destinationColumn >= _loadedColumnCount)
-            {
-                destinationColumn = 0;
-                destinationRow += view.rows;
-            }
-        });
+                if (destinationColumn >= _loadedColumnCount)
+                {
+                    destinationColumn = 0;
+                    destinationRow += view.rows;
+                }
+            });
+    }
+    catch (const std::exception& exception)
+    {
+        _lastError = QString::fromUtf8(exception.what());
+        _values.clear();
+        _loadedRowCount = _loadedColumnCount = 0;
+        return 0;
+    }
+    catch (...)
+    {
+        _lastError = QStringLiteral("Unknown error while loading point-data tiles");
+        _values.clear();
+        _loadedRowCount = _loadedColumnCount = 0;
+        return 0;
+    }
 
     notifyRange(oldFirstRow, oldRowCount, oldFirstColumn, oldColumnCount);
     notifyRange(_loadedFirstRow, _loadedRowCount, _loadedFirstColumn, _loadedColumnCount);
 
     return callbackCount;
+}
+
+void PointsTableModel::setQueryResult(const std::vector<std::uint64_t>& rowIds, const std::vector<std::uint64_t>& columnIds, const std::vector<float>& values)
+{
+    beginResetModel();
+
+    _queryResult = true;
+    _queryRowIds = rowIds;
+    _queryColumnIds = columnIds;
+    _values = values;
+    _lastError.clear();
+    _loadedFirstRow = _loadedRowCount = _loadedFirstColumn = _loadedColumnCount = 0;
+
+    endResetModel();
 }
 
 void PointsTableModel::notifyRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount)
