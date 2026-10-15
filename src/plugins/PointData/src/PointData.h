@@ -778,6 +778,11 @@ public:
     Points(QString dataName, bool mayUnderive = true, const QString& guid = "");
     ~Points() override = default;
 
+    using ElementTypeSpecifier = PointData::ElementTypeSpecifier;
+    using TileView = PointData::TileView;
+    using TiledMemoryEstimate = PointData::TiledMemoryEstimate;
+    using TiledTileGenerator = PointData::TiledTileGenerator;
+
     void init() override;
 
     /// Allows read-only access to the internal point data vector, from its begin to its end.
@@ -998,6 +1003,87 @@ public:
         }
     }
 
+    /** Returns the name of the element type used by this logical dataset. */
+    QString getElementTypeName() const;
+
+    /** Returns whether all concrete datasets represented by this object are tiled. */
+    bool isTiled() const;
+
+    /** Converts this dataset, or each member of a proxy dataset, to tiled storage. */
+    void makeTiled(std::size_t rowTileSize, std::size_t columnTileSize, std::function<void(float)> progress = {});
+
+    /** Creates read-only generator-backed tiled storage for a concrete dataset. */
+    void makeTiledFromGenerator(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, std::size_t rowTileSize, std::size_t columnTileSize, TiledTileGenerator generator);
+
+    /** Loads a backend tile for a concrete, non-proxy dataset. */
+    TileView acquireTile(std::uint64_t tileRow, std::uint64_t tileColumn) const;
+
+    /** Sets the tile-cache capacity on this dataset and its proxy members. */
+    void setTiledCacheCapacity(std::size_t capacity);
+
+    /** Returns the number of currently cached tile payloads. */
+    std::size_t getTiledCacheSize() const;
+
+    /** Returns the configured tile-cache capacity. */
+    std::size_t getTiledCacheCapacity() const;
+
+    /** Returns the configured number of rows per tile. */
+    std::size_t getTiledRowTileSize() const;
+
+    /** Returns the configured number of columns per tile. */
+    std::size_t getTiledColumnTileSize() const;
+
+    /** Returns the total number of tile-cache hits. */
+    std::uint64_t getTiledCacheHits() const;
+
+    /** Returns the total number of tile-cache misses. */
+    std::uint64_t getTiledCacheMisses() const;
+
+    /** Returns the total number of tile-cache evictions. */
+    std::uint64_t getTiledCacheEvictions() const;
+
+    /** Returns a memory estimate aggregated across proxy members. */
+    TiledMemoryEstimate getTiledMemoryEstimate() const;
+
+    /** Estimates tiled memory usage without allocating point data. */
+    static TiledMemoryEstimate estimateTiledMemory(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, std::size_t cacheCapacity);
+
+    /** Returns one logical row as a storage-neutral read-only view. */
+    PointDataAccessView getRow(std::uint64_t row) const;
+
+    /** Visits a contiguous range of logical rows. */
+    void visitRows(std::uint64_t firstRow, std::uint64_t rowCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits selected logical rows in rowIds order. */
+    void visitRows(const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a contiguous column range for every logical row. */
+    void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a contiguous column range for selected logical rows. */
+    void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a rectangular range of logical rows and columns. */
+    void visitRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Returns the element type represented by a type name. */
+    static ElementTypeSpecifier elementTypeSpecifier(const QString& typeName)
+    {
+        return PointData::elementTypeSpecifier(typeName);
+    }
+
+    /** Returns the display name for an element type. */
+    static QString elementTypeName(const ElementTypeSpecifier elementTypeSpecifier)
+    {
+        return PointData::elementTypeName(elementTypeSpecifier);
+    }
+
+    /** Returns the names of all supported element types. */
+    static constexpr auto getElementTypeNames()
+    {
+        return PointData::getElementTypeNames();
+    }
+
     const std::vector<QString>& getDimensionNames() const;
 
     void setDimensionNames(const std::vector<QString>& dimNames);
@@ -1193,16 +1279,6 @@ public: // Linked data
 public:
 
     std::vector<std::uint32_t> indices;
-
-    /**
-     * Get the dense point-data backend for experimental storage-aware access.
-     *
-     * This narrow bridge keeps the backend implementation out of consumers
-     * that only need the regular Points API while allowing developer tools and
-     * experimental views to exercise tile-oriented access.
-     */
-    PointData* getPointData() { return getRawData<PointData>(); }
-    const PointData* getPointData() const { return getRawData<PointData>(); }
 
     InfoAction*                 _infoAction;                    /** Non-owning pointer to info action */
     mv::gui::GroupAction*       _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */

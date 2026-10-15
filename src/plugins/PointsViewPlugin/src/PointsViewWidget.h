@@ -20,7 +20,7 @@ namespace mv
 class Task;
 }
 
-class PointData;
+class Points;
 
 /**
  * @brief Interactive table view for inspecting point data and tiled access.
@@ -57,7 +57,7 @@ private slots:
 private:
     QSpinBox* createIndexSpinBox(QWidget* parent) const;
     void setStatus(const QString& text);
-    void updateInspector(const PointData* pointData);
+    void updateInspector(const Points* points);
 
     QLabel* _datasetLabel;
     QLabel* _inspectorLabel;

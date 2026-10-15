@@ -52,27 +52,27 @@ void writeValue(char* destination, const std::size_t offset, const T value)
     std::memcpy(destination + offset, &value, sizeof(T));
 }
 
-QByteArray makeTile(const PointData::ElementTypeSpecifier type, const Population population, const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t rows, const std::uint64_t columns)
+QByteArray makeTile(const Points::ElementTypeSpecifier type, const Population population, const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t rows, const std::uint64_t columns)
 {
     const auto elementSize = [&] {
         switch (type)
         {
-            case PointData::ElementTypeSpecifier::float32:
+            case Points::ElementTypeSpecifier::float32:
                 return sizeof(float);
 
-            case PointData::ElementTypeSpecifier::bfloat16:
+            case Points::ElementTypeSpecifier::bfloat16:
                 return std::size_t(2);
 
-            case PointData::ElementTypeSpecifier::int32:
-            case PointData::ElementTypeSpecifier::uint32:
+            case Points::ElementTypeSpecifier::int32:
+            case Points::ElementTypeSpecifier::uint32:
                 return sizeof(std::int32_t);
 
-            case PointData::ElementTypeSpecifier::int16:
-            case PointData::ElementTypeSpecifier::uint16:
+            case Points::ElementTypeSpecifier::int16:
+            case Points::ElementTypeSpecifier::uint16:
                 return sizeof(std::int16_t);
 
-            case PointData::ElementTypeSpecifier::int8:
-            case PointData::ElementTypeSpecifier::uint8:
+            case Points::ElementTypeSpecifier::int8:
+            case Points::ElementTypeSpecifier::uint8:
                 return sizeof(std::int8_t);
         }
         return sizeof(float);
@@ -99,11 +99,11 @@ QByteArray makeTile(const PointData::ElementTypeSpecifier type, const Population
 
             switch (type)
             {
-                case PointData::ElementTypeSpecifier::float32:
+                case Points::ElementTypeSpecifier::float32:
                     writeValue(bytes.data(), offset, value);
                     break;
 
-                case PointData::ElementTypeSpecifier::bfloat16:
+                case Points::ElementTypeSpecifier::bfloat16:
                 {
                     std::uint32_t bits = 0;
                     std::memcpy(&bits, &value, sizeof(bits));
@@ -112,27 +112,27 @@ QByteArray makeTile(const PointData::ElementTypeSpecifier type, const Population
                     break;
                 }
 
-                case PointData::ElementTypeSpecifier::int32:
+                case Points::ElementTypeSpecifier::int32:
                     writeValue(bytes.data(), offset, static_cast<std::int32_t>(value * 1000.0f));
                     break;
 
-                case PointData::ElementTypeSpecifier::uint32:
+                case Points::ElementTypeSpecifier::uint32:
                     writeValue(bytes.data(), offset, static_cast<std::uint32_t>(std::max(0.0f, value * 1000.0f)));
                     break;
 
-                case PointData::ElementTypeSpecifier::int16:
+                case Points::ElementTypeSpecifier::int16:
                     writeValue(bytes.data(), offset, static_cast<std::int16_t>(value * 1000.0f));
                     break;
 
-                case PointData::ElementTypeSpecifier::uint16:
+                case Points::ElementTypeSpecifier::uint16:
                     writeValue(bytes.data(), offset, static_cast<std::uint16_t>(std::max(0.0f, value * 1000.0f)));
                     break;
 
-                case PointData::ElementTypeSpecifier::int8:
+                case Points::ElementTypeSpecifier::int8:
                     writeValue(bytes.data(), offset, static_cast<std::int8_t>(value * 100.0f));
                     break;
 
-                case PointData::ElementTypeSpecifier::uint8:
+                case Points::ElementTypeSpecifier::uint8:
                     writeValue(bytes.data(), offset, static_cast<std::uint8_t>(std::max(0.0f, value * 100.0f)));
                     break;
             }
@@ -158,7 +158,7 @@ public:
         _cacheCapacity  = makeSpin(1, 100000, 8);
         _type           = new QComboBox(this);
         QStringList typeNames;
-        for (const auto* typeName : PointData::getElementTypeNames())
+        for (const auto* typeName : Points::getElementTypeNames())
         {
             typeNames.push_back(QString::fromLatin1(typeName));
         }
@@ -206,9 +206,9 @@ public:
 
     std::size_t cacheCapacity() const { return _cacheCapacity->value(); }
 
-    PointData::ElementTypeSpecifier type() const
+    Points::ElementTypeSpecifier type() const
     {
-        return PointData::elementTypeSpecifier(_type->currentText());
+        return Points::elementTypeSpecifier(_type->currentText());
     }
 
     Population population() const
@@ -227,18 +227,18 @@ private:
 
     void updateEstimate()
     {
-        const auto type = PointData::elementTypeSpecifier(_type->currentText());
-        const auto elementSize = type == PointData::ElementTypeSpecifier::float32
+        const auto type = Points::elementTypeSpecifier(_type->currentText());
+        const auto elementSize = type == Points::ElementTypeSpecifier::float32
             ? 4
-            : type == PointData::ElementTypeSpecifier::bfloat16
+            : type == Points::ElementTypeSpecifier::bfloat16
             ? 2
-            : type == PointData::ElementTypeSpecifier::int32 || type == PointData::ElementTypeSpecifier::uint32
+            : type == Points::ElementTypeSpecifier::int32 || type == Points::ElementTypeSpecifier::uint32
             ? 4
-            : type == PointData::ElementTypeSpecifier::int16 || type == PointData::ElementTypeSpecifier::uint16
+            : type == Points::ElementTypeSpecifier::int16 || type == Points::ElementTypeSpecifier::uint16
             ? 2
             : 1;
 
-        const auto estimate = PointData::estimateTiledMemory(rows(), columns(), elementSize, rowTileSize(), columnTileSize(), cacheCapacity());
+        const auto estimate = Points::estimateTiledMemory(rows(), columns(), elementSize, rowTileSize(), columnTileSize(), cacheCapacity());
 
         _estimate->setText(QString("Raw size: %1\nLargest tile: %2\nEstimated cache: %3\nTiles: %4\nIndex estimate: %5")
             .arg(formatBytes(estimate.rawDataBytes))
@@ -272,15 +272,14 @@ void PointDataPhantomGenerator::populateMenu(QMenu& menu, QWidget* owner)
         const auto type = dialog.type();
         const auto population = dialog.population();
         auto dataset = mv::data().createDataset<Points>("Points", dialog.name());
-        auto* pointData = dataset->getPointData();
-        pointData->makeTiledFromGenerator(dialog.rows(), dialog.columns(), type, dialog.rowTileSize(), dialog.columnTileSize(),
+        dataset->makeTiledFromGenerator(dialog.rows(), dialog.columns(), type, dialog.rowTileSize(), dialog.columnTileSize(),
             [type, population](const std::uint64_t rowOffset, const std::uint64_t columnOffset,
                 const std::uint64_t rows, const std::uint64_t columns) {
                 return makeTile(type, population, rowOffset, columnOffset, rows, columns);
             });
-        pointData->setTiledCacheCapacity(dialog.cacheCapacity());
+        dataset->setTiledCacheCapacity(dialog.cacheCapacity());
 
-        const auto estimate = pointData->getTiledMemoryEstimate();
+        const auto estimate = dataset->getTiledMemoryEstimate();
         mv::help().addNotification(QObject::tr("Phantom points dataset created"),
             QObject::tr("%1 is generator-backed and occupies %2 of raw logical data. Tiles will be written when the project is saved.")
                 .arg(dialog.name()).arg(formatBytes(estimate.rawDataBytes)), mv::util::StyledIcon("check"));

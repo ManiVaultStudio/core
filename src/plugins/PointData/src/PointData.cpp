@@ -1353,6 +1353,308 @@ void Points::setDimensionNames(const std::vector<QString>& dimNames)
     mv::events().notifyDatasetDataDimensionsChanged(this);
 }
 
+QString Points::getElementTypeName() const
+{
+    if (isProxy())
+    {
+        const auto proxyMembers = getProxyMembers();
+
+        return proxyMembers.isEmpty() ? PointData::elementTypeName(ElementTypeSpecifier::float32) : mv::Dataset<Points>(proxyMembers.first())->getElementTypeName();
+    }
+
+    return getRawData<PointData>()->getElementTypeName();
+}
+
+bool Points::isTiled() const
+{
+    if (isProxy())
+    {
+        const auto proxyMembers = getProxyMembers();
+
+        if (proxyMembers.isEmpty())
+            return false;
+
+        for (const auto& proxyMember : proxyMembers)
+        {
+            if (!mv::Dataset<Points>(proxyMember)->isTiled())
+                return false;
+        }
+
+        return true;
+    }
+
+    return getRawData<PointData>()->isTiled();
+}
+
+void Points::makeTiled(const std::size_t rowTileSize, const std::size_t columnTileSize, std::function<void(float)> progress)
+{
+    if (!isProxy())
+    {
+        getRawData<PointData>()->makeTiled(rowTileSize, columnTileSize, std::move(progress));
+        return;
+    }
+
+    auto proxyMembers = getProxyMembers();
+
+    for (std::size_t memberIndex = 0; memberIndex < static_cast<std::size_t>(proxyMembers.size()); ++memberIndex)
+    {
+        auto member = mv::Dataset<Points>(proxyMembers[static_cast<qsizetype>(memberIndex)]);
+
+        member->makeTiled(rowTileSize, columnTileSize, [progress, memberIndex, memberCount = static_cast<std::size_t>(proxyMembers.size())](const float memberProgress) {
+            if (progress)
+                progress((static_cast<float>(memberIndex) + memberProgress) / static_cast<float>(memberCount));
+        });
+    }
+}
+
+void Points::makeTiledFromGenerator(const std::uint64_t rows, const std::uint64_t columns, const ElementTypeSpecifier elementType, const std::size_t rowTileSize, const std::size_t columnTileSize, TiledTileGenerator generator)
+{
+    if (isProxy())
+        throw std::invalid_argument("Cannot create generator-backed tiled storage for a proxy dataset");
+
+    getRawData<PointData>()->makeTiledFromGenerator(rows, columns, elementType, rowTileSize, columnTileSize, std::move(generator));
+}
+
+Points::TileView Points::acquireTile(const std::uint64_t tileRow, const std::uint64_t tileColumn) const
+{
+    return isProxy() ? TileView{} : getRawData<PointData>()->acquireTile(tileRow, tileColumn);
+}
+
+void Points::setTiledCacheCapacity(const std::size_t capacity)
+{
+    if (isProxy())
+    {
+        for (const auto& proxyMember : getProxyMembers())
+            mv::Dataset<Points>(proxyMember)->setTiledCacheCapacity(capacity);
+
+        return;
+    }
+
+    getRawData<PointData>()->setTiledCacheCapacity(capacity);
+}
+
+std::size_t Points::getTiledCacheSize() const
+{
+    if (isProxy())
+    {
+        std::size_t cacheSize = 0;
+
+        for (const auto& proxyMember : getProxyMembers())
+            cacheSize += mv::Dataset<Points>(proxyMember)->getTiledCacheSize();
+
+        return cacheSize;
+    }
+
+    return getRawData<PointData>()->getTiledCacheSize();
+}
+
+std::size_t Points::getTiledCacheCapacity() const
+{
+    if (isProxy())
+    {
+        const auto proxyMembers = getProxyMembers();
+
+        return proxyMembers.isEmpty() ? 0 : mv::Dataset<Points>(proxyMembers.first())->getTiledCacheCapacity();
+    }
+
+    return getRawData<PointData>()->getTiledCacheCapacity();
+}
+
+std::size_t Points::getTiledRowTileSize() const
+{
+    if (isProxy())
+    {
+        const auto proxyMembers = getProxyMembers();
+
+        return proxyMembers.isEmpty() ? 0 : mv::Dataset<Points>(proxyMembers.first())->getTiledRowTileSize();
+    }
+
+    return getRawData<PointData>()->getTiledRowTileSize();
+}
+
+std::size_t Points::getTiledColumnTileSize() const
+{
+    if (isProxy())
+    {
+        const auto proxyMembers = getProxyMembers();
+
+        return proxyMembers.isEmpty() ? 0 : mv::Dataset<Points>(proxyMembers.first())->getTiledColumnTileSize();
+    }
+
+    return getRawData<PointData>()->getTiledColumnTileSize();
+}
+
+std::uint64_t Points::getTiledCacheHits() const
+{
+    if (isProxy())
+    {
+        std::uint64_t cacheHits = 0;
+
+        for (const auto& proxyMember : getProxyMembers())
+            cacheHits += mv::Dataset<Points>(proxyMember)->getTiledCacheHits();
+
+        return cacheHits;
+    }
+
+    return getRawData<PointData>()->getTiledCacheHits();
+}
+
+std::uint64_t Points::getTiledCacheMisses() const
+{
+    if (isProxy())
+    {
+        std::uint64_t cacheMisses = 0;
+
+        for (const auto& proxyMember : getProxyMembers())
+            cacheMisses += mv::Dataset<Points>(proxyMember)->getTiledCacheMisses();
+
+        return cacheMisses;
+    }
+
+    return getRawData<PointData>()->getTiledCacheMisses();
+}
+
+std::uint64_t Points::getTiledCacheEvictions() const
+{
+    if (isProxy())
+    {
+        std::uint64_t cacheEvictions = 0;
+
+        for (const auto& proxyMember : getProxyMembers())
+            cacheEvictions += mv::Dataset<Points>(proxyMember)->getTiledCacheEvictions();
+
+        return cacheEvictions;
+    }
+
+    return getRawData<PointData>()->getTiledCacheEvictions();
+}
+
+Points::TiledMemoryEstimate Points::getTiledMemoryEstimate() const
+{
+    if (isProxy())
+    {
+        TiledMemoryEstimate estimate;
+
+        for (const auto& proxyMember : getProxyMembers())
+        {
+            const auto memberEstimate = mv::Dataset<Points>(proxyMember)->getTiledMemoryEstimate();
+
+            estimate.rawDataBytes += memberEstimate.rawDataBytes;
+            estimate.largestTileBytes = std::max(estimate.largestTileBytes, memberEstimate.largestTileBytes);
+            estimate.cachedTileBytes += memberEstimate.cachedTileBytes;
+            estimate.tileCount += memberEstimate.tileCount;
+            estimate.indexBytes += memberEstimate.indexBytes;
+        }
+
+        return estimate;
+    }
+
+    return getRawData<PointData>()->getTiledMemoryEstimate();
+}
+
+Points::TiledMemoryEstimate Points::estimateTiledMemory(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, const std::size_t cacheCapacity)
+{
+    return PointData::estimateTiledMemory(rows, columns, elementSize, rowTileSize, columnTileSize, cacheCapacity);
+}
+
+PointDataAccessView Points::getRow(const std::uint64_t row) const
+{
+    if (row >= getNumPoints())
+        return {};
+
+    if (isProxy())
+    {
+        auto rowOffset = row;
+
+        for (const auto& proxyMember : getProxyMembers())
+        {
+            const auto member = mv::Dataset<Points>(proxyMember);
+            const auto memberRowCount = member->getNumPoints();
+
+            if (rowOffset < memberRowCount)
+                return member->getRow(rowOffset);
+
+            rowOffset -= memberRowCount;
+        }
+
+        return {};
+    }
+
+    return isFull() ? getRawData<PointData>()->getRow(row) : getRawData<PointData>()->getRow(indices[static_cast<std::size_t>(row)]);
+}
+
+void Points::visitRows(const std::uint64_t firstRow, const std::uint64_t rowCount, const PointDataAccessVisitor& visitor) const
+{
+    visitRange(firstRow, rowCount, 0, getNumDimensions(), visitor);
+}
+
+void Points::visitRows(const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
+{
+    for (const auto row : rowIds)
+        visitRange(row, 1, 0, getNumDimensions(), visitor);
+}
+
+void Points::visitColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
+{
+    visitRange(0, getNumPoints(), firstColumn, columnCount, visitor);
+}
+
+void Points::visitColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
+{
+    for (const auto row : rowIds)
+        visitRange(row, 1, firstColumn, columnCount, visitor);
+}
+
+void Points::visitRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
+{
+    if (!visitor || firstRow > getNumPoints() || rowCount > getNumPoints() - firstRow || firstColumn > getNumDimensions() || columnCount > getNumDimensions() - firstColumn)
+        throw std::out_of_range("Point-data range is invalid");
+
+    if (rowCount == 0 || columnCount == 0)
+        return;
+
+    if (isProxy())
+    {
+        std::uint64_t proxyRowOffset = 0;
+        const auto requestedEnd = firstRow + rowCount;
+
+        for (const auto& proxyMember : getProxyMembers())
+        {
+            const auto member = mv::Dataset<Points>(proxyMember);
+            const auto memberRowCount = member->getNumPoints();
+            const auto memberEnd = proxyRowOffset + memberRowCount;
+            const auto overlapBegin = std::max(firstRow, proxyRowOffset);
+            const auto overlapEnd = std::min(requestedEnd, memberEnd);
+
+            if (overlapBegin < overlapEnd)
+                member->visitRange(overlapBegin - proxyRowOffset, overlapEnd - overlapBegin, firstColumn, columnCount, visitor);
+
+            proxyRowOffset = memberEnd;
+
+            if (proxyRowOffset >= requestedEnd)
+                break;
+        }
+
+        return;
+    }
+
+    const auto* rawPointData = getRawData<PointData>();
+
+    if (isFull())
+    {
+        rawPointData->visitRange(firstRow, rowCount, firstColumn, columnCount, visitor);
+        return;
+    }
+
+    std::vector<std::uint64_t> rowIds;
+    rowIds.reserve(static_cast<std::size_t>(rowCount));
+
+    for (std::uint64_t row = firstRow; row < firstRow + rowCount; ++row)
+        rowIds.push_back(indices[static_cast<std::size_t>(row)]);
+
+    rawPointData->visitColumns(firstColumn, columnCount, rowIds, visitor);
+}
+
 float Points::getValueAt(const std::size_t index) const
 {
     return getRawData<PointData>()->getValueAt(index);

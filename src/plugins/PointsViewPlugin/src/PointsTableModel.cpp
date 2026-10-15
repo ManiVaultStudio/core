@@ -57,11 +57,11 @@ PointsTableModel::PointsTableModel(QObject* parent) :
 {
 }
 
-void PointsTableModel::setPointData(PointData* pointData, const std::uint64_t rows, const std::uint64_t columns)
+void PointsTableModel::setPoints(Points* points, const std::uint64_t rows, const std::uint64_t columns)
 {
     beginResetModel();
 
-    _pointData = pointData;
+    _points = points;
     _totalRows = rows;
     _totalColumns = columns;
     _loadedFirstRow = _loadedRowCount = _loadedFirstColumn = _loadedColumnCount = 0;
@@ -73,7 +73,7 @@ void PointsTableModel::setPointData(PointData* pointData, const std::uint64_t ro
 
 void PointsTableModel::clear()
 {
-    setPointData(nullptr, 0, 0);
+    setPoints(nullptr, 0, 0);
 }
 
 int PointsTableModel::rowCount(const QModelIndex& parent) const
@@ -88,7 +88,7 @@ int PointsTableModel::columnCount(const QModelIndex& parent) const
 
 QVariant PointsTableModel::data(const QModelIndex& index, const int role) const
 {
-    if (!index.isValid() || role != Qt::DisplayRole || !_pointData)
+    if (!index.isValid() || role != Qt::DisplayRole || !_points)
         return {};
 
     const auto row    = static_cast<std::uint64_t>(index.row());
@@ -116,7 +116,7 @@ QVariant PointsTableModel::headerData(const int section, const Qt::Orientation o
 
 std::size_t PointsTableModel::fetchRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount)
 {
-    if (!_pointData || firstRow >= _totalRows || firstColumn >= _totalColumns || rowCount == 0 || columnCount == 0)
+    if (!_points || firstRow >= _totalRows || firstColumn >= _totalColumns || rowCount == 0 || columnCount == 0)
         return 0;
 
     const auto boundedRowCount    = std::min(rowCount, _totalRows - firstRow);
@@ -137,7 +137,7 @@ std::size_t PointsTableModel::fetchRange(const std::uint64_t firstRow, const std
     std::uint64_t destinationColumn = 0;
     std::size_t callbackCount       = 0;
 
-    _pointData->visitRange(
+    _points->visitRange(
         firstRow,
         boundedRowCount,
         firstColumn,

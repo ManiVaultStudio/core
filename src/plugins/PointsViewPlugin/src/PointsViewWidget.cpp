@@ -107,31 +107,31 @@ void PointsViewWidget::setStatus(const QString& text)
     _statusLabel->setText(text);
 }
 
-void PointsViewWidget::updateInspector(const PointData* pointData)
+void PointsViewWidget::updateInspector(const Points* points)
 {
-    if (!pointData) {
+    if (!points) {
         _inspectorLabel->setText("Storage inspector: no point data");
         return;
     }
 
-    if (!pointData->isTiled()) {
+    if (!points->isTiled()) {
         _inspectorLabel->setText(QString("Storage inspector: eager | type: %1 | tiled cache unavailable")
-            .arg(pointData->getElementTypeName()));
+            .arg(points->getElementTypeName()));
         return;
     }
 
-    const auto estimate = pointData->getTiledMemoryEstimate();
+    const auto estimate = points->getTiledMemoryEstimate();
     _inspectorLabel->setText(QString("Storage inspector: tiled | type: %1 | tile: %2 × %3 | raw: %4 MiB | cache estimate: %5 MiB | cache: %6/%7 | hits: %8 | misses: %9 | evictions: %10")
-        .arg(pointData->getElementTypeName())
-        .arg(pointData->getTiledRowTileSize())
-        .arg(pointData->getTiledColumnTileSize())
+        .arg(points->getElementTypeName())
+        .arg(points->getTiledRowTileSize())
+        .arg(points->getTiledColumnTileSize())
         .arg(static_cast<double>(estimate.rawDataBytes) / (1024.0 * 1024.0), 0, 'f', 1)
         .arg(static_cast<double>(estimate.cachedTileBytes) / (1024.0 * 1024.0), 0, 'f', 1)
-        .arg(pointData->getTiledCacheSize())
-        .arg(pointData->getTiledCacheCapacity())
-        .arg(pointData->getTiledCacheHits())
-        .arg(pointData->getTiledCacheMisses())
-        .arg(pointData->getTiledCacheEvictions()));
+        .arg(points->getTiledCacheSize())
+        .arg(points->getTiledCacheCapacity())
+        .arg(points->getTiledCacheHits())
+        .arg(points->getTiledCacheMisses())
+        .arg(points->getTiledCacheEvictions()));
 }
 
 void PointsViewWidget::refreshSelection()
@@ -156,15 +156,14 @@ void PointsViewWidget::refreshSelection()
         return;
     }
 
-    auto* rawData = points->getPointData();
-    _model->setPointData(rawData, rawData->getNumPoints(), rawData->getNumDimensions());
+    _model->setPoints(points.get(), points->getNumPoints(), points->getNumDimensions());
     _datasetLabel->setText(QString("%1 — %2 points × %3 dimensions (%4)")
         .arg(points->getGuiName())
-        .arg(rawData->getNumPoints())
-        .arg(rawData->getNumDimensions())
-        .arg(rawData->isTiled() ? "tiled" : "eager"));
+        .arg(points->getNumPoints())
+        .arg(points->getNumDimensions())
+        .arg(points->isTiled() ? "tiled" : "eager"));
     _accessLog->clear();
-    updateInspector(rawData);
+    updateInspector(points.get());
     setStatus("Fetching the visible table window...");
     QTimer::singleShot(0, this, &PointsViewWidget::fetchVisibleRange);
 }
@@ -202,7 +201,6 @@ void PointsViewWidget::fetchVisibleRange()
     if (!points.isValid())
         return;
 
-    auto* rawData = points->getPointData();
     _accessLog->appendPlainText(QString("rows %1–%2, columns %3–%4 | %5 segment(s) | %6 ms")
         .arg(firstRow)
         .arg(firstRow + static_cast<int>(rowCount) - 1)
@@ -210,14 +208,14 @@ void PointsViewWidget::fetchVisibleRange()
         .arg(firstColumn + static_cast<int>(columnCount) - 1)
         .arg(callbacks)
         .arg(elapsedMilliseconds));
-    updateInspector(rawData);
+    updateInspector(points.get());
     setStatus(QString("Fetched visible rows %1–%2, columns %3–%4 in %5 access segment(s); cached tiles: %6. Drag/scroll and release to fetch again.")
         .arg(firstRow)
         .arg(firstRow + static_cast<int>(rowCount) - 1)
         .arg(firstColumn)
         .arg(firstColumn + static_cast<int>(columnCount) - 1)
         .arg(callbacks)
-        .arg(rawData->getTiledCacheSize()));
+        .arg(points->getTiledCacheSize()));
 }
 
 void PointsViewWidget::tileSelectedData()
@@ -230,10 +228,9 @@ void PointsViewWidget::tileSelectedData()
     if (!points.isValid())
         return;
 
-    auto* rawData = points->getPointData();
-    rawData->setTiledCacheCapacity(static_cast<std::size_t>(_cacheCapacity->value()));
+    points->setTiledCacheCapacity(static_cast<std::size_t>(_cacheCapacity->value()));
 
-    if (rawData->isTiled()) {
+    if (points->isTiled()) {
         emit tiledStorageEnabled(points->getGuiName());
         refreshSelection();
         return;
@@ -263,7 +260,7 @@ void PointsViewWidget::tileSelectedData()
         if (selectedItems.size() == 1) {
             auto points = selectedItems.first()->getDataset<Points>();
             if (points.isValid())
-                points->getPointData()->setTiledCacheCapacity(cacheCapacity);
+                points->setTiledCacheCapacity(cacheCapacity);
         }
 
         emit tiledStorageEnabled(datasetName);
@@ -271,7 +268,7 @@ void PointsViewWidget::tileSelectedData()
     });
 
     _tileWatcher->setFuture(QtConcurrent::run([points, rowTileSize, columnTileSize, progressTask]() mutable {
-        points->getPointData()->makeTiled(rowTileSize, columnTileSize, [progressTask](const float progress) {
+        points->makeTiled(rowTileSize, columnTileSize, [progressTask](const float progress) {
             if (progressTask)
                 progressTask->setProgress(progress, "Creating point-data tiles");
         });

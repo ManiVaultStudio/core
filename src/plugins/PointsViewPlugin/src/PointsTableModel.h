@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <vector>
 
-class PointData;
+class Points;
 
 /**
  * @brief Table model that exposes a fetched point-data window to Qt views.
@@ -29,7 +29,7 @@ public:
     explicit PointsTableModel(QObject* parent = nullptr);
 
     /** Selects the point data and logical table dimensions displayed by the model. */
-    void setPointData(PointData* pointData, std::uint64_t rows, std::uint64_t columns);
+    void setPoints(Points* points, std::uint64_t rows, std::uint64_t columns);
 
     /** Clears the selected data and any fetched values. */
     void clear();
@@ -37,7 +37,7 @@ public:
     /** Returns whether a point-data source is selected. */
     bool hasPointData() const
     {
-        return _pointData != nullptr;
+        return _points != nullptr;
     }
 
     /** Returns the total number of rows in the selected data. */
@@ -63,7 +63,7 @@ public:
 private:
     void notifyRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount);
 
-    PointData* _pointData = nullptr;
+    Points* _points = nullptr;
     std::uint64_t _totalRows = 0;
     std::uint64_t _totalColumns = 0;
     std::uint64_t _loadedFirstRow = 0;
