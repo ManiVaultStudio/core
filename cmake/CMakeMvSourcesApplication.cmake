@@ -2,17 +2,18 @@
 # Source files for target MV_EXE
 # -----------------------------------------------------------------------------
 # defines MAIN_SOURCES, PRIVATE_SOURCES and PRIVATE_HEADERS
+# all file path are relative to ROOT/src
 
 set(MAIN_SOURCES
-    src/Main.cpp
+    Main.cpp
 )
 
 set(PRIVATE_CORE_HEADERS
-    src/private/Core.h
+    private/Core.h
 )
 
 set(PRIVATE_CORE_SOURCES
-    src/private/Core.cpp
+    private/Core.cpp
 )
 
 set(PRIVATE_CORE_FILES
@@ -21,23 +22,23 @@ set(PRIVATE_CORE_FILES
 )
 
 set(PRIVATE_ACTIONS_HEADERS
-    src/private/ManiVaultVersionStatusBarAction.h
-    src/private/PluginsStatusBarAction.h
-    src/private/LoggingStatusBarAction.h
-    src/private/BackgroundTasksStatusBarAction.h
-    src/private/FrontPagesStatusBarAction.h
-    src/private/SettingsStatusBarAction.h
-    src/private/WorkspaceStatusBarAction.h
+    private/ManiVaultVersionStatusBarAction.h
+    private/PluginsStatusBarAction.h
+    private/LoggingStatusBarAction.h
+    private/BackgroundTasksStatusBarAction.h
+    private/FrontPagesStatusBarAction.h
+    private/SettingsStatusBarAction.h
+    private/WorkspaceStatusBarAction.h
 )
 
 set(PRIVATE_ACTIONS_SOURCES
-    src/private/PluginsStatusBarAction.cpp
-    src/private/ManiVaultVersionStatusBarAction.cpp
-    src/private/LoggingStatusBarAction.cpp
-    src/private/BackgroundTasksStatusBarAction.cpp
-    src/private/FrontPagesStatusBarAction.cpp
-    src/private/SettingsStatusBarAction.cpp
-    src/private/WorkspaceStatusBarAction.cpp
+    private/PluginsStatusBarAction.cpp
+    private/ManiVaultVersionStatusBarAction.cpp
+    private/LoggingStatusBarAction.cpp
+    private/BackgroundTasksStatusBarAction.cpp
+    private/FrontPagesStatusBarAction.cpp
+    private/SettingsStatusBarAction.cpp
+    private/WorkspaceStatusBarAction.cpp
 )
 
 set(PRIVATE_ACTIONS_FILES
@@ -46,27 +47,27 @@ set(PRIVATE_ACTIONS_FILES
 )
 
 set(PRIVATE_WORKSPACE_MANAGER_HEADERS
-    src/private/WorkspaceManager.h
-    src/private/DockManager.h
-    src/private/DockComponentsFactory.h
-    src/private/ViewPluginsDockWidget.h
-    src/private/ViewPluginDockWidget.h
-    src/private/CentralDockWidget.h
-    src/private/DockWidget.h
-    src/private/DockAreaTitleBar.h
-    src/private/WorkspaceSettingsDialog.h
+    private/WorkspaceManager.h
+    private/DockManager.h
+    private/DockComponentsFactory.h
+    private/ViewPluginsDockWidget.h
+    private/ViewPluginDockWidget.h
+    private/CentralDockWidget.h
+    private/DockWidget.h
+    private/DockAreaTitleBar.h
+    private/WorkspaceSettingsDialog.h
 )
 
 set(PRIVATE_WORKSPACE_MANAGER_SOURCES
-    src/private/WorkspaceManager.cpp
-    src/private/DockManager.cpp
-    src/private/DockComponentsFactory.cpp
-    src/private/ViewPluginsDockWidget.cpp
-    src/private/ViewPluginDockWidget.cpp
-    src/private/CentralDockWidget.cpp
-    src/private/DockWidget.cpp
-    src/private/DockAreaTitleBar.cpp
-    src/private/WorkspaceSettingsDialog.cpp
+    private/WorkspaceManager.cpp
+    private/DockManager.cpp
+    private/DockComponentsFactory.cpp
+    private/ViewPluginsDockWidget.cpp
+    private/ViewPluginDockWidget.cpp
+    private/CentralDockWidget.cpp
+    private/DockWidget.cpp
+    private/DockAreaTitleBar.cpp
+    private/WorkspaceSettingsDialog.cpp
 )
 
 set(PRIVATE_WORKSPACE_MANAGER_FILES
@@ -75,13 +76,13 @@ set(PRIVATE_WORKSPACE_MANAGER_FILES
 )
 
 set(PRIVATE_PLUGIN_MANAGER_HEADERS
-    src/private/PluginManager.h
-    src/private/PluginManagerDialog.h
+    private/PluginManager.h
+    private/PluginManagerDialog.h
 )
 
 set(PRIVATE_PLUGIN_MANAGER_SOURCES
-    src/private/PluginManager.cpp
-    src/private/PluginManagerDialog.cpp
+    private/PluginManager.cpp
+    private/PluginManagerDialog.cpp
 )
 
 set(PRIVATE_PLUGIN_MANAGER_FILES
@@ -90,19 +91,19 @@ set(PRIVATE_PLUGIN_MANAGER_FILES
 )
 
 set(PRIVATE_DATA_MANAGER_HEADERS
-    src/private/DataManager.h
-    src/private/GroupDataDialog.h
-    src/private/RemoveDatasetsDialog.h
-    src/private/DatasetsToRemoveModel.h
-    src/private/DatasetsToRemoveFilterModel.h
+    private/DataManager.h
+    private/GroupDataDialog.h
+    private/RemoveDatasetsDialog.h
+    private/DatasetsToRemoveModel.h
+    private/DatasetsToRemoveFilterModel.h
 )
 
 set(PRIVATE_DATA_MANAGER_SOURCES
-    src/private/DataManager.cpp
-    src/private/GroupDataDialog.cpp
-    src/private/RemoveDatasetsDialog.cpp
-    src/private/DatasetsToRemoveModel.cpp
-    src/private/DatasetsToRemoveFilterModel.cpp
+    private/DataManager.cpp
+    private/GroupDataDialog.cpp
+    private/RemoveDatasetsDialog.cpp
+    private/DatasetsToRemoveModel.cpp
+    private/DatasetsToRemoveFilterModel.cpp
 )
 
 set(PRIVATE_DATA_MANAGER_FILES
@@ -111,11 +112,11 @@ set(PRIVATE_DATA_MANAGER_FILES
 )
 
 set(PRIVATE_DATA_HIERARCHY_MANAGER_HEADERS
-    src/private/DataHierarchyManager.h
+    private/DataHierarchyManager.h
 )
 
 set(PRIVATE_DATA_HIERARCHY_MANAGER_SOURCES
-    src/private/DataHierarchyManager.cpp
+    private/DataHierarchyManager.cpp
 )
 
 set(PRIVATE_DATA_HIERARCHY_MANAGER_FILES
@@ -124,11 +125,11 @@ set(PRIVATE_DATA_HIERARCHY_MANAGER_FILES
 )
 
 set(PRIVATE_EVENT_MANAGER_HEADERS
-    src/private/EventManager.h
+    private/EventManager.h
 )
 
 set(PRIVATE_EVENT_MANAGER_SOURCES
-    src/private/EventManager.cpp
+    private/EventManager.cpp
 )
 
 set(PRIVATE_EVENT_MANAGER_FILES
@@ -137,11 +138,11 @@ set(PRIVATE_EVENT_MANAGER_FILES
 )
 
 set(PRIVATE_ACTIONS_MANAGER_HEADERS
-    src/private/ActionsManager.h
+    private/ActionsManager.h
 )
 
 set(PRIVATE_ACTIONS_MANAGER_SOURCES
-    src/private/ActionsManager.cpp
+    private/ActionsManager.cpp
 )
 
 set(PRIVATE_ACTIONS_MANAGER_FILES
@@ -150,17 +151,17 @@ set(PRIVATE_ACTIONS_MANAGER_FILES
 )
 
 set(PRIVATE_PROJECT_MANAGER_HEADERS
-    src/private/ProjectManager.h
-    src/private/ProjectWidget.h
-    src/private/ProjectSettingsDialog.h
-    src/private/NewProjectDialog.h
+    private/ProjectManager.h
+    private/ProjectWidget.h
+    private/ProjectSettingsDialog.h
+    private/NewProjectDialog.h
 )
 
 set(PRIVATE_PROJECT_MANAGER_SOURCES
-    src/private/ProjectManager.cpp
-    src/private/ProjectWidget.cpp
-    src/private/ProjectSettingsDialog.cpp
-    src/private/NewProjectDialog.cpp
+    private/ProjectManager.cpp
+    private/ProjectWidget.cpp
+    private/ProjectSettingsDialog.cpp
+    private/NewProjectDialog.cpp
 )
 
 set(PRIVATE_PROJECT_MANAGER_FILES
@@ -169,13 +170,13 @@ set(PRIVATE_PROJECT_MANAGER_FILES
 )
 
 set(PRIVATE_SETTINGS_MANAGER_HEADERS
-    src/private/SettingsManager.h
-    src/private/SettingsManagerDialog.h
+    private/SettingsManager.h
+    private/SettingsManagerDialog.h
 )
 
 set(PRIVATE_SETTINGS_MANAGER_SOURCES
-    src/private/SettingsManager.cpp
-    src/private/SettingsManagerDialog.cpp
+    private/SettingsManager.cpp
+    private/SettingsManagerDialog.cpp
 )
 
 set(PRIVATE_SETTINGS_MANAGER_FILES
@@ -184,11 +185,11 @@ set(PRIVATE_SETTINGS_MANAGER_FILES
 )
 
 set(PRIVATE_TASK_MANAGER_HEADERS
-    src/private/TaskManager.h
+    private/TaskManager.h
 )
 
 set(PRIVATE_TASK_MANAGER_SOURCES
-    src/private/TaskManager.cpp
+    private/TaskManager.cpp
 )
 
 set(PRIVATE_TASK_MANAGER_FILES
@@ -197,11 +198,11 @@ set(PRIVATE_TASK_MANAGER_FILES
 )
 
 set(PRIVATE_HELP_MANAGER_HEADERS
-    src/private/HelpManager.h
+    private/HelpManager.h
 )
 
 set(PRIVATE_HELP_MANAGER_SOURCES
-    src/private/HelpManager.cpp
+    private/HelpManager.cpp
 )
 
 set(PRIVATE_HELP_MANAGER_FILES
@@ -210,11 +211,11 @@ set(PRIVATE_HELP_MANAGER_FILES
 )
 
 set(PRIVATE_ERROR_MANAGER_HEADERS
-    src/private/ErrorManager.h
+    private/ErrorManager.h
 )
 
 set(PRIVATE_ERROR_MANAGER_SOURCES
-    src/private/ErrorManager.cpp
+    private/ErrorManager.cpp
 )
 
 set(PRIVATE_ERROR_MANAGER_FILES
@@ -223,11 +224,11 @@ set(PRIVATE_ERROR_MANAGER_FILES
 )
 
 set(PRIVATE_THEME_MANAGER_HEADERS
-    src/private/ThemeManager.h
+    private/ThemeManager.h
 )
 
 set(PRIVATE_THEME_MANAGER_SOURCES
-    src/private/ThemeManager.cpp
+    private/ThemeManager.cpp
 )
 
 set(PRIVATE_THEME_MANAGER_FILES
@@ -236,11 +237,11 @@ set(PRIVATE_THEME_MANAGER_FILES
 )
 
 set(PRIVATE_SCRIPTING_MANAGER_HEADERS
-    src/private/ScriptingManager.h
+    private/ScriptingManager.h
 )
 
 set(PRIVATE_SCRIPTING_MANAGER_SOURCES
-    src/private/ScriptingManager.cpp
+    private/ScriptingManager.cpp
 )
 
 set(PRIVATE_SCRIPTING_MANAGER_FILES
@@ -289,58 +290,58 @@ set(PRIVATE_MANAGER_FILES
 )
 
 set(PRIVATE_APPLICATION_HEADERS
-    src/private/MainWindow.h
-    src/private/FileMenu.h
-    src/private/ViewMenu.h
-    src/private/LoadSystemViewMenu.h
-    src/private/LoadedViewsMenu.h
-    src/private/ProjectsMenu.h
-    src/private/HelpMenu.h
-    src/private/UserFeedbackDialog.h
-    src/private/NoProxyRectanglesFusionStyle.h
-    src/private/GifEncoder.h
-    src/private/GifRecorder.h
+    private/MainWindow.h
+    private/FileMenu.h
+    private/ViewMenu.h
+    private/LoadSystemViewMenu.h
+    private/LoadedViewsMenu.h
+    private/ProjectsMenu.h
+    private/HelpMenu.h
+    private/UserFeedbackDialog.h
+    private/NoProxyRectanglesFusionStyle.h
+    private/GifEncoder.h
+    private/GifRecorder.h
 )
 
 if(WIN32)
     list(APPEND PRIVATE_APPLICATION_HEADERS
-        src/private/DeveloperMenu.h
+        private/DeveloperMenu.h
     )
 endif()
 
 if(MV_USE_ERROR_LOGGING)
 	list(APPEND PRIVATE_APPLICATION_HEADERS
-		src/private/SentryErrorLogger.h
-		src/private/CrashReportDialog.h
-		src/private/ErrorLoggingConsentDialog.h
+		private/SentryErrorLogger.h
+		private/CrashReportDialog.h
+		private/ErrorLoggingConsentDialog.h
 	)
 endif()
 
 set(PRIVATE_APPLICATION_SOURCES
-    src/private/MainWindow.cpp
-    src/private/FileMenu.cpp
-    src/private/ViewMenu.cpp
-    src/private/LoadSystemViewMenu.cpp
-    src/private/LoadedViewsMenu.cpp
-    src/private/ProjectsMenu.cpp
-    src/private/HelpMenu.cpp
-    src/private/UserFeedbackDialog.cpp
-    src/private/NoProxyRectanglesFusionStyle.cpp
-    src/private/GifEncoder.cpp
-    src/private/GifRecorder.cpp
+    private/MainWindow.cpp
+    private/FileMenu.cpp
+    private/ViewMenu.cpp
+    private/LoadSystemViewMenu.cpp
+    private/LoadedViewsMenu.cpp
+    private/ProjectsMenu.cpp
+    private/HelpMenu.cpp
+    private/UserFeedbackDialog.cpp
+    private/NoProxyRectanglesFusionStyle.cpp
+    private/GifEncoder.cpp
+    private/GifRecorder.cpp
 )
 
 if(WIN32)
     list(APPEND PRIVATE_APPLICATION_SOURCES
-        src/private/DeveloperMenu.cpp
+        private/DeveloperMenu.cpp
     )
 endif()
 
 if(MV_USE_ERROR_LOGGING)
 	list(APPEND PRIVATE_APPLICATION_SOURCES
-		src/private/SentryErrorLogger.cpp
-		src/private/CrashReportDialog.cpp
-		src/private/ErrorLoggingConsentDialog.cpp
+		private/SentryErrorLogger.cpp
+		private/CrashReportDialog.cpp
+		private/ErrorLoggingConsentDialog.cpp
 	)
 endif()
 
@@ -350,22 +351,22 @@ set(PRIVATE_APPLICATION_FILES
 )
 
 set(PRIVATE_WORKFLOW_HEADERS
-    src/private/ProjectOpenWorkflowPlan.h
-    src/private/ProjectSaveWorkflowPlan.h
-    src/private/ProjectPublishWorkflowPlan.h
-    src/private/ProjectPublishContext.h
-    src/private/ParallelPhantomTestSuite.h
-    src/private/TaskflowWorkflowPlanExecutor.h
-    src/private/Taskflow.h
+    private/ProjectOpenWorkflowPlan.h
+    private/ProjectSaveWorkflowPlan.h
+    private/ProjectPublishWorkflowPlan.h
+    private/ProjectPublishContext.h
+    private/ParallelPhantomTestSuite.h
+    private/TaskflowWorkflowPlanExecutor.h
+    private/Taskflow.h
 )
 
 set(PRIVATE_WORKFLOW_SOURCES
-    src/private/ProjectOpenWorkflowPlan.cpp
-    src/private/ProjectSaveWorkflowPlan.cpp
-    src/private/ProjectPublishWorkflowPlan.cpp
-    src/private/ProjectPublishContext.cpp
-    src/private/ParallelPhantomTestSuite.cpp
-    src/private/TaskflowWorkflowPlanExecutor.cpp
+    private/ProjectOpenWorkflowPlan.cpp
+    private/ProjectSaveWorkflowPlan.cpp
+    private/ProjectPublishWorkflowPlan.cpp
+    private/ProjectPublishContext.cpp
+    private/ParallelPhantomTestSuite.cpp
+    private/TaskflowWorkflowPlanExecutor.cpp
 )
 
 set(PRIVATE_WORKFLOW_FILES
@@ -374,21 +375,21 @@ set(PRIVATE_WORKFLOW_FILES
 )
 
 set(PRIVATE_CODEC_HEADERS
-    src/private/PassthroughBlobCodec.h
-    src/private/PassthroughBlobCodecFactory.h
-    src/private/ZstdBlobCodec.h
-    src/private/ZstdBlobCodecFactory.h
-    src/private/ZstdCodecSettingsAction.h
-    src/private/PassthroughCodecSettingsAction.h
+    private/PassthroughBlobCodec.h
+    private/PassthroughBlobCodecFactory.h
+    private/ZstdBlobCodec.h
+    private/ZstdBlobCodecFactory.h
+    private/ZstdCodecSettingsAction.h
+    private/PassthroughCodecSettingsAction.h
 )
 
 set(PRIVATE_CODEC_SOURCES
-    src/private/PassthroughBlobCodec.cpp
-    src/private/PassthroughBlobCodecFactory.cpp
-    src/private/ZstdBlobCodec.cpp
-    src/private/ZstdBlobCodecFactory.cpp
-    src/private/ZstdCodecSettingsAction.cpp
-    src/private/PassthroughCodecSettingsAction.cpp
+    private/PassthroughBlobCodec.cpp
+    private/PassthroughBlobCodecFactory.cpp
+    private/ZstdBlobCodec.cpp
+    private/ZstdBlobCodecFactory.cpp
+    private/ZstdCodecSettingsAction.cpp
+    private/PassthroughCodecSettingsAction.cpp
 )
 
 set(PRIVATE_CODEC_FILES
@@ -397,35 +398,35 @@ set(PRIVATE_CODEC_FILES
 )
 
 set(PRIVATE_PAGES_COMMON_HEADERS
-    src/private/PageWidget.h
-    src/private/PageHeaderWidget.h
-    src/private/PageContentWidget.h
-    src/private/LogoWidget.h
-	src/private/PageActionsWidget.h
-    src/private/AbstractPageActionsModel.h
-    src/private/PageActionsTreeModel.h
-    src/private/PageActionsFilterModel.h
-    src/private/PageActionDelegate.h
-    src/private/PageActionDelegateEditorWidget.h
-    src/private/PageAction.h
-    src/private/PageSubAction.h
-	src/private/PageTutorialsWidget.h
+    private/PageWidget.h
+    private/PageHeaderWidget.h
+    private/PageContentWidget.h
+    private/LogoWidget.h
+	private/PageActionsWidget.h
+    private/AbstractPageActionsModel.h
+    private/PageActionsTreeModel.h
+    private/PageActionsFilterModel.h
+    private/PageActionDelegate.h
+    private/PageActionDelegateEditorWidget.h
+    private/PageAction.h
+    private/PageSubAction.h
+	private/PageTutorialsWidget.h
 )
 
 set(PRIVATE_PAGES_COMMON_SOURCES
-    src/private/PageWidget.cpp
-    src/private/PageHeaderWidget.cpp
-    src/private/PageContentWidget.cpp
-    src/private/LogoWidget.cpp
-	src/private/PageActionsWidget.cpp
-    src/private/AbstractPageActionsModel.cpp
-    src/private/PageActionsTreeModel.cpp
-    src/private/PageActionsFilterModel.cpp
-    src/private/PageActionDelegate.cpp
-    src/private/PageActionDelegateEditorWidget.cpp
-    src/private/PageAction.cpp
-    src/private/PageSubAction.cpp
-	src/private/PageTutorialsWidget.cpp
+    private/PageWidget.cpp
+    private/PageHeaderWidget.cpp
+    private/PageContentWidget.cpp
+    private/LogoWidget.cpp
+	private/PageActionsWidget.cpp
+    private/AbstractPageActionsModel.cpp
+    private/PageActionsTreeModel.cpp
+    private/PageActionsFilterModel.cpp
+    private/PageActionDelegate.cpp
+    private/PageActionDelegateEditorWidget.cpp
+    private/PageAction.cpp
+    private/PageSubAction.cpp
+	private/PageTutorialsWidget.cpp
 )
 
 set(PRIVATE_PAGES_COMMON_FILES
@@ -434,17 +435,17 @@ set(PRIVATE_PAGES_COMMON_FILES
 )
 
 set(PRIVATE_START_PAGE_HEADERS
-    src/private/StartPageWidget.h
-    src/private/StartPageContentWidget.h
-    src/private/StartPageOpenProjectWidget.h
-    src/private/StartPageGetStartedWidget.h
+    private/StartPageWidget.h
+    private/StartPageContentWidget.h
+    private/StartPageOpenProjectWidget.h
+    private/StartPageGetStartedWidget.h
 )
 
 set(PRIVATE_START_PAGE_SOURCES
-    src/private/StartPageWidget.cpp
-    src/private/StartPageContentWidget.cpp
-    src/private/StartPageOpenProjectWidget.cpp
-    src/private/StartPageGetStartedWidget.cpp
+    private/StartPageWidget.cpp
+    private/StartPageContentWidget.cpp
+    private/StartPageOpenProjectWidget.cpp
+    private/StartPageGetStartedWidget.cpp
 )
 
 set(PRIVATE_START_PAGE_FILES
@@ -453,25 +454,25 @@ set(PRIVATE_START_PAGE_FILES
 )
 
 set(PRIVATE_LEARNING_PAGE_HEADERS
-    src/private/LearningPageWidget.h
-    src/private/LearningPageContentWidget.h
-    src/private/LearningPageVideosWidget.h
-    src/private/LearningPageVideoWidget.h
-    src/private/LearningPageVideoStyledItemDelegate.h
-	src/private/LearningPageExamplesWidget.h
-    src/private/LearningPagePluginResourcesWidget.h
-    src/private/LearningPagePluginAction.h
+    private/LearningPageWidget.h
+    private/LearningPageContentWidget.h
+    private/LearningPageVideosWidget.h
+    private/LearningPageVideoWidget.h
+    private/LearningPageVideoStyledItemDelegate.h
+	private/LearningPageExamplesWidget.h
+    private/LearningPagePluginResourcesWidget.h
+    private/LearningPagePluginAction.h
 )
 
 set(PRIVATE_LEARNING_PAGE_SOURCES
-    src/private/LearningPageWidget.cpp
-    src/private/LearningPageContentWidget.cpp
-    src/private/LearningPageVideosWidget.cpp
-    src/private/LearningPageVideoWidget.cpp
-    src/private/LearningPageVideoStyledItemDelegate.cpp
-	src/private/LearningPageExamplesWidget.cpp
-    src/private/LearningPagePluginResourcesWidget.cpp
-    src/private/LearningPagePluginAction.cpp
+    private/LearningPageWidget.cpp
+    private/LearningPageContentWidget.cpp
+    private/LearningPageVideosWidget.cpp
+    private/LearningPageVideoWidget.cpp
+    private/LearningPageVideoStyledItemDelegate.cpp
+	private/LearningPageExamplesWidget.cpp
+    private/LearningPagePluginResourcesWidget.cpp
+    private/LearningPagePluginAction.cpp
 )
 
 set(PRIVATE_LEARNING_PAGE_FILES
@@ -480,11 +481,11 @@ set(PRIVATE_LEARNING_PAGE_FILES
 )
 
 set(PRIVATE_MISCELLANEOUS_HEADERS
-    src/private/Archiver.h
+    private/Archiver.h
 )
 
 set(PRIVATE_MISCELLANEOUS_SOURCES
-    src/private/Archiver.cpp
+    private/Archiver.cpp
 )
 
 set(PRIVATE_MISCELLANEOUS_FILES

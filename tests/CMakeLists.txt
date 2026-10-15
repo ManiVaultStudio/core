@@ -2,6 +2,8 @@
 # when MV_BUILD_TESTING is enabled by the top-level project.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+find_package(Qt6 6.8 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets Concurrent REQUIRED)
+
 add_subdirectory(public)
 add_subdirectory(application)
 add_subdirectory(integration)

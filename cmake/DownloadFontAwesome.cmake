@@ -9,7 +9,7 @@ set(FONT_AWESOME_VERSIONS
 set(TEMP_DIR "${CMAKE_BINARY_DIR}/Font-Awesome-Resources")
 file(MAKE_DIRECTORY ${TEMP_DIR})
 
-set(FONT_AWESOME_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res/iconfonts")
+set(FONT_AWESOME_DIR "${MV_ROOT_DIR}/res/iconfonts")
 file(MAKE_DIRECTORY ${FONT_AWESOME_DIR})
 
 message(STATUS "Downloading Font Awesome resources to: ${FONT_AWESOME_DIR}")
