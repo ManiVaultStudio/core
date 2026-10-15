@@ -105,8 +105,8 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     settingsLayout->addLayout(controls, 1);
     settingsLayout->addLayout(actions);
 
-    _rowFilterAction.setPlaceHolderString("Empty = all rows; e.g. 1, 3, 10-20");
-    _columnFilterAction.setPlaceHolderString("Empty = all columns; e.g. 0-4, 8");
+    _rowFilterAction.setPlaceHolderString("Required; e.g. 1, 3, 10-20");
+    _columnFilterAction.setPlaceHolderString("Optional = all columns; e.g. 0-4, 8");
 
     auto* queryGroup = new QGroupBox("Point-data filters", this);
     auto* queryLayout = new QHBoxLayout(queryGroup);
@@ -143,6 +143,12 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask) :
     _fetchTimer->setInterval(100);
 
     connect(_tileButton, &QPushButton::clicked, this, &PointsViewWidget::tileSelectedData);
+    connect(&_rowFilterAction, &mv::gui::StringAction::stringChanged, this, [this] {
+        updateUiState();
+    });
+    connect(&_columnFilterAction, &mv::gui::StringAction::stringChanged, this, [this] {
+        updateUiState();
+    });
     connect(&_applyFiltersAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::applyFilters);
     connect(&_liveTableAction, &mv::gui::ToggleAction::toggled, this, &PointsViewWidget::showLiveTable);
     connect(&mv::dataHierarchy(), &mv::AbstractDataHierarchyManager::selectedItemsChanged, this, &PointsViewWidget::refreshSelection);
@@ -163,6 +169,36 @@ QSpinBox* PointsViewWidget::createIndexSpinBox(QWidget* parent) const
 void PointsViewWidget::setStatus(const QString& text)
 {
     _statusLabel->setText(text);
+}
+
+void PointsViewWidget::updateUiState()
+{
+    const auto hasPointData = _model->hasPointData();
+    const auto controlsEnabled = hasPointData && !_tilingInProgress;
+    const auto tableEnabled = hasPointData && !_tilingInProgress;
+    const auto liveTable = _liveTableAction.isChecked();
+
+    auto filtersAreValid = false;
+    if (controlsEnabled && !liveTable && !_rowFilterAction.getString().trimmed().isEmpty())
+    {
+        QString error;
+        const auto maximumRow = _model->totalRows() > 0 ? _model->totalRows() - 1 : 0;
+        const auto maximumColumn = _model->totalColumns() > 0 ? _model->totalColumns() - 1 : 0;
+        const auto rowIds = parseFilter(_rowFilterAction.getString(), maximumRow, error);
+        const auto columnIds = parseFilter(_columnFilterAction.getString(), maximumColumn, error);
+        filtersAreValid = error.isEmpty() && !rowIds.empty() && (_columnFilterAction.getString().trimmed().isEmpty() || !columnIds.empty());
+    }
+
+    _rowTileSize->setEnabled(controlsEnabled && !_model->isQueryResult());
+    _columnTileSize->setEnabled(controlsEnabled && !_model->isQueryResult());
+    _cacheCapacity->setEnabled(controlsEnabled);
+    _tileButton->setEnabled(controlsEnabled);
+    _table->setEnabled(tableEnabled);
+
+    _rowFilterAction.setEnabled(controlsEnabled && !liveTable);
+    _columnFilterAction.setEnabled(controlsEnabled && !liveTable);
+    _applyFiltersAction.setEnabled(filtersAreValid);
+    _liveTableAction.setEnabled(controlsEnabled);
 }
 
 void PointsViewWidget::updateInspector(const Points* points)
@@ -195,6 +231,7 @@ void PointsViewWidget::updateInspector(const Points* points)
 void PointsViewWidget::refreshSelection()
 {
     _model->clear();
+    updateUiState();
 
     const auto selectedItems = mv::dataHierarchy().getSelectedItems();
     if (selectedItems.size() != 1) {
@@ -215,6 +252,7 @@ void PointsViewWidget::refreshSelection()
     }
 
     _model->setPoints(points.get(), points->getNumPoints(), points->getNumDimensions());
+    updateUiState();
     _datasetLabel->setText(QString("%1 — %2 points × %3 dimensions (%4)")
         .arg(points->getGuiName())
         .arg(points->getNumPoints())
@@ -407,10 +445,10 @@ void PointsViewWidget::applyFilters()
         return;
     }
 
-    if (_rowFilterAction.getString().trimmed().isEmpty())
+    if (rowIds.empty())
     {
-        rowIds.resize(static_cast<std::size_t>(points->getNumPoints()));
-        std::iota(rowIds.begin(), rowIds.end(), 0);
+        setStatus("The row filter must contain at least one valid value");
+        return;
     }
 
     if (_columnFilterAction.getString().trimmed().isEmpty())
@@ -470,7 +508,14 @@ void PointsViewWidget::applyFilters()
 void PointsViewWidget::showLiveTable(const bool live)
 {
     if (live)
+    {
+        updateUiState();
         refreshSelection();
+    }
+    else
+    {
+        updateUiState();
+    }
 }
 
 void PointsViewWidget::tileSelectedData()
@@ -497,7 +542,8 @@ void PointsViewWidget::tileSelectedData()
     const auto datasetName = points->getGuiName();
     const auto progressTask = _progressTask;
 
-    _tileButton->setEnabled(false);
+    _tilingInProgress = true;
+    updateUiState();
     if (progressTask) {
         progressTask->resetProgress();
         progressTask->setRunning();
@@ -505,7 +551,8 @@ void PointsViewWidget::tileSelectedData()
     }
 
     connect(_tileWatcher, &QFutureWatcher<void>::finished, this, [this, datasetName, progressTask, cacheCapacity]() {
-        _tileButton->setEnabled(true);
+        _tilingInProgress = false;
+        updateUiState();
         if (progressTask) {
             progressTask->setProgress(1.0f, "Point-data tiling complete");
             progressTask->setFinished();

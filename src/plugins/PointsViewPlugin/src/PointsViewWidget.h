@@ -69,6 +69,7 @@ private slots:
 private:
     QSpinBox* createIndexSpinBox(QWidget* parent) const;
     void setStatus(const QString& text);
+    void updateUiState();
     void updateInspector(const Points* points);
     static std::vector<std::uint64_t> parseFilter(const QString& filter, std::uint64_t maximum, QString& error);
     void displayQuery(const std::vector<std::uint64_t>& rowIds, const std::vector<std::uint64_t>& columnIds, const std::function<void(const PointDataAccessVisitor&)>& request);
@@ -86,6 +87,7 @@ private:
     mv::Task* _progressTask;
     QFutureWatcher<void>* _tileWatcher;
     QTimer* _fetchTimer;
+    bool _tilingInProgress = false;
     mv::gui::StringAction _rowFilterAction;
     mv::gui::StringAction _columnFilterAction;
     mv::gui::TriggerAction _applyFiltersAction;
