@@ -36,6 +36,11 @@ target_include_directories(${DATAPROPERTIESPLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<
 
 target_compile_features(${DATAPROPERTIESPLUGIN} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
+target_compile_options(${DATAPROPERTIESPLUGIN}
+        PRIVATE
+            $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
+    )
+
 target_link_libraries(${DATAPROPERTIESPLUGIN} PRIVATE Qt6::Core)
 target_link_libraries(${DATAPROPERTIESPLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${DATAPROPERTIESPLUGIN} PRIVATE Qt6::WebEngineWidgets)

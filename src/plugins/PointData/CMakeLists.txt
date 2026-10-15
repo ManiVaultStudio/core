@@ -101,6 +101,11 @@ target_include_directories(${POINTDATA} PRIVATE ${MV_ROOT_DIR}/external/biovault
 
 target_compile_features(${POINTDATA} PUBLIC cxx_std_${MV_CXX_STANDARD})
 
+target_compile_options(${POINTDATA}
+        PRIVATE
+            $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
+    )
+
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
 generate_export_header(${POINTDATA})

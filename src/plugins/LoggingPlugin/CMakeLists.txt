@@ -35,6 +35,11 @@ target_include_directories(${LOGGINGPLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGU
 
 target_compile_features(${LOGGINGPLUGIN} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
+target_compile_options(${LOGGINGPLUGIN}
+        PRIVATE
+            $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
+    )
+
 target_link_libraries(${LOGGINGPLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${LOGGINGPLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${LOGGINGPLUGIN} PRIVATE ${MV_PUBLIC_LIB})

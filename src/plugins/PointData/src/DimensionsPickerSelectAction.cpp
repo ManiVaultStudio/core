@@ -10,7 +10,7 @@
 #include <QLabel>
 #include <QVBoxLayout>
 
-#include "../../../widgets/FileDialog.h"
+#include "../../lib/widgets/FileDialog.h"
 
 namespace mv::gui {
 

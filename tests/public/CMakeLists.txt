@@ -3,7 +3,7 @@ add_executable(MV_Public_ParseByteSizeTest
 )
 
 target_include_directories(MV_Public_ParseByteSizeTest PRIVATE
-    ${MV_ROOT_DIR}/src
+    ${MV_ROOT_DIR}/src/lib
 )
 
 target_link_libraries(MV_Public_ParseByteSizeTest PRIVATE

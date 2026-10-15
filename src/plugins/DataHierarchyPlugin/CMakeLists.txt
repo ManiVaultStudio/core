@@ -46,6 +46,11 @@ target_include_directories(${DATAHIERARCHYPLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<C
 
 target_compile_features(${DATAHIERARCHYPLUGIN} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
+target_compile_options(${DATAHIERARCHYPLUGIN}
+        PRIVATE
+            $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
+    )
+
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::Core)
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${DATAHIERARCHYPLUGIN} PRIVATE Qt6::WebEngineWidgets)
