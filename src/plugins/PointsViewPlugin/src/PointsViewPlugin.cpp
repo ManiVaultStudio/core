@@ -10,15 +10,10 @@ Q_PLUGIN_METADATA(IID "studio.manivault.PointsViewPlugin")
 
 PointsViewPlugin::PointsViewPlugin(const mv::plugin::PluginFactory* factory) :
     ViewPlugin(factory),
-    _tileTask(this, "Enable tiled storage"),
-    _widget(nullptr, &_tileTask)
+    _widget(nullptr)
 {
     getGuiNameAction().setString("Points View");
-    setProgressTask(&_tileTask);
     connect(&mv::dataHierarchy(), &mv::AbstractDataHierarchyManager::selectedItemsChanged, this, &PointsViewPlugin::refreshSelection);
-    connect(&_widget, &PointsViewWidget::tiledStorageEnabled, this, [this](const QString& datasetName) {
-        addNotification(QString("Tiled storage enabled for %1").arg(datasetName));
-    });
 
     refreshSelection();
 }

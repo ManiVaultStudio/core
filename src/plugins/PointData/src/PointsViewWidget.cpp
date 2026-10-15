@@ -4,22 +4,17 @@
 
 #include <CoreInterface.h>
 #include "PointData.h"
-#include <Task.h>
 
 #include <QAbstractItemView>
 #include <QEvent>
-#include <QFutureWatcher>
 #include <QHeaderView>
 #include <QLabel>
-#include <QPushButton>
 #include <QScrollBar>
 #include <QSpinBox>
 #include <QTableView>
 #include <QTimer>
 #include <QTextEdit>
 #include <QVBoxLayout>
-#include <QtConcurrent>
-
 #include <algorithm>
 #include <limits>
 #include <numeric>
@@ -63,20 +58,12 @@ float valueAt(const PointDataAccessView& view, const std::uint64_t row, const st
 }
 }
 
-PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask, const bool showDatasetControls) :
+PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetControls) :
     QWidget(parent),
     _showDatasetControls(showDatasetControls),
     _datasetLabel(showDatasetControls ? new QLabel("No Points dataset selected", this) : nullptr),
-    _inspectorLabel(showDatasetControls ? new QLabel(this) : nullptr),
-    _statusLabel(showDatasetControls ? new QLabel(this) : nullptr),
-    _rowTileSize(showDatasetControls ? createIndexSpinBox(this) : nullptr),
-    _columnTileSize(showDatasetControls ? createIndexSpinBox(this) : nullptr),
-    _cacheCapacity(showDatasetControls ? createIndexSpinBox(this) : nullptr),
-    _tileButton(showDatasetControls ? new QPushButton("Enable tiled storage", this) : nullptr),
     _table(new QTableView(this)),
     _model(new PointsTableModel(this)),
-    _progressTask(progressTask),
-    _tileWatcher(new QFutureWatcher<void>(this)),
     _fetchTimer(new QTimer(this)),
     _filterTimer(new QTimer(this)),
     _filterGroupAction(this, "Point-data filters"),
@@ -243,12 +230,7 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, mv::Task* progressTask, cons
     layout->addWidget(_filterGroupAction.createWidget(this));
     layout->addWidget(_table, 1);
 
-    if (_showDatasetControls)
-    {
-        layout->addWidget(_inspectorLabel);
-        layout->addWidget(_statusLabel);
-    }
-    else
+    if (!_showDatasetControls)
         layout->addWidget(_openInPointsViewAction.createWidget(this));
 
     _table->verticalScrollBar()->installEventFilter(this);
@@ -333,33 +315,18 @@ void PointsViewWidget::setPoints(const mv::Dataset<Points>& points)
     refreshPoints();
 }
 
-QSpinBox* PointsViewWidget::createIndexSpinBox(QWidget* parent) const
-{
-    auto* spinBox = new QSpinBox(parent);
-    spinBox->setRange(1, 1000000000);
-    return spinBox;
-}
-
 void PointsViewWidget::setStatus(const QString& text)
 {
-    if (_statusLabel)
-        _statusLabel->setText(text);
+    Q_UNUSED(text);
 }
 
 void PointsViewWidget::updateUiState()
 {
     const auto hasPointData    = _model->hasPointData();
-    const auto controlsEnabled = hasPointData && !_tilingInProgress;
-    const auto tableEnabled    = hasPointData && !_tilingInProgress;
+    const auto controlsEnabled = hasPointData;
+    const auto tableEnabled    = hasPointData;
     const auto liveTable       = _liveTableAction.isChecked();
 
-    if (_showDatasetControls)
-    {
-        _rowTileSize->setEnabled(controlsEnabled && !_model->isQueryResult());
-        _columnTileSize->setEnabled(controlsEnabled && !_model->isQueryResult());
-        _cacheCapacity->setEnabled(controlsEnabled);
-        _tileButton->setEnabled(controlsEnabled);
-    }
     _table->setEnabled(tableEnabled);
     _openInPointsViewAction.setEnabled(hasPointData && !_showDatasetControls);
 
@@ -372,7 +339,7 @@ void PointsViewWidget::updateUiState()
 
 void PointsViewWidget::updateFacadeActionState()
 {
-    if (!_points.isValid() || _tilingInProgress)
+    if (!_points.isValid())
     {
         _getRowAction.setEnabled(false);
         _getRowRangeAction.setEnabled(false);
@@ -417,38 +384,6 @@ void PointsViewWidget::updateFacadeActionState()
     _getRangeAction.setEnabled(pointCount > 0 && dimensionCount > 0 && rangeRowStart <= rangeRowEnd && rangeRowEnd < pointCount && rangeColumnStart <= rangeColumnEnd && rangeColumnEnd < dimensionCount);
 }
 
-void PointsViewWidget::updateInspector(const Points* points)
-{
-    if (!_inspectorLabel)
-        return;
-
-    if (!points)
-    {
-        _inspectorLabel->setText("Storage inspector: no point data");
-        return;
-    }
-
-    if (!points->isTiled())
-    {
-        _inspectorLabel->setText(QString("Storage inspector: eager | type: %1 | tiled cache unavailable")
-            .arg(points->getElementTypeName()));
-        return;
-    }
-
-    const auto estimate = points->getTiledMemoryEstimate();
-    _inspectorLabel->setText(QString("Storage inspector: tiled | type: %1 | tile: %2 × %3 | raw: %4 MiB | cache estimate: %5 MiB | cache: %6/%7 | hits: %8 | misses: %9 | evictions: %10")
-        .arg(points->getElementTypeName())
-        .arg(points->getTiledRowTileSize())
-        .arg(points->getTiledColumnTileSize())
-        .arg(static_cast<double>(estimate.rawDataBytes) / (1024.0 * 1024.0), 0, 'f', 1)
-        .arg(static_cast<double>(estimate.cachedTileBytes) / (1024.0 * 1024.0), 0, 'f', 1)
-        .arg(points->getTiledCacheSize())
-        .arg(points->getTiledCacheCapacity())
-        .arg(points->getTiledCacheHits())
-        .arg(points->getTiledCacheMisses())
-        .arg(points->getTiledCacheEvictions()));
-}
-
 void PointsViewWidget::refreshPoints()
 {
     _model->clear();
@@ -458,7 +393,6 @@ void PointsViewWidget::refreshPoints()
     {
         if (_datasetLabel)
             _datasetLabel->setText("Select exactly one Points dataset");
-        updateInspector(nullptr);
         setStatus("Scroll after selecting a dataset to fetch visible values");
         return;
     }
@@ -471,7 +405,6 @@ void PointsViewWidget::refreshPoints()
             .arg(_points->getNumPoints())
             .arg(_points->getNumDimensions())
             .arg(_points->isTiled() ? "tiled" : "eager"));
-    updateInspector(_points.get());
     setStatus("Fetching the visible table window...");
     QTimer::singleShot(0, this, &PointsViewWidget::fetchVisibleRange);
 }
@@ -516,7 +449,6 @@ void PointsViewWidget::fetchVisibleRange()
         return;
     }
 
-    updateInspector(_points.get());
     setStatus(QString("Fetched visible rows %1–%2, columns %3–%4 in %5 access segment(s); cached tiles: %6. Drag/scroll and release to fetch again.")
         .arg(firstRow)
         .arg(firstRow + static_cast<int>(rowCount) - 1)
@@ -893,63 +825,6 @@ void PointsViewWidget::getRange()
     displayQuery(rowIds, columnIds, [points, firstRow, firstColumn, rowIds, columnIds](const PointDataAccessVisitor& visitor) {
         points->visitRange(firstRow, rowIds.size(), firstColumn, columnIds.size(), visitor);
     });
-}
-
-void PointsViewWidget::tileSelectedData()
-{
-    auto points = _points;
-
-    if (!points.isValid())
-    {
-        return;
-    }
-
-    points->setTiledCacheCapacity(static_cast<std::size_t>(_cacheCapacity->value()));
-
-    if (points->isTiled())
-    {
-        emit tiledStorageEnabled(points->getGuiName());
-        refreshPoints();
-        return;
-    }
-
-    const auto rowTileSize    = static_cast<std::size_t>(_rowTileSize->value());
-    const auto columnTileSize = static_cast<std::size_t>(_columnTileSize->value());
-    const auto cacheCapacity  = static_cast<std::size_t>(_cacheCapacity->value());
-    const auto datasetName    = points->getGuiName();
-    const auto progressTask   = _progressTask;
-
-    _tilingInProgress = true;
-    updateUiState();
-    if (progressTask)
-    {
-        progressTask->resetProgress();
-        progressTask->setRunning();
-        progressTask->setProgressDescription("Creating point-data tiles");
-    }
-
-    connect(_tileWatcher, &QFutureWatcher<void>::finished, this, [this, datasetName, progressTask, cacheCapacity]() {
-        _tilingInProgress = false;
-        updateUiState();
-        if (progressTask)
-        {
-            progressTask->setProgress(1.0f, "Point-data tiling complete");
-            progressTask->setFinished();
-        }
-
-        if (_points.isValid())
-            _points->setTiledCacheCapacity(cacheCapacity);
-
-        emit tiledStorageEnabled(datasetName);
-        refreshPoints();
-    });
-
-    _tileWatcher->setFuture(QtConcurrent::run([points, rowTileSize, columnTileSize, progressTask]() mutable {
-        points->makeTiled(rowTileSize, columnTileSize, [progressTask](const float progress) {
-            if (progressTask)
-                progressTask->setProgress(progress, "Creating point-data tiles");
-        });
-    }));
 }
 
 bool PointsViewWidget::eventFilter(QObject* watched, QEvent* event)

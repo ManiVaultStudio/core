@@ -3,7 +3,6 @@
 #pragma once
 
 #include <ViewPlugin.h>
-#include <Task.h>
 #include <PointsViewWidget.h>
 
 /**
@@ -28,8 +27,7 @@ public:
 private:
     void refreshSelection();
 
-    mv::Task         _tileTask; /**< Progress task used while creating tiled storage. */
-    PointsViewWidget _widget;   /**< Embedded diagnostic table and facade-access view. */
+    PointsViewWidget _widget; /**< Embedded diagnostic table and facade-access view. */
 };
 
 /**

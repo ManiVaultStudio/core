@@ -27,7 +27,7 @@ const mv::Dataset<Points>& PointsViewAction::getPoints() const
 PointsViewAction::Widget::Widget(QWidget* parent, PointsViewAction* pointsViewAction) :
     WidgetActionWidget(parent, pointsViewAction)
 {
-    auto* pointsViewWidget = new PointsViewWidget(this, nullptr, false);
+    auto* pointsViewWidget = new PointsViewWidget(this, false);
 
 	pointsViewWidget->setPoints(pointsViewAction->getPoints());
     pointsViewWidget->layout()->setContentsMargins(0, 0, 0, 0);

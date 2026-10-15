@@ -24,17 +24,10 @@
 #include <vector>
 
 class QEvent;
-template <typename T> class QFutureWatcher;
 class QLabel;
-class QPushButton;
 class QSpinBox;
 class QTableView;
 class QTimer;
-
-namespace mv
-{
-class Task;
-}
 
 class Points;
 
@@ -43,9 +36,9 @@ class Points;
  *
  * The widget is a diagnostic consumer of the storage-neutral PointData access
  * API. It fetches only the visible row and column window after table
- * navigation, exposes tile-cache statistics, and can enable tiled storage on
- * the selected dataset. This makes the plugin useful both as a basic point
- * data browser and as a manual test surface for lazy loading behavior.
+ * navigation and can inspect both eager and tiled datasets. This makes the
+ * plugin useful as a basic point-data browser and as a manual test surface
+ * for lazy loading behavior.
  *
  * @author Thomas Kroes
  */
@@ -54,15 +47,11 @@ class POINTDATA_EXPORT PointsViewWidget final : public QWidget
     Q_OBJECT
 
 public:
-    /** Constructs the points view and optionally associates a progress task. */
-    explicit PointsViewWidget(QWidget* parent = nullptr, mv::Task* progressTask = nullptr, bool showDatasetControls = true);
+    /** Constructs the points view. */
+    explicit PointsViewWidget(QWidget* parent = nullptr, bool showDatasetControls = true);
 
     /** Sets the point-data source displayed by the widget. */
     void setPoints(const mv::Dataset<Points>& points);
-
-signals:
-    /** Emitted after the selected dataset has been converted to tiled storage. */
-    void tiledStorageEnabled(const QString& datasetName);
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event) override;
@@ -70,7 +59,6 @@ protected:
 private slots:
     void scheduleVisibleRangeFetch();
     void fetchVisibleRange();
-    void tileSelectedData();
     void applyFilters();
     void showLiveTable(bool live);
     void getRow();
@@ -84,30 +72,19 @@ private slots:
 
 private:
     void refreshPoints();
-    QSpinBox* createIndexSpinBox(QWidget* parent) const;
     void setStatus(const QString& text);
     void updateUiState();
     void updateFacadeActionState();
-    void updateInspector(const Points* points);
     static std::vector<std::uint64_t> parseFilter(const QString& filter, std::uint64_t maximum, QString& error);
     void displayQuery(const std::vector<std::uint64_t>& rowIds, const std::vector<std::uint64_t>& columnIds, const std::function<void(const PointDataAccessVisitor&)>& request);
 
     mv::Dataset<Points>             _points;
     bool                            _showDatasetControls;
     QLabel*                         _datasetLabel;
-    QLabel*                         _inspectorLabel;
-    QLabel*                         _statusLabel;
-    QSpinBox*                       _rowTileSize;
-    QSpinBox*                       _columnTileSize;
-    QSpinBox*                       _cacheCapacity;
-    QPushButton*                    _tileButton;
     QTableView*                     _table;
     PointsTableModel*               _model;
-    mv::Task*                       _progressTask;
-    QFutureWatcher<void>*           _tileWatcher;
     QTimer*                         _fetchTimer;
     QTimer*                         _filterTimer;
-    bool                            _tilingInProgress = false;
     mv::gui::HorizontalGroupAction  _filterGroupAction;
     mv::gui::StringAction           _facadeInfoAction;
     mv::gui::VerticalGroupAction    _facadeGroupAction;
