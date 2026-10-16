@@ -4,16 +4,15 @@
 
 #include <CoreInterface.h>
 #include <DeveloperActionRegistry.h>
+#include <actions/IntegralAction.h>
+#include <actions/OptionAction.h>
+#include <actions/StringAction.h>
+#include <actions/VerticalGroupAction.h>
 #include <util/StyledIcon.h>
 
-#include <QComboBox>
 #include <QDialog>
 #include <QDialogButtonBox>
-#include <QFormLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QSpinBox>
+#include <QVBoxLayout>
 
 #include <algorithm>
 #include <cstdint>
@@ -139,104 +138,205 @@ QByteArray makeTile(const Points::ElementTypeSpecifier type, const Population po
     return bytes;
 }
 
+float makeValue(const Population population, const std::uint64_t row, const std::uint64_t column, std::mt19937_64& random, std::uniform_real_distribution<float>& unit)
+{
+    const auto deterministic = static_cast<float>(row % 10000) / 10000.0f + static_cast<float>(column % 1000) / 1000.0f;
+
+    return population == Population::Zero ? 0.0f
+        : population == Population::RandomZeroOne ? (random() & 1ULL ? 1.0f : 0.0f)
+        : population == Population::RandomFloat ? unit(random)
+        : deterministic;
+}
+
+template <typename T>
+T convertValue(const float value)
+{
+    return static_cast<T>(value);
+}
+
+template <>
+biovault::bfloat16_t convertValue(const float value)
+{
+    std::uint32_t bits = 0;
+    std::memcpy(&bits, &value, sizeof(bits));
+
+    const auto truncated = static_cast<std::uint16_t>(bits >> 16);
+    biovault::bfloat16_t result;
+    std::memcpy(&result, &truncated, sizeof(truncated));
+    return result;
+}
+
+template <typename T>
+std::vector<T> makeEagerData(const Population population, const std::uint64_t rows, const std::uint64_t columns)
+{
+    std::vector<T> values(static_cast<std::size_t>(rows * columns));
+    std::mt19937_64 random(17);
+    std::uniform_real_distribution<float> unit(0.0f, 1.0f);
+
+    for (std::uint64_t row = 0; row < rows; ++row)
+    {
+        for (std::uint64_t column = 0; column < columns; ++column)
+            values[static_cast<std::size_t>(row * columns + column)] = convertValue<T>(makeValue(population, row, column, random, unit));
+    }
+
+    return values;
+}
+
+void populateEager(Points& points, const Points::ElementTypeSpecifier type, const Population population, const std::uint64_t rows, const std::uint64_t columns)
+{
+    switch (type)
+    {
+        case Points::ElementTypeSpecifier::float32:
+            points.setData(makeEagerData<float>(population, rows, columns), columns);
+            break;
+
+        case Points::ElementTypeSpecifier::bfloat16:
+            points.setData(makeEagerData<biovault::bfloat16_t>(population, rows, columns), columns);
+            break;
+
+        case Points::ElementTypeSpecifier::int32:
+            points.setData(makeEagerData<std::int32_t>(population, rows, columns), columns);
+            break;
+
+        case Points::ElementTypeSpecifier::uint32:
+            points.setData(makeEagerData<std::uint32_t>(population, rows, columns), columns);
+            break;
+
+        case Points::ElementTypeSpecifier::int16:
+            points.setData(makeEagerData<std::int16_t>(population, rows, columns), columns);
+            break;
+
+        case Points::ElementTypeSpecifier::uint16:
+            points.setData(makeEagerData<std::uint16_t>(population, rows, columns), columns);
+            break;
+
+        case Points::ElementTypeSpecifier::int8:
+            points.setData(makeEagerData<std::int8_t>(population, rows, columns), columns);
+            break;
+
+        case Points::ElementTypeSpecifier::uint8:
+            points.setData(makeEagerData<std::uint8_t>(population, rows, columns), columns);
+            break;
+    }
+}
+
 /**
  * @brief Collects settings for a developer-generated phantom dataset.
  *
  * The dialog keeps dataset dimensions, element representation, population
- * strategy, tile geometry, and cache capacity together so the developer menu
- * can create repeatable large-data scenarios without embedding configuration
- * in the generator callback. Its estimate is informational and describes the
+ * strategy, storage backend, tile geometry, and cache capacity together so the
+ * developer menu can create repeatable large-data scenarios without embedding
+ * configuration in the generator callback. It supports both fully materialized
+ * eager data and generator-backed tiled data, while its estimate describes the
  * logical and resident tiled footprint before any tile is requested.
  *
- * @author Thomas Kroes
+ * @author T. Kroes
  */
 class PhantomDialog final : public QDialog
 {
 public:
     explicit PhantomDialog(QWidget* parent) :
-        QDialog(parent)
+        QDialog(parent),
+        _settingsGroupAction(this, "Phantom points"),
+        _nameAction(&_settingsGroupAction, "Dataset name", "Phantom points"),
+        _rowsAction(&_settingsGroupAction, "Rows", 1, std::numeric_limits<std::int32_t>::max(), 1000000),
+        _columnsAction(&_settingsGroupAction, "Dimensions", 1, 100000, 32),
+        _typeAction(&_settingsGroupAction, "Element type"),
+        _populationAction(&_settingsGroupAction, "Population", { "Deterministic", "Random floats", "Random zeros and ones", "All zeros" }, "Deterministic"),
+        _storageBackendAction(&_settingsGroupAction, "Storage backend", { "Eager", "Tiled" }, "Tiled"),
+        _rowTileSizeAction(&_settingsGroupAction, "Tile rows", 1, 1000000, 4096),
+        _columnTileSizeAction(&_settingsGroupAction, "Tile columns", 1, 100000, 32),
+        _cacheCapacityAction(&_settingsGroupAction, "Cache tiles", 1, 100000, 8),
+        _estimateAction(&_settingsGroupAction, "Estimate")
     {
         setWindowTitle(tr("Create phantom points dataset"));
-        auto* form = new QFormLayout(this);
 
-        _name           = new QLineEdit("Phantom points", this);
-        _rows           = makeSpin(1, std::numeric_limits<int>::max(), 1000000);
-        _columns        = makeSpin(1, 100000, 32);
-        _rowTileSize    = makeSpin(1, 1000000, 4096);
-        _columnTileSize = makeSpin(1, 100000, 32);
-        _cacheCapacity  = makeSpin(1, 100000, 8);
-        _type           = new QComboBox(this);
         QStringList typeNames;
-        for (const auto* typeName : Points::getElementTypeNames())
-        {
-            typeNames.push_back(QString::fromLatin1(typeName));
-        }
-        _type->addItems(typeNames);
-        _population    = new QComboBox(this);
-        _population->addItem("Deterministic", static_cast<int>(Population::Deterministic));
-        _population->addItem("Random floats", static_cast<int>(Population::RandomFloat));
-        _population->addItem("Random zeros and ones", static_cast<int>(Population::RandomZeroOne));
-        _population->addItem("All zeros", static_cast<int>(Population::Zero));
-        _estimate      = new QLabel(this);
-        _estimate->setWordWrap(true);
 
-        form->addRow("Dataset name", _name);
-        form->addRow("Rows", _rows);
-        form->addRow("Dimensions", _columns);
-        form->addRow("Element type", _type);
-        form->addRow("Population", _population);
-        form->addRow("Tile rows", _rowTileSize);
-        form->addRow("Tile columns", _columnTileSize);
-        form->addRow("Cache tiles", _cacheCapacity);
-        form->addRow("Estimate", _estimate);
+        for (const auto* typeName : Points::getElementTypeNames())
+            typeNames.push_back(QString::fromLatin1(typeName));
+
+        _typeAction.initialize(typeNames, typeNames.first());
+
+        _settingsGroupAction.setShowLabels(true);
+        _nameAction.setDefaultWidgetFlags(mv::gui::StringAction::LineEdit);
+        _rowsAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
+        _columnsAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
+        _typeAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
+        _populationAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
+        _storageBackendAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
+        _rowTileSizeAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
+        _columnTileSizeAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
+        _cacheCapacityAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
+        _estimateAction.setDefaultWidgetFlags(mv::gui::StringAction::TextEdit);
+        _estimateAction.setEnabled(false);
+
+        _settingsGroupAction.addAction(&_nameAction);
+        _settingsGroupAction.addAction(&_rowsAction);
+        _settingsGroupAction.addAction(&_columnsAction);
+        _settingsGroupAction.addAction(&_typeAction);
+        _settingsGroupAction.addAction(&_populationAction);
+        _settingsGroupAction.addAction(&_storageBackendAction);
+        _settingsGroupAction.addAction(&_rowTileSizeAction);
+        _settingsGroupAction.addAction(&_columnTileSizeAction);
+        _settingsGroupAction.addAction(&_cacheCapacityAction);
+        _settingsGroupAction.addAction(&_estimateAction);
+
+        auto* layout = new QVBoxLayout(this);
+        layout->addWidget(_settingsGroupAction.createWidget(this));
 
         auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
-        form->addRow(buttons);
+        layout->addWidget(buttons);
+
         connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
         connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
-        for (auto* spin : { _rows, _columns, _rowTileSize, _columnTileSize, _cacheCapacity })
-            connect(spin, qOverload<int>(&QSpinBox::valueChanged), this, [this] { updateEstimate(); });
-        connect(_type, &QComboBox::currentTextChanged, this, [this] { updateEstimate(); });
-        updateEstimate();
+
+        connect(&_rowsAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateEstimate(); });
+        connect(&_columnsAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateEstimate(); });
+        connect(&_typeAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateEstimate(); });
+        connect(&_storageBackendAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateActions(); });
+        connect(&_rowTileSizeAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateEstimate(); });
+        connect(&_columnTileSizeAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateEstimate(); });
+        connect(&_cacheCapacityAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateEstimate(); });
+
+        updateActions();
     }
 
     QString name() const
     {
-        return _name->text().trimmed().isEmpty() ? QStringLiteral("Phantom points") : _name->text().trimmed();
+        const auto name = _nameAction.getString().trimmed();
+        return name.isEmpty() ? QStringLiteral("Phantom points") : name;
     }
 
-    std::uint64_t rows() const { return _rows->value(); }
+    std::uint64_t rows() const { return static_cast<std::uint64_t>(_rowsAction.getValue()); }
 
-    std::uint64_t columns() const { return _columns->value(); }
+    std::uint64_t columns() const { return static_cast<std::uint64_t>(_columnsAction.getValue()); }
 
-    std::size_t rowTileSize() const { return _rowTileSize->value(); }
+    std::size_t rowTileSize() const { return static_cast<std::size_t>(_rowTileSizeAction.getValue()); }
 
-    std::size_t columnTileSize() const { return _columnTileSize->value(); }
+    std::size_t columnTileSize() const { return static_cast<std::size_t>(_columnTileSizeAction.getValue()); }
 
-    std::size_t cacheCapacity() const { return _cacheCapacity->value(); }
+    std::size_t cacheCapacity() const { return static_cast<std::size_t>(_cacheCapacityAction.getValue()); }
 
-    Points::ElementTypeSpecifier type() const
-    {
-        return Points::elementTypeSpecifier(_type->currentText());
-    }
+    bool isTiled() const { return _storageBackendAction.getCurrentText() == "Tiled"; }
 
-    Population population() const
-    {
-        return static_cast<Population>(_population->currentData().toInt());
-    }
+    Points::ElementTypeSpecifier type() const { return Points::elementTypeSpecifier(_typeAction.getCurrentText()); }
+
+    Population population() const { return static_cast<Population>(_populationAction.getCurrentIndex()); }
 
 private:
-    static QSpinBox* makeSpin(int minimum, int maximum, int value)
+    void updateActions()
     {
-        auto* spin = new QSpinBox;
-        spin->setRange(minimum, maximum);
-        spin->setValue(value);
-        return spin;
+        const auto tiled = isTiled();
+        _rowTileSizeAction.setEnabled(tiled);
+        _columnTileSizeAction.setEnabled(tiled);
+        _cacheCapacityAction.setEnabled(tiled);
+        updateEstimate();
     }
 
     void updateEstimate()
     {
-        const auto type = Points::elementTypeSpecifier(_type->currentText());
+        const auto type = Points::elementTypeSpecifier(_typeAction.getCurrentText());
         const auto elementSize = type == Points::ElementTypeSpecifier::float32
             ? 4
             : type == Points::ElementTypeSpecifier::bfloat16
@@ -249,7 +349,8 @@ private:
 
         const auto estimate = Points::estimateTiledMemory(rows(), columns(), elementSize, rowTileSize(), columnTileSize(), cacheCapacity());
 
-        _estimate->setText(QString("Raw size: %1\nLargest tile: %2\nEstimated cache: %3\nTiles: %4\nIndex estimate: %5")
+        _estimateAction.setString(QString("Storage backend: %1\nRaw size: %2\nLargest tile: %3\nEstimated cache: %4\nTiles: %5\nIndex estimate: %6")
+            .arg(isTiled() ? "Tiled" : "Eager")
             .arg(formatBytes(estimate.rawDataBytes))
             .arg(formatBytes(estimate.largestTileBytes))
             .arg(formatBytes(estimate.cachedTileBytes))
@@ -257,22 +358,24 @@ private:
             .arg(formatBytes(estimate.indexBytes)));
     }
 
-    QLineEdit* _name = nullptr;
-    QSpinBox* _rows = nullptr;
-    QSpinBox* _columns = nullptr;
-    QSpinBox* _rowTileSize = nullptr;
-    QSpinBox* _columnTileSize = nullptr;
-    QSpinBox* _cacheCapacity = nullptr;
-    QComboBox* _type = nullptr;
-    QComboBox* _population = nullptr;
-    QLabel* _estimate = nullptr;
+    mv::gui::VerticalGroupAction _settingsGroupAction;
+    mv::gui::StringAction       _nameAction;
+    mv::gui::IntegralAction     _rowsAction;
+    mv::gui::IntegralAction     _columnsAction;
+    mv::gui::OptionAction       _typeAction;
+    mv::gui::OptionAction       _populationAction;
+    mv::gui::OptionAction       _storageBackendAction;
+    mv::gui::IntegralAction     _rowTileSizeAction;
+    mv::gui::IntegralAction     _columnTileSizeAction;
+    mv::gui::IntegralAction     _cacheCapacityAction;
+    mv::gui::StringAction       _estimateAction;
 };
 }
 
 void PointDataPhantomGenerator::populateMenu(QMenu& menu, QWidget* owner)
 {
     auto* action = menu.addAction(mv::util::StyledIcon("table"), QObject::tr("Phantom points…"));
-    action->setToolTip(QObject::tr("Create a lazy, generator-backed tiled points dataset"));
+    action->setToolTip(QObject::tr("Create a synthetic eager or tiled points dataset"));
     QObject::connect(action, &QAction::triggered, owner, [owner] {
         PhantomDialog dialog(owner);
         if (dialog.exec() != QDialog::Accepted)
@@ -281,15 +384,22 @@ void PointDataPhantomGenerator::populateMenu(QMenu& menu, QWidget* owner)
         const auto type = dialog.type();
         const auto population = dialog.population();
         auto dataset = mv::data().createDataset<Points>("Points", dialog.name());
-        dataset->makeTiledFromGenerator(dialog.rows(), dialog.columns(), type, dialog.rowTileSize(), dialog.columnTileSize(), [type, population](const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t rows, const std::uint64_t columns) {
-            return makeTile(type, population, rowOffset, columnOffset, rows, columns);
-        });
-        dataset->setTiledCacheCapacity(dialog.cacheCapacity());
 
-        const auto estimate = dataset->getTiledMemoryEstimate();
+        if (dialog.isTiled())
+        {
+            dataset->makeTiledFromGenerator(dialog.rows(), dialog.columns(), type, dialog.rowTileSize(), dialog.columnTileSize(), [type, population](const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t rows, const std::uint64_t columns) {
+                return makeTile(type, population, rowOffset, columnOffset, rows, columns);
+            });
+            dataset->setTiledCacheCapacity(dialog.cacheCapacity());
+        }
+        else
+            populateEager(*dataset, type, population, dialog.rows(), dialog.columns());
+
         mv::help().addNotification(QObject::tr("Phantom points dataset created"),
-            QObject::tr("%1 is generator-backed and occupies %2 of raw logical data. Tiles will be written when the project is saved.")
-                .arg(dialog.name()).arg(formatBytes(estimate.rawDataBytes)), mv::util::StyledIcon("check"));
+            QObject::tr("%1 was created with %2 storage and has a raw logical size of %3.")
+                .arg(dialog.name())
+                .arg(dialog.isTiled() ? QObject::tr("tiled") : QObject::tr("eager"))
+                .arg(formatBytes(dataset->getRawDataSize())), mv::util::StyledIcon("check"));
     });
 }
 
