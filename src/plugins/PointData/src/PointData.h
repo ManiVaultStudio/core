@@ -33,6 +33,8 @@
 #include <variant>
 #include <vector>
 
+class QObject;
+
 namespace mv
 {
     namespace pointdata::tiled
@@ -53,6 +55,7 @@ namespace mv
 
     namespace gui {
         class GroupAction;
+        class StorageBackendConversionAction;
     }
 
     namespace legacy
@@ -302,6 +305,9 @@ public:
     /** Returns the backend capability flags for this concrete dataset. */
     mv::pointdata::storage::StorageBackendCapabilities getStorageBackendCapabilities() const;
 
+    /** Creates controls for converting to the requested storage backend. */
+    std::unique_ptr<mv::gui::StorageBackendConversionAction> createStorageBackendConversionAction(mv::pointdata::storage::StorageBackendType targetType, QObject* parent = nullptr) const;
+
     /**
      * Converts this concrete dataset to the requested storage backend.
      *
@@ -311,6 +317,9 @@ public:
      * materialization back to Eager storage.
      */
     void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, const mv::pointdata::storage::StorageBackendConfiguration& configuration = {}, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
+
+    /** Converts using backend-specific options supplied by a conversion action. */
+    void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, mv::pointdata::storage::StorageBackendConversionOptionsPtr options, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
 
     /**
      * Converts dense point data to read-only rectangular tiled storage.
@@ -865,6 +874,7 @@ public:
     using StorageBackendType = mv::pointdata::storage::StorageBackendType;
     using StorageBackendConfiguration = mv::pointdata::storage::StorageBackendConfiguration;
     using StorageBackendProgressCallback = mv::pointdata::storage::StorageBackendProgressCallback;
+    using StorageBackendConversionOptionsPtr = mv::pointdata::storage::StorageBackendConversionOptionsPtr;
 
     void init() override;
 
@@ -1098,8 +1108,14 @@ public:
     /** Returns the capability flags of the physical backend used by this dataset. */
     mv::pointdata::storage::StorageBackendCapabilities getStorageBackendCapabilities() const;
 
+    /** Creates controls for converting to the requested storage backend. */
+    std::unique_ptr<mv::gui::StorageBackendConversionAction> createStorageBackendConversionAction(StorageBackendType targetType, QObject* parent = nullptr) const;
+
     /** Converts this concrete dataset to a storage backend transactionally. */
     void convertToStorageBackend(StorageBackendType type, const StorageBackendConfiguration& configuration = {}, StorageBackendProgressCallback progress = {});
+
+    /** Converts using backend-specific options supplied by a conversion action. */
+    void convertToStorageBackend(StorageBackendType type, StorageBackendConversionOptionsPtr options, StorageBackendProgressCallback progress = {});
 
     /** Converts this dataset, or each member of a proxy dataset, to read-only tiled storage. */
     void makeTiled(std::size_t rowTileSize, std::size_t columnTileSize, std::function<void(float)> progress = {});

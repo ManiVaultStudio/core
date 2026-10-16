@@ -10,6 +10,7 @@
 #include "PointsAction.h"
 #include "DimensionNamesSerializer.h"
 #include "storage/EagerPointsStorageBackend.h"
+#include "storage/StorageBackendConversionAction.h"
 #include "storage/TiledPointsStorageBackend.h"
 #include "tiled/PointDataTiledStorage.h"
 #include "tiled/PointDataTiledSerialization.h"
@@ -231,16 +232,33 @@ pointdata::storage::StorageBackendCapabilities PointData::getStorageBackendCapab
     return _storageBackend ? _storageBackend->getCapabilities() : 0;
 }
 
+std::unique_ptr<mv::gui::StorageBackendConversionAction> PointData::createStorageBackendConversionAction(const pointdata::storage::StorageBackendType targetType, QObject* parent) const
+{
+    const auto lock = lockData();
+
+    return _storageBackend ? _storageBackend->createConversionAction(targetType, parent) : nullptr;
+}
+
 void PointData::convertToStorageBackend(const pointdata::storage::StorageBackendType type, const pointdata::storage::StorageBackendConfiguration& configuration, pointdata::storage::StorageBackendProgressCallback progress)
+{
+    convertToStorageBackend(type, std::make_shared<const pointdata::storage::StorageBackendConfiguration>(configuration), std::move(progress));
+}
+
+void PointData::convertToStorageBackend(const pointdata::storage::StorageBackendType type, const pointdata::storage::StorageBackendConversionOptionsPtr options, pointdata::storage::StorageBackendProgressCallback progress)
 {
     const auto lock = lockData();
 
     if (type == pointdata::storage::StorageBackendType::Tiled)
     {
-        makeTiled(configuration.rowTileSize, configuration.columnTileSize, std::move(progress));
+        const auto configuration = std::dynamic_pointer_cast<const pointdata::storage::StorageBackendConfiguration>(options);
+
+        if (!configuration)
+            throw std::invalid_argument("Missing tiled storage conversion configuration");
+
+        makeTiled(configuration->rowTileSize, configuration->columnTileSize, progress);
 
         if (_tiledStorage)
-            _tiledStorage->setCacheCapacity(configuration.cacheCapacity);
+            _tiledStorage->setCacheCapacity(configuration->cacheCapacity);
 
         return;
     }
@@ -1482,6 +1500,23 @@ void Points::convertToStorageBackend(const StorageBackendType type, const Storag
         throw std::invalid_argument("Storage backend conversion is only supported for concrete point datasets");
 
     getRawData<PointData>()->convertToStorageBackend(type, configuration, std::move(progress));
+    mv::events().notifyDatasetDataChanged(this);
+}
+
+std::unique_ptr<mv::gui::StorageBackendConversionAction> Points::createStorageBackendConversionAction(const StorageBackendType targetType, QObject* parent) const
+{
+    if (isProxy())
+        return nullptr;
+
+    return getRawData<PointData>()->createStorageBackendConversionAction(targetType, parent);
+}
+
+void Points::convertToStorageBackend(const StorageBackendType type, const StorageBackendConversionOptionsPtr options, StorageBackendProgressCallback progress)
+{
+    if (isProxy())
+        throw std::invalid_argument("Storage backend conversion is only supported for concrete point datasets");
+
+    getRawData<PointData>()->convertToStorageBackend(type, std::move(options), std::move(progress));
     mv::events().notifyDatasetDataChanged(this);
 }
 

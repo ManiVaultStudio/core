@@ -4,6 +4,8 @@
 
 #include "TiledPointsStorageBackend.h"
 
+#include "StorageBackendConversionAction.h"
+
 #include <algorithm>
 #include <cstring>
 #include <stdexcept>
@@ -59,6 +61,11 @@ StorageBackendType TiledPointsStorageBackend::getType() const
 StorageBackendCapabilities TiledPointsStorageBackend::getCapabilities() const
 {
     return StorageBackendCapability::RandomAccess | StorageBackendCapability::RangeAccess | StorageBackendCapability::Lazy | StorageBackendCapability::Materializable;
+}
+
+std::unique_ptr<mv::gui::StorageBackendConversionAction> TiledPointsStorageBackend::createConversionAction(const StorageBackendType, QObject*) const
+{
+    return {};
 }
 
 std::uint64_t TiledPointsStorageBackend::getNumPoints() const

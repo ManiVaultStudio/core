@@ -4,34 +4,19 @@
 
 #include <QDialogButtonBox>
 #include <QFormLayout>
-#include <QSpinBox>
 
-#include <limits>
+#include <utility>
 
-StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(QWidget* parent) :
-    QDialog(parent)
+StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique_ptr<mv::gui::StorageBackendConversionAction> conversionAction, QWidget* parent) :
+    QDialog(parent),
+    _conversionAction(std::move(conversionAction))
 {
-    setWindowTitle(tr("Configure tiled point-data storage"));
+    setWindowTitle(tr("Configure point-data conversion"));
 
     auto* form = new QFormLayout(this);
 
-    _rowTileSize    = new QSpinBox(this);
-    _columnTileSize = new QSpinBox(this);
-    _cacheCapacity  = new QSpinBox(this);
-
-    for (auto* spinBox : { _rowTileSize, _columnTileSize, _cacheCapacity })
-    {
-        spinBox->setRange(1, std::numeric_limits<int>::max());
-        spinBox->setMaximumWidth(120);
-    }
-
-    _rowTileSize->setValue(256);
-    _columnTileSize->setValue(8);
-    _cacheCapacity->setValue(8);
-
-    form->addRow(tr("Rows per tile"), _rowTileSize);
-    form->addRow(tr("Columns per tile"), _columnTileSize);
-    form->addRow(tr("Tile cache capacity"), _cacheCapacity);
+    if (_conversionAction)
+        form->addWidget(_conversionAction->createWidget(this));
 
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
     form->addRow(buttons);
@@ -40,11 +25,7 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(QWidget* pa
     connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
 }
 
-mv::pointdata::storage::StorageBackendConfiguration StorageBackendConfigurationDialog::getConfiguration() const
+mv::pointdata::storage::StorageBackendConversionOptionsPtr StorageBackendConfigurationDialog::getConversionOptions() const
 {
-    mv::pointdata::storage::StorageBackendConfiguration configuration;
-    configuration.rowTileSize    = static_cast<std::size_t>(_rowTileSize->value());
-    configuration.columnTileSize = static_cast<std::size_t>(_columnTileSize->value());
-    configuration.cacheCapacity  = static_cast<std::size_t>(_cacheCapacity->value());
-    return configuration;
+    return _conversionAction ? _conversionAction->getConversionOptions() : nullptr;
 }

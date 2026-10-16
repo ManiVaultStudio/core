@@ -32,6 +32,7 @@ public:
 
     StorageBackendType getType() const override;
     StorageBackendCapabilities getCapabilities() const override;
+    std::unique_ptr<mv::gui::StorageBackendConversionAction> createConversionAction(StorageBackendType targetType, QObject* parent) const override;
     std::uint64_t getNumPoints() const override;
     std::uint64_t getNumDimensions() const override;
     std::size_t getElementSize() const override;

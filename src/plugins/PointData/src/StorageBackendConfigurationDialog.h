@@ -2,31 +2,29 @@
 
 #pragma once
 
-#include "storage/PointsStorageBackendTypes.h"
+#include "storage/StorageBackendConversionAction.h"
 
 #include <QDialog>
 
-class QSpinBox;
+#include <memory>
 
 /**
- * @brief Collects the configuration used when converting dense point data to tiled storage.
+ * @brief Hosts backend-provided controls for a storage conversion.
  *
- * The dialog keeps the tile geometry and bounded-cache capacity together so a
- * user can choose a storage layout appropriate for the intended access pattern.
- * It does not perform conversion itself; the owning action validates the
- * accepted configuration and starts the conversion through the Points facade.
+ * The dialog deliberately knows nothing about a particular backend. It hosts
+ * the conversion action supplied by the target backend and returns its options
+ * after acceptance. This allows new backends to provide their own settings
+ * without adding another hardcoded dialog implementation.
  *
  * @author T. Kroes
  */
 class StorageBackendConfigurationDialog final : public QDialog
 {
 public:
-    explicit StorageBackendConfigurationDialog(QWidget* parent = nullptr);
+    explicit StorageBackendConfigurationDialog(std::unique_ptr<mv::gui::StorageBackendConversionAction> conversionAction, QWidget* parent = nullptr);
 
-    mv::pointdata::storage::StorageBackendConfiguration getConfiguration() const;
+    mv::pointdata::storage::StorageBackendConversionOptionsPtr getConversionOptions() const;
 
 private:
-    QSpinBox* _rowTileSize    = nullptr;
-    QSpinBox* _columnTileSize = nullptr;
-    QSpinBox* _cacheCapacity  = nullptr;
+    std::unique_ptr<mv::gui::StorageBackendConversionAction> _conversionAction;
 };

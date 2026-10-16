@@ -110,7 +110,8 @@ void StorageBackendAction::changeBackendType(const QString& backendType)
 
     if (backendType == "Tiled")
     {
-        StorageBackendConfigurationDialog dialog(QApplication::activeWindow());
+        auto configurationAction = _points->createStorageBackendConversionAction(Points::StorageBackendType::Tiled);
+        StorageBackendConfigurationDialog dialog(std::move(configurationAction), QApplication::activeWindow());
 
         if (dialog.exec() != QDialog::Accepted)
         {
@@ -118,7 +119,7 @@ void StorageBackendAction::changeBackendType(const QString& backendType)
             return;
         }
 
-        convertBackend(Points::StorageBackendType::Tiled, dialog.getConfiguration());
+        convertBackend(Points::StorageBackendType::Tiled, dialog.getConversionOptions());
         return;
     }
 
@@ -131,7 +132,7 @@ void StorageBackendAction::changeBackendType(const QString& backendType)
     updateBackendType();
 }
 
-void StorageBackendAction::convertBackend(const pointdata::storage::StorageBackendType type, const pointdata::storage::StorageBackendConfiguration& configuration)
+void StorageBackendAction::convertBackend(const pointdata::storage::StorageBackendType type, const pointdata::storage::StorageBackendConversionOptionsPtr options)
 {
     _conversionInProgress = true;
     updateBackendType();
@@ -142,7 +143,7 @@ void StorageBackendAction::convertBackend(const pointdata::storage::StorageBacke
 
     try
     {
-        _points->convertToStorageBackend(type, configuration, [&conversionTask](const float progress) {
+        _points->convertToStorageBackend(type, options, [&conversionTask](const float progress) {
             conversionTask.setProgress(progress);
             QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         });

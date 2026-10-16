@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <memory>
 
 namespace mv::pointdata::storage
 {
@@ -34,7 +35,16 @@ enum class StorageBackendCapability : std::uint32_t
 using StorageBackendCapabilities = std::uint32_t;
 using StorageBackendProgressCallback = std::function<void(float)>;
 
-struct StorageBackendConfiguration
+/** Base type for backend-specific conversion options. */
+struct StorageBackendConversionOptions
+{
+    virtual ~StorageBackendConversionOptions() = default;
+};
+
+using StorageBackendConversionOptionsPtr = std::shared_ptr<const StorageBackendConversionOptions>;
+
+/** Configuration used when converting dense point data to tiled storage. */
+struct StorageBackendConfiguration : StorageBackendConversionOptions
 {
     std::size_t rowTileSize    = 256;
     std::size_t columnTileSize = 8;

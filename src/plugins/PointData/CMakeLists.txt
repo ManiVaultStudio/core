@@ -24,6 +24,7 @@ set(POINTS_SOURCES
     src/StorageBackendConfigurationDialog.cpp
     src/storage/EagerPointsStorageBackend.cpp
     src/storage/TiledPointsStorageBackend.cpp
+    src/storage/TiledStorageBackendConversionAction.cpp
     src/tiled/PointDataTileCache.cpp
     src/tiled/PointDataTiledStorage.cpp
     src/tiled/PointDataTiledSerialization.cpp
@@ -80,6 +81,8 @@ set(POINTS_STORAGE_HEADERS
     src/storage/PointsStorageBackendTypes.h
     src/storage/EagerPointsStorageBackend.h
     src/storage/TiledPointsStorageBackend.h
+    src/storage/StorageBackendConversionAction.h
+    src/storage/TiledStorageBackendConversionAction.h
 )
 
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects
@@ -136,6 +139,9 @@ source_group(Storage FILES
     src/storage/EagerPointsStorageBackend.cpp
     src/storage/TiledPointsStorageBackend.h
     src/storage/TiledPointsStorageBackend.cpp
+    src/storage/StorageBackendConversionAction.h
+    src/storage/TiledStorageBackendConversionAction.h
+    src/storage/TiledStorageBackendConversionAction.cpp
 )
 source_group(BFloat FILES ${BFLOAT_HEADER})
 source_group(Aux FILES ${POINT_DATA_AUX})

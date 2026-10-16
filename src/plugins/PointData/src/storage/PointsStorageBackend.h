@@ -11,7 +11,15 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <vector>
+
+class QObject;
+
+namespace mv::gui
+{
+    class StorageBackendConversionAction;
+}
 
 namespace mv::pointdata::storage
 {
@@ -41,6 +49,9 @@ public:
 
     /** Returns the operations supported by this backend. */
     virtual StorageBackendCapabilities getCapabilities() const = 0;
+
+    /** Creates the controls used to configure conversion to p targetType. */
+    virtual std::unique_ptr<mv::gui::StorageBackendConversionAction> createConversionAction(StorageBackendType targetType, QObject* parent) const = 0;
 
     /** Returns the number of matrix rows. */
     virtual std::uint64_t getNumPoints() const = 0;

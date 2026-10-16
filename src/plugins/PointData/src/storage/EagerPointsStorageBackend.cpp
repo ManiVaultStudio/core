@@ -5,6 +5,7 @@
 #include "EagerPointsStorageBackend.h"
 
 #include "../PointData.h"
+#include "TiledStorageBackendConversionAction.h"
 
 #include <cstring>
 
@@ -24,6 +25,14 @@ StorageBackendType EagerPointsStorageBackend::getType() const
 StorageBackendCapabilities EagerPointsStorageBackend::getCapabilities() const
 {
     return StorageBackendCapability::RandomAccess | StorageBackendCapability::RangeAccess | StorageBackendCapability::Writable | StorageBackendCapability::Materializable;
+}
+
+std::unique_ptr<mv::gui::StorageBackendConversionAction> EagerPointsStorageBackend::createConversionAction(const StorageBackendType targetType, QObject* parent) const
+{
+    if (targetType == StorageBackendType::Tiled)
+        return std::make_unique<mv::gui::TiledStorageBackendConversionAction>(parent);
+
+    return {};
 }
 
 std::uint64_t EagerPointsStorageBackend::getNumPoints() const

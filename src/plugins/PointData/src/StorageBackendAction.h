@@ -18,8 +18,8 @@ class Points;
  * StorageBackendAction keeps the backend selection visible alongside the
  * point-data controls. The selector is intentionally read-only while tiled
  * storage remains an experimental read-only representation. The adjacent
- * configuration trigger reserves the standard entry point for future backend
- * configuration without exposing unsupported mutation behavior today.
+ * configuration trigger opens controls supplied by the target backend and
+ * starts the conversion after the user accepts them.
  *
  * @author T. Kroes
  */
@@ -40,7 +40,7 @@ public:
 private:
     void updateBackendType();
     void changeBackendType(const QString& backendType);
-    void convertBackend(mv::pointdata::storage::StorageBackendType type, const mv::pointdata::storage::StorageBackendConfiguration& configuration = {});
+    void convertBackend(mv::pointdata::storage::StorageBackendType type, mv::pointdata::storage::StorageBackendConversionOptionsPtr options = {});
 
     mv::Dataset<Points>         _points;                 /**< Points dataset whose backend is displayed and converted. */
     mv::gui::OptionAction       _backendTypeAction;      /**< Storage backend selector and conversion action. */
