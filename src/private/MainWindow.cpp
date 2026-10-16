@@ -194,7 +194,7 @@ void MainWindow::initialize()
     const auto developerMenuVisible = Application::current()->getSetting("DeveloperMenu/Visible", false).toBool();
     developerMenuAction->setVisible(developerMenuVisible);
 
-    auto toggleDeveloperMenuShortcut = new QShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::ShiftModifier | Qt::Key_Delete), this);
+    auto toggleDeveloperMenuShortcut = new QShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::ShiftModifier | Qt::Key_D), this);
 
     toggleDeveloperMenuShortcut->setContext(Qt::ApplicationShortcut);
 
