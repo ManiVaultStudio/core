@@ -5,6 +5,7 @@
 #include "TiledPointsStorageBackend.h"
 
 #include "StorageBackendConversionAction.h"
+#include "TiledStorageBackendConversionAction.h"
 
 #include <algorithm>
 #include <cstring>
@@ -63,8 +64,17 @@ StorageBackendCapabilities TiledPointsStorageBackend::getCapabilities() const
     return StorageBackendCapability::RandomAccess | StorageBackendCapability::RangeAccess | StorageBackendCapability::Lazy | StorageBackendCapability::Materializable;
 }
 
-std::unique_ptr<mv::gui::StorageBackendConversionAction> TiledPointsStorageBackend::createConversionAction(const StorageBackendType, QObject*) const
+std::unique_ptr<mv::gui::StorageBackendConversionAction> TiledPointsStorageBackend::createConversionAction(const StorageBackendType targetType, QObject* parent) const
 {
+    if (targetType == StorageBackendType::Tiled && _storage)
+    {
+        pointdata::storage::StorageBackendConfiguration configuration;
+        configuration.rowTileSize    = _storage->rowTileSize();
+        configuration.columnTileSize = _storage->columnTileSize();
+        configuration.cacheCapacity  = _storage->cacheCapacity();
+        return std::make_unique<mv::gui::TiledStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), configuration, true);
+    }
+
     return {};
 }
 

@@ -65,6 +65,23 @@ GTEST_TEST(PointData, materializesTilesInRowMajorOrder)
     ASSERT_EQ(materialized, values);
 }
 
+GTEST_TEST(PointData, retilePreservesLazyDataAccess)
+{
+    const auto values = makeValues(5, 4);
+    const auto source = PointDataTiledStorage::fromDense(reinterpret_cast<const char*>(values.data()), 5, 4, sizeof(float), 2, 3);
+    const auto retiled = PointDataTiledStorage::retile(source, 3, 2);
+
+    ASSERT_EQ(retiled->rowTileSize(), 3U);
+    ASSERT_EQ(retiled->columnTileSize(), 2U);
+    ASSERT_EQ(retiled->cacheSize(), 0U);
+    ASSERT_FLOAT_EQ(retiled->valueAt(13, 0), 13.0f);
+
+    std::vector<float> materialized(values.size());
+    retiled->materialize(reinterpret_cast<char*>(materialized.data()));
+
+    ASSERT_EQ(materialized, values);
+}
+
 GTEST_TEST(PointData, generatorLoadsTilesSelectively)
 {
     std::size_t loadCount = 0;

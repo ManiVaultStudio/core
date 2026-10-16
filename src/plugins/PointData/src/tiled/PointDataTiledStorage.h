@@ -68,6 +68,9 @@ public:
     /** Creates read-only tiled storage whose tiles are generated only when accessed. */
     static std::shared_ptr<PointDataTiledStorage> fromGenerator(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileGenerator generator);
 
+    /** Creates a new lazy tile layout backed by the existing tiled storage. */
+    static std::shared_ptr<PointDataTiledStorage> retile(const std::shared_ptr<const PointDataTiledStorage>& source, std::size_t rowTileSize, std::size_t columnTileSize, ProgressCallback progress = {});
+
     /** Returns the number of rows in the matrix. */
     std::uint64_t rows() const { return _rows; }
 

@@ -23,13 +23,14 @@ StorageBackendAction::StorageBackendAction(QObject* parent, const Dataset<Points
     _backendTypeAction(this, "Type", { "Eager", "Tiled", "Mixed", "Unknown" }, "Eager"),
     _configureAction(this, "Configure...")
 {
-    setShowLabels(true);
+    setShowLabels(false);
 
     _backendTypeAction.setDefaultWidgetFlags(OptionAction::ComboBox);
     _backendTypeAction.setToolTip("Select the storage backend for this points dataset");
 
     _configureAction.setIconByName("ellipsis");
     _configureAction.setToolTip("Configure tiled storage and convert this points dataset");
+    _configureAction.setVisible(false);
 
     addAction(&_backendTypeAction);
     addAction(&_configureAction, TriggerAction::Icon);
@@ -39,7 +40,7 @@ StorageBackendAction::StorageBackendAction(QObject* parent, const Dataset<Points
     });
 
     connect(&_configureAction, &TriggerAction::triggered, this, [this] {
-        changeBackendType("Tiled");
+        changeBackendType("Configure");
     });
 
     if (_points.isValid())
@@ -86,7 +87,7 @@ void StorageBackendAction::updateBackendType()
     }
 
     _backendTypeAction.setEnabled(pointsAreValid && !isProxy && !_conversionInProgress);
-    _configureAction.setEnabled(pointsAreValid && !isProxy && backendType == Points::StorageBackendType::Eager && !_conversionInProgress);
+    _configureAction.setEnabled(pointsAreValid && !isProxy && (backendType == Points::StorageBackendType::Eager || backendType == Points::StorageBackendType::Tiled) && !_conversionInProgress);
 
     _updatingBackendType = false;
 }
@@ -108,10 +109,31 @@ void StorageBackendAction::changeBackendType(const QString& backendType)
         (backendType == "Tiled" && currentBackendType == Points::StorageBackendType::Tiled))
         return;
 
+    if (backendType == "Configure")
+    {
+        const auto targetType = Points::StorageBackendType::Tiled;
+        auto configurationAction = _points->createStorageBackendConversionAction(targetType);
+
+        if (!configurationAction)
+        {
+            updateBackendType();
+            return;
+        }
+
+        StorageBackendConfigurationDialog dialog(std::move(configurationAction), true, QApplication::activeWindow());
+
+        if (dialog.exec() == QDialog::Accepted)
+            convertBackend(targetType, dialog.getConversionOptions());
+        else
+            updateBackendType();
+
+        return;
+    }
+
     if (backendType == "Tiled")
     {
         auto configurationAction = _points->createStorageBackendConversionAction(Points::StorageBackendType::Tiled);
-        StorageBackendConfigurationDialog dialog(std::move(configurationAction), QApplication::activeWindow());
+        StorageBackendConfigurationDialog dialog(std::move(configurationAction), false, QApplication::activeWindow());
 
         if (dialog.exec() != QDialog::Accepted)
         {

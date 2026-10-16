@@ -5,6 +5,7 @@
 #include "StorageBackendConversionAction.h"
 
 #include <actions/IntegralAction.h>
+#include <actions/OptionAction.h>
 
 namespace mv::gui
 {
@@ -21,12 +22,18 @@ namespace mv::gui
 class POINTDATA_EXPORT TiledStorageBackendConversionAction final : public StorageBackendConversionAction
 {
 public:
-    explicit TiledStorageBackendConversionAction(QObject* parent = nullptr);
+    TiledStorageBackendConversionAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, const pointdata::storage::StorageBackendConfiguration& configuration = {}, bool initializeFromConfiguration = false);
 
     pointdata::storage::StorageBackendType getTargetBackendType() const override;
     pointdata::storage::StorageBackendConversionOptionsPtr getConversionOptions() const override;
 
 private:
+    void applyPreset(std::int32_t presetIndex);
+
+    std::uint64_t _rows    = 0;
+    std::uint64_t _columns = 0;
+
+    OptionAction    _presetAction;
     IntegralAction _rowTileSizeAction;
     IntegralAction _columnTileSizeAction;
     IntegralAction _cacheCapacityAction;

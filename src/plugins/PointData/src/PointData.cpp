@@ -255,7 +255,13 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
         if (!configuration)
             throw std::invalid_argument("Missing tiled storage conversion configuration");
 
-        makeTiled(configuration->rowTileSize, configuration->columnTileSize, progress);
+        if (_tiledStorage)
+        {
+            if (_tiledStorage->rowTileSize() != configuration->rowTileSize || _tiledStorage->columnTileSize() != configuration->columnTileSize)
+                _tiledStorage = mv::pointdata::tiled::PointDataTiledStorage::retile(_tiledStorage, configuration->rowTileSize, configuration->columnTileSize, progress);
+        }
+        else
+            makeTiled(configuration->rowTileSize, configuration->columnTileSize, progress);
 
         if (_tiledStorage)
             _tiledStorage->setCacheCapacity(configuration->cacheCapacity);

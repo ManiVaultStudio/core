@@ -75,6 +75,39 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromGenerator(cons
     return std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize, std::move(generator));
 }
 
+std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::retile(const std::shared_ptr<const PointDataTiledStorage>& source, const std::size_t rowTileSize, const std::size_t columnTileSize, ProgressCallback progress)
+{
+    if (!source)
+        throw std::invalid_argument("Cannot retile empty point-data storage");
+
+    auto storage = std::make_shared<PointDataTiledStorage>(source->rows(), source->columns(), source->elementSize(), rowTileSize, columnTileSize, [source](const TileDescriptor& descriptor) {
+        QByteArray bytes(static_cast<qsizetype>(descriptor.rows * descriptor.columns * source->elementSize()), '\0');
+
+        for (std::uint64_t row = 0; row < descriptor.rows; ++row)
+        {
+            std::uint64_t column = 0;
+
+            while (column < descriptor.columns)
+            {
+                const auto sourceTile = source->acquire((descriptor.rowOffset + row) / source->rowTileSize(), (descriptor.columnOffset + column) / source->columnTileSize());
+                const auto sourceRowOffset = descriptor.rowOffset + row - sourceTile.rowOffset();
+                const auto sourceColumnOffset = descriptor.columnOffset + column - sourceTile.columnOffset();
+                const auto copyColumns = std::min(descriptor.columns - column, sourceTile.columns() - sourceColumnOffset);
+
+                std::memcpy(bytes.data() + (row * descriptor.columns + column) * source->elementSize(), static_cast<const char*>(sourceTile.data()) + (sourceRowOffset * sourceTile.columns() + sourceColumnOffset) * source->elementSize(), copyColumns * source->elementSize());
+                column += copyColumns;
+            }
+        }
+
+        return bytes;
+    });
+
+    if (progress)
+        progress(1.0f);
+
+    return storage;
+}
+
 std::uint64_t PointDataTiledStorage::tileRowCount() const
 {
     return (_rows + _rowTileSize - 1) / _rowTileSize;

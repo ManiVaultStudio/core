@@ -24,6 +24,8 @@ namespace mv::gui
  */
 class POINTDATA_EXPORT StorageBackendConversionAction : public GroupAction
 {
+    Q_OBJECT
+
 public:
     StorageBackendConversionAction(QObject* parent, const QString& title) :
         GroupAction(parent, title)
@@ -37,6 +39,12 @@ public:
 
     /** Returns the current backend-specific conversion options. */
     virtual pointdata::storage::StorageBackendConversionOptionsPtr getConversionOptions() const = 0;
+
+signals:
+    void optionsChanged();
+
+protected:
+    void notifyOptionsChanged() { emit optionsChanged(); }
 };
 
 }

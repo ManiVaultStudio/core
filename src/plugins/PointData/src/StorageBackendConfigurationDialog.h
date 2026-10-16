@@ -21,7 +21,7 @@
 class StorageBackendConfigurationDialog final : public QDialog
 {
 public:
-    explicit StorageBackendConfigurationDialog(std::unique_ptr<mv::gui::StorageBackendConversionAction> conversionAction, QWidget* parent = nullptr);
+    explicit StorageBackendConfigurationDialog(std::unique_ptr<mv::gui::StorageBackendConversionAction> conversionAction, bool updateMode = false, QWidget* parent = nullptr);
 
     mv::pointdata::storage::StorageBackendConversionOptionsPtr getConversionOptions() const;
 
