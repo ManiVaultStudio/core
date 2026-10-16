@@ -3,9 +3,10 @@
 #pragma once
 
 #include "StorageBackendConversionAction.h"
+#include "TiledStorageDominanceAction.h"
+#include "TiledStorageGeometry.h"
 
-#include <actions/IntegralAction.h>
-#include <actions/OptionAction.h>
+#include <actions/StringAction.h>
 
 namespace mv::gui
 {
@@ -28,14 +29,13 @@ public:
     pointdata::storage::StorageBackendConversionOptionsPtr getConversionOptions() const override;
 
 private:
-    void applyPreset(std::int32_t presetIndex);
+    void updateTileGeometry();
 
     std::uint64_t _rows    = 0;
     std::uint64_t _columns = 0;
 
-    OptionAction    _presetAction;
-    IntegralAction _rowTileSizeAction;
-    IntegralAction _columnTileSizeAction;
+    TiledStorageDominanceAction _tileDominanceAction;
+    StringAction                _tileGeometryAction;
     IntegralAction _cacheCapacityAction;
 };
 

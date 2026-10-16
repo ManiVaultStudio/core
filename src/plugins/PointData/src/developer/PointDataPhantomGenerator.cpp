@@ -1,7 +1,10 @@
 #include "PointDataPhantomGenerator.h"
 
 #include "../PointData.h"
+#include "../storage/TiledStorageDominanceAction.h"
+#include "../storage/TiledStorageGeometry.h"
 
+#include <Application.h>
 #include <CoreInterface.h>
 #include <DeveloperActionRegistry.h>
 #include <actions/IntegralAction.h>
@@ -224,11 +227,11 @@ void populateEager(Points& points, const Points::ElementTypeSpecifier type, cons
  * @brief Collects settings for a developer-generated phantom dataset.
  *
  * The dialog keeps dataset dimensions, element representation, population
- * strategy, storage backend, tile geometry, and cache capacity together so the
+ * strategy, storage backend, tile dominance, and cache capacity together so the
  * developer menu can create repeatable large-data scenarios without embedding
  * configuration in the generator callback. It supports both fully materialized
- * eager data and generator-backed tiled data, while its estimate describes the
- * logical and resident tiled footprint before any tile is requested.
+ * eager data and generator-backed tiled data. For tiled data, the row and
+ * column tile sizes are optimized from the data shape and selected dominance.
  *
  * @author T. Kroes
  */
@@ -244,8 +247,8 @@ public:
         _typeAction(&_settingsGroupAction, "Element type"),
         _populationAction(&_settingsGroupAction, "Population", { "Deterministic", "Random floats", "Random zeros and ones", "All zeros" }, "Deterministic"),
         _storageBackendAction(&_settingsGroupAction, "Storage backend", { "Eager", "Tiled" }, "Tiled"),
-        _rowTileSizeAction(&_settingsGroupAction, "Tile rows", 1, 1000000, 4096),
-        _columnTileSizeAction(&_settingsGroupAction, "Tile columns", 1, 100000, 32),
+        _tileDominanceAction(&_settingsGroupAction),
+        _tileGeometryAction(&_settingsGroupAction, "Tile geometry"),
         _cacheCapacityAction(&_settingsGroupAction, "Cache tiles", 1, 100000, 8),
         _estimateAction(&_settingsGroupAction, "Estimate")
     {
@@ -265,8 +268,8 @@ public:
         _typeAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
         _populationAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
         _storageBackendAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
-        _rowTileSizeAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
-        _columnTileSizeAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
+        _tileGeometryAction.setDefaultWidgetFlags(mv::gui::StringAction::TextEdit);
+        _tileGeometryAction.setEnabled(false);
         _cacheCapacityAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
         _estimateAction.setDefaultWidgetFlags(mv::gui::StringAction::TextEdit);
         _estimateAction.setEnabled(false);
@@ -277,8 +280,8 @@ public:
         _settingsGroupAction.addAction(&_typeAction);
         _settingsGroupAction.addAction(&_populationAction);
         _settingsGroupAction.addAction(&_storageBackendAction);
-        _settingsGroupAction.addAction(&_rowTileSizeAction);
-        _settingsGroupAction.addAction(&_columnTileSizeAction);
+        _settingsGroupAction.addAction(&_tileDominanceAction);
+        _settingsGroupAction.addAction(&_tileGeometryAction);
         _settingsGroupAction.addAction(&_cacheCapacityAction);
         _settingsGroupAction.addAction(&_estimateAction);
 
@@ -291,14 +294,14 @@ public:
         connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
         connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
-        connect(&_rowsAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateEstimate(); });
-        connect(&_columnsAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateEstimate(); });
+        connect(&_rowsAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateTileGeometry(); });
+        connect(&_columnsAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateTileGeometry(); });
         connect(&_typeAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateEstimate(); });
         connect(&_storageBackendAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateActions(); });
-        connect(&_rowTileSizeAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateEstimate(); });
-        connect(&_columnTileSizeAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateEstimate(); });
+        connect(&_tileDominanceAction.getDominanceAction(), &mv::gui::IntegralAction::valueChanged, this, [this] { updateTileGeometry(); });
         connect(&_cacheCapacityAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateEstimate(); });
 
+        loadSettings();
         updateActions();
     }
 
@@ -312,9 +315,9 @@ public:
 
     std::uint64_t columns() const { return static_cast<std::uint64_t>(_columnsAction.getValue()); }
 
-    std::size_t rowTileSize() const { return static_cast<std::size_t>(_rowTileSizeAction.getValue()); }
+    std::size_t rowTileSize() const { return storage::calculateTiledStorageGeometry(rows(), columns(), _tileDominanceAction.getDominanceAction().getValue()).rowTileSize; }
 
-    std::size_t columnTileSize() const { return static_cast<std::size_t>(_columnTileSizeAction.getValue()); }
+    std::size_t columnTileSize() const { return storage::calculateTiledStorageGeometry(rows(), columns(), _tileDominanceAction.getDominanceAction().getValue()).columnTileSize; }
 
     std::size_t cacheCapacity() const { return static_cast<std::size_t>(_cacheCapacityAction.getValue()); }
 
@@ -324,13 +327,48 @@ public:
 
     Population population() const { return static_cast<Population>(_populationAction.getCurrentIndex()); }
 
+    void saveSettings() const
+    {
+        auto* application = Application::current();
+
+        application->setSetting("Developer/PhantomPointGenerator/Name", _nameAction.getString());
+        application->setSetting("Developer/PhantomPointGenerator/Rows", _rowsAction.getValue());
+        application->setSetting("Developer/PhantomPointGenerator/Columns", _columnsAction.getValue());
+        application->setSetting("Developer/PhantomPointGenerator/ElementType", _typeAction.getCurrentText());
+        application->setSetting("Developer/PhantomPointGenerator/Population", _populationAction.getCurrentText());
+        application->setSetting("Developer/PhantomPointGenerator/StorageBackend", _storageBackendAction.getCurrentText());
+        application->setSetting("Developer/PhantomPointGenerator/TileDominance", _tileDominanceAction.getDominanceAction().getValue());
+        application->setSetting("Developer/PhantomPointGenerator/CacheCapacity", _cacheCapacityAction.getValue());
+    }
+
 private:
+    void loadSettings()
+    {
+        auto* application = Application::current();
+
+        _nameAction.setString(application->getSetting("Developer/PhantomPointGenerator/Name", _nameAction.getString()).toString());
+        _rowsAction.setValue(application->getSetting("Developer/PhantomPointGenerator/Rows", _rowsAction.getValue()).toInt());
+        _columnsAction.setValue(application->getSetting("Developer/PhantomPointGenerator/Columns", _columnsAction.getValue()).toInt());
+        _typeAction.setCurrentText(application->getSetting("Developer/PhantomPointGenerator/ElementType", _typeAction.getCurrentText()).toString());
+        _populationAction.setCurrentText(application->getSetting("Developer/PhantomPointGenerator/Population", _populationAction.getCurrentText()).toString());
+        _storageBackendAction.setCurrentText(application->getSetting("Developer/PhantomPointGenerator/StorageBackend", _storageBackendAction.getCurrentText()).toString());
+        _tileDominanceAction.getDominanceAction().setValue(application->getSetting("Developer/PhantomPointGenerator/TileDominance", _tileDominanceAction.getDominanceAction().getValue()).toInt());
+        _cacheCapacityAction.setValue(application->getSetting("Developer/PhantomPointGenerator/CacheCapacity", _cacheCapacityAction.getValue()).toInt());
+    }
+
     void updateActions()
     {
         const auto tiled = isTiled();
-        _rowTileSizeAction.setEnabled(tiled);
-        _columnTileSizeAction.setEnabled(tiled);
+        _tileDominanceAction.setEnabled(tiled);
+        _tileGeometryAction.setEnabled(tiled);
         _cacheCapacityAction.setEnabled(tiled);
+        updateEstimate();
+    }
+
+    void updateTileGeometry()
+    {
+        const auto geometry = storage::calculateTiledStorageGeometry(rows(), columns(), _tileDominanceAction.getDominanceAction().getValue());
+        _cacheCapacityAction.setValue(static_cast<std::int32_t>(storage::calculateTiledStorageCacheCapacity(rows(), columns(), geometry)));
         updateEstimate();
     }
 
@@ -347,7 +385,12 @@ private:
             ? 2
             : 1;
 
-        const auto estimate = Points::estimateTiledMemory(rows(), columns(), elementSize, rowTileSize(), columnTileSize(), cacheCapacity());
+        const auto geometry = storage::calculateTiledStorageGeometry(rows(), columns(), _tileDominanceAction.getDominanceAction().getValue());
+        const auto estimate = Points::estimateTiledMemory(rows(), columns(), elementSize, geometry.rowTileSize, geometry.columnTileSize, cacheCapacity());
+
+        _tileGeometryAction.setString(QString("Rows per tile: %1\nColumns per tile: %2")
+            .arg(geometry.rowTileSize)
+            .arg(geometry.columnTileSize));
 
         _estimateAction.setString(QString("Storage backend: %1\nRaw size: %2\nLargest tile: %3\nEstimated cache: %4\nTiles: %5\nIndex estimate: %6")
             .arg(isTiled() ? "Tiled" : "Eager")
@@ -365,8 +408,8 @@ private:
     mv::gui::OptionAction       _typeAction;
     mv::gui::OptionAction       _populationAction;
     mv::gui::OptionAction       _storageBackendAction;
-    mv::gui::IntegralAction     _rowTileSizeAction;
-    mv::gui::IntegralAction     _columnTileSizeAction;
+    mv::gui::TiledStorageDominanceAction _tileDominanceAction;
+    mv::gui::StringAction                _tileGeometryAction;
     mv::gui::IntegralAction     _cacheCapacityAction;
     mv::gui::StringAction       _estimateAction;
 };
@@ -380,6 +423,8 @@ void PointDataPhantomGenerator::populateMenu(QMenu& menu, QWidget* owner)
         PhantomDialog dialog(owner);
         if (dialog.exec() != QDialog::Accepted)
             return;
+
+        dialog.saveSettings();
 
         const auto type = dialog.type();
         const auto population = dialog.population();
