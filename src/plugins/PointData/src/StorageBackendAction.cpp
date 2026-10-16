@@ -2,7 +2,17 @@
 
 #include "StorageBackendAction.h"
 
+#include "StorageBackendConfigurationDialog.h"
+
 #include "PointData.h"
+
+#include <ForegroundTask.h>
+#include <util/StyledIcon.h>
+
+#include <QApplication>
+#include <QCoreApplication>
+
+#include <exception>
 
 using namespace mv;
 using namespace mv::gui;
@@ -16,15 +26,21 @@ StorageBackendAction::StorageBackendAction(QObject* parent, const Dataset<Points
     setShowLabels(true);
 
     _backendTypeAction.setDefaultWidgetFlags(OptionAction::ComboBox);
-    _backendTypeAction.setEnabled(false);
-    _backendTypeAction.setToolTip("The storage backend currently used by this points dataset");
+    _backendTypeAction.setToolTip("Select the storage backend for this points dataset");
 
     _configureAction.setIconByName("ellipsis");
-    _configureAction.setEnabled(false);
-    _configureAction.setToolTip("Storage backend configuration is not available yet");
+    _configureAction.setToolTip("Configure tiled storage and convert this points dataset");
 
     addAction(&_backendTypeAction);
     addAction(&_configureAction, TriggerAction::Icon);
+
+    connect(&_backendTypeAction, &OptionAction::currentTextChanged, this, [this](const QString& backendType) {
+        changeBackendType(backendType);
+    });
+
+    connect(&_configureAction, &TriggerAction::triggered, this, [this] {
+        changeBackendType("Tiled");
+    });
 
     if (_points.isValid())
         connect(&_points, &Dataset<Points>::dataChanged, this, &StorageBackendAction::updateBackendType);
@@ -44,13 +60,13 @@ TriggerAction& StorageBackendAction::getConfigureAction()
 
 void StorageBackendAction::updateBackendType()
 {
-    if (!_points.isValid())
-    {
-        _backendTypeAction.setCurrentText("Unknown");
-        return;
-    }
+    _updatingBackendType = true;
 
-    switch (_points->getStorageBackendType())
+    const auto pointsAreValid = _points.isValid();
+    const auto isProxy        = pointsAreValid && _points->isProxy();
+    const auto backendType    = pointsAreValid ? _points->getStorageBackendType() : Points::StorageBackendType::Unknown;
+
+    switch (backendType)
     {
         case Points::StorageBackendType::Eager:
             _backendTypeAction.setCurrentText("Eager");
@@ -68,4 +84,79 @@ void StorageBackendAction::updateBackendType()
             _backendTypeAction.setCurrentText("Unknown");
             break;
     }
+
+    _backendTypeAction.setEnabled(pointsAreValid && !isProxy && !_conversionInProgress);
+    _configureAction.setEnabled(pointsAreValid && !isProxy && backendType == Points::StorageBackendType::Eager && !_conversionInProgress);
+
+    _updatingBackendType = false;
+}
+
+void StorageBackendAction::changeBackendType(const QString& backendType)
+{
+    if (_updatingBackendType)
+        return;
+
+    if (_conversionInProgress || !_points.isValid() || _points->isProxy())
+    {
+        updateBackendType();
+        return;
+    }
+
+    const auto currentBackendType = _points->getStorageBackendType();
+
+    if ((backendType == "Eager" && currentBackendType == Points::StorageBackendType::Eager) ||
+        (backendType == "Tiled" && currentBackendType == Points::StorageBackendType::Tiled))
+        return;
+
+    if (backendType == "Tiled")
+    {
+        StorageBackendConfigurationDialog dialog(QApplication::activeWindow());
+
+        if (dialog.exec() != QDialog::Accepted)
+        {
+            updateBackendType();
+            return;
+        }
+
+        convertBackend(Points::StorageBackendType::Tiled, dialog.getConfiguration());
+        return;
+    }
+
+    if (backendType == "Eager")
+    {
+        convertBackend(Points::StorageBackendType::Eager);
+        return;
+    }
+
+    updateBackendType();
+}
+
+void StorageBackendAction::convertBackend(const pointdata::storage::StorageBackendType type, const pointdata::storage::StorageBackendConfiguration& configuration)
+{
+    _conversionInProgress = true;
+    updateBackendType();
+
+    ForegroundTask conversionTask(this, "Convert point-data storage", Task::Status::Running);
+    conversionTask.setAlwaysProcessEvents(true);
+    conversionTask.setProgressDescription("Converting point-data storage");
+
+    try
+    {
+        _points->convertToStorageBackend(type, configuration, [&conversionTask](const float progress) {
+            conversionTask.setProgress(progress);
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        });
+
+        conversionTask.setProgress(1.0f);
+        conversionTask.setFinished();
+        help().addNotification("Point-data storage converted", "The point-data storage backend was converted successfully.", util::StyledIcon("check"));
+    }
+    catch (const std::exception& exception)
+    {
+        conversionTask.setAborted();
+        help().addNotification("Point-data storage conversion failed", QString::fromUtf8(exception.what()), util::StyledIcon("circle-exclamation"));
+    }
+
+    _conversionInProgress = false;
+    updateBackendType();
 }

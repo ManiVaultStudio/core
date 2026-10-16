@@ -21,6 +21,7 @@ set(POINTS_SOURCES
     src/PointsAction.cpp
     src/PointsViewAction.cpp
     src/StorageBackendAction.cpp
+    src/StorageBackendConfigurationDialog.cpp
     src/storage/EagerPointsStorageBackend.cpp
     src/storage/TiledPointsStorageBackend.cpp
     src/tiled/PointDataTileCache.cpp
@@ -64,6 +65,7 @@ set(POINTS_HEADERS
     src/PointsAction.h
     src/PointsViewAction.h
     src/StorageBackendAction.h
+    src/StorageBackendConfigurationDialog.h
     src/PointsTableModel.h
     src/PointsViewWidget.h
     src/tiled/PointDataTile.h
@@ -126,6 +128,8 @@ source_group(Plugin FILES ${POINTS_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 source_group(Widgets FILES ${POINTS_VIEW_WIDGETS})
 source_group(Storage FILES
+    src/StorageBackendConfigurationDialog.h
+    src/StorageBackendConfigurationDialog.cpp
     src/storage/PointsStorageBackend.h
     src/storage/PointsStorageBackendTypes.h
     src/storage/EagerPointsStorageBackend.h

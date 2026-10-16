@@ -3,6 +3,7 @@
 #pragma once
 
 #include "pointdata_export.h"
+#include "storage/PointsStorageBackendTypes.h"
 
 #include <Dataset.h>
 #include <actions/HorizontalGroupAction.h>
@@ -20,7 +21,7 @@ class Points;
  * configuration trigger reserves the standard entry point for future backend
  * configuration without exposing unsupported mutation behavior today.
  *
- * @author Thomas Kroes
+ * @author T. Kroes
  */
 class POINTDATA_EXPORT StorageBackendAction final : public mv::gui::HorizontalGroupAction
 {
@@ -38,8 +39,12 @@ public:
 
 private:
     void updateBackendType();
+    void changeBackendType(const QString& backendType);
+    void convertBackend(mv::pointdata::storage::StorageBackendType type, const mv::pointdata::storage::StorageBackendConfiguration& configuration = {});
 
-    mv::Dataset<Points>         _points;            /**< Points dataset whose backend is displayed. */
-    mv::gui::OptionAction       _backendTypeAction; /**< Read-only storage backend selector. */
-    mv::gui::TriggerAction      _configureAction;   /**< Trigger reserved for backend configuration. */
+    mv::Dataset<Points>         _points;                 /**< Points dataset whose backend is displayed and converted. */
+    mv::gui::OptionAction       _backendTypeAction;      /**< Storage backend selector and conversion action. */
+    mv::gui::TriggerAction      _configureAction;        /**< Opens the tiled storage configuration dialog. */
+    bool                        _updatingBackendType = false; /**< Whether the selector is being synchronized with the dataset. */
+    bool                        _conversionInProgress = false; /**< Whether a backend conversion is currently running. */
 };
