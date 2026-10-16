@@ -13,6 +13,7 @@
 #include "Set.h"
 #include "PointDataAccess.h"
 #include "SparseMatrix.h"
+#include "storage/PointsStorageBackendTypes.h"
 
 #include "event/EventListener.h"
 
@@ -38,6 +39,13 @@ namespace mv
     {
         class PointDataTiledStorage;
         class TileView;
+    }
+
+    namespace pointdata::storage
+    {
+        class EagerPointsStorageBackend;
+        class PointsStorageBackend;
+        class TiledPointsStorageBackend;
     }
 
     // From "graphics/Vector2f.h"
@@ -246,8 +254,8 @@ public:
     template <std::size_t N>
     using ElementTypeAt = typename std::variant_alternative_t<N, VariantOfVectors>::value_type;
 
-    PointData(mv::plugin::PluginFactory* factory) : RawData(factory, PointType) { }
-    ~PointData() override = default;
+    PointData(mv::plugin::PluginFactory* factory);
+    ~PointData() override;
 
     /**
      * Acquires exclusive access to the point-data storage and its metadata.
@@ -287,6 +295,22 @@ public:
 
     /** Returns whether the point data currently uses tiled storage. */
     bool isTiled() const;
+
+    /** Returns the physical storage backend used by this concrete dataset. */
+    mv::pointdata::storage::StorageBackendType getStorageBackendType() const;
+
+    /** Returns the backend capability flags for this concrete dataset. */
+    mv::pointdata::storage::StorageBackendCapabilities getStorageBackendCapabilities() const;
+
+    /**
+     * Converts this concrete dataset to the requested storage backend.
+     *
+     * Conversion is transactional: the current backend remains active until
+     * the requested backend has been created successfully. The experimental
+     * implementation currently supports Eager-to-Tiled conversion and
+     * materialization back to Eager storage.
+     */
+    void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, const mv::pointdata::storage::StorageBackendConfiguration& configuration = {}, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
 
     /**
      * Converts dense point data to read-only rectangular tiled storage.
@@ -518,6 +542,7 @@ public:
         _tiledStorage.reset();
         convertData(data, numPoints * numDimensions);
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
+        refreshStorageBackend();
     }
 
     /// Converts the specified data to the internal data, using static_cast for each data element.
@@ -531,6 +556,7 @@ public:
         _tiledStorage.reset();
         convertData(inputDataContainer.data(), inputDataContainer.size());
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
+        refreshStorageBackend();
     }
 
     /// Copies the specified data into the internal data, sets the number of
@@ -544,6 +570,7 @@ public:
          _tiledStorage.reset();
          _variantOfVectors = VariantOfVectors( std::vector<T>(data, data + numPoints * numDimensions) );
          _numDimensions = static_cast<std::uint64_t>(numDimensions);
+         refreshStorageBackend();
     }
 
 
@@ -562,6 +589,7 @@ public:
         _tiledStorage.reset();
         _variantOfVectors = VariantOfVectors(data);
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
+        refreshStorageBackend();
     }
 
     /// Efficiently "moves" the data from the specified vector into the internal
@@ -575,6 +603,7 @@ public:
         _tiledStorage.reset();
         _variantOfVectors = VariantOfVectors(std::move(data));
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
+        refreshStorageBackend();
     }
 
     void setDimensionNames(const std::vector<QString>& dimNames);
@@ -677,6 +706,11 @@ public: // Serialization
     mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const final;
 
 private:
+    void refreshStorageBackend();
+    PointDataAccessView getEagerRow(std::uint64_t row) const;
+    void visitEagerRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+    float getEagerValueAt(std::size_t index) const;
+
     void materializeTiled();
     mutable std::recursive_mutex _dataMutex;
 
@@ -685,6 +719,7 @@ private:
     /** Number of features of each data point */
     std::uint64_t _numDimensions = 1;
     std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> _tiledStorage;
+    std::unique_ptr<mv::pointdata::storage::PointsStorageBackend> _storageBackend;
 
     std::vector<QString> _dimNames;
 
@@ -695,6 +730,7 @@ private: // Sparse data, experimental
     bool _isDense = true;
 
     friend class mv::legacy::PointDataLegacySerializer;
+    friend class mv::pointdata::storage::EagerPointsStorageBackend;
 };
 
 // =============================================================================
@@ -826,6 +862,9 @@ public:
     using TileView = PointData::TileView;
     using TiledMemoryEstimate = PointData::TiledMemoryEstimate;
     using TiledTileGenerator = PointData::TiledTileGenerator;
+    using StorageBackendType = mv::pointdata::storage::StorageBackendType;
+    using StorageBackendConfiguration = mv::pointdata::storage::StorageBackendConfiguration;
+    using StorageBackendProgressCallback = mv::pointdata::storage::StorageBackendProgressCallback;
 
     void init() override;
 
@@ -1052,6 +1091,15 @@ public:
 
     /** Returns whether all concrete datasets represented by this object are tiled. */
     bool isTiled() const;
+
+    /** Returns the physical backend type used by this concrete point dataset. */
+    StorageBackendType getStorageBackendType() const;
+
+    /** Returns the capability flags of the physical backend used by this dataset. */
+    mv::pointdata::storage::StorageBackendCapabilities getStorageBackendCapabilities() const;
+
+    /** Converts this concrete dataset to a storage backend transactionally. */
+    void convertToStorageBackend(StorageBackendType type, const StorageBackendConfiguration& configuration = {}, StorageBackendProgressCallback progress = {});
 
     /** Converts this dataset, or each member of a proxy dataset, to read-only tiled storage. */
     void makeTiled(std::size_t rowTileSize, std::size_t columnTileSize, std::function<void(float)> progress = {});

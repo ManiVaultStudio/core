@@ -10,7 +10,7 @@ using namespace mv::gui;
 StorageBackendAction::StorageBackendAction(QObject* parent, const Dataset<Points>& points) :
     HorizontalGroupAction(parent, "Storage backend"),
     _points(points),
-    _backendTypeAction(this, "Type", { "Eager", "Tiled" }, "Eager"),
+    _backendTypeAction(this, "Type", { "Eager", "Tiled", "Mixed", "Unknown" }, "Eager"),
     _configureAction(this, "Configure...")
 {
     setShowLabels(true);
@@ -44,5 +44,28 @@ TriggerAction& StorageBackendAction::getConfigureAction()
 
 void StorageBackendAction::updateBackendType()
 {
-    _backendTypeAction.setCurrentText(_points.isValid() && _points->isTiled() ? "Tiled" : "Eager");
+    if (!_points.isValid())
+    {
+        _backendTypeAction.setCurrentText("Unknown");
+        return;
+    }
+
+    switch (_points->getStorageBackendType())
+    {
+        case Points::StorageBackendType::Eager:
+            _backendTypeAction.setCurrentText("Eager");
+            break;
+
+        case Points::StorageBackendType::Tiled:
+            _backendTypeAction.setCurrentText("Tiled");
+            break;
+
+        case Points::StorageBackendType::Mixed:
+            _backendTypeAction.setCurrentText("Mixed");
+            break;
+
+        case Points::StorageBackendType::Unknown:
+            _backendTypeAction.setCurrentText("Unknown");
+            break;
+    }
 }

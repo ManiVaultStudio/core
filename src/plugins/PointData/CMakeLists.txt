@@ -21,6 +21,8 @@ set(POINTS_SOURCES
     src/PointsAction.cpp
     src/PointsViewAction.cpp
     src/StorageBackendAction.cpp
+    src/storage/EagerPointsStorageBackend.cpp
+    src/storage/TiledPointsStorageBackend.cpp
     src/tiled/PointDataTileCache.cpp
     src/tiled/PointDataTiledStorage.cpp
     src/tiled/PointDataTiledSerialization.cpp
@@ -71,6 +73,13 @@ set(POINTS_HEADERS
     src/developer/PointDataPhantomGenerator.h
 )
 
+set(POINTS_STORAGE_HEADERS
+    src/storage/PointsStorageBackend.h
+    src/storage/PointsStorageBackendTypes.h
+    src/storage/EagerPointsStorageBackend.h
+    src/storage/TiledPointsStorageBackend.h
+)
+
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects
 set(BFLOAT_HEADER
     ${MV_ROOT_DIR}/external/biovault/biovault_bfloat16/biovault_bfloat16.h
@@ -116,10 +125,18 @@ set(POINT_DATA_AUX
 source_group(Plugin FILES ${POINTS_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 source_group(Widgets FILES ${POINTS_VIEW_WIDGETS})
+source_group(Storage FILES
+    src/storage/PointsStorageBackend.h
+    src/storage/PointsStorageBackendTypes.h
+    src/storage/EagerPointsStorageBackend.h
+    src/storage/EagerPointsStorageBackend.cpp
+    src/storage/TiledPointsStorageBackend.h
+    src/storage/TiledPointsStorageBackend.cpp
+)
 source_group(BFloat FILES ${BFLOAT_HEADER})
 source_group(Aux FILES ${POINT_DATA_AUX})
 
-add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINTS_VIEW_WIDGETS} ${POINT_DATA_AUX})
+add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINTS_VIEW_WIDGETS} ${POINTS_STORAGE_HEADERS} ${POINT_DATA_AUX})
 
 add_library(ManiVault::${POINTDATA} ALIAS ${POINTDATA})
 
@@ -161,6 +178,11 @@ install(TARGETS ${POINTDATA}
     LIBRARY DESTINATION "$<CONFIGURATION>/Plugins/" COMPONENT PLUGINS # Linux/Mac .so
     ARCHIVE DESTINATION "$<CONFIGURATION>/lib/"     COMPONENT LINKLIB # Windows .lib
     PUBLIC_HEADER DESTINATION "$<CONFIGURATION>/include/${POINTDATA}/" COMPONENT HEADERS
+)
+
+install(FILES ${POINTS_STORAGE_HEADERS}
+    DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/"
+    COMPONENT HEADERS
 )
 
 # Copy the external biovault_bfloat16 header into its own subfolder - cmake's install PUBLIC_HEADER flattens all subdirs
