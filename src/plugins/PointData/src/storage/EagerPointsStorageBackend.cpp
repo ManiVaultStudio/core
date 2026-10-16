@@ -30,7 +30,7 @@ StorageBackendCapabilities EagerPointsStorageBackend::getCapabilities() const
 std::unique_ptr<mv::gui::StorageBackendConversionAction> EagerPointsStorageBackend::createConversionAction(const StorageBackendType targetType, QObject* parent) const
 {
     if (targetType == StorageBackendType::Tiled)
-        return std::make_unique<mv::gui::TiledStorageBackendConversionAction>(parent, _pointData.getNumPoints(), _pointData.getNumDimensions());
+        return std::make_unique<mv::gui::TiledStorageBackendConversionAction>(parent, _pointData.getNumPoints(), _pointData.getNumDimensions(), getElementSize());
 
     return {};
 }

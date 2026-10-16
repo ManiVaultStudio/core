@@ -48,6 +48,29 @@ QString formatBytes(const std::uint64_t bytes)
     return QString::number(value, 'f', suffix == 0 ? 0 : 2) + " " + suffixes[suffix];
 }
 
+std::size_t elementSizeForType(const Points::ElementTypeSpecifier type)
+{
+    switch (type)
+    {
+        case Points::ElementTypeSpecifier::float32:
+        case Points::ElementTypeSpecifier::int32:
+        case Points::ElementTypeSpecifier::uint32:
+            return sizeof(std::int32_t);
+
+        case Points::ElementTypeSpecifier::bfloat16:
+        case Points::ElementTypeSpecifier::int16:
+        case Points::ElementTypeSpecifier::uint16:
+            return sizeof(std::int16_t);
+
+        case Points::ElementTypeSpecifier::int8:
+        case Points::ElementTypeSpecifier::uint8:
+            return sizeof(std::int8_t);
+
+        default:
+            return sizeof(float);
+    }
+}
+
 template <typename T>
 void writeValue(char* destination, const std::size_t offset, const T value)
 {
@@ -227,11 +250,11 @@ void populateEager(Points& points, const Points::ElementTypeSpecifier type, cons
  * @brief Collects settings for a developer-generated phantom dataset.
  *
  * The dialog keeps dataset dimensions, element representation, population
- * strategy, storage backend, tile dominance, and cache capacity together so the
+ * strategy, storage backend, tile asymmetry, and cache capacity together so the
  * developer menu can create repeatable large-data scenarios without embedding
  * configuration in the generator callback. It supports both fully materialized
  * eager data and generator-backed tiled data. For tiled data, the row and
- * column tile sizes are optimized from the data shape and selected dominance.
+ * column tile sizes are optimized from the data shape and selected asymmetry.
  *
  * @author T. Kroes
  */
@@ -248,6 +271,7 @@ public:
         _populationAction(&_settingsGroupAction, "Population", { "Deterministic", "Random floats", "Random zeros and ones", "All zeros" }, "Deterministic"),
         _storageBackendAction(&_settingsGroupAction, "Storage backend", { "Eager", "Tiled" }, "Tiled"),
         _tileDominanceAction(&_settingsGroupAction),
+        _tileSizeAction(&_settingsGroupAction, "Tile size (MiB)", 1, 1024, 1),
         _tileGeometryAction(&_settingsGroupAction, "Tile geometry"),
         _cacheCapacityAction(&_settingsGroupAction, "Cache tiles", 1, 100000, 8),
         _estimateAction(&_settingsGroupAction, "Estimate")
@@ -268,6 +292,7 @@ public:
         _typeAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
         _populationAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
         _storageBackendAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
+        _tileSizeAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
         _tileGeometryAction.setDefaultWidgetFlags(mv::gui::StringAction::TextEdit);
         _tileGeometryAction.setEnabled(false);
         _cacheCapacityAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
@@ -281,6 +306,7 @@ public:
         _settingsGroupAction.addAction(&_populationAction);
         _settingsGroupAction.addAction(&_storageBackendAction);
         _settingsGroupAction.addAction(&_tileDominanceAction);
+        _settingsGroupAction.addAction(&_tileSizeAction);
         _settingsGroupAction.addAction(&_tileGeometryAction);
         _settingsGroupAction.addAction(&_cacheCapacityAction);
         _settingsGroupAction.addAction(&_estimateAction);
@@ -296,9 +322,10 @@ public:
 
         connect(&_rowsAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateTileGeometry(); });
         connect(&_columnsAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateTileGeometry(); });
-        connect(&_typeAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateEstimate(); });
+        connect(&_typeAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateTileGeometry(); });
         connect(&_storageBackendAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateActions(); });
         connect(&_tileDominanceAction.getDominanceAction(), &mv::gui::IntegralAction::valueChanged, this, [this] { updateTileGeometry(); });
+        connect(&_tileSizeAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateTileGeometry(); });
         connect(&_cacheCapacityAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateEstimate(); });
 
         loadSettings();
@@ -315,9 +342,11 @@ public:
 
     std::uint64_t columns() const { return static_cast<std::uint64_t>(_columnsAction.getValue()); }
 
-    std::size_t rowTileSize() const { return storage::calculateTiledStorageGeometry(rows(), columns(), _tileDominanceAction.getDominanceAction().getValue()).rowTileSize; }
+    std::size_t rowTileSize() const { return storage::calculateTiledStorageGeometry(rows(), columns(), elementSizeForType(type()), tileSizeBytes(), _tileDominanceAction.getDominanceAction().getValue()).rowTileSize; }
 
-    std::size_t columnTileSize() const { return storage::calculateTiledStorageGeometry(rows(), columns(), _tileDominanceAction.getDominanceAction().getValue()).columnTileSize; }
+    std::size_t columnTileSize() const { return storage::calculateTiledStorageGeometry(rows(), columns(), elementSizeForType(type()), tileSizeBytes(), _tileDominanceAction.getDominanceAction().getValue()).columnTileSize; }
+
+    std::uint64_t tileSizeBytes() const { return static_cast<std::uint64_t>(_tileSizeAction.getValue()) * 1024 * 1024; }
 
     std::size_t cacheCapacity() const { return static_cast<std::size_t>(_cacheCapacityAction.getValue()); }
 
@@ -338,6 +367,7 @@ public:
         application->setSetting("Developer/PhantomPointGenerator/Population", _populationAction.getCurrentText());
         application->setSetting("Developer/PhantomPointGenerator/StorageBackend", _storageBackendAction.getCurrentText());
         application->setSetting("Developer/PhantomPointGenerator/TileDominance", _tileDominanceAction.getDominanceAction().getValue());
+        application->setSetting("Developer/PhantomPointGenerator/TileSizeMiB", _tileSizeAction.getValue());
         application->setSetting("Developer/PhantomPointGenerator/CacheCapacity", _cacheCapacityAction.getValue());
     }
 
@@ -353,6 +383,7 @@ private:
         _populationAction.setCurrentText(application->getSetting("Developer/PhantomPointGenerator/Population", _populationAction.getCurrentText()).toString());
         _storageBackendAction.setCurrentText(application->getSetting("Developer/PhantomPointGenerator/StorageBackend", _storageBackendAction.getCurrentText()).toString());
         _tileDominanceAction.getDominanceAction().setValue(application->getSetting("Developer/PhantomPointGenerator/TileDominance", _tileDominanceAction.getDominanceAction().getValue()).toInt());
+        _tileSizeAction.setValue(application->getSetting("Developer/PhantomPointGenerator/TileSizeMiB", _tileSizeAction.getValue()).toInt());
         _cacheCapacityAction.setValue(application->getSetting("Developer/PhantomPointGenerator/CacheCapacity", _cacheCapacityAction.getValue()).toInt());
     }
 
@@ -367,25 +398,17 @@ private:
 
     void updateTileGeometry()
     {
-        const auto geometry = storage::calculateTiledStorageGeometry(rows(), columns(), _tileDominanceAction.getDominanceAction().getValue());
+        const auto geometry = storage::calculateTiledStorageGeometry(rows(), columns(), elementSizeForType(type()), tileSizeBytes(), _tileDominanceAction.getDominanceAction().getValue());
         _cacheCapacityAction.setValue(static_cast<std::int32_t>(storage::calculateTiledStorageCacheCapacity(rows(), columns(), geometry)));
         updateEstimate();
     }
 
     void updateEstimate()
     {
-        const auto type = Points::elementTypeSpecifier(_typeAction.getCurrentText());
-        const auto elementSize = type == Points::ElementTypeSpecifier::float32
-            ? 4
-            : type == Points::ElementTypeSpecifier::bfloat16
-            ? 2
-            : type == Points::ElementTypeSpecifier::int32 || type == Points::ElementTypeSpecifier::uint32
-            ? 4
-            : type == Points::ElementTypeSpecifier::int16 || type == Points::ElementTypeSpecifier::uint16
-            ? 2
-            : 1;
+        const auto type        = Points::elementTypeSpecifier(_typeAction.getCurrentText());
+        const auto elementSize = elementSizeForType(type);
 
-        const auto geometry = storage::calculateTiledStorageGeometry(rows(), columns(), _tileDominanceAction.getDominanceAction().getValue());
+        const auto geometry = storage::calculateTiledStorageGeometry(rows(), columns(), elementSize, tileSizeBytes(), _tileDominanceAction.getDominanceAction().getValue());
         const auto estimate = Points::estimateTiledMemory(rows(), columns(), elementSize, geometry.rowTileSize, geometry.columnTileSize, cacheCapacity());
 
         _tileGeometryAction.setString(QString("Rows per tile: %1\nColumns per tile: %2")
@@ -401,17 +424,18 @@ private:
             .arg(formatBytes(estimate.indexBytes)));
     }
 
-    mv::gui::VerticalGroupAction _settingsGroupAction;
-    mv::gui::StringAction       _nameAction;
-    mv::gui::IntegralAction     _rowsAction;
-    mv::gui::IntegralAction     _columnsAction;
-    mv::gui::OptionAction       _typeAction;
-    mv::gui::OptionAction       _populationAction;
-    mv::gui::OptionAction       _storageBackendAction;
+    mv::gui::VerticalGroupAction         _settingsGroupAction;
+    mv::gui::StringAction                _nameAction;
+    mv::gui::IntegralAction              _rowsAction;
+    mv::gui::IntegralAction              _columnsAction;
+    mv::gui::OptionAction                _typeAction;
+    mv::gui::OptionAction                _populationAction;
+    mv::gui::OptionAction                _storageBackendAction;
     mv::gui::TiledStorageDominanceAction _tileDominanceAction;
-    mv::gui::StringAction                _tileGeometryAction;
-    mv::gui::IntegralAction     _cacheCapacityAction;
-    mv::gui::StringAction       _estimateAction;
+    mv::gui::IntegralAction              _tileSizeAction;
+    mv::gui::StringAction                 _tileGeometryAction;
+    mv::gui::IntegralAction               _cacheCapacityAction;
+    mv::gui::StringAction                 _estimateAction;
 };
 }
 

@@ -68,6 +68,9 @@ public:
     /** Creates read-only tiled storage whose tiles are generated only when accessed. */
     static std::shared_ptr<PointDataTiledStorage> fromGenerator(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileGenerator generator);
 
+    /** Creates read-only tiled storage whose payloads are independently encoded in one pack file. */
+    static std::shared_ptr<PointDataTiledStorage> fromPackedFile(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, const QString& filePath, const mv::util::SharedCodec& codec, const std::vector<PackedTileBlock>& blocks);
+
     /** Creates a new lazy tile layout backed by the existing tiled storage. */
     static std::shared_ptr<PointDataTiledStorage> retile(const std::shared_ptr<const PointDataTiledStorage>& source, std::size_t rowTileSize, std::size_t columnTileSize, ProgressCallback progress = {});
 
@@ -133,14 +136,14 @@ public:
 
 private:
     QByteArray load(const TileDescriptor& descriptor) const;
-    std::uint64_t                  _rows;          /**< Logical matrix row count. */
-    std::uint64_t                  _columns;       /**< Logical matrix column count. */
-    std::size_t                    _elementSize;   /**< Size of one matrix element in bytes. */
-    std::size_t                    _rowTileSize;   /**< Configured maximum rows per tile. */
-    std::size_t                    _columnTileSize; /**< Configured maximum columns per tile. */
-    std::vector<TileDescriptor>    _descriptors;   /**< Resident row/column tile index. */
-    TileLoader                     _loader;        /**< Optional callback that decodes or generates tile bytes. */
-    mutable std::recursive_mutex   _mutex;         /**< Serializes cache and lazy-load access. */
-    mutable PointDataTileCache     _cache;         /**< Bounded cache of loaded tile payloads. */
+    std::uint64_t                _rows;           /**< Logical matrix row count. */
+    std::uint64_t                _columns;        /**< Logical matrix column count. */
+    std::size_t                  _elementSize;    /**< Size of one matrix element in bytes. */
+    std::size_t                  _rowTileSize;    /**< Configured maximum rows per tile. */
+    std::size_t                  _columnTileSize; /**< Configured maximum columns per tile. */
+    std::vector<TileDescriptor>  _descriptors;    /**< Resident row/column tile index. */
+    TileLoader                   _loader;         /**< Optional callback that decodes or generates tile bytes. */
+    mutable std::recursive_mutex _mutex;          /**< Serializes cache and lazy-load access. */
+    mutable PointDataTileCache   _cache;          /**< Bounded cache of loaded tile payloads. */
 };
 }

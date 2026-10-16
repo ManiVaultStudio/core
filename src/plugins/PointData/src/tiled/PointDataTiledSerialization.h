@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <memory>
 
+#include <workflow/WorkflowPlan.h>
+
 namespace mv::pointdata::tiled
 {
 class PointDataTiledStorage;
@@ -32,6 +34,17 @@ public:
      * loading can retain the tile index without decoding the complete matrix.
      */
     static QVariantMap toVariantMap(const PointDataTiledStorage& storage);
+
+    /**
+     * Creates a workflow that encodes tiles in parallel and publishes their
+     * metadata in descriptor order.
+     *
+     * Tile encoding is independent because every tile owns its blob metadata.
+     * The final publication stage preserves the deterministic order used by
+     * the synchronous serializer and therefore keeps the serialized format
+     * compatible.
+     */
+    static mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow(const PointDataTiledStorage& storage);
 
     /**
      * Reconstructs tiled storage while retaining serialized tile payloads for

@@ -48,6 +48,7 @@ struct StorageBackendConfiguration : StorageBackendConversionOptions
 {
     std::size_t rowTileSize    = 256;
     std::size_t columnTileSize = 8;
+    std::size_t tileSizeBytes  = 1024 * 1024;
     std::size_t cacheCapacity  = 8;
 };
 

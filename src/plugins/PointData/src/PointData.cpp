@@ -717,11 +717,13 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
     bool isDense;
     bool isTiled;
+    std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> tiledStorage;
 
     {
         const auto dataLock = lockData();
         isDense = _isDense;
-        isTiled = static_cast<bool>(_tiledStorage);
+        tiledStorage = _tiledStorage;
+        isTiled = static_cast<bool>(tiledStorage);
     }
 
     //const auto baseSaveStage = plan->addNestedWorkflowStage("Save raw data base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
@@ -733,13 +735,17 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 
     if (isTiled)
     {
-        plan->addSequentialStage("Build tiled point data map", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        const auto serializeTiledStage = plan->addNestedWorkflowStage("Encode tiled point data", [tiledStorage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+            return mv::pointdata::tiled::PointDataTiledSerialization::toVariantMapWorkflow(*tiledStorage);
+        });
+
+        plan->addSequentialStage("Build tiled point data map", [this, serializeTiledStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
             const auto dataLock = lockData();
             QVariantMap outputMap;
 
-            outputMap["TypeIndex"] = static_cast<std::int32_t>(getElementTypeSpecifier());
-            outputMap["TypeName"]  = elementTypeName(getElementTypeSpecifier());
-            outputMap["Tiled"]     = mv::pointdata::tiled::PointDataTiledSerialization::toVariantMap(*_tiledStorage);
+            outputMap["TypeIndex"]        = static_cast<std::int32_t>(getElementTypeSpecifier());
+            outputMap["TypeName"]         = elementTypeName(getElementTypeSpecifier());
+            outputMap["Tiled"]            = executionContext->takeOutput(serializeTiledStage).toMap();
             outputMap["NumberOfElements"] = QVariant::fromValue(static_cast<qulonglong>(getNumberOfElements()));
 
             executionContext->setOutput(outputMap);

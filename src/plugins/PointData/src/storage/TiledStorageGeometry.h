@@ -15,8 +15,8 @@ namespace mv::pointdata::storage
  *
  * The geometry keeps the approximate number of elements per tile bounded while
  * allowing callers to favor contiguous access along either the row or column
- * axis. A dominance of zero favors larger row tiles, a dominance of one
- * hundred favors larger column tiles, and intermediate values interpolate
+ * axis. An asymmetry of zero favors column-oriented tiles, an asymmetry of one
+ * hundred favors row-oriented tiles, and intermediate values interpolate
  * between those shape-aware configurations.
  *
  * @author T. Kroes
@@ -27,10 +27,11 @@ struct TiledStorageGeometry
     std::size_t columnTileSize = 1;
 };
 
-inline TiledStorageGeometry calculateTiledStorageGeometry(const std::uint64_t rows, const std::uint64_t columns, const std::int32_t dominance)
+inline TiledStorageGeometry calculateTiledStorageGeometry(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::uint64_t targetTileBytes, const std::int32_t dominance)
 {
-    constexpr std::uint64_t targetTileElements      = 65536;
-    constexpr std::uint64_t dominantAxisTileExtent  = 8;
+    constexpr std::uint64_t dominantAxisTileExtent = 8;
+
+    const auto targetTileElements = std::max<std::uint64_t>(1, targetTileBytes / std::max<std::size_t>(1, elementSize));
 
     const auto clampTileSize = [](const std::uint64_t extent, const std::uint64_t value) {
         return extent == 0 ? std::size_t(1) : static_cast<std::size_t>(std::min(extent, std::max<std::uint64_t>(1, value)));
@@ -50,6 +51,11 @@ inline TiledStorageGeometry calculateTiledStorageGeometry(const std::uint64_t ro
         clampTileSize(rows, interpolate(rowDominantRowTileSize, columnDominantRowTileSize)),
         clampTileSize(columns, interpolate(rowDominantColumnTileSize, columnDominantColumnTileSize))
     };
+}
+
+inline TiledStorageGeometry calculateTiledStorageGeometry(const std::uint64_t rows, const std::uint64_t columns, const std::int32_t dominance)
+{
+    return calculateTiledStorageGeometry(rows, columns, sizeof(float), 256 * 1024, dominance);
 }
 
 inline std::size_t calculateTiledStorageCacheCapacity(const std::uint64_t rows, const std::uint64_t columns, const TiledStorageGeometry& geometry)

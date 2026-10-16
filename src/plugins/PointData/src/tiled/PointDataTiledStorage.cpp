@@ -75,6 +75,22 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromGenerator(cons
     return std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize, std::move(generator));
 }
 
+std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromPackedFile(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, const QString& filePath, const mv::util::SharedCodec& codec, const std::vector<PackedTileBlock>& blocks)
+{
+    auto reader = std::make_shared<PackedTileFileReader>(filePath, codec);
+    auto storage = std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize, [reader](const TileDescriptor& descriptor) {
+        return reader->read(descriptor.packedBlock);
+    });
+
+    if (blocks.size() != storage->descriptors().size())
+        throw std::invalid_argument("Packed tile block count does not match tiled point-data geometry");
+
+    for (std::size_t index = 0; index < blocks.size(); ++index)
+        storage->descriptors()[index].packedBlock = blocks[index];
+
+    return storage;
+}
+
 std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::retile(const std::shared_ptr<const PointDataTiledStorage>& source, const std::size_t rowTileSize, const std::size_t columnTileSize, ProgressCallback progress)
 {
     if (!source)
@@ -90,9 +106,9 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::retile(const std::
             while (column < descriptor.columns)
             {
                 const auto sourceTile = source->acquire((descriptor.rowOffset + row) / source->rowTileSize(), (descriptor.columnOffset + column) / source->columnTileSize());
-                const auto sourceRowOffset = descriptor.rowOffset + row - sourceTile.rowOffset();
+                const auto sourceRowOffset    = descriptor.rowOffset + row - sourceTile.rowOffset();
                 const auto sourceColumnOffset = descriptor.columnOffset + column - sourceTile.columnOffset();
-                const auto copyColumns = std::min(descriptor.columns - column, sourceTile.columns() - sourceColumnOffset);
+                const auto copyColumns        = std::min(descriptor.columns - column, sourceTile.columns() - sourceColumnOffset);
 
                 std::memcpy(bytes.data() + (row * descriptor.columns + column) * source->elementSize(), static_cast<const char*>(sourceTile.data()) + (sourceRowOffset * sourceTile.columns() + sourceColumnOffset) * source->elementSize(), copyColumns * source->elementSize());
                 column += copyColumns;

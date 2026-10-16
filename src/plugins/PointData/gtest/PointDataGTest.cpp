@@ -3,13 +3,21 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
 #include <tiled/PointDataTiledStorage.h>
+#include <tiled/PackedTileFile.h>
 
 #include <gtest/gtest.h>
 
+#include <QTemporaryDir>
+
+#include <algorithm>
+#include <cstring>
 #include <numeric>
+#include <stdexcept>
 #include <vector>
 
 using mv::pointdata::tiled::PointDataTiledStorage;
+using mv::pointdata::tiled::PackedTileFileReader;
+using mv::pointdata::tiled::PackedTileFileWriter;
 
 namespace
 {
@@ -117,4 +125,71 @@ GTEST_TEST(PointData, reportsTileGeometryAndMemoryEstimate)
     ASSERT_EQ(estimate.largestTileBytes, 2U * 3U * sizeof(float));
     ASSERT_EQ(estimate.cachedTileBytes, 2U * estimate.largestTileBytes);
     ASSERT_GT(estimate.indexBytes, 0U);
+}
+
+namespace
+{
+class TestBlobCodec final : public mv::util::BlobCodec
+{
+public:
+    TestBlobCodec() : BlobCodec(nullptr, nullptr) {}
+
+    Type getType() const override { return Type::None; }
+    QString getName() const override { return QStringLiteral("test"); }
+    QByteArray encode(const QByteArray& input) const override { return input; }
+    QByteArray encode(const char* data, qsizetype size) const override { return QByteArray(data, size); }
+    QByteArray decode(const QByteArray& input, qsizetype) const override { return input; }
+    QByteArray decodeFromFile(const QString& filePath, qsizetype) const override
+    {
+        QFile file(filePath);
+
+        if (!file.open(QIODevice::ReadOnly))
+            throw std::runtime_error("Unable to open test blob file");
+
+        return file.readAll();
+    }
+    void decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const override
+    {
+        const auto bytes = decodeFromFile(filePath, -1);
+        std::memcpy(destination, bytes.constData(), static_cast<std::size_t>(std::min<std::uint64_t>(destinationSize, bytes.size())));
+    }
+    QString getFileExtension() const override { return QStringLiteral("test"); }
+};
+}
+
+GTEST_TEST(PointData, packedTileFileReadsOnlySelectedBlock)
+{
+    QTemporaryDir temporaryDirectory;
+    ASSERT_TRUE(temporaryDirectory.isValid());
+
+    const auto path = temporaryDirectory.filePath(QStringLiteral("tiles.pack"));
+    const auto codec = std::make_shared<TestBlobCodec>();
+    PackedTileFileWriter writer(path, codec);
+    const auto firstBlock = writer.append(QByteArray("first tile"));
+    const auto secondBlock = writer.append(QByteArray("second tile"));
+    writer.close();
+
+    PackedTileFileReader reader(path, codec);
+
+    ASSERT_EQ(reader.read(firstBlock), QByteArray("first tile"));
+    ASSERT_EQ(reader.read(secondBlock), QByteArray("second tile"));
+    ASSERT_NE(firstBlock.offset, secondBlock.offset);
+}
+
+GTEST_TEST(PointData, tiledStorageReadsFromPackedFile)
+{
+    QTemporaryDir temporaryDirectory;
+    ASSERT_TRUE(temporaryDirectory.isValid());
+
+    const auto path = temporaryDirectory.filePath(QStringLiteral("tiles.pack"));
+    const auto codec = std::make_shared<TestBlobCodec>();
+    PackedTileFileWriter writer(path, codec);
+    const auto firstBlock = writer.append(QByteArray::fromRawData("\0\0\x80\x3f", 4));
+    const auto secondBlock = writer.append(QByteArray::fromRawData("\0\0\x00\x40", 4));
+    writer.close();
+
+    const auto storage = PointDataTiledStorage::fromPackedFile(1, 2, sizeof(float), 1, 1, path, codec, { firstBlock, secondBlock });
+
+    ASSERT_FLOAT_EQ(storage->valueAt(0, 0), 1.0f);
+    ASSERT_FLOAT_EQ(storage->valueAt(1, 0), 2.0f);
 }

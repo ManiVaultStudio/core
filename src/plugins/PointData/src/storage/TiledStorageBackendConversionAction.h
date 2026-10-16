@@ -23,7 +23,7 @@ namespace mv::gui
 class POINTDATA_EXPORT TiledStorageBackendConversionAction final : public StorageBackendConversionAction
 {
 public:
-    TiledStorageBackendConversionAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, const pointdata::storage::StorageBackendConfiguration& configuration = {}, bool initializeFromConfiguration = false);
+    TiledStorageBackendConversionAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration = {}, bool initializeFromConfiguration = false);
 
     pointdata::storage::StorageBackendType getTargetBackendType() const override;
     pointdata::storage::StorageBackendConversionOptionsPtr getConversionOptions() const override;
@@ -31,12 +31,14 @@ public:
 private:
     void updateTileGeometry();
 
-    std::uint64_t _rows    = 0;
-    std::uint64_t _columns = 0;
+    std::uint64_t _rows        = 0;
+    std::uint64_t _columns     = 0;
+    std::size_t   _elementSize = 0;
 
     TiledStorageDominanceAction _tileDominanceAction;
+    IntegralAction              _tileSizeAction;
     StringAction                _tileGeometryAction;
-    IntegralAction _cacheCapacityAction;
+    IntegralAction              _cacheCapacityAction;
 };
 
 }

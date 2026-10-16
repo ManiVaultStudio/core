@@ -1,5 +1,7 @@
 #pragma once
 
+#include "PackedTileFile.h"
+
 #include <QByteArray>
 #include <QVariantMap>
 
@@ -29,6 +31,7 @@ struct TileDescriptor
     std::uint64_t columns      = 0; /**< Number of columns in this tile. */
     QVariantMap blob;               /**< Serialized blob metadata and block index. */
     QByteArray residentBytes;       /**< Optional in-memory payload for eager/generated tiles. */
+    PackedTileBlock packedBlock;    /**< Optional independently encoded block in a packed tile file. */
 };
 
 /**
@@ -104,7 +107,7 @@ public:
 
 private:
     friend class PointDataTiledStorage;
-    std::shared_ptr<const QByteArray> _bytes;        /**< Shared tile payload that provides the lease guarantee. */
+    std::shared_ptr<const QByteArray> _bytes;       /**< Shared tile payload that provides the lease guarantee. */
     std::uint64_t                     _rowOffset    = 0; /**< Global row offset of the tile. */
     std::uint64_t                     _columnOffset = 0; /**< Global column offset of the tile. */
     std::uint64_t                     _rows         = 0; /**< Number of rows in the tile. */

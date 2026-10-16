@@ -4,53 +4,97 @@
 
 #include <util/Serialization.h>
 
+#include <workflow/WorkflowExecutionContext.h>
+
+#include <QVector>
+
+namespace
+{
+QVariantMap makeTileVariantMap(const mv::pointdata::tiled::PointDataTiledStorage& storage, const std::size_t tileIndex)
+{
+    const auto& descriptor = storage.descriptors()[tileIndex];
+
+    QVariantMap tile;
+    tile["RowOffset"]     = QVariant::fromValue(static_cast<qulonglong>(descriptor.rowOffset));
+    tile["ColumnOffset"]  = QVariant::fromValue(static_cast<qulonglong>(descriptor.columnOffset));
+    tile["Rows"]          = QVariant::fromValue(static_cast<qulonglong>(descriptor.rows));
+    tile["Columns"]       = QVariant::fromValue(static_cast<qulonglong>(descriptor.columns));
+
+    if (!descriptor.blob.isEmpty())
+    {
+        tile["Raw"] = descriptor.blob;
+    }
+    else
+    {
+        const auto tileView = storage.acquire(tileIndex / storage.tileColumnCount(), tileIndex % storage.tileColumnCount());
+
+        tile["Raw"] = mv::util::bytesToBlobVariantMap(static_cast<const char*>(tileView.data()), tileView.sizeInBytes(), mv::util::BlobStorageLocation::FileInProject);
+    }
+
+    return tile;
+}
+
+QVariantMap makeTiledVariantMap(const mv::pointdata::tiled::PointDataTiledStorage& storage, const QVector<QVariantMap>& tiles)
+{
+    const auto memoryEstimate = storage.memoryEstimate();
+
+    QVariantMap result;
+    result["Version"]         = 2;
+    result["Storage"]         = "IndexedTileBlobs";
+    result["RowTileSize"]     = QVariant::fromValue(static_cast<qulonglong>(storage.rowTileSize()));
+    result["ColumnTileSize"]  = QVariant::fromValue(static_cast<qulonglong>(storage.columnTileSize()));
+    result["ElementSize"]     = QVariant::fromValue(static_cast<qulonglong>(storage.elementSize()));
+    result["RawDataBytes"]    = QVariant::fromValue(static_cast<qulonglong>(memoryEstimate.rawDataBytes));
+    result["TileCount"]       = QVariant::fromValue(static_cast<qulonglong>(memoryEstimate.tileCount));
+    result["Tiles"]           = QVariantList(tiles.cbegin(), tiles.cend());
+
+    return result;
+}
+}
+
 namespace mv::pointdata::tiled
 {
 QVariantMap PointDataTiledSerialization::toVariantMap(const PointDataTiledStorage& storage)
 {
-    QVariantMap result;
-
-    // Version 2 is an indexed tile representation. Tile payloads are explicitly
-    // stored as external project blobs; the project JSON contains only metadata
-    // and the per-tile blob index. Version 1 remains readable below.
-    result["Version"]         = 2;
-    result["Storage"]         = "IndexedTileBlobs";
-    result["RowTileSize"]     = QVariant::fromValue(static_cast<qulonglong>(storage.rowTileSize()));
-    result["ColumnTileSize"] = QVariant::fromValue(static_cast<qulonglong>(storage.columnTileSize()));
-    result["ElementSize"]     = QVariant::fromValue(static_cast<qulonglong>(storage.elementSize()));
-    result["RawDataBytes"]    = QVariant::fromValue(static_cast<qulonglong>(storage.memoryEstimate().rawDataBytes));
-    result["TileCount"]       = QVariant::fromValue(static_cast<qulonglong>(storage.memoryEstimate().tileCount));
-
-    QVariantList tiles;
+    QVector<QVariantMap> tiles;
     tiles.reserve(static_cast<qsizetype>(storage.descriptors().size()));
 
     for (std::size_t tileIndex = 0; tileIndex < storage.descriptors().size(); ++tileIndex)
+        tiles.push_back(makeTileVariantMap(storage, tileIndex));
+
+    return makeTiledVariantMap(storage, tiles);
+}
+
+mv::workflow::UniqueWorkflowPlan PointDataTiledSerialization::toVariantMapWorkflow(const PointDataTiledStorage& storage)
+{
+    const auto tileCount = storage.descriptors().size();
+    const auto tiles     = std::make_shared<QVector<QVariantMap>>(static_cast<qsizetype>(tileCount));
+
+    auto plan = std::make_unique<mv::workflow::WorkflowPlan>("Serialize tiled point data");
+    mv::workflow::WorkflowPlan::Jobs jobs;
+    jobs.reserve(static_cast<qsizetype>(tileCount));
+
+    for (std::size_t tileIndex = 0; tileIndex < tileCount; ++tileIndex)
     {
-        const auto& descriptor = storage.descriptors()[tileIndex];
+        jobs.emplace_back(QString("Encode tile %1").arg(tileIndex), [&storage, tiles, tileIndex](const mv::workflow::WorkflowPlan::Job&, const mv::workflow::SharedWorkflowExecutionContext& executionContext) {
+            (*tiles)[static_cast<qsizetype>(tileIndex)] = makeTileVariantMap(storage, tileIndex);
 
-        QVariantMap tile;
-        tile["RowOffset"]     = QVariant::fromValue(static_cast<qulonglong>(descriptor.rowOffset));
-        tile["ColumnOffset"] = QVariant::fromValue(static_cast<qulonglong>(descriptor.columnOffset));
-        tile["Rows"]          = QVariant::fromValue(static_cast<qulonglong>(descriptor.rows));
-        tile["Columns"]       = QVariant::fromValue(static_cast<qulonglong>(descriptor.columns));
-
-        if (!descriptor.blob.isEmpty())
-        {
-            tile["Raw"] = descriptor.blob;
-        }
-        else
-        {
-            const auto tileView = storage.acquire(tileIndex / storage.tileColumnCount(), tileIndex % storage.tileColumnCount());
-
-            tile["Raw"] = mv::util::bytesToBlobVariantMap(static_cast<const char*>(tileView.data()), tileView.sizeInBytes(), mv::util::BlobStorageLocation::FileInProject);
-        }
-
-        tiles.push_back(tile);
+            executionContext->setProgress(1.0);
+        }, mv::workflow::WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, mv::workflow::WorkflowPlan::JobProgressMode::Atomic);
     }
 
-    result["Tiles"] = tiles;
+    if (!jobs.empty())
+    {
+        plan->addBatchedParallelStage("Encode tiled point-data tiles", std::move(jobs), [](const mv::workflow::SharedWorkflowExecutionContext& executionContext) {
+            return executionContext->getState()->getOptions().batching.dataBlockEncodingBatchSize;
+        });
+    }
 
-    return result;
+    plan->addSequentialStage("Publish tiled point-data map", [&storage, tiles](const mv::workflow::WorkflowPlan::Job&, const mv::workflow::SharedWorkflowExecutionContext& executionContext) {
+        executionContext->setOutput(makeTiledVariantMap(storage, *tiles));
+    });
+
+    return plan;
 }
 
 std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantMap(const QVariantMap& map, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize)

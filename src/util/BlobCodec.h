@@ -135,6 +135,20 @@ public:
      */
     virtual void decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const = 0;
 
+    /**
+     * @brief Decode an encoded byte range from a file into a destination buffer.
+     *
+     * The range is read without loading the remainder of the file. This is
+     * useful for packed files that contain independently encoded blocks.
+     *
+     * @param filePath Path of the file containing the encoded range.
+     * @param offset Byte offset of the encoded range in the file.
+     * @param encodedSize Number of encoded bytes to read.
+     * @param destination Destination buffer that receives the decoded bytes.
+     * @param destinationSize Size of the destination buffer in bytes.
+     */
+    void decodeFromFileRangeTo(const QString& filePath, std::uint64_t offset, std::uint64_t encodedSize, char* destination, std::uint64_t destinationSize) const;
+
     /** Convert codec type to persistent string */
     [[nodiscard]] static QString typeToString(Type type);
 

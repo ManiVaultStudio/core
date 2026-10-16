@@ -8,7 +8,7 @@ namespace mv::gui
 TiledStorageDominanceAction::TiledStorageDominanceAction(QObject* parent, const QString& title) :
     HorizontalGroupAction(parent, title),
     _columnLabelAction(this, "Column", "Column"),
-    _dominanceAction(this, "Dominance", 0, 100, 50),
+    _dominanceAction(this, "Asymmetry", 0, 100, 50),
     _rowLabelAction(this, "Row", "Row")
 {
     setShowLabels(false);
@@ -18,7 +18,7 @@ TiledStorageDominanceAction::TiledStorageDominanceAction(QObject* parent, const 
     _dominanceAction.setDefaultWidgetFlags(IntegralAction::Slider);
     _dominanceAction.setStretch(1);
     _dominanceAction.setUpdateDuringDrag(true);
-    _dominanceAction.setToolTip("0 = column-dominant tiles, 50 = balanced tiles, 100 = row-dominant tiles");
+    _dominanceAction.setToolTip("0 = column-oriented tiles, 50 = balanced tiles, 100 = row-oriented tiles");
 
     addAction(&_columnLabelAction);
     addAction(&_dominanceAction);
