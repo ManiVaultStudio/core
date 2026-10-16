@@ -73,7 +73,8 @@ void PointsViewPlugin::refreshSelection()
     const auto selectedItems = mv::dataHierarchy().getSelectedItems();
     const auto points = selectedItems.size() == 1 ? getPointsDataset(selectedItems.first()->getDataset()) : mv::Dataset<Points>();
 
-    _widget.setPoints(points);
+    _datasetPickerAction.setCurrentDataset(mv::Dataset<mv::DatasetImpl>(points));
+    setPickedPoints(points);
 }
 
 void PointsViewPlugin::setPickedPoints(const mv::Dataset<Points>& points)
