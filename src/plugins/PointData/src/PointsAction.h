@@ -8,6 +8,7 @@
 
 #include <Dataset.h>
 #include <actions/GroupAction.h>
+#include <actions/TriggerAction.h>
 
 class Points;
 
@@ -39,7 +40,11 @@ public:
     /** Returns the point-data view action. */
     PointsViewAction& getPointsViewAction();
 
+    /** Returns the action for opening the standalone Points View plugin. */
+    mv::gui::TriggerAction& getOpenInPointsViewAction();
+
 private:
     StorageBackendAction _storageBackendAction; /**< Storage backend selector and configuration action. */
     PointsViewAction     _pointsViewAction;     /**< Embedded point-data view action. */
+    mv::gui::TriggerAction _openInPointsViewAction; /**< Opens the standalone Points View plugin. */
 };

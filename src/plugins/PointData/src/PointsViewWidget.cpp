@@ -100,15 +100,12 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
     _getRangeAction(&_getRangeGroupAction, "Get range"),
     _rowFilterAction(this, "Rows"),
     _columnFilterAction(this, "Columns"),
-    _liveTableAction(this, "Show live table", true),
-    _openInPointsViewAction(this, "Open in Points View")
+    _liveTableAction(this, "Show live table", true)
 {
     _rowFilterAction.setPlaceHolderString("Required; e.g. 1, 3, 10-20");
     _columnFilterAction.setPlaceHolderString("Optional = all columns; e.g. 0-4, 8");
     _rowFilterAction.setDefaultWidgetFlags(mv::gui::StringAction::LineEdit);
     _columnFilterAction.setDefaultWidgetFlags(mv::gui::StringAction::LineEdit);
-    _openInPointsViewAction.setIconByName("external-link");
-
     _filterGroupAction.setShowLabels(true);
     _filterGroupAction.addAction(&_rowFilterAction);
     _filterGroupAction.addAction(&_columnFilterAction);
@@ -234,9 +231,6 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
     layout->addWidget(_filterGroupAction.createWidget(this));
     layout->addWidget(_table, 1);
 
-    if (!_showDatasetControls)
-        layout->addWidget(_openInPointsViewAction.createWidget(this));
-
     _table->verticalScrollBar()->installEventFilter(this);
     _table->horizontalScrollBar()->installEventFilter(this);
     _table->viewport()->installEventFilter(this);
@@ -274,10 +268,6 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
 
     connect(_filterTimer, &QTimer::timeout, this, &PointsViewWidget::applyFilters);
     connect(&_liveTableAction, &mv::gui::ToggleAction::toggled, this, &PointsViewWidget::showLiveTable);
-    connect(&_openInPointsViewAction, &mv::gui::TriggerAction::triggered, this, [this] {
-        if (_points.isValid())
-            mv::plugins().requestViewPluginFloated("Points View", { _points });
-    });
     connect(&_getRowAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getRow);
     connect(&_getRowRangeAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getRowRange);
     connect(&_getRowsAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getRows);
@@ -332,7 +322,6 @@ void PointsViewWidget::updateUiState()
     const auto liveTable       = _liveTableAction.isChecked();
 
     _table->setEnabled(tableEnabled);
-    _openInPointsViewAction.setEnabled(hasPointData && !_showDatasetControls);
 
     _rowFilterAction.setEnabled(controlsEnabled && !liveTable);
     _columnFilterAction.setEnabled(controlsEnabled && !liveTable);

@@ -12,7 +12,6 @@
 #include <actions/StringAction.h>
 #include <actions/HorizontalGroupAction.h>
 #include <actions/IntegralAction.h>
-#include <actions/TriggerAction.h>
 #include <actions/ToggleAction.h>
 #include <actions/TriggerAction.h>
 #include <actions/VerticalGroupAction.h>
@@ -121,5 +120,4 @@ private:
     mv::gui::StringAction           _rowFilterAction;
     mv::gui::StringAction           _columnFilterAction;
     mv::gui::ToggleAction           _liveTableAction;
-    mv::gui::TriggerAction          _openInPointsViewAction;    /**< Opens the standalone Points View plugin when embedded. */
 };
