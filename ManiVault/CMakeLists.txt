@@ -782,19 +782,21 @@ add_custom_command(TARGET ${MV_EXE} POST_BUILD
 set(INSTALL_LICENSE_COMMANDS)
 list(APPEND INSTALL_LICENSE_COMMANDS
     COMMAND ${CMAKE_COMMAND} -E echo "Installing: dependency licenses: core"
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${advanced_docking_SOURCE_DIR}/LICENSE ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads/LICENSE
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${quazip_SOURCE_DIR}/COPYING ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ZLIB_COPYRIGHT} ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/nlohmann_json
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${nlohmann_json_COPYRIGHT} ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/nlohmann_json/LICENSE
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/valijson
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${valijson_COPYRIGHT} ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/valijson/LICENSE
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${biovault-bfloat16_COPYRIGHT} ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16/LICENSE
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${advanced_docking_SOURCE_DIR}/LICENSE" "${MV_INSTALL_DIR}/$<CONFIGURATION>/license/ads/LICENSE"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${quazip_SOURCE_DIR}/COPYING" "${MV_INSTALL_DIR}/$<CONFIGURATION>/license/quazip/LICENSE"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${ZLIB_COPYRIGHT}" "${MV_INSTALL_DIR}/$<CONFIGURATION>/license/zlib/LICENSE"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${MV_INSTALL_DIR}/$<CONFIGURATION>/license/nlohmann_json"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${nlohmann_json_COPYRIGHT}" "${MV_INSTALL_DIR}/$<CONFIGURATION>/license/nlohmann_json/LICENSE"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${MV_INSTALL_DIR}/$<CONFIGURATION>/license/valijson"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${valijson_COPYRIGHT}" "${MV_INSTALL_DIR}/$<CONFIGURATION>/license/valijson/LICENSE"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${biovault-bfloat16_COPYRIGHT}" "${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16/LICENSE"
 )
+
+message(STATUS "Install licences commands: ${INSTALL_LICENSE_COMMANDS}")
 
 if(${MV_USE_ERROR_LOGGING})
     list(APPEND INSTALL_LICENSE_COMMANDS
