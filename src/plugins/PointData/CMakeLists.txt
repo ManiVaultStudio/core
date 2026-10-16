@@ -25,7 +25,7 @@ set(POINTS_SOURCES
     src/storage/EagerPointsStorageBackend.cpp
     src/storage/TiledPointsStorageBackend.cpp
     src/storage/TiledStorageBackendConversionAction.cpp
-    src/storage/TiledStorageDominanceAction.cpp
+    src/storage/TiledStorageAsymmetryAction.cpp
     src/tiled/PointDataTileCache.cpp
     src/tiled/PackedTileFile.cpp
     src/tiled/PointDataTiledStorage.cpp
@@ -86,7 +86,7 @@ set(POINTS_STORAGE_HEADERS
     src/storage/TiledPointsStorageBackend.h
     src/storage/StorageBackendConversionAction.h
     src/storage/TiledStorageBackendConversionAction.h
-    src/storage/TiledStorageDominanceAction.h
+    src/storage/TiledStorageAsymmetryAction.h
     src/storage/TiledStorageGeometry.h
 )
 
@@ -146,7 +146,7 @@ source_group(Storage FILES
     src/storage/TiledPointsStorageBackend.cpp
     src/storage/StorageBackendConversionAction.h
     src/storage/TiledStorageBackendConversionAction.h
-    src/storage/TiledStorageDominanceAction.h
+    src/storage/TiledStorageAsymmetryAction.h
     src/storage/TiledStorageGeometry.h
     src/storage/TiledStorageBackendConversionAction.cpp
 )
