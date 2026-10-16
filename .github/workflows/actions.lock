@@ -20,8 +20,6 @@ dependencies:
         repo_id: 192625525
     'manivaultstudio/github-actions@main':
         ref: 'main'
-        commit: 'sha1-9fb0263509563b08bcbe0c0f2468d19c11e7d10a'
+        commit: 'sha1-797e1ce018a9072d6076d74ca4d8e8d7841f0d6c'
         owner_id: 52745266
         repo_id: 307986418
-        uses:
-            - 'actions/checkout@v7.0.1'
