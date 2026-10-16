@@ -191,14 +191,17 @@ void MainWindow::initialize()
     auto helpMenuAction     = menuBar()->addMenu(new HelpMenu());
 
 #ifdef Q_OS_WIN
-    developerMenuAction->setVisible(false);
+    const auto developerMenuVisible = Application::current()->getSetting("DeveloperMenu/Visible", false).toBool();
+    developerMenuAction->setVisible(developerMenuVisible);
 
-    auto enableDeveloperMenuShortcut = new QShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::ShiftModifier | Qt::Key_D), this);
+    auto toggleDeveloperMenuShortcut = new QShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::ShiftModifier | Qt::Key_Delete), this);
 
-    enableDeveloperMenuShortcut->setContext(Qt::ApplicationShortcut);
+    toggleDeveloperMenuShortcut->setContext(Qt::ApplicationShortcut);
 
-    connect(enableDeveloperMenuShortcut, &QShortcut::activated, developerMenuAction, [developerMenuAction] {
-        developerMenuAction->setVisible(true);
+    connect(toggleDeveloperMenuShortcut, &QShortcut::activated, developerMenuAction, [developerMenuAction] {
+        const auto visible = !developerMenuAction->isVisible();
+        developerMenuAction->setVisible(visible);
+        Application::current()->setSetting("DeveloperMenu/Visible", visible);
     });
 #endif
     
