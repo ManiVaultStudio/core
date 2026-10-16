@@ -21,23 +21,23 @@ namespace mv::gui
  *
  * @author T. Kroes
  */
-class POINTDATA_EXPORT TiledStorageDominanceAction final : public HorizontalGroupAction
+class POINTDATA_EXPORT TiledStorageAsymmetryAction final : public HorizontalGroupAction
 {
     Q_OBJECT
 
 public:
-    /** Constructs a row-to-column dominance control. */
-    TiledStorageDominanceAction(QObject* parent, const QString& title = "Tile asymmetry");
+    /** Constructs a row-to-column asymmetry control. */
+    TiledStorageAsymmetryAction(QObject* parent, const QString& title = "Tile asymmetry");
 
     /** Returns the row-to-column asymmetry slider action. */
-    IntegralAction& getDominanceAction();
+    IntegralAction& getAsymmetryAction();
 
     /** Returns the row-to-column asymmetry slider action. */
-    const IntegralAction& getDominanceAction() const;
+    const IntegralAction& getAsymmetryAction() const;
 
 private:
     StringAction   _columnLabelAction;
-    IntegralAction _dominanceAction;
+    IntegralAction _asymmetryAction;
     StringAction   _rowLabelAction;
 };
 

@@ -80,16 +80,16 @@ public:
 private:
     void notifyRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount);
 
-    Points*                    _points            = nullptr;
-    std::uint64_t              _totalRows         = 0;
-    std::uint64_t              _totalColumns      = 0;
-    std::uint64_t              _loadedFirstRow    = 0;
-    std::uint64_t              _loadedRowCount    = 0;
-    std::uint64_t              _loadedFirstColumn = 0;
-    std::uint64_t              _loadedColumnCount = 0;
-    std::vector<float>         _values;
-    bool                       _queryResult       = false;
-    std::vector<std::uint64_t> _queryRowIds;
-    std::vector<std::uint64_t> _queryColumnIds;
-    QString                    _lastError;
+    Points*                    _points            = nullptr; /**< Non-owning point-data source used for range requests. */
+    std::uint64_t              _totalRows         = 0;       /**< Logical row count exposed to Qt. */
+    std::uint64_t              _totalColumns      = 0;       /**< Logical column count exposed to Qt. */
+    std::uint64_t              _loadedFirstRow    = 0;       /**< First row of the currently fetched window. */
+    std::uint64_t              _loadedRowCount    = 0;       /**< Number of fetched rows in the current window. */
+    std::uint64_t              _loadedFirstColumn = 0;       /**< First column of the currently fetched window. */
+    std::uint64_t              _loadedColumnCount = 0;       /**< Number of fetched columns in the current window. */
+    std::vector<float>         _values;                       /**< Row-major values for the current window or query. */
+    bool                       _queryResult       = false;   /**< Whether the current values came from an explicit query. */
+    std::vector<std::uint64_t> _queryRowIds;                  /**< Logical row IDs represented by an explicit query. */
+    std::vector<std::uint64_t> _queryColumnIds;               /**< Logical column IDs represented by an explicit query. */
+    QString                    _lastError;                   /**< Most recent access error shown by the view. */
 };

@@ -23,11 +23,12 @@ namespace mv::pointdata::storage
  */
 struct TiledStorageGeometry
 {
-    std::size_t rowTileSize    = 1;
-    std::size_t columnTileSize = 1;
+    std::size_t rowTileSize    = 1; /**< Number of matrix rows in each calculated tile. */
+    std::size_t columnTileSize = 1; /**< Number of matrix columns in each calculated tile. */
 };
 
-inline TiledStorageGeometry calculateTiledStorageGeometry(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::uint64_t targetTileBytes, const std::int32_t dominance)
+/** Calculates rectangular tile extents from matrix shape, target bytes, and axis asymmetry. */
+inline TiledStorageGeometry calculateTiledStorageGeometry(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::uint64_t targetTileBytes, const std::int32_t asymmetry)
 {
     constexpr std::uint64_t dominantAxisTileExtent = 8;
 
@@ -37,12 +38,12 @@ inline TiledStorageGeometry calculateTiledStorageGeometry(const std::uint64_t ro
         return extent == 0 ? std::size_t(1) : static_cast<std::size_t>(std::min(extent, std::max<std::uint64_t>(1, value)));
     };
 
-    const auto normalizedDominance            = std::clamp(dominance, 0, 100);
+    const auto normalizedAsymmetry            = std::clamp(asymmetry, 0, 100);
     const auto rowDominantColumnTileSize      = clampTileSize(columns, std::min<std::uint64_t>(columns, dominantAxisTileExtent));
     const auto rowDominantRowTileSize         = clampTileSize(rows, targetTileElements / std::max<std::size_t>(1, rowDominantColumnTileSize));
     const auto columnDominantRowTileSize      = clampTileSize(rows, std::min<std::uint64_t>(rows, dominantAxisTileExtent));
     const auto columnDominantColumnTileSize   = clampTileSize(columns, targetTileElements / std::max<std::size_t>(1, columnDominantRowTileSize));
-    const auto interpolation                 = static_cast<double>(normalizedDominance) / 100.0;
+    const auto interpolation                 = static_cast<double>(normalizedAsymmetry) / 100.0;
     const auto interpolate                   = [interpolation](const std::size_t first, const std::size_t second) {
         return static_cast<std::size_t>(std::llround(std::exp(std::log(static_cast<double>(first)) * (1.0 - interpolation) + std::log(static_cast<double>(second)) * interpolation)));
     };
@@ -53,11 +54,12 @@ inline TiledStorageGeometry calculateTiledStorageGeometry(const std::uint64_t ro
     };
 }
 
-inline TiledStorageGeometry calculateTiledStorageGeometry(const std::uint64_t rows, const std::uint64_t columns, const std::int32_t dominance)
+inline TiledStorageGeometry calculateTiledStorageGeometry(const std::uint64_t rows, const std::uint64_t columns, const std::int32_t asymmetry)
 {
-    return calculateTiledStorageGeometry(rows, columns, sizeof(float), 256 * 1024, dominance);
+    return calculateTiledStorageGeometry(rows, columns, sizeof(float), 256 * 1024, asymmetry);
 }
 
+/** Estimates a bounded cache capacity for the supplied matrix geometry. */
 inline std::size_t calculateTiledStorageCacheCapacity(const std::uint64_t rows, const std::uint64_t columns, const TiledStorageGeometry& geometry)
 {
     const auto rowTileCount    = (rows + geometry.rowTileSize - 1) / geometry.rowTileSize;

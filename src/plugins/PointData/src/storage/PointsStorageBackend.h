@@ -50,7 +50,7 @@ public:
     /** Returns the operations supported by this backend. */
     virtual StorageBackendCapabilities getCapabilities() const = 0;
 
-    /** Creates the controls used to configure conversion to p targetType. */
+    /** Creates the controls used to configure conversion to \p targetType. */
     virtual std::unique_ptr<mv::gui::StorageBackendConversionAction> createConversionAction(StorageBackendType targetType, QObject* parent) const = 0;
 
     /** Returns the number of matrix rows. */

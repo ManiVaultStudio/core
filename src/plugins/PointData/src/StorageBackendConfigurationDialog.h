@@ -21,8 +21,10 @@
 class StorageBackendConfigurationDialog final : public QDialog
 {
 public:
+    /** Takes ownership of the backend-provided action and hosts it in the dialog. */
     explicit StorageBackendConfigurationDialog(std::unique_ptr<mv::gui::StorageBackendConversionAction> conversionAction, bool updateMode = false, QWidget* parent = nullptr);
 
+    /** Returns the options currently held by the embedded conversion action. */
     mv::pointdata::storage::StorageBackendConversionOptionsPtr getConversionOptions() const;
 
 private:

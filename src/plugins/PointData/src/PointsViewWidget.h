@@ -46,10 +46,16 @@ class POINTDATA_EXPORT PointsViewWidget final : public QWidget
     Q_OBJECT
 
 public:
-    /** Constructs the points view. */
+    /**
+     * Constructs the points view.
+     *
+     * When \p showDatasetControls is false, the widget displays only the
+     * supplied dataset and leaves dataset selection to its embedding action
+     * or plugin.
+     */
     explicit PointsViewWidget(QWidget* parent = nullptr, bool showDatasetControls = true);
 
-    /** Sets the point-data source displayed by the widget. */
+    /** Sets the point-data source displayed by the widget and clears old query results. */
     void setPoints(const mv::Dataset<Points>& points);
 
 protected:
@@ -86,38 +92,38 @@ private:
     QTimer*                         _filterTimer;               /**< Debounces filter-driven requests. */
     mv::gui::HorizontalGroupAction  _filterGroupAction;          /**< Row, column, and live-table controls. */
     mv::gui::VerticalGroupAction    _facadeGroupAction;         /**< Point-data query actions. */
-    mv::gui::HorizontalGroupAction  _getRowGroupAction;
-    mv::gui::HorizontalGroupAction  _getRowRangeGroupAction;
-    mv::gui::HorizontalGroupAction  _getRowsGroupAction;
-    mv::gui::HorizontalGroupAction  _getColumnGroupAction;
-    mv::gui::HorizontalGroupAction  _getColumnRangeGroupAction;
-    mv::gui::HorizontalGroupAction  _getColumnsGroupAction;
-    mv::gui::HorizontalGroupAction  _getColumnsForRowsGroupAction;
-    mv::gui::HorizontalGroupAction  _getRangeGroupAction;
-    mv::gui::IntegralAction         _rowIdAction;
-    mv::gui::IntegralAction         _columnIdAction;
-    mv::gui::IntegralAction         _rowStartAction;
-    mv::gui::IntegralAction         _rowEndAction;
-    mv::gui::IntegralAction         _columnStartAction;
-    mv::gui::IntegralAction         _columnEndAction;
-    mv::gui::IntegralAction         _rangeRowStartAction;
-    mv::gui::IntegralAction         _rangeRowEndAction;
-    mv::gui::IntegralAction         _rangeColumnStartAction;
-    mv::gui::IntegralAction         _rangeColumnEndAction;
-    mv::gui::IntegralAction         _columnsForRowsStartAction;
-    mv::gui::IntegralAction         _columnsForRowsEndAction;
-    mv::gui::StringAction           _rowIdsAction;
-    mv::gui::StringAction           _columnIdsAction;
-    mv::gui::StringAction           _columnRowIdsAction;
-    mv::gui::TriggerAction          _getRowAction;
-    mv::gui::TriggerAction          _getRowRangeAction;
-    mv::gui::TriggerAction          _getRowsAction;
-    mv::gui::TriggerAction          _getColumnAction;
-    mv::gui::TriggerAction          _getColumnRangeAction;
-    mv::gui::TriggerAction          _getColumnsAction;
-    mv::gui::TriggerAction          _getColumnsForRowsAction;
-    mv::gui::TriggerAction          _getRangeAction;
-    mv::gui::StringAction           _rowFilterAction;
-    mv::gui::StringAction           _columnFilterAction;
-    mv::gui::ToggleAction           _liveTableAction;
+    mv::gui::HorizontalGroupAction  _getRowGroupAction;              /**< Controls a single-row query. */
+    mv::gui::HorizontalGroupAction  _getRowRangeGroupAction;         /**< Controls a contiguous row-range query. */
+    mv::gui::HorizontalGroupAction  _getRowsGroupAction;             /**< Controls a selected-row query. */
+    mv::gui::HorizontalGroupAction  _getColumnGroupAction;           /**< Controls a single-column query. */
+    mv::gui::HorizontalGroupAction  _getColumnRangeGroupAction;      /**< Controls a contiguous column-range query. */
+    mv::gui::HorizontalGroupAction  _getColumnsGroupAction;          /**< Controls a selected-column query. */
+    mv::gui::HorizontalGroupAction  _getColumnsForRowsGroupAction;   /**< Controls selected columns for selected rows. */
+    mv::gui::HorizontalGroupAction  _getRangeGroupAction;             /**< Controls a rectangular range query. */
+    mv::gui::IntegralAction         _rowIdAction;                     /**< Row ID for a single-row query. */
+    mv::gui::IntegralAction         _columnIdAction;                  /**< Column ID for a single-column query. */
+    mv::gui::IntegralAction         _rowStartAction;                  /**< First row of a row-range query. */
+    mv::gui::IntegralAction         _rowEndAction;                    /**< Last row of a row-range query. */
+    mv::gui::IntegralAction         _columnStartAction;               /**< First column of a column-range query. */
+    mv::gui::IntegralAction         _columnEndAction;                 /**< Last column of a column-range query. */
+    mv::gui::IntegralAction         _rangeRowStartAction;              /**< First row of a rectangular range query. */
+    mv::gui::IntegralAction         _rangeRowEndAction;                /**< Last row of a rectangular range query. */
+    mv::gui::IntegralAction         _rangeColumnStartAction;           /**< First column of a rectangular range query. */
+    mv::gui::IntegralAction         _rangeColumnEndAction;             /**< Last column of a rectangular range query. */
+    mv::gui::IntegralAction         _columnsForRowsStartAction;        /**< First selected column for a row-list query. */
+    mv::gui::IntegralAction         _columnsForRowsEndAction;          /**< Last selected column for a row-list query. */
+    mv::gui::StringAction           _rowIdsAction;                     /**< Comma- and range-separated row IDs. */
+    mv::gui::StringAction           _columnIdsAction;                  /**< Comma- and range-separated column IDs. */
+    mv::gui::StringAction           _columnRowIdsAction;               /**< Row IDs used by the selected-column query. */
+    mv::gui::TriggerAction          _getRowAction;                     /**< Executes the single-row query. */
+    mv::gui::TriggerAction          _getRowRangeAction;                /**< Executes the row-range query. */
+    mv::gui::TriggerAction          _getRowsAction;                    /**< Executes the row-list query. */
+    mv::gui::TriggerAction          _getColumnAction;                  /**< Executes the single-column query. */
+    mv::gui::TriggerAction          _getColumnRangeAction;             /**< Executes the column-range query. */
+    mv::gui::TriggerAction          _getColumnsAction;                 /**< Executes the column-list query. */
+    mv::gui::TriggerAction          _getColumnsForRowsAction;          /**< Executes the selected-columns-for-rows query. */
+    mv::gui::TriggerAction          _getRangeAction;                   /**< Executes the rectangular range query. */
+    mv::gui::StringAction           _rowFilterAction;                  /**< Filter expression selecting displayed rows. */
+    mv::gui::StringAction           _columnFilterAction;               /**< Filter expression selecting displayed columns. */
+    mv::gui::ToggleAction           _liveTableAction;                  /**< Whether visible table ranges update automatically. */
 };

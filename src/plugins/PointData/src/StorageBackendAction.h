@@ -28,7 +28,7 @@ class POINTDATA_EXPORT StorageBackendAction final : public mv::gui::HorizontalGr
     Q_OBJECT
 
 public:
-    /** Constructs a storage backend action for p points. */
+    /** Constructs a storage backend action for \p points. */
     StorageBackendAction(QObject* parent, const mv::Dataset<Points>& points);
 
     /** Returns the backend selector action. */

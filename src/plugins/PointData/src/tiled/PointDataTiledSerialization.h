@@ -51,6 +51,12 @@ public:
      * lazy loading. The map is additive to the legacy eager point-data format;
      * callers provide the matrix geometry and element size from the enclosing
      * point-data metadata.
+     *
+     * @param map Versioned tiled representation containing tile descriptors and
+     * blob metadata.
+     * @param rows Logical matrix row count from the enclosing point-data map.
+     * @param columns Logical matrix column count from the enclosing map.
+     * @param elementSize Size of one stored matrix element in bytes.
      */
     static std::shared_ptr<PointDataTiledStorage> fromVariantMap(const QVariantMap& map, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize);
 };

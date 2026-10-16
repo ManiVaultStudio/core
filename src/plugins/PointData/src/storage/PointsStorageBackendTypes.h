@@ -15,10 +15,10 @@ namespace mv::pointdata::storage
 /** Identifies the physical representation used by a concrete point dataset. */
 enum class StorageBackendType
 {
-    Eager,
-    Tiled,
-    Mixed,
-    Unknown
+    Eager,   /**< Fully materialized dense point-data vectors. */
+    Tiled,   /**< Read-only rectangular tiles loaded on demand. */
+    Mixed,   /**< A transitional or combined representation. */
+    Unknown  /**< No recognized concrete representation. */
 };
 
 /** Describes operations supported by a storage backend. */
@@ -33,9 +33,11 @@ enum class StorageBackendCapability : std::uint32_t
 };
 
 using StorageBackendCapabilities = std::uint32_t;
+
+/** Callback receiving conversion progress in the inclusive range [0, 1]. */
 using StorageBackendProgressCallback = std::function<void(float)>;
 
-/** Base type for backend-specific conversion options. */
+/** Base type for backend-specific conversion options passed through the facade. */
 struct StorageBackendConversionOptions
 {
     virtual ~StorageBackendConversionOptions() = default;
@@ -46,10 +48,10 @@ using StorageBackendConversionOptionsPtr = std::shared_ptr<const StorageBackendC
 /** Configuration used when converting dense point data to tiled storage. */
 struct StorageBackendConfiguration : StorageBackendConversionOptions
 {
-    std::size_t rowTileSize    = 256;
-    std::size_t columnTileSize = 8;
-    std::size_t tileSizeBytes  = 1024 * 1024;
-    std::size_t cacheCapacity  = 8;
+    std::size_t rowTileSize    = 256;           /**< Maximum number of matrix rows in one tile. */
+    std::size_t columnTileSize = 8;             /**< Maximum number of matrix columns in one tile. */
+    std::size_t tileSizeBytes  = 1024 * 1024;   /**< Target uncompressed tile size used to derive geometry. */
+    std::size_t cacheCapacity  = 8;             /**< Maximum number of tile payloads retained in memory. */
 };
 
 constexpr StorageBackendCapabilities operator|(const StorageBackendCapability left, const StorageBackendCapability right)

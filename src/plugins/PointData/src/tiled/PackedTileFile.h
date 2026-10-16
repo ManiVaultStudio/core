@@ -43,15 +43,21 @@ struct PackedTileBlock
 class POINTDATA_EXPORT PackedTileFileWriter
 {
 public:
+    /** Opens or creates p filePath and uses p codec for each independent block. */
     PackedTileFileWriter(const QString& filePath, const mv::util::SharedCodec& codec);
 
-    /** Appends one tile payload and returns its location in the pack file. */
+    /**
+     * Appends one non-empty tile payload and returns its encoded location.
+     *
+     * @throws std::invalid_argument when the payload is empty or the codec is
+     * missing, and std::runtime_error when the file cannot be written.
+     */
     PackedTileBlock append(const char* data, std::size_t size);
 
-    /** Appends one tile payload and returns its location in the pack file. */
+    /** Appends one non-empty tile payload and returns its encoded location. */
     PackedTileBlock append(const QByteArray& data);
 
-    /** Flushes and closes the pack file. */
+    /** Flushes and closes the pack file; subsequent append operations fail. */
     void close();
 
 private:
@@ -71,12 +77,13 @@ private:
 class POINTDATA_EXPORT PackedTileFileReader
 {
 public:
+    /** Opens p filePath and validates its packed-tile file header. */
     PackedTileFileReader(const QString& filePath, const mv::util::SharedCodec& codec);
 
-    /** Reads and decodes one packed tile block. */
+    /** Reads and decodes one independently encoded tile block. */
     QByteArray read(const PackedTileBlock& block) const;
 
-    /** Decodes one packed tile block directly into a caller-provided buffer. */
+    /** Decodes one tile block into a buffer of at least the block's decoded size. */
     void readTo(const PackedTileBlock& block, char* destination, std::size_t destinationSize) const;
 
 private:

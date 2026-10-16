@@ -3,7 +3,7 @@
 #pragma once
 
 #include "StorageBackendConversionAction.h"
-#include "TiledStorageDominanceAction.h"
+#include "TiledStorageAsymmetryAction.h"
 #include "TiledStorageGeometry.h"
 
 #include <actions/StringAction.h>
@@ -23,6 +23,11 @@ namespace mv::gui
 class POINTDATA_EXPORT TiledStorageBackendConversionAction final : public StorageBackendConversionAction
 {
 public:
+    /**
+     * Constructs controls for a matrix with the supplied shape and element size.
+     * When requested, the initial tile size and cache capacity are copied from
+     * \p configuration.
+     */
     TiledStorageBackendConversionAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration = {}, bool initializeFromConfiguration = false);
 
     pointdata::storage::StorageBackendType getTargetBackendType() const override;
@@ -35,7 +40,7 @@ private:
     std::uint64_t _columns     = 0;
     std::size_t   _elementSize = 0;
 
-    TiledStorageDominanceAction _tileDominanceAction;
+    TiledStorageAsymmetryAction _tileAsymmetryAction;
     IntegralAction              _tileSizeAction;
     StringAction                _tileGeometryAction;
     IntegralAction              _cacheCapacityAction;

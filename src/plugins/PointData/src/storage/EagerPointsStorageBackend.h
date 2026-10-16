@@ -27,7 +27,11 @@ namespace pointdata::storage
 class POINTDATA_EXPORT EagerPointsStorageBackend final : public PointsStorageBackend
 {
 public:
-    /** Creates an adapter around \p pointData, which must outlive the adapter. */
+    /**
+     * Creates a non-owning adapter around \p pointData.
+     *
+     * The referenced PointData object must outlive this backend instance.
+     */
     explicit EagerPointsStorageBackend(const ::PointData& pointData);
 
     StorageBackendType getType() const override;

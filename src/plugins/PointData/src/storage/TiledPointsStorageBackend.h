@@ -26,7 +26,12 @@ namespace mv::pointdata::storage
 class POINTDATA_EXPORT TiledPointsStorageBackend final : public PointsStorageBackend
 {
 public:
-    /** Creates an adapter around \p storage, which must remain alive while the adapter is used. */
+    /**
+     * Creates an adapter around \p storage and retains shared ownership of it.
+     *
+     * The element-type index is the PointData representation used when tile
+     * bytes are converted to the facade's floating-point access API.
+     */
     TiledPointsStorageBackend(const std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage>& storage, std::uint32_t elementTypeIndex);
 
     StorageBackendType getType() const override;

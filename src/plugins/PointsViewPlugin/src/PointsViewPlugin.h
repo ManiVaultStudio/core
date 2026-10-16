@@ -27,6 +27,8 @@ class PointsViewPlugin final : public mv::plugin::ViewPlugin
 public:
     /** Constructs the points view plugin. */
     explicit PointsViewPlugin(const mv::plugin::PluginFactory* factory);
+
+    /** Connects dataset-selection sources and initializes the embedded widget. */
     void init() override;
 
 private:

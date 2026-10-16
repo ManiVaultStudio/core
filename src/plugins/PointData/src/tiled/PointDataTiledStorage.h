@@ -43,11 +43,11 @@ public:
 
     struct MemoryEstimate
     {
-        std::uint64_t rawDataBytes      = 0; /**< Logical dense matrix size. */
-        std::uint64_t largestTileBytes = 0; /**< Payload size of the largest possible tile. */
-        std::uint64_t cachedTileBytes  = 0; /**< Conservative payload size for the configured cache. */
-        std::uint64_t tileCount         = 0; /**< Number of row/column tiles. */
-        std::uint64_t indexBytes        = 0; /**< Conservative resident descriptor/index size. */
+        std::uint64_t rawDataBytes      = 0; /**< Logical dense matrix size in bytes. */
+        std::uint64_t largestTileBytes  = 0; /**< Payload size of the largest possible tile in bytes. */
+        std::uint64_t cachedTileBytes   = 0; /**< Conservative payload size for the configured cache. */
+        std::uint64_t tileCount         = 0; /**< Number of row/column tiles in the resident index. */
+        std::uint64_t indexBytes        = 0; /**< Conservative resident descriptor/index size in bytes. */
     };
 
     /**
@@ -59,19 +59,41 @@ public:
      * @param rowTileSize Maximum number of rows in a tile.
      * @param columnTileSize Maximum number of columns in a tile.
      * @param loader Callback used to obtain bytes for a descriptor on a cache miss.
+     *
+     * The loader must return exactly rows * columns * elementSize bytes for
+     * the requested descriptor. An empty loader is valid when descriptors are
+     * populated with resident tile bytes.
      */
     PointDataTiledStorage(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileLoader loader = {});
 
-    /** Creates tiled storage by copying a dense row-major matrix into resident tile payloads. */
+    /**
+     * Creates tiled storage by copying a dense row-major matrix into resident tile payloads.
+     *
+     * The source buffer must contain rows * columns * elementSize bytes and
+     * remain valid for the duration of the call. The optional callback is
+     * invoked with progress values in [0, 1].
+     */
     static std::shared_ptr<PointDataTiledStorage> fromDense(const char* data, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, ProgressCallback progress = {});
 
-    /** Creates read-only tiled storage whose tiles are generated only when accessed. */
+    /**
+     * Creates read-only tiled storage whose tiles are generated only when accessed.
+     *
+     * The generator must return row-major bytes matching the descriptor's
+     * extent and element size. It is invoked on cache misses and may therefore
+     * be called again after eviction.
+     */
     static std::shared_ptr<PointDataTiledStorage> fromGenerator(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileGenerator generator);
 
-    /** Creates read-only tiled storage whose payloads are independently encoded in one pack file. */
+    /**
+     * Creates read-only tiled storage whose payloads are independently encoded in one pack file.
+     *
+     * The block list must be in the same row-major tile order as the resident
+     * descriptor index. Each tile read opens and decodes only its recorded
+     * byte range.
+     */
     static std::shared_ptr<PointDataTiledStorage> fromPackedFile(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, const QString& filePath, const mv::util::SharedCodec& codec, const std::vector<PackedTileBlock>& blocks);
 
-    /** Creates a new lazy tile layout backed by the existing tiled storage. */
+    /** Creates a new lazy tile layout backed by the existing tiled storage without copying all bytes immediately. */
     static std::shared_ptr<PointDataTiledStorage> retile(const std::shared_ptr<const PointDataTiledStorage>& source, std::size_t rowTileSize, std::size_t columnTileSize, ProgressCallback progress = {});
 
     /** Returns the number of rows in the matrix. */
@@ -95,13 +117,19 @@ public:
     /** Returns the number of tile columns, including a possible boundary tile. */
     std::uint64_t tileColumnCount() const;
 
-    /** Loads or retrieves a tile and returns a lifetime-safe read-only view. */
+    /**
+     * Loads or retrieves a tile and returns a lifetime-safe read-only view.
+     *
+     * Invalid tile coordinates return an empty view. A cache eviction removes
+     * only the cache entry; a view already returned remains valid through its
+     * shared payload lease.
+     */
     TileView acquire(std::uint64_t tileRow, std::uint64_t tileColumn) const;
 
-    /** Reads one row-major element and converts it to float. */
+    /** Reads one row-major element and converts it to float using p typeIndex. */
     float valueAt(std::uint64_t flatIndex, std::uint32_t typeIndex) const;
 
-    /** Materializes the complete tiled matrix into a row-major destination buffer. */
+    /** Materializes the complete tiled matrix into a caller-owned row-major destination buffer. */
     void materialize(char* destination) const;
 
     /** Returns the mutable tile descriptor index used by serialization and lazy blob assignment. */
@@ -110,7 +138,7 @@ public:
     /** Returns the read-only tile descriptor index. */
     const std::vector<TileDescriptor>& descriptors() const { return _descriptors; }
 
-    /** Sets the maximum number of tile payloads retained in the cache. */
+    /** Sets the maximum number of tile payloads retained in the bounded LRU cache. */
     void setCacheCapacity(std::size_t capacity) const;
 
     /** Returns the configured cache capacity. */
