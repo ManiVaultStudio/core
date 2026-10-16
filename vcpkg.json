@@ -22,6 +22,10 @@
     },
     {
       "name": "zlib"
+    },
+    {
+      "name": "tbb",
+      "platform": "linux"
     }
   ],
   "features": {
