@@ -62,9 +62,10 @@ void PointsTableModel::setPoints(Points* points, const std::uint64_t rows, const
 {
     beginResetModel();
 
-    _points = points;
-    _totalRows = rows;
-    _totalColumns = columns;
+    _points          = points;
+    _totalRows       = rows;
+    _totalColumns    = columns;
+    _dimensionNames = points ? points->getDimensionNames() : std::vector<QString>();
     _loadedFirstRow = _loadedRowCount = _loadedFirstColumn = _loadedColumnCount = 0;
 
     _values.clear();
@@ -120,8 +121,19 @@ QVariant PointsTableModel::headerData(const int section, const Qt::Orientation o
     {
         const auto ids = orientation == Qt::Horizontal ? &_queryColumnIds : &_queryRowIds;
 
-        return section < static_cast<int>(ids->size()) ? QVariant(QString::number(ids->at(static_cast<std::size_t>(section)))) : QVariant();
+        if (section >= static_cast<int>(ids->size()))
+            return {};
+
+        const auto id = ids->at(static_cast<std::size_t>(section));
+
+        if (orientation == Qt::Horizontal && id < _dimensionNames.size() && !_dimensionNames[id].isEmpty())
+            return _dimensionNames[id];
+
+        return QString::number(id);
     }
+
+    if (orientation == Qt::Horizontal && section < static_cast<int>(_dimensionNames.size()) && !_dimensionNames[static_cast<std::size_t>(section)].isEmpty())
+        return _dimensionNames[static_cast<std::size_t>(section)];
 
     return orientation == Qt::Horizontal ? QVariant(QString("D%1").arg(section)) : QVariant(QString::number(section));
 }

@@ -19,6 +19,7 @@
 #include <QVBoxLayout>
 
 #include <algorithm>
+#include <array>
 #include <cstdint>
 #include <cstring>
 #include <limits>
@@ -35,6 +36,47 @@ enum class Population
     RandomZeroOne,
     Zero
 };
+
+enum class DimensionNameType
+{
+    Dim,
+    LoremIpsum
+};
+
+std::vector<QString> makeDimensionNames(const DimensionNameType type, const std::uint64_t columns)
+{
+    static const std::array<const char*, 16> loremWords {
+        "lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit",
+        "sed", "do", "eiusmod", "tempor", "incididunt", "ut", "labore", "magna"
+    };
+
+    std::vector<QString> names;
+    names.reserve(static_cast<std::size_t>(columns));
+
+    for (std::uint64_t column = 0; column < columns; ++column)
+    {
+        if (type == DimensionNameType::Dim)
+        {
+            names.emplace_back(QStringLiteral("DIM_%1").arg(column + 1));
+            continue;
+        }
+
+        auto value = column;
+        QString name;
+
+        do
+        {
+            const auto word = loremWords[static_cast<std::size_t>(value % loremWords.size())];
+            name = QString::fromLatin1(word) + (name.isEmpty() ? QString() : QStringLiteral(" ") + name);
+            value /= loremWords.size();
+        }
+        while (value > 0);
+
+        names.emplace_back(std::move(name));
+    }
+
+    return names;
+}
 
 QString formatBytes(const std::uint64_t bytes)
 {
@@ -251,7 +293,7 @@ void populateEager(Points& points, const Points::ElementTypeSpecifier type, cons
  * @brief Collects settings for a developer-generated phantom dataset.
  *
  * The dialog keeps dataset dimensions, element representation, population
- * strategy, storage backend, tile geometry, and cache capacity together so the
+ * strategy, dimension-name style, storage backend, tile geometry, and cache capacity together so the
  * developer menu can create repeatable large-data scenarios without embedding
  * configuration in the generator callback. It supports both fully materialized
  * eager data and generator-backed tiled data. For tiled data, the row and
@@ -269,6 +311,7 @@ public:
         _nameAction(&_settingsGroupAction, "Dataset name", "Phantom points"),
         _rowsAction(&_settingsGroupAction, "Rows", 1, std::numeric_limits<std::int32_t>::max(), 1000000),
         _columnsAction(&_settingsGroupAction, "Dimensions", 1, 100000, 32),
+        _dimensionNameAction(&_settingsGroupAction, "Dimension names", { "DIM_<index>", "Lorem ipsum" }, "DIM_<index>"),
         _typeAction(&_settingsGroupAction, "Element type"),
         _populationAction(&_settingsGroupAction, "Population", { "Deterministic", "Random floats", "Random zeros and ones", "All zeros" }, "Deterministic"),
         _storageBackendAction(&_settingsGroupAction, "Storage backend", { "Eager", "Tiled" }, "Tiled"),
@@ -293,6 +336,7 @@ public:
         _nameAction.setDefaultWidgetFlags(mv::gui::StringAction::LineEdit);
         _rowsAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
         _columnsAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
+        _dimensionNameAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
         _typeAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
         _populationAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
         _storageBackendAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
@@ -306,6 +350,7 @@ public:
         _settingsGroupAction.addAction(&_nameAction);
         _settingsGroupAction.addAction(&_rowsAction);
         _settingsGroupAction.addAction(&_columnsAction);
+        _settingsGroupAction.addAction(&_dimensionNameAction);
         _settingsGroupAction.addAction(&_typeAction);
         _settingsGroupAction.addAction(&_populationAction);
         _settingsGroupAction.addAction(&_storageBackendAction);
@@ -361,6 +406,8 @@ public:
 
     Population population() const { return static_cast<Population>(_populationAction.getCurrentIndex()); }
 
+    DimensionNameType dimensionNameType() const { return static_cast<DimensionNameType>(_dimensionNameAction.getCurrentIndex()); }
+
     void saveSettings() const
     {
         auto* application = Application::current();
@@ -368,6 +415,7 @@ public:
         application->setSetting("Developer/PhantomPointGenerator/Name", _nameAction.getString());
         application->setSetting("Developer/PhantomPointGenerator/Rows", _rowsAction.getValue());
         application->setSetting("Developer/PhantomPointGenerator/Columns", _columnsAction.getValue());
+        application->setSetting("Developer/PhantomPointGenerator/DimensionNames", _dimensionNameAction.getCurrentText());
         application->setSetting("Developer/PhantomPointGenerator/ElementType", _typeAction.getCurrentText());
         application->setSetting("Developer/PhantomPointGenerator/Population", _populationAction.getCurrentText());
         application->setSetting("Developer/PhantomPointGenerator/StorageBackend", _storageBackendAction.getCurrentText());
@@ -386,6 +434,7 @@ private:
         _nameAction.setString(application->getSetting("Developer/PhantomPointGenerator/Name", _nameAction.getString()).toString());
         _rowsAction.setValue(application->getSetting("Developer/PhantomPointGenerator/Rows", _rowsAction.getValue()).toInt());
         _columnsAction.setValue(application->getSetting("Developer/PhantomPointGenerator/Columns", _columnsAction.getValue()).toInt());
+        _dimensionNameAction.setCurrentText(application->getSetting("Developer/PhantomPointGenerator/DimensionNames", _dimensionNameAction.getCurrentText()).toString());
         _typeAction.setCurrentText(application->getSetting("Developer/PhantomPointGenerator/ElementType", _typeAction.getCurrentText()).toString());
         _populationAction.setCurrentText(application->getSetting("Developer/PhantomPointGenerator/Population", _populationAction.getCurrentText()).toString());
         _storageBackendAction.setCurrentText(application->getSetting("Developer/PhantomPointGenerator/StorageBackend", _storageBackendAction.getCurrentText()).toString());
@@ -440,6 +489,7 @@ private:
     mv::gui::StringAction                _nameAction;
     mv::gui::IntegralAction              _rowsAction;
     mv::gui::IntegralAction              _columnsAction;
+    mv::gui::OptionAction                _dimensionNameAction;
     mv::gui::OptionAction                _typeAction;
     mv::gui::OptionAction                _populationAction;
     mv::gui::OptionAction                _storageBackendAction;
@@ -490,6 +540,8 @@ void PointDataPhantomGenerator::populateMenu(QMenu& menu, QWidget* owner)
         }
         else
             populateEager(*dataset, type, population, dialog.rows(), dialog.columns());
+
+        dataset->setDimensionNames(makeDimensionNames(dialog.dimensionNameType(), dialog.columns()));
 
         mv::events().notifyDatasetDataChanged(dataset);
 

@@ -5,6 +5,7 @@
 #include "pointdata_export.h"
 
 #include <QAbstractTableModel>
+#include <QString>
 
 #include <cstdint>
 #include <vector>
@@ -83,6 +84,7 @@ private:
     Points*                    _points            = nullptr; /**< Non-owning point-data source used for range requests. */
     std::uint64_t              _totalRows         = 0;       /**< Logical row count exposed to Qt. */
     std::uint64_t              _totalColumns      = 0;       /**< Logical column count exposed to Qt. */
+    std::vector<QString>       _dimensionNames;              /**< Dimension names used for horizontal headers. */
     std::uint64_t              _loadedFirstRow    = 0;       /**< First row of the currently fetched window. */
     std::uint64_t              _loadedRowCount    = 0;       /**< Number of fetched rows in the current window. */
     std::uint64_t              _loadedFirstColumn = 0;       /**< First column of the currently fetched window. */
