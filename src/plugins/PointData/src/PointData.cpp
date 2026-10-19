@@ -262,7 +262,7 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
 
         if (creation)
         {
-            if (_numRows != 0 || _numDimensions != 0 || getTiledStorage())
+            if (_numRows != 0 || getSizeOfVector() != 0 || getTiledStorage())
                 throw std::invalid_argument("Point-data storage creation requires an empty dataset");
 
             setElementTypeSpecifier(static_cast<ElementTypeSpecifier>(creation->elementTypeIndex));
