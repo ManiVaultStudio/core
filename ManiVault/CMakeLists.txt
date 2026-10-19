@@ -164,7 +164,7 @@ message(STATUS "Using Qt version ${Qt6Widgets_VERSION}")
 
 find_package(ZLIB REQUIRED)
 get_vcpkg_copyright(ZLIB ZLIB_COPYRIGHT)
-message(STATUS "zlib dir ${ZLIB_DIR}")
+message(STATUS "zlib dir:  ${ZLIB_DIR}; zlib copyright: ${ZLIB_COPYRIGHT}")
 
 # Maintain build compatibility between find_package and CMakeLists.txt variants (for QuaZip)
 # add_library(ZLIB::ZLIB ALIAS zlibstatic)
@@ -796,7 +796,6 @@ list(APPEND INSTALL_LICENSE_COMMANDS
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${biovault-bfloat16_COPYRIGHT}" "${MV_INSTALL_DIR}/$<CONFIGURATION>/license/biovault_bfloat16/LICENSE"
 )
 
-message(STATUS "Install licences commands: ${INSTALL_LICENSE_COMMANDS}")
 
 if(${MV_USE_ERROR_LOGGING})
     list(APPEND INSTALL_LICENSE_COMMANDS
@@ -807,6 +806,8 @@ if(${MV_USE_ERROR_LOGGING})
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${sentry-native_SOURCE_DIR}/external/crashpad/LICENSE" ${MV_INSTALL_DIR}/$<CONFIGURATION>/license/crashpad/LICENSE
     )
 endif()
+
+message(STATUS "Install licences commands: ${INSTALL_LICENSE_COMMANDS}")
 
 add_custom_command(TARGET ${MV_EXE} POST_BUILD ${INSTALL_LICENSE_COMMANDS})
 
