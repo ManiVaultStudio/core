@@ -138,6 +138,8 @@ source_group(Plugin FILES ${POINTS_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 source_group(Widgets FILES ${POINTS_VIEW_WIDGETS})
 source_group(Storage FILES
+    src/StorageBackendAction.h
+    src/StorageBackendAction.cpp
     src/StorageBackendConfigurationDialog.h
     src/StorageBackendConfigurationDialog.cpp
     src/storage/PointsStorageBackend.h
@@ -150,6 +152,7 @@ source_group(Storage FILES
     src/storage/TiledStorageBackendConversionAction.h
     src/storage/TiledStorageAsymmetryAction.h
     src/storage/TiledStorageGeometry.h
+    src/storage/TiledStorageAsymmetryAction.cpp
     src/storage/TiledStorageBackendConversionAction.cpp
 )
 source_group(BFloat FILES ${BFLOAT_HEADER})

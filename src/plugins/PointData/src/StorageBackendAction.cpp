@@ -20,7 +20,7 @@ using namespace mv::gui;
 StorageBackendAction::StorageBackendAction(QObject* parent, const Dataset<Points>& points) :
     HorizontalGroupAction(parent, "Storage backend"),
     _points(points),
-    _backendTypeAction(this, "Type", { "Eager", "Tiled", "Mixed", "Unknown" }, "Eager"),
+    _backendTypeAction(this, "Type", { "Eager", "Tiled", "Unknown" }, "Eager"),
     _configureAction(this, "Configure...")
 {
     setShowLabels(false);

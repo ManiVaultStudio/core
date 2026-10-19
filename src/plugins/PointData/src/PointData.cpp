@@ -1527,6 +1527,36 @@ pointdata::storage::StorageBackendCapabilities Points::getStorageBackendCapabili
     return getRawData<PointData>()->getStorageBackendCapabilities();
 }
 
+std::size_t Points::getTiledRowTileSize() const
+{
+    return isProxy() ? 0 : getRawData<PointData>()->getTiledRowTileSize();
+}
+
+std::size_t Points::getTiledColumnTileSize() const
+{
+    return isProxy() ? 0 : getRawData<PointData>()->getTiledColumnTileSize();
+}
+
+std::size_t Points::getTiledCacheCapacity() const
+{
+    return isProxy() ? 0 : getRawData<PointData>()->getTiledCacheCapacity();
+}
+
+std::uint64_t Points::getTiledCacheHits() const
+{
+    return isProxy() ? 0 : getRawData<PointData>()->getTiledCacheHits();
+}
+
+std::uint64_t Points::getTiledCacheMisses() const
+{
+    return isProxy() ? 0 : getRawData<PointData>()->getTiledCacheMisses();
+}
+
+std::uint64_t Points::getTiledCacheEvictions() const
+{
+    return isProxy() ? 0 : getRawData<PointData>()->getTiledCacheEvictions();
+}
+
 void Points::convertToStorageBackend(const StorageBackendType type, const StorageBackendConfiguration& configuration, StorageBackendProgressCallback progress)
 {
     if (isProxy())

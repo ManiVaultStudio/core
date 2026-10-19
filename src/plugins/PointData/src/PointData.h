@@ -1098,6 +1098,24 @@ public:
     /** Returns the capability flags of the physical backend used by this dataset. */
     mv::pointdata::storage::StorageBackendCapabilities getStorageBackendCapabilities() const;
 
+    /** Returns the configured row tile size, or zero when the dataset is not tiled. */
+    std::size_t getTiledRowTileSize() const;
+
+    /** Returns the configured column tile size, or zero when the dataset is not tiled. */
+    std::size_t getTiledColumnTileSize() const;
+
+    /** Returns the configured tile-cache capacity, or zero when the dataset is not tiled. */
+    std::size_t getTiledCacheCapacity() const;
+
+    /** Returns the number of tile-cache hits since the current backend was created or reset. */
+    std::uint64_t getTiledCacheHits() const;
+
+    /** Returns the number of tile-cache misses since the current backend was created or reset. */
+    std::uint64_t getTiledCacheMisses() const;
+
+    /** Returns the number of tile-cache evictions since the current backend was created or reset. */
+    std::uint64_t getTiledCacheEvictions() const;
+
     /** Creates controls for converting to the requested storage backend. */
     std::unique_ptr<mv::gui::StorageBackendConversionAction> createStorageBackendConversionAction(StorageBackendType targetType, QObject* parent = nullptr) const;
 
