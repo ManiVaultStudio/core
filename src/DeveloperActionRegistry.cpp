@@ -33,7 +33,7 @@ void registerMenuPopulator(const QString& id, MenuPopulator populator)
     populators().insert(id, std::move(populator));
 }
 
-void populateMenu(QMenu& menu, QWidget* owner)
+void populateMenu(QMenu& menu, QWidget* owner, const QString& category)
 {
     QHash<QString, MenuPopulator> copy;
     {
@@ -41,9 +41,12 @@ void populateMenu(QMenu& menu, QWidget* owner)
         copy = populators();
     }
 
-    for (const auto& populator : copy)
+    for (auto iterator = copy.cbegin(); iterator != copy.cend(); ++iterator)
     {
-        populator(menu, owner);
+        if (!category.isEmpty() && !iterator.key().startsWith(category + QStringLiteral(".")))
+            continue;
+
+        iterator.value()(menu, owner);
     }
 }
 }

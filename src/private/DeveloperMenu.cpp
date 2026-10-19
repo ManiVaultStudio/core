@@ -57,8 +57,19 @@ DeveloperMenu::DeveloperMenu(QWidget* parent /*= nullptr*/) :
         if (_dataSynthesisPopulated)
             return;
 
-        developer::populateMenu(*_dataSynthesisMenu, parentWidget());
+        developer::populateMenu(*_dataSynthesisMenu, parentWidget(), QStringLiteral("PointData.DataSynthesis"));
         _dataSynthesisPopulated = true;
+    });
+
+    _performanceTestingMenu = addMenu(util::StyledIcon("gauge-high"), tr("Performance testing"));
+    _performanceTestingMenu->setToolTip(tr("Run headed performance benchmarks"));
+
+    connect(_performanceTestingMenu, &QMenu::aboutToShow, this, [this] {
+        if (_performanceTestingPopulated)
+            return;
+
+        developer::populateMenu(*_performanceTestingMenu, parentWidget(), QStringLiteral("PointData.PerformanceTesting"));
+        _performanceTestingPopulated = true;
     });
 
     auto errorReportingMenu = addMenu(util::StyledIcon("bug"), tr("Error reporting testing"));

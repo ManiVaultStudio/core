@@ -41,4 +41,6 @@ private:
     QAction*                     _gifRecordingAction     = nullptr; /**< Start/stop recording action. */
     QMenu*                       _dataSynthesisMenu      = nullptr; /**< Runtime-populated synthetic data menu. */
     bool                         _dataSynthesisPopulated = false;
+    QMenu*                       _performanceTestingMenu      = nullptr; /**< Runtime-populated performance testing menu. */
+    bool                         _performanceTestingPopulated = false;
 };

@@ -31,6 +31,7 @@ set(POINTS_SOURCES
     src/tiled/PointDataTiledStorage.cpp
     src/tiled/PointDataTiledSerialization.cpp
     src/developer/PointDataPhantomGenerator.cpp
+    src/developer/PointDataBenchmark.cpp
 )
 
 set(POINTS_VIEW_WIDGETS
@@ -77,6 +78,7 @@ set(POINTS_HEADERS
     src/tiled/PointDataTiledSerialization.h
     src/tiled/PackedTileFile.h
     src/developer/PointDataPhantomGenerator.h
+    src/developer/PointDataBenchmark.h
 )
 
 set(POINTS_STORAGE_HEADERS
@@ -217,8 +219,4 @@ mv_handle_plugin_config(${POINTDATA})
 
 if(MV_BUILD_TESTING)
     add_subdirectory(gtest)
-endif()
-
-if(MV_BUILD_BENCHMARKS)
-    add_subdirectory(benchmark)
 endif()
