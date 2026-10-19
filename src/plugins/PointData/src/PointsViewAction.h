@@ -3,9 +3,12 @@
 #pragma once
 
 #include "pointdata_export.h"
+#include "PointsViewWidget.h"
 
 #include <Dataset.h>
 #include <actions/WidgetAction.h>
+
+#include <QPointer>
 
 class Points;
 
@@ -48,6 +51,10 @@ public:
     /** Returns the point-data source displayed by the embedded view. */
     const mv::Dataset<Points>& getPoints() const;
 
+    /** Returns the current settings of the embedded point-data view. */
+    PointsViewWidget::ViewState getViewState() const;
+
 private:
-    mv::Dataset<Points> _points; /**< Point-data source displayed by the view. */
+    mv::Dataset<Points>       _points;           /**< Point-data source displayed by the view. */
+    QPointer<PointsViewWidget> _pointsViewWidget; /**< Embedded point-data view, when its widget exists. */
 };

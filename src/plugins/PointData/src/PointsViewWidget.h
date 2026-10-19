@@ -47,6 +47,17 @@ class POINTDATA_EXPORT PointsViewWidget final : public QWidget
 
 public:
     /**
+     * Captures the user-facing table settings that can be transferred to
+     * another point-data view.
+     */
+    struct ViewState
+    {
+        QString rowFilter;
+        QString columnFilter;
+        bool live = true;
+    };
+
+    /**
      * Constructs the points view.
      *
      * When \p showDatasetControls is false, the widget displays only the
@@ -57,6 +68,12 @@ public:
 
     /** Sets the point-data source displayed by the widget and clears old query results. */
     void setPoints(const mv::Dataset<Points>& points);
+
+    /** Returns the current filters and live-table setting. */
+    ViewState getViewState() const;
+
+    /** Applies filters and live-table state to the widget. */
+    void setViewState(const ViewState& state);
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event) override;

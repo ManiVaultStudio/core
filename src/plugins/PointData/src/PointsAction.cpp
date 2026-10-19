@@ -3,8 +3,10 @@
 #include "PointsAction.h"
 
 #include "PointData.h"
+#include "PointsViewWidget.h"
 
 #include <CoreInterface.h>
+#include <ViewPlugin.h>
 
 PointsAction::PointsAction(QObject* parent, const mv::Dataset<Points>& points) :
     GroupAction(parent, "Points", true),
@@ -20,8 +22,17 @@ PointsAction::PointsAction(QObject* parent, const mv::Dataset<Points>& points) :
     addAction(&_openInPointsViewAction);
 
     connect(&_openInPointsViewAction, &mv::gui::TriggerAction::triggered, this, [this] {
-        if (_pointsViewAction.getPoints().isValid())
-            mv::plugins().requestViewPluginFloated("Points View", { _pointsViewAction.getPoints() });
+        if (!_pointsViewAction.getPoints().isValid())
+            return;
+
+        const auto viewState = _pointsViewAction.getViewState();
+        auto* pointsViewPlugin = mv::plugins().requestViewPluginFloated("Points View", { _pointsViewAction.getPoints() });
+
+        if (!pointsViewPlugin)
+            return;
+
+        if (auto* pointsViewWidget = pointsViewPlugin->getWidget().findChild<PointsViewWidget*>())
+            pointsViewWidget->setViewState(viewState);
     });
 }
 

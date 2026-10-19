@@ -309,6 +309,22 @@ void PointsViewWidget::setPoints(const mv::Dataset<Points>& points)
     refreshPoints();
 }
 
+PointsViewWidget::ViewState PointsViewWidget::getViewState() const
+{
+    return { _rowFilterAction.getString(), _columnFilterAction.getString(), _liveTableAction.isChecked() };
+}
+
+void PointsViewWidget::setViewState(const ViewState& state)
+{
+    _filterTimer->stop();
+    _rowFilterAction.setString(state.rowFilter);
+    _columnFilterAction.setString(state.columnFilter);
+    _liveTableAction.setChecked(state.live);
+
+    if (!state.live && !_rowFilterAction.getString().trimmed().isEmpty())
+        applyFilters();
+}
+
 void PointsViewWidget::setStatus(const QString& text)
 {
     Q_UNUSED(text);

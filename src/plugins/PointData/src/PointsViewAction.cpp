@@ -24,12 +24,18 @@ const mv::Dataset<Points>& PointsViewAction::getPoints() const
     return _points;
 }
 
+PointsViewWidget::ViewState PointsViewAction::getViewState() const
+{
+    return _pointsViewWidget != nullptr ? _pointsViewWidget->getViewState() : PointsViewWidget::ViewState();
+}
+
 PointsViewAction::Widget::Widget(QWidget* parent, PointsViewAction* pointsViewAction) :
     WidgetActionWidget(parent, pointsViewAction)
 {
     auto* pointsViewWidget = new PointsViewWidget(this, false);
 
-	pointsViewWidget->setPoints(pointsViewAction->getPoints());
+    pointsViewAction->_pointsViewWidget = pointsViewWidget;
+    pointsViewWidget->setPoints(pointsViewAction->getPoints());
     pointsViewWidget->layout()->setContentsMargins(0, 0, 0, 0);
 
     auto* layout = new QVBoxLayout();
