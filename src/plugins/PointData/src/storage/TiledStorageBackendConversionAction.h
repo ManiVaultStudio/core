@@ -6,7 +6,7 @@
 #include "TiledStorageAsymmetryAction.h"
 #include "TiledStorageGeometry.h"
 
-#include <actions/StringAction.h>
+#include <actions/IntegralAction.h>
 
 namespace mv::gui
 {
@@ -25,16 +25,22 @@ class POINTDATA_EXPORT TiledStorageBackendConversionAction final : public Storag
 public:
     /**
      * Constructs controls for a matrix with the supplied shape and element size.
-     * When requested, the initial tile size and cache capacity are copied from
-     * \p configuration.
+     * The tile-size and asymmetry controls calculate a suggested geometry;
+     * the row and column dimensions remain directly editable. When requested,
+     * the current physical geometry and cache capacity are copied from
+     * \p configuration for backend inspection or reconfiguration.
      */
     TiledStorageBackendConversionAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration = {}, bool initializeFromConfiguration = false);
 
+    /** Returns the tiled backend type represented by this action. */
     pointdata::storage::StorageBackendType getTargetBackendType() const override;
+
+    /** Returns the currently selected physical tile geometry and cache capacity. */
     pointdata::storage::StorageBackendConversionOptionsPtr getConversionOptions() const override;
 
 private:
-    void updateTileGeometry();
+    void updateTileGeometryFromPolicy();
+    void updateCacheCapacity();
 
     std::uint64_t _rows        = 0;
     std::uint64_t _columns     = 0;
@@ -42,7 +48,8 @@ private:
 
     TiledStorageAsymmetryAction _tileAsymmetryAction;
     IntegralAction              _tileSizeAction;
-    StringAction                _tileGeometryAction;
+    IntegralAction              _rowTileSizeAction;
+    IntegralAction              _columnTileSizeAction;
     IntegralAction              _cacheCapacityAction;
 };
 

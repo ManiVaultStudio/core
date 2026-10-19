@@ -2,16 +2,10 @@
 
 #include "TiledStorageBackendConversionAction.h"
 
-#include <algorithm>
 #include <limits>
 
 namespace mv::gui
 {
-
-namespace
-{
-
-}
 
 TiledStorageBackendConversionAction::TiledStorageBackendConversionAction(QObject* parent, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration, const bool initializeFromConfiguration) :
     StorageBackendConversionAction(parent, "Tiled storage"),
@@ -20,28 +14,40 @@ TiledStorageBackendConversionAction::TiledStorageBackendConversionAction(QObject
     _elementSize(elementSize),
     _tileAsymmetryAction(this),
     _tileSizeAction(this, "Tile size (MiB)", 1, 1024, 1),
-    _tileGeometryAction(this, "Tile geometry"),
+    _rowTileSizeAction(this, "Tile height", 1, std::numeric_limits<std::int32_t>::max(), 256),
+    _columnTileSizeAction(this, "Tile width", 1, std::numeric_limits<std::int32_t>::max(), 8),
     _cacheCapacityAction(this, "Tile cache capacity", 1, std::numeric_limits<std::int32_t>::max(), 1)
 {
     setShowLabels(true);
 
-    _tileGeometryAction.setDefaultWidgetFlags(StringAction::TextEdit);
-    _tileGeometryAction.setEnabled(false);
     _tileSizeAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
+    _rowTileSizeAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
+    _columnTileSizeAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _cacheCapacityAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
 
     addAction(&_tileAsymmetryAction);
     addAction(&_tileSizeAction);
-    addAction(&_tileGeometryAction);
+    addAction(&_rowTileSizeAction);
+    addAction(&_columnTileSizeAction);
     addAction(&_cacheCapacityAction);
 
     connect(&_tileAsymmetryAction.getAsymmetryAction(), &IntegralAction::valueChanged, this, [this] {
-        updateTileGeometry();
+        updateTileGeometryFromPolicy();
         notifyOptionsChanged();
     });
 
     connect(&_tileSizeAction, &IntegralAction::valueChanged, this, [this] {
-        updateTileGeometry();
+        updateTileGeometryFromPolicy();
+        notifyOptionsChanged();
+    });
+
+    connect(&_rowTileSizeAction, &IntegralAction::valueChanged, this, [this] {
+        updateCacheCapacity();
+        notifyOptionsChanged();
+    });
+
+    connect(&_columnTileSizeAction, &IntegralAction::valueChanged, this, [this] {
+        updateCacheCapacity();
         notifyOptionsChanged();
     });
 
@@ -49,13 +55,12 @@ TiledStorageBackendConversionAction::TiledStorageBackendConversionAction(QObject
         notifyOptionsChanged();
     });
 
-    const auto geometry = pointdata::storage::calculateTiledStorageGeometry(_rows, _columns, _elementSize, static_cast<std::uint64_t>(_tileSizeAction.getValue()) * 1024 * 1024, _tileAsymmetryAction.getAsymmetryAction().getValue());
-    _cacheCapacityAction.setValue(static_cast<std::int32_t>(pointdata::storage::calculateTiledStorageCacheCapacity(_rows, _columns, geometry)));
-    updateTileGeometry();
+    updateCacheCapacity();
 
     if (initializeFromConfiguration)
     {
-        _tileSizeAction.setValue(static_cast<std::int32_t>(std::max<std::size_t>(1, configuration.tileSizeBytes / (1024 * 1024))));
+        _rowTileSizeAction.setValue(static_cast<std::int32_t>(configuration.rowTileSize));
+        _columnTileSizeAction.setValue(static_cast<std::int32_t>(configuration.columnTileSize));
         _cacheCapacityAction.setValue(static_cast<std::int32_t>(configuration.cacheCapacity));
     }
 }
@@ -68,21 +73,27 @@ pointdata::storage::StorageBackendType TiledStorageBackendConversionAction::getT
 pointdata::storage::StorageBackendConversionOptionsPtr TiledStorageBackendConversionAction::getConversionOptions() const
 {
     auto configuration = std::make_shared<pointdata::storage::StorageBackendConfiguration>();
-    const auto geometry = pointdata::storage::calculateTiledStorageGeometry(_rows, _columns, _elementSize, static_cast<std::uint64_t>(_tileSizeAction.getValue()) * 1024 * 1024, _tileAsymmetryAction.getAsymmetryAction().getValue());
-    configuration->rowTileSize    = geometry.rowTileSize;
-    configuration->columnTileSize = geometry.columnTileSize;
-    configuration->tileSizeBytes  = static_cast<std::size_t>(_tileSizeAction.getValue()) * 1024 * 1024;
+    configuration->rowTileSize    = static_cast<std::size_t>(_rowTileSizeAction.getValue());
+    configuration->columnTileSize = static_cast<std::size_t>(_columnTileSizeAction.getValue());
     configuration->cacheCapacity  = static_cast<std::size_t>(_cacheCapacityAction.getValue());
     return configuration;
 }
 
-void TiledStorageBackendConversionAction::updateTileGeometry()
+void TiledStorageBackendConversionAction::updateCacheCapacity()
 {
-    const auto geometry = pointdata::storage::calculateTiledStorageGeometry(_rows, _columns, _elementSize, static_cast<std::uint64_t>(_tileSizeAction.getValue()) * 1024 * 1024, _tileAsymmetryAction.getAsymmetryAction().getValue());
+    const pointdata::storage::TiledStorageGeometry geometry {
+        static_cast<std::size_t>(_rowTileSizeAction.getValue()),
+        static_cast<std::size_t>(_columnTileSizeAction.getValue())
+    };
+
     _cacheCapacityAction.setValue(static_cast<std::int32_t>(pointdata::storage::calculateTiledStorageCacheCapacity(_rows, _columns, geometry)));
-    _tileGeometryAction.setString(QString("Rows per tile: %1\nColumns per tile: %2")
-        .arg(geometry.rowTileSize)
-        .arg(geometry.columnTileSize));
 }
 
+void TiledStorageBackendConversionAction::updateTileGeometryFromPolicy()
+{
+    const auto geometry = pointdata::storage::calculateTiledStorageGeometry(_rows, _columns, _elementSize, static_cast<std::uint64_t>(_tileSizeAction.getValue()) * 1024 * 1024, _tileAsymmetryAction.getAsymmetryAction().getValue());
+    _rowTileSizeAction.setValue(static_cast<std::int32_t>(geometry.rowTileSize));
+    _columnTileSizeAction.setValue(static_cast<std::int32_t>(geometry.columnTileSize));
+    updateCacheCapacity();
+}
 }

@@ -71,12 +71,21 @@ std::unique_ptr<mv::gui::StorageBackendConversionAction> TiledPointsStorageBacke
         pointdata::storage::StorageBackendConfiguration configuration;
         configuration.rowTileSize    = _storage->rowTileSize();
         configuration.columnTileSize = _storage->columnTileSize();
-        configuration.tileSizeBytes  = _storage->rowTileSize() * _storage->columnTileSize() * _storage->elementSize();
         configuration.cacheCapacity  = _storage->cacheCapacity();
         return std::make_unique<mv::gui::TiledStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _storage->elementSize(), configuration, true);
     }
 
     return {};
+}
+
+void TiledPointsStorageBackend::applyConfiguration(const StorageBackendConversionOptionsPtr& options)
+{
+    const auto configuration = std::dynamic_pointer_cast<const StorageBackendConfiguration>(options);
+
+    if (!configuration || !_storage)
+        throw std::invalid_argument("Missing tiled storage configuration");
+
+    _storage->setCacheCapacity(configuration->cacheCapacity);
 }
 
 std::uint64_t TiledPointsStorageBackend::getNumPoints() const

@@ -37,7 +37,14 @@ using StorageBackendCapabilities = std::uint32_t;
 /** Callback receiving conversion progress in the inclusive range [0, 1]. */
 using StorageBackendProgressCallback = std::function<void(float)>;
 
-/** Base type for backend-specific conversion options passed through the facade. */
+/**
+ * Base type for backend-specific conversion and reconfiguration options passed
+ * through the storage facade.
+ *
+ * Concrete backends own the derived option types and validate them when they
+ * are applied. The shared pointer keeps the options alive while a conversion
+ * or configuration operation is in progress.
+ */
 struct StorageBackendConversionOptions
 {
     virtual ~StorageBackendConversionOptions() = default;
@@ -45,12 +52,17 @@ struct StorageBackendConversionOptions
 
 using StorageBackendConversionOptionsPtr = std::shared_ptr<const StorageBackendConversionOptions>;
 
-/** Configuration used when converting dense point data to tiled storage. */
+/**
+ * Configuration used to create or reconfigure the experimental tiled backend.
+ *
+ * Tile dimensions are physical limits in matrix rows and columns. The cache
+ * capacity limits the number of decoded tile payloads retained in memory; it
+ * does not change the serialized dataset or force all tiles to be loaded.
+ */
 struct StorageBackendConfiguration : StorageBackendConversionOptions
 {
     std::size_t rowTileSize    = 256;           /**< Maximum number of matrix rows in one tile. */
     std::size_t columnTileSize = 8;             /**< Maximum number of matrix columns in one tile. */
-    std::size_t tileSizeBytes  = 1024 * 1024;   /**< Target uncompressed tile size used to derive geometry. */
     std::size_t cacheCapacity  = 8;             /**< Maximum number of tile payloads retained in memory. */
 };
 

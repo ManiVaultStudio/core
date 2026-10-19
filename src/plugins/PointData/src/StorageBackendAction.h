@@ -16,10 +16,10 @@ class Points;
  * @brief Displays the storage backend used by a points dataset.
  *
  * StorageBackendAction keeps the backend selection visible alongside the
- * point-data controls. The selector is intentionally read-only while tiled
- * storage remains an experimental read-only representation. The adjacent
- * configuration trigger opens controls supplied by the target backend and
- * starts the conversion after the user accepts them.
+ * point-data controls. Selecting another supported backend opens controls
+ * supplied by that target backend and starts the conversion after acceptance.
+ * The adjacent configuration trigger opens the active backend's controls for
+ * runtime reconfiguration without changing the backend type.
  *
  * @author T. Kroes
  */
@@ -44,7 +44,7 @@ private:
 
     mv::Dataset<Points>         _points;                 /**< Points dataset whose backend is displayed and converted. */
     mv::gui::OptionAction       _backendTypeAction;      /**< Storage backend selector and conversion action. */
-    mv::gui::TriggerAction      _configureAction;        /**< Opens the tiled storage configuration dialog. */
+    mv::gui::TriggerAction      _configureAction;        /**< Opens the active backend configuration dialog. */
     bool                        _updatingBackendType = false; /**< Whether the selector is being synchronized with the dataset. */
     bool                        _conversionInProgress = false; /**< Whether a backend conversion is currently running. */
 };

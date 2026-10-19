@@ -29,8 +29,7 @@ StorageBackendAction::StorageBackendAction(QObject* parent, const Dataset<Points
     _backendTypeAction.setToolTip("Select the storage backend for this points dataset");
 
     _configureAction.setIconByName("ellipsis");
-    _configureAction.setToolTip("Configure tiled storage and convert this points dataset");
-    _configureAction.setVisible(false);
+    _configureAction.setToolTip("Show the properties of the active storage backend");
 
     addAction(&_backendTypeAction);
     addAction(&_configureAction, TriggerAction::Icon);
@@ -87,7 +86,7 @@ void StorageBackendAction::updateBackendType()
     }
 
     _backendTypeAction.setEnabled(pointsAreValid && !isProxy && !_conversionInProgress);
-    _configureAction.setEnabled(pointsAreValid && !isProxy && (backendType == Points::StorageBackendType::Eager || backendType == Points::StorageBackendType::Tiled) && !_conversionInProgress);
+    _configureAction.setEnabled(pointsAreValid && !isProxy && backendType == Points::StorageBackendType::Tiled && !_conversionInProgress);
 
     _updatingBackendType = false;
 }
@@ -111,7 +110,7 @@ void StorageBackendAction::changeBackendType(const QString& backendType)
 
     if (backendType == "Configure")
     {
-        const auto targetType = Points::StorageBackendType::Tiled;
+        const auto targetType = currentBackendType;
         auto configurationAction = _points->createStorageBackendConversionAction(targetType);
 
         if (!configurationAction)

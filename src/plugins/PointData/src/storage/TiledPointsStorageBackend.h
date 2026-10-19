@@ -37,6 +37,8 @@ public:
     StorageBackendType getType() const override;
     StorageBackendCapabilities getCapabilities() const override;
     std::unique_ptr<mv::gui::StorageBackendConversionAction> createConversionAction(StorageBackendType targetType, QObject* parent) const override;
+    /** Applies the tiled cache setting without changing tile geometry or backend type. */
+    void applyConfiguration(const StorageBackendConversionOptionsPtr& options) override;
     std::uint64_t getNumPoints() const override;
     std::uint64_t getNumDimensions() const override;
     std::size_t getElementSize() const override;

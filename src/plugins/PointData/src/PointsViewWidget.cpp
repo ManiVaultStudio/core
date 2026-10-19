@@ -397,7 +397,7 @@ void PointsViewWidget::refreshPoints()
             .arg(_points->getGuiName())
             .arg(_points->getNumPoints())
             .arg(_points->getNumDimensions())
-            .arg(_points->isTiled() ? "tiled" : "eager"));
+            .arg(_points->getStorageBackendType() == Points::StorageBackendType::Tiled ? "tiled" : "eager"));
     setStatus("Fetching the visible table window...");
     QTimer::singleShot(0, this, &PointsViewWidget::fetchVisibleRange);
 }
@@ -442,13 +442,12 @@ void PointsViewWidget::fetchVisibleRange()
         return;
     }
 
-    setStatus(QString("Fetched visible rows %1–%2, columns %3–%4 in %5 access segment(s); cached tiles: %6. Drag/scroll and release to fetch again.")
+    setStatus(QString("Fetched visible rows %1–%2, columns %3–%4 in %5 access segment(s). Drag/scroll and release to fetch again.")
         .arg(firstRow)
         .arg(firstRow + static_cast<int>(rowCount) - 1)
         .arg(firstColumn)
         .arg(firstColumn + static_cast<int>(columnCount) - 1)
-        .arg(callbacks)
-        .arg(_points->getTiledCacheSize()));
+        .arg(callbacks));
 }
 
 std::vector<std::uint64_t> PointsViewWidget::parseFilter(const QString& filter, const std::uint64_t maximum, QString& error)

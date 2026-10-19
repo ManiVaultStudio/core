@@ -322,6 +322,16 @@ public:
     void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, mv::pointdata::storage::StorageBackendConversionOptionsPtr options, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
 
     /**
+     * Applies options owned by the current storage backend without converting
+     * the point data to another backend.
+     *
+     * The options must be compatible with the active backend. The operation
+     * throws std::invalid_argument when no backend is available or the backend
+     * rejects the supplied options.
+     */
+    void configureStorageBackend(mv::pointdata::storage::StorageBackendConversionOptionsPtr options);
+
+    /**
      * Converts dense point data to read-only rectangular tiled storage.
      *
      * The eager vector remains the source during conversion and is replaced
@@ -349,9 +359,6 @@ public:
      * Invalid tile coordinates return an empty view.
      */
     TileView acquireTile(std::uint64_t tileRow, std::uint64_t tileColumn) const;
-
-    /** Sets the maximum number of loaded tile payloads retained in the LRU cache. */
-    void setTiledCacheCapacity(std::size_t capacity);
 
     /** Returns the number of currently cached tile payloads. */
     std::size_t getTiledCacheSize() const;
@@ -868,8 +875,6 @@ public:
     ~Points() override = default;
 
     using ElementTypeSpecifier = PointData::ElementTypeSpecifier;
-    using TileView = PointData::TileView;
-    using TiledMemoryEstimate = PointData::TiledMemoryEstimate;
     using TiledTileGenerator = PointData::TiledTileGenerator;
     using StorageBackendType = mv::pointdata::storage::StorageBackendType;
     using StorageBackendConfiguration = mv::pointdata::storage::StorageBackendConfiguration;
@@ -1099,9 +1104,6 @@ public:
     /** Returns the name of the element type used by this logical dataset. */
     QString getElementTypeName() const;
 
-    /** Returns whether all concrete datasets represented by this object are tiled. */
-    bool isTiled() const;
-
     /** Returns the physical backend type used by this concrete point dataset. */
     StorageBackendType getStorageBackendType() const;
 
@@ -1117,44 +1119,15 @@ public:
     /** Converts using backend-specific options supplied by a conversion action. */
     void convertToStorageBackend(StorageBackendType type, StorageBackendConversionOptionsPtr options, StorageBackendProgressCallback progress = {});
 
-    /** Converts this dataset, or each member of a proxy dataset, to read-only tiled storage. */
-    void makeTiled(std::size_t rowTileSize, std::size_t columnTileSize, std::function<void(float)> progress = {});
+    /**
+     * Applies options owned by the current storage backend of this concrete
+     * dataset. Proxy datasets are rejected because their members may use
+     * different physical backends and configurations.
+     */
+    void configureStorageBackend(StorageBackendConversionOptionsPtr options);
 
     /** Creates read-only generator-backed tiled storage for a concrete, non-proxy dataset. */
     void makeTiledFromGenerator(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, std::size_t rowTileSize, std::size_t columnTileSize, TiledTileGenerator generator);
-
-    /** Loads a backend tile for a concrete, non-proxy dataset; proxy datasets return an empty view. */
-    TileView acquireTile(std::uint64_t tileRow, std::uint64_t tileColumn) const;
-
-    /** Sets the tile-cache capacity on this dataset and its proxy members. */
-    void setTiledCacheCapacity(std::size_t capacity);
-
-    /** Returns the number of currently cached tile payloads. */
-    std::size_t getTiledCacheSize() const;
-
-    /** Returns the configured tile-cache capacity. */
-    std::size_t getTiledCacheCapacity() const;
-
-    /** Returns the configured number of rows per tile. */
-    std::size_t getTiledRowTileSize() const;
-
-    /** Returns the configured number of columns per tile. */
-    std::size_t getTiledColumnTileSize() const;
-
-    /** Returns the total number of tile-cache hits. */
-    std::uint64_t getTiledCacheHits() const;
-
-    /** Returns the total number of tile-cache misses. */
-    std::uint64_t getTiledCacheMisses() const;
-
-    /** Returns the total number of tile-cache evictions. */
-    std::uint64_t getTiledCacheEvictions() const;
-
-    /** Returns a memory estimate aggregated across proxy members. */
-    TiledMemoryEstimate getTiledMemoryEstimate() const;
-
-    /** Estimates tiled memory usage without allocating point data. */
-    static TiledMemoryEstimate estimateTiledMemory(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, std::size_t cacheCapacity);
 
     /** Returns one logical row as a storage-neutral read-only view, translating subset or proxy indices. */
     PointDataAccessView getRow(std::uint64_t row) const;

@@ -2,9 +2,11 @@
 
 #include "StorageBackendConfigurationDialog.h"
 
+#include <util/StyledIcon.h>
+
 #include <QDialogButtonBox>
-#include <QFormLayout>
 #include <QPushButton>
+#include <QVBoxLayout>
 
 #include <utility>
 
@@ -12,12 +14,14 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique
     QDialog(parent),
     _conversionAction(std::move(conversionAction))
 {
+    setWindowIcon(mv::util::StyledIcon("shuffle"));
     setWindowTitle(tr("Configure point-data conversion"));
+    resize(400, 500);
 
-    auto* form = new QFormLayout(this);
+    auto* layout = new QVBoxLayout(this);
 
     if (_conversionAction)
-        form->addWidget(_conversionAction->createWidget(this));
+        layout->addWidget(_conversionAction->createWidget(this));
 
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
 
@@ -32,7 +36,8 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique
         });
     }
 
-    form->addRow(buttons);
+    layout->addStretch(1);
+    layout->addWidget(buttons);
 
     connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);

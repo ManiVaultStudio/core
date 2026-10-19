@@ -53,6 +53,16 @@ public:
     /** Creates the controls used to configure conversion to \p targetType. */
     virtual std::unique_ptr<mv::gui::StorageBackendConversionAction> createConversionAction(StorageBackendType targetType, QObject* parent) const = 0;
 
+    /**
+     * Applies backend-owned configuration options to the current representation.
+     *
+     * The options object must be compatible with this backend. Implementations
+     * reject unsupported or invalid options rather than silently ignoring them.
+     * Applying options may change runtime configuration, such as cache limits,
+     * without changing the backend type.
+     */
+    virtual void applyConfiguration(const StorageBackendConversionOptionsPtr& options) = 0;
+
     /** Returns the number of matrix rows. */
     virtual std::uint64_t getNumPoints() const = 0;
 

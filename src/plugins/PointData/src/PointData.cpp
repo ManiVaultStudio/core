@@ -263,8 +263,10 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
         else
             makeTiled(configuration->rowTileSize, configuration->columnTileSize, progress);
 
-        if (_tiledStorage)
-            _tiledStorage->setCacheCapacity(configuration->cacheCapacity);
+        refreshStorageBackend();
+
+        if (_storageBackend)
+            _storageBackend->applyConfiguration(options);
 
         return;
     }
@@ -280,6 +282,16 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
     }
 
     throw std::invalid_argument("Unsupported point-data storage backend");
+}
+
+void PointData::configureStorageBackend(const pointdata::storage::StorageBackendConversionOptionsPtr options)
+{
+    const auto lock = lockData();
+
+    if (!_storageBackend)
+        throw std::invalid_argument("Point-data storage backend is unavailable");
+
+    _storageBackend->applyConfiguration(options);
 }
 
 void PointData::makeTiled(const std::size_t rowTileSize, const std::size_t columnTileSize, std::function<void(float)> progress)
@@ -324,14 +336,6 @@ PointData::TileView PointData::acquireTile(const std::uint64_t tileRow, const st
     const auto lock = lockData();
 
     return _tiledStorage ? _tiledStorage->acquire(tileRow, tileColumn) : TileView{};
-}
-
-void PointData::setTiledCacheCapacity(const std::size_t capacity)
-{
-    const auto lock = lockData();
-
-    if (_tiledStorage)
-        _tiledStorage->setCacheCapacity(capacity);
 }
 
 std::size_t PointData::getTiledCacheSize() const
@@ -1454,27 +1458,6 @@ QString Points::getElementTypeName() const
     return getRawData<PointData>()->getElementTypeName();
 }
 
-bool Points::isTiled() const
-{
-    if (isProxy())
-    {
-        const auto proxyMembers = getProxyMembers();
-
-        if (proxyMembers.isEmpty())
-            return false;
-
-        for (const auto& proxyMember : proxyMembers)
-        {
-            if (!mv::Dataset<Points>(proxyMember)->isTiled())
-                return false;
-        }
-
-        return true;
-    }
-
-    return getRawData<PointData>()->isTiled();
-}
-
 Points::StorageBackendType Points::getStorageBackendType() const
 {
     if (isProxy())
@@ -1532,25 +1515,13 @@ void Points::convertToStorageBackend(const StorageBackendType type, const Storag
     mv::events().notifyDatasetDataChanged(this);
 }
 
-void Points::makeTiled(const std::size_t rowTileSize, const std::size_t columnTileSize, std::function<void(float)> progress)
+void Points::configureStorageBackend(const StorageBackendConversionOptionsPtr options)
 {
-    if (!isProxy())
-    {
-        getRawData<PointData>()->makeTiled(rowTileSize, columnTileSize, std::move(progress));
-        return;
-    }
+    if (isProxy())
+        throw std::invalid_argument("Storage backend configuration is only supported for concrete point datasets");
 
-    auto proxyMembers = getProxyMembers();
-
-    for (std::size_t memberIndex = 0; memberIndex < static_cast<std::size_t>(proxyMembers.size()); ++memberIndex)
-    {
-        auto member = mv::Dataset<Points>(proxyMembers[static_cast<qsizetype>(memberIndex)]);
-
-        member->makeTiled(rowTileSize, columnTileSize, [progress, memberIndex, memberCount = static_cast<std::size_t>(proxyMembers.size())](const float memberProgress) {
-            if (progress)
-                progress((static_cast<float>(memberIndex) + memberProgress) / static_cast<float>(memberCount));
-        });
-    }
+    getRawData<PointData>()->configureStorageBackend(std::move(options));
+    mv::events().notifyDatasetDataChanged(this);
 }
 
 void Points::makeTiledFromGenerator(const std::uint64_t rows, const std::uint64_t columns, const ElementTypeSpecifier elementType, const std::size_t rowTileSize, const std::size_t columnTileSize, TiledTileGenerator generator)
@@ -1559,148 +1530,6 @@ void Points::makeTiledFromGenerator(const std::uint64_t rows, const std::uint64_
         throw std::invalid_argument("Cannot create generator-backed tiled storage for a proxy dataset");
 
     getRawData<PointData>()->makeTiledFromGenerator(rows, columns, elementType, rowTileSize, columnTileSize, std::move(generator));
-}
-
-Points::TileView Points::acquireTile(const std::uint64_t tileRow, const std::uint64_t tileColumn) const
-{
-    return isProxy() ? TileView{} : getRawData<PointData>()->acquireTile(tileRow, tileColumn);
-}
-
-void Points::setTiledCacheCapacity(const std::size_t capacity)
-{
-    if (isProxy())
-    {
-        for (const auto& proxyMember : getProxyMembers())
-            mv::Dataset<Points>(proxyMember)->setTiledCacheCapacity(capacity);
-
-        return;
-    }
-
-    getRawData<PointData>()->setTiledCacheCapacity(capacity);
-}
-
-std::size_t Points::getTiledCacheSize() const
-{
-    if (isProxy())
-    {
-        std::size_t cacheSize = 0;
-
-        for (const auto& proxyMember : getProxyMembers())
-            cacheSize += mv::Dataset<Points>(proxyMember)->getTiledCacheSize();
-
-        return cacheSize;
-    }
-
-    return getRawData<PointData>()->getTiledCacheSize();
-}
-
-std::size_t Points::getTiledCacheCapacity() const
-{
-    if (isProxy())
-    {
-        const auto proxyMembers = getProxyMembers();
-
-        return proxyMembers.isEmpty() ? 0 : mv::Dataset<Points>(proxyMembers.first())->getTiledCacheCapacity();
-    }
-
-    return getRawData<PointData>()->getTiledCacheCapacity();
-}
-
-std::size_t Points::getTiledRowTileSize() const
-{
-    if (isProxy())
-    {
-        const auto proxyMembers = getProxyMembers();
-
-        return proxyMembers.isEmpty() ? 0 : mv::Dataset<Points>(proxyMembers.first())->getTiledRowTileSize();
-    }
-
-    return getRawData<PointData>()->getTiledRowTileSize();
-}
-
-std::size_t Points::getTiledColumnTileSize() const
-{
-    if (isProxy())
-    {
-        const auto proxyMembers = getProxyMembers();
-
-        return proxyMembers.isEmpty() ? 0 : mv::Dataset<Points>(proxyMembers.first())->getTiledColumnTileSize();
-    }
-
-    return getRawData<PointData>()->getTiledColumnTileSize();
-}
-
-std::uint64_t Points::getTiledCacheHits() const
-{
-    if (isProxy())
-    {
-        std::uint64_t cacheHits = 0;
-
-        for (const auto& proxyMember : getProxyMembers())
-            cacheHits += mv::Dataset<Points>(proxyMember)->getTiledCacheHits();
-
-        return cacheHits;
-    }
-
-    return getRawData<PointData>()->getTiledCacheHits();
-}
-
-std::uint64_t Points::getTiledCacheMisses() const
-{
-    if (isProxy())
-    {
-        std::uint64_t cacheMisses = 0;
-
-        for (const auto& proxyMember : getProxyMembers())
-            cacheMisses += mv::Dataset<Points>(proxyMember)->getTiledCacheMisses();
-
-        return cacheMisses;
-    }
-
-    return getRawData<PointData>()->getTiledCacheMisses();
-}
-
-std::uint64_t Points::getTiledCacheEvictions() const
-{
-    if (isProxy())
-    {
-        std::uint64_t cacheEvictions = 0;
-
-        for (const auto& proxyMember : getProxyMembers())
-            cacheEvictions += mv::Dataset<Points>(proxyMember)->getTiledCacheEvictions();
-
-        return cacheEvictions;
-    }
-
-    return getRawData<PointData>()->getTiledCacheEvictions();
-}
-
-Points::TiledMemoryEstimate Points::getTiledMemoryEstimate() const
-{
-    if (isProxy())
-    {
-        TiledMemoryEstimate estimate;
-
-        for (const auto& proxyMember : getProxyMembers())
-        {
-            const auto memberEstimate = mv::Dataset<Points>(proxyMember)->getTiledMemoryEstimate();
-
-            estimate.rawDataBytes += memberEstimate.rawDataBytes;
-            estimate.largestTileBytes = std::max(estimate.largestTileBytes, memberEstimate.largestTileBytes);
-            estimate.cachedTileBytes += memberEstimate.cachedTileBytes;
-            estimate.tileCount += memberEstimate.tileCount;
-            estimate.indexBytes += memberEstimate.indexBytes;
-        }
-
-        return estimate;
-    }
-
-    return getRawData<PointData>()->getTiledMemoryEstimate();
-}
-
-Points::TiledMemoryEstimate Points::estimateTiledMemory(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, const std::size_t cacheCapacity)
-{
-    return PointData::estimateTiledMemory(rows, columns, elementSize, rowTileSize, columnTileSize, cacheCapacity);
 }
 
 PointDataAccessView Points::getRow(const std::uint64_t row) const
