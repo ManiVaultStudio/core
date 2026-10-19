@@ -8,10 +8,33 @@
 
 #include "../tiled/PointDataTiledStorage.h"
 
+#include <functional>
 #include <memory>
 
 namespace mv::pointdata::storage
 {
+
+/**
+ * @brief Describes generator-backed tiled storage to be created by the tiled backend.
+ *
+ * The generator returns row-major bytes for the requested tile. The options
+ * are consumed during creation and are not retained by the backend after the
+ * tiled storage has been constructed.
+ *
+ * @author T. Kroes
+ */
+struct TiledStorageBackendCreationOptions final : StorageBackendCreationOptions
+{
+    using TileGenerator = std::function<QByteArray(std::uint64_t rowOffset, std::uint64_t columnOffset, std::uint64_t rows, std::uint64_t columns)>;
+
+    std::uint64_t rows                 = 0;   /**< Number of logical matrix rows. */
+    std::uint64_t columns              = 0;   /**< Number of logical matrix columns. */
+    std::size_t   elementSize          = 0;   /**< Size of one generated element in bytes. */
+    std::uint32_t elementTypeIndex     = 0;   /**< PointData element-type index used by access views. */
+    std::size_t   rowTileSize          = 256; /**< Maximum number of rows per tile. */
+    std::size_t   columnTileSize       = 8;   /**< Maximum number of columns per tile. */
+    TileGenerator generator;                 /**< Callback that generates one tile on first access. */
+};
 
 /**
  * @brief Storage-backend adapter for read-only rectangular tiled point data.
@@ -33,6 +56,15 @@ public:
      * bytes are converted to the facade's floating-point access API.
      */
     TiledPointsStorageBackend(const std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage>& storage, std::uint32_t elementTypeIndex);
+
+    /** Creates tiled storage from backend-owned creation options. */
+    static std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> create(const TiledStorageBackendCreationOptions& options);
+
+    /** Returns the tiled storage owned by this backend. */
+    std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> getStorage() const;
+
+    /** Replaces the tiled storage owned by this backend. */
+    void setStorage(std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> storage);
 
     StorageBackendType getType() const override;
     StorageBackendCapabilities getCapabilities() const override;

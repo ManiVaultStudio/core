@@ -52,6 +52,12 @@ struct StorageBackendConversionOptions
 
 using StorageBackendConversionOptionsPtr = std::shared_ptr<const StorageBackendConversionOptions>;
 
+/** Base type for backend-specific options used to create a new representation. */
+struct StorageBackendCreationOptions : StorageBackendConversionOptions
+{
+    virtual ~StorageBackendCreationOptions() = default;
+};
+
 /**
  * Configuration used to create or reconfigure the experimental tiled backend.
  *

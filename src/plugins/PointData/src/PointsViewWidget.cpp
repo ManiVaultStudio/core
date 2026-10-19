@@ -100,7 +100,7 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
     _getRangeAction(&_getRangeGroupAction, "Get range"),
     _rowFilterAction(this, "Rows"),
     _columnFilterAction(this, "Columns"),
-    _liveTableAction(this, "Show live table", true)
+    _liveTableAction(this, "Live", true)
 {
     _rowFilterAction.setPlaceHolderString("Required; e.g. 1, 3, 10-20");
     _columnFilterAction.setPlaceHolderString("Optional = all columns; e.g. 0-4, 8");
@@ -539,7 +539,7 @@ void PointsViewWidget::displayQuery(const std::vector<std::uint64_t>& rowIds, co
     _liveTableAction.setChecked(false);
     _model->setQueryResult(rowIds, columnIds, values);
     _table->resizeColumnsToContents();
-    setStatus(QString("Displayed %1 row(s) × %2 column(s) from a facade query. Click Show live table to resume viewport loading.").arg(rowIds.size()).arg(columnIds.size()));
+    setStatus(QString("Displayed %1 row(s) × %2 column(s) from a facade query. Click Live to resume viewport loading.").arg(rowIds.size()).arg(columnIds.size()));
 }
 
 void PointsViewWidget::applyFilters()

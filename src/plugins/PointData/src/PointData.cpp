@@ -133,13 +133,18 @@ void PointData::init()
 
 void PointData::refreshStorageBackend()
 {
-    if (_tiledStorage)
-    {
-        _storageBackend = std::make_unique<mv::pointdata::storage::TiledPointsStorageBackend>(_tiledStorage, static_cast<std::uint32_t>(getElementTypeSpecifier()));
-        return;
-    }
-
     _storageBackend = std::make_unique<mv::pointdata::storage::EagerPointsStorageBackend>(*this);
+}
+
+void PointData::clearStorageBackend()
+{
+    _storageBackend.reset();
+}
+
+std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> PointData::getTiledStorage() const
+{
+    const auto* tiledBackend = dynamic_cast<const mv::pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get());
+    return tiledBackend ? tiledBackend->getStorage() : nullptr;
 }
 
 mv::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) const
@@ -157,8 +162,8 @@ std::uint64_t PointData::getNumPoints() const
         return 0;
     }
 
-    if (_tiledStorage)
-        return _tiledStorage->rows();
+    if (const auto tiledStorage = getTiledStorage())
+        return tiledStorage->rows();
     if (_isDense)
         return static_cast<std::uint64_t>(getSizeOfVector() / _numDimensions);
     else
@@ -174,7 +179,10 @@ std::uint64_t PointData::getNumDimensions() const
 std::uint64_t PointData::getNumberOfElements() const
 {
     const auto dataLock = lockData();
-    return _tiledStorage ? _tiledStorage->rows() * _tiledStorage->columns() : getSizeOfVector();
+    if (const auto tiledStorage = getTiledStorage())
+        return tiledStorage->rows() * tiledStorage->columns();
+
+    return getSizeOfVector();
 }
 
 
@@ -182,8 +190,8 @@ std::uint64_t PointData::getRawDataSize() const
 {
     const auto dataLock = lockData();
 
-    if (_tiledStorage)
-        return getNumberOfElements() * _tiledStorage->elementSize();
+    if (const auto tiledStorage = getTiledStorage())
+        return getNumberOfElements() * tiledStorage->elementSize();
     if (_isDense)
     {
         std::uint64_t elementSize = std::visit([](auto& vec) { return vec.empty() ? 0u : sizeof(vec[0]); }, _variantOfVectors);
@@ -198,7 +206,7 @@ std::uint64_t PointData::getRawDataSize() const
 void* PointData::getDataVoidPtr()
 {
     const auto dataLock = lockData();
-    if (_tiledStorage)
+    if (getTiledStorage())
         materializeTiled();
     return std::visit([](auto& vec) { return (void*)vec.data(); }, _variantOfVectors);
 }
@@ -206,7 +214,7 @@ void* PointData::getDataVoidPtr()
 const void* PointData::getDataConstVoidPtr() const
 {
     const auto dataLock = lockData();
-    if (_tiledStorage)
+    if (getTiledStorage())
         const_cast<PointData*>(this)->materializeTiled();
     return std::visit([](const auto& vec) { return (const void*)vec.data(); }, _variantOfVectors);
 }
@@ -215,7 +223,7 @@ bool PointData::isTiled() const
 {
     const auto lock = lockData();
 
-    return static_cast<bool>(_tiledStorage);
+    return static_cast<bool>(getTiledStorage());
 }
 
 pointdata::storage::StorageBackendType PointData::getStorageBackendType() const
@@ -250,20 +258,40 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
 
     if (type == pointdata::storage::StorageBackendType::Tiled)
     {
+        const auto creation = std::dynamic_pointer_cast<const pointdata::storage::TiledStorageBackendCreationOptions>(options);
+
+        if (creation)
+        {
+            if (_numRows != 0 || _numDimensions != 0 || getTiledStorage())
+                throw std::invalid_argument("Point-data storage creation requires an empty dataset");
+
+            setElementTypeSpecifier(static_cast<ElementTypeSpecifier>(creation->elementTypeIndex));
+            _numDimensions = creation->columns;
+            _numRows       = creation->rows;
+            _isDense       = true;
+            _storageBackend = std::make_unique<pointdata::storage::TiledPointsStorageBackend>(pointdata::storage::TiledPointsStorageBackend::create(*creation), static_cast<std::uint32_t>(getElementTypeSpecifier()));
+
+            if (progress)
+                progress(1.0f);
+
+            return;
+        }
+
         const auto configuration = std::dynamic_pointer_cast<const pointdata::storage::StorageBackendConfiguration>(options);
 
         if (!configuration)
             throw std::invalid_argument("Missing tiled storage conversion configuration");
 
-        if (_tiledStorage)
+        if (const auto tiledStorage = getTiledStorage())
         {
-            if (_tiledStorage->rowTileSize() != configuration->rowTileSize || _tiledStorage->columnTileSize() != configuration->columnTileSize)
-                _tiledStorage = mv::pointdata::tiled::PointDataTiledStorage::retile(_tiledStorage, configuration->rowTileSize, configuration->columnTileSize, progress);
+            if (tiledStorage->rowTileSize() != configuration->rowTileSize || tiledStorage->columnTileSize() != configuration->columnTileSize)
+            {
+                const auto retiledStorage = mv::pointdata::tiled::PointDataTiledStorage::retile(tiledStorage, configuration->rowTileSize, configuration->columnTileSize, progress);
+                dynamic_cast<pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get())->setStorage(retiledStorage);
+            }
         }
         else
             makeTiled(configuration->rowTileSize, configuration->columnTileSize, progress);
-
-        refreshStorageBackend();
 
         if (_storageBackend)
             _storageBackend->applyConfiguration(options);
@@ -298,103 +326,110 @@ void PointData::makeTiled(const std::size_t rowTileSize, const std::size_t colum
 {
     const auto lock = lockData();
 
-    if (_isDense && !_tiledStorage && _numDimensions > 0)
+    if (_isDense && !getTiledStorage() && _numDimensions > 0)
     {
         const auto rows = static_cast<std::uint64_t>(getSizeOfVector() / _numDimensions);
 
         const auto elementSize = std::visit([](const auto& vector) { return sizeof(typename std::decay_t<decltype(vector)>::value_type); }, _variantOfVectors);
         const auto* data = static_cast<const char*>(std::visit([](const auto& vector) { return static_cast<const void*>(vector.data()); }, _variantOfVectors));
 
-        _tiledStorage = mv::pointdata::tiled::PointDataTiledStorage::fromDense(data, rows, _numDimensions, elementSize, rowTileSize, columnTileSize, std::move(progress));
+        const auto tiledStorage = mv::pointdata::tiled::PointDataTiledStorage::fromDense(data, rows, _numDimensions, elementSize, rowTileSize, columnTileSize, std::move(progress));
 
         _numRows = rows;
-        refreshStorageBackend();
+        _storageBackend = std::make_unique<pointdata::storage::TiledPointsStorageBackend>(tiledStorage, static_cast<std::uint32_t>(getElementTypeSpecifier()));
     }
-}
-
-void PointData::makeTiledFromGenerator(const std::uint64_t rows, const std::uint64_t columns, const ElementTypeSpecifier elementType, const std::size_t rowTileSize, const std::size_t columnTileSize, TiledTileGenerator generator)
-{
-    const auto lock = lockData();
-
-    if (!generator || rows == 0 || columns == 0)
-        throw std::invalid_argument("Invalid tiled point-data generator settings");
-
-    setElementTypeSpecifier(elementType);
-    _numDimensions = columns;
-    _numRows = rows;
-    _isDense = true;
-    const auto elementSize = std::visit([](const auto& vector) { return sizeof(typename std::decay_t<decltype(vector)>::value_type); }, _variantOfVectors);
-    _tiledStorage = mv::pointdata::tiled::PointDataTiledStorage::fromGenerator(rows, columns, elementSize, rowTileSize, columnTileSize, [generator = std::move(generator)](const mv::pointdata::tiled::TileDescriptor& descriptor) {
-        return generator(descriptor.rowOffset, descriptor.columnOffset, descriptor.rows, descriptor.columns);
-    });
-
-    refreshStorageBackend();
 }
 
 PointData::TileView PointData::acquireTile(const std::uint64_t tileRow, const std::uint64_t tileColumn) const
 {
     const auto lock = lockData();
 
-    return _tiledStorage ? _tiledStorage->acquire(tileRow, tileColumn) : TileView{};
+    if (const auto tiledStorage = getTiledStorage())
+        return tiledStorage->acquire(tileRow, tileColumn);
+
+    return {};
 }
 
 std::size_t PointData::getTiledCacheSize() const
 {
     const auto lock = lockData();
 
-    return _tiledStorage ? _tiledStorage->cacheSize() : 0;
+    if (const auto tiledStorage = getTiledStorage())
+        return tiledStorage->cacheSize();
+
+    return 0;
 }
 
 std::size_t PointData::getTiledCacheCapacity() const
 {
     const auto lock = lockData();
 
-    return _tiledStorage ? _tiledStorage->cacheCapacity() : 0;
+    if (const auto tiledStorage = getTiledStorage())
+        return tiledStorage->cacheCapacity();
+
+    return 0;
 }
 
 std::size_t PointData::getTiledRowTileSize() const
 {
     const auto lock = lockData();
 
-    return _tiledStorage ? _tiledStorage->rowTileSize() : 0;
+    if (const auto tiledStorage = getTiledStorage())
+        return tiledStorage->rowTileSize();
+
+    return 0;
 }
 
 std::size_t PointData::getTiledColumnTileSize() const
 {
     const auto lock = lockData();
 
-    return _tiledStorage ? _tiledStorage->columnTileSize() : 0;
+    if (const auto tiledStorage = getTiledStorage())
+        return tiledStorage->columnTileSize();
+
+    return 0;
 }
 
 std::uint64_t PointData::getTiledCacheHits() const
 {
     const auto lock = lockData();
 
-    return _tiledStorage ? _tiledStorage->cacheHits() : 0;
+    if (const auto tiledStorage = getTiledStorage())
+        return tiledStorage->cacheHits();
+
+    return 0;
 }
 
 std::uint64_t PointData::getTiledCacheMisses() const
 {
     const auto lock = lockData();
 
-    return _tiledStorage ? _tiledStorage->cacheMisses() : 0;
+    if (const auto tiledStorage = getTiledStorage())
+        return tiledStorage->cacheMisses();
+
+    return 0;
 }
 
 std::uint64_t PointData::getTiledCacheEvictions() const
 {
     const auto lock = lockData();
 
-    return _tiledStorage ? _tiledStorage->cacheEvictions() : 0;
+    if (const auto tiledStorage = getTiledStorage())
+        return tiledStorage->cacheEvictions();
+
+    return 0;
 }
 
 PointData::TiledMemoryEstimate PointData::getTiledMemoryEstimate() const
 {
     const auto lock = lockData();
 
-    if (!_tiledStorage)
+    const auto tiledStorage = getTiledStorage();
+
+    if (!tiledStorage)
         return {};
 
-    const auto estimate = _tiledStorage->memoryEstimate();
+    const auto estimate = tiledStorage->memoryEstimate();
     return {
         estimate.rawDataBytes,
         estimate.largestTileBytes,
@@ -557,14 +592,16 @@ void PointData::visitRange(const std::uint64_t firstRow, const std::uint64_t row
 
 void PointData::materializeTiled()
 {
-    if (!_tiledStorage)
+    const auto tiledStorage = getTiledStorage();
+
+    if (!tiledStorage)
         return;
 
-    const auto elementCount = static_cast<std::size_t>(_tiledStorage->rows() * _tiledStorage->columns());
-    const auto elementSize  = _tiledStorage->elementSize();
+    const auto elementCount = static_cast<std::size_t>(tiledStorage->rows() * tiledStorage->columns());
+    const auto elementSize  = tiledStorage->elementSize();
     std::vector<char> materializedBytes(elementCount * elementSize);
 
-    _tiledStorage->materialize(materializedBytes.data());
+    tiledStorage->materialize(materializedBytes.data());
 
     resizeVector(elementCount);
     std::visit([&materializedBytes](auto& vector) {
@@ -572,7 +609,7 @@ void PointData::materializeTiled()
             std::memcpy(vector.data(), materializedBytes.data(), vector.size() * sizeof(typename std::decay_t<decltype(vector)>::value_type));
     }, _variantOfVectors);
 
-    _tiledStorage.reset();
+    clearStorageBackend();
     refreshStorageBackend();
 }
 
@@ -586,7 +623,7 @@ void PointData::setData(const std::nullptr_t, const std::size_t numPoints, const
 {
     const auto dataLock = lockData();
 
-    _tiledStorage.reset();
+    clearStorageBackend();
     resizeVector(numPoints * numDimensions);
     _numDimensions = static_cast<std::uint64_t>(numDimensions);
     refreshStorageBackend();
@@ -637,7 +674,7 @@ void PointData::setValueAt(const std::size_t index, const float newValue)
     // Use lockData() / the bulk-access APIs when synchronized access is
     // required.
 
-    if (_tiledStorage)
+    if (getTiledStorage())
         materializeTiled();
 
     std::visit([index, newValue](auto& vec) {
@@ -673,6 +710,7 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
         const auto dataMap  = variantMap["Data"].toMap();
         _isDense            = variantMap.value("Dense", true).toBool();
         _numDimensions      = static_cast<std::size_t>(variantMap["NumberOfDimensions"].toULongLong());
+        clearStorageBackend();
 
         if (dataMap.contains("Tiled") && dataMap["Tiled"].canConvert<QVariantMap>())
         {
@@ -684,8 +722,8 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
             _numRows = variantMap["NumberOfPoints"].toULongLong();
 
             const auto elementSize = std::visit([](const auto& vector) { return sizeof(typename std::decay_t<decltype(vector)>::value_type); }, _variantOfVectors);
-            _tiledStorage = mv::pointdata::tiled::PointDataTiledSerialization::fromVariantMap(dataMap["Tiled"].toMap(), _numRows, _numDimensions, elementSize);
-            refreshStorageBackend();
+            const auto tiledStorage = mv::pointdata::tiled::PointDataTiledSerialization::fromVariantMap(dataMap["Tiled"].toMap(), _numRows, _numDimensions, elementSize);
+            _storageBackend = std::make_unique<pointdata::storage::TiledPointsStorageBackend>(tiledStorage, static_cast<std::uint32_t>(elementType));
         }
         else if (dataMap.contains("Raw") && dataMap["Raw"].canConvert<QVariantMap>())
         {
@@ -726,7 +764,7 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
     {
         const auto dataLock = lockData();
         isDense = _isDense;
-        tiledStorage = _tiledStorage;
+        tiledStorage = getTiledStorage();
         isTiled = static_cast<bool>(tiledStorage);
     }
 
@@ -841,7 +879,7 @@ void PointData::extractFullDataForDimension(std::vector<float>& result, const in
 
     result.resize(getNumPoints());
 
-    if (_tiledStorage)
+    if (getTiledStorage())
     {
         for (std::size_t i = 0; i < result.size(); ++i)
             result[i] = getValueAt(i * _numDimensions + static_cast<std::size_t>(dimensionIndex));
@@ -872,7 +910,7 @@ void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, 
 
         result.resize(getNumPoints());
 
-        if (_tiledStorage)
+        if (getTiledStorage())
         {
             for (std::size_t i = 0; i < result.size(); ++i)
             {
@@ -913,7 +951,7 @@ void PointData::extractDataForDimension(std::vector<float>& result, const int di
 
     result.resize(indices.size());
 
-    if (_tiledStorage)
+    if (getTiledStorage())
     {
         for (std::size_t i = 0; i < result.size(); ++i)
             result[i] = getValueAt(static_cast<std::size_t>(indices[i]) * _numDimensions + static_cast<std::size_t>(dimensionIndex));
@@ -942,7 +980,7 @@ void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, cons
 
     result.resize(indices.size());
 
-    if (_tiledStorage)
+    if (getTiledStorage())
     {
         for (std::size_t i = 0; i < result.size(); ++i)
         {
@@ -1522,14 +1560,6 @@ void Points::configureStorageBackend(const StorageBackendConversionOptionsPtr op
 
     getRawData<PointData>()->configureStorageBackend(std::move(options));
     mv::events().notifyDatasetDataChanged(this);
-}
-
-void Points::makeTiledFromGenerator(const std::uint64_t rows, const std::uint64_t columns, const ElementTypeSpecifier elementType, const std::size_t rowTileSize, const std::size_t columnTileSize, TiledTileGenerator generator)
-{
-    if (isProxy())
-        throw std::invalid_argument("Cannot create generator-backed tiled storage for a proxy dataset");
-
-    getRawData<PointData>()->makeTiledFromGenerator(rows, columns, elementType, rowTileSize, columnTileSize, std::move(generator));
 }
 
 PointDataAccessView Points::getRow(const std::uint64_t row) const

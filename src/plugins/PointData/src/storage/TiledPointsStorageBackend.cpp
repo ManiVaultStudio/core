@@ -54,6 +54,26 @@ TiledPointsStorageBackend::TiledPointsStorageBackend(const std::shared_ptr<mv::p
 {
 }
 
+std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> TiledPointsStorageBackend::create(const TiledStorageBackendCreationOptions& options)
+{
+    if (!options.generator || options.rows == 0 || options.columns == 0 || options.elementSize == 0 || options.rowTileSize == 0 || options.columnTileSize == 0)
+        throw std::invalid_argument("Invalid tiled storage creation options");
+
+    return mv::pointdata::tiled::PointDataTiledStorage::fromGenerator(options.rows, options.columns, options.elementSize, options.rowTileSize, options.columnTileSize, [generator = options.generator](const mv::pointdata::tiled::TileDescriptor& descriptor) {
+        return generator(descriptor.rowOffset, descriptor.columnOffset, descriptor.rows, descriptor.columns);
+    });
+}
+
+std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> TiledPointsStorageBackend::getStorage() const
+{
+    return _storage;
+}
+
+void TiledPointsStorageBackend::setStorage(std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> storage)
+{
+    _storage = std::move(storage);
+}
+
 StorageBackendType TiledPointsStorageBackend::getType() const
 {
     return StorageBackendType::Tiled;

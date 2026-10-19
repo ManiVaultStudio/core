@@ -47,7 +47,6 @@ namespace mv
     {
         class EagerPointsStorageBackend;
         class PointsStorageBackend;
-        class TiledPointsStorageBackend;
     }
 
     // From "graphics/Vector2f.h"
@@ -103,9 +102,6 @@ class POINTDATA_EXPORT PointData : public mv::plugin::RawData
 public:
     using TileView = mv::pointdata::tiled::TileView;
     using DataLock = std::unique_lock<std::recursive_mutex>;
-    /** Generates the row-major bytes for one requested tile. */
-    using TiledTileGenerator = std::function<QByteArray(std::uint64_t rowOffset, std::uint64_t columnOffset, std::uint64_t rows, std::uint64_t columns)>;
-
     enum class ElementTypeSpecifier
     {
         float32,
@@ -309,7 +305,9 @@ public:
     std::unique_ptr<mv::gui::StorageBackendConversionAction> createStorageBackendConversionAction(mv::pointdata::storage::StorageBackendType targetType, QObject* parent = nullptr) const;
 
     /**
-     * Converts this concrete dataset to the requested storage backend.
+     * Converts this concrete dataset to the requested storage backend. When
+     * backend-specific creation options are supplied for an empty dataset,
+     * this operation initializes the requested backend instead.
      *
      * Conversion is transactional: the current backend remains active until
      * the requested backend has been created successfully. The experimental
@@ -318,7 +316,7 @@ public:
      */
     void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, const mv::pointdata::storage::StorageBackendConfiguration& configuration = {}, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
 
-    /** Converts using backend-specific options supplied by a conversion action. */
+    /** Converts or initializes using backend-specific options supplied by a conversion action or backend factory. */
     void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, mv::pointdata::storage::StorageBackendConversionOptionsPtr options, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
 
     /**
@@ -340,16 +338,6 @@ public:
      * callback receives values in the range [0, 1].
      */
     void makeTiled(std::size_t rowTileSize, std::size_t columnTileSize, std::function<void(float)> progress = {});
-
-    /**
-     * Creates read-only tiled storage whose tile bytes are generated on demand.
-     *
-     * The generator is called only when a tile is first requested and must
-     * return row-major bytes for the descriptor supplied to it. This is
-     * intended for procedural or externally indexed data and does not create
-     * an eager backing vector.
-     */
-    void makeTiledFromGenerator(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, std::size_t rowTileSize, std::size_t columnTileSize, TiledTileGenerator generator);
 
     /**
      * Loads or retrieves a tile and returns a lifetime-safe read-only view.
@@ -555,7 +543,7 @@ public:
     {
         const auto dataLock = lockData();
 
-        _tiledStorage.reset();
+        clearStorageBackend();
         convertData(data, numPoints * numDimensions);
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
         refreshStorageBackend();
@@ -569,7 +557,7 @@ public:
     {
         const auto dataLock = lockData();
 
-        _tiledStorage.reset();
+        clearStorageBackend();
         convertData(inputDataContainer.data(), inputDataContainer.size());
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
         refreshStorageBackend();
@@ -583,7 +571,7 @@ public:
     {
          const auto dataLock = lockData();
 
-         _tiledStorage.reset();
+         clearStorageBackend();
          _variantOfVectors = VariantOfVectors( std::vector<T>(data, data + numPoints * numDimensions) );
          _numDimensions = static_cast<std::uint64_t>(numDimensions);
          refreshStorageBackend();
@@ -602,7 +590,7 @@ public:
     {
         const auto dataLock = lockData();
 
-        _tiledStorage.reset();
+        clearStorageBackend();
         _variantOfVectors = VariantOfVectors(data);
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
         refreshStorageBackend();
@@ -616,7 +604,7 @@ public:
     {
         const auto dataLock = lockData();
 
-        _tiledStorage.reset();
+        clearStorageBackend();
         _variantOfVectors = VariantOfVectors(std::move(data));
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
         refreshStorageBackend();
@@ -723,6 +711,8 @@ public: // Serialization
 
 private:
     void refreshStorageBackend();
+    void clearStorageBackend();
+    std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> getTiledStorage() const;
     PointDataAccessView getEagerRow(std::uint64_t row) const;
     void visitEagerRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
     float getEagerValueAt(std::size_t index) const;
@@ -734,7 +724,6 @@ private:
 
     /** Number of features of each data point */
     std::uint64_t _numDimensions = 1;
-    std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> _tiledStorage;
     std::unique_ptr<mv::pointdata::storage::PointsStorageBackend> _storageBackend;
 
     std::vector<QString> _dimNames;
@@ -875,7 +864,6 @@ public:
     ~Points() override = default;
 
     using ElementTypeSpecifier = PointData::ElementTypeSpecifier;
-    using TiledTileGenerator = PointData::TiledTileGenerator;
     using StorageBackendType = mv::pointdata::storage::StorageBackendType;
     using StorageBackendConfiguration = mv::pointdata::storage::StorageBackendConfiguration;
     using StorageBackendProgressCallback = mv::pointdata::storage::StorageBackendProgressCallback;
@@ -1113,10 +1101,10 @@ public:
     /** Creates controls for converting to the requested storage backend. */
     std::unique_ptr<mv::gui::StorageBackendConversionAction> createStorageBackendConversionAction(StorageBackendType targetType, QObject* parent = nullptr) const;
 
-    /** Converts this concrete dataset to a storage backend transactionally. */
+    /** Converts this concrete dataset to a storage backend transactionally. An empty dataset may be initialized with backend creation options. */
     void convertToStorageBackend(StorageBackendType type, const StorageBackendConfiguration& configuration = {}, StorageBackendProgressCallback progress = {});
 
-    /** Converts using backend-specific options supplied by a conversion action. */
+    /** Converts or initializes using backend-specific options supplied by a conversion action or backend factory. */
     void convertToStorageBackend(StorageBackendType type, StorageBackendConversionOptionsPtr options, StorageBackendProgressCallback progress = {});
 
     /**
@@ -1125,9 +1113,6 @@ public:
      * different physical backends and configurations.
      */
     void configureStorageBackend(StorageBackendConversionOptionsPtr options);
-
-    /** Creates read-only generator-backed tiled storage for a concrete, non-proxy dataset. */
-    void makeTiledFromGenerator(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, std::size_t rowTileSize, std::size_t columnTileSize, TiledTileGenerator generator);
 
     /** Returns one logical row as a storage-neutral read-only view, translating subset or proxy indices. */
     PointDataAccessView getRow(std::uint64_t row) const;

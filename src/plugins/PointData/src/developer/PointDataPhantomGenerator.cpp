@@ -1,6 +1,7 @@
 #include "PointDataPhantomGenerator.h"
 
 #include "../PointData.h"
+#include "../storage/TiledPointsStorageBackend.h"
 #include "../storage/TiledStorageAsymmetryAction.h"
 #include "../storage/TiledStorageGeometry.h"
 
@@ -278,6 +279,7 @@ public:
         _cacheCapacityAction(&_settingsGroupAction, "Cache tiles", 1, 100000, 8),
         _estimateAction(&_settingsGroupAction, "Estimate")
     {
+        setWindowIcon(mv::util::StyledIcon("table"));
         setWindowTitle(tr("Create phantom points dataset"));
 
         QStringList typeNames;
@@ -467,9 +469,18 @@ void PointDataPhantomGenerator::populateMenu(QMenu& menu, QWidget* owner)
 
         if (dialog.isTiled())
         {
-            dataset->makeTiledFromGenerator(dialog.rows(), dialog.columns(), type, dialog.rowTileSize(), dialog.columnTileSize(), [type, population](const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t rows, const std::uint64_t columns) {
+            auto creation = std::make_shared<storage::TiledStorageBackendCreationOptions>();
+            creation->rows             = dialog.rows();
+            creation->columns          = dialog.columns();
+            creation->elementSize      = elementSizeForType(type);
+            creation->elementTypeIndex = static_cast<std::uint32_t>(type);
+            creation->rowTileSize      = dialog.rowTileSize();
+            creation->columnTileSize   = dialog.columnTileSize();
+            creation->generator        = [type, population](const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t rows, const std::uint64_t columns) {
                 return makeTile(type, population, rowOffset, columnOffset, rows, columns);
-            });
+            };
+
+            dataset->convertToStorageBackend(Points::StorageBackendType::Tiled, creation);
 
             auto configuration = std::make_shared<Points::StorageBackendConfiguration>();
             configuration->rowTileSize    = dialog.rowTileSize();
