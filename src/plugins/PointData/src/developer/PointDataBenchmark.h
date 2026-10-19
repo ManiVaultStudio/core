@@ -6,6 +6,17 @@
 
 #include <QMenu>
 
+/**
+ * @brief Adds the point-data discovery and benchmark tool to a developer menu.
+ *
+ * The tool benchmarks selected concrete point datasets already present in the
+ * current data hierarchy. It does not create or materialize fixture data; the
+ * loaded datasets retain ownership of their storage backends and cache state.
+ * Benchmark results are written to the selected CSV file, and the workflow
+ * can be canceled through its modal progress task.
+ *
+ * @author Thomas Kroes
+ */
 class PointDataBenchmark final
 {
 public:

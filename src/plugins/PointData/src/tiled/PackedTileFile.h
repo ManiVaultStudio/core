@@ -43,7 +43,7 @@ struct PackedTileBlock
 class POINTDATA_EXPORT PackedTileFileWriter
 {
 public:
-    /** Opens or creates p filePath and uses p codec for each independent block. */
+    /** Opens or creates \p filePath and uses \p codec for each independent block. */
     PackedTileFileWriter(const QString& filePath, const mv::util::SharedCodec& codec);
 
     /**
@@ -77,7 +77,7 @@ private:
 class POINTDATA_EXPORT PackedTileFileReader
 {
 public:
-    /** Opens p filePath and validates its packed-tile file header. */
+    /** Opens \p filePath and validates its packed-tile file header. */
     PackedTileFileReader(const QString& filePath, const mv::util::SharedCodec& codec);
 
     /** Reads and decodes one independently encoded tile block. */

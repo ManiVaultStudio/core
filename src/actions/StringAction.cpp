@@ -211,7 +211,22 @@ QWidget* StringAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
         layout->addWidget(new StringAction::LineEditWidget(parent, this));
 
     if (widgetFlags & WidgetFlag::TextEdit)
-        layout->addWidget(new StringAction::TextEditWidget(parent, this));
+    {
+        auto* textEdit = new StringAction::TextEditWidget(parent, this);
+
+        layout->addWidget(textEdit);
+
+        if (!(widgetFlags & WidgetFlag::LineEdit))
+        {
+            const auto updateTextEditEnabled = [this, widget, textEdit]() {
+                widget->setEnabled(true);
+                textEdit->setReadOnly(!isEnabled());
+            };
+
+            connect(this, &QAction::enabledChanged, widget, updateTextEditEnabled);
+            updateTextEditEnabled();
+        }
+    }
 
     widget->setLayout(layout);
 

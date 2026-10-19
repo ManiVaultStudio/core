@@ -24,12 +24,12 @@ enum class StorageBackendType
 /** Describes operations supported by a storage backend. */
 enum class StorageBackendCapability : std::uint32_t
 {
-    None          = 0,
-    RandomAccess  = 1u << 0,
-    RangeAccess   = 1u << 1,
-    Lazy          = 1u << 2,
-    Writable      = 1u << 3,
-    Materializable = 1u << 4
+    None           = 0,        /**< No advertised backend operations. */
+    RandomAccess   = 1u << 0,  /**< Individual row-major values can be read. */
+    RangeAccess    = 1u << 1,  /**< Rectangular ranges can be visited. */
+    Lazy           = 1u << 2,  /**< Data may be loaded or decoded on demand. */
+    Writable       = 1u << 3,  /**< The backend supports mutation without materialization. */
+    Materializable = 1u << 4   /**< The backend can be converted to eager storage. */
 };
 
 using StorageBackendCapabilities = std::uint32_t;
@@ -62,8 +62,9 @@ struct StorageBackendCreationOptions : StorageBackendConversionOptions
  * Configuration used to create or reconfigure the experimental tiled backend.
  *
  * Tile dimensions are physical limits in matrix rows and columns. The cache
- * capacity limits the number of decoded tile payloads retained in memory; it
- * does not change the serialized dataset or force all tiles to be loaded.
+ * capacity limits the number of decoded tile payloads retained in memory. The
+ * capacity is runtime metadata and is persisted by the tiled point-data
+ * serializer; changing it does not force all tiles to be loaded.
  */
 struct StorageBackendConfiguration : StorageBackendConversionOptions
 {

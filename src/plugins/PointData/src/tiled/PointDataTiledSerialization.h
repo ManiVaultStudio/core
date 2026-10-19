@@ -50,7 +50,8 @@ public:
      * Reconstructs tiled storage while retaining serialized tile payloads for
      * lazy loading. The map is additive to the legacy eager point-data format;
      * callers provide the matrix geometry and element size from the enclosing
-     * point-data metadata.
+     * point-data metadata. Older maps without a cache-capacity field use the
+     * historical default of eight tile payloads.
      *
      * @param map Versioned tiled representation containing tile descriptors and
      * blob metadata.

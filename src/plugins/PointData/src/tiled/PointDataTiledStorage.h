@@ -126,7 +126,7 @@ public:
      */
     TileView acquire(std::uint64_t tileRow, std::uint64_t tileColumn) const;
 
-    /** Reads one row-major element and converts it to float using p typeIndex. */
+    /** Reads one row-major element and converts it to float using \p typeIndex. */
     float valueAt(std::uint64_t flatIndex, std::uint32_t typeIndex) const;
 
     /** Materializes the complete tiled matrix into a caller-owned row-major destination buffer. */

@@ -17,9 +17,9 @@ namespace mv::pointdata::storage
 /**
  * @brief Describes generator-backed tiled storage to be created by the tiled backend.
  *
- * The generator returns row-major bytes for the requested tile. The options
- * are consumed during creation and are not retained by the backend after the
- * tiled storage has been constructed.
+ * The generator returns row-major bytes for the requested tile. The cache
+ * capacity is applied while the tiled storage is constructed. The options
+ * object itself is not retained by the backend after creation.
  *
  * @author T. Kroes
  */

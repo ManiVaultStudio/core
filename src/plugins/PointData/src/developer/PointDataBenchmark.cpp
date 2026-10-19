@@ -56,15 +56,28 @@ namespace
 {
 struct BenchmarkConfiguration
 {
-    std::uint64_t rows      = 10000;
-    std::uint64_t columns   = 128;
-    std::size_t samples     = 10000;
+    std::uint64_t rows          = 10000;
+    std::uint64_t columns       = 128;
+    std::size_t samples         = 10000;
     std::size_t randomRowSamples = 100;
-    QString elementType     = QStringLiteral("float32");
-    QString rowTileSizes    = QStringLiteral("auto");
-    QString columnTileSizes = QStringLiteral("auto");
-    QString cacheCapacities = QStringLiteral("auto");
+    QString scanMode            = QStringLiteral("Quick");
+    QString elementType         = QStringLiteral("float32");
+    QString rowTileSizes        = QStringLiteral("auto");
+    QString columnTileSizes     = QStringLiteral("auto");
+    QString cacheCapacities     = QStringLiteral("auto");
     QStringList datasetLabels;
+};
+
+struct ScanLimits
+{
+    std::uint64_t rows;
+    std::uint64_t columns;
+};
+
+struct ScanDefaults
+{
+    std::int32_t randomSamples;
+    std::int32_t randomRowSamples;
 };
 
 struct BenchmarkDataset
@@ -307,6 +320,51 @@ QString formatValues(const std::vector<std::size_t>& values)
         formattedValues.push_back(QString::number(value));
 
     return formattedValues.join(QStringLiteral(", "));
+}
+
+ScanLimits scanLimits(const QString& scanMode)
+{
+    if (scanMode == QStringLiteral("Standard"))
+        return { 10000, 1000 };
+
+    if (scanMode == QStringLiteral("Full"))
+        return { std::numeric_limits<std::uint64_t>::max(), std::numeric_limits<std::uint64_t>::max() };
+
+    return { 1, 1 };
+}
+
+ScanDefaults scanDefaults(const QString& scanMode)
+{
+    if (scanMode == QStringLiteral("Standard"))
+        return { 10000, 1000 };
+
+    if (scanMode == QStringLiteral("Full"))
+        return { 100000, 10000 };
+
+    return { 100, 1 };
+}
+
+std::vector<std::uint64_t> makeScanIndices(const std::uint64_t dimension, const std::uint64_t maximumCount)
+{
+    const auto count = std::min(dimension, maximumCount);
+    std::vector<std::uint64_t> indices;
+    indices.reserve(static_cast<std::size_t>(count));
+
+    if (count == 0)
+        return indices;
+
+    if (count == dimension)
+    {
+        for (std::uint64_t index = 0; index < dimension; ++index)
+            indices.push_back(index);
+
+        return indices;
+    }
+
+    for (std::uint64_t index = 0; index < count; ++index)
+        indices.push_back(count == 1 ? 0 : index * (dimension - 1) / (count - 1));
+
+    return indices;
 }
 
 class BenchmarkSettingsAction final : public mv::gui::VerticalGroupAction
@@ -572,11 +630,11 @@ double checksumView(const PointDataAccessView& view)
 }
 
 template <typename Function>
-FixtureResult measurePoints(const mv::Dataset<Points>& points, const BenchmarkConfiguration& configuration, const std::vector<std::pair<std::uint64_t, std::uint64_t>>& coordinates, const std::vector<std::uint64_t>& randomRows, const mv::workflow::SharedWorkflowExecutionContext& executionContext, const std::size_t phaseIndex, const std::size_t phaseCount, const QString& accessPattern, Function function)
+FixtureResult measurePoints(const mv::Dataset<Points>& points, const BenchmarkConfiguration& configuration, const std::vector<std::pair<std::uint64_t, std::uint64_t>>& coordinates, const std::vector<std::uint64_t>& randomRows, const std::vector<std::uint64_t>& scanRows, const std::vector<std::uint64_t>& scanColumns, const mv::workflow::SharedWorkflowExecutionContext& executionContext, const std::size_t phaseIndex, const std::size_t phaseCount, const QString& accessPattern, Function function)
 {
     const auto rows       = points->getNumPoints();
     const auto columns    = points->getNumDimensions();
-    const auto operations = accessPattern == QStringLiteral("random") ? static_cast<std::uint64_t>(coordinates.size()) : accessPattern == QStringLiteral("random_row") ? static_cast<std::uint64_t>(randomRows.size()) * columns : rows * columns;
+    const auto operations = accessPattern == QStringLiteral("random") ? static_cast<std::uint64_t>(coordinates.size()) : accessPattern == QStringLiteral("row_scan") ? static_cast<std::uint64_t>(scanRows.size()) * columns : accessPattern == QStringLiteral("column_scan") ? rows * static_cast<std::uint64_t>(scanColumns.size()) : static_cast<std::uint64_t>(randomRows.size()) * columns;
     const auto start      = std::chrono::steady_clock::now();
     throwIfCancellationRequested(executionContext);
     const auto checksum   = function(operations);
@@ -642,8 +700,9 @@ public:
     explicit BenchmarkDialog(QWidget* parent) :
         QDialog(parent),
         _settingsGroupAction(this, "Point Data Discovery and Benchmark", true),
-        _descriptionAction(&_settingsGroupAction, "Description", "The benchmark uses the currently loaded concrete point datasets in the data hierarchy as its fixture. It does not create or reload data. Each dataset is measured for random-point, full row, full column, and random-row access."),
+        _descriptionAction(&_settingsGroupAction, "Description", "The benchmark uses the currently loaded concrete point datasets in the data hierarchy as its fixture. It does not create or reload data. Each dataset is measured for random-point, sampled or full row-major, sampled or full column-major, and random-row access."),
         _datasetsAction(&_settingsGroupAction, "Point datasets"),
+        _scanModeAction(&_settingsGroupAction, "Scan mode", { "Quick", "Standard", "Full" }, "Quick"),
         _samplesAction(&_settingsGroupAction, "Random samples", 1, std::numeric_limits<std::int32_t>::max(), 10000),
         _randomRowSamplesAction(&_settingsGroupAction, "Random row samples", 1, std::numeric_limits<std::int32_t>::max(), 100),
         _outputPathAction(&_settingsGroupAction, "CSV output", QDir::homePath() + QStringLiteral("/point-data-benchmark.csv")),
@@ -660,6 +719,7 @@ public:
         _descriptionAction.setEnabled(false);
         _datasetsAction.setDefaultWidgetFlags(mv::gui::OptionsAction::ListView | mv::gui::OptionsAction::Selection);
         _datasetsAction.setSerializeAllOptions(false);
+        _scanModeAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
         _samplesAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
         _randomRowSamplesAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
         _outputPathAction.setNameFilters({ "CSV files (*.csv)" });
@@ -680,6 +740,7 @@ public:
                 textEdit->setFixedHeight(72);
         });
         _settingsGroupAction.addAction(&_datasetsAction);
+        _settingsGroupAction.addAction(&_scanModeAction);
         _settingsGroupAction.addAction(&_samplesAction);
         _settingsGroupAction.addAction(&_randomRowSamplesAction);
         _settingsGroupAction.addAction(&_outputPathAction);
@@ -707,12 +768,18 @@ public:
         layout->addLayout(buttonLayout);
 
         loadSettings();
+        connect(&_scanModeAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] {
+            const auto defaults = scanDefaults(_scanModeAction.getCurrentText());
+            _samplesAction.setValue(defaults.randomSamples);
+            _randomRowSamplesAction.setValue(defaults.randomRowSamples);
+            updatePreview();
+        });
         updatePreview();
     }
 
     BenchmarkConfiguration configuration() const
     {
-        return { 0, 0, static_cast<std::size_t>(_samplesAction.getValue()), static_cast<std::size_t>(_randomRowSamplesAction.getValue()), {}, {}, {}, {}, _datasetsAction.getSelectedOptions() };
+        return { 0, 0, static_cast<std::size_t>(_samplesAction.getValue()), static_cast<std::size_t>(_randomRowSamplesAction.getValue()), _scanModeAction.getCurrentText(), {}, {}, {}, {}, _datasetsAction.getSelectedOptions() };
     }
 
     QString outputPath() const { return _outputPathAction.getFilePath(); }
@@ -723,6 +790,7 @@ public:
 
         application->setSetting("Developer/PointDataBenchmark/Samples", _samplesAction.getValue());
         application->setSetting("Developer/PointDataBenchmark/RandomRowSamples", _randomRowSamplesAction.getValue());
+        application->setSetting("Developer/PointDataBenchmark/ScanMode", _scanModeAction.getCurrentText());
         application->setSetting("Developer/PointDataBenchmark/Datasets", _datasetsAction.getSelectedOptions());
         application->setSetting("Developer/PointDataBenchmark/OutputPath", _outputPathAction.getFilePath());
     }
@@ -734,6 +802,7 @@ private:
 
         _samplesAction.setValue(application->getSetting("Developer/PointDataBenchmark/Samples", _samplesAction.getValue()).toInt());
         _randomRowSamplesAction.setValue(application->getSetting("Developer/PointDataBenchmark/RandomRowSamples", _randomRowSamplesAction.getValue()).toInt());
+        _scanModeAction.setCurrentText(application->getSetting("Developer/PointDataBenchmark/ScanMode", _scanModeAction.getCurrentText()).toString());
         _datasetsAction.setSelectedOptions(application->getSetting("Developer/PointDataBenchmark/Datasets", _datasetsAction.getSelectedOptions()).toStringList());
         _outputPathAction.setFilePath(application->getSetting("Developer/PointDataBenchmark/OutputPath", _outputPathAction.getFilePath()).toString());
     }
@@ -744,14 +813,18 @@ private:
         {
             const auto datasets = getPointDatasets();
             QStringList datasetSummary;
+            const auto limits = scanLimits(_scanModeAction.getCurrentText());
 
             for (const auto& dataset : datasets)
                 datasetSummary.push_back(tr("%1%2").arg(_datasetsAction.isOptionSelected(dataset.label) ? QStringLiteral("[enabled] ") : QStringLiteral("[disabled] ")).arg(dataset.label));
 
-            _previewAction.setString(tr("Available point datasets: %1\n%2\nEnabled datasets: %3\nRandom point samples per dataset: %4\nRandom row samples per dataset: %5\nMeasurements: %6 per enabled dataset (random point, row scan, column scan, random-row mean)\nTile sizes and cache capacities are read from each loaded dataset.")
+            _previewAction.setString(tr("Available point datasets: %1\n%2\nEnabled datasets: %3\nScan mode: %4 (up to %5 rows and %6 columns per scan)\nRandom point samples per dataset: %7\nRandom row samples per dataset: %8\nMeasurements: %9 per enabled dataset (random point, row-major scan, column-major scan, random-row mean)\nTile sizes and cache capacities are read from each loaded dataset.")
                 .arg(datasets.size())
                 .arg(datasetSummary.isEmpty() ? tr("No point datasets are currently loaded") : datasetSummary.join('\n'))
                 .arg(_datasetsAction.getSelectedOptions().size())
+                .arg(_scanModeAction.getCurrentText())
+                .arg(limits.rows == std::numeric_limits<std::uint64_t>::max() ? tr("all") : QString::number(limits.rows))
+                .arg(limits.columns == std::numeric_limits<std::uint64_t>::max() ? tr("all") : QString::number(limits.columns))
                 .arg(_samplesAction.getValue())
                 .arg(_randomRowSamplesAction.getValue())
                 .arg(_datasetsAction.getSelectedOptions().size() * 4));
@@ -765,6 +838,7 @@ private:
     BenchmarkSettingsAction     _settingsGroupAction;
     mv::gui::StringAction        _descriptionAction;
     mv::gui::OptionsAction       _datasetsAction;
+    mv::gui::OptionAction        _scanModeAction;
     mv::gui::IntegralAction      _samplesAction;
     mv::gui::IntegralAction      _randomRowSamplesAction;
     mv::gui::FilePickerAction    _outputPathAction;
@@ -806,10 +880,13 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
             datasetConfiguration.columns = pointDataset->getNumDimensions();
             const auto coordinates = makeRandomCoordinates(datasetConfiguration);
             const auto randomRows = makeRandomRows(datasetConfiguration);
+            const auto limits = scanLimits(datasetConfiguration.scanMode);
+            const auto scanRows = makeScanIndices(datasetConfiguration.rows, limits.rows);
+            const auto scanColumns = makeScanIndices(datasetConfiguration.columns, limits.columns);
             const auto phaseCount = std::size_t { 4 };
 
             const auto measureAccess = [&](const QString& accessPattern, const std::size_t phaseIndex) {
-                return measurePoints(pointDataset, datasetConfiguration, coordinates, randomRows, executionContext, phaseIndex, phaseCount, accessPattern, [&](const std::uint64_t operations) {
+                return measurePoints(pointDataset, datasetConfiguration, coordinates, randomRows, scanRows, scanColumns, executionContext, phaseIndex, phaseCount, accessPattern, [&](const std::uint64_t operations) {
                     double checksum = 0.0;
                     std::uint64_t completedOperations = 0;
                     const auto progressInterval = std::max<std::uint64_t>(1, operations / 100);
@@ -838,13 +915,35 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
 
                         if (accessPattern == QStringLiteral("row_scan"))
                         {
-                            for (std::uint64_t firstRow = 0; firstRow < datasetConfiguration.rows; firstRow += 1024)
-                                pointDataset->visitRows(firstRow, std::min<std::uint64_t>(1024, datasetConfiguration.rows - firstRow), visitor);
+                            if (datasetConfiguration.scanMode == QStringLiteral("Full"))
+                            {
+                                for (std::uint64_t firstRow = 0; firstRow < datasetConfiguration.rows; firstRow += 1024)
+                                    pointDataset->visitRows(firstRow, std::min<std::uint64_t>(1024, datasetConfiguration.rows - firstRow), visitor);
+                            }
+                            else
+                            {
+                                for (std::size_t firstRow = 0; firstRow < scanRows.size(); firstRow += 128)
+                                {
+                                    const auto lastRow = std::min<std::size_t>(scanRows.size(), firstRow + 128);
+                                    pointDataset->visitRows(std::vector<std::uint64_t>(scanRows.begin() + firstRow, scanRows.begin() + lastRow), visitor);
+                                }
+                            }
                         }
                         else if (accessPattern == QStringLiteral("column_scan"))
                         {
-                            for (std::uint64_t firstColumn = 0; firstColumn < datasetConfiguration.columns; firstColumn += 64)
-                                pointDataset->visitColumns(firstColumn, std::min<std::uint64_t>(64, datasetConfiguration.columns - firstColumn), visitor);
+                            if (datasetConfiguration.scanMode == QStringLiteral("Full"))
+                            {
+                                for (std::uint64_t firstColumn = 0; firstColumn < datasetConfiguration.columns; firstColumn += 64)
+                                    pointDataset->visitColumns(firstColumn, std::min<std::uint64_t>(64, datasetConfiguration.columns - firstColumn), visitor);
+                            }
+                            else
+                            {
+                                for (std::size_t firstColumn = 0; firstColumn < scanColumns.size(); firstColumn += 64)
+                                {
+                                    const auto lastColumn = std::min<std::size_t>(scanColumns.size(), firstColumn + 64);
+                                    pointDataset->visitColumns(std::vector<std::uint64_t>(scanColumns.begin() + firstColumn, scanColumns.begin() + lastColumn), visitor);
+                                }
+                            }
                         }
                         else
                         {
