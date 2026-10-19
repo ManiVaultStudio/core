@@ -33,6 +33,7 @@ struct TiledStorageBackendCreationOptions final : StorageBackendCreationOptions
     std::uint32_t elementTypeIndex     = 0;   /**< PointData element-type index used by access views. */
     std::size_t   rowTileSize          = 256; /**< Maximum number of rows per tile. */
     std::size_t   columnTileSize       = 8;   /**< Maximum number of columns per tile. */
+    std::size_t   cacheCapacity        = 8;   /**< Maximum number of generated tile payloads retained in memory. */
     TileGenerator generator;                 /**< Callback that generates one tile on first access. */
 };
 

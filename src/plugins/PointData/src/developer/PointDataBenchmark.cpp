@@ -13,6 +13,7 @@
 #include <models/DatasetsListModel.h>
 #include <actions/FilePickerAction.h>
 #include <actions/IntegralAction.h>
+#include <actions/OptionsAction.h>
 #include <actions/OptionAction.h>
 #include <actions/PresetsAction.h>
 #include <actions/StringAction.h>
@@ -63,6 +64,13 @@ struct BenchmarkConfiguration
     QString rowTileSizes    = QStringLiteral("auto");
     QString columnTileSizes = QStringLiteral("auto");
     QString cacheCapacities = QStringLiteral("auto");
+    QStringList datasetLabels;
+};
+
+struct BenchmarkDataset
+{
+    mv::Dataset<Points> points;
+    QString label;
 };
 
 struct BenchmarkResult
@@ -534,6 +542,19 @@ QString csvValue(const QString& value)
     return QStringLiteral("\"%1\"").arg(escaped);
 }
 
+bool isCancellationRequested(const mv::workflow::SharedWorkflowExecutionContext& executionContext)
+{
+    const auto task = executionContext ? executionContext->getTask() : nullptr;
+
+    return task && (task->isAboutToBeAborted() || task->isAborting() || task->isAborted());
+}
+
+void throwIfCancellationRequested(const mv::workflow::SharedWorkflowExecutionContext& executionContext)
+{
+    if (isCancellationRequested(executionContext))
+        throw std::runtime_error("Point-data benchmark canceled");
+}
+
 double checksumView(const PointDataAccessView& view)
 {
     double checksum = 0.0;
@@ -557,6 +578,7 @@ FixtureResult measurePoints(const mv::Dataset<Points>& points, const BenchmarkCo
     const auto columns    = points->getNumDimensions();
     const auto operations = accessPattern == QStringLiteral("random") ? static_cast<std::uint64_t>(coordinates.size()) : accessPattern == QStringLiteral("random_row") ? static_cast<std::uint64_t>(randomRows.size()) * columns : rows * columns;
     const auto start      = std::chrono::steady_clock::now();
+    throwIfCancellationRequested(executionContext);
     const auto checksum   = function(operations);
     const auto end        = std::chrono::steady_clock::now();
 
@@ -586,16 +608,24 @@ FixtureResult measurePoints(const mv::Dataset<Points>& points, const BenchmarkCo
     };
 }
 
-std::vector<mv::Dataset<Points>> getPointDatasets()
+QString datasetLabel(const mv::Dataset<Points>& dataset)
 {
-    std::vector<mv::Dataset<Points>> pointDatasets;
+    return QObject::tr("%1 (%2 × %3, %4, %5)").arg(dataset.getDataset()->getGuiName()).arg(dataset->getNumPoints()).arg(dataset->getNumDimensions()).arg(dataset->getElementTypeName()).arg(backendName(dataset->getStorageBackendType()));
+}
+
+std::vector<BenchmarkDataset> getPointDatasets()
+{
+    std::vector<BenchmarkDataset> pointDatasets;
 
     for (const auto& dataset : mv::data().getDatasetsListModel().getDatasets())
     {
         const auto* points = dynamic_cast<const Points*>(dataset.getDataset());
 
         if (points != nullptr && !points->isProxy() && points->getNumPoints() > 0 && points->getNumDimensions() > 0)
-            pointDatasets.emplace_back(const_cast<Points*>(points));
+        {
+            const mv::Dataset<Points> pointDataset(const_cast<Points*>(points));
+            pointDatasets.push_back({ pointDataset, datasetLabel(pointDataset) });
+        }
     }
 
     return pointDatasets;
@@ -611,21 +641,25 @@ class BenchmarkDialog final : public QDialog
 public:
     explicit BenchmarkDialog(QWidget* parent) :
         QDialog(parent),
-        _settingsGroupAction(this, "Point-data benchmark sweep", true),
+        _settingsGroupAction(this, "Point Data Discovery and Benchmark", true),
         _descriptionAction(&_settingsGroupAction, "Description", "The benchmark uses the currently loaded concrete point datasets in the data hierarchy as its fixture. It does not create or reload data. Each dataset is measured for random-point, full row, full column, and random-row access."),
+        _datasetsAction(&_settingsGroupAction, "Point datasets"),
         _samplesAction(&_settingsGroupAction, "Random samples", 1, std::numeric_limits<std::int32_t>::max(), 10000),
         _randomRowSamplesAction(&_settingsGroupAction, "Random row samples", 1, std::numeric_limits<std::int32_t>::max(), 100),
         _outputPathAction(&_settingsGroupAction, "CSV output", QDir::homePath() + QStringLiteral("/point-data-benchmark.csv")),
         _previewAction(&_settingsGroupAction, "Preview"),
-        _presetsAction(&_settingsGroupAction, &_settingsGroupAction, "Developer/PointDataBenchmark/Presets", "Benchmark sweep", mv::util::StyledIcon("prescription"))
+        _presetsAction(&_settingsGroupAction, &_settingsGroupAction, "Developer/PointDataBenchmark/Presets", "Point Data Benchmark", mv::util::StyledIcon("prescription"))
     {
         setWindowIcon(mv::util::StyledIcon("gauge-high"));
-        setWindowTitle(tr("Point-data benchmark sweep"));
+        setWindowTitle(tr("Point Data Discovery and Benchmark"));
         resize(560, 640);
 
         _settingsGroupAction.setShowLabels(true);
+        _settingsGroupAction.setDefaultWidgetFlag(mv::gui::GroupAction::NoMargins);
         _descriptionAction.setDefaultWidgetFlags(mv::gui::StringAction::TextEdit);
         _descriptionAction.setEnabled(false);
+        _datasetsAction.setDefaultWidgetFlags(mv::gui::OptionsAction::ListView | mv::gui::OptionsAction::Selection);
+        _datasetsAction.setSerializeAllOptions(false);
         _samplesAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
         _randomRowSamplesAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
         _outputPathAction.setNameFilters({ "CSV files (*.csv)" });
@@ -633,10 +667,19 @@ public:
         _previewAction.setDefaultWidgetFlags(mv::gui::StringAction::TextEdit);
         _previewAction.setEnabled(false);
 
+        const auto datasets = getPointDatasets();
+        QStringList datasetLabels;
+
+        for (const auto& dataset : datasets)
+            datasetLabels.push_back(dataset.label);
+
+        _datasetsAction.initialize(datasetLabels, datasetLabels);
+
         _settingsGroupAction.addAction(&_descriptionAction, -1, [](mv::gui::WidgetAction*, QWidget* widget) {
             if (auto* textEdit = widget->findChild<QTextEdit*>(QStringLiteral("TextEdit")))
                 textEdit->setFixedHeight(72);
         });
+        _settingsGroupAction.addAction(&_datasetsAction);
         _settingsGroupAction.addAction(&_samplesAction);
         _settingsGroupAction.addAction(&_randomRowSamplesAction);
         _settingsGroupAction.addAction(&_outputPathAction);
@@ -644,6 +687,7 @@ public:
 
         connect(&_samplesAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updatePreview(); });
         connect(&_randomRowSamplesAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updatePreview(); });
+        connect(&_datasetsAction, &mv::gui::OptionsAction::selectedOptionsChanged, this, [this] { updatePreview(); });
 
         auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
         connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
@@ -668,7 +712,7 @@ public:
 
     BenchmarkConfiguration configuration() const
     {
-        return { 0, 0, static_cast<std::size_t>(_samplesAction.getValue()), static_cast<std::size_t>(_randomRowSamplesAction.getValue()), {}, {}, {}, {} };
+        return { 0, 0, static_cast<std::size_t>(_samplesAction.getValue()), static_cast<std::size_t>(_randomRowSamplesAction.getValue()), {}, {}, {}, {}, _datasetsAction.getSelectedOptions() };
     }
 
     QString outputPath() const { return _outputPathAction.getFilePath(); }
@@ -679,6 +723,7 @@ public:
 
         application->setSetting("Developer/PointDataBenchmark/Samples", _samplesAction.getValue());
         application->setSetting("Developer/PointDataBenchmark/RandomRowSamples", _randomRowSamplesAction.getValue());
+        application->setSetting("Developer/PointDataBenchmark/Datasets", _datasetsAction.getSelectedOptions());
         application->setSetting("Developer/PointDataBenchmark/OutputPath", _outputPathAction.getFilePath());
     }
 
@@ -689,6 +734,7 @@ private:
 
         _samplesAction.setValue(application->getSetting("Developer/PointDataBenchmark/Samples", _samplesAction.getValue()).toInt());
         _randomRowSamplesAction.setValue(application->getSetting("Developer/PointDataBenchmark/RandomRowSamples", _randomRowSamplesAction.getValue()).toInt());
+        _datasetsAction.setSelectedOptions(application->getSetting("Developer/PointDataBenchmark/Datasets", _datasetsAction.getSelectedOptions()).toStringList());
         _outputPathAction.setFilePath(application->getSetting("Developer/PointDataBenchmark/OutputPath", _outputPathAction.getFilePath()).toString());
     }
 
@@ -700,14 +746,15 @@ private:
             QStringList datasetSummary;
 
             for (const auto& dataset : datasets)
-                datasetSummary.push_back(tr("%1 (%2 × %3, %4, %5)").arg(dataset.getDataset()->getGuiName()).arg(dataset->getNumPoints()).arg(dataset->getNumDimensions()).arg(dataset->getElementTypeName()).arg(backendName(dataset->getStorageBackendType())));
+                datasetSummary.push_back(tr("%1%2").arg(_datasetsAction.isOptionSelected(dataset.label) ? QStringLiteral("[enabled] ") : QStringLiteral("[disabled] ")).arg(dataset.label));
 
-            _previewAction.setString(tr("Fixture datasets: %1\n%2\nRandom point samples per dataset: %3\nRandom row samples per dataset: %4\nMeasurements: %5 per dataset (random point, row scan, column scan, random-row mean)\nTile sizes and cache capacities are read from each loaded dataset.")
+            _previewAction.setString(tr("Available point datasets: %1\n%2\nEnabled datasets: %3\nRandom point samples per dataset: %4\nRandom row samples per dataset: %5\nMeasurements: %6 per enabled dataset (random point, row scan, column scan, random-row mean)\nTile sizes and cache capacities are read from each loaded dataset.")
                 .arg(datasets.size())
                 .arg(datasetSummary.isEmpty() ? tr("No point datasets are currently loaded") : datasetSummary.join('\n'))
+                .arg(_datasetsAction.getSelectedOptions().size())
                 .arg(_samplesAction.getValue())
                 .arg(_randomRowSamplesAction.getValue())
-                .arg(datasets.size() * 4));
+                .arg(_datasetsAction.getSelectedOptions().size() * 4));
         }
         catch (const std::exception& exception)
         {
@@ -717,6 +764,7 @@ private:
 
     BenchmarkSettingsAction     _settingsGroupAction;
     mv::gui::StringAction        _descriptionAction;
+    mv::gui::OptionsAction       _datasetsAction;
     mv::gui::IntegralAction      _samplesAction;
     mv::gui::IntegralAction      _randomRowSamplesAction;
     mv::gui::FilePickerAction    _outputPathAction;
@@ -726,10 +774,17 @@ private:
 
 void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, const QString& outputPath)
 {
-    const auto datasets = getPointDatasets();
+    const auto availableDatasets = getPointDatasets();
+    std::vector<BenchmarkDataset> datasets;
+
+    for (const auto& dataset : availableDatasets)
+    {
+        if (configuration.datasetLabels.contains(dataset.label))
+            datasets.push_back(dataset);
+    }
 
     if (datasets.empty())
-        throw std::runtime_error("At least one non-empty point dataset must be loaded in the data hierarchy before running the benchmark");
+        throw std::runtime_error("Enable at least one non-empty point dataset before running the benchmark");
 
     const auto output = std::make_shared<std::ofstream>(outputPath.toStdString(), std::ios::trunc);
 
@@ -744,20 +799,22 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
 
     for (const auto& points : datasets)
     {
-        benchmarkJobs.emplace_back(QStringLiteral("%1: %2, %3 × %4, %5").arg(points.getDataset()->getGuiName()).arg(points->getElementTypeName()).arg(points->getNumPoints()).arg(points->getNumDimensions()).arg(backendName(points->getStorageBackendType())), [configuration, points, output](const mv::workflow::WorkflowPlan::Job&, const mv::workflow::SharedWorkflowExecutionContext& executionContext) {
+        benchmarkJobs.emplace_back(points.label, [configuration, points, output](const mv::workflow::WorkflowPlan::Job&, const mv::workflow::SharedWorkflowExecutionContext& executionContext) {
             BenchmarkConfiguration datasetConfiguration = configuration;
-            datasetConfiguration.rows = points->getNumPoints();
-            datasetConfiguration.columns = points->getNumDimensions();
+            const auto& pointDataset = points.points;
+            datasetConfiguration.rows = pointDataset->getNumPoints();
+            datasetConfiguration.columns = pointDataset->getNumDimensions();
             const auto coordinates = makeRandomCoordinates(datasetConfiguration);
             const auto randomRows = makeRandomRows(datasetConfiguration);
             const auto phaseCount = std::size_t { 4 };
 
             const auto measureAccess = [&](const QString& accessPattern, const std::size_t phaseIndex) {
-                return measurePoints(points, datasetConfiguration, coordinates, randomRows, executionContext, phaseIndex, phaseCount, accessPattern, [&](const std::uint64_t operations) {
+                return measurePoints(pointDataset, datasetConfiguration, coordinates, randomRows, executionContext, phaseIndex, phaseCount, accessPattern, [&](const std::uint64_t operations) {
                     double checksum = 0.0;
                     std::uint64_t completedOperations = 0;
                     const auto progressInterval = std::max<std::uint64_t>(1, operations / 100);
                     const auto reportProgress = [&](const std::uint64_t count) {
+                        throwIfCancellationRequested(executionContext);
                         completedOperations += count;
 
                         if (executionContext && (completedOperations >= progressInterval || completedOperations == operations))
@@ -768,7 +825,7 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
                     {
                         for (const auto [row, column] : coordinates)
                         {
-                            checksum += points->getValueAt(row * datasetConfiguration.columns + column);
+                            checksum += pointDataset->getValueAt(row * datasetConfiguration.columns + column);
                             reportProgress(1);
                         }
                     }
@@ -782,19 +839,19 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
                         if (accessPattern == QStringLiteral("row_scan"))
                         {
                             for (std::uint64_t firstRow = 0; firstRow < datasetConfiguration.rows; firstRow += 1024)
-                                points->visitRows(firstRow, std::min<std::uint64_t>(1024, datasetConfiguration.rows - firstRow), visitor);
+                                pointDataset->visitRows(firstRow, std::min<std::uint64_t>(1024, datasetConfiguration.rows - firstRow), visitor);
                         }
                         else if (accessPattern == QStringLiteral("column_scan"))
                         {
                             for (std::uint64_t firstColumn = 0; firstColumn < datasetConfiguration.columns; firstColumn += 64)
-                                points->visitColumns(firstColumn, std::min<std::uint64_t>(64, datasetConfiguration.columns - firstColumn), visitor);
+                                pointDataset->visitColumns(firstColumn, std::min<std::uint64_t>(64, datasetConfiguration.columns - firstColumn), visitor);
                         }
                         else
                         {
                             for (std::size_t firstRow = 0; firstRow < randomRows.size(); firstRow += 128)
                             {
                                 const auto lastRow = std::min<std::size_t>(randomRows.size(), firstRow + 128);
-                                points->visitRows(std::vector<std::uint64_t>(randomRows.begin() + firstRow, randomRows.begin() + lastRow), visitor);
+                                pointDataset->visitRows(std::vector<std::uint64_t>(randomRows.begin() + firstRow, randomRows.begin() + lastRow), visitor);
                             }
                         }
                     }
@@ -816,12 +873,20 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
     });
 
     mv::workflow::WorkflowOptions options;
+    options.cancellation.enabled = true;
     options.reporting.progress = true;
     options.reporting.finishedNotification = false;
 
     auto future = mv::Application::getWorkflowPlanExecutor().execute(std::move(plan), nullptr, options);
-    future.onFinished(owner, [output, outputPath](const mv::workflow::SharedWorkflowResult&) {
+    future.onFinished(owner, [output, outputPath](const mv::workflow::SharedWorkflowResult& result) {
         output->flush();
+
+        if (!result)
+        {
+            mv::help().addNotification(QObject::tr("Point-data benchmark stopped"), QObject::tr("The benchmark was canceled or stopped before completion."), mv::util::StyledIcon("stop"));
+            return;
+        }
+
         mv::help().addNotification(QObject::tr("Point-data benchmark completed"), QObject::tr("Benchmark results were saved to %1.").arg(outputPath), mv::util::StyledIcon("check"));
     });
 }
@@ -829,8 +894,8 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
 
 void PointDataBenchmark::populateMenu(QMenu& menu, QWidget* owner)
 {
-    auto* action = menu.addAction(mv::util::StyledIcon("gauge-high"), QObject::tr("Point-data benchmark sweep…"));
-    action->setToolTip(QObject::tr("Benchmark the loaded concrete point datasets using random-point, row, column, and random-row access"));
+    auto* action = menu.addAction(mv::util::StyledIcon("gauge-high"), QObject::tr("Point Data Discovery and Benchmark…"));
+    action->setToolTip(QObject::tr("Discover and benchmark selected concrete point datasets using random-point, row, column, and random-row access"));
 
     QObject::connect(action, &QAction::triggered, owner, [owner] {
         BenchmarkDialog dialog(owner);

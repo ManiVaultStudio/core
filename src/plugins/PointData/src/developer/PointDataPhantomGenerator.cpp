@@ -10,12 +10,17 @@
 #include <DeveloperActionRegistry.h>
 #include <actions/IntegralAction.h>
 #include <actions/OptionAction.h>
+#include <actions/PresetsAction.h>
 #include <actions/StringAction.h>
+#include <actions/ToggleAction.h>
 #include <actions/VerticalGroupAction.h>
 #include <util/StyledIcon.h>
 
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <QHBoxLayout>
+#include <QMessageBox>
+#include <QPushButton>
 #include <QVBoxLayout>
 
 #include <algorithm>
@@ -289,6 +294,33 @@ void populateEager(Points& points, const Points::ElementTypeSpecifier type, cons
     }
 }
 
+class PhantomSettingsAction final : public mv::gui::VerticalGroupAction
+{
+public:
+    PhantomSettingsAction(QObject* parent, const QString& title) :
+        mv::gui::VerticalGroupAction(parent, title)
+    {
+    }
+
+    void fromVariantMap(const QVariantMap& variantMap) override
+    {
+        mv::gui::VerticalGroupAction::fromVariantMap(variantMap);
+
+        for (auto* action : getActions())
+            action->fromParentVariantMap(variantMap, true);
+    }
+
+    QVariantMap toVariantMap() const override
+    {
+        auto variantMap = mv::gui::VerticalGroupAction::toVariantMap();
+
+        for (const auto* action : const_cast<PhantomSettingsAction*>(this)->getConstActions())
+            action->insertIntoVariantMap(variantMap);
+
+        return variantMap;
+    }
+};
+
 /**
  * @brief Collects settings for a developer-generated phantom dataset.
  *
@@ -309,6 +341,7 @@ public:
         QDialog(parent),
         _settingsGroupAction(this, "Phantom points"),
         _nameAction(&_settingsGroupAction, "Dataset name", "Phantom points"),
+        _nameOverrideAction(&_settingsGroupAction, "Override generated name", false),
         _rowsAction(&_settingsGroupAction, "Rows", 1, std::numeric_limits<std::int32_t>::max(), 1000000),
         _columnsAction(&_settingsGroupAction, "Dimensions", 1, 100000, 32),
         _dimensionNameAction(&_settingsGroupAction, "Dimension names", { "DIM_<index>", "Lorem ipsum" }, "DIM_<index>"),
@@ -320,7 +353,8 @@ public:
         _rowTileSizeAction(&_settingsGroupAction, "Tile height", 1, std::numeric_limits<std::int32_t>::max(), 256),
         _columnTileSizeAction(&_settingsGroupAction, "Tile width", 1, std::numeric_limits<std::int32_t>::max(), 8),
         _cacheCapacityAction(&_settingsGroupAction, "Cache tiles", 1, 100000, 8),
-        _estimateAction(&_settingsGroupAction, "Estimate")
+        _estimateAction(&_settingsGroupAction, "Estimate"),
+        _presetsAction(&_settingsGroupAction, &_settingsGroupAction, "Developer/PhantomPointGenerator/Presets", "Phantom points", mv::util::StyledIcon("prescription"))
     {
         setWindowIcon(mv::util::StyledIcon("table"));
         setWindowTitle(tr("Create phantom points dataset"));
@@ -333,7 +367,9 @@ public:
         _typeAction.initialize(typeNames, typeNames.first());
 
         _settingsGroupAction.setShowLabels(true);
+        _settingsGroupAction.setDefaultWidgetFlag(mv::gui::GroupAction::NoMargins);
         _nameAction.setDefaultWidgetFlags(mv::gui::StringAction::LineEdit);
+        _nameOverrideAction.setDefaultWidgetFlags(mv::gui::ToggleAction::CheckBox);
         _rowsAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
         _columnsAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
         _dimensionNameAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
@@ -348,6 +384,7 @@ public:
         _estimateAction.setEnabled(false);
 
         _settingsGroupAction.addAction(&_nameAction);
+        _settingsGroupAction.addAction(&_nameOverrideAction);
         _settingsGroupAction.addAction(&_rowsAction);
         _settingsGroupAction.addAction(&_columnsAction);
         _settingsGroupAction.addAction(&_dimensionNameAction);
@@ -363,9 +400,21 @@ public:
 
         auto* layout = new QVBoxLayout(this);
         layout->addWidget(_settingsGroupAction.createWidget(this));
+        setMinimumWidth(720);
+
+        auto* presetsButton = new QPushButton(tr("Presets"), this);
+        presetsButton->setMenu(_presetsAction.getMenu(presetsButton));
+
+        auto* createButton = new QPushButton(tr("Create"), this);
+        _createButton = createButton;
 
         auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
-        layout->addWidget(buttons);
+        auto* buttonLayout = new QHBoxLayout();
+        buttonLayout->addWidget(presetsButton);
+        buttonLayout->addStretch(1);
+        buttonLayout->addWidget(createButton);
+        buttonLayout->addWidget(buttons);
+        layout->addLayout(buttonLayout);
 
         connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
         connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
@@ -373,6 +422,8 @@ public:
         connect(&_rowsAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateTileGeometryFromPolicy(); });
         connect(&_columnsAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateTileGeometryFromPolicy(); });
         connect(&_typeAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateTileGeometryFromPolicy(); });
+        connect(&_populationAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateName(); });
+        connect(&_nameOverrideAction, &mv::gui::ToggleAction::toggled, this, [this] { updateName(); });
         connect(&_storageBackendAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateActions(); });
         connect(&_tileAsymmetryAction.getAsymmetryAction(), &mv::gui::IntegralAction::valueChanged, this, [this] { updateTileGeometryFromPolicy(); });
         connect(&_tileSizeAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateTileGeometryFromPolicy(); });
@@ -389,6 +440,8 @@ public:
         const auto name = _nameAction.getString().trimmed();
         return name.isEmpty() ? QStringLiteral("Phantom points") : name;
     }
+
+    QPushButton* createButton() const { return _createButton; }
 
     std::uint64_t rows() const { return static_cast<std::uint64_t>(_rowsAction.getValue()); }
 
@@ -413,6 +466,7 @@ public:
         auto* application = Application::current();
 
         application->setSetting("Developer/PhantomPointGenerator/Name", _nameAction.getString());
+        application->setSetting("Developer/PhantomPointGenerator/NameOverride", _nameOverrideAction.isChecked());
         application->setSetting("Developer/PhantomPointGenerator/Rows", _rowsAction.getValue());
         application->setSetting("Developer/PhantomPointGenerator/Columns", _columnsAction.getValue());
         application->setSetting("Developer/PhantomPointGenerator/DimensionNames", _dimensionNameAction.getCurrentText());
@@ -432,6 +486,7 @@ private:
         auto* application = Application::current();
 
         _nameAction.setString(application->getSetting("Developer/PhantomPointGenerator/Name", _nameAction.getString()).toString());
+        _nameOverrideAction.setChecked(application->getSetting("Developer/PhantomPointGenerator/NameOverride", _nameOverrideAction.isChecked()).toBool());
         _rowsAction.setValue(application->getSetting("Developer/PhantomPointGenerator/Rows", _rowsAction.getValue()).toInt());
         _columnsAction.setValue(application->getSetting("Developer/PhantomPointGenerator/Columns", _columnsAction.getValue()).toInt());
         _dimensionNameAction.setCurrentText(application->getSetting("Developer/PhantomPointGenerator/DimensionNames", _dimensionNameAction.getCurrentText()).toString());
@@ -448,6 +503,7 @@ private:
 
     void updateActions()
     {
+        updateName();
         const auto tiled = isTiled();
         _tileAsymmetryAction.setEnabled(tiled);
         _tileSizeAction.setEnabled(tiled);
@@ -463,10 +519,34 @@ private:
         _rowTileSizeAction.setValue(static_cast<std::int32_t>(geometry.rowTileSize));
         _columnTileSizeAction.setValue(static_cast<std::int32_t>(geometry.columnTileSize));
         _cacheCapacityAction.setValue(static_cast<std::int32_t>(storage::calculateTiledStorageCacheCapacity(rows(), columns(), geometry)));
+        updateName();
+    }
+
+    void updateName()
+    {
+        _nameAction.setEnabled(_nameOverrideAction.isChecked());
+
+        if (_nameOverrideAction.isChecked())
+            return;
+
+        auto generatedName = QStringLiteral("Phantom (size: %1x%2, type: %3, storage: %4")
+            .arg(rows())
+            .arg(columns())
+            .arg(_typeAction.getCurrentText())
+            .arg(_storageBackendAction.getCurrentText());
+
+        if (isTiled())
+            generatedName += QStringLiteral(", tilesize: %1x%2, cache: %3").arg(rowTileSize()).arg(columnTileSize()).arg(cacheCapacity());
+
+        generatedName += QLatin1Char(')');
+
+        _nameAction.setString(generatedName);
     }
 
     void updateEstimate()
     {
+        updateName();
+
         const auto type        = Points::elementTypeSpecifier(_typeAction.getCurrentText());
         const auto elementSize = elementSizeForType(type);
 
@@ -485,8 +565,9 @@ private:
             .arg(formatBytes(estimate.indexBytes)));
     }
 
-    mv::gui::VerticalGroupAction         _settingsGroupAction;
+    PhantomSettingsAction                _settingsGroupAction;
     mv::gui::StringAction                _nameAction;
+    mv::gui::ToggleAction                _nameOverrideAction;
     mv::gui::IntegralAction              _rowsAction;
     mv::gui::IntegralAction              _columnsAction;
     mv::gui::OptionAction                _dimensionNameAction;
@@ -499,6 +580,8 @@ private:
     mv::gui::IntegralAction              _columnTileSizeAction;
     mv::gui::IntegralAction              _cacheCapacityAction;
     mv::gui::StringAction                _estimateAction;
+    mv::gui::PresetsAction               _presetsAction;
+    QPushButton*                          _createButton = nullptr;
 };
 }
 
@@ -508,48 +591,65 @@ void PointDataPhantomGenerator::populateMenu(QMenu& menu, QWidget* owner)
     action->setToolTip(QObject::tr("Create a synthetic eager or tiled points dataset"));
     QObject::connect(action, &QAction::triggered, owner, [owner] {
         PhantomDialog dialog(owner);
+        const auto createDataset = [&dialog] {
+            dialog.saveSettings();
+
+            const auto type = dialog.type();
+            const auto population = dialog.population();
+            auto dataset = mv::data().createDataset<Points>("Points", dialog.name());
+
+            if (dialog.isTiled())
+            {
+                auto creation = std::make_shared<storage::TiledStorageBackendCreationOptions>();
+                creation->rows             = dialog.rows();
+                creation->columns          = dialog.columns();
+                creation->elementSize      = elementSizeForType(type);
+                creation->elementTypeIndex = static_cast<std::uint32_t>(type);
+                creation->rowTileSize      = dialog.rowTileSize();
+                creation->columnTileSize   = dialog.columnTileSize();
+                creation->cacheCapacity   = dialog.cacheCapacity();
+                creation->generator        = [type, population](const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t rows, const std::uint64_t columns) {
+                    return makeTile(type, population, rowOffset, columnOffset, rows, columns);
+                };
+
+                dataset->convertToStorageBackend(Points::StorageBackendType::Tiled, creation);
+            }
+            else
+                populateEager(*dataset, type, population, dialog.rows(), dialog.columns());
+
+            dataset->setDimensionNames(makeDimensionNames(dialog.dimensionNameType(), dialog.columns()));
+
+            mv::events().notifyDatasetDataChanged(dataset);
+
+            mv::help().addNotification(QObject::tr("Phantom points dataset created"),
+                QObject::tr("%1 was created with %2 storage and has a raw logical size of %3.")
+                    .arg(dialog.name())
+                    .arg(dialog.isTiled() ? QObject::tr("tiled") : QObject::tr("eager"))
+                    .arg(formatBytes(dataset->getRawDataSize())), mv::util::StyledIcon("check"));
+        };
+
+        QObject::connect(dialog.createButton(), &QPushButton::clicked, owner, [&dialog, createDataset, owner] {
+            try
+            {
+                createDataset();
+            }
+            catch (const std::exception& exception)
+            {
+                QMessageBox::critical(owner, QObject::tr("Phantom dataset creation failed"), QString::fromUtf8(exception.what()));
+            }
+        });
+
         if (dialog.exec() != QDialog::Accepted)
             return;
 
-        dialog.saveSettings();
-
-        const auto type = dialog.type();
-        const auto population = dialog.population();
-        auto dataset = mv::data().createDataset<Points>("Points", dialog.name());
-
-        if (dialog.isTiled())
+        try
         {
-            auto creation = std::make_shared<storage::TiledStorageBackendCreationOptions>();
-            creation->rows             = dialog.rows();
-            creation->columns          = dialog.columns();
-            creation->elementSize      = elementSizeForType(type);
-            creation->elementTypeIndex = static_cast<std::uint32_t>(type);
-            creation->rowTileSize      = dialog.rowTileSize();
-            creation->columnTileSize   = dialog.columnTileSize();
-            creation->generator        = [type, population](const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t rows, const std::uint64_t columns) {
-                return makeTile(type, population, rowOffset, columnOffset, rows, columns);
-            };
-
-            dataset->convertToStorageBackend(Points::StorageBackendType::Tiled, creation);
-
-            auto configuration = std::make_shared<Points::StorageBackendConfiguration>();
-            configuration->rowTileSize    = dialog.rowTileSize();
-            configuration->columnTileSize = dialog.columnTileSize();
-            configuration->cacheCapacity  = dialog.cacheCapacity();
-            dataset->configureStorageBackend(configuration);
+            createDataset();
         }
-        else
-            populateEager(*dataset, type, population, dialog.rows(), dialog.columns());
-
-        dataset->setDimensionNames(makeDimensionNames(dialog.dimensionNameType(), dialog.columns()));
-
-        mv::events().notifyDatasetDataChanged(dataset);
-
-        mv::help().addNotification(QObject::tr("Phantom points dataset created"),
-            QObject::tr("%1 was created with %2 storage and has a raw logical size of %3.")
-                .arg(dialog.name())
-                .arg(dialog.isTiled() ? QObject::tr("tiled") : QObject::tr("eager"))
-                .arg(formatBytes(dataset->getRawDataSize())), mv::util::StyledIcon("check"));
+        catch (const std::exception& exception)
+        {
+            QMessageBox::critical(owner, QObject::tr("Phantom dataset creation failed"), QString::fromUtf8(exception.what()));
+        }
     });
 }
 
