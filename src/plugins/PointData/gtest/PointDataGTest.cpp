@@ -24,7 +24,9 @@ namespace
 std::vector<float> makeValues(const std::uint64_t rows, const std::uint64_t columns)
 {
     std::vector<float> values(rows * columns);
+
     std::iota(values.begin(), values.end(), 0.0f);
+
     return values;
 }
 }
@@ -45,6 +47,23 @@ GTEST_TEST(PointData, supportsRectangularTiledReadsAndBoundaryTiles)
     ASSERT_EQ(boundaryTile.rows(), 1U);
     ASSERT_EQ(boundaryTile.columns(), 1U);
     ASSERT_FLOAT_EQ(*static_cast<const float*>(boundaryTile.data()), 19.0f);
+}
+
+GTEST_TEST(PointData, deterministicRandomAccessMatchesRowMajorReference)
+{
+    constexpr std::uint64_t rows = 7;
+    constexpr std::uint64_t columns = 5;
+    const auto values = makeValues(rows, columns);
+    const auto storage = PointDataTiledStorage::fromDense(reinterpret_cast<const char*>(values.data()), rows, columns, sizeof(float), 3, 2);
+
+    for (std::uint64_t row = 0; row < rows; ++row)
+    {
+        for (std::uint64_t column = 0; column < columns; ++column)
+        {
+            const auto flatIndex = row * columns + column;
+            ASSERT_FLOAT_EQ(storage->valueAt(flatIndex, 0), values[flatIndex]);
+        }
+    }
 }
 
 GTEST_TEST(PointData, tileCacheEvictionPreservesActiveViews)
