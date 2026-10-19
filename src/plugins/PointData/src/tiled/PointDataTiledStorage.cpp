@@ -2,6 +2,8 @@
 
 #include <biovault_bfloat16/biovault_bfloat16.h>
 
+#include <QString>
+
 #include <algorithm>
 #include <cstring>
 #include <stdexcept>
@@ -33,7 +35,7 @@ PointDataTiledStorage::PointDataTiledStorage(const std::uint64_t rows, const std
     {
         for (std::uint64_t column = 0; column < columns; column += columnTileSize)
         {
-            _descriptors.push_back({ row, column, std::min<std::uint64_t>(rowTileSize, rows - row), std::min<std::uint64_t>(columnTileSize, columns - column), {}, {} });
+            _descriptors.push_back({ row, column, std::min<std::uint64_t>(rowTileSize, rows - row), std::min<std::uint64_t>(columnTileSize, columns - column), {}, {}, {} });
         }
     }
 }
@@ -159,7 +161,14 @@ TileView PointDataTiledStorage::acquire(const std::uint64_t tileRow, const std::
         const auto& descriptor = _descriptors.at(index);
         const auto expectedSize = descriptor.rows * descriptor.columns * _elementSize;
         if (bytes->size() != static_cast<qsizetype>(expectedSize))
-            throw std::runtime_error("Decoded tiled point-data payload has an unexpected size");
+        {
+            throw std::runtime_error(QString("Decoded tiled point-data payload has an unexpected size for tile (%1, %2): expected %3 bytes, got %4 bytes")
+                .arg(descriptor.rowOffset)
+                .arg(descriptor.columnOffset)
+                .arg(expectedSize)
+                .arg(bytes->size())
+                .toStdString());
+        }
 
         _cache.insert(index, bytes);
     }
@@ -247,6 +256,16 @@ std::size_t PointDataTiledStorage::cacheCapacity() const
     const std::lock_guard lock(_mutex);
 
     return _cache.capacity();
+}
+
+void PointDataTiledStorage::setPackedTiles(const bool enabled, const std::size_t superTileRows, const std::size_t superTileColumns)
+{
+    if (enabled && (superTileRows == 0 || superTileColumns == 0))
+        throw std::invalid_argument("Super-tile dimensions must be positive");
+
+    _packedTiles       = enabled;
+    _superTileRows     = enabled ? superTileRows : 1;
+    _superTileColumns  = enabled ? superTileColumns : 1;
 }
 
 std::size_t PointDataTiledStorage::cacheSize() const

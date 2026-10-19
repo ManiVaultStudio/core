@@ -216,12 +216,17 @@ void PointsTableModel::setQueryResult(const std::vector<std::uint64_t>& rowIds, 
 {
     beginResetModel();
 
-    _queryResult = true;
-    _queryRowIds = rowIds;
+    _queryResult    = true;
+    _queryRowIds    = rowIds;
     _queryColumnIds = columnIds;
-    _values = values;
+    _values         = values;
+
     _lastError.clear();
-    _loadedFirstRow = _loadedRowCount = _loadedFirstColumn = _loadedColumnCount = 0;
+
+    _loadedFirstRow    = 0;
+    _loadedRowCount    = 0;
+    _loadedFirstColumn = 0;
+    _loadedColumnCount = 0;
 
     endResetModel();
 }

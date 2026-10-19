@@ -16,7 +16,10 @@ TiledStorageBackendConversionAction::TiledStorageBackendConversionAction(QObject
     _tileSizeAction(this, "Tile size (MiB)", 1, 1024, 1),
     _rowTileSizeAction(this, "Tile height", 1, std::numeric_limits<std::int32_t>::max(), 256),
     _columnTileSizeAction(this, "Tile width", 1, std::numeric_limits<std::int32_t>::max(), 8),
-    _cacheCapacityAction(this, "Tile cache capacity", 1, std::numeric_limits<std::int32_t>::max(), 1)
+    _cacheCapacityAction(this, "Tile cache capacity", 1, std::numeric_limits<std::int32_t>::max(), 1),
+    _packedTilesAction(this, "Packed tiles", false),
+    _superTileRowsAction(this, "Super-tile rows", 1, std::numeric_limits<std::int32_t>::max(), 1),
+    _superTileColumnsAction(this, "Super-tile columns", 1, std::numeric_limits<std::int32_t>::max(), 1)
 {
     setShowLabels(true);
 
@@ -24,12 +27,18 @@ TiledStorageBackendConversionAction::TiledStorageBackendConversionAction(QObject
     _rowTileSizeAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _columnTileSizeAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _cacheCapacityAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
+    _packedTilesAction.setDefaultWidgetFlags(ToggleAction::CheckBox);
+    _superTileRowsAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
+    _superTileColumnsAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
 
     addAction(&_tileAsymmetryAction);
     addAction(&_tileSizeAction);
     addAction(&_rowTileSizeAction);
     addAction(&_columnTileSizeAction);
     addAction(&_cacheCapacityAction);
+    addAction(&_packedTilesAction);
+    addAction(&_superTileRowsAction);
+    addAction(&_superTileColumnsAction);
 
     connect(&_tileAsymmetryAction.getAsymmetryAction(), &IntegralAction::valueChanged, this, [this] {
         updateTileGeometryFromPolicy();
@@ -55,6 +64,19 @@ TiledStorageBackendConversionAction::TiledStorageBackendConversionAction(QObject
         notifyOptionsChanged();
     });
 
+    connect(&_packedTilesAction, &ToggleAction::toggled, this, [this] {
+        updatePackedTileControls();
+        notifyOptionsChanged();
+    });
+
+    connect(&_superTileRowsAction, &IntegralAction::valueChanged, this, [this] {
+        notifyOptionsChanged();
+    });
+
+    connect(&_superTileColumnsAction, &IntegralAction::valueChanged, this, [this] {
+        notifyOptionsChanged();
+    });
+
     updateCacheCapacity();
 
     if (initializeFromConfiguration)
@@ -62,7 +84,12 @@ TiledStorageBackendConversionAction::TiledStorageBackendConversionAction(QObject
         _rowTileSizeAction.setValue(static_cast<std::int32_t>(configuration.rowTileSize));
         _columnTileSizeAction.setValue(static_cast<std::int32_t>(configuration.columnTileSize));
         _cacheCapacityAction.setValue(static_cast<std::int32_t>(configuration.cacheCapacity));
+        _packedTilesAction.setChecked(configuration.packedTiles);
+        _superTileRowsAction.setValue(static_cast<std::int32_t>(configuration.superTileRows));
+        _superTileColumnsAction.setValue(static_cast<std::int32_t>(configuration.superTileColumns));
     }
+
+    updatePackedTileControls();
 }
 
 pointdata::storage::StorageBackendType TiledStorageBackendConversionAction::getTargetBackendType() const
@@ -76,7 +103,16 @@ pointdata::storage::StorageBackendConversionOptionsPtr TiledStorageBackendConver
     configuration->rowTileSize    = static_cast<std::size_t>(_rowTileSizeAction.getValue());
     configuration->columnTileSize = static_cast<std::size_t>(_columnTileSizeAction.getValue());
     configuration->cacheCapacity  = static_cast<std::size_t>(_cacheCapacityAction.getValue());
+    configuration->packedTiles      = _packedTilesAction.isChecked();
+    configuration->superTileRows    = static_cast<std::size_t>(_superTileRowsAction.getValue());
+    configuration->superTileColumns = static_cast<std::size_t>(_superTileColumnsAction.getValue());
     return configuration;
+}
+
+void TiledStorageBackendConversionAction::updatePackedTileControls()
+{
+    _superTileRowsAction.setEnabled(_packedTilesAction.isChecked());
+    _superTileColumnsAction.setEnabled(_packedTilesAction.isChecked());
 }
 
 void TiledStorageBackendConversionAction::updateCacheCapacity()

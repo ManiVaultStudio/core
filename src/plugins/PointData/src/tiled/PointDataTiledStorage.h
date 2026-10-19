@@ -144,6 +144,18 @@ public:
     /** Returns the configured cache capacity. */
     std::size_t cacheCapacity() const;
 
+    /** Sets whether serialized tiles are grouped into jointly encoded super tiles. */
+    void setPackedTiles(bool enabled, std::size_t superTileRows = 1, std::size_t superTileColumns = 1);
+
+    /** Returns whether serialized tiles are grouped into super tiles. */
+    bool packedTiles() const { return _packedTiles; }
+
+    /** Returns the number of base tile rows in one serialized super tile. */
+    std::size_t superTileRows() const { return _superTileRows; }
+
+    /** Returns the number of base tile columns in one serialized super tile. */
+    std::size_t superTileColumns() const { return _superTileColumns; }
+
     /** Returns the number of currently cached tile payloads. */
     std::size_t cacheSize() const;
 
@@ -169,6 +181,9 @@ private:
     std::size_t                  _elementSize;    /**< Size of one matrix element in bytes. */
     std::size_t                  _rowTileSize;    /**< Configured maximum rows per tile. */
     std::size_t                  _columnTileSize; /**< Configured maximum columns per tile. */
+    bool                         _packedTiles = false; /**< Whether serialized tiles are grouped into super tiles. */
+    std::size_t                  _superTileRows = 1; /**< Number of base tile rows in one serialized super tile. */
+    std::size_t                  _superTileColumns = 1; /**< Number of base tile columns in one serialized super tile. */
     std::vector<TileDescriptor>  _descriptors;    /**< Resident row/column tile index. */
     TileLoader                   _loader;         /**< Optional callback that decodes or generates tile bytes. */
     mutable std::recursive_mutex _mutex;          /**< Serializes cache and lazy-load access. */

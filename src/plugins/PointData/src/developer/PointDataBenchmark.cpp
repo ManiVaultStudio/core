@@ -668,7 +668,9 @@ FixtureResult measurePoints(const mv::Dataset<Points>& points, const BenchmarkCo
 
 QString datasetLabel(const mv::Dataset<Points>& dataset)
 {
-    return QObject::tr("%1 (%2 × %3, %4, %5)").arg(dataset.getDataset()->getGuiName()).arg(dataset->getNumPoints()).arg(dataset->getNumDimensions()).arg(dataset->getElementTypeName()).arg(backendName(dataset->getStorageBackendType()));
+    auto label = QObject::tr("%1 (%2 × %3, %4, %5)").arg(dataset.getDataset()->getGuiName()).arg(dataset->getNumPoints()).arg(dataset->getNumDimensions()).arg(dataset->getElementTypeName()).arg(backendName(dataset->getStorageBackendType()));
+
+    return label;
 }
 
 std::vector<BenchmarkDataset> getPointDatasets()
@@ -974,19 +976,29 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
     mv::workflow::WorkflowOptions options;
     options.cancellation.enabled = true;
     options.reporting.progress = true;
-    options.reporting.finishedNotification = false;
+    options.reporting.finishedNotification = true;
 
+    const auto benchmarkStart = std::chrono::steady_clock::now();
     auto future = mv::Application::getWorkflowPlanExecutor().execute(std::move(plan), nullptr, options);
-    future.onFinished(owner, [output, outputPath](const mv::workflow::SharedWorkflowResult& result) {
+    future.onFinished(owner, [output, outputPath, benchmarkStart](const mv::workflow::SharedWorkflowResult& result) {
         output->flush();
 
-        if (!result)
+        const auto elapsedMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - benchmarkStart).count();
+        const auto elapsedTime = QObject::tr("%1 s").arg(static_cast<double>(elapsedMilliseconds) / 1000.0, 0, 'f', 2);
+
+        if (!result || result->getStatus() == mv::workflow::WorkflowResultBase::Status::Canceled)
         {
-            mv::help().addNotification(QObject::tr("Point-data benchmark stopped"), QObject::tr("The benchmark was canceled or stopped before completion."), mv::util::StyledIcon("stop"));
+            mv::help().addNotification(QObject::tr("Point-data benchmark canceled"), QObject::tr("The benchmark was canceled after %1. Partial results were saved to %2.").arg(elapsedTime, outputPath), mv::util::StyledIcon("stop"));
             return;
         }
 
-        mv::help().addNotification(QObject::tr("Point-data benchmark completed"), QObject::tr("Benchmark results were saved to %1.").arg(outputPath), mv::util::StyledIcon("check"));
+        if (result->getStatus() != mv::workflow::WorkflowResultBase::Status::Success)
+        {
+            mv::help().addNotification(QObject::tr("Point-data benchmark failed"), QObject::tr("The benchmark failed after %1. Partial results were saved to %2.").arg(elapsedTime, outputPath), mv::util::StyledIcon("times"));
+            return;
+        }
+
+        mv::help().addNotification(QObject::tr("Point-data benchmark completed"), QObject::tr("The benchmark completed in %1. Results were saved to %2.").arg(elapsedTime, outputPath), mv::util::StyledIcon("check"));
     });
 }
 }

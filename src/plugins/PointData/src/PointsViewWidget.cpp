@@ -10,6 +10,7 @@
 #include <QHeaderView>
 #include <QLabel>
 #include <QScrollBar>
+#include <QShowEvent>
 #include <QSpinBox>
 #include <QTableView>
 #include <QTimer>
@@ -233,6 +234,7 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
 
     _table->verticalScrollBar()->installEventFilter(this);
     _table->horizontalScrollBar()->installEventFilter(this);
+    _table->installEventFilter(this);
     _table->viewport()->installEventFilter(this);
     _fetchTimer->setSingleShot(true);
     _fetchTimer->setInterval(100);
@@ -859,9 +861,20 @@ void PointsViewWidget::getRange()
 
 bool PointsViewWidget::eventFilter(QObject* watched, QEvent* event)
 {
-    if ((watched == _table->verticalScrollBar() || watched == _table->horizontalScrollBar() || watched == _table->viewport()) &&
-        (event->type() == QEvent::MouseButtonRelease || event->type() == QEvent::Wheel || event->type() == QEvent::KeyRelease))
+    const auto isTableResize = (watched == _table || watched == _table->viewport()) && event->type() == QEvent::Resize;
+    const auto isTableNavigation = (watched == _table->verticalScrollBar() || watched == _table->horizontalScrollBar() || watched == _table->viewport()) &&
+        (event->type() == QEvent::MouseButtonRelease || event->type() == QEvent::Wheel || event->type() == QEvent::KeyRelease);
+
+    if (isTableResize || isTableNavigation)
         scheduleVisibleRangeFetch();
 
     return QWidget::eventFilter(watched, event);
+}
+
+void PointsViewWidget::showEvent(QShowEvent* event)
+{
+    QWidget::showEvent(event);
+
+    if (_model->hasPointData() && !_model->isQueryResult())
+        QTimer::singleShot(0, this, &PointsViewWidget::fetchVisibleRange);
 }

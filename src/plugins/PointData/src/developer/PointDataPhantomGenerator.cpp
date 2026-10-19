@@ -353,6 +353,9 @@ public:
         _rowTileSizeAction(&_settingsGroupAction, "Tile height", 1, std::numeric_limits<std::int32_t>::max(), 256),
         _columnTileSizeAction(&_settingsGroupAction, "Tile width", 1, std::numeric_limits<std::int32_t>::max(), 8),
         _cacheCapacityAction(&_settingsGroupAction, "Cache tiles", 1, 100000, 8),
+        _packedTilesAction(&_settingsGroupAction, "Packed tiles", false),
+        _superTileRowsAction(&_settingsGroupAction, "Super-tile rows", 1, std::numeric_limits<std::int32_t>::max(), 1),
+        _superTileColumnsAction(&_settingsGroupAction, "Super-tile columns", 1, std::numeric_limits<std::int32_t>::max(), 1),
         _estimateAction(&_settingsGroupAction, "Estimate"),
         _presetsAction(&_settingsGroupAction, &_settingsGroupAction, "Developer/PhantomPointGenerator/Presets", "Phantom points", mv::util::StyledIcon("prescription"))
     {
@@ -380,6 +383,9 @@ public:
         _rowTileSizeAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
         _columnTileSizeAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
         _cacheCapacityAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
+        _packedTilesAction.setDefaultWidgetFlags(mv::gui::ToggleAction::CheckBox);
+        _superTileRowsAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
+        _superTileColumnsAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
         _estimateAction.setDefaultWidgetFlags(mv::gui::StringAction::TextEdit);
         _estimateAction.setEnabled(false);
 
@@ -396,6 +402,9 @@ public:
         _settingsGroupAction.addAction(&_rowTileSizeAction);
         _settingsGroupAction.addAction(&_columnTileSizeAction);
         _settingsGroupAction.addAction(&_cacheCapacityAction);
+        _settingsGroupAction.addAction(&_packedTilesAction);
+        _settingsGroupAction.addAction(&_superTileRowsAction);
+        _settingsGroupAction.addAction(&_superTileColumnsAction);
         _settingsGroupAction.addAction(&_estimateAction);
 
         auto* layout = new QVBoxLayout(this);
@@ -430,6 +439,9 @@ public:
         connect(&_rowTileSizeAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateEstimate(); });
         connect(&_columnTileSizeAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateEstimate(); });
         connect(&_cacheCapacityAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateEstimate(); });
+        connect(&_packedTilesAction, &mv::gui::ToggleAction::toggled, this, [this] { updateActions(); });
+        connect(&_superTileRowsAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateName(); });
+        connect(&_superTileColumnsAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateName(); });
 
         loadSettings();
         updateActions();
@@ -452,6 +464,12 @@ public:
     std::size_t columnTileSize() const { return static_cast<std::size_t>(_columnTileSizeAction.getValue()); }
 
     std::size_t cacheCapacity() const { return static_cast<std::size_t>(_cacheCapacityAction.getValue()); }
+
+    bool packedTiles() const { return _packedTilesAction.isChecked(); }
+
+    std::size_t superTileRows() const { return static_cast<std::size_t>(_superTileRowsAction.getValue()); }
+
+    std::size_t superTileColumns() const { return static_cast<std::size_t>(_superTileColumnsAction.getValue()); }
 
     bool isTiled() const { return _storageBackendAction.getCurrentText() == "Tiled"; }
 
@@ -478,6 +496,9 @@ public:
         application->setSetting("Developer/PhantomPointGenerator/RowTileSize", _rowTileSizeAction.getValue());
         application->setSetting("Developer/PhantomPointGenerator/ColumnTileSize", _columnTileSizeAction.getValue());
         application->setSetting("Developer/PhantomPointGenerator/CacheCapacity", _cacheCapacityAction.getValue());
+        application->setSetting("Developer/PhantomPointGenerator/PackedTiles", _packedTilesAction.isChecked());
+        application->setSetting("Developer/PhantomPointGenerator/SuperTileRows", _superTileRowsAction.getValue());
+        application->setSetting("Developer/PhantomPointGenerator/SuperTileColumns", _superTileColumnsAction.getValue());
     }
 
 private:
@@ -499,6 +520,9 @@ private:
         _rowTileSizeAction.setValue(application->getSetting("Developer/PhantomPointGenerator/RowTileSize", _rowTileSizeAction.getValue()).toInt());
         _columnTileSizeAction.setValue(application->getSetting("Developer/PhantomPointGenerator/ColumnTileSize", _columnTileSizeAction.getValue()).toInt());
         _cacheCapacityAction.setValue(application->getSetting("Developer/PhantomPointGenerator/CacheCapacity", _cacheCapacityAction.getValue()).toInt());
+        _packedTilesAction.setChecked(application->getSetting("Developer/PhantomPointGenerator/PackedTiles", _packedTilesAction.isChecked()).toBool());
+        _superTileRowsAction.setValue(application->getSetting("Developer/PhantomPointGenerator/SuperTileRows", _superTileRowsAction.getValue()).toInt());
+        _superTileColumnsAction.setValue(application->getSetting("Developer/PhantomPointGenerator/SuperTileColumns", _superTileColumnsAction.getValue()).toInt());
     }
 
     void updateActions()
@@ -510,6 +534,9 @@ private:
         _rowTileSizeAction.setEnabled(tiled);
         _columnTileSizeAction.setEnabled(tiled);
         _cacheCapacityAction.setEnabled(tiled);
+        _packedTilesAction.setEnabled(tiled);
+        _superTileRowsAction.setEnabled(tiled && packedTiles());
+        _superTileColumnsAction.setEnabled(tiled && packedTiles());
         updateEstimate();
     }
 
@@ -536,7 +563,12 @@ private:
             .arg(_storageBackendAction.getCurrentText());
 
         if (isTiled())
+        {
             generatedName += QStringLiteral(", tilesize: %1x%2, cache: %3").arg(rowTileSize()).arg(columnTileSize()).arg(cacheCapacity());
+
+            if (packedTiles())
+                generatedName += QStringLiteral(", packed %1x%2 tiles").arg(superTileRows()).arg(superTileColumns());
+        }
 
         generatedName += QLatin1Char(')');
 
@@ -579,6 +611,9 @@ private:
     mv::gui::IntegralAction              _rowTileSizeAction;
     mv::gui::IntegralAction              _columnTileSizeAction;
     mv::gui::IntegralAction              _cacheCapacityAction;
+    mv::gui::ToggleAction                _packedTilesAction;
+    mv::gui::IntegralAction              _superTileRowsAction;
+    mv::gui::IntegralAction              _superTileColumnsAction;
     mv::gui::StringAction                _estimateAction;
     mv::gui::PresetsAction               _presetsAction;
     QPushButton*                          _createButton = nullptr;
@@ -608,6 +643,9 @@ void PointDataPhantomGenerator::populateMenu(QMenu& menu, QWidget* owner)
                 creation->rowTileSize      = dialog.rowTileSize();
                 creation->columnTileSize   = dialog.columnTileSize();
                 creation->cacheCapacity   = dialog.cacheCapacity();
+                creation->packedTiles     = dialog.packedTiles();
+                creation->superTileRows   = dialog.superTileRows();
+                creation->superTileColumns = dialog.superTileColumns();
                 creation->generator        = [type, population](const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t rows, const std::uint64_t columns) {
                     return makeTile(type, population, rowOffset, columnOffset, rows, columns);
                 };

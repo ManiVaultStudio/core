@@ -68,9 +68,12 @@ struct StorageBackendCreationOptions : StorageBackendConversionOptions
  */
 struct StorageBackendConfiguration : StorageBackendConversionOptions
 {
-    std::size_t rowTileSize    = 256;           /**< Maximum number of matrix rows in one tile. */
-    std::size_t columnTileSize = 8;             /**< Maximum number of matrix columns in one tile. */
-    std::size_t cacheCapacity  = 8;             /**< Maximum number of tile payloads retained in memory. */
+    std::size_t rowTileSize      = 256;         /**< Maximum number of matrix rows in one tile. */
+    std::size_t columnTileSize   = 8;           /**< Maximum number of matrix columns in one tile. */
+    std::size_t cacheCapacity    = 8;           /**< Maximum number of tile payloads retained in memory. */
+    bool        packedTiles      = false;       /**< Whether serialized tiles are grouped into jointly encoded super tiles. */
+    std::size_t superTileRows    = 1;           /**< Number of base tile rows in one serialized super tile. */
+    std::size_t superTileColumns = 1;           /**< Number of base tile columns in one serialized super tile. */
 };
 
 constexpr StorageBackendCapabilities operator|(const StorageBackendCapability left, const StorageBackendCapability right)

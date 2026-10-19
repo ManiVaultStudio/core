@@ -7,6 +7,7 @@
 #include "TiledStorageGeometry.h"
 
 #include <actions/IntegralAction.h>
+#include <actions/ToggleAction.h>
 
 namespace mv::gui
 {
@@ -41,6 +42,7 @@ public:
 private:
     void updateTileGeometryFromPolicy();
     void updateCacheCapacity();
+    void updatePackedTileControls();
 
     std::uint64_t _rows        = 0;
     std::uint64_t _columns     = 0;
@@ -51,6 +53,9 @@ private:
     IntegralAction              _rowTileSizeAction;
     IntegralAction              _columnTileSizeAction;
     IntegralAction              _cacheCapacityAction;
+    ToggleAction                _packedTilesAction;
+    IntegralAction              _superTileRowsAction;
+    IntegralAction              _superTileColumnsAction;
 };
 
 }

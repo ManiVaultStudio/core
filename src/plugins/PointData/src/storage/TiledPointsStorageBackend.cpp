@@ -56,7 +56,7 @@ TiledPointsStorageBackend::TiledPointsStorageBackend(const std::shared_ptr<mv::p
 
 std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> TiledPointsStorageBackend::create(const TiledStorageBackendCreationOptions& options)
 {
-    if (!options.generator || options.rows == 0 || options.columns == 0 || options.elementSize == 0 || options.rowTileSize == 0 || options.columnTileSize == 0)
+    if (!options.generator || options.rows == 0 || options.columns == 0 || options.elementSize == 0 || options.rowTileSize == 0 || options.columnTileSize == 0 || (options.packedTiles && (options.superTileRows == 0 || options.superTileColumns == 0)))
         throw std::invalid_argument("Invalid tiled storage creation options");
 
     const auto storage = mv::pointdata::tiled::PointDataTiledStorage::fromGenerator(options.rows, options.columns, options.elementSize, options.rowTileSize, options.columnTileSize, [generator = options.generator](const mv::pointdata::tiled::TileDescriptor& descriptor) {
@@ -64,6 +64,7 @@ std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> TiledPointsStorageB
     });
 
     storage->setCacheCapacity(options.cacheCapacity);
+    storage->setPackedTiles(options.packedTiles, options.superTileRows, options.superTileColumns);
     return storage;
 }
 
@@ -95,6 +96,9 @@ std::unique_ptr<mv::gui::StorageBackendConversionAction> TiledPointsStorageBacke
         configuration.rowTileSize    = _storage->rowTileSize();
         configuration.columnTileSize = _storage->columnTileSize();
         configuration.cacheCapacity  = _storage->cacheCapacity();
+        configuration.packedTiles    = _storage->packedTiles();
+        configuration.superTileRows  = _storage->superTileRows();
+        configuration.superTileColumns = _storage->superTileColumns();
         return std::make_unique<mv::gui::TiledStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _storage->elementSize(), configuration, true);
     }
 
@@ -109,6 +113,7 @@ void TiledPointsStorageBackend::applyConfiguration(const StorageBackendConversio
         throw std::invalid_argument("Missing tiled storage configuration");
 
     _storage->setCacheCapacity(configuration->cacheCapacity);
+    _storage->setPackedTiles(configuration->packedTiles, configuration->superTileRows, configuration->superTileColumns);
 }
 
 std::uint64_t TiledPointsStorageBackend::getNumPoints() const
