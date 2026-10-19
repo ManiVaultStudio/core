@@ -103,7 +103,7 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
     _liveTableAction(this, "Live", true)
 {
     _rowFilterAction.setPlaceHolderString("Required; e.g. 1, 3, 10-20");
-    _columnFilterAction.setPlaceHolderString("Optional = all columns; e.g. 0-4, 8");
+    _columnFilterAction.setPlaceHolderString("Optional = all columns; e.g. 0-4, DIM_8");
     _rowFilterAction.setDefaultWidgetFlags(mv::gui::StringAction::LineEdit);
     _columnFilterAction.setDefaultWidgetFlags(mv::gui::StringAction::LineEdit);
     _filterGroupAction.setShowLabels(true);
@@ -182,7 +182,7 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
     _getColumnsForRowsAction.setToolTip("Points::visitColumns(firstColumn, columnCount, rowIds)");
     _getRangeAction.setToolTip("Points::visitRange(firstRow, rowCount, firstColumn, columnCount)");
     _rowIdsAction.setPlaceHolderString("e.g. 1, 3, 10-20");
-    _columnIdsAction.setPlaceHolderString("e.g. 1, 3, 10-20");
+    _columnIdsAction.setPlaceHolderString("e.g. 1, 3, DIM_10");
     _columnRowIdsAction.setPlaceHolderString("Row IDs; e.g. 1, 3, 10-20");
     _getRowGroupAction.addAction(&_rowIdAction, -1, configureIntegralWidget);
     _getRowGroupAction.addAction(&_getRowAction, mv::gui::TriggerAction::Icon);
@@ -247,7 +247,7 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
         const auto maximumRow = _model->totalRows() > 0 ? _model->totalRows() - 1 : 0;
         const auto maximumColumn = _model->totalColumns() > 0 ? _model->totalColumns() - 1 : 0;
         const auto rowIds = parseFilter(_rowFilterAction.getString(), maximumRow, error);
-        const auto columnIds = parseFilter(_columnFilterAction.getString(), maximumColumn, error);
+        const auto columnIds = parseFilter(_columnFilterAction.getString(), maximumColumn, error, _points.isValid() ? _points->getDimensionNames() : std::vector<QString>());
 
         if (_model->hasPointData() && !_liveTableAction.isChecked() && error.isEmpty() && !rowIds.empty() && (_columnFilterAction.getString().trimmed().isEmpty() || !columnIds.empty()))
             _filterTimer->start();
@@ -260,7 +260,7 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
         const auto maximumRow = _model->totalRows() > 0 ? _model->totalRows() - 1 : 0;
         const auto maximumColumn = _model->totalColumns() > 0 ? _model->totalColumns() - 1 : 0;
         const auto rowIds = parseFilter(_rowFilterAction.getString(), maximumRow, error);
-        const auto columnIds = parseFilter(_columnFilterAction.getString(), maximumColumn, error);
+        const auto columnIds = parseFilter(_columnFilterAction.getString(), maximumColumn, error, _points.isValid() ? _points->getDimensionNames() : std::vector<QString>());
 
         if (_model->hasPointData() && !_liveTableAction.isChecked() && error.isEmpty() && !rowIds.empty() && (_columnFilterAction.getString().trimmed().isEmpty() || !columnIds.empty()))
             _filterTimer->start();
@@ -364,7 +364,7 @@ void PointsViewWidget::updateFacadeActionState()
     QString columnIdsError;
     QString columnRowsError;
     const auto rowIds       = pointCount > 0 ? parseFilter(_rowIdsAction.getString(), pointCount - 1, rowIdsError) : std::vector<std::uint64_t>();
-    const auto columnIds    = dimensionCount > 0 ? parseFilter(_columnIdsAction.getString(), dimensionCount - 1, columnIdsError) : std::vector<std::uint64_t>();
+    const auto columnIds    = dimensionCount > 0 ? parseFilter(_columnIdsAction.getString(), dimensionCount - 1, columnIdsError, _points->getDimensionNames()) : std::vector<std::uint64_t>();
     const auto columnRowIds = pointCount > 0 ? parseFilter(_columnRowIdsAction.getString(), pointCount - 1, columnRowsError) : std::vector<std::uint64_t>();
 
     _getRowAction.setEnabled(pointCount > 0 && rowId < pointCount);
@@ -450,7 +450,7 @@ void PointsViewWidget::fetchVisibleRange()
         .arg(callbacks));
 }
 
-std::vector<std::uint64_t> PointsViewWidget::parseFilter(const QString& filter, const std::uint64_t maximum, QString& error)
+std::vector<std::uint64_t> PointsViewWidget::parseFilter(const QString& filter, const std::uint64_t maximum, QString& error, const std::vector<QString>& dimensionNames)
 {
     std::vector<std::uint64_t> values;
     std::unordered_set<std::uint64_t> seen;
@@ -460,6 +460,25 @@ std::vector<std::uint64_t> PointsViewWidget::parseFilter(const QString& filter, 
         const auto expression = part.trimmed();
         const auto rangeParts = expression.split('-', Qt::KeepEmptyParts);
 
+        bool matchedName = false;
+
+        for (std::size_t index = 0; index < dimensionNames.size(); ++index)
+        {
+            if (dimensionNames[index].compare(expression, Qt::CaseInsensitive) == 0)
+            {
+                const auto value = static_cast<std::uint64_t>(index);
+
+                if (seen.insert(value).second)
+                    values.push_back(value);
+
+                matchedName = true;
+                break;
+            }
+        }
+
+        if (matchedName)
+            continue;
+
         if (rangeParts.size() > 2 || rangeParts.contains(QString()))
         {
             error = QString("Invalid filter expression: %1").arg(expression);
@@ -467,8 +486,11 @@ std::vector<std::uint64_t> PointsViewWidget::parseFilter(const QString& filter, 
         }
 
         bool firstOk = false;
-        const auto first = rangeParts.first().trimmed().toULongLong(&firstOk);
-        const auto last = rangeParts.size() == 1 ? first : rangeParts.last().trimmed().toULongLong(&firstOk);
+        auto first = rangeParts.first().trimmed().toULongLong(&firstOk);
+        auto last = first;
+
+        if (rangeParts.size() > 1)
+            last = rangeParts.last().trimmed().toULongLong(&firstOk);
 
         if (!firstOk || first > maximum || last > maximum || first > last)
         {
@@ -557,7 +579,7 @@ void PointsViewWidget::applyFilters()
         return;
     }
 
-    auto columnIds = parseFilter(_columnFilterAction.getString(), maximumColumn, error);
+    auto columnIds = parseFilter(_columnFilterAction.getString(), maximumColumn, error, _points->getDimensionNames());
     if (!error.isEmpty())
     {
         setStatus(error);
@@ -754,7 +776,7 @@ void PointsViewWidget::getColumns()
     const auto points = _points;
 
     QString error;
-    const auto columnIds = points.isValid() ? parseFilter(_columnIdsAction.getString(), points->getNumDimensions() - 1, error) : std::vector<std::uint64_t>();
+    const auto columnIds = points.isValid() ? parseFilter(_columnIdsAction.getString(), points->getNumDimensions() - 1, error, points->getDimensionNames()) : std::vector<std::uint64_t>();
 
     if (!points.isValid() || columnIds.empty() || !error.isEmpty())
     {

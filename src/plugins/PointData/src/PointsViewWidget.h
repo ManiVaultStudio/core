@@ -80,7 +80,7 @@ private:
     void setStatus(const QString& text);
     void updateUiState();
     void updateFacadeActionState();
-    static std::vector<std::uint64_t> parseFilter(const QString& filter, std::uint64_t maximum, QString& error);
+    static std::vector<std::uint64_t> parseFilter(const QString& filter, std::uint64_t maximum, QString& error, const std::vector<QString>& dimensionNames = {});
     void displayQuery(const std::vector<std::uint64_t>& rowIds, const std::vector<std::uint64_t>& columnIds, const std::function<void(const PointDataAccessVisitor&)>& request);
 
     mv::Dataset<Points>             _points;                    /**< Dataset currently displayed by the table. */
