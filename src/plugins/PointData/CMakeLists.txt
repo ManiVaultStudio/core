@@ -218,3 +218,7 @@ mv_handle_plugin_config(${POINTDATA})
 if(MV_BUILD_TESTING)
     add_subdirectory(gtest)
 endif()
+
+if(MV_BUILD_BENCHMARKS)
+    add_subdirectory(benchmark)
+endif()
