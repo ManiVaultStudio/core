@@ -39,18 +39,18 @@ inline TiledStorageGeometry calculateTiledStorageGeometry(const std::uint64_t ro
     };
 
     const auto normalizedAsymmetry            = std::clamp(asymmetry, 0, 100);
-    const auto rowDominantColumnTileSize      = clampTileSize(columns, std::min<std::uint64_t>(columns, dominantAxisTileExtent));
-    const auto rowDominantRowTileSize         = clampTileSize(rows, targetTileElements / std::max<std::size_t>(1, rowDominantColumnTileSize));
-    const auto columnDominantRowTileSize      = clampTileSize(rows, std::min<std::uint64_t>(rows, dominantAxisTileExtent));
-    const auto columnDominantColumnTileSize   = clampTileSize(columns, targetTileElements / std::max<std::size_t>(1, columnDominantRowTileSize));
+    const auto rowDominantRowTileSize         = clampTileSize(rows, std::min<std::uint64_t>(rows, dominantAxisTileExtent));
+    const auto rowDominantColumnTileSize      = clampTileSize(columns, targetTileElements / std::max<std::size_t>(1, rowDominantRowTileSize));
+    const auto columnDominantColumnTileSize   = clampTileSize(columns, std::min<std::uint64_t>(columns, dominantAxisTileExtent));
+    const auto columnDominantRowTileSize      = clampTileSize(rows, targetTileElements / std::max<std::size_t>(1, columnDominantColumnTileSize));
     const auto interpolation                 = static_cast<double>(normalizedAsymmetry) / 100.0;
     const auto interpolate                   = [interpolation](const std::size_t first, const std::size_t second) {
         return static_cast<std::size_t>(std::llround(std::exp(std::log(static_cast<double>(first)) * (1.0 - interpolation) + std::log(static_cast<double>(second)) * interpolation)));
     };
 
     return {
-        clampTileSize(rows, interpolate(rowDominantRowTileSize, columnDominantRowTileSize)),
-        clampTileSize(columns, interpolate(rowDominantColumnTileSize, columnDominantColumnTileSize))
+        clampTileSize(rows, interpolate(columnDominantRowTileSize, rowDominantRowTileSize)),
+        clampTileSize(columns, interpolate(columnDominantColumnTileSize, rowDominantColumnTileSize))
     };
 }
 
