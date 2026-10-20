@@ -89,8 +89,6 @@ TiledStorageBackendConversionAction::TiledStorageBackendConversionAction(QObject
         if (dialog->exec() == QDialog::Accepted)
         {
             const auto& recommendation = dialog->recommendation();
-            _tileAsymmetryAction.getAsymmetryAction().setValue(recommendation.asymmetry);
-            _tileSizeAction.setValue(static_cast<std::int32_t>(recommendation.targetTileMiB));
             _rowTileSizeAction.setValue(static_cast<std::int32_t>(recommendation.geometry.rowTileSize));
             _columnTileSizeAction.setValue(static_cast<std::int32_t>(recommendation.geometry.columnTileSize));
             _cacheCapacityAction.setValue(static_cast<std::int32_t>(recommendation.cacheCapacity));

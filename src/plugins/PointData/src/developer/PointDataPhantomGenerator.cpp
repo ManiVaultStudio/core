@@ -117,14 +117,12 @@ private:
         const auto memoryPreference = _memoryPreferenceAction.getCurrentIndex() == 1 ? storage::StorageMemoryPreference::Low : storage::StorageMemoryPreference::Balanced;
         _recommendation = storage::recommendTiledStorage(_rows, _columns, _elementSize, accessProfile, memoryPreference);
 
-        _recommendationAction.setString(QStringLiteral("Target tile size: %1 MiB\nTile geometry: %2 x %3\nCache capacity: %4 tiles\nPacked tiles: yes\nSuper-tile: %5 x %6 tiles\nAsymmetry: %7\n\nThese are preliminary heuristics. Review the generated values and validate them with the benchmark.")
-            .arg(_recommendation.targetTileMiB)
+        _recommendationAction.setString(QStringLiteral("Tile geometry: %1 x %2\nCache capacity: %3 tiles\nPacked tiles: yes\nSuper-tile: %4 x %5 tiles\n\nThese are preliminary heuristics. Review the generated values and validate them with the benchmark.")
             .arg(_recommendation.geometry.rowTileSize)
             .arg(_recommendation.geometry.columnTileSize)
             .arg(_recommendation.cacheCapacity)
             .arg(_recommendation.superTileRows)
-            .arg(_recommendation.superTileColumns)
-            .arg(_recommendation.asymmetry));
+            .arg(_recommendation.superTileColumns));
     }
 
     mv::gui::VerticalGroupAction _settingsGroupAction;
@@ -764,8 +762,6 @@ private:
 
         const auto& recommendation = dialog.recommendation();
         _storageBackendAction.setCurrentText(QStringLiteral("Tiled"));
-        _tileAsymmetryAction.getAsymmetryAction().setValue(recommendation.asymmetry);
-        _tileSizeAction.setValue(static_cast<std::int32_t>(recommendation.targetTileMiB));
         _rowTileSizeAction.setString(QString::number(recommendation.geometry.rowTileSize));
         _columnTileSizeAction.setString(QString::number(recommendation.geometry.columnTileSize));
         _cacheCapacityAction.setString(QString::number(recommendation.cacheCapacity));

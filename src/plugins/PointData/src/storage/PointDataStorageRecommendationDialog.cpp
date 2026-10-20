@@ -51,14 +51,12 @@ public:
         const auto memoryPreference = memoryPreferenceAction.getCurrentIndex() == 1 ? StorageMemoryPreference::Low : StorageMemoryPreference::Balanced;
         recommendation = recommendTiledStorage(rows, columns, elementSize, accessProfile, memoryPreference);
 
-        recommendationAction.setString(QStringLiteral("Target tile size: %1 MiB\nTile geometry: %2 x %3\nCache capacity: %4 tiles\nPacked tiles: yes\nSuper-tile: %5 x %6 tiles\nAsymmetry: %7\n\nThese are preliminary heuristics. Review the generated values and validate them with the benchmark.")
-            .arg(recommendation.targetTileMiB)
+        recommendationAction.setString(QStringLiteral("Tile geometry: %1 x %2\nCache capacity: %3 tiles\nPacked tiles: yes\nSuper-tile: %4 x %5 tiles\n\nThese are preliminary heuristics. Review the generated values and validate them with the benchmark.")
             .arg(recommendation.geometry.rowTileSize)
             .arg(recommendation.geometry.columnTileSize)
             .arg(recommendation.cacheCapacity)
             .arg(recommendation.superTileRows)
-            .arg(recommendation.superTileColumns)
-            .arg(recommendation.asymmetry));
+            .arg(recommendation.superTileColumns));
     }
 
     mv::gui::VerticalGroupAction settingsGroupAction;
