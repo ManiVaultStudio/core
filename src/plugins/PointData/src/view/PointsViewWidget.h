@@ -5,7 +5,7 @@
 #include "PointsTableModel.h"
 #include "pointdata_export.h"
 
-#include "../storage/interface/PointDataAccess.h"
+#include "storage/interface/PointDataAccess.h"
 
 #include <Dataset.h>
 
