@@ -17,6 +17,14 @@ set(POINTS_SOURCES
     src/SparseMatrix.h
     src/DimensionNamesSerializer.h
     src/DimensionNamesSerializer.cpp
+    src/DimensionPickerAction.cpp
+    src/DimensionsPickerAction.cpp
+    src/DimensionsPickerFilterAction.cpp
+    src/DimensionsPickerHolder.cpp
+    src/DimensionsPickerItemModel.cpp
+    src/DimensionsPickerMiscellaneousAction.cpp
+    src/DimensionsPickerProxyModel.cpp
+    src/DimensionsPickerSelectAction.cpp
     src/storage/widgets/StorageBackendConfigurationDialog.cpp
     src/storage/eager/EagerPointsStorageBackend.cpp
     src/storage/tiled/TiledPointsStorageBackend.cpp
@@ -45,19 +53,19 @@ set(POINTS_HEADERS
     src/PointDataRange.h
     src/view/PointView.h
     src/RandomAccessRange.h
+    src/DimensionPickerAction.h
+    src/DimensionsPickerAction.h
+    src/DimensionsPickerFilterAction.h
+    src/DimensionsPickerSelectAction.h
+    src/DimensionsPickerMiscellaneousAction.h
+    src/DimensionsPickerHolder.h
+    src/DimensionsPickerItemModel.h
+    src/DimensionsPickerProxyModel.h
     src/actions/InfoAction.h
     src/actions/SelectedIndicesAction.h
     src/actions/ProxyDatasetsAction.h
     src/actions/EditProxyDatasetsAction.h
     src/actions/NumberOfSelectedPointsAction.h
-    src/actions/DimensionPickerAction.h
-    src/actions/DimensionsPickerAction.h
-    src/actions/DimensionsPickerFilterAction.h
-    src/actions/DimensionsPickerSelectAction.h
-    src/actions/DimensionsPickerMiscellaneousAction.h
-    src/actions/DimensionsPickerHolder.h
-    src/actions/DimensionsPickerItemModel.h
-    src/actions/DimensionsPickerProxyModel.h
     src/actions/ModelResetter.h
     src/actions/CreateSetFromSelectionAction.h
     src/SparseMatrix.h
@@ -108,6 +116,22 @@ set(BFLOAT_HEADER
 )
 
 set(ACTIONS_SOURCES
+    src/DimensionPickerAction.h
+    src/DimensionPickerAction.cpp
+    src/DimensionsPickerAction.h
+    src/DimensionsPickerAction.cpp
+    src/DimensionsPickerHolder.h
+    src/DimensionsPickerHolder.cpp
+    src/DimensionsPickerItemModel.h
+    src/DimensionsPickerItemModel.cpp
+    src/DimensionsPickerProxyModel.h
+    src/DimensionsPickerProxyModel.cpp
+    src/DimensionsPickerFilterAction.h
+    src/DimensionsPickerFilterAction.cpp
+    src/DimensionsPickerSelectAction.h
+    src/DimensionsPickerSelectAction.cpp
+    src/DimensionsPickerMiscellaneousAction.h
+    src/DimensionsPickerMiscellaneousAction.cpp
     src/actions/InfoAction.h
     src/actions/InfoAction.cpp
     src/actions/ProxyDatasetsAction.h
@@ -120,22 +144,6 @@ set(ACTIONS_SOURCES
     src/actions/SelectedIndicesAction.cpp
     src/actions/CreateSetFromSelectionAction.h
     src/actions/CreateSetFromSelectionAction.cpp
-    src/actions/DimensionPickerAction.h
-    src/actions/DimensionPickerAction.cpp
-    src/actions/DimensionsPickerAction.h
-    src/actions/DimensionsPickerAction.cpp
-    src/actions/DimensionsPickerHolder.h
-    src/actions/DimensionsPickerHolder.cpp
-    src/actions/DimensionsPickerItemModel.h
-    src/actions/DimensionsPickerItemModel.cpp
-    src/actions/DimensionsPickerProxyModel.h
-    src/actions/DimensionsPickerProxyModel.cpp
-    src/actions/DimensionsPickerFilterAction.h
-    src/actions/DimensionsPickerFilterAction.cpp
-    src/actions/DimensionsPickerSelectAction.h
-    src/actions/DimensionsPickerSelectAction.cpp
-    src/actions/DimensionsPickerMiscellaneousAction.h
-    src/actions/DimensionsPickerMiscellaneousAction.cpp
     src/actions/ModelResetter.h
     src/actions/ModelResetter.cpp
     src/actions/PointsAction.h
@@ -167,11 +175,11 @@ source_group(Storage\\Actions FILES
 source_group(Storage\\Interface FILES
     ${POINTS_STORAGE_COMMON_HEADERS}
 )
-source_group(Storage\\eager FILES
+source_group(Storage\\Eager FILES
     src/storage/eager/EagerPointsStorageBackend.h
     src/storage/eager/EagerPointsStorageBackend.cpp
 )
-source_group(Storage\\tiled FILES
+source_group(Storage\\Tiled FILES
     ${POINTS_STORAGE_TILED_HEADERS}
     src/storage/tiled/TiledPointsStorageBackend.cpp
     src/storage/tiled/TiledStorageAsymmetryAction.cpp

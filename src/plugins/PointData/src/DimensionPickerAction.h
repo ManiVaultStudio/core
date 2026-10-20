@@ -7,7 +7,7 @@
 #include "actions/WidgetAction.h"
 #include "actions/OptionAction.h"
 
-#include "../PointData.h"
+#include "PointData.h"
 
 #include "pointdata_export.h"
 

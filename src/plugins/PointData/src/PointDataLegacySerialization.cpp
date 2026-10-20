@@ -4,7 +4,7 @@
 
 #include "PointDataLegacySerialization.h"
 #include "PointData.h"
-#include "actions/DimensionsPickerAction.h"
+#include "DimensionsPickerAction.h"
 
 #include <util/Serialization.h>
 
