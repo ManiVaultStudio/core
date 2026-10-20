@@ -20,7 +20,6 @@ target_link_libraries(PointDataGTest PRIVATE
     PointData
     Qt6::Widgets
     Qt6::WebEngineWidgets
-    Qt6::Network
     GTest::gtest
 )
 
