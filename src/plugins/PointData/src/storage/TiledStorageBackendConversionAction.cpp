@@ -2,6 +2,9 @@
 
 #include "TiledStorageBackendConversionAction.h"
 
+#include "PointDataStorageRecommendationDialog.h"
+
+#include <QApplication>
 #include <limits>
 
 namespace mv::gui
@@ -19,7 +22,8 @@ TiledStorageBackendConversionAction::TiledStorageBackendConversionAction(QObject
     _cacheCapacityAction(this, "Tile cache capacity", 1, std::numeric_limits<std::int32_t>::max(), 1),
     _packedTilesAction(this, "Packed tiles", false),
     _superTileRowsAction(this, "Super-tile rows", 1, std::numeric_limits<std::int32_t>::max(), 1),
-    _superTileColumnsAction(this, "Super-tile columns", 1, std::numeric_limits<std::int32_t>::max(), 1)
+    _superTileColumnsAction(this, "Super-tile columns", 1, std::numeric_limits<std::int32_t>::max(), 1),
+    _wizardAction(this, "Wizard")
 {
     setShowLabels(true);
 
@@ -30,6 +34,7 @@ TiledStorageBackendConversionAction::TiledStorageBackendConversionAction(QObject
     _packedTilesAction.setDefaultWidgetFlags(ToggleAction::CheckBox);
     _superTileRowsAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _superTileColumnsAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
+    _wizardAction.setIconByName("lightbulb");
 
     addAction(&_tileAsymmetryAction);
     addAction(&_tileSizeAction);
@@ -39,6 +44,7 @@ TiledStorageBackendConversionAction::TiledStorageBackendConversionAction(QObject
     addAction(&_packedTilesAction);
     addAction(&_superTileRowsAction);
     addAction(&_superTileColumnsAction);
+    addAction(&_wizardAction);
 
     connect(&_tileAsymmetryAction.getAsymmetryAction(), &IntegralAction::valueChanged, this, [this] {
         updateTileGeometryFromPolicy();
@@ -75,6 +81,25 @@ TiledStorageBackendConversionAction::TiledStorageBackendConversionAction(QObject
 
     connect(&_superTileColumnsAction, &IntegralAction::valueChanged, this, [this] {
         notifyOptionsChanged();
+    });
+
+    connect(&_wizardAction, &TriggerAction::triggered, this, [this] {
+        auto* dialog = new pointdata::storage::PointDataStorageRecommendationDialog(QApplication::activeWindow(), _rows, _columns, _elementSize);
+
+        if (dialog->exec() == QDialog::Accepted)
+        {
+            const auto& recommendation = dialog->recommendation();
+            _tileAsymmetryAction.getAsymmetryAction().setValue(recommendation.asymmetry);
+            _tileSizeAction.setValue(static_cast<std::int32_t>(recommendation.targetTileMiB));
+            _rowTileSizeAction.setValue(static_cast<std::int32_t>(recommendation.geometry.rowTileSize));
+            _columnTileSizeAction.setValue(static_cast<std::int32_t>(recommendation.geometry.columnTileSize));
+            _cacheCapacityAction.setValue(static_cast<std::int32_t>(recommendation.cacheCapacity));
+            _packedTilesAction.setChecked(true);
+            _superTileRowsAction.setValue(static_cast<std::int32_t>(recommendation.superTileRows));
+            _superTileColumnsAction.setValue(static_cast<std::int32_t>(recommendation.superTileColumns));
+        }
+
+        dialog->deleteLater();
     });
 
     updateCacheCapacity();

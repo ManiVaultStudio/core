@@ -1,6 +1,8 @@
 #include "PointDataPhantomGenerator.h"
 
 #include "../PointData.h"
+#include "../storage/PointDataStorageRecommendation.h"
+#include "../storage/PointDataStorageRecommendationDialog.h"
 #include "../storage/TiledPointsStorageBackend.h"
 #include "../storage/TiledStorageAsymmetryAction.h"
 #include "../storage/TiledStorageGeometry.h"
@@ -60,6 +62,79 @@ struct PhantomConfiguration
     std::size_t   cacheCapacity    = 0;
     std::size_t   superTileRows    = 1;
     std::size_t   superTileColumns = 1;
+};
+
+class LegacyStorageWizardDialog final : public QDialog
+{
+public:
+    LegacyStorageWizardDialog(QWidget* parent, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize) :
+        QDialog(parent),
+        _settingsGroupAction(this, "Storage recommendation"),
+        _accessProfileAction(&_settingsGroupAction, "Intended access", { "Mixed or random", "Mostly rows", "Mostly columns" }, "Mixed or random"),
+        _memoryPreferenceAction(&_settingsGroupAction, "Memory preference", { "Balanced", "Low memory" }, "Balanced"),
+        _recommendationAction(&_settingsGroupAction, "Recommendation"),
+        _rows(rows),
+        _columns(columns),
+        _elementSize(elementSize)
+    {
+        setWindowTitle(tr("Storage settings wizard"));
+        setWindowIcon(mv::util::StyledIcon("lightbulb"));
+        resize(560, 360);
+
+        _settingsGroupAction.setShowLabels(true);
+        _settingsGroupAction.setDefaultWidgetFlag(mv::gui::GroupAction::NoMargins);
+        _accessProfileAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
+        _memoryPreferenceAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
+        _recommendationAction.setDefaultWidgetFlags(mv::gui::StringAction::TextEdit);
+        _recommendationAction.setEnabled(false);
+
+        _settingsGroupAction.addAction(&_accessProfileAction);
+        _settingsGroupAction.addAction(&_memoryPreferenceAction);
+        _settingsGroupAction.addAction(&_recommendationAction, -1, [](mv::gui::WidgetAction*, QWidget* widget) {
+            if (auto* textEdit = widget->findChild<QTextEdit*>(QStringLiteral("TextEdit")))
+                textEdit->setFixedHeight(180);
+        });
+
+        auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+        auto* layout = new QVBoxLayout(this);
+        layout->addWidget(_settingsGroupAction.createWidget(this));
+        layout->addWidget(buttons);
+
+        connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
+        connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
+        connect(&_accessProfileAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateRecommendation(); });
+        connect(&_memoryPreferenceAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateRecommendation(); });
+
+        updateRecommendation();
+    }
+
+    const storage::TiledStorageRecommendation& recommendation() const { return _recommendation; }
+
+private:
+    void updateRecommendation()
+    {
+        const auto accessProfile = _accessProfileAction.getCurrentIndex() == 1 ? storage::StorageAccessProfile::Rows : _accessProfileAction.getCurrentIndex() == 2 ? storage::StorageAccessProfile::Columns : storage::StorageAccessProfile::Mixed;
+        const auto memoryPreference = _memoryPreferenceAction.getCurrentIndex() == 1 ? storage::StorageMemoryPreference::Low : storage::StorageMemoryPreference::Balanced;
+        _recommendation = storage::recommendTiledStorage(_rows, _columns, _elementSize, accessProfile, memoryPreference);
+
+        _recommendationAction.setString(QStringLiteral("Target tile size: %1 MiB\nTile geometry: %2 x %3\nCache capacity: %4 tiles\nPacked tiles: yes\nSuper-tile: %5 x %6 tiles\nAsymmetry: %7\n\nThese are preliminary heuristics. Review the generated values and validate them with the benchmark.")
+            .arg(_recommendation.targetTileMiB)
+            .arg(_recommendation.geometry.rowTileSize)
+            .arg(_recommendation.geometry.columnTileSize)
+            .arg(_recommendation.cacheCapacity)
+            .arg(_recommendation.superTileRows)
+            .arg(_recommendation.superTileColumns)
+            .arg(_recommendation.asymmetry));
+    }
+
+    mv::gui::VerticalGroupAction _settingsGroupAction;
+    mv::gui::OptionAction       _accessProfileAction;
+    mv::gui::OptionAction       _memoryPreferenceAction;
+    mv::gui::StringAction       _recommendationAction;
+    std::uint64_t                _rows;
+    std::uint64_t                _columns;
+    std::size_t                  _elementSize;
+    storage::TiledStorageRecommendation _recommendation;
 };
 
 std::vector<std::size_t> parsePositiveList(const QString& text, const QString& label)
@@ -467,12 +542,18 @@ public:
         auto* presetsButton = new QPushButton(tr("Presets"), this);
         presetsButton->setMenu(_presetsAction.getMenu(presetsButton));
 
+        auto* wizardButton = new QPushButton(tr("Wizard"), this);
+        wizardButton->setIcon(mv::util::StyledIcon("lightbulb"));
+        _wizardButton = wizardButton;
+
         auto* createButton = new QPushButton(tr("Create"), this);
         _createButton = createButton;
 
         auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+        _okButton = buttons->button(QDialogButtonBox::Ok);
         auto* buttonLayout = new QHBoxLayout();
         buttonLayout->addWidget(presetsButton);
+        buttonLayout->addWidget(wizardButton);
         buttonLayout->addStretch(1);
         buttonLayout->addWidget(createButton);
         buttonLayout->addWidget(buttons);
@@ -495,6 +576,7 @@ public:
         connect(&_packedTilesAction, &mv::gui::ToggleAction::toggled, this, [this] { updateActions(); });
         connect(&_superTileRowsAction, &mv::gui::StringAction::stringChanged, this, [this] { updateEstimate(); });
         connect(&_superTileColumnsAction, &mv::gui::StringAction::stringChanged, this, [this] { updateEstimate(); });
+        connect(wizardButton, &QPushButton::clicked, this, [this] { showStorageWizard(); });
 
         loadSettings();
         updateActions();
@@ -668,6 +750,31 @@ private:
         updateEstimate();
     }
 
+    void showStorageWizard()
+    {
+        const auto configurations = this->configurations();
+
+        if (configurations.size() != 1)
+            return;
+
+        storage::PointDataStorageRecommendationDialog dialog(this, configurations.front().rows, configurations.front().columns, elementSizeForType(type()));
+
+        if (dialog.exec() != QDialog::Accepted)
+            return;
+
+        const auto& recommendation = dialog.recommendation();
+        _storageBackendAction.setCurrentText(QStringLiteral("Tiled"));
+        _tileAsymmetryAction.getAsymmetryAction().setValue(recommendation.asymmetry);
+        _tileSizeAction.setValue(static_cast<std::int32_t>(recommendation.targetTileMiB));
+        _rowTileSizeAction.setString(QString::number(recommendation.geometry.rowTileSize));
+        _columnTileSizeAction.setString(QString::number(recommendation.geometry.columnTileSize));
+        _cacheCapacityAction.setString(QString::number(recommendation.cacheCapacity));
+        _packedTilesAction.setChecked(true);
+        _superTileRowsAction.setString(QString::number(recommendation.superTileRows));
+        _superTileColumnsAction.setString(QString::number(recommendation.superTileColumns));
+        updateActions();
+    }
+
     void updateTileGeometryFromPolicy()
     {
         if (_rowsAction.getString().contains(',') || _columnsAction.getString().contains(','))
@@ -730,6 +837,9 @@ private:
                 throw std::invalid_argument("No valid phantom configurations");
 
             _createButton->setEnabled(true);
+            _wizardButton->setEnabled(configurations.size() == 1);
+            _createButton->setText(QStringLiteral("Create (%1)").arg(configurations.size()));
+            _okButton->setText(QStringLiteral("OK (%1)").arg(configurations.size()));
 
             if (!isTiled())
             {
@@ -760,6 +870,9 @@ private:
         catch (const std::exception& exception)
         {
             _createButton->setEnabled(false);
+            _wizardButton->setEnabled(false);
+            _createButton->setText(QStringLiteral("Create"));
+            _okButton->setText(QStringLiteral("OK"));
             _estimateAction.setString(QStringLiteral("Invalid settings: %1").arg(QString::fromUtf8(exception.what())));
         }
     }
@@ -785,6 +898,8 @@ private:
     mv::gui::StringAction                _estimateAction;
     mv::gui::PresetsAction               _presetsAction;
     QPushButton*                          _createButton = nullptr;
+    QPushButton*                          _okButton = nullptr;
+    QPushButton*                          _wizardButton = nullptr;
 };
 }
 

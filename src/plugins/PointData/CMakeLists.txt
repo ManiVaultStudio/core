@@ -26,6 +26,7 @@ set(POINTS_SOURCES
     src/storage/TiledPointsStorageBackend.cpp
     src/storage/TiledStorageBackendConversionAction.cpp
     src/storage/TiledStorageAsymmetryAction.cpp
+    src/storage/PointDataStorageRecommendationDialog.cpp
     src/tiled/PointDataTileCache.cpp
     src/tiled/PackedTileFile.cpp
     src/tiled/PointDataTiledStorage.cpp
@@ -90,6 +91,8 @@ set(POINTS_STORAGE_HEADERS
     src/storage/TiledStorageBackendConversionAction.h
     src/storage/TiledStorageAsymmetryAction.h
     src/storage/TiledStorageGeometry.h
+    src/storage/PointDataStorageRecommendation.h
+    src/storage/PointDataStorageRecommendationDialog.h
 )
 
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects
@@ -152,8 +155,11 @@ source_group(Storage FILES
     src/storage/TiledStorageBackendConversionAction.h
     src/storage/TiledStorageAsymmetryAction.h
     src/storage/TiledStorageGeometry.h
+    src/storage/PointDataStorageRecommendation.h
+    src/storage/PointDataStorageRecommendationDialog.h
     src/storage/TiledStorageAsymmetryAction.cpp
     src/storage/TiledStorageBackendConversionAction.cpp
+    src/storage/PointDataStorageRecommendationDialog.cpp
 )
 source_group(BFloat FILES ${BFLOAT_HEADER})
 source_group(Aux FILES ${POINT_DATA_AUX})

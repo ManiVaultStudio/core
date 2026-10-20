@@ -7,6 +7,7 @@
 #include "TiledStorageGeometry.h"
 
 #include <actions/IntegralAction.h>
+#include <actions/TriggerAction.h>
 #include <actions/ToggleAction.h>
 
 namespace mv::gui
@@ -56,6 +57,7 @@ private:
     ToggleAction                _packedTilesAction;
     IntegralAction              _superTileRowsAction;
     IntegralAction              _superTileColumnsAction;
+    TriggerAction               _wizardAction;
 };
 
 }
