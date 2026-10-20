@@ -77,9 +77,9 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromGenerator(cons
     return std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize, std::move(generator));
 }
 
-std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromPackedFile(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, const QString& filePath, const mv::util::SharedCodec& codec, const std::vector<PackedTileBlock>& blocks)
+std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromPackedFile(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, const QString& filePath, const mv::util::SharedCodec& codec, const std::vector<mv::util::PackedBlobBlock>& blocks)
 {
-    auto reader = std::make_shared<PackedTileFileReader>(filePath, codec);
+    auto reader = std::make_shared<mv::util::PackedBlobFileReader>(filePath, codec);
     auto storage = std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize, [reader](const TileDescriptor& descriptor) {
         return reader->read(descriptor.packedBlock);
     });

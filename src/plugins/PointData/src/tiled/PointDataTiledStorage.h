@@ -91,7 +91,7 @@ public:
      * descriptor index. Each tile read opens and decodes only its recorded
      * byte range.
      */
-    static std::shared_ptr<PointDataTiledStorage> fromPackedFile(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, const QString& filePath, const mv::util::SharedCodec& codec, const std::vector<PackedTileBlock>& blocks);
+    static std::shared_ptr<PointDataTiledStorage> fromPackedFile(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, const QString& filePath, const mv::util::SharedCodec& codec, const std::vector<mv::util::PackedBlobBlock>& blocks);
 
     /** Creates a new lazy tile layout backed by the existing tiled storage without copying all bytes immediately. */
     static std::shared_ptr<PointDataTiledStorage> retile(const std::shared_ptr<const PointDataTiledStorage>& source, std::size_t rowTileSize, std::size_t columnTileSize, ProgressCallback progress = {});

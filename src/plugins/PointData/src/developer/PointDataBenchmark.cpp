@@ -24,14 +24,15 @@
 #include <workflow/WorkflowExecutionContext.h>
 #include <workflow/WorkflowPlan.h>
 
-#include "../tiled/PackedTileFile.h"
 #include "../tiled/PointDataTiledStorage.h"
 
 #include <QCoreApplication>
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <QDateTime>
 #include <QDir>
 #include <QEventLoop>
+#include <QFileInfo>
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include <QPushButton>
@@ -424,8 +425,8 @@ std::unique_ptr<ShardedStorage> makeShardedStorage(const BenchmarkConfiguration&
         throw std::runtime_error("Unable to create a temporary point-data benchmark directory");
 
     const auto path = shardedStorage->directory->filePath(QStringLiteral("point-data.shard"));
-    mv::pointdata::tiled::PackedTileFileWriter writer(path, codec);
-    std::vector<mv::pointdata::tiled::PackedTileBlock> blocks;
+    mv::util::PackedBlobFileWriter writer(path, codec);
+    std::vector<mv::util::PackedBlobBlock> blocks;
     blocks.reserve(source->descriptors().size());
 
     for (std::size_t tileIndex = 0; tileIndex < source->descriptors().size(); ++tileIndex)
@@ -696,6 +697,17 @@ void writeFixtureResult(std::ofstream& output, const FixtureResult& result)
     output << csvValue(result.datasetName).toStdString() << ',' << result.backend.toStdString() << ',' << result.elementType.toStdString() << ',' << result.rows << ',' << result.columns << ',' << result.rowTileSize << ',' << result.columnTileSize << ',' << result.cacheCapacity << ',' << result.accessPattern.toStdString() << ',' << result.operations << ',' << result.elapsedMilliseconds << ',' << result.meanMillisecondsPerRow << ',' << result.checksum << ',' << result.cacheHits << ',' << result.cacheMisses << ',' << result.cacheEvictions << '\n';
 }
 
+QString makeTimestampedBenchmarkOutputPath(const QString& outputPath)
+{
+    const QFileInfo fileInfo(outputPath);
+    const auto directory = fileInfo.absolutePath();
+    const auto baseName  = fileInfo.completeBaseName().isEmpty() ? QStringLiteral("point-data-benchmark") : fileInfo.completeBaseName();
+    const auto suffix    = fileInfo.suffix().isEmpty() ? QStringLiteral("csv") : fileInfo.suffix();
+    const auto timestamp = QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd-HHmmss-zzz"));
+
+    return QDir(directory).filePath(QStringLiteral("%1-%2.%3").arg(baseName, timestamp, suffix));
+}
+
 class BenchmarkDialog final : public QDialog
 {
 public:
@@ -862,7 +874,8 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
     if (datasets.empty())
         throw std::runtime_error("Enable at least one non-empty point dataset before running the benchmark");
 
-    const auto output = std::make_shared<std::ofstream>(outputPath.toStdString(), std::ios::trunc);
+    const auto benchmarkOutputPath = makeTimestampedBenchmarkOutputPath(outputPath);
+    const auto output              = std::make_shared<std::ofstream>(benchmarkOutputPath.toStdString(), std::ios::trunc);
 
     if (!*output)
         throw std::runtime_error("Unable to open the benchmark output file");
@@ -980,7 +993,7 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
 
     const auto benchmarkStart = std::chrono::steady_clock::now();
     auto future = mv::Application::getWorkflowPlanExecutor().execute(std::move(plan), nullptr, options);
-    future.onFinished(owner, [output, outputPath, benchmarkStart](const mv::workflow::SharedWorkflowResult& result) {
+    future.onFinished(owner, [output, benchmarkOutputPath, benchmarkStart](const mv::workflow::SharedWorkflowResult& result) {
         output->flush();
 
         const auto elapsedMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - benchmarkStart).count();
@@ -988,17 +1001,17 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
 
         if (!result || result->getStatus() == mv::workflow::WorkflowResultBase::Status::Canceled)
         {
-            mv::help().addNotification(QObject::tr("Point-data benchmark canceled"), QObject::tr("The benchmark was canceled after %1. Partial results were saved to %2.").arg(elapsedTime, outputPath), mv::util::StyledIcon("stop"));
+            mv::help().addNotification(QObject::tr("Point-data benchmark canceled"), QObject::tr("The benchmark was canceled after %1. Partial results were saved to %2.").arg(elapsedTime, benchmarkOutputPath), mv::util::StyledIcon("stop"));
             return;
         }
 
         if (result->getStatus() != mv::workflow::WorkflowResultBase::Status::Success)
         {
-            mv::help().addNotification(QObject::tr("Point-data benchmark failed"), QObject::tr("The benchmark failed after %1. Partial results were saved to %2.").arg(elapsedTime, outputPath), mv::util::StyledIcon("times"));
+            mv::help().addNotification(QObject::tr("Point-data benchmark failed"), QObject::tr("The benchmark failed after %1. Partial results were saved to %2.").arg(elapsedTime, benchmarkOutputPath), mv::util::StyledIcon("times"));
             return;
         }
 
-        mv::help().addNotification(QObject::tr("Point-data benchmark completed"), QObject::tr("The benchmark completed in %1. Results were saved to %2.").arg(elapsedTime, outputPath), mv::util::StyledIcon("check"));
+        mv::help().addNotification(QObject::tr("Point-data benchmark completed"), QObject::tr("The benchmark completed in %1. Results were saved to %2.").arg(elapsedTime, benchmarkOutputPath), mv::util::StyledIcon("check"));
     });
 }
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PackedTileFile.h"
+#include <util/Serialization.h>
 
 #include <QByteArray>
 #include <QVariantMap>
@@ -25,16 +25,16 @@ class PointDataTiledStorage;
  */
 struct TileDescriptor
 {
-    std::uint64_t rowOffset    = 0; /**< Global row offset. */
-    std::uint64_t columnOffset = 0; /**< Global column offset. */
-    std::uint64_t rows         = 0; /**< Number of rows in this tile. */
-    std::uint64_t columns      = 0; /**< Number of columns in this tile. */
-    QVariantMap blob;               /**< Serialized blob metadata and block index. */
-    QByteArray residentBytes;       /**< Optional in-memory payload for eager/generated tiles. */
-    PackedTileBlock packedBlock;    /**< Optional independently encoded block in a packed tile file. */
-    std::size_t superTileIndex = 0; /**< Index of the serialized super tile containing this tile. */
-    std::uint64_t superTileOffset = 0; /**< Byte offset within the decoded super-tile payload. */
-    std::uint64_t superTileSize = 0; /**< Number of decoded bytes occupied by this tile in the super tile. */
+    std::uint64_t              rowOffset       = 0; /**< Global row offset. */
+    std::uint64_t              columnOffset    = 0; /**< Global column offset. */
+    std::uint64_t              rows            = 0; /**< Number of rows in this tile. */
+    std::uint64_t              columns         = 0; /**< Number of columns in this tile. */
+    QVariantMap                blob;               /**< Serialized blob metadata and block index. */
+    QByteArray                 residentBytes;       /**< Optional in-memory payload for eager/generated tiles. */
+    mv::util::PackedBlobBlock  packedBlock;         /**< Optional independently encoded block in a packed blob file. */
+    std::size_t                superTileIndex  = 0; /**< Index of the serialized super tile containing this tile. */
+    std::uint64_t              superTileOffset = 0; /**< Legacy byte offset within a decoded super-tile payload. */
+    std::uint64_t              superTileSize   = 0; /**< Legacy number of decoded bytes occupied by this tile in a super tile. */
 };
 
 /**

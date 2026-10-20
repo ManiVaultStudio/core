@@ -11,6 +11,7 @@
 #include "workflow/WorkflowOptions.h"
 
 #include <QByteArray>
+#include <QFile>
 #include <QString>
 #include <QStringList>
 #include <QVariant>
@@ -18,6 +19,7 @@
 #include <QVector>
 
 #include <cstdint>
+#include <cstddef>
 
 namespace mv::util {
 
@@ -75,6 +77,76 @@ struct DecodeBlockJob
 };
 
 using DecodeBlockJobs = QVector<DecodeBlockJob>;
+
+/**
+ * @brief Describes one independently encoded block in a packed blob file.
+ *
+ * The offset points directly to the encoded payload, allowing callers to read
+ * and decode one block without materializing the other blocks in the file.
+ *
+ * @author Thomas Kroes
+ */
+struct PackedBlobBlock
+{
+    std::uint64_t offset           = 0; /**< Byte offset of the encoded payload. */
+    std::uint64_t compressedSize   = 0; /**< Number of encoded bytes. */
+    std::uint64_t uncompressedSize = 0; /**< Number of decoded bytes. */
+};
+
+/**
+ * @brief Appends independently encoded blobs to one packed project file.
+ *
+ * The file is an uncompressed container. Each appended payload is encoded
+ * independently with the supplied codec, so a reader can fetch one block
+ * without decoding unrelated blocks.
+ *
+ * @author Thomas Kroes
+ */
+class CORE_EXPORT PackedBlobFileWriter
+{
+public:
+    /** Opens or creates the file path and uses the codec for each block. */
+    PackedBlobFileWriter(const QString& filePath, const SharedCodec& codec);
+
+    /** Appends one non-empty payload and returns its encoded range. */
+    PackedBlobBlock append(const char* data, std::size_t size);
+
+    /** Appends one non-empty payload and returns its encoded range. */
+    PackedBlobBlock append(const QByteArray& data);
+
+    /** Flushes and closes the file; subsequent append operations fail. */
+    void close();
+
+private:
+    QFile       _file;
+    SharedCodec _codec;
+    bool        _closed = false;
+};
+
+/**
+ * @brief Reads independently encoded ranges from a packed blob file.
+ *
+ * A reader owns only the file path and codec. Each read obtains the selected
+ * encoded range and decodes it into a new or caller-provided buffer.
+ *
+ * @author Thomas Kroes
+ */
+class CORE_EXPORT PackedBlobFileReader
+{
+public:
+    /** Opens the file path and validates its local packed-file header. */
+    PackedBlobFileReader(const QString& filePath, const SharedCodec& codec);
+
+    /** Reads and decodes one packed block. */
+    QByteArray read(const PackedBlobBlock& block) const;
+
+    /** Decodes one packed block into a caller-provided buffer. */
+    void readTo(const PackedBlobBlock& block, char* destination, std::size_t destinationSize) const;
+
+private:
+    QString     _filePath;
+    SharedCodec _codec;
+};
 
 /**
  * Serialize a raw byte buffer into a blob variant map.

@@ -7,6 +7,8 @@
 #include <util/Exception.h>
 
 #include <stdexcept>
+#include <algorithm>
+#include <limits>
 
 #include <QDebug>
 #include <QDir>
@@ -273,6 +275,51 @@ QByteArray Archiver::readZipEntryToMemory(const QString& zipPath, const QString&
     }
 
 	return data;
+}
+
+QByteArray Archiver::readZipEntryRangeToMemory(const QString& zipPath, const QString& entryName, const std::uint64_t offset, const std::uint64_t size)
+{
+    static QMutex zipReadMutex;
+
+    if (offset > static_cast<std::uint64_t>(std::numeric_limits<qint64>::max()) || size > static_cast<std::uint64_t>(std::numeric_limits<qint64>::max()))
+        throw std::runtime_error("ZIP entry range exceeds Qt size limits");
+
+    QMutexLocker lock(&zipReadMutex);
+    QuaZip zip(zipPath);
+
+    if (!zip.open(QuaZip::mdUnzip))
+        throw std::runtime_error(QString("Unable to open ZIP archive: %1").arg(zipPath).toStdString());
+
+    if (!zip.setCurrentFile(entryName))
+        throw std::runtime_error(QString("Unable to locate ZIP entry: %1").arg(entryName).toStdString());
+
+    QuaZipFile file(&zip);
+
+    if (!file.open(QIODevice::ReadOnly))
+        throw std::runtime_error(QString("Unable to open ZIP entry for reading: %1").arg(entryName).toStdString());
+
+    std::uint64_t bytesToDiscard = offset;
+
+    while (bytesToDiscard > 0)
+    {
+        const auto chunkSize = static_cast<qint64>(std::min<std::uint64_t>(bytesToDiscard, 1024 * 1024));
+        const auto chunk = file.read(chunkSize);
+
+        if (chunk.isEmpty())
+            throw std::runtime_error(QString("Unable to skip to ZIP entry range: %1").arg(entryName).toStdString());
+
+        bytesToDiscard -= static_cast<std::uint64_t>(chunk.size());
+    }
+
+    const auto data = file.read(static_cast<qint64>(size));
+
+    if (data.size() != static_cast<qsizetype>(size))
+        throw std::runtime_error(QString("Unable to read ZIP entry range: %1").arg(entryName).toStdString());
+
+    if (file.getZipError() != UNZ_OK)
+        throw std::runtime_error(QString("Failed while reading ZIP entry: %1").arg(entryName).toStdString());
+
+    return data;
 }
 
 void Archiver::compressSubDirectory(QuaZip* parentZip, const QString& directory, const QString& parentDirectory, bool recursive /*= true*/, std::int32_t compressionLevel /*= 0*/, const QString& password /*= ""*/, QDir::Filters filters /*= QDir::Filter::Files*/)

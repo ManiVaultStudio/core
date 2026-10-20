@@ -2,10 +2,17 @@
 
 #include "PointDataTiledStorage.h"
 
+#include <CoreInterface.h>
+
+#include <ProjectCompressionAction.h>
+
 #include <util/Serialization.h>
+#include <util/CodecRegistry.h>
 
 #include <workflow/WorkflowExecutionContext.h>
 
+#include <QDir>
+#include <QUuid>
 #include <QVector>
 #include <QString>
 
@@ -44,8 +51,8 @@ QVariantMap makeTiledVariantMap(const mv::pointdata::tiled::PointDataTiledStorag
     const auto memoryEstimate = storage.memoryEstimate();
 
     QVariantMap result;
-    result["Version"]         = storage.packedTiles() ? 3 : 2;
-    result["Storage"]         = storage.packedTiles() ? "SuperTileBlobs" : "IndexedTileBlobs";
+    result["Version"]         = storage.packedTiles() ? 4 : 2;
+    result["Storage"]         = storage.packedTiles() ? "PackedTileFiles" : "IndexedTileBlobs";
     result["RowTileSize"]     = QVariant::fromValue(static_cast<qulonglong>(storage.rowTileSize()));
     result["ColumnTileSize"]  = QVariant::fromValue(static_cast<qulonglong>(storage.columnTileSize()));
     result["CacheCapacity"]   = QVariant::fromValue(static_cast<qulonglong>(storage.cacheCapacity()));
@@ -70,6 +77,8 @@ QVariantMap makePackedTiledVariantMap(const mv::pointdata::tiled::PointDataTiled
     QVector<QVariantMap> superTiles;
     const auto tileRows = storage.tileRowCount();
     const auto tileColumns = storage.tileColumnCount();
+    const auto codec = mv::projects().getCurrentProject()->getCompressionAction().createCodec(nullptr);
+    const auto saveDirectory = QDir::cleanPath(mv::projects().getTemporaryDirPath(mv::AbstractProjectManager::TemporaryDirType::Save));
 
     tiles.resize(static_cast<qsizetype>(storage.descriptors().size()));
 
@@ -78,7 +87,9 @@ QVariantMap makePackedTiledVariantMap(const mv::pointdata::tiled::PointDataTiled
         for (std::uint64_t superTileColumn = 0; superTileColumn < tileColumns; superTileColumn += storage.superTileColumns())
         {
             const auto superTileIndex = superTiles.size();
-            QByteArray payload;
+            const auto fileName = QUuid::createUuid().toString(QUuid::WithoutBraces) + QStringLiteral(".ptpack");
+            const auto filePath = QDir(saveDirectory).filePath(fileName);
+            mv::util::PackedBlobFileWriter writer(filePath, codec);
             const auto lastTileRow = std::min(tileRows, superTileRow + storage.superTileRows());
             const auto lastTileColumn = std::min(tileColumns, superTileColumn + storage.superTileColumns());
 
@@ -88,9 +99,7 @@ QVariantMap makePackedTiledVariantMap(const mv::pointdata::tiled::PointDataTiled
                 {
                     const auto tileIndex = static_cast<std::size_t>(tileRow * tileColumns + tileColumn);
                     const auto tile = storage.acquire(tileRow, tileColumn);
-                    const auto tileOffset = static_cast<std::uint64_t>(payload.size());
-
-                    payload.append(static_cast<const char*>(tile.data()), static_cast<qsizetype>(tile.sizeInBytes()));
+                    const auto packedBlock = writer.append(static_cast<const char*>(tile.data()), tile.sizeInBytes());
 
                     const auto& descriptor = storage.descriptors()[tileIndex];
                     QVariantMap tileMap;
@@ -99,16 +108,20 @@ QVariantMap makePackedTiledVariantMap(const mv::pointdata::tiled::PointDataTiled
                     tileMap["Rows"]             = QVariant::fromValue(static_cast<qulonglong>(descriptor.rows));
                     tileMap["Columns"]          = QVariant::fromValue(static_cast<qulonglong>(descriptor.columns));
                     tileMap["SuperTileIndex"]   = QVariant::fromValue(static_cast<qulonglong>(superTileIndex));
-                    tileMap["SuperTileOffset"]  = QVariant::fromValue(static_cast<qulonglong>(tileOffset));
-                    tileMap["SuperTileSize"]    = QVariant::fromValue(static_cast<qulonglong>(tile.sizeInBytes()));
+                    tileMap["PackedTileOffset"] = QVariant::fromValue(static_cast<qulonglong>(packedBlock.offset));
+                    tileMap["PackedTileCompressedSize"] = QVariant::fromValue(static_cast<qulonglong>(packedBlock.compressedSize));
+                    tileMap["PackedTileUncompressedSize"] = QVariant::fromValue(static_cast<qulonglong>(packedBlock.uncompressedSize));
                     tiles[static_cast<qsizetype>(tileIndex)] = tileMap;
                 }
             }
 
+            writer.close();
+
             QVariantMap superTileMap;
             superTileMap["TileRow"]       = QVariant::fromValue(static_cast<qulonglong>(superTileRow));
             superTileMap["TileColumn"]    = QVariant::fromValue(static_cast<qulonglong>(superTileColumn));
-            superTileMap["Raw"]           = mv::util::bytesToBlobVariantMap(payload.constData(), static_cast<std::uint64_t>(payload.size()), mv::util::BlobStorageLocation::FileInProject);
+            superTileMap["URI"]           = fileName;
+            superTileMap["Codec"]         = codec->getName();
             superTiles.push_back(superTileMap);
         }
     }
@@ -180,11 +193,14 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantM
     const auto columnTileSize = map.value("ColumnTileSize").toULongLong();
     const auto cacheCapacity  = map.value("CacheCapacity", QVariant::fromValue<qulonglong>(8)).toULongLong();
     const auto tileMaps       = map.value("Tiles").toList();
-    const auto packedTiles    = map.value("Storage").toString() == QStringLiteral("SuperTileBlobs");
+    const auto storageType    = map.value("Storage").toString();
+    const auto packedTiles    = storageType == QStringLiteral("SuperTileBlobs") || storageType == QStringLiteral("PackedTileFiles");
+    const auto packedTileFiles = storageType == QStringLiteral("PackedTileFiles");
 
     std::shared_ptr<std::vector<QVariantMap>> superTileBlobs;
     std::shared_ptr<std::vector<std::shared_ptr<QByteArray>>> superTilePayloads;
-    if (packedTiles)
+    std::shared_ptr<std::vector<std::shared_ptr<mv::util::PackedBlobFileReader>>> packedTileReaders;
+    if (storageType == QStringLiteral("SuperTileBlobs"))
     {
         superTileBlobs = std::make_shared<std::vector<QVariantMap>>();
         superTilePayloads = std::make_shared<std::vector<std::shared_ptr<QByteArray>>>();
@@ -195,10 +211,34 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantM
             superTilePayloads->push_back(nullptr);
         }
     }
+    else if (packedTileFiles)
+    {
+        packedTileReaders = std::make_shared<std::vector<std::shared_ptr<mv::util::PackedBlobFileReader>>>();
+        for (const auto& value : map.value("SuperTiles").toList())
+        {
+            const auto superTile = value.toMap();
+            const auto fileName   = superTile.value("URI").toString();
+            const auto codecName  = superTile.value("Codec").toString();
 
-    auto storage = std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize, [packedTiles, superTileBlobs, superTilePayloads](const TileDescriptor& descriptor) {
+            if (fileName.isEmpty() || codecName.isEmpty())
+                throw std::runtime_error("Packed tiled point-data metadata has an incomplete super-tile file entry");
+
+            const auto codec = mv::util::codecRegistry().createCodec(nullptr, codecName);
+            packedTileReaders->push_back(std::make_shared<mv::util::PackedBlobFileReader>(fileName, codec));
+        }
+    }
+
+    auto storage = std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize, [packedTiles, packedTileFiles, superTileBlobs, superTilePayloads, packedTileReaders](const TileDescriptor& descriptor) {
         if (!packedTiles)
             return mv::util::bytesFromBlobVariantMap(descriptor.blob);
+
+        if (packedTileFiles)
+        {
+            if (descriptor.superTileIndex >= packedTileReaders->size())
+                throw std::runtime_error("Invalid serialized packed tile file index");
+
+            return (*packedTileReaders)[descriptor.superTileIndex]->read(descriptor.packedBlock);
+        }
 
         if (descriptor.superTileIndex >= superTileBlobs->size())
             throw std::runtime_error("Invalid serialized super-tile index");
@@ -235,11 +275,18 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantM
 
         descriptors[i].blob = tile.value("Raw").toMap();
 
-        if (packedTiles)
+        if (storageType == QStringLiteral("SuperTileBlobs"))
         {
             descriptors[i].superTileIndex  = tile.value("SuperTileIndex").toULongLong();
             descriptors[i].superTileOffset = tile.value("SuperTileOffset").toULongLong();
             descriptors[i].superTileSize   = tile.value("SuperTileSize").toULongLong();
+        }
+        else if (packedTileFiles)
+        {
+            descriptors[i].superTileIndex              = tile.value("SuperTileIndex").toULongLong();
+            descriptors[i].packedBlock.offset          = tile.value("PackedTileOffset").toULongLong();
+            descriptors[i].packedBlock.compressedSize  = tile.value("PackedTileCompressedSize").toULongLong();
+            descriptors[i].packedBlock.uncompressedSize = tile.value("PackedTileUncompressedSize").toULongLong();
         }
     }
 
