@@ -478,7 +478,7 @@ public:
         presetsButton->setMenu(_presetsAction.getMenu(presetsButton));
 
         auto* wizardButton = new QPushButton(tr("Wizard"), this);
-        wizardButton->setIcon(mv::util::StyledIcon("lightbulb"));
+        wizardButton->setIcon(mv::util::StyledIcon("hat-wizard"));
         _wizardButton = wizardButton;
 
         auto* createButton = new QPushButton(tr("Create"), this);
