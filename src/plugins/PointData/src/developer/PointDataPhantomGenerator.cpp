@@ -782,11 +782,11 @@ private:
                 return;
             }
 
-            const auto type        = Points::elementTypeSpecifier(_typeAction.getCurrentText());
-            const auto elementSize = elementSizeForType(type);
+            const auto type          = Points::elementTypeSpecifier(_typeAction.getCurrentText());
+            const auto elementSize   = elementSizeForType(type);
             const auto& configuration = configurations.front();
             const storage::TiledStorageGeometry geometry { configuration.rowTileSize, configuration.columnTileSize };
-            const auto estimate = PointData::estimateTiledMemory(rows(), columns(), elementSize, geometry.rowTileSize, geometry.columnTileSize, configuration.cacheCapacity);
+            const auto estimate      = PointData::estimateTiledMemory(rows(), columns(), elementSize, geometry.rowTileSize, geometry.columnTileSize, configuration.cacheCapacity);
 
             _estimateAction.setString(QString("Storage backend: Tiled\nConfigurations: %1\nRaw size: %2\nFirst tile: %3x%4\nLargest tile: %5\nEstimated cache: %6\nTiles: %7\nIndex estimate: %8")
                 .arg(configurations.size())

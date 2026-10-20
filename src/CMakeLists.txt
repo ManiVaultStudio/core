@@ -33,12 +33,12 @@ add_subdirectory(plugins/TutorialPlugin)
 add_subdirectory(plugins/PointsViewPlugin)
 
 set(MV_SYSTEM_PLUGINS
-    DataHierarchyPlugin 
-    DataPropertiesPlugin 
-    SharedParametersPlugin 
-    LoggingPlugin 
-    TasksPlugin 
-    SampleScopePlugin 
+    DataHierarchyPlugin
+    DataPropertiesPlugin
+    SharedParametersPlugin
+    LoggingPlugin
+    TasksPlugin
+    SampleScopePlugin
     TutorialPlugin
     PointsViewPlugin
 )
