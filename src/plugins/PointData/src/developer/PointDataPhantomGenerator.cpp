@@ -433,13 +433,24 @@ public:
         _estimateAction.setEnabled(false);
         _presetsAction.setSaveDefaultPresetActionVisible(false);
 
-        _rowTileSizeAction.setToolTip("Comma-separated tile heights; one dataset is created for every combination");
-        _columnTileSizeAction.setToolTip("Comma-separated tile widths; one dataset is created for every combination");
-        _cacheCapacityAction.setToolTip("Comma-separated cache capacities; one dataset is created for every combination");
-        _superTileRowsAction.setToolTip("Comma-separated super-tile row counts; one dataset is created for every combination");
-        _superTileColumnsAction.setToolTip("Comma-separated super-tile column counts; one dataset is created for every combination");
-        _rowsAction.setToolTip("Comma-separated dataset row counts; one dataset is created for every combination");
-        _columnsAction.setToolTip("Comma-separated dataset column counts; one dataset is created for every combination");
+        _descriptionAction.setToolTip("Summary of the generator settings. The controls below accept single values or comma-separated lists; lists create the Cartesian product of all supplied values.");
+        _nameAction.setToolTip("Dataset name. When automatic naming is enabled, this field is generated from the dataset size, type, storage backend, tile geometry, cache, and packing settings.");
+        _nameOverrideAction.setToolTip("Use a custom dataset name instead of the generated name. Naming does not affect storage or benchmark performance.");
+        _rowsAction.setToolTip("Number of rows in each generated dataset. Larger datasets increase disk usage, creation time, and the amount of data that can be touched during scans; comma-separated values create multiple sizes.");
+        _columnsAction.setToolTip("Number of dimensions, or columns, in each generated dataset. More columns increase the raw footprint and can make column access and wide row access more expensive; comma-separated values create multiple sizes.");
+        _dimensionNameAction.setToolTip("How dimensions are named. This affects labels and metadata, but has no meaningful effect on numeric access performance.");
+        _typeAction.setToolTip("Element type stored for every point value. Smaller types reduce disk and memory traffic; larger or more precise types increase storage, I/O, and decoding work.");
+        _populationAction.setToolTip("How values are generated. Deterministic, random, and zero-filled data are useful for different tests; the choice may affect compression ratio and therefore disk footprint and I/O time.");
+        _storageBackendAction.setToolTip("Storage representation. Eager storage keeps the complete dataset materialized, while Tiled storage loads bounded tiles on demand and is the relevant choice for tile and cache experiments.");
+        _tileAsymmetryAction.setToolTip("Balances tile shape between row-oriented and column-oriented access. Row-oriented tiles can accelerate contiguous row access, while column-oriented tiles can accelerate contiguous column access; the wrong orientation can increase tile reads.");
+        _tileSizeAction.setToolTip("Automatic tile-geometry budget used to calculate row and column tile sizes. Larger budgets reduce the number of tiles but increase the amount of data read and decoded per miss; changing this policy recalculates the tile dimensions below.");
+        _rowTileSizeAction.setToolTip("Number of dataset rows in each tile. Larger values help contiguous row scans but make random access fetch more unrelated data; comma-separated values create one dataset for every combination.");
+        _columnTileSizeAction.setToolTip("Number of dataset columns in each tile. Larger values help contiguous column access but increase the data fetched for individual values or narrow column requests; comma-separated values create one dataset for every combination.");
+        _cacheCapacityAction.setToolTip("Maximum number of decoded tiles retained in memory. A larger cache can reduce repeated disk reads for local or repeated access, but uses more memory; comma-separated values create one dataset for every combination.");
+        _packedTilesAction.setToolTip("Pack neighboring tiles into shared container files. Packing can reduce file-open and filesystem overhead, while individual tile access still requires locating and decoding the requested tile.");
+        _superTileRowsAction.setToolTip("Number of tile rows in each packed-tile container. Larger values can reduce metadata and file-operation overhead, but may increase container reads and packing work; comma-separated values create one dataset for every combination.");
+        _superTileColumnsAction.setToolTip("Number of tile columns in each packed-tile container. Larger values can reduce metadata and file-operation overhead, but may increase container reads and packing work; comma-separated values create one dataset for every combination.");
+        _estimateAction.setToolTip("Estimated raw footprint, tile count, cache footprint, and index size. These are planning estimates; actual runtime depends on compression, cache state, filesystem behavior, and access pattern.");
 
         _settingsGroupAction.addAction(&_descriptionAction, -1, [](mv::gui::WidgetAction*, QWidget* widget) {
             if (auto* textEdit = widget->findChild<QTextEdit*>(QStringLiteral("TextEdit")))
