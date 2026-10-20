@@ -5,6 +5,7 @@
 #include "PointDataStorageRecommendation.h"
 
 #include <QDialog>
+#include <QVariantMap>
 
 #include <cstddef>
 #include <cstdint>
@@ -22,6 +23,9 @@ public:
 
     /** Returns the recommendation selected when the dialog was accepted. */
     const TiledStorageRecommendation& recommendation() const;
+
+    /** Returns the intended-use profile to persist with the generated dataset. */
+    QVariantMap profile() const;
 
 private:
     class Private;

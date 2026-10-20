@@ -19,7 +19,9 @@ class PointDataStorageRecommendationDialog::Private
 public:
     Private(PointDataStorageRecommendationDialog* dialog, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize) :
         settingsGroupAction(dialog, "Storage recommendation"),
-        accessProfileAction(&settingsGroupAction, "Intended access", { "Mixed or random", "Mostly rows", "Mostly columns" }, "Mixed or random"),
+        rowAccessAction(&settingsGroupAction, "Row access", { "None", "Contiguous", "Random" }, "None"),
+        columnAccessAction(&settingsGroupAction, "Column access", { "None", "Contiguous", "Random" }, "None"),
+        pointAccessFrequencyAction(&settingsGroupAction, "Point access", { "Incidental", "Frequent" }, "Incidental"),
         memoryPreferenceAction(&settingsGroupAction, "Memory preference", { "Balanced", "Low memory" }, "Balanced"),
         recommendationAction(&settingsGroupAction, "Recommendation"),
         rows(rows),
@@ -28,28 +30,36 @@ public:
     {
         settingsGroupAction.setShowLabels(true);
         settingsGroupAction.setDefaultWidgetFlag(mv::gui::GroupAction::NoMargins);
-        accessProfileAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
+        rowAccessAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
+        columnAccessAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
+        pointAccessFrequencyAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
         memoryPreferenceAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
         recommendationAction.setDefaultWidgetFlags(mv::gui::StringAction::TextEdit);
         recommendationAction.setEnabled(false);
 
-        settingsGroupAction.addAction(&accessProfileAction);
+        settingsGroupAction.addAction(&rowAccessAction);
+        settingsGroupAction.addAction(&columnAccessAction);
+        settingsGroupAction.addAction(&pointAccessFrequencyAction);
         settingsGroupAction.addAction(&memoryPreferenceAction);
         settingsGroupAction.addAction(&recommendationAction, -1, [](mv::gui::WidgetAction*, QWidget* widget) {
             if (auto* textEdit = widget->findChild<QTextEdit*>(QStringLiteral("TextEdit")))
                 textEdit->setFixedHeight(180);
         });
 
-        QObject::connect(&accessProfileAction, &mv::gui::OptionAction::currentIndexChanged, dialog, [this] { updateRecommendation(); });
+        QObject::connect(&rowAccessAction, &mv::gui::OptionAction::currentIndexChanged, dialog, [this] { updateRecommendation(); });
+        QObject::connect(&columnAccessAction, &mv::gui::OptionAction::currentIndexChanged, dialog, [this] { updateRecommendation(); });
+        QObject::connect(&pointAccessFrequencyAction, &mv::gui::OptionAction::currentIndexChanged, dialog, [this] { updateRecommendation(); });
         QObject::connect(&memoryPreferenceAction, &mv::gui::OptionAction::currentIndexChanged, dialog, [this] { updateRecommendation(); });
         updateRecommendation();
     }
 
     void updateRecommendation()
     {
-        const auto accessProfile = accessProfileAction.getCurrentIndex() == 1 ? StorageAccessProfile::Rows : accessProfileAction.getCurrentIndex() == 2 ? StorageAccessProfile::Columns : StorageAccessProfile::Mixed;
+        const auto rowAccess = static_cast<StorageAxisAccess>(rowAccessAction.getCurrentIndex());
+        const auto columnAccess = static_cast<StorageAxisAccess>(columnAccessAction.getCurrentIndex());
+        const auto pointAccessFrequency = static_cast<StoragePointAccessFrequency>(pointAccessFrequencyAction.getCurrentIndex());
         const auto memoryPreference = memoryPreferenceAction.getCurrentIndex() == 1 ? StorageMemoryPreference::Low : StorageMemoryPreference::Balanced;
-        recommendation = recommendTiledStorage(rows, columns, elementSize, accessProfile, memoryPreference);
+        recommendation = recommendTiledStorage(rows, columns, elementSize, rowAccess, columnAccess, pointAccessFrequency, memoryPreference);
 
         recommendationAction.setString(QStringLiteral("Tile geometry: %1 x %2\nCache capacity: %3 tiles\nPacked tiles: yes\nSuper-tile: %4 x %5 tiles\n\nThese are preliminary heuristics. Review the generated values and validate them with the benchmark.")
             .arg(recommendation.geometry.rowTileSize)
@@ -60,7 +70,9 @@ public:
     }
 
     mv::gui::VerticalGroupAction settingsGroupAction;
-    mv::gui::OptionAction       accessProfileAction;
+    mv::gui::OptionAction       rowAccessAction;
+    mv::gui::OptionAction       columnAccessAction;
+    mv::gui::OptionAction       pointAccessFrequencyAction;
     mv::gui::OptionAction       memoryPreferenceAction;
     mv::gui::StringAction       recommendationAction;
     std::uint64_t                rows;
@@ -89,6 +101,23 @@ PointDataStorageRecommendationDialog::PointDataStorageRecommendationDialog(QWidg
 const TiledStorageRecommendation& PointDataStorageRecommendationDialog::recommendation() const
 {
     return _private->recommendation;
+}
+
+QVariantMap PointDataStorageRecommendationDialog::profile() const
+{
+    return {
+        { QStringLiteral("row_access"), _private->rowAccessAction.getCurrentText() },
+        { QStringLiteral("column_access"), _private->columnAccessAction.getCurrentText() },
+        { QStringLiteral("point_access_frequency"), _private->pointAccessFrequencyAction.getCurrentText() },
+        { QStringLiteral("memory_preference"), _private->memoryPreferenceAction.getCurrentText() },
+        { QStringLiteral("recommended_tile_rows"), QVariant::fromValue(_private->recommendation.geometry.rowTileSize) },
+        { QStringLiteral("recommended_tile_columns"), QVariant::fromValue(_private->recommendation.geometry.columnTileSize) },
+        { QStringLiteral("recommended_cache_capacity"), QVariant::fromValue(_private->recommendation.cacheCapacity) },
+        { QStringLiteral("recommended_packed_tiles"), true },
+        { QStringLiteral("recommended_super_tile_rows"), QVariant::fromValue(_private->recommendation.superTileRows) },
+        { QStringLiteral("recommended_super_tile_columns"), QVariant::fromValue(_private->recommendation.superTileColumns) },
+        { QStringLiteral("recommendation_version"), 1 }
+    };
 }
 
 PointDataStorageRecommendationDialog::~PointDataStorageRecommendationDialog() = default;

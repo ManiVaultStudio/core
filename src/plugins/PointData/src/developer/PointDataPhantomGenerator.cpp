@@ -24,6 +24,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QTextEdit>
+#include <QVariantMap>
 #include <QVBoxLayout>
 
 #include <algorithm>
@@ -62,77 +63,6 @@ struct PhantomConfiguration
     std::size_t   cacheCapacity    = 0;
     std::size_t   superTileRows    = 1;
     std::size_t   superTileColumns = 1;
-};
-
-class LegacyStorageWizardDialog final : public QDialog
-{
-public:
-    LegacyStorageWizardDialog(QWidget* parent, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize) :
-        QDialog(parent),
-        _settingsGroupAction(this, "Storage recommendation"),
-        _accessProfileAction(&_settingsGroupAction, "Intended access", { "Mixed or random", "Mostly rows", "Mostly columns" }, "Mixed or random"),
-        _memoryPreferenceAction(&_settingsGroupAction, "Memory preference", { "Balanced", "Low memory" }, "Balanced"),
-        _recommendationAction(&_settingsGroupAction, "Recommendation"),
-        _rows(rows),
-        _columns(columns),
-        _elementSize(elementSize)
-    {
-        setWindowTitle(tr("Storage settings wizard"));
-        setWindowIcon(mv::util::StyledIcon("lightbulb"));
-        resize(560, 360);
-
-        _settingsGroupAction.setShowLabels(true);
-        _settingsGroupAction.setDefaultWidgetFlag(mv::gui::GroupAction::NoMargins);
-        _accessProfileAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
-        _memoryPreferenceAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
-        _recommendationAction.setDefaultWidgetFlags(mv::gui::StringAction::TextEdit);
-        _recommendationAction.setEnabled(false);
-
-        _settingsGroupAction.addAction(&_accessProfileAction);
-        _settingsGroupAction.addAction(&_memoryPreferenceAction);
-        _settingsGroupAction.addAction(&_recommendationAction, -1, [](mv::gui::WidgetAction*, QWidget* widget) {
-            if (auto* textEdit = widget->findChild<QTextEdit*>(QStringLiteral("TextEdit")))
-                textEdit->setFixedHeight(180);
-        });
-
-        auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
-        auto* layout = new QVBoxLayout(this);
-        layout->addWidget(_settingsGroupAction.createWidget(this));
-        layout->addWidget(buttons);
-
-        connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
-        connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
-        connect(&_accessProfileAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateRecommendation(); });
-        connect(&_memoryPreferenceAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateRecommendation(); });
-
-        updateRecommendation();
-    }
-
-    const storage::TiledStorageRecommendation& recommendation() const { return _recommendation; }
-
-private:
-    void updateRecommendation()
-    {
-        const auto accessProfile = _accessProfileAction.getCurrentIndex() == 1 ? storage::StorageAccessProfile::Rows : _accessProfileAction.getCurrentIndex() == 2 ? storage::StorageAccessProfile::Columns : storage::StorageAccessProfile::Mixed;
-        const auto memoryPreference = _memoryPreferenceAction.getCurrentIndex() == 1 ? storage::StorageMemoryPreference::Low : storage::StorageMemoryPreference::Balanced;
-        _recommendation = storage::recommendTiledStorage(_rows, _columns, _elementSize, accessProfile, memoryPreference);
-
-        _recommendationAction.setString(QStringLiteral("Tile geometry: %1 x %2\nCache capacity: %3 tiles\nPacked tiles: yes\nSuper-tile: %4 x %5 tiles\n\nThese are preliminary heuristics. Review the generated values and validate them with the benchmark.")
-            .arg(_recommendation.geometry.rowTileSize)
-            .arg(_recommendation.geometry.columnTileSize)
-            .arg(_recommendation.cacheCapacity)
-            .arg(_recommendation.superTileRows)
-            .arg(_recommendation.superTileColumns));
-    }
-
-    mv::gui::VerticalGroupAction _settingsGroupAction;
-    mv::gui::OptionAction       _accessProfileAction;
-    mv::gui::OptionAction       _memoryPreferenceAction;
-    mv::gui::StringAction       _recommendationAction;
-    std::uint64_t                _rows;
-    std::uint64_t                _columns;
-    std::size_t                  _elementSize;
-    storage::TiledStorageRecommendation _recommendation;
 };
 
 std::vector<std::size_t> parsePositiveList(const QString& text, const QString& label)
@@ -653,6 +583,8 @@ public:
         return result;
     }
 
+    QVariantMap storageRecommendationProfile() const { return _storageRecommendationProfile; }
+
     QString generatedName(const PhantomConfiguration& configuration) const
     {
         auto generatedName = QStringLiteral("Phantom (size: %1x%2, type: %3, storage: %4")
@@ -761,6 +693,7 @@ private:
             return;
 
         const auto& recommendation = dialog.recommendation();
+        _storageRecommendationProfile = dialog.profile();
         _storageBackendAction.setCurrentText(QStringLiteral("Tiled"));
         _rowTileSizeAction.setString(QString::number(recommendation.geometry.rowTileSize));
         _columnTileSizeAction.setString(QString::number(recommendation.geometry.columnTileSize));
@@ -896,6 +829,7 @@ private:
     QPushButton*                          _createButton = nullptr;
     QPushButton*                          _okButton = nullptr;
     QPushButton*                          _wizardButton = nullptr;
+    QVariantMap                            _storageRecommendationProfile;
 };
 }
 
@@ -911,12 +845,16 @@ void PointDataPhantomGenerator::populateMenu(QMenu& menu, QWidget* owner)
             const auto configurations = dialog.configurations();
             const auto type           = dialog.type();
             const auto population     = dialog.population();
+            const auto recommendationProfile = configurations.size() == 1 ? dialog.storageRecommendationProfile() : QVariantMap();
 
             for (std::size_t index = 0; index < configurations.size(); ++index)
             {
                 const auto& configuration = configurations[index];
                 const auto datasetName = dialog.datasetName(configuration, index, configurations.size());
                 auto dataset = mv::data().createDataset<Points>("Points", datasetName);
+
+                if (!recommendationProfile.isEmpty())
+                    dataset.getDataset()->setProperty(QStringLiteral("PointDataStorageRecommendation"), QVariant::fromValue(recommendationProfile));
 
                 if (dialog.isTiled())
                 {

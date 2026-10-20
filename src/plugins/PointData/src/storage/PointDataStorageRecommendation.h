@@ -10,12 +10,19 @@
 namespace mv::pointdata::storage
 {
 
-/** Describes the access profile used by the preliminary tiled-storage heuristic. */
-enum class StorageAccessProfile
+/** Describes how rows or columns are expected to be accessed. */
+enum class StorageAxisAccess
 {
-    Mixed,
-    Rows,
-    Columns
+    None,
+    Contiguous,
+    Random
+};
+
+/** Describes how often individual random points are expected to be accessed. */
+enum class StoragePointAccessFrequency
+{
+    Incidental,
+    Frequent
 };
 
 /** Describes the memory preference used by the preliminary tiled-storage heuristic. */
@@ -34,11 +41,14 @@ struct TiledStorageRecommendation
     std::size_t superTileColumns = 3;
 };
 
-/** Suggests tiled-storage settings from dataset shape, element size, access profile, and memory preference. */
-inline TiledStorageRecommendation recommendTiledStorage(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const StorageAccessProfile accessProfile, const StorageMemoryPreference memoryPreference)
+/** Suggests tiled-storage settings from dataset shape, element size, access patterns, and memory preference. */
+inline TiledStorageRecommendation recommendTiledStorage(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const StorageAxisAccess rowAccess, const StorageAxisAccess columnAccess, const StoragePointAccessFrequency pointAccessFrequency, const StorageMemoryPreference memoryPreference)
 {
-    const auto axisPreference = accessProfile == StorageAccessProfile::Rows ? 100 : accessProfile == StorageAccessProfile::Columns ? 0 : 50;
-    const auto tileBudgetBytes = memoryPreference == StorageMemoryPreference::Low ? std::size_t { 1 } * 1024U * 1024U : std::size_t { 4 } * 1024U * 1024U;
+    const auto rowWeight = rowAccess == StorageAxisAccess::Contiguous ? 3 : rowAccess == StorageAxisAccess::Random ? 1 : 0;
+    const auto columnWeight = columnAccess == StorageAxisAccess::Contiguous ? 3 : columnAccess == StorageAxisAccess::Random ? 1 : 0;
+    const auto totalWeight = rowWeight + columnWeight;
+    const auto axisPreference = totalWeight == 0 ? 50 : (100 * rowWeight) / totalWeight;
+    const auto tileBudgetBytes = memoryPreference == StorageMemoryPreference::Low ? std::size_t { 1 } * 1024U * 1024U : pointAccessFrequency == StoragePointAccessFrequency::Frequent ? std::size_t { 2 } * 1024U * 1024U : std::size_t { 4 } * 1024U * 1024U;
     const auto geometry = calculateTiledStorageGeometry(rows, columns, elementSize, tileBudgetBytes, axisPreference);
 
     return {
