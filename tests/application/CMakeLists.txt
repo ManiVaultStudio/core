@@ -1,13 +1,13 @@
 add_executable(MV_Application_GifEncoderTest
     GifEncoderTest.cpp
-    ../../src/private/GifEncoder.cpp
+    ${MV_ROOT_DIR}/src/app/GifEncoder.cpp
 )
 
 source_group("Tests/Application" FILES GifEncoderTest.cpp)
-source_group("Tests/Application/Implementation" FILES ../../src/private/GifEncoder.cpp)
+source_group("Tests/Application/Implementation" FILES ${MV_ROOT_DIR}/src/app/GifEncoder.cpp)
 
 target_include_directories(MV_Application_GifEncoderTest PRIVATE
-    ${MV_ROOT_DIR}/src/private
+    ${MV_ROOT_DIR}/src/app
 )
 
 target_link_libraries(MV_Application_GifEncoderTest PRIVATE
@@ -33,15 +33,15 @@ endif()
 
 add_executable(MV_Application_ArchiverTest
     ArchiverTest.cpp
-    ../../src/private/Archiver.cpp
+    ${MV_ROOT_DIR}/src/app/Archiver.cpp
 )
 
 source_group("Tests/Application" FILES ArchiverTest.cpp)
-source_group("Tests/Application/Implementation" FILES ../../src/private/Archiver.cpp)
+source_group("Tests/Application/Implementation" FILES ${MV_ROOT_DIR}/src/app/Archiver.cpp)
 
 target_include_directories(MV_Application_ArchiverTest PRIVATE
-    ${MV_ROOT_DIR}/src/private
-    ${MV_ROOT_DIR}/src
+    ${MV_ROOT_DIR}/src/app
+    ${MV_ROOT_DIR}/src/lib
 )
 
 target_link_libraries(MV_Application_ArchiverTest PRIVATE

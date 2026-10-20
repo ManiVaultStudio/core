@@ -90,6 +90,11 @@ target_include_directories(${CLUSTERDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURA
 
 target_compile_features(${CLUSTERDATA} PUBLIC cxx_std_${MV_CXX_STANDARD})
 
+target_compile_options(${CLUSTERDATA}
+        PRIVATE
+            $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
+    )
+
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
 generate_export_header(${CLUSTERDATA})

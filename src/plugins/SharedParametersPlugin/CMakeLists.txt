@@ -37,6 +37,11 @@ target_include_directories(${SHARED_PARAMETERS_PLUGIN} PRIVATE "${MV_INSTALL_DIR
 
 target_compile_features(${SHARED_PARAMETERS_PLUGIN} PRIVATE cxx_std_${MV_CXX_STANDARD})
 
+target_compile_options(${SHARED_PARAMETERS_PLUGIN}
+        PRIVATE
+            $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
+    )
+
 target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE Qt6::Widgets)
 target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${SHARED_PARAMETERS_PLUGIN} PRIVATE ${MV_PUBLIC_LIB})

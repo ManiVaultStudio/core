@@ -19,7 +19,7 @@ using namespace mv::util;
 #endif
 
 #ifdef MV_USE_ERROR_LOGGING
-    #include "private/SentryErrorLogger.h"
+    #include "SentryErrorLogger.h"
 #endif
 
 namespace mv

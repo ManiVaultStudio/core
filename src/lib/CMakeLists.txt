@@ -1559,3 +1559,182 @@ source_group(GlobalSettings FILES ${PUBLIC_GLOBAL_SETTINGS_FILES})
 source_group(Task FILES ${PUBLIC_TASK_FILES})
 source_group(Exception FILES ${PUBLIC_EXCEPTION_FILES})
 source_group(Notifications FILES ${PUBLIC_NOTIFICATIONS_FILES})
+
+# -----------------------------------------------------------------------------
+# Target MV_PUBLIC_LIB
+# -----------------------------------------------------------------------------
+
+add_library(${MV_PUBLIC_LIB} SHARED)
+
+add_library(ManiVault::Core ALIAS ${MV_PUBLIC_LIB})
+
+set_target_properties(${MV_PUBLIC_LIB} PROPERTIES
+    POSITION_INDEPENDENT_CODE ON
+    AUTOMOC ON
+    PROJECT_LABEL "MV_Public"       # Set the project name in VS different to the target name
+    OUTPUT_NAME "MV_Public"         # Set the library output name different to the target name
+    UNITY_BUILD ${MV_UNITY_BUILD}
+)
+
+target_sources(${MV_PUBLIC_LIB}
+    PRIVATE
+    ${PUBLIC_SOURCES}
+    ${SHADERS}
+)
+
+target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${MV_ROOT_DIR}/src/lib")
+
+target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${nlohmann_json_SOURCE_DIR}/include")
+target_include_directories(${MV_PUBLIC_LIB} PRIVATE "${valijson_SOURCE_DIR}/include")
+
+target_compile_features(${MV_PUBLIC_LIB} PUBLIC cxx_std_${MV_CXX_STANDARD})
+
+target_compile_definitions(${MV_PUBLIC_LIB} 
+    PRIVATE 
+        MV_SHARED_EXPORT
+        VALIJSON_USE_EXCEPTIONS=1
+)
+
+target_compile_options(${MV_PUBLIC_LIB} 
+    PRIVATE
+        $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
+)
+
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Core)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Gui)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Widgets)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGL)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::OpenGLWidgets)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::WebEngineWidgets)
+target_link_libraries(${MV_PUBLIC_LIB} PRIVATE Qt6::Concurrent)
+
+# Use AVX if enabled and available
+mv_check_and_set_AVX(${MV_PUBLIC_LIB} ${MV_USE_AVX})
+
+if(MV_PRECOMPILE_HEADERS)
+    target_precompile_headers(${MV_PUBLIC_LIB} PRIVATE 
+        ${PRECOMPILE_HEADERS}
+    )
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(${MV_PUBLIC_LIB} PRIVATE /bigobj)
+endif()
+
+
+# -----------------------------------------------------------------------------
+# Installation library
+# -----------------------------------------------------------------------------
+
+install(TARGETS ${MV_PUBLIC_LIB}
+    EXPORT "ManiVaultPublicExport"
+    RUNTIME DESTINATION $<CONFIGURATION>        COMPONENT MVPUBLIC_LINKLIB  # Windows .dll
+    ARCHIVE DESTINATION "$<CONFIGURATION>/lib/" COMPONENT MVPUBLIC_LINKLIB  # Linux/Mac .so
+    LIBRARY DESTINATION "$<CONFIGURATION>/lib/" COMPONENT MVPUBLIC_LINKLIB  # Windows .lib
+)
+
+# Install public headers with preserved folder structure
+foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
+    string(REGEX REPLACE "^(.*/).*" "\\1" STRIPPED_PUBLIC_HEADER "${PUBLIC_HEADER}")
+    if("${STRIPPED_PUBLIC_HEADER}" STREQUAL "${PUBLIC_HEADER}")
+        set(STRIPPED_PUBLIC_HEADER "")
+    endif()
+    set(HEADER_DEST "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${STRIPPED_PUBLIC_HEADER}")    
+    install(FILES ${PUBLIC_HEADER} DESTINATION ${HEADER_DEST} COMPONENT MVPUBLIC_HEADERS)
+endforeach()
+
+# Generate a .cmake file that can be imported from the install to enable plugin building
+install(EXPORT "ManiVaultPublicExport"
+        FILE ManiVaultTargets.cmake
+        NAMESPACE ManiVault::
+        DESTINATION cmake/mv
+        COMPONENT MVPUBLIC_EXPORT
+)
+
+# Copy cmake helper files
+install(FILES 
+        "${MV_ROOT_DIR}/cmake/mv_install_dependencies_utils.cmake"
+        "${MV_ROOT_DIR}/cmake/mv_install_dependencies.cmake.in"
+        "${MV_ROOT_DIR}/cmake/mv_check_and_set_AVX.cmake"
+        "${MV_ROOT_DIR}/cmake/mv_plugin_meta_data.cmake"
+        "${MV_ROOT_DIR}/cmake/mv_project_defaults.cmake"
+        DESTINATION cmake/mv
+        COMPONENT MVPUBLIC_CMAKE_HELPER
+)
+# Generate the version file for use with find_package
+write_basic_package_version_file(
+  ManiVaultConfigVersion.cmake
+  VERSION ${MV_VERSION}
+  COMPATIBILITY SameMajorVersion
+)
+
+# create config file
+configure_package_config_file(
+    "${MV_ROOT_DIR}/cmake/MvCoreConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/ManiVaultConfig.cmake"
+    INSTALL_DESTINATION cmake/mv
+    PATH_VARS MV_INSTALL_DIR
+)
+
+# install the package files
+install(FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/ManiVaultConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/ManiVaultConfigVersion.cmake"
+        DESTINATION cmake/mv
+        COMPONENT MVPUBLIC_PACKAGE
+)
+
+# Install program database (.pdb) files
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION $<CONFIGURATION> COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "Debug" OPTIONAL)
+    install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION .                COMPONENT MV_EXECUTABLE    CONFIGURATIONS "Debug" OPTIONAL)
+    install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION $<CONFIGURATION> COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "RelWithDebInfo" OPTIONAL)
+    install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION .                COMPONENT MV_EXECUTABLE    CONFIGURATIONS "RelWithDebInfo" OPTIONAL)
+
+    if(MV_RELWITHDEBUGINFO)
+        install(FILES $<TARGET_PDB_FILE:${MV_PUBLIC_LIB}> DESTINATION $<CONFIGURATION> COMPONENT MVPUBLIC_LINKLIB CONFIGURATIONS "Release" OPTIONAL)
+        install(FILES $<TARGET_PDB_FILE:${MV_EXE}>        DESTINATION .                COMPONENT MV_EXECUTABLE    CONFIGURATIONS "Release" OPTIONAL)
+    endif()
+
+endif()
+
+# Call the install functions of the all public targets
+# needed for plugins directly after the build
+add_custom_command(TARGET ${MV_PUBLIC_LIB} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault public headers"
+    COMMAND ${CMAKE_COMMAND}
+        --install ${CMAKE_CURRENT_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component MVPUBLIC_HEADERS
+        --verbose
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault public link library"
+    COMMAND ${CMAKE_COMMAND}
+        --install ${CMAKE_CURRENT_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component MVPUBLIC_LINKLIB
+        --prefix ${MV_INSTALL_DIR}
+        --verbose
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault cmake config files"
+    COMMAND ${CMAKE_COMMAND}
+        --install ${CMAKE_CURRENT_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component MVPUBLIC_PACKAGE
+        --prefix ${MV_INSTALL_DIR}
+        --verbose
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault cmake target files"
+    COMMAND ${CMAKE_COMMAND}
+        --install ${CMAKE_CURRENT_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component MVPUBLIC_EXPORT
+        --prefix ${MV_INSTALL_DIR}
+        --verbose
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing: ManiVault cmake helper files"
+    COMMAND ${CMAKE_COMMAND}
+        --install ${CMAKE_CURRENT_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component MVPUBLIC_CMAKE_HELPER
+        --prefix ${MV_INSTALL_DIR}
+        --verbose
+    # If no plugin directory exists, ManiVault might try to import 
+    # any library in the executable directory as a plugin
+    COMMAND ${CMAKE_COMMAND}
+        -E make_directory ${MV_INSTALL_DIR}/$<CONFIGURATION>/Plugins
+)

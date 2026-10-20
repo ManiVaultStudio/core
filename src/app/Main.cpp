@@ -2,20 +2,20 @@
 // A corresponding LICENSE file is located in the root directory of this source tree 
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
-#include "private/MainWindow.h"
-#include "private/Archiver.h"
-#include "private/Core.h"
-#include "private/NoProxyRectanglesFusionStyle.h"
-#include "private/PassthroughBlobCodec.h"
-#include "private/PassthroughBlobCodecFactory.h"
-#include "private/ZstdBlobCodec.h"
-#include "private/ZstdBlobCodecFactory.h"
-#include "private/TaskflowWorkflowPlanExecutor.h"
-#include "actions/SplashScreenAction.h"
+#include "MainWindow.h"
+#include "Archiver.h"
+#include "Core.h"
+#include "NoProxyRectanglesFusionStyle.h"
+#include "PassthroughBlobCodec.h"
+#include "PassthroughBlobCodecFactory.h"
+#include "ZstdBlobCodec.h"
+#include "ZstdBlobCodecFactory.h"
+#include "TaskflowWorkflowPlanExecutor.h"
 
 #include <Application.h>
 #include <ManiVaultVersion.h>
 
+#include <actions/SplashScreenAction.h>
 #include <models/ProjectsTreeModel.h>
 
 #include <util/HardwareSpec.h>

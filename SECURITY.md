@@ -30,6 +30,28 @@ without imposing broad limits that could reject valid scientific projects.
 | Learning-center content | HTML injection through a video title | Video titles inserted into the learning-center HTML are HTML-escaped. | [PR #1368](https://github.com/ManiVaultStudio/core/pull/1368) | Implemented |
 | Custom asset serving | Symlink or path edge cases escaping the configured asset root | The configured root and requested asset path must resolve to valid canonical paths, and the resolved asset must remain within the canonical root. | [PR #1369](https://github.com/ManiVaultStudio/core/pull/1369) | Implemented |
 | Markdown viewer | Dependency drift and unnecessary script loading in rendered Markdown | CDN dependencies are version-pinned, the redundant script load was removed, and a restrictive Content Security Policy limits permitted resource types and origins. | [PR #1370](https://github.com/ManiVaultStudio/core/pull/1370) | Implemented |
+| GitHub Actions dependencies | Workflow actions or reusable dependencies changing after review because a tag or branch moves | The build workflow is being onboarded to GitHub Actions workflow dependency locking. The generated `.github/workflows/actions.lock` records the exact commits and repository identities for direct and transitive action dependencies. | [GitHub workflow dependency lockfiles](https://docs.github.com/en/actions/concepts/security/workflow-dependency-lockfiles) | Pending rollout |
+
+## CI workflow dependency maintenance
+
+The build workflow uses versioned action references for readability, while the
+workflow lockfile provides the security boundary for what actually executes.
+Once the workflow is onboarded, GitHub Actions uses the commits recorded in
+`.github/workflows/actions.lock`, including covered transitive dependencies,
+even if an upstream tag or branch moves. This reduces the risk that a
+compromised or unexpectedly changed upstream reference introduces code into a
+build without a corresponding repository change.
+
+The lockfile is machine-generated and must not be edited by hand. Maintainers
+should update the workflow reference first, regenerate the lockfile with
+`gh actions-lock`, review the workflow and lockfile changes together, and run
+the lockfile freshness check in CI where supported. Dependabot can update the
+workflow reference and its corresponding lockfile entry together for onboarded
+workflows. Locking improves integrity and reproducibility, but it does not
+replace review of the action source, least-privilege permissions, or secure
+handling of CI credentials. Workflow lockfiles are currently a GitHub public
+preview feature and should be revalidated when GitHub changes the feature or
+its availability.
 
 ## Compatibility and risk decisions
 
@@ -43,7 +65,7 @@ code changes.
 | JavaScript in tutorial pages | Retained | Existing tutorials use JavaScript for expand/collapse behavior. Metadata is escaped while the required tutorial behavior remains available. |
 | Serialization and decompression resource limits | Deferred | Some valid projects contain data files around 70 GB. Broad fixed limits could break supported workflows. Future safeguards should be operation-specific and configurable, with measurements from real projects before rollout. |
 | CI credentials in pull-request builds | Mitigated operationally | Repository settings are used to restrict secret availability according to the project team's current configuration. Workflow and repository settings should be revalidated whenever CI permissions or publishing workflows change. |
-| Third-party GitHub Action SHA pinning | Deferred | Dependabot-based SHA maintenance is not fully rolled out yet. Pinning should be revisited once that automation is available and stable. |
+| Third-party GitHub Action dependency pinning | In progress | The repository is adopting GitHub Actions workflow lockfiles, which pin direct and covered transitive dependencies to reviewed commits while keeping readable references in workflow files. The lockfile rollout and Dependabot maintenance should be completed and verified before this control is marked implemented. |
 
 ## Residual risk and follow-up
 
@@ -53,8 +75,8 @@ code changes.
 - The CI credential model remains dependent on repository configuration and
   workflow review. Changes to publishing, deployment, SSH, Sentry, or other
   privileged integrations should be reviewed as security-sensitive changes.
-- Action pinning and resource-limit designs remain follow-up items rather than
-  completed controls.
+- Action lockfile rollout and resource-limit designs remain follow-up items
+  rather than completed controls.
 - Any new feature that renders user-, plugin-, tutorial-, or project-controlled
   text as HTML should use context-appropriate escaping and receive a focused
   review.
@@ -76,3 +98,4 @@ associated changes:
 | Date | Change |
 | --- | --- |
 | 2026-10-09 | Added this security hardening record covering the current targeted security stack and deferred controls. |
+| 2026-10-16 | Documented the GitHub Actions workflow lockfile rollout and its maintenance requirements. |
