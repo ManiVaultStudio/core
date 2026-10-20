@@ -686,6 +686,8 @@ struct FixtureResult
     std::uint64_t cacheEvictions        = 0;
     QString rowAccess;
     QString columnAccess;
+    QString rowAccessFrequency;
+    QString columnAccessFrequency;
     QString pointAccessFrequency;
     QString memoryPreference;
     std::size_t recommendedRowTileSize       = 0;
@@ -789,6 +791,8 @@ FixtureResult measurePoints(const mv::Dataset<Points>& points, const BenchmarkCo
         points->getTiledCacheEvictions(),
         recommendation.value(QStringLiteral("row_access")).toString(),
         recommendation.value(QStringLiteral("column_access")).toString(),
+        recommendation.value(QStringLiteral("row_access_frequency")).toString(),
+        recommendation.value(QStringLiteral("column_access_frequency")).toString(),
         recommendation.value(QStringLiteral("point_access_frequency")).toString(),
         recommendation.value(QStringLiteral("memory_preference")).toString(),
         static_cast<std::size_t>(recommendation.value(QStringLiteral("recommended_tile_rows")).toULongLong()),
@@ -827,7 +831,7 @@ std::vector<BenchmarkDataset> getPointDatasets()
 
 void writeFixtureResult(std::ofstream& output, const FixtureResult& result, const BenchmarkContext& context)
 {
-    output << csvValue(result.datasetName).toStdString() << ',' << result.backend.toStdString() << ',' << result.elementType.toStdString() << ',' << result.rows << ',' << result.columns << ',' << result.rowTileSize << ',' << result.columnTileSize << ',' << result.cacheCapacity << ',' << result.accessPattern.toStdString() << ',' << result.operations << ',' << result.elapsedMilliseconds << ',' << result.meanMillisecondsPerRow << ',' << result.checksum << ',' << result.cacheHits << ',' << result.cacheMisses << ',' << result.cacheEvictions << ',' << csvValue(result.rowAccess).toStdString() << ',' << csvValue(result.columnAccess).toStdString() << ',' << csvValue(result.pointAccessFrequency).toStdString() << ',' << csvValue(result.memoryPreference).toStdString() << ',' << result.recommendedRowTileSize << ',' << result.recommendedColumnTileSize << ',' << result.recommendedCacheCapacity << ',' << (result.recommendedPackedTiles ? 1 : 0) << ',' << result.recommendedSuperTileRows << ',' << result.recommendedSuperTileColumns << ',' << csvValue(context.benchmarkTimestamp).toStdString() << ',' << csvValue(context.cpuModel).toStdString() << ',' << csvValue(context.cpuArchitecture).toStdString() << ',' << csvValue(context.operatingSystem).toStdString() << ',' << context.logicalCores << ',' << context.physicalMemoryBytes << ',' << csvValue(context.storageVolume).toStdString() << ',' << csvValue(context.storageDevice).toStdString() << ',' << csvValue(context.storageFileSystem).toStdString() << ',' << context.storageTotalBytes << ',' << context.storageAvailableBytes << ',' << (context.projectCompressionEnabled ? 1 : 0) << ',' << csvValue(context.projectCodec).toStdString() << '\n';
+    output << csvValue(result.datasetName).toStdString() << ',' << result.backend.toStdString() << ',' << result.elementType.toStdString() << ',' << result.rows << ',' << result.columns << ',' << result.rowTileSize << ',' << result.columnTileSize << ',' << result.cacheCapacity << ',' << result.accessPattern.toStdString() << ',' << result.operations << ',' << result.elapsedMilliseconds << ',' << result.meanMillisecondsPerRow << ',' << result.checksum << ',' << result.cacheHits << ',' << result.cacheMisses << ',' << result.cacheEvictions << ',' << csvValue(result.rowAccess).toStdString() << ',' << csvValue(result.columnAccess).toStdString() << ',' << csvValue(result.rowAccessFrequency).toStdString() << ',' << csvValue(result.columnAccessFrequency).toStdString() << ',' << csvValue(result.pointAccessFrequency).toStdString() << ',' << csvValue(result.memoryPreference).toStdString() << ',' << result.recommendedRowTileSize << ',' << result.recommendedColumnTileSize << ',' << result.recommendedCacheCapacity << ',' << (result.recommendedPackedTiles ? 1 : 0) << ',' << result.recommendedSuperTileRows << ',' << result.recommendedSuperTileColumns << ',' << csvValue(context.benchmarkTimestamp).toStdString() << ',' << csvValue(context.cpuModel).toStdString() << ',' << csvValue(context.cpuArchitecture).toStdString() << ',' << csvValue(context.operatingSystem).toStdString() << ',' << context.logicalCores << ',' << context.physicalMemoryBytes << ',' << csvValue(context.storageVolume).toStdString() << ',' << csvValue(context.storageDevice).toStdString() << ',' << csvValue(context.storageFileSystem).toStdString() << ',' << context.storageTotalBytes << ',' << context.storageAvailableBytes << ',' << (context.projectCompressionEnabled ? 1 : 0) << ',' << csvValue(context.projectCodec).toStdString() << '\n';
 }
 
 QString makeTimestampedBenchmarkOutputPath(const QString& outputPath)
@@ -1014,7 +1018,7 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
     if (!*output)
         throw std::runtime_error("Unable to open the benchmark output file");
 
-    *output << "dataset,backend,element_type,rows,columns,row_tile_size,column_tile_size,cache_capacity,access_pattern,operations,milliseconds,mean_milliseconds_per_row,checksum,cache_hits,cache_misses,evictions,row_access,column_access,point_access_frequency,memory_preference,recommended_tile_rows,recommended_tile_columns,recommended_cache_capacity,recommended_packed_tiles,recommended_super_tile_rows,recommended_super_tile_columns,benchmark_timestamp,cpu_model,cpu_architecture,operating_system,logical_cores,physical_memory_bytes,storage_volume,storage_device,storage_filesystem,storage_total_bytes,storage_available_bytes,project_compression_enabled,project_codec\n";
+    *output << "dataset,backend,element_type,rows,columns,row_tile_size,column_tile_size,cache_capacity,access_pattern,operations,milliseconds,mean_milliseconds_per_row,checksum,cache_hits,cache_misses,evictions,row_access,column_access,row_access_frequency,column_access_frequency,point_access_frequency,memory_preference,recommended_tile_rows,recommended_tile_columns,recommended_cache_capacity,recommended_packed_tiles,recommended_super_tile_rows,recommended_super_tile_columns,benchmark_timestamp,cpu_model,cpu_architecture,operating_system,logical_cores,physical_memory_bytes,storage_volume,storage_device,storage_filesystem,storage_total_bytes,storage_available_bytes,project_compression_enabled,project_codec\n";
 
     const auto benchmarkContext = collectBenchmarkContext();
     auto plan = std::make_unique<mv::workflow::WorkflowPlan>(QObject::tr("Point-data benchmark"));
