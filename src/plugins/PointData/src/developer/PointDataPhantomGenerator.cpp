@@ -481,8 +481,8 @@ public:
         connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
         connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
-        connect(&_rowsAction, &mv::gui::StringAction::stringChanged, this, [this] { updateTileGeometryFromPolicy(); });
-        connect(&_columnsAction, &mv::gui::StringAction::stringChanged, this, [this] { updateTileGeometryFromPolicy(); });
+        connect(&_rowsAction, &mv::gui::StringAction::stringChanged, this, [this] { updateName(); updateEstimate(); });
+        connect(&_columnsAction, &mv::gui::StringAction::stringChanged, this, [this] { updateName(); updateEstimate(); });
         connect(&_typeAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateTileGeometryFromPolicy(); });
         connect(&_populationAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateName(); });
         connect(&_nameOverrideAction, &mv::gui::ToggleAction::toggled, this, [this] { updateName(); });
