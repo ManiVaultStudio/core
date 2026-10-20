@@ -70,18 +70,38 @@ public:
     /** Replaces the tiled storage owned by this backend. */
     void setStorage(std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> storage);
 
+    /** Returns the tiled backend type. */
     StorageBackendType getType() const override;
+
+    /** Returns tiled access, lazy loading, and materialization capabilities. */
     StorageBackendCapabilities getCapabilities() const override;
+
+    /** Creates controls for converting to or configuring the requested backend. */
     std::unique_ptr<mv::gui::StorageBackendConversionAction> createConversionAction(StorageBackendType targetType, QObject* parent) const override;
     /** Applies the tiled cache setting without changing tile geometry or backend type. */
     void applyConfiguration(const StorageBackendConversionOptionsPtr& options) override;
+    /** Returns the number of logical rows in the tiled storage. */
     std::uint64_t getNumPoints() const override;
+
+    /** Returns the number of logical columns in the tiled storage. */
     std::uint64_t getNumDimensions() const override;
+
+    /** Returns the size of one stored element in bytes. */
     std::size_t getElementSize() const override;
+
+    /** Returns the PointData element-type index used by access views. */
     std::uint32_t getElementTypeIndex() const override;
+
+    /** Loads the requested row and returns a lifetime-safe read-only view. */
     PointDataAccessView getRow(std::uint64_t row) const override;
+
+    /** Visits a bounded range without materializing unrelated tiles. */
     void visitRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const override;
+
+    /** Loads one row-major element and converts it to float. */
     float getValueAt(std::uint64_t flatIndex) const override;
+
+    /** Materializes all tiled values into the caller-owned destination buffer. */
     void materialize(char* destination) const override;
 
 private:

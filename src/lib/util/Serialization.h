@@ -105,13 +105,34 @@ struct PackedBlobBlock
 class CORE_EXPORT PackedBlobFileWriter
 {
 public:
-    /** Opens or creates the file path and uses the codec for each block. */
+    /**
+     * Opens or creates the file path and uses the codec for each block.
+     *
+     * The writer creates an uncompressed container. The codec is applied to
+     * each appended payload independently, which preserves range-readable
+     * block boundaries. The codec must remain valid for the lifetime of the
+     * writer.
+     *
+     * @param filePath Destination packed-file path.
+     * @param codec Codec used for each appended payload.
+     * @throws std::runtime_error If the file cannot be opened or initialized.
+     */
     PackedBlobFileWriter(const QString& filePath, const SharedCodec& codec);
 
-    /** Appends one non-empty payload and returns its encoded range. */
+    /**
+     * Appends one non-empty payload and returns its encoded range.
+     *
+     * @param data Source bytes; must remain valid for the duration of the call.
+     * @param size Number of source bytes.
+     * @return Offset and encoded/decoded sizes needed by PackedBlobFileReader.
+     * @throws std::invalid_argument If the payload is empty or the codec is invalid.
+     * @throws std::overflow_error If the payload exceeds QByteArray limits.
+     * @throws std::logic_error If the writer has already been closed.
+     * @throws std::runtime_error If encoding or writing fails.
+     */
     PackedBlobBlock append(const char* data, std::size_t size);
 
-    /** Appends one non-empty payload and returns its encoded range. */
+    /** Appends one non-empty QByteArray payload and returns its encoded range. */
     PackedBlobBlock append(const QByteArray& data);
 
     /** Flushes and closes the file; subsequent append operations fail. */
@@ -134,13 +155,38 @@ private:
 class CORE_EXPORT PackedBlobFileReader
 {
 public:
-    /** Opens the file path and validates its local packed-file header. */
+    /**
+     * Opens the file path and validates its local packed-file header.
+     *
+     * @param filePath Source packed-file path.
+     * @param codec Codec used to decode each selected payload.
+     * @throws std::runtime_error If the file cannot be opened or has an invalid header.
+     */
     PackedBlobFileReader(const QString& filePath, const SharedCodec& codec);
 
-    /** Reads and decodes one packed block. */
+    /**
+     * Reads and decodes one packed block.
+     *
+     * Only the encoded byte range described by the block is read; other packed
+     * blocks are not loaded or decoded.
+     *
+     * @param block Encoded range returned by PackedBlobFileWriter::append.
+     * @return Decoded payload.
+     * @throws std::overflow_error If the decoded block exceeds QByteArray limits.
+     * @throws std::runtime_error If the range cannot be read or decoded.
+     */
     QByteArray read(const PackedBlobBlock& block) const;
 
-    /** Decodes one packed block into a caller-provided buffer. */
+    /**
+     * Decodes one packed block into a caller-provided buffer.
+     *
+     * @param block Encoded range returned by PackedBlobFileWriter::append.
+     * @param destination Destination buffer with space for block.uncompressedSize bytes.
+     * @param destinationSize Destination buffer size in bytes.
+     * @throws std::invalid_argument If the block is empty or the destination is too small.
+     * @throws std::overflow_error If the block exceeds the supported size range.
+     * @throws std::runtime_error If the range cannot be read or decoded.
+     */
     void readTo(const PackedBlobBlock& block, char* destination, std::size_t destinationSize) const;
 
 private:

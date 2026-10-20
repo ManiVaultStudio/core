@@ -98,7 +98,7 @@ public:
 	 */
     virtual void decodeTo(const QByteArray& encodedData, char* destination, std::uint64_t destinationSize) const;
 
-    /*
+    /**
      * @brief Encode a block of raw bytes and save the encoded data to a file on disk.
      * @note This method will throw an exception if encoding or file writing fails.
      * @param input Raw input bytes
@@ -107,7 +107,7 @@ public:
      */
     void encodeToFile(const QByteArray& input, const QString& filePath, std::uint64_t* numberOfEncodedBytes = nullptr) const;
 
-    /*
+    /**
      * @brief Encode a block of raw bytes and save the encoded data to a file on disk.
      * @note This method will throw an exception if encoding or file writing fails.
      * @param data Pointer to raw input bytes
@@ -117,7 +117,7 @@ public:
      */
     virtual void encodeToFile(const char* data, qsizetype size, const QString& filePath, std::uint64_t* numberOfEncodedBytes = nullptr) const;
 
-    /*
+    /**
      * @brief Load encoded data from a file on disk and decode it.
      * @note This method will throw an exception if file reading or decoding fails. The returned QByteArray is only valid if the decoding was successful.
      * @param filePath Path of the file on disk from which the encoded data is loaded
@@ -126,7 +126,7 @@ public:
      */
     [[nodiscard]] virtual QByteArray decodeFromFile(const QString& filePath, qsizetype expectedSize = -1) const = 0;
 
-    /*
+    /**
      * @brief Load encoded data from a file on disk and decode it directly to a provided output buffer.
      * @note This method will throw an exception if file reading or decoding fails. The returned QByteArray is only valid if the decoding was successful.
      * @param filePath Path of the file on disk from which the encoded data is loaded
