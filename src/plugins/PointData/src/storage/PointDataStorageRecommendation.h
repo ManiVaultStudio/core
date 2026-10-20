@@ -44,22 +44,19 @@ struct TiledStorageRecommendation
 /** Suggests tiled-storage settings from dataset shape, element size, access patterns, and memory preference. */
 inline TiledStorageRecommendation recommendTiledStorage(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const StorageAxisAccess rowAccess, const StorageAccessFrequency rowFrequency, const StorageAxisAccess columnAccess, const StorageAccessFrequency columnFrequency, const bool pointAccessEnabled, const StorageAccessFrequency pointFrequency, const StorageMemoryPreference memoryPreference)
 {
-    const auto axisWeight = [](const StorageAxisAccess access, const StorageAccessFrequency frequency) {
-        const auto accessMask = static_cast<int>(access);
-        const auto frequencyMultiplier = frequency == StorageAccessFrequency::Frequent ? 2 : 1;
-
-        return frequencyMultiplier * ((accessMask & static_cast<int>(StorageAxisAccess::Contiguous) ? 3 : 0) + (accessMask & static_cast<int>(StorageAxisAccess::Random) ? 1 : 0));
-    };
-    const auto rowWeight = axisWeight(rowAccess, rowFrequency);
-    const auto columnWeight = axisWeight(columnAccess, columnFrequency);
-    const auto totalWeight = rowWeight + columnWeight;
-    const auto axisPreference = totalWeight == 0 ? 50 : (100 * rowWeight) / totalWeight;
+    const auto rowContiguousWeight    = (static_cast<int>(rowAccess) & static_cast<int>(StorageAxisAccess::Contiguous)) ? (rowFrequency == StorageAccessFrequency::Frequent ? 6 : 3) : 0;
+    const auto rowRandomWeight        = (static_cast<int>(rowAccess) & static_cast<int>(StorageAxisAccess::Random)) ? (rowFrequency == StorageAccessFrequency::Frequent ? 2 : 1) : 0;
+    const auto columnContiguousWeight = (static_cast<int>(columnAccess) & static_cast<int>(StorageAxisAccess::Contiguous)) ? (columnFrequency == StorageAccessFrequency::Frequent ? 6 : 3) : 0;
+    const auto columnRandomWeight     = (static_cast<int>(columnAccess) & static_cast<int>(StorageAxisAccess::Random)) ? (columnFrequency == StorageAccessFrequency::Frequent ? 2 : 1) : 0;
+    const auto totalWeight            = rowContiguousWeight + rowRandomWeight + columnContiguousWeight + columnRandomWeight;
+    const auto axisPreference         = totalWeight == 0 ? 50 : (100 * rowContiguousWeight + 65 * rowRandomWeight + 35 * columnRandomWeight) / totalWeight;
     const auto frequentAccess = rowFrequency == StorageAccessFrequency::Frequent || columnFrequency == StorageAccessFrequency::Frequent || (pointAccessEnabled && pointFrequency == StorageAccessFrequency::Frequent);
     const auto frequentRandomAccess = (rowFrequency == StorageAccessFrequency::Frequent && (static_cast<int>(rowAccess) & static_cast<int>(StorageAxisAccess::Random))) || (columnFrequency == StorageAccessFrequency::Frequent && (static_cast<int>(columnAccess) & static_cast<int>(StorageAxisAccess::Random))) || (pointAccessEnabled && pointFrequency == StorageAccessFrequency::Frequent);
-    const auto tileBudgetBytes = memoryPreference == StorageMemoryPreference::Low ? std::size_t { 1 } * 1024U * 1024U : frequentRandomAccess ? std::size_t { 1 } * 1024U * 1024U : frequentAccess ? std::size_t { 2 } * 1024U * 1024U : std::size_t { 4 } * 1024U * 1024U;
+    const auto frequentContiguousAccess = (rowFrequency == StorageAccessFrequency::Frequent && (static_cast<int>(rowAccess) & static_cast<int>(StorageAxisAccess::Contiguous))) || (columnFrequency == StorageAccessFrequency::Frequent && (static_cast<int>(columnAccess) & static_cast<int>(StorageAxisAccess::Contiguous)));
+    const auto tileBudgetBytes = memoryPreference == StorageMemoryPreference::Low ? std::size_t { 1 } * 1024U * 1024U : frequentRandomAccess && frequentContiguousAccess ? std::size_t { 2 } * 1024U * 1024U : frequentRandomAccess ? std::size_t { 1 } * 1024U * 1024U : frequentAccess ? std::size_t { 2 } * 1024U * 1024U : std::size_t { 4 } * 1024U * 1024U;
     const auto geometry = calculateTiledStorageGeometry(rows, columns, elementSize, tileBudgetBytes, axisPreference);
     const auto baseCacheCapacity = calculateTiledStorageCacheCapacity(rows, columns, geometry);
-    const auto cacheCapacity = frequentAccess ? std::min<std::size_t>(64, baseCacheCapacity * 2) : baseCacheCapacity;
+    const auto cacheCapacity = frequentAccess ? std::min<std::size_t>(64, baseCacheCapacity + 16) : baseCacheCapacity;
 
     return {
         geometry,

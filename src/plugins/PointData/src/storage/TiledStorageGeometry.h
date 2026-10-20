@@ -30,7 +30,9 @@ struct TiledStorageGeometry
 /** Calculates rectangular tile extents from matrix shape, target bytes, and axis asymmetry. */
 inline TiledStorageGeometry calculateTiledStorageGeometry(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::uint64_t targetTileBytes, const std::int32_t asymmetry)
 {
-    constexpr std::uint64_t dominantAxisTileExtent = 8;
+    // Keep directional tiles practical for mixed workloads. A very small
+    // dominant extent creates dataset-spanning tiles on the other axis.
+    constexpr std::uint64_t dominantAxisTileExtent = 256;
 
     const auto targetTileElements = std::max<std::uint64_t>(1, targetTileBytes / std::max<std::size_t>(1, elementSize));
 
@@ -68,8 +70,9 @@ inline std::size_t calculateTiledStorageCacheCapacity(const std::uint64_t rows, 
     const auto aspectRatio     = static_cast<double>(std::max(geometry.rowTileSize, geometry.columnTileSize)) / std::min(geometry.rowTileSize, geometry.columnTileSize);
     const auto directionalBias = 1.0 + std::min(1.0, std::log2(std::max(1.0, aspectRatio)) / 10.0);
     const auto capacity        = static_cast<std::uint64_t>(std::sqrt(static_cast<double>(std::max<std::uint64_t>(1, tileCount)) * directionalBias));
+    const auto minimumCapacity = std::min<std::uint64_t>(32, tileCount);
 
-    return static_cast<std::size_t>(std::clamp<std::uint64_t>(capacity, 1, 64));
+    return static_cast<std::size_t>(std::clamp<std::uint64_t>(capacity, minimumCapacity, 64));
 }
 
 }
