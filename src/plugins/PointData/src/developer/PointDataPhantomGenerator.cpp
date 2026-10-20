@@ -390,7 +390,6 @@ public:
         _populationAction(&_settingsGroupAction, "Population", { "Deterministic", "Random floats", "Random zeros and ones", "All zeros" }, "Deterministic"),
         _storageBackendAction(&_settingsGroupAction, "Storage backend", { "Eager", "Tiled" }, "Tiled"),
         _tileAsymmetryAction(&_settingsGroupAction),
-        _tileSizeAction(&_settingsGroupAction, "Tile size (MiB)", 1, 1024, 1),
         _rowTileSizeAction(&_settingsGroupAction, "Tile heights", "256"),
         _columnTileSizeAction(&_settingsGroupAction, "Tile widths", "8"),
         _cacheCapacityAction(&_settingsGroupAction, "Cache tiles", "8"),
@@ -422,7 +421,6 @@ public:
         _typeAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
         _populationAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
         _storageBackendAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
-        _tileSizeAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
         _rowTileSizeAction.setDefaultWidgetFlags(mv::gui::StringAction::LineEdit);
         _columnTileSizeAction.setDefaultWidgetFlags(mv::gui::StringAction::LineEdit);
         _cacheCapacityAction.setDefaultWidgetFlags(mv::gui::StringAction::LineEdit);
@@ -443,7 +441,6 @@ public:
         _populationAction.setToolTip("How values are generated. Deterministic, random, and zero-filled data are useful for different tests; the choice may affect compression ratio and therefore disk footprint and I/O time.");
         _storageBackendAction.setToolTip("Storage representation. Eager storage keeps the complete dataset materialized, while Tiled storage loads bounded tiles on demand and is the relevant choice for tile and cache experiments.");
         _tileAsymmetryAction.setToolTip("Balances tile shape between row-oriented and column-oriented access. Row-oriented tiles can accelerate contiguous row access, while column-oriented tiles can accelerate contiguous column access; the wrong orientation can increase tile reads.");
-        _tileSizeAction.setToolTip("Automatic tile-geometry budget used to calculate row and column tile sizes. Larger budgets reduce the number of tiles but increase the amount of data read and decoded per miss; changing this policy recalculates the tile dimensions below.");
         _rowTileSizeAction.setToolTip("Number of dataset rows in each tile. Larger values help contiguous row scans but make random access fetch more unrelated data; comma-separated values create one dataset for every combination.");
         _columnTileSizeAction.setToolTip("Number of dataset columns in each tile. Larger values help contiguous column access but increase the data fetched for individual values or narrow column requests; comma-separated values create one dataset for every combination.");
         _cacheCapacityAction.setToolTip("Maximum number of decoded tiles retained in memory. A larger cache can reduce repeated disk reads for local or repeated access, but uses more memory; comma-separated values create one dataset for every combination.");
@@ -465,7 +462,6 @@ public:
         _settingsGroupAction.addAction(&_populationAction);
         _settingsGroupAction.addAction(&_storageBackendAction);
         _settingsGroupAction.addAction(&_tileAsymmetryAction);
-        _settingsGroupAction.addAction(&_tileSizeAction);
         _settingsGroupAction.addAction(&_rowTileSizeAction);
         _settingsGroupAction.addAction(&_columnTileSizeAction);
         _settingsGroupAction.addAction(&_cacheCapacityAction);
@@ -503,12 +499,10 @@ public:
 
         connect(&_rowsAction, &mv::gui::StringAction::stringChanged, this, [this] { updateName(); updateEstimate(); });
         connect(&_columnsAction, &mv::gui::StringAction::stringChanged, this, [this] { updateName(); updateEstimate(); });
-        connect(&_typeAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateTileGeometryFromPolicy(); });
         connect(&_populationAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateName(); });
         connect(&_nameOverrideAction, &mv::gui::ToggleAction::toggled, this, [this] { updateName(); });
         connect(&_storageBackendAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateActions(); });
-        connect(&_tileAsymmetryAction.getAsymmetryAction(), &mv::gui::IntegralAction::valueChanged, this, [this] { updateTileGeometryFromPolicy(); });
-        connect(&_tileSizeAction, &mv::gui::IntegralAction::valueChanged, this, [this] { updateTileGeometryFromPolicy(); });
+        connect(&_tileAsymmetryAction.getAsymmetryAction(), &mv::gui::IntegralAction::valueChanged, this, [this] { updateTileGeometryFromAsymmetry(); });
         connect(&_rowTileSizeAction, &mv::gui::StringAction::stringChanged, this, [this] { updateEstimate(); });
         connect(&_columnTileSizeAction, &mv::gui::StringAction::stringChanged, this, [this] { updateEstimate(); });
         connect(&_cacheCapacityAction, &mv::gui::StringAction::stringChanged, this, [this] { updateEstimate(); });
@@ -643,7 +637,6 @@ public:
         application->setSetting("Developer/PhantomPointGenerator/Population", _populationAction.getCurrentText());
         application->setSetting("Developer/PhantomPointGenerator/StorageBackend", _storageBackendAction.getCurrentText());
         application->setSetting("Developer/PhantomPointGenerator/TileAsymmetry", _tileAsymmetryAction.getAsymmetryAction().getValue());
-        application->setSetting("Developer/PhantomPointGenerator/TileSizeMiB", _tileSizeAction.getValue());
         application->setSetting("Developer/PhantomPointGenerator/RowTileSizes", _rowTileSizeAction.getString());
         application->setSetting("Developer/PhantomPointGenerator/ColumnTileSizes", _columnTileSizeAction.getString());
         application->setSetting("Developer/PhantomPointGenerator/CacheCapacities", _cacheCapacityAction.getString());
@@ -667,7 +660,6 @@ private:
         _storageBackendAction.setCurrentText(application->getSetting("Developer/PhantomPointGenerator/StorageBackend", _storageBackendAction.getCurrentText()).toString());
         const auto asymmetry = application->getSetting("Developer/PhantomPointGenerator/TileAsymmetry", application->getSetting("Developer/PhantomPointGenerator/TileDominance", _tileAsymmetryAction.getAsymmetryAction().getValue())).toInt();
         _tileAsymmetryAction.getAsymmetryAction().setValue(asymmetry);
-        _tileSizeAction.setValue(application->getSetting("Developer/PhantomPointGenerator/TileSizeMiB", _tileSizeAction.getValue()).toInt());
         _rowTileSizeAction.setString(application->getSetting("Developer/PhantomPointGenerator/RowTileSizes", application->getSetting("Developer/PhantomPointGenerator/RowTileSize", _rowTileSizeAction.getString())).toString());
         _columnTileSizeAction.setString(application->getSetting("Developer/PhantomPointGenerator/ColumnTileSizes", application->getSetting("Developer/PhantomPointGenerator/ColumnTileSize", _columnTileSizeAction.getString())).toString());
         _cacheCapacityAction.setString(application->getSetting("Developer/PhantomPointGenerator/CacheCapacities", application->getSetting("Developer/PhantomPointGenerator/CacheCapacity", _cacheCapacityAction.getString())).toString());
@@ -681,7 +673,6 @@ private:
         updateName();
         const auto tiled = isTiled();
         _tileAsymmetryAction.setEnabled(tiled);
-        _tileSizeAction.setEnabled(tiled);
         _rowTileSizeAction.setEnabled(tiled);
         _columnTileSizeAction.setEnabled(tiled);
         _cacheCapacityAction.setEnabled(tiled);
@@ -715,7 +706,7 @@ private:
         updateActions();
     }
 
-    void updateTileGeometryFromPolicy()
+    void updateTileGeometryFromAsymmetry()
     {
         if (_rowsAction.getString().contains(',') || _columnsAction.getString().contains(','))
         {
@@ -725,7 +716,7 @@ private:
 
         try
         {
-            const auto geometry = storage::calculateTiledStorageGeometry(rows(), columns(), elementSizeForType(type()), static_cast<std::uint64_t>(_tileSizeAction.getValue()) * 1024 * 1024, _tileAsymmetryAction.getAsymmetryAction().getValue());
+            const auto geometry = storage::calculateTiledStorageGeometry(rows(), columns(), elementSizeForType(type()), 1024U * 1024U, _tileAsymmetryAction.getAsymmetryAction().getValue());
             _rowTileSizeAction.setString(QString::number(geometry.rowTileSize));
             _columnTileSizeAction.setString(QString::number(geometry.columnTileSize));
             _cacheCapacityAction.setString(QString::number(storage::calculateTiledStorageCacheCapacity(rows(), columns(), geometry)));
@@ -828,7 +819,6 @@ private:
     mv::gui::OptionAction                _populationAction;
     mv::gui::OptionAction                _storageBackendAction;
     mv::gui::TiledStorageAsymmetryAction _tileAsymmetryAction;
-    mv::gui::IntegralAction              _tileSizeAction;
     mv::gui::StringAction                _rowTileSizeAction;
     mv::gui::StringAction                _columnTileSizeAction;
     mv::gui::StringAction                _cacheCapacityAction;
