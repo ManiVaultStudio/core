@@ -16,7 +16,7 @@
 #include "DimensionsPickerSelectAction.h"
 #include "DimensionsPickerMiscellaneousAction.h"
 
-#include "actions/ModelResetter.h"
+#include "ModelResetter.h"
 
 #include "actions/StringAction.h"
 

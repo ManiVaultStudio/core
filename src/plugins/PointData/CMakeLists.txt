@@ -25,6 +25,7 @@ set(POINTS_SOURCES
     src/DimensionsPickerMiscellaneousAction.cpp
     src/DimensionsPickerProxyModel.cpp
     src/DimensionsPickerSelectAction.cpp
+    src/ModelResetter.cpp
     src/storage/widgets/StorageBackendConfigurationDialog.cpp
     src/storage/eager/EagerPointsStorageBackend.cpp
     src/storage/tiled/TiledPointsStorageBackend.cpp
@@ -61,12 +62,12 @@ set(POINTS_HEADERS
     src/DimensionsPickerHolder.h
     src/DimensionsPickerItemModel.h
     src/DimensionsPickerProxyModel.h
+    src/ModelResetter.h
     src/actions/InfoAction.h
     src/actions/SelectedIndicesAction.h
     src/actions/ProxyDatasetsAction.h
     src/actions/EditProxyDatasetsAction.h
     src/actions/NumberOfSelectedPointsAction.h
-    src/actions/ModelResetter.h
     src/actions/CreateSetFromSelectionAction.h
     src/SparseMatrix.h
     src/DimensionNamesSerializer.h
@@ -144,8 +145,6 @@ set(ACTIONS_SOURCES
     src/actions/SelectedIndicesAction.cpp
     src/actions/CreateSetFromSelectionAction.h
     src/actions/CreateSetFromSelectionAction.cpp
-    src/actions/ModelResetter.h
-    src/actions/ModelResetter.cpp
     src/actions/PointsAction.h
     src/actions/PointsAction.cpp
     src/actions/PointsViewAction.h
