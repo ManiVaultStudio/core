@@ -825,7 +825,7 @@ public:
     explicit BenchmarkDialog(QWidget* parent) :
         QDialog(parent),
         _settingsGroupAction(this, "Point Data Discovery and Benchmark", true),
-        _descriptionAction(&_settingsGroupAction, "Description", "The benchmark uses the currently loaded concrete point datasets in the data hierarchy as its fixture. It does not create or reload data. Each dataset is measured for random-point, sampled or full row-major, sampled or full column-major, and random-row access. The CSV also records CPU, memory, operating-system, storage-volume, and project-codec context."),
+        _descriptionAction(&_settingsGroupAction, "Description", "The benchmark uses the currently loaded concrete point datasets in the data hierarchy as its fixture. It does not create or reload data. Each access pattern starts with an empty application-level tiled cache; the operating-system file cache is not cleared. Each dataset is measured for random-point, sampled or full row-major, sampled or full column-major, and random-row access. The CSV also records CPU, memory, operating-system, storage-volume, and project-codec context."),
         _datasetsAction(&_settingsGroupAction, "Point datasets"),
         _scanModeAction(&_settingsGroupAction, "Scan mode", { "Quick", "Standard", "Full" }, "Quick"),
         _samplesAction(&_settingsGroupAction, "Random samples", 1, std::numeric_limits<std::int32_t>::max(), 10000),
@@ -1014,6 +1014,8 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
             const auto phaseCount = std::size_t { 4 };
 
             const auto measureAccess = [&](const QString& accessPattern, const std::size_t phaseIndex) {
+                pointDataset->resetTiledCache();
+
                 return measurePoints(pointDataset, datasetConfiguration, coordinates, randomRows, scanRows, scanColumns, executionContext, phaseIndex, phaseCount, accessPattern, [&](const std::uint64_t operations) {
                     double checksum = 0.0;
                     std::uint64_t completedOperations = 0;

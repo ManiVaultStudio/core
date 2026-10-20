@@ -43,6 +43,15 @@ void PointDataTileCache::setCapacity(const std::size_t capacity)
     trim();
 }
 
+void PointDataTileCache::reset()
+{
+    _entries.clear();
+    _lru.clear();
+    _hits      = 0;
+    _misses    = 0;
+    _evictions = 0;
+}
+
 void PointDataTileCache::trim()
 {
     while (_entries.size() > _capacity)

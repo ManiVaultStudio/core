@@ -351,6 +351,9 @@ public:
     /** Returns the number of currently cached tile payloads. */
     std::size_t getTiledCacheSize() const;
 
+    /** Clears cached tiled payloads and resets cache statistics without changing capacity. */
+    void resetTiledCache() const;
+
     /** Returns the maximum number of cached tile payloads. */
     std::size_t getTiledCacheCapacity() const;
 
@@ -1106,6 +1109,9 @@ public:
 
     /** Returns the configured tile-cache capacity, or zero when the dataset is not tiled. */
     std::size_t getTiledCacheCapacity() const;
+
+    /** Clears cached tiled payloads and resets cache statistics without changing capacity. */
+    void resetTiledCache() const;
 
     /** Returns the number of tile-cache hits since the current backend was created or reset. */
     std::uint64_t getTiledCacheHits() const;

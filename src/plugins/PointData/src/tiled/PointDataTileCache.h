@@ -35,6 +35,9 @@ public:
     /** Changes the maximum number of cached entries. */
     void setCapacity(std::size_t capacity);
 
+    /** Removes all cached payloads and resets hit, miss, and eviction counters. */
+    void reset();
+
     /** Returns the maximum number of cached entries. */
     std::size_t capacity() const
     {

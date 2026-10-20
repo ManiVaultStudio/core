@@ -251,6 +251,13 @@ void PointDataTiledStorage::setCacheCapacity(const std::size_t capacity) const
     _cache.setCapacity(capacity);
 }
 
+void PointDataTiledStorage::resetCache() const
+{
+    const std::lock_guard lock(_mutex);
+
+    _cache.reset();
+}
+
 std::size_t PointDataTiledStorage::cacheCapacity() const
 {
     const std::lock_guard lock(_mutex);

@@ -81,6 +81,25 @@ GTEST_TEST(PointData, tileCacheEvictionPreservesActiveViews)
     ASSERT_GE(storage->cacheEvictions(), 1U);
 }
 
+GTEST_TEST(PointData, resettingTileCacheClearsPayloadsAndStatistics)
+{
+    const auto values = makeValues(4, 4);
+    const auto storage = PointDataTiledStorage::fromDense(reinterpret_cast<const char*>(values.data()), 4, 4, sizeof(float), 2, 2);
+
+    const auto view = storage->acquire(0, 0);
+    ASSERT_TRUE(view);
+    ASSERT_EQ(storage->cacheSize(), 1U);
+    ASSERT_EQ(storage->cacheMisses(), 1U);
+
+    storage->resetCache();
+
+    ASSERT_EQ(storage->cacheSize(), 0U);
+    ASSERT_EQ(storage->cacheHits(), 0U);
+    ASSERT_EQ(storage->cacheMisses(), 0U);
+    ASSERT_EQ(storage->cacheEvictions(), 0U);
+    ASSERT_FLOAT_EQ(*static_cast<const float*>(view.data()), 0.0f);
+}
+
 GTEST_TEST(PointData, materializesTilesInRowMajorOrder)
 {
     const auto values = makeValues(5, 4);

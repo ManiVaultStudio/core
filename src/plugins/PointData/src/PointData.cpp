@@ -360,6 +360,14 @@ std::size_t PointData::getTiledCacheSize() const
     return 0;
 }
 
+void PointData::resetTiledCache() const
+{
+    const auto lock = lockData();
+
+    if (const auto tiledStorage = getTiledStorage())
+        tiledStorage->resetCache();
+}
+
 std::size_t PointData::getTiledCacheCapacity() const
 {
     const auto lock = lockData();
@@ -1540,6 +1548,12 @@ std::size_t Points::getTiledColumnTileSize() const
 std::size_t Points::getTiledCacheCapacity() const
 {
     return isProxy() ? 0 : getRawData<PointData>()->getTiledCacheCapacity();
+}
+
+void Points::resetTiledCache() const
+{
+    if (!isProxy())
+        getRawData<PointData>()->resetTiledCache();
 }
 
 std::uint64_t Points::getTiledCacheHits() const

@@ -141,6 +141,9 @@ public:
     /** Sets the maximum number of tile payloads retained in the bounded LRU cache. */
     void setCacheCapacity(std::size_t capacity) const;
 
+    /** Clears cached tile payloads and resets cache statistics without changing capacity. */
+    void resetCache() const;
+
     /** Returns the configured cache capacity. */
     std::size_t cacheCapacity() const;
 
