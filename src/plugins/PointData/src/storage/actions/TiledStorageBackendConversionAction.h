@@ -3,8 +3,8 @@
 #pragma once
 
 #include "StorageBackendConversionAction.h"
-#include "TiledStorageAsymmetryAction.h"
-#include "TiledStorageGeometry.h"
+#include "../tiled/TiledStorageAsymmetryAction.h"
+#include "../tiled/TiledStorageGeometry.h"
 
 #include <actions/IntegralAction.h>
 #include <actions/TriggerAction.h>

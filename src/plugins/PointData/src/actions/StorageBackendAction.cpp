@@ -2,9 +2,9 @@
 
 #include "StorageBackendAction.h"
 
-#include "StorageBackendConfigurationDialog.h"
+#include "../storage/widgets/StorageBackendConfigurationDialog.h"
 
-#include "PointData.h"
+#include "../PointData.h"
 
 #include <ForegroundTask.h>
 #include <util/StyledIcon.h>

@@ -5,15 +5,15 @@
 #include "PointData.h"
 #include "PointDataLegacySerialization.h"
 
-#include "DimensionsPickerAction.h"
-#include "InfoAction.h"
-#include "PointsAction.h"
+#include "actions/DimensionsPickerAction.h"
+#include "actions/InfoAction.h"
+#include "actions/PointsAction.h"
 #include "DimensionNamesSerializer.h"
-#include "storage/EagerPointsStorageBackend.h"
-#include "storage/StorageBackendConversionAction.h"
-#include "storage/TiledPointsStorageBackend.h"
-#include "tiled/PointDataTiledStorage.h"
-#include "tiled/PointDataTiledSerialization.h"
+#include "storage/eager/EagerPointsStorageBackend.h"
+#include "storage/actions/StorageBackendConversionAction.h"
+#include "storage/tiled/PointDataTiledSerialization.h"
+#include "storage/tiled/PointDataTiledStorage.h"
+#include "storage/tiled/TiledPointsStorageBackend.h"
 
 #include <Application.h>
 

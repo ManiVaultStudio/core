@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "PointsStorageBackendTypes.h"
+#include "../interface/PointsStorageBackendTypes.h"
 
 #include <actions/GroupAction.h>
 #include <pointdata_export.h>

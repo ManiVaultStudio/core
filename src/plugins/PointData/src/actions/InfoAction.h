@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "PointData.h"
+#include "../PointData.h"
 
 #include "ProxyDatasetsAction.h"
 #include "NumberOfSelectedPointsAction.h"

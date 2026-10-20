@@ -4,8 +4,8 @@
 
 #include "TiledPointsStorageBackend.h"
 
-#include "StorageBackendConversionAction.h"
-#include "TiledStorageBackendConversionAction.h"
+#include "../actions/StorageBackendConversionAction.h"
+#include "../actions/TiledStorageBackendConversionAction.h"
 
 #include <algorithm>
 #include <cstring>

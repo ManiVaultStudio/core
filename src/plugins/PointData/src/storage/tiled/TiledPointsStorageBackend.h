@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "PointsStorageBackend.h"
+#include "../interface/PointsStorageBackend.h"
 
-#include "../tiled/PointDataTiledStorage.h"
+#include "PointDataTiledStorage.h"
 
 #include <functional>
 #include <memory>

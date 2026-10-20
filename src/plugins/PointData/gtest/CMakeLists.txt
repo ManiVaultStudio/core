@@ -1,8 +1,8 @@
 add_executable(PointDataGTest
     PointDataGTestMain.cpp
     PointDataGTest.cpp
-    ../src/tiled/PointDataTileCache.cpp
-    ../src/tiled/PointDataTiledStorage.cpp
+    ../src/storage/tiled/PointDataTileCache.cpp
+    ../src/storage/tiled/PointDataTiledStorage.cpp
 )
 
 target_include_directories(PointDataGTest PRIVATE

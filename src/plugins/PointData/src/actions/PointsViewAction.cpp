@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "PointData.h"
+#include "../PointData.h"
 #include "PointsViewAction.h"
 
-#include "PointsViewWidget.h"
+#include "../view/PointsViewWidget.h"
 
 #include <QVBoxLayout>
 

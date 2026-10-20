@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../PointDataAccess.h"
+#include "PointDataAccess.h"
 #include "PointsStorageBackendTypes.h"
 
 #include <pointdata_export.h>

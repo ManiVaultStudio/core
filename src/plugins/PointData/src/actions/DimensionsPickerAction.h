@@ -6,7 +6,7 @@
 
 #include "pointdata_export.h"
 
-#include "PointData.h"
+#include "../PointData.h"
 
 #include "DimensionsPickerHolder.h"
 #include "DimensionsPickerItemModel.h"

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "PointsStorageBackend.h"
+#include "../interface/PointsStorageBackend.h"
 
 class PointData;
 

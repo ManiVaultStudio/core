@@ -2,8 +2,8 @@
 // A corresponding LICENSE file is located in the root directory of this source tree
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
 
-#include <tiled/PointDataTiledStorage.h>
-#include <tiled/PackedTileFile.h>
+#include <storage/tiled/PointDataTiledStorage.h>
+#include <storage/tiled/PackedTileFile.h>
 
 #include <gtest/gtest.h>
 

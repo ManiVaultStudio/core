@@ -3,7 +3,7 @@
 #pragma once
 
 #include "pointdata_export.h"
-#include "PointsViewWidget.h"
+#include "../view/PointsViewWidget.h"
 
 #include <Dataset.h>
 #include <actions/WidgetAction.h>

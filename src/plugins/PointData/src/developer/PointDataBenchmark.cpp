@@ -24,7 +24,7 @@
 #include <workflow/WorkflowExecutionContext.h>
 #include <workflow/WorkflowPlan.h>
 
-#include "../tiled/PointDataTiledStorage.h"
+#include "../storage/tiled/PointDataTiledStorage.h"
 
 #include <QCoreApplication>
 #include <QDialog>

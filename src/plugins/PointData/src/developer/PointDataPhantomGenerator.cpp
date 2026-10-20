@@ -1,11 +1,11 @@
 #include "PointDataPhantomGenerator.h"
 
 #include "../PointData.h"
-#include "../storage/PointDataStorageRecommendation.h"
-#include "../storage/PointDataStorageRecommendationDialog.h"
-#include "../storage/TiledPointsStorageBackend.h"
-#include "../storage/TiledStorageAsymmetryAction.h"
-#include "../storage/TiledStorageGeometry.h"
+#include "../storage/tiled/PointDataStorageRecommendation.h"
+#include "../storage/tiled/PointDataStorageRecommendationDialog.h"
+#include "../storage/tiled/TiledPointsStorageBackend.h"
+#include "../storage/tiled/TiledStorageAsymmetryAction.h"
+#include "../storage/tiled/TiledStorageGeometry.h"
 
 #include <Application.h>
 #include <CoreInterface.h>

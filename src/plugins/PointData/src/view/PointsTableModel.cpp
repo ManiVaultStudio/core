@@ -2,7 +2,7 @@
 
 #include "PointsTableModel.h"
 
-#include "PointData.h"
+#include "../PointData.h"
 
 #include <algorithm>
 #include <exception>

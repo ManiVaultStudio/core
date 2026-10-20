@@ -3,7 +3,7 @@
 #pragma once
 
 #include "pointdata_export.h"
-#include "storage/PointsStorageBackendTypes.h"
+#include "../storage/interface/PointsStorageBackendTypes.h"
 
 #include <Dataset.h>
 #include <actions/HorizontalGroupAction.h>

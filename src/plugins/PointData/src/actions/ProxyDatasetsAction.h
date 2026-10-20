@@ -4,19 +4,19 @@
 
 #pragma once
 
-#include "PointData.h"
+#include "../PointData.h"
+#include "EditProxyDatasetsAction.h"
 
-#include <actions/TriggerAction.h>
 #include <actions/StringAction.h>
 
 /**
- * Create set from selection action class
+ * Proxy datasets action class
  *
- * Action class for creating a set from a selection
+ * Action class for displaying the number of proxy datasets and providing an edit function
  *
  * @author Thomas Kroes
  */
-class CreateSetFromSelectionAction : public mv::gui::WidgetAction
+class ProxyDatasetsAction : public mv::gui::WidgetAction
 {
     Q_OBJECT
 
@@ -29,13 +29,13 @@ protected:
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param createSetFromSelectionAction Pointer to create set from selection action
+         * @param proxyDatasetsAction Pointer to proxy datasets action
          */
-        Widget(QWidget* parent, CreateSetFromSelectionAction* createSetFromSelectionAction);
+        Widget(QWidget* parent, ProxyDatasetsAction* proxyDatasetsAction);
     };
 
     /**
-     * Get widget representation of the create set from selection action
+     * Get widget representation of the proxy datasets action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
@@ -50,12 +50,12 @@ public:
      * @param parent Pointer to parent object
      * @param points Smart pointer to points dataset
      */
-    CreateSetFromSelectionAction(QObject* parent, const mv::Dataset<Points>& points);
+    ProxyDatasetsAction(QObject* parent, const mv::Dataset<Points>& points);
 
 public: // Action getters
 
-    mv::gui::StringAction& getNameAction() { return _nameAction; }
-    mv::gui::TriggerAction& getCreateAction() { return _createAction; }
+    mv::gui::StringAction& getCountAction() { return _countAction; }
+    EditProxyDatasetsAction& getEditProxyDatasetsAction() { return _editProxyDatasetsAction; }
 
 signals:
 
@@ -65,7 +65,7 @@ signals:
     void dimensionNamesChanged(const QStringList& dimensionNames);
 
 protected:
-    mv::Dataset<Points>         _points;            /** Points dataset reference */
-    mv::gui::StringAction       _nameAction;        /** Set name action */
-    mv::gui::TriggerAction      _createAction;      /** Create set action */
+    mv::Dataset<Points>         _points;                        /** Points dataset reference */
+    mv::gui::StringAction       _countAction;                   /** Number of proxy datasets action */
+    EditProxyDatasetsAction     _editProxyDatasetsAction;       /** Manual update action */
 };

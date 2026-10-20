@@ -11,9 +11,9 @@
 #include "LinkedData.h"
 #include "PointDataRange.h"
 #include "Set.h"
-#include "PointDataAccess.h"
+#include "storage/interface/PointDataAccess.h"
 #include "SparseMatrix.h"
-#include "storage/PointsStorageBackendTypes.h"
+#include "storage/interface/PointsStorageBackendTypes.h"
 
 #include "event/EventListener.h"
 

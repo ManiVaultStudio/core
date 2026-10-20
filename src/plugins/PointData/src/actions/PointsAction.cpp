@@ -2,8 +2,8 @@
 
 #include "PointsAction.h"
 
-#include "PointData.h"
-#include "PointsViewWidget.h"
+#include "../PointData.h"
+#include "../view/PointsViewWidget.h"
 
 #include <CoreInterface.h>
 #include <ViewPlugin.h>

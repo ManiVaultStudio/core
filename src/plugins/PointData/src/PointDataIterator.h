@@ -6,7 +6,7 @@
 
 #include <iterator>
 
-#include "PointView.h"
+#include "view/PointView.h"
 
 namespace mv
 {

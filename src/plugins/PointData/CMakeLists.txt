@@ -7,93 +7,100 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(POINTS_SOURCES
     src/PointData.h
-    src/PointDataAccess.h
     src/PointData.cpp
     src/PointDataLegacySerialization.h
     src/PointDataLegacySerialization.cpp
     src/PointDataIterator.h
     src/PointDataRange.h
-    src/PointView.h
+    src/view/PointView.h
     src/RandomAccessRange.h
     src/SparseMatrix.h
     src/DimensionNamesSerializer.h
     src/DimensionNamesSerializer.cpp
-    src/PointsAction.cpp
-    src/PointsViewAction.cpp
-    src/StorageBackendAction.cpp
-    src/StorageBackendConfigurationDialog.cpp
-    src/storage/EagerPointsStorageBackend.cpp
-    src/storage/TiledPointsStorageBackend.cpp
-    src/storage/TiledStorageBackendConversionAction.cpp
-    src/storage/TiledStorageAsymmetryAction.cpp
-    src/storage/PointDataStorageRecommendationDialog.cpp
-    src/tiled/PointDataTileCache.cpp
-    src/tiled/PackedTileFile.cpp
-    src/tiled/PointDataTiledStorage.cpp
-    src/tiled/PointDataTiledSerialization.cpp
+    src/storage/widgets/StorageBackendConfigurationDialog.cpp
+    src/storage/eager/EagerPointsStorageBackend.cpp
+    src/storage/tiled/TiledPointsStorageBackend.cpp
+    src/storage/actions/TiledStorageBackendConversionAction.cpp
+    src/storage/tiled/TiledStorageAsymmetryAction.cpp
+    src/storage/tiled/PointDataStorageRecommendationDialog.cpp
+    src/storage/tiled/PointDataTileCache.cpp
+    src/storage/tiled/PackedTileFile.cpp
+    src/storage/tiled/PointDataTiledStorage.cpp
+    src/storage/tiled/PointDataTiledSerialization.cpp
     src/developer/PointDataPhantomGenerator.cpp
     src/developer/PointDataBenchmark.cpp
 )
 
 set(POINTS_VIEW_WIDGETS
-    src/PointsTableModel.h
-    src/PointsTableModel.cpp
-    src/PointsViewWidget.h
-    src/PointsViewWidget.cpp
+    src/view/PointsTableModel.h
+    src/view/PointsTableModel.cpp
+    src/view/PointsViewWidget.h
+    src/view/PointsViewWidget.cpp
 )
 
 set(POINTS_HEADERS
     src/PointData.h
-    src/PointDataAccess.h
     src/PointDataLegacySerialization.h
     src/PointDataIterator.h
     src/PointDataRange.h
-    src/PointView.h
+    src/view/PointView.h
     src/RandomAccessRange.h
-    src/InfoAction.h
-    src/SelectedIndicesAction.h
-    src/ProxyDatasetsAction.h
-    src/EditProxyDatasetsAction.h
-    src/NumberOfSelectedPointsAction.h
-    src/DimensionPickerAction.h
-    src/DimensionsPickerAction.h
-    src/DimensionsPickerFilterAction.h
-    src/DimensionsPickerSelectAction.h
-    src/DimensionsPickerMiscellaneousAction.h
-    src/DimensionsPickerHolder.h
-    src/DimensionsPickerItemModel.h
-    src/DimensionsPickerProxyModel.h
-    src/ModelResetter.h
-    src/CreateSetFromSelectionAction.h
+    src/actions/InfoAction.h
+    src/actions/SelectedIndicesAction.h
+    src/actions/ProxyDatasetsAction.h
+    src/actions/EditProxyDatasetsAction.h
+    src/actions/NumberOfSelectedPointsAction.h
+    src/actions/DimensionPickerAction.h
+    src/actions/DimensionsPickerAction.h
+    src/actions/DimensionsPickerFilterAction.h
+    src/actions/DimensionsPickerSelectAction.h
+    src/actions/DimensionsPickerMiscellaneousAction.h
+    src/actions/DimensionsPickerHolder.h
+    src/actions/DimensionsPickerItemModel.h
+    src/actions/DimensionsPickerProxyModel.h
+    src/actions/ModelResetter.h
+    src/actions/CreateSetFromSelectionAction.h
     src/SparseMatrix.h
     src/DimensionNamesSerializer.h
-    src/PointsAction.h
-    src/PointsViewAction.h
-    src/StorageBackendAction.h
-    src/StorageBackendConfigurationDialog.h
-    src/PointsTableModel.h
-    src/PointsViewWidget.h
-    src/tiled/PointDataTile.h
-    src/tiled/PointDataTileCache.h
-    src/tiled/PointDataTiledStorage.h
-    src/tiled/PointDataTiledSerialization.h
-    src/tiled/PackedTileFile.h
+    src/actions/PointsAction.h
+    src/actions/PointsViewAction.h
+    src/actions/StorageBackendAction.h
+    src/storage/widgets/StorageBackendConfigurationDialog.h
+    src/view/PointsTableModel.h
+    src/view/PointsViewWidget.h
     src/developer/PointDataPhantomGenerator.h
     src/developer/PointDataBenchmark.h
 )
 
-set(POINTS_STORAGE_HEADERS
-    src/storage/PointsStorageBackend.h
-    src/storage/PointsStorageBackendTypes.h
-    src/storage/EagerPointsStorageBackend.h
-    src/storage/TiledPointsStorageBackend.h
-    src/storage/StorageBackendConversionAction.h
-    src/storage/TiledStorageBackendConversionAction.h
-    src/storage/TiledStorageAsymmetryAction.h
-    src/storage/TiledStorageGeometry.h
-    src/storage/PointDataStorageRecommendation.h
-    src/storage/PointDataStorageRecommendationDialog.h
+set(POINTS_STORAGE_COMMON_HEADERS
+    src/storage/interface/PointDataAccess.h
+    src/storage/interface/PointsStorageBackend.h
+    src/storage/interface/PointsStorageBackendTypes.h
 )
+
+set(POINTS_STORAGE_ACTION_HEADERS
+    src/storage/actions/StorageBackendConversionAction.h
+    src/storage/actions/TiledStorageBackendConversionAction.h
+)
+
+set(POINTS_STORAGE_EAGER_HEADERS
+    src/storage/eager/EagerPointsStorageBackend.h
+)
+
+set(POINTS_STORAGE_TILED_HEADERS
+    src/storage/tiled/PointDataTile.h
+    src/storage/tiled/PointDataTileCache.h
+    src/storage/tiled/PointDataTiledStorage.h
+    src/storage/tiled/PointDataTiledSerialization.h
+    src/storage/tiled/PackedTileFile.h
+    src/storage/tiled/TiledPointsStorageBackend.h
+    src/storage/tiled/TiledStorageAsymmetryAction.h
+    src/storage/tiled/TiledStorageGeometry.h
+    src/storage/tiled/PointDataStorageRecommendation.h
+    src/storage/tiled/PointDataStorageRecommendationDialog.h
+)
+
+set(POINTS_STORAGE_HEADERS ${POINTS_STORAGE_COMMON_HEADERS} ${POINTS_STORAGE_ACTION_HEADERS} ${POINTS_STORAGE_EAGER_HEADERS} ${POINTS_STORAGE_TILED_HEADERS})
 
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects
 set(BFLOAT_HEADER
@@ -101,36 +108,42 @@ set(BFLOAT_HEADER
 )
 
 set(ACTIONS_SOURCES
-    src/InfoAction.h
-    src/InfoAction.cpp
-    src/ProxyDatasetsAction.h
-    src/ProxyDatasetsAction.cpp
-    src/EditProxyDatasetsAction.h
-    src/EditProxyDatasetsAction.cpp
-    src/NumberOfSelectedPointsAction.h
-    src/NumberOfSelectedPointsAction.cpp
-    src/SelectedIndicesAction.h
-    src/SelectedIndicesAction.cpp
-    src/CreateSetFromSelectionAction.h
-    src/CreateSetFromSelectionAction.cpp
-    src/DimensionPickerAction.h
-    src/DimensionPickerAction.cpp
-    src/DimensionsPickerAction.h
-    src/DimensionsPickerAction.cpp
-    src/DimensionsPickerHolder.h
-    src/DimensionsPickerHolder.cpp
-    src/DimensionsPickerItemModel.h
-    src/DimensionsPickerItemModel.cpp
-    src/DimensionsPickerProxyModel.h
-    src/DimensionsPickerProxyModel.cpp
-    src/DimensionsPickerFilterAction.h
-    src/DimensionsPickerFilterAction.cpp
-    src/DimensionsPickerSelectAction.h
-    src/DimensionsPickerSelectAction.cpp
-    src/DimensionsPickerMiscellaneousAction.h
-    src/DimensionsPickerMiscellaneousAction.cpp
-    src/ModelResetter.h
-    src/ModelResetter.cpp
+    src/actions/InfoAction.h
+    src/actions/InfoAction.cpp
+    src/actions/ProxyDatasetsAction.h
+    src/actions/ProxyDatasetsAction.cpp
+    src/actions/EditProxyDatasetsAction.h
+    src/actions/EditProxyDatasetsAction.cpp
+    src/actions/NumberOfSelectedPointsAction.h
+    src/actions/NumberOfSelectedPointsAction.cpp
+    src/actions/SelectedIndicesAction.h
+    src/actions/SelectedIndicesAction.cpp
+    src/actions/CreateSetFromSelectionAction.h
+    src/actions/CreateSetFromSelectionAction.cpp
+    src/actions/DimensionPickerAction.h
+    src/actions/DimensionPickerAction.cpp
+    src/actions/DimensionsPickerAction.h
+    src/actions/DimensionsPickerAction.cpp
+    src/actions/DimensionsPickerHolder.h
+    src/actions/DimensionsPickerHolder.cpp
+    src/actions/DimensionsPickerItemModel.h
+    src/actions/DimensionsPickerItemModel.cpp
+    src/actions/DimensionsPickerProxyModel.h
+    src/actions/DimensionsPickerProxyModel.cpp
+    src/actions/DimensionsPickerFilterAction.h
+    src/actions/DimensionsPickerFilterAction.cpp
+    src/actions/DimensionsPickerSelectAction.h
+    src/actions/DimensionsPickerSelectAction.cpp
+    src/actions/DimensionsPickerMiscellaneousAction.h
+    src/actions/DimensionsPickerMiscellaneousAction.cpp
+    src/actions/ModelResetter.h
+    src/actions/ModelResetter.cpp
+    src/actions/PointsAction.h
+    src/actions/PointsAction.cpp
+    src/actions/PointsViewAction.h
+    src/actions/PointsViewAction.cpp
+    src/actions/StorageBackendAction.h
+    src/actions/StorageBackendAction.cpp
 )
 
 set(POINT_DATA_AUX
@@ -140,26 +153,33 @@ set(POINT_DATA_AUX
 source_group(Plugin FILES ${POINTS_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 source_group(Widgets FILES ${POINTS_VIEW_WIDGETS})
-source_group(Storage FILES
-    src/StorageBackendAction.h
-    src/StorageBackendAction.cpp
-    src/StorageBackendConfigurationDialog.h
-    src/StorageBackendConfigurationDialog.cpp
-    src/storage/PointsStorageBackend.h
-    src/storage/PointsStorageBackendTypes.h
-    src/storage/EagerPointsStorageBackend.h
-    src/storage/EagerPointsStorageBackend.cpp
-    src/storage/TiledPointsStorageBackend.h
-    src/storage/TiledPointsStorageBackend.cpp
-    src/storage/StorageBackendConversionAction.h
-    src/storage/TiledStorageBackendConversionAction.h
-    src/storage/TiledStorageAsymmetryAction.h
-    src/storage/TiledStorageGeometry.h
-    src/storage/PointDataStorageRecommendation.h
-    src/storage/PointDataStorageRecommendationDialog.h
-    src/storage/TiledStorageAsymmetryAction.cpp
-    src/storage/TiledStorageBackendConversionAction.cpp
-    src/storage/PointDataStorageRecommendationDialog.cpp
+source_group(View FILES
+    src/view/PointView.h
+)
+source_group(Storage\\widgets FILES
+    src/storage/widgets/StorageBackendConfigurationDialog.h
+    src/storage/widgets/StorageBackendConfigurationDialog.cpp
+)
+source_group(Storage\\Actions FILES
+    ${POINTS_STORAGE_ACTION_HEADERS}
+    src/storage/actions/TiledStorageBackendConversionAction.cpp
+)
+source_group(Storage\\Interface FILES
+    ${POINTS_STORAGE_COMMON_HEADERS}
+)
+source_group(Storage\\eager FILES
+    src/storage/eager/EagerPointsStorageBackend.h
+    src/storage/eager/EagerPointsStorageBackend.cpp
+)
+source_group(Storage\\tiled FILES
+    ${POINTS_STORAGE_TILED_HEADERS}
+    src/storage/tiled/TiledPointsStorageBackend.cpp
+    src/storage/tiled/TiledStorageAsymmetryAction.cpp
+    src/storage/tiled/PointDataStorageRecommendationDialog.cpp
+    src/storage/tiled/PointDataTileCache.cpp
+    src/storage/tiled/PackedTileFile.cpp
+    src/storage/tiled/PointDataTiledStorage.cpp
+    src/storage/tiled/PointDataTiledSerialization.cpp
 )
 source_group(BFloat FILES ${BFLOAT_HEADER})
 source_group(Aux FILES ${POINT_DATA_AUX})
@@ -213,8 +233,23 @@ install(TARGETS ${POINTDATA}
     PUBLIC_HEADER DESTINATION "$<CONFIGURATION>/include/${POINTDATA}/" COMPONENT HEADERS
 )
 
-install(FILES ${POINTS_STORAGE_HEADERS}
-    DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/"
+install(FILES ${POINTS_STORAGE_COMMON_HEADERS}
+    DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/interface/"
+    COMPONENT HEADERS
+)
+
+install(FILES ${POINTS_STORAGE_ACTION_HEADERS}
+    DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/actions/"
+    COMPONENT HEADERS
+)
+
+install(FILES ${POINTS_STORAGE_EAGER_HEADERS}
+    DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/eager/"
+    COMPONENT HEADERS
+)
+
+install(FILES ${POINTS_STORAGE_TILED_HEADERS}
+    DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/tiled/"
     COMPONENT HEADERS
 )
 

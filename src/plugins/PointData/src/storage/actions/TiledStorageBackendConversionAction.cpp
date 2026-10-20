@@ -2,7 +2,7 @@
 
 #include "TiledStorageBackendConversionAction.h"
 
-#include "PointDataStorageRecommendationDialog.h"
+#include "../tiled/PointDataStorageRecommendationDialog.h"
 
 #include <QApplication>
 #include <limits>

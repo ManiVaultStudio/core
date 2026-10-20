@@ -4,8 +4,8 @@
 
 #include "EagerPointsStorageBackend.h"
 
-#include "../PointData.h"
-#include "TiledStorageBackendConversionAction.h"
+#include "../../PointData.h"
+#include "../actions/TiledStorageBackendConversionAction.h"
 
 #include <cstring>
 
