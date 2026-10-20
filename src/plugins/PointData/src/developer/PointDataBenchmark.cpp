@@ -36,8 +36,14 @@
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QSettings>
+#include <QStorageInfo>
+#include <QSysInfo>
 #include <QTextEdit>
+#include <QThread>
 #include <QTemporaryDir>
+#include <QFile>
+#include <QTextStream>
 #include <QVBoxLayout>
 
 #include <algorithm>
@@ -53,6 +59,15 @@
 #include <stdexcept>
 #include <vector>
 
+#ifdef Q_OS_WIN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#elif defined(Q_OS_UNIX)
+#include <unistd.h>
+#endif
+
 namespace
 {
 struct BenchmarkConfiguration
@@ -67,6 +82,23 @@ struct BenchmarkConfiguration
     QString columnTileSizes     = QStringLiteral("auto");
     QString cacheCapacities     = QStringLiteral("auto");
     QStringList datasetLabels;
+};
+
+struct BenchmarkContext
+{
+    QString benchmarkTimestamp;
+    QString cpuModel;
+    QString cpuArchitecture;
+    QString operatingSystem;
+    std::int32_t logicalCores            = 0;
+    std::uint64_t physicalMemoryBytes    = 0;
+    QString storageVolume;
+    QString storageDevice;
+    QString storageFileSystem;
+    std::uint64_t storageTotalBytes      = 0;
+    std::uint64_t storageAvailableBytes = 0;
+    QString projectCodec;
+    bool projectCompressionEnabled      = false;
 };
 
 struct ScanLimits
@@ -100,6 +132,85 @@ struct BenchmarkResult
     std::uint64_t cacheMisses    = 0;
     std::uint64_t cacheEvictions = 0;
 };
+
+QString getCpuModel()
+{
+#ifdef Q_OS_WIN
+    QSettings settings(QStringLiteral("HKEY_LOCAL_MACHINE\\HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0"), QSettings::NativeFormat);
+    const auto model = settings.value(QStringLiteral("ProcessorNameString")).toString().simplified();
+
+    if (!model.isEmpty())
+        return model;
+#elif defined(Q_OS_LINUX)
+    QFile cpuInfo(QStringLiteral("/proc/cpuinfo"));
+
+    if (cpuInfo.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QTextStream stream(&cpuInfo);
+
+        while (!stream.atEnd())
+        {
+            const auto line = stream.readLine();
+
+            if (line.startsWith(QStringLiteral("model name")))
+                return line.section(':', 1).trimmed();
+        }
+    }
+#endif
+
+    return QSysInfo::currentCpuArchitecture();
+}
+
+std::uint64_t getPhysicalMemoryBytes()
+{
+#ifdef Q_OS_WIN
+    MEMORYSTATUSEX memoryStatus { };
+    memoryStatus.dwLength = sizeof(memoryStatus);
+
+    if (GlobalMemoryStatusEx(&memoryStatus))
+        return static_cast<std::uint64_t>(memoryStatus.ullTotalPhys);
+#elif defined(Q_OS_UNIX)
+    const auto pageCount = sysconf(_SC_PHYS_PAGES);
+    const auto pageSize  = sysconf(_SC_PAGESIZE);
+
+    if (pageCount > 0 && pageSize > 0)
+        return static_cast<std::uint64_t>(pageCount) * static_cast<std::uint64_t>(pageSize);
+#endif
+
+    return 0;
+}
+
+BenchmarkContext collectBenchmarkContext()
+{
+    BenchmarkContext context;
+    context.benchmarkTimestamp = QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs);
+    context.cpuModel           = getCpuModel();
+    context.cpuArchitecture    = QSysInfo::currentCpuArchitecture();
+    context.operatingSystem    = QStringLiteral("%1 %2").arg(QSysInfo::prettyProductName(), QSysInfo::kernelVersion()).simplified();
+    context.logicalCores       = QThread::idealThreadCount();
+    context.physicalMemoryBytes = getPhysicalMemoryBytes();
+
+    auto* project = mv::projects().getCurrentProject();
+    const auto projectPath = project && !project->getFilePath().isEmpty() ? project->getFilePath() : QDir::currentPath();
+    const QStorageInfo storage(QFileInfo(projectPath).absolutePath());
+
+    if (storage.isValid())
+    {
+        context.storageVolume         = storage.rootPath();
+        context.storageDevice         = QString::fromUtf8(storage.device());
+        context.storageFileSystem     = QString::fromUtf8(storage.fileSystemType());
+        context.storageTotalBytes     = storage.bytesTotal();
+        context.storageAvailableBytes = storage.bytesAvailable();
+    }
+
+    if (project)
+    {
+        context.projectCompressionEnabled = project->getCompressionAction().getEnabledAction().isChecked();
+        context.projectCodec              = project->getCompressionAction().getCodecTypeAction().getCurrentText();
+    }
+
+    return context;
+}
 
 QString formatBytes(long double bytes)
 {
@@ -692,9 +803,9 @@ std::vector<BenchmarkDataset> getPointDatasets()
     return pointDatasets;
 }
 
-void writeFixtureResult(std::ofstream& output, const FixtureResult& result)
+void writeFixtureResult(std::ofstream& output, const FixtureResult& result, const BenchmarkContext& context)
 {
-    output << csvValue(result.datasetName).toStdString() << ',' << result.backend.toStdString() << ',' << result.elementType.toStdString() << ',' << result.rows << ',' << result.columns << ',' << result.rowTileSize << ',' << result.columnTileSize << ',' << result.cacheCapacity << ',' << result.accessPattern.toStdString() << ',' << result.operations << ',' << result.elapsedMilliseconds << ',' << result.meanMillisecondsPerRow << ',' << result.checksum << ',' << result.cacheHits << ',' << result.cacheMisses << ',' << result.cacheEvictions << '\n';
+    output << csvValue(result.datasetName).toStdString() << ',' << result.backend.toStdString() << ',' << result.elementType.toStdString() << ',' << result.rows << ',' << result.columns << ',' << result.rowTileSize << ',' << result.columnTileSize << ',' << result.cacheCapacity << ',' << result.accessPattern.toStdString() << ',' << result.operations << ',' << result.elapsedMilliseconds << ',' << result.meanMillisecondsPerRow << ',' << result.checksum << ',' << result.cacheHits << ',' << result.cacheMisses << ',' << result.cacheEvictions << ',' << csvValue(context.benchmarkTimestamp).toStdString() << ',' << csvValue(context.cpuModel).toStdString() << ',' << csvValue(context.cpuArchitecture).toStdString() << ',' << csvValue(context.operatingSystem).toStdString() << ',' << context.logicalCores << ',' << context.physicalMemoryBytes << ',' << csvValue(context.storageVolume).toStdString() << ',' << csvValue(context.storageDevice).toStdString() << ',' << csvValue(context.storageFileSystem).toStdString() << ',' << context.storageTotalBytes << ',' << context.storageAvailableBytes << ',' << (context.projectCompressionEnabled ? 1 : 0) << ',' << csvValue(context.projectCodec).toStdString() << '\n';
 }
 
 QString makeTimestampedBenchmarkOutputPath(const QString& outputPath)
@@ -714,7 +825,7 @@ public:
     explicit BenchmarkDialog(QWidget* parent) :
         QDialog(parent),
         _settingsGroupAction(this, "Point Data Discovery and Benchmark", true),
-        _descriptionAction(&_settingsGroupAction, "Description", "The benchmark uses the currently loaded concrete point datasets in the data hierarchy as its fixture. It does not create or reload data. Each dataset is measured for random-point, sampled or full row-major, sampled or full column-major, and random-row access."),
+        _descriptionAction(&_settingsGroupAction, "Description", "The benchmark uses the currently loaded concrete point datasets in the data hierarchy as its fixture. It does not create or reload data. Each dataset is measured for random-point, sampled or full row-major, sampled or full column-major, and random-row access. The CSV also records CPU, memory, operating-system, storage-volume, and project-codec context."),
         _datasetsAction(&_settingsGroupAction, "Point datasets"),
         _scanModeAction(&_settingsGroupAction, "Scan mode", { "Quick", "Standard", "Full" }, "Quick"),
         _samplesAction(&_settingsGroupAction, "Random samples", 1, std::numeric_limits<std::int32_t>::max(), 10000),
@@ -881,15 +992,16 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
     if (!*output)
         throw std::runtime_error("Unable to open the benchmark output file");
 
-    *output << "dataset,backend,element_type,rows,columns,row_tile_size,column_tile_size,cache_capacity,access_pattern,operations,milliseconds,mean_milliseconds_per_row,checksum,cache_hits,cache_misses,evictions\n";
+    *output << "dataset,backend,element_type,rows,columns,row_tile_size,column_tile_size,cache_capacity,access_pattern,operations,milliseconds,mean_milliseconds_per_row,checksum,cache_hits,cache_misses,evictions,benchmark_timestamp,cpu_model,cpu_architecture,operating_system,logical_cores,physical_memory_bytes,storage_volume,storage_device,storage_filesystem,storage_total_bytes,storage_available_bytes,project_compression_enabled,project_codec\n";
 
+    const auto benchmarkContext = collectBenchmarkContext();
     auto plan = std::make_unique<mv::workflow::WorkflowPlan>(QObject::tr("Point-data benchmark"));
     mv::workflow::WorkflowPlan::Jobs benchmarkJobs;
     benchmarkJobs.reserve(datasets.size());
 
     for (const auto& points : datasets)
     {
-        benchmarkJobs.emplace_back(points.label, [configuration, points, output](const mv::workflow::WorkflowPlan::Job&, const mv::workflow::SharedWorkflowExecutionContext& executionContext) {
+        benchmarkJobs.emplace_back(points.label, [configuration, points, output, benchmarkContext](const mv::workflow::WorkflowPlan::Job&, const mv::workflow::SharedWorkflowExecutionContext& executionContext) {
             BenchmarkConfiguration datasetConfiguration = configuration;
             const auto& pointDataset = points.points;
             datasetConfiguration.rows = pointDataset->getNumPoints();
@@ -975,10 +1087,10 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
                 });
             };
 
-            writeFixtureResult(*output, measureAccess(QStringLiteral("random"), 0));
-            writeFixtureResult(*output, measureAccess(QStringLiteral("row_scan"), 1));
-            writeFixtureResult(*output, measureAccess(QStringLiteral("column_scan"), 2));
-            writeFixtureResult(*output, measureAccess(QStringLiteral("random_row"), 3));
+            writeFixtureResult(*output, measureAccess(QStringLiteral("random"), 0), benchmarkContext);
+            writeFixtureResult(*output, measureAccess(QStringLiteral("row_scan"), 1), benchmarkContext);
+            writeFixtureResult(*output, measureAccess(QStringLiteral("column_scan"), 2), benchmarkContext);
+            writeFixtureResult(*output, measureAccess(QStringLiteral("random_row"), 3), benchmarkContext);
         });
     }
 
