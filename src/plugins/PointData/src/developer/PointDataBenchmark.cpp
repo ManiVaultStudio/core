@@ -740,6 +740,7 @@ public:
         _outputPathAction.setDefaultSuffix("csv");
         _previewAction.setDefaultWidgetFlags(mv::gui::StringAction::TextEdit);
         _previewAction.setEnabled(false);
+        _presetsAction.setSaveDefaultPresetActionVisible(false);
 
         const auto datasets = getPointDatasets();
         QStringList datasetLabels;
