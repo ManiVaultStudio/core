@@ -1040,6 +1040,10 @@ void Task::updateProgress()
         case Status::Aborted:
             _progress = 0.f;
             break;
+
+        case Status::AboutToBeAborted:
+        case Status::Aborting:
+            break;
     }
 
     privateEmitProgressChanged();
