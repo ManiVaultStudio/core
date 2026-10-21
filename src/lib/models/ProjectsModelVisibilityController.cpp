@@ -25,7 +25,7 @@ ProjectsModelVisibilityController::ProjectsModelVisibilityController(AbstractPro
         _visibilityRuleFunction = std::move(visibilityRuleFunction);
     }
     else {
-        _visibilityRuleFunction = [this](const QModelIndexList& rows, QStandardItemModel* model) -> QModelIndex {
+        _visibilityRuleFunction = [](const QModelIndexList& rows, QStandardItemModel* model) -> QModelIndex {
             Q_ASSERT(!rows.isEmpty());
 
             if (rows.isEmpty())

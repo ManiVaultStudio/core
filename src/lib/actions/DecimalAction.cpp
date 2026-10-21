@@ -291,14 +291,14 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
         decimalAction->setValue(decimalAction->getMinimum() + (valueNormalized * decimalAction->getIntervalLength()));
     };
 
-    connect(this, &QSlider::valueChanged, this, [this, decimalAction, onUpdateAction](int value) {
+    connect(this, &QSlider::valueChanged, this, [decimalAction, onUpdateAction](int value) {
         if (!decimalAction->getUpdateDuringDrag())
             return;
 
         onUpdateAction();
     });
 
-    connect(this, &QSlider::sliderReleased, this, [this, decimalAction, onUpdateAction]() {
+    connect(this, &QSlider::sliderReleased, this, [decimalAction, onUpdateAction]() {
         if (decimalAction->getUpdateDuringDrag())
             return;
 
@@ -326,7 +326,7 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
         setToolTips();
     };
 
-    connect(decimalAction, &DecimalAction::valueChanged, this, [this, decimalAction, onUpdateValue](float value) {
+    connect(decimalAction, &DecimalAction::valueChanged, this, [decimalAction, onUpdateValue](float value) {
         onUpdateValue();
     });
 
