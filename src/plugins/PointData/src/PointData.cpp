@@ -252,6 +252,33 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
     convertToStorageBackend(type, std::make_shared<const pointdata::storage::StorageBackendConfiguration>(configuration), std::move(progress));
 }
 
+void PointData::initializeTiledStorage(const std::uint64_t rows, const std::uint64_t columns, const ElementTypeSpecifier elementType, const pointdata::storage::StorageBackendConfiguration& configuration, TiledTileGenerator generator)
+{
+    auto creation = std::make_shared<pointdata::storage::TiledStorageBackendCreationOptions>();
+    creation->rows = rows;
+    creation->columns = columns;
+    creation->elementSize = 4;
+    switch (elementType)
+    {
+    case ElementTypeSpecifier::bfloat16:
+    case ElementTypeSpecifier::int16:
+    case ElementTypeSpecifier::uint16: creation->elementSize = 2; break;
+    case ElementTypeSpecifier::int8:
+    case ElementTypeSpecifier::uint8: creation->elementSize = 1; break;
+    default: creation->elementSize = 4; break;
+    }
+    creation->elementTypeIndex = static_cast<std::uint32_t>(elementType);
+    creation->rowTileSize = configuration.rowTileSize;
+    creation->columnTileSize = configuration.columnTileSize;
+    creation->cacheCapacity = configuration.cacheCapacity;
+    creation->cacheCapacityBytes = configuration.cacheCapacityBytes;
+    creation->packedTiles = configuration.packedTiles;
+    creation->superTileRows = configuration.superTileRows;
+    creation->superTileColumns = configuration.superTileColumns;
+    creation->generator = std::move(generator);
+    convertToStorageBackend(pointdata::storage::StorageBackendType::Tiled, creation);
+}
+
 void PointData::convertToStorageBackend(const pointdata::storage::StorageBackendType type, const pointdata::storage::StorageBackendConversionOptionsPtr options, pointdata::storage::StorageBackendProgressCallback progress)
 {
     const auto lock = lockData();
@@ -1426,6 +1453,15 @@ void Points::convertToStorageBackend(const StorageBackendType type, const Storag
         throw std::invalid_argument("Storage backend conversion is only supported for concrete point datasets");
 
     getRawData<PointData>()->convertToStorageBackend(type, configuration, std::move(progress));
+    mv::events().notifyDatasetDataChanged(this);
+}
+
+void Points::initializeTiledStorage(const std::uint64_t rows, const std::uint64_t columns, const ElementTypeSpecifier elementType, const StorageBackendConfiguration& configuration, TiledTileGenerator generator)
+{
+    if (isProxy())
+        throw std::invalid_argument("Storage backend initialization is only supported for concrete point datasets");
+
+    getRawData<PointData>()->initializeTiledStorage(rows, columns, elementType, configuration, std::move(generator));
     mv::events().notifyDatasetDataChanged(this);
 }
 

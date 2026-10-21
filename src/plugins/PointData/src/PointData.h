@@ -100,6 +100,7 @@ class POINTDATA_EXPORT PointData : public mv::plugin::RawData
 {
 public:
     using DataLock = std::unique_lock<std::recursive_mutex>;
+    using TiledTileGenerator = std::function<QByteArray(std::uint64_t rowOffset, std::uint64_t columnOffset, std::uint64_t rows, std::uint64_t columns)>;
     enum class ElementTypeSpecifier
     {
         float32,
@@ -313,6 +314,9 @@ public:
      * materialization back to Eager storage.
      */
     void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, const mv::pointdata::storage::StorageBackendConfiguration& configuration = {}, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
+
+    /** Initializes an empty dataset as generator-backed tiled storage without materializing its values. */
+    void initializeTiledStorage(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, const mv::pointdata::storage::StorageBackendConfiguration& configuration, TiledTileGenerator generator);
 
     /** Converts or initializes using backend-specific options supplied by a conversion action or backend factory. */
     void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, mv::pointdata::storage::StorageBackendConversionOptionsPtr options, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
@@ -812,6 +816,7 @@ public:
     using StorageBackendConfiguration = mv::pointdata::storage::StorageBackendConfiguration;
     using StorageBackendProgressCallback = mv::pointdata::storage::StorageBackendProgressCallback;
     using StorageBackendConversionOptionsPtr = mv::pointdata::storage::StorageBackendConversionOptionsPtr;
+    using TiledTileGenerator = PointData::TiledTileGenerator;
 
     void init() override;
 
@@ -1050,6 +1055,9 @@ public:
 
     /** Converts this concrete dataset to a storage backend transactionally. An empty dataset may be initialized with backend creation options. */
     void convertToStorageBackend(StorageBackendType type, const StorageBackendConfiguration& configuration = {}, StorageBackendProgressCallback progress = {});
+
+    /** Initializes an empty dataset as generator-backed tiled storage without materializing its values. */
+    void initializeTiledStorage(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, const StorageBackendConfiguration& configuration, TiledTileGenerator generator);
 
     /** Converts or initializes using backend-specific options supplied by a conversion action or backend factory. */
     void convertToStorageBackend(StorageBackendType type, StorageBackendConversionOptionsPtr options, StorageBackendProgressCallback progress = {});
