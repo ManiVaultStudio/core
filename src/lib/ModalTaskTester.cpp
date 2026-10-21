@@ -126,7 +126,7 @@ void ModalTaskTester::testAggregation()
             return childTask;
         };
 
-        auto childTaskA = addChildTask("A", {
+        [[maybe_unused]] auto childTaskA = addChildTask("A", {
             "Child Task 1",
             "Child Task 2",
             "Child Task 3",
@@ -139,7 +139,7 @@ void ModalTaskTester::testAggregation()
             "Child Task 10"
         }, 450);
 
-        auto childTaskB = addChildTask("B", {
+        [[maybe_unused]] auto childTaskB = addChildTask("B", {
             "Child Task 1",
             "Child Task 2",
             "Child Task 3",
