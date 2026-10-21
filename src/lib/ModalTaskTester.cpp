@@ -46,7 +46,7 @@ void ModalTaskTester::testRunningIndeterminate()
 
         timer.setInterval(1000);
 
-        connect(indeterminateTask, &ModalTask::requestAbort, this, [this, &timer, indeterminateTask]() -> void {
+        connect(indeterminateTask, &ModalTask::requestAbort, this, [&timer, indeterminateTask]() -> void {
             timer.stop();
             indeterminateTask->setAborted();
         });
@@ -80,7 +80,7 @@ void ModalTaskTester::testAggregation()
 
         QMap<QString, QTimer*> timers;
 
-        const auto addChildTask = [this, taskRunner, &timers, aggregateTask](const QString& name, QStringList tasks, int interval) -> Task* {
+        const auto addChildTask = [this, &timers, aggregateTask](const QString& name, QStringList tasks, int interval) -> Task* {
             auto childTask = new ModalTask(nullptr, name);
 
             childTask->setParentTask(aggregateTask);
@@ -96,7 +96,7 @@ void ModalTaskTester::testAggregation()
 
                 timer->setInterval(interval);
 
-                connect(childTask, &ModalTask::requestAbort, this, [this, timer, childTask]() -> void {
+                connect(childTask, &ModalTask::requestAbort, this, [timer, childTask]() -> void {
                     timer->stop();
                     childTask->setAborted();
                 });
@@ -180,7 +180,7 @@ void ModalTaskTester::testPerformance()
 
         timer.setInterval(10);
 
-        connect(performanceTask, &ModalTask::requestAbort, this, [this, &timer, performanceTask]() -> void {
+        connect(performanceTask, &ModalTask::requestAbort, this, [&timer, performanceTask]() -> void {
             timer.stop();
             performanceTask->setAborted();
         });
