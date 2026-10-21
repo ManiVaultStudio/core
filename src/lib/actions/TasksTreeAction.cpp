@@ -35,7 +35,7 @@ public:
     {
     }
 
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const {
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
         auto progressAction = getProgressAction(index);
 
         if (progressAction == nullptr)
@@ -44,7 +44,7 @@ public:
         return progressAction->createWidget(parent);
     }
 
-    void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex&/*index*/) const {
+    void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex&/*index*/) const override {
         editor->setGeometry(option.rect);
     }
 
@@ -82,7 +82,7 @@ public:
     {
     }
 
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const {
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
         auto killTaskAction = getKillTaskAction(index);
 
         if (killTaskAction == nullptr)
@@ -91,7 +91,7 @@ public:
         return killTaskAction->createWidget(parent);
     }
 
-    void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex&/*index*/) const {
+    void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex&/*index*/) const override {
         editor->setGeometry(option.rect);
     }
 
