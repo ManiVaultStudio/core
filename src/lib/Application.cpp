@@ -71,7 +71,7 @@ Application::Application(int& argc, char** argv) :
     if (hasConfigurationFile()) {
         fromJsonFile(getConfigurationFilePath());
     } else {
-        const auto baseName = "ManiVault Studio";
+        const auto baseName = QStringLiteral("ManiVault Studio");
 
         auto& brandingConfigurationAction = _configurationAction.getBrandingConfigurationAction();
 
