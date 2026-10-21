@@ -23,11 +23,12 @@ namespace
 QString StandardPaths::get(StandardLocation location)
 {
 	switch (location) {
-		case Plugins:       return getPluginsDirectory();
-        case Downloads:     return getDownloadsDirectory();
-        case Customization: return getCustomizationDirectory();
-        case Projects:      return getProjectsDirectory();
-        case Logs:          return getLogsDirectory();
+		case Plugins:               return getPluginsDirectory();
+        case Downloads:             return getDownloadsDirectory();
+        case Customization:         return getCustomizationDirectory();
+        case Projects:              return getProjectsDirectory();
+        case Logs:                  return getLogsDirectory();
+        case PluginDependencies:    return getPluginDependenciesDirectory();
 	}
 
     return {};
