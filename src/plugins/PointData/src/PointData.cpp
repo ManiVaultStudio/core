@@ -219,13 +219,6 @@ const void* PointData::getDataConstVoidPtr() const
     return std::visit([](const auto& vec) { return (const void*)vec.data(); }, _variantOfVectors);
 }
 
-bool PointData::isTiled() const
-{
-    const auto lock = lockData();
-
-    return static_cast<bool>(getTiledStorage());
-}
-
 pointdata::storage::StorageBackendType PointData::getStorageBackendType() const
 {
     const auto lock = lockData();
@@ -238,6 +231,13 @@ pointdata::storage::StorageBackendCapabilities PointData::getStorageBackendCapab
     const auto lock = lockData();
 
     return _storageBackend ? _storageBackend->getCapabilities() : 0;
+}
+
+const pointdata::storage::PointsStorageBackend* PointData::getStorageBackend() const
+{
+    const auto lock = lockData();
+
+    return _storageBackend.get();
 }
 
 std::unique_ptr<mv::gui::StorageBackendConversionAction> PointData::createStorageBackendConversionAction(const pointdata::storage::StorageBackendType targetType, QObject* parent) const
@@ -338,126 +338,6 @@ void PointData::makeTiled(const std::size_t rowTileSize, const std::size_t colum
         _numRows = rows;
         _storageBackend = std::make_unique<pointdata::storage::TiledPointsStorageBackend>(tiledStorage, static_cast<std::uint32_t>(getElementTypeSpecifier()));
     }
-}
-
-PointData::TileView PointData::acquireTile(const std::uint64_t tileRow, const std::uint64_t tileColumn) const
-{
-    const auto lock = lockData();
-
-    if (const auto tiledStorage = getTiledStorage())
-        return tiledStorage->acquire(tileRow, tileColumn);
-
-    return {};
-}
-
-std::size_t PointData::getTiledCacheSize() const
-{
-    const auto lock = lockData();
-
-    if (const auto tiledStorage = getTiledStorage())
-        return tiledStorage->cacheSize();
-
-    return 0;
-}
-
-void PointData::resetTiledCache() const
-{
-    const auto lock = lockData();
-
-    if (const auto tiledStorage = getTiledStorage())
-        tiledStorage->resetCache();
-}
-
-std::size_t PointData::getTiledCacheCapacity() const
-{
-    const auto lock = lockData();
-
-    if (const auto tiledStorage = getTiledStorage())
-        return tiledStorage->cacheCapacity();
-
-    return 0;
-}
-
-std::size_t PointData::getTiledRowTileSize() const
-{
-    const auto lock = lockData();
-
-    if (const auto tiledStorage = getTiledStorage())
-        return tiledStorage->rowTileSize();
-
-    return 0;
-}
-
-std::size_t PointData::getTiledColumnTileSize() const
-{
-    const auto lock = lockData();
-
-    if (const auto tiledStorage = getTiledStorage())
-        return tiledStorage->columnTileSize();
-
-    return 0;
-}
-
-std::uint64_t PointData::getTiledCacheHits() const
-{
-    const auto lock = lockData();
-
-    if (const auto tiledStorage = getTiledStorage())
-        return tiledStorage->cacheHits();
-
-    return 0;
-}
-
-std::uint64_t PointData::getTiledCacheMisses() const
-{
-    const auto lock = lockData();
-
-    if (const auto tiledStorage = getTiledStorage())
-        return tiledStorage->cacheMisses();
-
-    return 0;
-}
-
-std::uint64_t PointData::getTiledCacheEvictions() const
-{
-    const auto lock = lockData();
-
-    if (const auto tiledStorage = getTiledStorage())
-        return tiledStorage->cacheEvictions();
-
-    return 0;
-}
-
-PointData::TiledMemoryEstimate PointData::getTiledMemoryEstimate() const
-{
-    const auto lock = lockData();
-
-    const auto tiledStorage = getTiledStorage();
-
-    if (!tiledStorage)
-        return {};
-
-    const auto estimate = tiledStorage->memoryEstimate();
-    return {
-        estimate.rawDataBytes,
-        estimate.largestTileBytes,
-        estimate.cachedTileBytes,
-        estimate.tileCount,
-        estimate.indexBytes
-    };
-}
-
-PointData::TiledMemoryEstimate PointData::estimateTiledMemory(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, const std::size_t cacheCapacity)
-{
-    const auto estimate = mv::pointdata::tiled::PointDataTiledStorage::estimateMemory(rows, columns, elementSize, rowTileSize, columnTileSize, cacheCapacity);
-
-    return {
-        estimate.rawDataBytes,
-        estimate.largestTileBytes,
-        estimate.cachedTileBytes,
-        estimate.tileCount,
-        estimate.indexBytes
-    };
 }
 
 namespace
@@ -1535,40 +1415,9 @@ pointdata::storage::StorageBackendCapabilities Points::getStorageBackendCapabili
     return getRawData<PointData>()->getStorageBackendCapabilities();
 }
 
-std::size_t Points::getTiledRowTileSize() const
+const pointdata::storage::PointsStorageBackend* Points::getStorageBackend() const
 {
-    return isProxy() ? 0 : getRawData<PointData>()->getTiledRowTileSize();
-}
-
-std::size_t Points::getTiledColumnTileSize() const
-{
-    return isProxy() ? 0 : getRawData<PointData>()->getTiledColumnTileSize();
-}
-
-std::size_t Points::getTiledCacheCapacity() const
-{
-    return isProxy() ? 0 : getRawData<PointData>()->getTiledCacheCapacity();
-}
-
-void Points::resetTiledCache() const
-{
-    if (!isProxy())
-        getRawData<PointData>()->resetTiledCache();
-}
-
-std::uint64_t Points::getTiledCacheHits() const
-{
-    return isProxy() ? 0 : getRawData<PointData>()->getTiledCacheHits();
-}
-
-std::uint64_t Points::getTiledCacheMisses() const
-{
-    return isProxy() ? 0 : getRawData<PointData>()->getTiledCacheMisses();
-}
-
-std::uint64_t Points::getTiledCacheEvictions() const
-{
-    return isProxy() ? 0 : getRawData<PointData>()->getTiledCacheEvictions();
+    return isProxy() ? nullptr : getRawData<PointData>()->getStorageBackend();
 }
 
 void Points::convertToStorageBackend(const StorageBackendType type, const StorageBackendConfiguration& configuration, StorageBackendProgressCallback progress)

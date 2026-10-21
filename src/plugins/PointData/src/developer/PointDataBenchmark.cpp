@@ -25,6 +25,7 @@
 #include <workflow/WorkflowPlan.h>
 
 #include "../storage/tiled/PointDataTiledStorage.h"
+#include "../storage/tiled/TiledPointsStorageBackend.h"
 
 #include <QCoreApplication>
 #include <QDialog>
@@ -754,6 +755,16 @@ double checksumView(const PointDataAccessView& view)
     return checksum;
 }
 
+std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> getTiledStorage(const mv::Dataset<Points>& points)
+{
+    if (points->isProxy())
+        return {};
+
+    const auto* tiledBackend = dynamic_cast<const mv::pointdata::storage::TiledPointsStorageBackend*>(points->getStorageBackend());
+
+    return tiledBackend ? tiledBackend->getStorage() : nullptr;
+}
+
 template <typename Function>
 FixtureResult measurePoints(const mv::Dataset<Points>& points, const BenchmarkConfiguration& configuration, const std::vector<std::pair<std::uint64_t, std::uint64_t>>& coordinates, const std::vector<std::uint64_t>& randomRows, const std::vector<std::uint64_t>& scanRows, const std::vector<std::uint64_t>& scanColumns, const mv::workflow::SharedWorkflowExecutionContext& executionContext, const std::size_t phaseIndex, const std::size_t phaseCount, const QString& accessPattern, Function function)
 {
@@ -771,6 +782,7 @@ FixtureResult measurePoints(const mv::Dataset<Points>& points, const BenchmarkCo
     const auto elapsedMilliseconds = std::chrono::duration<double, std::milli>(end - start).count();
     const auto meanMillisecondsPerRow = accessPattern == QStringLiteral("random_row") && !randomRows.empty() ? elapsedMilliseconds / static_cast<double>(randomRows.size()) : 0.0;
     const auto recommendation = points.getDataset()->getProperty(QStringLiteral("PointDataStorageRecommendation")).toMap();
+    const auto tiledStorage = getTiledStorage(points);
 
     return {
         points.getDataset()->getGuiName(),
@@ -779,16 +791,16 @@ FixtureResult measurePoints(const mv::Dataset<Points>& points, const BenchmarkCo
         accessPattern,
         rows,
         columns,
-        points->getTiledRowTileSize(),
-        points->getTiledColumnTileSize(),
-        points->getTiledCacheCapacity(),
+        tiledStorage ? tiledStorage->rowTileSize() : 0,
+        tiledStorage ? tiledStorage->columnTileSize() : 0,
+        tiledStorage ? tiledStorage->cacheCapacity() : 0,
         operations,
         elapsedMilliseconds,
         meanMillisecondsPerRow,
         checksum,
-        points->getTiledCacheHits(),
-        points->getTiledCacheMisses(),
-        points->getTiledCacheEvictions(),
+        tiledStorage ? tiledStorage->cacheHits() : 0,
+        tiledStorage ? tiledStorage->cacheMisses() : 0,
+        tiledStorage ? tiledStorage->cacheEvictions() : 0,
         recommendation.value(QStringLiteral("row_access")).toString(),
         recommendation.value(QStringLiteral("column_access")).toString(),
         recommendation.value(QStringLiteral("row_access_frequency")).toString(),
@@ -1040,7 +1052,8 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
             const auto phaseCount = std::size_t { 4 };
 
             const auto measureAccess = [&](const QString& accessPattern, const std::size_t phaseIndex) {
-                pointDataset->resetTiledCache();
+                if (const auto tiledStorage = getTiledStorage(pointDataset))
+                    tiledStorage->resetCache();
 
                 return measurePoints(pointDataset, datasetConfiguration, coordinates, randomRows, scanRows, scanColumns, executionContext, phaseIndex, phaseCount, accessPattern, [&](const std::uint64_t operations) {
                     double checksum = 0.0;

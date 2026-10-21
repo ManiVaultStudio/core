@@ -40,7 +40,6 @@ namespace mv
     namespace pointdata::tiled
     {
         class PointDataTiledStorage;
-        class TileView;
     }
 
     namespace pointdata::storage
@@ -100,7 +99,6 @@ class ClusterAction;
 class POINTDATA_EXPORT PointData : public mv::plugin::RawData
 {
 public:
-    using TileView = mv::pointdata::tiled::TileView;
     using DataLock = std::unique_lock<std::recursive_mutex>;
     enum class ElementTypeSpecifier
     {
@@ -292,14 +290,14 @@ public:
     void* getDataVoidPtr();
     const void* getDataConstVoidPtr() const;
 
-    /** Returns whether the point data currently uses tiled storage. */
-    bool isTiled() const;
-
     /** Returns the physical storage backend used by this concrete dataset. */
     mv::pointdata::storage::StorageBackendType getStorageBackendType() const;
 
     /** Returns the backend capability flags for this concrete dataset. */
     mv::pointdata::storage::StorageBackendCapabilities getStorageBackendCapabilities() const;
+
+    /** Returns the active storage backend without exposing its concrete representation. */
+    const mv::pointdata::storage::PointsStorageBackend* getStorageBackend() const;
 
     /** Creates controls for converting to the requested storage backend. */
     std::unique_ptr<mv::gui::StorageBackendConversionAction> createStorageBackendConversionAction(mv::pointdata::storage::StorageBackendType targetType, QObject* parent = nullptr) const;
@@ -328,64 +326,6 @@ public:
      * rejects the supplied options.
      */
     void configureStorageBackend(mv::pointdata::storage::StorageBackendConversionOptionsPtr options);
-
-    /**
-     * Converts dense point data to read-only rectangular tiled storage.
-     *
-     * The eager vector remains the source during conversion and is replaced
-     * by a resident tile index after the operation. Existing raw-pointer APIs
-     * can still materialize that representation when needed. The progress
-     * callback receives values in the range [0, 1].
-     */
-    void makeTiled(std::size_t rowTileSize, std::size_t columnTileSize, std::function<void(float)> progress = {});
-
-    /**
-     * Loads or retrieves a tile and returns a lifetime-safe read-only view.
-     *
-     * The returned view owns a lease on the tile payload, so it remains valid
-     * even if the bounded cache evicts the tile before the view is released.
-     * Invalid tile coordinates return an empty view.
-     */
-    TileView acquireTile(std::uint64_t tileRow, std::uint64_t tileColumn) const;
-
-    /** Returns the number of currently cached tile payloads. */
-    std::size_t getTiledCacheSize() const;
-
-    /** Clears cached tiled payloads and resets cache statistics without changing capacity. */
-    void resetTiledCache() const;
-
-    /** Returns the maximum number of cached tile payloads. */
-    std::size_t getTiledCacheCapacity() const;
-
-    /** Returns the configured number of rows per tile. */
-    std::size_t getTiledRowTileSize() const;
-
-    /** Returns the configured number of columns per tile. */
-    std::size_t getTiledColumnTileSize() const;
-
-    /** Returns the number of tile-cache hits. */
-    std::uint64_t getTiledCacheHits() const;
-
-    /** Returns the number of tile-cache misses. */
-    std::uint64_t getTiledCacheMisses() const;
-
-    /** Returns the number of tile-cache evictions. */
-    std::uint64_t getTiledCacheEvictions() const;
-
-    /** Estimate raw, largest-tile, cache, descriptor, and tile-count requirements without allocation. */
-    struct TiledMemoryEstimate
-    {
-        std::uint64_t rawDataBytes      = 0; /**< Logical dense matrix size. */
-        std::uint64_t largestTileBytes = 0; /**< Payload size of the largest possible tile. */
-        std::uint64_t cachedTileBytes  = 0; /**< Conservative payload size for the configured cache. */
-        std::uint64_t tileCount         = 0; /**< Number of row/column tiles. */
-        std::uint64_t indexBytes        = 0; /**< Conservative resident descriptor/index size. */
-    };
-    /** Returns a memory estimate for the current tiled storage. */
-    TiledMemoryEstimate getTiledMemoryEstimate() const;
-
-    /** Estimates tiled memory usage without allocating point data. */
-    static TiledMemoryEstimate estimateTiledMemory(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, std::size_t cacheCapacity);
 
     /** Returns one row as a storage-neutral read-only view, or an empty view when row is out of bounds. */
     PointDataAccessView getRow(std::uint64_t row) const;
@@ -713,6 +653,7 @@ public: // Serialization
     mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const final;
 
 private:
+    void makeTiled(std::size_t rowTileSize, std::size_t columnTileSize, std::function<void(float)> progress = {});
     void refreshStorageBackend();
     void clearStorageBackend();
     std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> getTiledStorage() const;
@@ -1101,26 +1042,8 @@ public:
     /** Returns the capability flags of the physical backend used by this dataset. */
     mv::pointdata::storage::StorageBackendCapabilities getStorageBackendCapabilities() const;
 
-    /** Returns the configured row tile size, or zero when the dataset is not tiled. */
-    std::size_t getTiledRowTileSize() const;
-
-    /** Returns the configured column tile size, or zero when the dataset is not tiled. */
-    std::size_t getTiledColumnTileSize() const;
-
-    /** Returns the configured tile-cache capacity, or zero when the dataset is not tiled. */
-    std::size_t getTiledCacheCapacity() const;
-
-    /** Clears cached tiled payloads and resets cache statistics without changing capacity. */
-    void resetTiledCache() const;
-
-    /** Returns the number of tile-cache hits since the current backend was created or reset. */
-    std::uint64_t getTiledCacheHits() const;
-
-    /** Returns the number of tile-cache misses since the current backend was created or reset. */
-    std::uint64_t getTiledCacheMisses() const;
-
-    /** Returns the number of tile-cache evictions since the current backend was created or reset. */
-    std::uint64_t getTiledCacheEvictions() const;
+    /** Returns the active storage backend for a concrete point dataset. */
+    const mv::pointdata::storage::PointsStorageBackend* getStorageBackend() const;
 
     /** Creates controls for converting to the requested storage backend. */
     std::unique_ptr<mv::gui::StorageBackendConversionAction> createStorageBackendConversionAction(StorageBackendType targetType, QObject* parent = nullptr) const;
