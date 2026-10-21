@@ -19,18 +19,6 @@ namespace mv
 
 namespace
 {
-    static float getMaxDimension(const std::vector<Vector2f>& points)
-    {
-        float maxDimension = 0;
-        for (const Vector2f& point : points)
-        {
-            float len = point.sqrMagnitude();
-
-            if (len > maxDimension) { maxDimension = len; }
-        }
-        return std::sqrt(maxDimension);
-    }
-
     static Matrix3f createProjectionMatrix(const Bounds& bounds)
     {
         Matrix3f m;
