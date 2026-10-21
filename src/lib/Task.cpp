@@ -1072,7 +1072,7 @@ void Task::registerChildTask(Task* childTask)
     if (childTask == nullptr)
         return;
 
-    connect(childTask, &Task::statusChanged, this, [this, childTask](const Status& previousStatus, const Status& status) -> void {
+    connect(childTask, &Task::statusChanged, this, [this](const Status& previousStatus, const Status& status) -> void {
         if (getProgressMode() != ProgressMode::Aggregate)
             return;
 
@@ -1127,7 +1127,7 @@ void Task::updateAggregateStatus()
     const auto enabledChildTasks            = getChildTasks(false, true);
     const auto numberOfEnabledChildTasks    = enabledChildTasks.size();
 
-    const auto getNumberOfChildTaskWithStatus = [this, &enabledChildTasks](const Status& status) -> std::size_t {
+    const auto getNumberOfChildTaskWithStatus = [this](const Status& status) -> std::size_t {
         return getChildTasksForStatuses(false, true, { status }).count();
     };
     
