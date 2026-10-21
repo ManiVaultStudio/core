@@ -126,7 +126,10 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
     setAcceptDrops(true);
     setObjectName("SpinBox");
 
-    connect(this, qOverload<int>(&QSpinBox::valueChanged), this, [this, integralAction](int value) {
+    connect(this, qOverload<int>(&QSpinBox::valueChanged), this, [integralAction](int value) {
+        if (!integralAction)
+            return;
+
         integralAction->setValue(value);
     });
 
@@ -135,10 +138,16 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
     };
 
     const auto setToolTips = [this, integralAction, valueString]() {
+        if (!integralAction)
+            return;
+
         setToolTip(QString("%1: %2%3").arg(integralAction->text(), valueString(integralAction->getValue()), integralAction->getSuffix()));
     };
 
     const auto onUpdateValue = [this, integralAction, setToolTips]() {
+        if (!integralAction)
+            return;
+
         const auto actionValue = integralAction->getValue();
 
         if (actionValue == value())
@@ -152,6 +161,9 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
     };
 
     const auto onUpdateValueRange = [this, integralAction]() {
+        if (!integralAction)
+            return;
+
         QSignalBlocker blocker(this);
 
         setRange(integralAction->getMinimum(), integralAction->getMaximum());
@@ -166,6 +178,9 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
     });
 
     const auto onUpdatePrefix = [this, integralAction, setToolTips]() {
+        if (!integralAction)
+            return;
+
         QSignalBlocker blocker(this);
 
         setPrefix(integralAction->getPrefix());
@@ -174,6 +189,9 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
     };
 
     const auto onUpdateSuffix = [this, integralAction, setToolTips]() {
+        if (!integralAction)
+            return;
+
         QSignalBlocker blocker(this);
 
         setSuffix(integralAction->getSuffix());

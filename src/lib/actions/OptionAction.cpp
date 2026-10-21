@@ -414,6 +414,9 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     connect(optionAction, &OptionAction::modelChanged, this, updateComboBoxModel);
 
     const auto updateComboBoxSelection = [this, optionAction]() -> void {
+        if (!optionAction)
+            return;
+
         if (optionAction->getCurrentText() == currentText())
             return;
 
