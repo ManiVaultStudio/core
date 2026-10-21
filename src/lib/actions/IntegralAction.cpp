@@ -169,11 +169,11 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
         setRange(integralAction->getMinimum(), integralAction->getMaximum());
     };
 
-    connect(integralAction, &IntegralAction::minimumChanged, this, [this, integralAction, onUpdateValueRange](const std::int32_t& minimum) {
+    connect(integralAction, &IntegralAction::minimumChanged, this, [onUpdateValueRange](const std::int32_t& minimum) {
         onUpdateValueRange();
     });
 
-    connect(integralAction, &IntegralAction::maximumChanged, this, [this, integralAction, onUpdateValueRange](const std::int32_t& maximum) {
+    connect(integralAction, &IntegralAction::maximumChanged, this, [onUpdateValueRange](const std::int32_t& maximum) {
         onUpdateValueRange();
     });
 
@@ -202,7 +202,7 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
     connect(integralAction, &IntegralAction::prefixChanged, this, onUpdatePrefix);
     connect(integralAction, &IntegralAction::suffixChanged, this, onUpdateSuffix);
 
-    connect(integralAction, &IntegralAction::valueChanged, this, [this, integralAction, onUpdateValue](std::int32_t value) {
+    connect(integralAction, &IntegralAction::valueChanged, this, [onUpdateValue](std::int32_t value) {
         onUpdateValue();
     });
 
@@ -219,14 +219,14 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
     setAcceptDrops(true);
     setObjectName("Slider");
 
-    connect(this, &QSlider::valueChanged, this, [this, integralAction](int value) {
+    connect(this, &QSlider::valueChanged, this, [integralAction](int value) {
         if (!integralAction->getUpdateDuringDrag())
             return;
 
         integralAction->setValue(value);
     });
 
-    connect(this, &QSlider::sliderReleased, this, [this, integralAction]() {
+    connect(this, &QSlider::sliderReleased, this, [integralAction]() {
         if (integralAction->getUpdateDuringDrag())
             return;
 
@@ -260,15 +260,15 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
         setRange(integralAction->getMinimum(), integralAction->getMaximum());
     };
 
-    connect(integralAction, &IntegralAction::minimumChanged, this, [this, integralAction, onUpdateValueRange](const std::int32_t& minimum) {
+    connect(integralAction, &IntegralAction::minimumChanged, this, [onUpdateValueRange](const std::int32_t& minimum) {
         onUpdateValueRange();
     });
 
-    connect(integralAction, &IntegralAction::maximumChanged, this, [this, integralAction, onUpdateValueRange](const std::int32_t& maximum) {
+    connect(integralAction, &IntegralAction::maximumChanged, this, [onUpdateValueRange](const std::int32_t& maximum) {
         onUpdateValueRange();
     });
 
-    connect(integralAction, &IntegralAction::valueChanged, this, [this, integralAction, onUpdateValue](const std::int32_t& value) {
+    connect(integralAction, &IntegralAction::valueChanged, this, [onUpdateValue](const std::int32_t& value) {
         onUpdateValue();
     });
 

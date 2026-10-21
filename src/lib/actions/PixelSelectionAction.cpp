@@ -376,7 +376,7 @@ void PixelSelectionAction::initMiscellaneous()
         _notifyDuringSelectionAction.setChecked(_pixelSelectionTool->isNotifyDuringSelection());
     };
 
-    connect(_pixelSelectionTool, &PixelSelectionTool::notifyDuringSelectionChanged, this, [this, updateNotifyDuringSelection](const bool& notifyDuringSelection) {
+    connect(_pixelSelectionTool, &PixelSelectionTool::notifyDuringSelectionChanged, this, [updateNotifyDuringSelection](const bool& notifyDuringSelection) {
         updateNotifyDuringSelection();
     });
 

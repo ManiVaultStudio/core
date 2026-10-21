@@ -201,7 +201,7 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
 {
     setObjectName("SpinBox");
 
-    connect(this, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, decimalAction](double value) {
+    connect(this, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [decimalAction](double value) {
         decimalAction->setValue(value);
     });
 

@@ -148,7 +148,7 @@ void OptionAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
     if (publicOptionAction->getCurrentText().isEmpty() && !getCurrentText().isEmpty())
         publicOptionAction->setCurrentText(getCurrentText());
 
-    const auto currentTextChanged = [this, publicOptionAction](const QString& currentText) -> void {
+    const auto currentTextChanged = [publicOptionAction](const QString& currentText) -> void {
         if (currentText.isEmpty())
             return;
 
@@ -157,7 +157,7 @@ void OptionAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
 
     connect(this, &OptionAction::currentTextChanged, this, currentTextChanged);
 
-    connect(publicOptionAction, &OptionAction::currentTextChanged, this, [this, publicOptionAction, currentTextChanged](const QString& currentText) -> void {
+    connect(publicOptionAction, &OptionAction::currentTextChanged, this, [this, currentTextChanged](const QString& currentText) -> void {
         disconnect(this, &OptionAction::currentTextChanged, this, nullptr);
         {
             setCurrentText(currentText);
@@ -438,7 +438,7 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
         update();
     });
 
-    connect(this, qOverload<int>(&QComboBox::activated), this, [this, optionAction](const int& currentIndex) {
+    connect(this, qOverload<int>(&QComboBox::activated), this, [optionAction](const int& currentIndex) {
         optionAction->setCurrentIndex(currentIndex);
     });
 
