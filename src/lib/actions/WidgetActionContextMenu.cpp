@@ -131,7 +131,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 
                 connectAction->setToolTip("Connect " + firstAction->text() + " to " + publicAction->text());
 
-                connect(connectAction, &QAction::triggered, this, [this, firstAction, publicAction]() -> void {
+                connect(connectAction, &QAction::triggered, this, [firstAction, publicAction]() -> void {
                     mv::actions().connectPrivateActionToPublicAction(firstAction, publicAction, true);
                 });
 
@@ -174,7 +174,7 @@ WidgetActionContextMenu::WidgetActionContextMenu(QWidget* parent, WidgetActions 
 
                     	targetMenu->addAction(action);
 
-                        connect(action, &QAction::triggered, this, [this, firstAction, candidateAction]() {
+                        connect(action, &QAction::triggered, this, [firstAction, candidateAction]() {
                             mv::actions().connectPrivateActions(firstAction, candidateAction);
                         });
                     }
