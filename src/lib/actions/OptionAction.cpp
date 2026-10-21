@@ -659,7 +659,7 @@ void OptionAction::LazyIndicesModel::setSourceAndMatches(QAbstractItemModel* sou
     beginResetModel();
     {
         _sourceModel = sourceModel;
-        _all         = std::move(matches);
+        _all         = matches;
         _loaded      = 0;
     }
     endResetModel();
