@@ -145,7 +145,7 @@ void ColorMapEditor1DNodeGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent*
             _colorMapEditor1DWidget.getColorMapEditor1DAction().removeNode(&_node);
             break;
 
-        case default:
+        default:
             break;
     }
 

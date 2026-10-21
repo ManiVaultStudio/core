@@ -75,7 +75,7 @@ QVariant ColorMapModel::data(const QModelIndex& index, int role /* = Qt::Display
                 case Column::Name: [[fallthrough]];
                 case Column::Image: [[fallthrough]];
                 case Column::ResourcePath: [[fallthrough]];
-                case Column::NoDimensions: [[fallthrough]];
+                case Column::NoDimensions:
                     break;
             }
 

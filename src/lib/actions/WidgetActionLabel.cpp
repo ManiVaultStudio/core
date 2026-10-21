@@ -111,7 +111,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                     break;
                 }
 
-                case default:
+                default:
                     break;
             }
 
