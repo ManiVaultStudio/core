@@ -144,6 +144,9 @@ void ColorMapEditor1DNodeGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent*
         case Qt::RightButton:
             _colorMapEditor1DWidget.getColorMapEditor1DAction().removeNode(&_node);
             break;
+
+        case default:
+            break;
     }
 
     QGraphicsItem::mousePressEvent(event);
