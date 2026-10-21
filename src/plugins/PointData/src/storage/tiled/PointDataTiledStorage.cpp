@@ -251,6 +251,13 @@ void PointDataTiledStorage::setCacheCapacity(const std::size_t capacity) const
     _cache.setCapacity(capacity);
 }
 
+void PointDataTiledStorage::setCacheCapacityBytes(const std::size_t capacityBytes) const
+{
+    const std::lock_guard lock(_mutex);
+
+    _cache.setCapacityBytes(capacityBytes);
+}
+
 void PointDataTiledStorage::resetCache() const
 {
     const std::lock_guard lock(_mutex);
@@ -263,6 +270,13 @@ std::size_t PointDataTiledStorage::cacheCapacity() const
     const std::lock_guard lock(_mutex);
 
     return _cache.capacity();
+}
+
+std::size_t PointDataTiledStorage::cacheCapacityBytes() const
+{
+    const std::lock_guard lock(_mutex);
+
+    return _cache.capacityBytes();
 }
 
 void PointDataTiledStorage::setPackedTiles(const bool enabled, const std::size_t superTileRows, const std::size_t superTileColumns)
@@ -280,6 +294,13 @@ std::size_t PointDataTiledStorage::cacheSize() const
     const std::lock_guard lock(_mutex);
 
     return _cache.size();
+}
+
+std::size_t PointDataTiledStorage::cacheSizeInBytes() const
+{
+    const std::lock_guard lock(_mutex);
+
+    return _cache.sizeInBytes();
 }
 
 std::uint64_t PointDataTiledStorage::cacheHits() const
@@ -303,7 +324,7 @@ std::uint64_t PointDataTiledStorage::cacheEvictions() const
     return _cache.evictions();
 }
 
-PointDataTiledStorage::MemoryEstimate PointDataTiledStorage::estimateMemory(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, const std::size_t cacheCapacity)
+PointDataTiledStorage::MemoryEstimate PointDataTiledStorage::estimateMemory(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, const std::size_t cacheCapacity, const std::size_t cacheCapacityBytes)
 {
     MemoryEstimate estimate;
 
@@ -319,7 +340,7 @@ PointDataTiledStorage::MemoryEstimate PointDataTiledStorage::estimateMemory(cons
 
     const auto residentTiles = std::min<std::uint64_t>(estimate.tileCount, std::max<std::size_t>(1, cacheCapacity));
 
-    estimate.cachedTileBytes  = residentTiles * estimate.largestTileBytes;
+    estimate.cachedTileBytes  = std::min<std::uint64_t>(residentTiles * estimate.largestTileBytes, std::max<std::size_t>(1, cacheCapacityBytes));
 
     // This is an intentionally conservative planning estimate for the resident descriptor/index.
     estimate.indexBytes       = estimate.tileCount * static_cast<std::uint64_t>(sizeof(TileDescriptor));
@@ -330,6 +351,6 @@ PointDataTiledStorage::MemoryEstimate PointDataTiledStorage::estimateMemory(cons
 PointDataTiledStorage::MemoryEstimate PointDataTiledStorage::memoryEstimate() const
 {
     const std::lock_guard lock(_mutex);
-    return estimateMemory(_rows, _columns, _elementSize, _rowTileSize, _columnTileSize, _cache.capacity());
+    return estimateMemory(_rows, _columns, _elementSize, _rowTileSize, _columnTileSize, _cache.capacity(), _cache.capacityBytes());
 }
 }

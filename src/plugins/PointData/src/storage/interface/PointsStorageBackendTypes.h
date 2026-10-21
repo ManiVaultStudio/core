@@ -12,6 +12,9 @@
 namespace mv::pointdata::storage
 {
 
+/** Default upper bound for decoded tile payloads retained by a tiled cache. */
+inline constexpr std::size_t defaultTileCacheCapacityBytes = 512U * 1024U * 1024U;
+
 /** Identifies the physical representation used by a concrete point dataset. */
 enum class StorageBackendType
 {
@@ -70,7 +73,8 @@ struct StorageBackendConfiguration : StorageBackendConversionOptions
 {
     std::size_t rowTileSize      = 256;         /**< Maximum number of matrix rows in one tile. */
     std::size_t columnTileSize   = 8;           /**< Maximum number of matrix columns in one tile. */
-    std::size_t cacheCapacity    = 8;           /**< Maximum number of tile payloads retained in memory. */
+    std::size_t cacheCapacity      = 8;           /**< Maximum number of tile payloads retained in memory. */
+    std::size_t cacheCapacityBytes = defaultTileCacheCapacityBytes; /**< Maximum decoded tile payload bytes retained in memory. */
     bool        packedTiles      = false;       /**< Whether serialized tiles are grouped into jointly encoded super tiles. */
     std::size_t superTileRows    = 1;           /**< Number of base tile rows in one serialized super tile. */
     std::size_t superTileColumns = 1;           /**< Number of base tile columns in one serialized super tile. */

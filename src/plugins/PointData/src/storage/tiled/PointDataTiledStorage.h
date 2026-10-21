@@ -141,11 +141,17 @@ public:
     /** Sets the maximum number of tile payloads retained in the bounded LRU cache. */
     void setCacheCapacity(std::size_t capacity) const;
 
+    /** Sets the maximum decoded payload bytes retained in the bounded LRU cache. */
+    void setCacheCapacityBytes(std::size_t capacityBytes) const;
+
     /** Clears cached tile payloads and resets cache statistics without changing capacity. */
     void resetCache() const;
 
     /** Returns the configured cache capacity. */
     std::size_t cacheCapacity() const;
+
+    /** Returns the configured decoded-byte cache capacity. */
+    std::size_t cacheCapacityBytes() const;
 
     /** Sets whether serialized tiles are grouped into jointly encoded super tiles. */
     void setPackedTiles(bool enabled, std::size_t superTileRows = 1, std::size_t superTileColumns = 1);
@@ -162,6 +168,9 @@ public:
     /** Returns the number of currently cached tile payloads. */
     std::size_t cacheSize() const;
 
+    /** Returns the decoded payload bytes currently retained by the cache. */
+    std::size_t cacheSizeInBytes() const;
+
     /** Returns the number of cache hits. */
     std::uint64_t cacheHits() const;
 
@@ -175,7 +184,7 @@ public:
     MemoryEstimate memoryEstimate() const;
 
     /** Estimates memory usage without constructing a storage instance. */
-    static MemoryEstimate estimateMemory(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, std::size_t cacheCapacity);
+    static MemoryEstimate estimateMemory(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, std::size_t cacheCapacity, std::size_t cacheCapacityBytes = mv::pointdata::storage::defaultTileCacheCapacityBytes);
 
 private:
     QByteArray load(const TileDescriptor& descriptor) const;

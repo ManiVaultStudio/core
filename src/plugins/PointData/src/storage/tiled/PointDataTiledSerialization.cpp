@@ -56,6 +56,7 @@ QVariantMap makeTiledVariantMap(const mv::pointdata::tiled::PointDataTiledStorag
     result["RowTileSize"]     = QVariant::fromValue(static_cast<qulonglong>(storage.rowTileSize()));
     result["ColumnTileSize"]  = QVariant::fromValue(static_cast<qulonglong>(storage.columnTileSize()));
     result["CacheCapacity"]   = QVariant::fromValue(static_cast<qulonglong>(storage.cacheCapacity()));
+    result["CacheCapacityBytes"] = QVariant::fromValue(static_cast<qulonglong>(storage.cacheCapacityBytes()));
     result["ElementSize"]     = QVariant::fromValue(static_cast<qulonglong>(storage.elementSize()));
     result["RawDataBytes"]    = QVariant::fromValue(static_cast<qulonglong>(memoryEstimate.rawDataBytes));
     result["TileCount"]       = QVariant::fromValue(static_cast<qulonglong>(memoryEstimate.tileCount));
@@ -192,6 +193,7 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantM
     const auto rowTileSize    = map.value("RowTileSize").toULongLong();
     const auto columnTileSize = map.value("ColumnTileSize").toULongLong();
     const auto cacheCapacity  = map.value("CacheCapacity", QVariant::fromValue<qulonglong>(8)).toULongLong();
+    const auto cacheCapacityBytes = map.value("CacheCapacityBytes", QVariant::fromValue<qulonglong>(mv::pointdata::storage::defaultTileCacheCapacityBytes)).toULongLong();
     const auto tileMaps       = map.value("Tiles").toList();
     const auto storageType    = map.value("Storage").toString();
     const auto packedTiles    = storageType == QStringLiteral("SuperTileBlobs") || storageType == QStringLiteral("PackedTileFiles");
@@ -261,6 +263,7 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantM
         return payload->mid(static_cast<qsizetype>(descriptor.superTileOffset), static_cast<qsizetype>(descriptor.superTileSize));
     });
     storage->setCacheCapacity(static_cast<std::size_t>(cacheCapacity));
+    storage->setCacheCapacityBytes(static_cast<std::size_t>(cacheCapacityBytes));
 
     if (packedTiles)
     {

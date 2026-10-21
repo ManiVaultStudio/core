@@ -64,6 +64,7 @@ std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> TiledPointsStorageB
     });
 
     storage->setCacheCapacity(options.cacheCapacity);
+    storage->setCacheCapacityBytes(options.cacheCapacityBytes);
     storage->setPackedTiles(options.packedTiles, options.superTileRows, options.superTileColumns);
     return storage;
 }
@@ -96,6 +97,7 @@ std::unique_ptr<mv::gui::StorageBackendConversionAction> TiledPointsStorageBacke
         configuration.rowTileSize    = _storage->rowTileSize();
         configuration.columnTileSize = _storage->columnTileSize();
         configuration.cacheCapacity  = _storage->cacheCapacity();
+        configuration.cacheCapacityBytes = _storage->cacheCapacityBytes();
         configuration.packedTiles    = _storage->packedTiles();
         configuration.superTileRows  = _storage->superTileRows();
         configuration.superTileColumns = _storage->superTileColumns();
@@ -113,6 +115,7 @@ void TiledPointsStorageBackend::applyConfiguration(const StorageBackendConversio
         throw std::invalid_argument("Missing tiled storage configuration");
 
     _storage->setCacheCapacity(configuration->cacheCapacity);
+    _storage->setCacheCapacityBytes(configuration->cacheCapacityBytes);
     _storage->setPackedTiles(configuration->packedTiles, configuration->superTileRows, configuration->superTileColumns);
 }
 

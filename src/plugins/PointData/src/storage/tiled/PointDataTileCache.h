@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PointDataTile.h"
+#include "../interface/PointsStorageBackendTypes.h"
 
 #include <cstdint>
 #include <list>
@@ -23,8 +24,8 @@ namespace mv::pointdata::tiled
 class PointDataTileCache
 {
 public:
-    /** Constructs a cache with the specified maximum number of entries. */
-    explicit PointDataTileCache(std::size_t capacity = 8);
+    /** Constructs a cache with entry and decoded-byte limits. */
+    explicit PointDataTileCache(std::size_t capacity = 8, std::size_t capacityBytes = mv::pointdata::storage::defaultTileCacheCapacityBytes);
 
     /** Finds a payload and promotes it to the most recently used position. */
     std::shared_ptr<QByteArray> find(std::size_t key);
@@ -35,6 +36,9 @@ public:
     /** Changes the maximum number of cached entries. */
     void setCapacity(std::size_t capacity);
 
+    /** Changes the maximum number of decoded payload bytes retained. */
+    void setCapacityBytes(std::size_t capacityBytes);
+
     /** Removes all cached payloads and resets hit, miss, and eviction counters. */
     void reset();
 
@@ -44,10 +48,22 @@ public:
         return _capacity;
     }
 
+    /** Returns the maximum number of decoded payload bytes retained. */
+    std::size_t capacityBytes() const
+    {
+        return _capacityBytes;
+    }
+
     /** Returns the current number of cached entries. */
     std::size_t size() const
     {
         return _entries.size();
+    }
+
+    /** Returns the decoded payload bytes currently retained by the cache. */
+    std::size_t sizeInBytes() const
+    {
+        return _sizeInBytes;
     }
 
     /** Returns the number of successful lookups. */
@@ -71,11 +87,13 @@ public:
 private:
     using Entry = std::pair<std::shared_ptr<QByteArray>, std::list<std::size_t>::iterator>;
     void trim();
-    std::size_t                           _capacity;      /**< Maximum number of resident payloads. */
-    std::list<std::size_t>                _lru;           /**< Keys ordered from least to most recently used. */
-    std::unordered_map<std::size_t, Entry> _entries;      /**< Payloads and their positions in the LRU list. */
-    std::uint64_t                         _hits      = 0; /**< Number of successful lookups. */
-    std::uint64_t                         _misses    = 0; /**< Number of unsuccessful lookups. */
-    std::uint64_t                         _evictions = 0; /**< Number of payloads removed by capacity trimming. */
+    std::size_t                           _capacity      = 8; /**< Maximum number of resident payloads. */
+    std::size_t                           _capacityBytes = mv::pointdata::storage::defaultTileCacheCapacityBytes; /**< Maximum decoded payload bytes. */
+    std::size_t                           _sizeInBytes   = 0; /**< Decoded payload bytes currently retained. */
+    std::list<std::size_t>                _lru;              /**< Keys ordered from least to most recently used. */
+    std::unordered_map<std::size_t, Entry> _entries;         /**< Payloads and their positions in the LRU list. */
+    std::uint64_t                         _hits      = 0;    /**< Number of successful lookups. */
+    std::uint64_t                         _misses    = 0;    /**< Number of unsuccessful lookups. */
+    std::uint64_t                         _evictions = 0;    /**< Number of payloads removed by capacity trimming. */
 };
 }
