@@ -226,7 +226,7 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
         integralAction->setValue(value);
     });
 
-    connect(this, &QSlider::sliderReleased, this, [integralAction]() {
+    connect(this, &QSlider::sliderReleased, this, [this, integralAction]() {
         if (integralAction->getUpdateDuringDrag())
             return;
 
