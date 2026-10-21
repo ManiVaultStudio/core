@@ -13,6 +13,7 @@
 
 #include <cmath>
 #include <limits>
+#include <numbers>
 
 namespace mv
 {
@@ -35,22 +36,21 @@ void GaussianTexture::generate()
 {
     create();
 
-    int w = 32;
-    int h = 32;
+    constexpr int w = 32;
+    constexpr int h = 32;
+    constexpr double sigma = w / 6.0;
+    constexpr double i_c = w / 2.0;
+    constexpr double j_c = h / 2.0;
 
     float* data = new float[w * h];
-
-    double sigma = w / 6.0;
-    double i_c = w / 2.0;
-    double j_c = h / 2.0;
 
     for (int j = 0; j < h; j++){
         for (int i = 0; i < w; i++){
 
             const double sqrt_dist = (i - i_c)*(i - i_c) + (j - j_c)*(j - j_c);
-            const double val = exp(sqrt_dist / (-2.0 * sigma * sigma)) / (2.0 * 3.1415926535 * sigma * sigma);
+            const double val = exp(sqrt_dist / (-2.0 * sigma * sigma)) / (2.0 * std::numbers::pi * sigma * sigma);
 
-            data[j*w + i] = val*1000.0;// texture_multiplier;
+            data[j*w + i] = static_cast<float>(val * 1000.0);// texture_multiplier;
         }
     }
 
