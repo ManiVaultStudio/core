@@ -536,8 +536,6 @@ void HierarchyWidget::updateExpandCollapseActionsReadOnly()
     _expandAllAction.setEnabled(hasItems && mayExpandAll());
     _collapseAllAction.setEnabled(hasItems && mayCollapseAll());
 
-    QModelIndex index;
-
     const auto showExpandCollapse = mayExpandAll() || mayCollapseAll();
 
     _expandAllAction.setVisible(showExpandCollapse);
