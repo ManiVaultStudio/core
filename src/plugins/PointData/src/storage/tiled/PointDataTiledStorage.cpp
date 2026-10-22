@@ -21,7 +21,7 @@ std::size_t typeSize(const std::uint32_t typeIndex)
 }
 }
 
-PointDataTiledStorage::PointDataTiledStorage(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, TileLoader loader) :
+PointDataTiledStorage::PointDataTiledStorage(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, TileLoader loader, ProgressCallback progress) :
     _rows(rows),
     _columns(columns),
     _elementSize(elementSize),
@@ -32,13 +32,27 @@ PointDataTiledStorage::PointDataTiledStorage(const std::uint64_t rows, const std
     if (rowTileSize == 0 || columnTileSize == 0 || elementSize == 0)
         throw std::invalid_argument("Invalid tiled point-data geometry");
 
+    const auto totalTiles       = tileRowCount() * tileColumnCount();
+    const auto progressInterval = std::max<std::uint64_t>(1, totalTiles / 100);
+    std::uint64_t tileIndex     = 0;
+
+    if (progress)
+        progress(0.0f);
+
     for (std::uint64_t row = 0; row < rows; row += rowTileSize)
     {
         for (std::uint64_t column = 0; column < columns; column += columnTileSize)
         {
             _descriptors.push_back({ row, column, std::min<std::uint64_t>(rowTileSize, rows - row), std::min<std::uint64_t>(columnTileSize, columns - column), {}, {}, {} });
+            ++tileIndex;
+
+            if (progress && (tileIndex == totalTiles || tileIndex % progressInterval == 0))
+                progress(static_cast<float>(tileIndex) / static_cast<float>(totalTiles));
         }
     }
+
+    if (progress && totalTiles == 0)
+        progress(1.0f);
 }
 
 void PointDataTiledStorage::setLoaderThreadSafe(const bool threadSafe)
@@ -75,12 +89,12 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromDense(const ch
     return storage;
 }
 
-std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromGenerator(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, TileGenerator generator)
+std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromGenerator(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, TileGenerator generator, ProgressCallback progress)
 {
     if (!generator)
         throw std::invalid_argument("Tile generator is empty");
 
-    return std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize, std::move(generator));
+    return std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize, std::move(generator), std::move(progress));
 }
 
 std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromPackedFile(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, const QString& filePath, const mv::util::SharedCodec& codec, const std::vector<mv::util::PackedBlobBlock>& blocks)

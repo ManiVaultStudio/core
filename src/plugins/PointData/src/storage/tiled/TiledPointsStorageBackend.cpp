@@ -54,14 +54,14 @@ TiledPointsStorageBackend::TiledPointsStorageBackend(const std::shared_ptr<mv::p
 {
 }
 
-std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> TiledPointsStorageBackend::create(const TiledStorageBackendCreationOptions& options)
+std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> TiledPointsStorageBackend::create(const TiledStorageBackendCreationOptions& options, StorageBackendProgressCallback progress)
 {
     if (!options.generator || options.rows == 0 || options.columns == 0 || options.elementSize == 0 || options.rowTileSize == 0 || options.columnTileSize == 0 || (options.packedTiles && (options.superTileRows == 0 || options.superTileColumns == 0)))
         throw std::invalid_argument("Invalid tiled storage creation options");
 
     const auto storage = mv::pointdata::tiled::PointDataTiledStorage::fromGenerator(options.rows, options.columns, options.elementSize, options.rowTileSize, options.columnTileSize, [generator = options.generator](const mv::pointdata::tiled::TileDescriptor& descriptor) {
         return generator(descriptor.rowOffset, descriptor.columnOffset, descriptor.rows, descriptor.columns);
-    });
+    }, std::move(progress));
 
     storage->setCacheCapacity(options.cacheCapacity);
     storage->setCacheCapacityBytes(options.cacheCapacityBytes);

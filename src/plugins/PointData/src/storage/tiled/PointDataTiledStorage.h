@@ -64,12 +64,13 @@ public:
      * @param rowTileSize Maximum number of rows in a tile.
      * @param columnTileSize Maximum number of columns in a tile.
      * @param loader Callback used to obtain bytes for a descriptor on a cache miss.
+     * @param progress Optional progress callback for constructing the resident descriptor index.
      *
      * The loader must return exactly rows * columns * elementSize bytes for
      * the requested descriptor. An empty loader is valid when descriptors are
      * populated with resident tile bytes.
      */
-    PointDataTiledStorage(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileLoader loader = {});
+    PointDataTiledStorage(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileLoader loader = {}, ProgressCallback progress = {});
 
     /** Allows independent tile-loader callbacks to run concurrently. */
     void setLoaderThreadSafe(bool threadSafe);
@@ -89,8 +90,10 @@ public:
      * The generator must return row-major bytes matching the descriptor's
      * extent and element size. It is invoked on cache misses and may therefore
      * be called again after eviction.
+     * The optional progress callback covers descriptor-index construction only;
+     * tile payloads remain lazy and are not generated during this call.
      */
-    static std::shared_ptr<PointDataTiledStorage> fromGenerator(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileGenerator generator);
+    static std::shared_ptr<PointDataTiledStorage> fromGenerator(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileGenerator generator, ProgressCallback progress = {});
 
     /**
      * Creates read-only tiled storage whose payloads are independently encoded in one pack file.

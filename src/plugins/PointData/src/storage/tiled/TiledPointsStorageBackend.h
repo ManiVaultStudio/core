@@ -62,8 +62,8 @@ public:
      */
     TiledPointsStorageBackend(const std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage>& storage, std::uint32_t elementTypeIndex);
 
-    /** Creates tiled storage from backend-owned creation options. */
-    static std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> create(const TiledStorageBackendCreationOptions& options);
+    /** Creates tiled storage from backend-owned creation options, optionally reporting descriptor-index progress. */
+    static std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> create(const TiledStorageBackendCreationOptions& options, StorageBackendProgressCallback progress = {});
 
     /** Returns the tiled storage owned by this backend. */
     std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> getStorage() const;

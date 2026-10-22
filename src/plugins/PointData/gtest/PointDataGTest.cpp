@@ -150,6 +150,7 @@ GTEST_TEST(PointData, retilePreservesLazyDataAccess)
 GTEST_TEST(PointData, generatorLoadsTilesSelectively)
 {
     std::size_t loadCount = 0;
+    std::vector<float> progress;
     const auto storage = PointDataTiledStorage::fromGenerator(5, 4, sizeof(float), 2, 2, [&loadCount](const auto& descriptor) {
         ++loadCount;
         QByteArray bytes(static_cast<qsizetype>(descriptor.rows * descriptor.columns * sizeof(float)), '\0');
@@ -164,9 +165,13 @@ GTEST_TEST(PointData, generatorLoadsTilesSelectively)
         }
 
         return bytes;
-    });
+    }, [&progress](const float value) { progress.push_back(value); });
 
     ASSERT_EQ(loadCount, 0U);
+    ASSERT_FALSE(progress.empty());
+    ASSERT_FLOAT_EQ(progress.front(), 0.0f);
+    ASSERT_FLOAT_EQ(progress.back(), 1.0f);
+    ASSERT_GT(progress.size(), 2U);
     ASSERT_FLOAT_EQ(storage->valueAt(9, 0), 9.0f);
     ASSERT_EQ(loadCount, 1U);
     ASSERT_FLOAT_EQ(storage->valueAt(9, 0), 9.0f);

@@ -345,11 +345,13 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
             if (_numRows != 0 || getSizeOfVector() != 0 || getTiledStorage())
                 throw std::invalid_argument("Point-data storage creation requires an empty dataset");
 
+            auto tiledStorage = pointdata::storage::TiledPointsStorageBackend::create(*creation, progress);
+
             setElementTypeSpecifier(static_cast<ElementTypeSpecifier>(creation->elementTypeIndex));
             _numDimensions = creation->columns;
             _numRows       = creation->rows;
             _isDense       = true;
-            _storageBackend = std::make_unique<pointdata::storage::TiledPointsStorageBackend>(pointdata::storage::TiledPointsStorageBackend::create(*creation), static_cast<std::uint32_t>(getElementTypeSpecifier()));
+            _storageBackend = std::make_unique<pointdata::storage::TiledPointsStorageBackend>(std::move(tiledStorage), static_cast<std::uint32_t>(getElementTypeSpecifier()));
 
             if (progress)
                 progress(1.0f);
