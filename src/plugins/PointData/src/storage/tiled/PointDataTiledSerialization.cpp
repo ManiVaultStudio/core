@@ -14,9 +14,9 @@
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFileInfo>
+#include <QString>
 #include <QUuid>
 #include <QVector>
-#include <QString>
 
 #include <algorithm>
 #include <atomic>
