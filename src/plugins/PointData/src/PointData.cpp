@@ -741,41 +741,6 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
         isTiled = static_cast<bool>(tiledStorage);
     }
 
-    if (!isTiled && isDense)
-    {
-        constexpr std::size_t rowTileSize    = 256;
-        constexpr std::size_t columnTileSize = 8;
-
-        const auto rows        = getNumPoints();
-        const auto columns     = getNumDimensions();
-        const auto elementSize = [&] {
-            const auto dataLock = lockData();
-            return std::visit([](const auto& values) { return sizeof(typename std::decay_t<decltype(values)>::value_type); }, _variantOfVectors);
-        }();
-
-        tiledStorage = mv::pointdata::tiled::PointDataTiledStorage::fromGenerator(rows, columns, elementSize, rowTileSize, columnTileSize, [this, elementSize](const mv::pointdata::tiled::TileDescriptor& descriptor) {
-            const auto dataLock = lockData();
-            QByteArray bytes(static_cast<qsizetype>(descriptor.rows * descriptor.columns * elementSize), Qt::Uninitialized);
-
-            std::visit([&bytes, &descriptor, columns = getNumDimensions()](const auto& values) {
-                using ValueType = typename std::decay_t<decltype(values)>::value_type;
-
-                for (std::uint64_t row = 0; row < descriptor.rows; ++row)
-                {
-                    const auto sourceOffset = (descriptor.rowOffset + row) * columns + descriptor.columnOffset;
-                    auto* destination = bytes.data() + row * descriptor.columns * sizeof(ValueType);
-                    std::memcpy(destination, values.data() + sourceOffset, descriptor.columns * sizeof(ValueType));
-                }
-            }, _variantOfVectors);
-
-            return bytes;
-        });
-
-        tiledStorage->setCacheCapacity(2);
-        tiledStorage->setCacheCapacityBytes(std::max<std::size_t>(elementSize * rowTileSize * columnTileSize * 2, mv::pointdata::storage::defaultTileCacheCapacityBytes));
-        isTiled = true;
-    }
-
     //const auto baseSaveStage = plan->addNestedWorkflowStage("Save raw data base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
     //    return this->Plugin::toVariantMapWorkflow();
     //})
