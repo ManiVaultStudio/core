@@ -40,6 +40,11 @@ PointDataTiledStorage::PointDataTiledStorage(const std::uint64_t rows, const std
     }
 }
 
+void PointDataTiledStorage::setLoaderThreadSafe(const bool threadSafe)
+{
+    _loaderThreadSafe = threadSafe;
+}
+
 std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromDense(const char* data, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, ProgressCallback progress)
 {
     auto storage = std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize);
@@ -149,38 +154,88 @@ QByteArray PointDataTiledStorage::load(const TileDescriptor& descriptor) const
 
 TileView PointDataTiledStorage::acquire(const std::uint64_t tileRow, const std::uint64_t tileColumn) const
 {
-    const std::lock_guard lock(_mutex);
     if (tileRow >= tileRowCount() || tileColumn >= tileColumnCount())
         return {};
+
     const auto index = static_cast<std::size_t>(tileRow * tileColumnCount() + tileColumn);
-    auto bytes = _cache.find(index);
-    if (!bytes)
+    TileDescriptor descriptor;
+    std::shared_ptr<QByteArray> bytes;
+
     {
-        bytes = std::make_shared<QByteArray>(load(_descriptors.at(index)));
+        std::unique_lock lock(_mutex);
 
-        const auto& descriptor = _descriptors.at(index);
-        const auto expectedSize = descriptor.rows * descriptor.columns * _elementSize;
-        if (bytes->size() != static_cast<qsizetype>(expectedSize))
+        while (true)
         {
-            throw std::runtime_error(QString("Decoded tiled point-data payload has an unexpected size for tile (%1, %2): expected %3 bytes, got %4 bytes")
-                .arg(descriptor.rowOffset)
-                .arg(descriptor.columnOffset)
-                .arg(expectedSize)
-                .arg(bytes->size())
-                .toStdString());
-        }
+            bytes = _cache.find(index);
+            if (bytes)
+                break;
 
-        _cache.insert(index, bytes);
+            if (_loadingTiles.insert(index).second)
+            {
+                descriptor = _descriptors.at(index);
+                break;
+            }
+
+            _loadCondition.wait(lock);
+        }
     }
 
-    const auto& descriptor = _descriptors.at(index);
+    if (!bytes)
+    {
+        try
+        {
+			if (descriptor.residentBytes.isEmpty())
+            {
+				if (_loaderThreadSafe)
+					bytes = std::make_shared<QByteArray>(load(descriptor));
+				else
+				{
+					const std::lock_guard loaderLock(_loaderMutex);
+					bytes = std::make_shared<QByteArray>(load(descriptor));
+				}
+            }
+            else
+                bytes = std::make_shared<QByteArray>(descriptor.residentBytes);
+
+            const auto expectedSize = descriptor.rows * descriptor.columns * _elementSize;
+            if (bytes->size() != static_cast<qsizetype>(expectedSize))
+            {
+                throw std::runtime_error(QString("Decoded tiled point-data payload has an unexpected size for tile (%1, %2): expected %3 bytes, got %4 bytes")
+                    .arg(descriptor.rowOffset)
+                    .arg(descriptor.columnOffset)
+                    .arg(expectedSize)
+                    .arg(bytes->size())
+                    .toStdString());
+            }
+        }
+        catch (...)
+        {
+            {
+                const std::lock_guard lock(_mutex);
+                _loadingTiles.erase(index);
+            }
+
+            _loadCondition.notify_all();
+            throw;
+        }
+
+        {
+            const std::lock_guard lock(_mutex);
+            _cache.insert(index, bytes);
+            _loadingTiles.erase(index);
+        }
+
+        _loadCondition.notify_all();
+    }
+
+    const auto& cachedDescriptor = _descriptors.at(index);
 
     TileView view;
     view._bytes        = bytes;
-    view._rowOffset    = descriptor.rowOffset;
-    view._columnOffset = descriptor.columnOffset;
-    view._rows         = descriptor.rows;
-    view._columns      = descriptor.columns;
+    view._rowOffset    = cachedDescriptor.rowOffset;
+    view._columnOffset = cachedDescriptor.columnOffset;
+    view._rows         = cachedDescriptor.rows;
+    view._columns      = cachedDescriptor.columns;
     view._elementSize  = _elementSize;
 
     return view;

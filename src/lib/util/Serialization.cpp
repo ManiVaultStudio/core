@@ -860,19 +860,19 @@ PackedBlobBlock PackedBlobFileWriter::append(const char* data, const std::size_t
     if (size > static_cast<std::size_t>(std::numeric_limits<qsizetype>::max()))
         throw std::overflow_error("Packed blob file block exceeds QByteArray size limits");
 
-    const auto encoded = _codec->encode(data, static_cast<qsizetype>(size));
-    const auto blockHeaderOffset = static_cast<std::uint64_t>(_file.pos());
-    QDataStream stream(&_file);
-    stream.setByteOrder(QDataStream::LittleEndian);
-    stream << static_cast<quint64>(size) << static_cast<quint64>(encoded.size());
+	const auto encoded = _codec->encode(data, static_cast<qsizetype>(size));
+	const auto blockHeaderOffset = static_cast<std::uint64_t>(_file.pos());
+	QByteArray block;
+	block.reserve(static_cast<qsizetype>(packedBlobBlockHeaderSize + encoded.size()));
+	QDataStream stream(&block, QIODevice::WriteOnly);
+	stream.setByteOrder(QDataStream::LittleEndian);
+	stream << static_cast<quint64>(size) << static_cast<quint64>(encoded.size());
+	block.append(encoded);
 
-    if (stream.status() != QDataStream::Ok)
-        throw std::runtime_error("Unable to write packed blob block header");
+	if (stream.status() != QDataStream::Ok || _file.write(block) != block.size())
+		throw std::runtime_error("Unable to write packed blob block");
 
-    const auto payloadOffset = blockHeaderOffset + packedBlobBlockHeaderSize;
-
-    if (_file.write(encoded) != encoded.size())
-        throw std::runtime_error("Unable to write packed blob block payload");
+	const auto payloadOffset = blockHeaderOffset + packedBlobBlockHeaderSize;
 
     return { payloadOffset, static_cast<std::uint64_t>(encoded.size()), static_cast<std::uint64_t>(size) };
 }

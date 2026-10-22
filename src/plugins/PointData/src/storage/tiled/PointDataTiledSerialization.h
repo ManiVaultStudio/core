@@ -2,6 +2,8 @@
 
 #include <QVariantMap>
 
+#include <functional>
+
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -37,7 +39,7 @@ public:
      * Packed storage additionally writes independently encoded tile records to
      * one file per super tile and stores their byte ranges in the index.
      */
-    static QVariantMap toVariantMap(const PointDataTiledStorage& storage);
+    static QVariantMap toVariantMap(const PointDataTiledStorage& storage, const std::function<void(float)>& progress = {});
 
     /**
      * Creates a workflow that encodes tiles in parallel and publishes their

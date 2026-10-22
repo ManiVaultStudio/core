@@ -6,9 +6,11 @@
 #include <QByteArray>
 
 #include <cstdint>
+#include <condition_variable>
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <unordered_set>
 #include <vector>
 
 namespace mv::pointdata::tiled
@@ -65,6 +67,9 @@ public:
      * populated with resident tile bytes.
      */
     PointDataTiledStorage(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileLoader loader = {});
+
+    /** Allows independent tile-loader callbacks to run concurrently. */
+    void setLoaderThreadSafe(bool threadSafe);
 
     /**
      * Creates tiled storage by copying a dense row-major matrix into resident tile payloads.
@@ -198,7 +203,11 @@ private:
     std::size_t                  _superTileColumns = 1; /**< Number of base tile columns in one serialized super tile. */
     std::vector<TileDescriptor>  _descriptors;    /**< Resident row/column tile index. */
     TileLoader                   _loader;         /**< Optional callback that decodes or generates tile bytes. */
-    mutable std::recursive_mutex _mutex;          /**< Serializes cache and lazy-load access. */
-    mutable PointDataTileCache   _cache;          /**< Bounded cache of loaded tile payloads. */
+    bool                         _loaderThreadSafe = false; /**< Whether the loader can run concurrently on multiple threads. */
+    mutable std::mutex                     _mutex;         /**< Protects cache state and in-flight tile loads. */
+    mutable std::recursive_mutex           _loaderMutex;   /**< Serializes arbitrary loader callbacks. */
+    mutable std::condition_variable        _loadCondition; /**< Wakes callers waiting for an in-flight tile load. */
+    mutable std::unordered_set<std::size_t> _loadingTiles;  /**< Tile indices currently being loaded outside the mutex. */
+    mutable PointDataTileCache              _cache;        /**< Bounded cache of loaded tile payloads. */
 };
 }

@@ -19,6 +19,7 @@
 #include "util/SeverityLevel.h"
 
 #include <QObject>
+#include <QDir>
 #include <QMenu>
 #include <QTemporaryDir>
 #include <QFuture>
@@ -55,7 +56,8 @@ public:
     enum class TemporaryDirType {
         Open,       /** Opening of a project */
         Save,       /** Saving of a project */
-        Publish     /** Publishing of a project */
+        Publish,    /** Publishing of a project */
+        Staging     /** Staging imported data for later serialization */
     };
 
     /**
@@ -67,7 +69,8 @@ public:
         static QMap<TemporaryDirType, QString> temporaryDirTypeNames{
             { TemporaryDirType::Open, "Open" },
             { TemporaryDirType::Save, "Save" },
-            { TemporaryDirType::Publish, "Publish" }
+            { TemporaryDirType::Publish, "Publish" },
+            { TemporaryDirType::Staging, "Staging" }
         };
         
         return temporaryDirTypeNames[temporaryDirType];
@@ -305,6 +308,33 @@ public: // Temporary directories
 
             return Application::current()->getTemporaryDir().path();
         }
+    }
+
+    /**
+     * Ensures that a temporary directory for \p temporaryDirType exists and returns its path.
+     *
+     * Existing workflow-owned directories are preserved. If no directory has
+     * been registered, an application-temporary directory is created and
+     * registered for operations that need project-style file storage outside a
+     * project save workflow.
+     *
+     * @param temporaryDirType Type of temporary directory, see AbstractProjectManager#TemporaryDirType
+     * @return Path of the existing or newly created temporary directory
+     * @throws std::runtime_error If the directory cannot be created
+     */
+    QString ensureTemporaryDirPath(const TemporaryDirType& temporaryDirType) {
+        if (_temporaryDirPaths.contains(temporaryDirType))
+            return _temporaryDirPaths[temporaryDirType];
+
+        const auto temporaryDirPath = QDir(Application::current()->getTemporaryDir().path()).filePath(getTemporaryDirTypeName(temporaryDirType));
+        QDir temporaryDir;
+
+        if (!temporaryDir.mkpath(temporaryDirPath))
+            throw std::runtime_error(QString("Unable to create temporary directory: %1").arg(temporaryDirPath).toStdString());
+
+        setTemporaryDirPath(temporaryDirType, temporaryDirPath);
+
+        return temporaryDirPath;
     }
 
 protected: // Temporary directories

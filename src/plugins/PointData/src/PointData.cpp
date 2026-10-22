@@ -279,6 +279,42 @@ void PointData::initializeTiledStorage(const std::uint64_t rows, const std::uint
     convertToStorageBackend(pointdata::storage::StorageBackendType::Tiled, creation);
 }
 
+void PointData::persistTiledStorage(pointdata::storage::StorageBackendProgressCallback progress)
+{
+    const auto lock = lockData();
+    const auto tiledStorage = getTiledStorage();
+
+    if (!tiledStorage)
+        return;
+
+    const auto serializedStorage = pointdata::tiled::PointDataTiledSerialization::toVariantMap(*tiledStorage, progress);
+    const auto persistedStorage = pointdata::tiled::PointDataTiledSerialization::fromVariantMap(serializedStorage, tiledStorage->rows(), tiledStorage->columns(), tiledStorage->elementSize());
+    dynamic_cast<pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get())->setStorage(persistedStorage);
+}
+
+UniqueWorkflowPlan PointData::persistTiledStorageWorkflow()
+{
+    const auto lock = lockData();
+    const auto tiledStorage = getTiledStorage();
+
+    if (!tiledStorage)
+        return {};
+
+    auto plan = std::make_unique<WorkflowPlan>("Persist tiled point data");
+    const auto serializeStage = plan->addNestedWorkflowStage("Encode tiled point data", [tiledStorage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        return pointdata::tiled::PointDataTiledSerialization::toVariantMapWorkflow(*tiledStorage);
+    });
+
+    plan->addSequentialStage("Install persisted tiled storage", [this, tiledStorage, serializeStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        const auto serializedStorage = executionContext->takeOutput(serializeStage).toMap();
+        const auto persistedStorage = pointdata::tiled::PointDataTiledSerialization::fromVariantMap(serializedStorage, tiledStorage->rows(), tiledStorage->columns(), tiledStorage->elementSize());
+        const auto dataLock = lockData();
+        dynamic_cast<pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get())->setStorage(persistedStorage);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+
+    return plan;
+}
+
 void PointData::convertToStorageBackend(const pointdata::storage::StorageBackendType type, const pointdata::storage::StorageBackendConversionOptionsPtr options, pointdata::storage::StorageBackendProgressCallback progress)
 {
     const auto lock = lockData();
@@ -683,6 +719,41 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
         isTiled = static_cast<bool>(tiledStorage);
     }
 
+    if (!isTiled && isDense)
+    {
+        constexpr std::size_t rowTileSize    = 256;
+        constexpr std::size_t columnTileSize = 8;
+
+        const auto rows        = getNumPoints();
+        const auto columns     = getNumDimensions();
+        const auto elementSize = [&] {
+            const auto dataLock = lockData();
+            return std::visit([](const auto& values) { return sizeof(typename std::decay_t<decltype(values)>::value_type); }, _variantOfVectors);
+        }();
+
+        tiledStorage = mv::pointdata::tiled::PointDataTiledStorage::fromGenerator(rows, columns, elementSize, rowTileSize, columnTileSize, [this, elementSize](const mv::pointdata::tiled::TileDescriptor& descriptor) {
+            const auto dataLock = lockData();
+            QByteArray bytes(static_cast<qsizetype>(descriptor.rows * descriptor.columns * elementSize), Qt::Uninitialized);
+
+            std::visit([&bytes, &descriptor, columns = getNumDimensions()](const auto& values) {
+                using ValueType = typename std::decay_t<decltype(values)>::value_type;
+
+                for (std::uint64_t row = 0; row < descriptor.rows; ++row)
+                {
+                    const auto sourceOffset = (descriptor.rowOffset + row) * columns + descriptor.columnOffset;
+                    auto* destination = bytes.data() + row * descriptor.columns * sizeof(ValueType);
+                    std::memcpy(destination, values.data() + sourceOffset, descriptor.columns * sizeof(ValueType));
+                }
+            }, _variantOfVectors);
+
+            return bytes;
+        });
+
+        tiledStorage->setCacheCapacity(2);
+        tiledStorage->setCacheCapacityBytes(std::max<std::size_t>(elementSize * rowTileSize * columnTileSize * 2, mv::pointdata::storage::defaultTileCacheCapacityBytes));
+        isTiled = true;
+    }
+
     //const auto baseSaveStage = plan->addNestedWorkflowStage("Save raw data base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
     //    return this->Plugin::toVariantMapWorkflow();
     //})
@@ -692,9 +763,10 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 
     if (isTiled)
     {
+        const auto tiledDataWeight = std::max(1.0, static_cast<double>(tiledStorage->memoryEstimate().rawDataBytes));
         const auto serializeTiledStage = plan->addNestedWorkflowStage("Encode tiled point data", [tiledStorage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
             return mv::pointdata::tiled::PointDataTiledSerialization::toVariantMapWorkflow(*tiledStorage);
-        });
+        }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, tiledDataWeight);
 
         plan->addSequentialStage("Build tiled point data map", [this, serializeTiledStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
             const auto dataLock = lockData();
@@ -1447,6 +1519,20 @@ const pointdata::storage::PointsStorageBackend* Points::getStorageBackend() cons
     return isProxy() ? nullptr : getRawData<PointData>()->getStorageBackend();
 }
 
+std::shared_ptr<pointdata::tiled::PointDataTiledStorage> Points::getTiledStorage() const
+{
+    return isProxy() ? nullptr : getRawData<PointData>()->getTiledStorage();
+}
+
+void Points::setTiledLoaderThreadSafe(const bool threadSafe)
+{
+    if (!isProxy())
+    {
+        if (const auto tiledStorage = getRawData<PointData>()->getTiledStorage())
+            tiledStorage->setLoaderThreadSafe(threadSafe);
+    }
+}
+
 void Points::convertToStorageBackend(const StorageBackendType type, const StorageBackendConfiguration& configuration, StorageBackendProgressCallback progress)
 {
     if (isProxy())
@@ -1463,6 +1549,23 @@ void Points::initializeTiledStorage(const std::uint64_t rows, const std::uint64_
 
     getRawData<PointData>()->initializeTiledStorage(rows, columns, elementType, configuration, std::move(generator));
     mv::events().notifyDatasetDataChanged(this);
+}
+
+void Points::persistTiledStorage(StorageBackendProgressCallback progress)
+{
+    if (isProxy())
+        throw std::invalid_argument("Tiled storage persistence is only supported for concrete point datasets");
+
+    getRawData<PointData>()->persistTiledStorage(std::move(progress));
+    mv::events().notifyDatasetDataChanged(this);
+}
+
+UniqueWorkflowPlan Points::persistTiledStorageWorkflow()
+{
+    if (isProxy())
+        throw std::invalid_argument("Tiled storage persistence is only supported for concrete point datasets");
+
+    return getRawData<PointData>()->persistTiledStorageWorkflow();
 }
 
 std::unique_ptr<mv::gui::StorageBackendConversionAction> Points::createStorageBackendConversionAction(const StorageBackendType targetType, QObject* parent) const
@@ -1880,6 +1983,8 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
+    const auto rawDataWeight = isFull() ? std::max(1.0, static_cast<double>(getRawData<PointData>()->getRawDataSize())) : 1.0;
+
     const auto saveDatasetBaseStage = plan->addNestedWorkflowStage("Save dataset base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
         return this->DatasetImpl::toVariantMapWorkflow();
     });
@@ -1889,7 +1994,7 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
     if (isFull()) {
         encodeRawDataStage = plan->addNestedWorkflowStage("Encode raw data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
             return getRawData<PointData>()->toVariantMapWorkflow();
-        });
+        }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, rawDataWeight);
     }
 
     const auto storeRawDataStage = plan->addSequentialStage("Store raw data", [this, saveDatasetBaseStage, encodeRawDataStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> void {

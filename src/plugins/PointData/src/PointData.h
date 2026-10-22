@@ -73,6 +73,7 @@ class InfoAction;
 class PointsAction;
 class DimensionsPickerAction;
 class ClusterAction;
+class Points;
 
 // =============================================================================
 // Raw Data
@@ -317,6 +318,19 @@ public:
 
     /** Initializes an empty dataset as generator-backed tiled storage without materializing its values. */
     void initializeTiledStorage(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, const mv::pointdata::storage::StorageBackendConfiguration& configuration, TiledTileGenerator generator);
+
+    /**
+     * Persists the currently configured tiled storage immediately.
+     *
+     * This is useful for importers that use a temporary source-backed tile
+     * generator, such as an HDF5 reader. After this call, the tiled payloads
+     * are owned by the project storage and no longer depend on the source
+     * generator or source file.
+     */
+    void persistTiledStorage(mv::pointdata::storage::StorageBackendProgressCallback progress = {});
+
+    /** Creates a workflow that persists tiled storage and installs the persisted backend on completion. */
+    mv::workflow::UniqueWorkflowPlan persistTiledStorageWorkflow();
 
     /** Converts or initializes using backend-specific options supplied by a conversion action or backend factory. */
     void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, mv::pointdata::storage::StorageBackendConversionOptionsPtr options, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
@@ -661,6 +675,7 @@ private:
     void refreshStorageBackend();
     void clearStorageBackend();
     std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> getTiledStorage() const;
+
     PointDataAccessView getEagerRow(std::uint64_t row) const;
     void visitEagerRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
     float getEagerValueAt(std::size_t index) const;
@@ -684,6 +699,7 @@ private: // Sparse data, experimental
 
     friend class mv::legacy::PointDataLegacySerializer;
     friend class mv::pointdata::storage::EagerPointsStorageBackend;
+    friend class Points;
 };
 
 // =============================================================================
@@ -1050,6 +1066,12 @@ public:
     /** Returns the active storage backend for a concrete point dataset. */
     const mv::pointdata::storage::PointsStorageBackend* getStorageBackend() const;
 
+    /** Returns the tiled storage implementation for a concrete tiled dataset, or an empty pointer otherwise. */
+    std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> getTiledStorage() const;
+
+    /** Enables concurrent tiled-storage loader callbacks for this concrete dataset. */
+    void setTiledLoaderThreadSafe(bool threadSafe);
+
     /** Creates controls for converting to the requested storage backend. */
     std::unique_ptr<mv::gui::StorageBackendConversionAction> createStorageBackendConversionAction(StorageBackendType targetType, QObject* parent = nullptr) const;
 
@@ -1058,6 +1080,12 @@ public:
 
     /** Initializes an empty dataset as generator-backed tiled storage without materializing its values. */
     void initializeTiledStorage(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, const StorageBackendConfiguration& configuration, TiledTileGenerator generator);
+
+    /** Persists the currently configured tiled storage and detaches it from its source tile generator. */
+    void persistTiledStorage(StorageBackendProgressCallback progress = {});
+
+    /** Creates a workflow that persists tiled storage and installs the persisted backend on completion. */
+    mv::workflow::UniqueWorkflowPlan persistTiledStorageWorkflow();
 
     /** Converts or initializes using backend-specific options supplied by a conversion action or backend factory. */
     void convertToStorageBackend(StorageBackendType type, StorageBackendConversionOptionsPtr options, StorageBackendProgressCallback progress = {});
