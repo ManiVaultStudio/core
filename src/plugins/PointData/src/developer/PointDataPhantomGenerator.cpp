@@ -11,6 +11,8 @@
 #include <Application.h>
 #include <CoreInterface.h>
 #include <DeveloperActionRegistry.h>
+#include <ForegroundTask.h>
+#include <actions/HorizontalGroupAction.h>
 #include <actions/IntegralAction.h>
 #include <actions/OptionAction.h>
 #include <actions/PresetsAction.h>
@@ -19,8 +21,10 @@
 #include <actions/VerticalGroupAction.h>
 #include <util/StyledIcon.h>
 
+#include <QCoreApplication>
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <QEventLoop>
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include <QPushButton>
@@ -65,6 +69,12 @@ struct PhantomConfiguration
     std::size_t   cacheCapacity    = 0;
     std::size_t   superTileRows    = 1;
     std::size_t   superTileColumns = 1;
+};
+
+struct PopulationSettings
+{
+    Population    type           = Population::Deterministic;
+    std::uint32_t nonzeroPercent = 1;
 };
 
 std::vector<std::size_t> parsePositiveList(const QString& text, const QString& label)
@@ -166,7 +176,18 @@ void writeValue(char* destination, const std::size_t offset, const T value)
     std::memcpy(destination + offset, &value, sizeof(T));
 }
 
-QByteArray makeTile(const Points::ElementTypeSpecifier type, const Population population, const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t rows, const std::uint64_t columns)
+float makeValue(const PopulationSettings& population, const std::uint64_t row, const std::uint64_t column, std::mt19937_64& random, std::uniform_real_distribution<float>& unit)
+{
+    const auto deterministic = static_cast<float>(row % 10000) / 10000.0f + static_cast<float>(column % 1000) / 1000.0f;
+
+    return population.type == Population::Zero ? 0.0f
+        : population.type == Population::RandomZeroOne ? (random() & 1ULL ? 1.0f : 0.0f)
+        : population.type == Population::RandomFloat ? unit(random)
+        : population.type == Population::SparseRandomFloat ? (random() % 100 < population.nonzeroPercent ? 1.0f + unit(random) * 0.2f : 0.0f)
+        : deterministic;
+}
+
+QByteArray makeTile(const Points::ElementTypeSpecifier type, const PopulationSettings& population, const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t rows, const std::uint64_t columns)
 {
     const auto elementSize = [&] {
         switch (type)
@@ -200,15 +221,9 @@ QByteArray makeTile(const Points::ElementTypeSpecifier type, const Population po
     {
         for (std::uint64_t column = 0; column < columns; ++column)
         {
-            const auto linearIndex   = row * columns + column;
-            const auto offset        = static_cast<std::size_t>(linearIndex * elementSize);
-            const auto deterministic = static_cast<float>((rowOffset + row) % 10000) / 10000.0f
-                + static_cast<float>((columnOffset + column) % 1000) / 1000.0f;
-            const auto value         = population == Population::Zero ? 0.0f
-                : population == Population::RandomZeroOne ? (random() & 1ULL ? 1.0f : 0.0f)
-                : population == Population::RandomFloat ? unit(random)
-                : population == Population::SparseRandomFloat ? (random() % 100 == 0 ? 1.0f + unit(random) * 0.2f : 0.0f)
-                : deterministic;
+            const auto linearIndex = row * columns + column;
+            const auto offset      = static_cast<std::size_t>(linearIndex * elementSize);
+            const auto value       = makeValue(population, rowOffset + row, columnOffset + column, random, unit);
 
             switch (type)
             {
@@ -254,17 +269,6 @@ QByteArray makeTile(const Points::ElementTypeSpecifier type, const Population po
     return bytes;
 }
 
-float makeValue(const Population population, const std::uint64_t row, const std::uint64_t column, std::mt19937_64& random, std::uniform_real_distribution<float>& unit)
-{
-    const auto deterministic = static_cast<float>(row % 10000) / 10000.0f + static_cast<float>(column % 1000) / 1000.0f;
-
-    return population == Population::Zero ? 0.0f
-        : population == Population::RandomZeroOne ? (random() & 1ULL ? 1.0f : 0.0f)
-        : population == Population::RandomFloat ? unit(random)
-        : population == Population::SparseRandomFloat ? (random() % 100 == 0 ? 1.0f + unit(random) * 0.2f : 0.0f)
-        : deterministic;
-}
-
 template <typename T>
 T convertValue(const float value)
 {
@@ -284,58 +288,159 @@ biovault::bfloat16_t convertValue(const float value)
 }
 
 template <typename T>
-std::vector<T> makeEagerData(const Population population, const std::uint64_t rows, const std::uint64_t columns)
+std::vector<T> makeEagerData(const PopulationSettings& population, const std::uint64_t rows, const std::uint64_t columns, const storage::StorageBackendProgressCallback& progress)
 {
+    if (progress)
+        progress(0.0f);
+
     std::vector<T> values(static_cast<std::size_t>(rows * columns));
     std::mt19937_64 random(17);
     std::uniform_real_distribution<float> unit(0.0f, 1.0f);
+    const auto totalValues      = rows * columns;
+    const auto progressInterval = std::max<std::uint64_t>(1, totalValues / 100);
+    std::uint64_t valueIndex    = 0;
+    std::uint64_t nextProgress  = progressInterval;
 
     for (std::uint64_t row = 0; row < rows; ++row)
     {
         for (std::uint64_t column = 0; column < columns; ++column)
+        {
             values[static_cast<std::size_t>(row * columns + column)] = convertValue<T>(makeValue(population, row, column, random, unit));
+            ++valueIndex;
+
+            if (progress && (valueIndex >= nextProgress || valueIndex == totalValues))
+            {
+                progress(0.9f * static_cast<float>(valueIndex) / static_cast<float>(totalValues));
+                nextProgress = valueIndex + progressInterval;
+            }
+        }
     }
 
     return values;
 }
 
-void populateEager(Points& points, const Points::ElementTypeSpecifier type, const Population population, const std::uint64_t rows, const std::uint64_t columns)
+void populateEager(Points& points, const Points::ElementTypeSpecifier type, const PopulationSettings& population, const std::uint64_t rows, const std::uint64_t columns, const storage::StorageBackendProgressCallback& progress)
 {
     switch (type)
     {
         case Points::ElementTypeSpecifier::float32:
-            points.setData(makeEagerData<float>(population, rows, columns), columns);
+            points.setData(makeEagerData<float>(population, rows, columns, progress), columns);
             break;
 
         case Points::ElementTypeSpecifier::bfloat16:
-            points.setData(makeEagerData<biovault::bfloat16_t>(population, rows, columns), columns);
+            points.setData(makeEagerData<biovault::bfloat16_t>(population, rows, columns, progress), columns);
             break;
 
         case Points::ElementTypeSpecifier::int32:
-            points.setData(makeEagerData<std::int32_t>(population, rows, columns), columns);
+            points.setData(makeEagerData<std::int32_t>(population, rows, columns, progress), columns);
             break;
 
         case Points::ElementTypeSpecifier::uint32:
-            points.setData(makeEagerData<std::uint32_t>(population, rows, columns), columns);
+            points.setData(makeEagerData<std::uint32_t>(population, rows, columns, progress), columns);
             break;
 
         case Points::ElementTypeSpecifier::int16:
-            points.setData(makeEagerData<std::int16_t>(population, rows, columns), columns);
+            points.setData(makeEagerData<std::int16_t>(population, rows, columns, progress), columns);
             break;
 
         case Points::ElementTypeSpecifier::uint16:
-            points.setData(makeEagerData<std::uint16_t>(population, rows, columns), columns);
+            points.setData(makeEagerData<std::uint16_t>(population, rows, columns, progress), columns);
             break;
 
         case Points::ElementTypeSpecifier::int8:
-            points.setData(makeEagerData<std::int8_t>(population, rows, columns), columns);
+            points.setData(makeEagerData<std::int8_t>(population, rows, columns, progress), columns);
             break;
 
         case Points::ElementTypeSpecifier::uint8:
-            points.setData(makeEagerData<std::uint8_t>(population, rows, columns), columns);
+            points.setData(makeEagerData<std::uint8_t>(population, rows, columns, progress), columns);
             break;
     }
+
+    if (progress)
+        progress(1.0f);
 }
+
+/** Keeps the population selector visible and exposes settings only for configurable populations. */
+class PopulationAction final : public mv::gui::HorizontalGroupAction
+{
+public:
+    explicit PopulationAction(QObject* parent) :
+        HorizontalGroupAction(parent, "Population"),
+        _typeAction(this, "Type", { "Deterministic", "Random floats", "Random zeros and ones", "All zeros", "Sparse random floats" }, "Deterministic"),
+        _parametersAction(this, "Parameters"),
+        _nonzeroPercentAction(&_parametersAction, "Nonzero (%)", 1, 100, 1)
+    {
+        setShowLabels(false);
+
+        _typeAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
+        _typeAction.setStretch(1);
+        _typeAction.setToolTip("How values are generated. Sparse random floats leave a configurable proportion of nonzero values; the choice may affect compression ratio and I/O time.");
+
+        _parametersAction.setIconByName("gear");
+        _parametersAction.setToolTip("Configure the selected population");
+        _parametersAction.setConfigurationFlag(mv::gui::WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+        _parametersAction.setPopupSizeHint(QSize(240, 0));
+
+        _nonzeroPercentAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);
+        _nonzeroPercentAction.setToolTip("Approximate percentage of values that are nonzero");
+        _parametersAction.addAction(&_nonzeroPercentAction);
+
+        addAction(&_typeAction);
+        addAction(&_parametersAction);
+
+        connect(&_typeAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateParameters(); });
+        updateParameters();
+    }
+
+    mv::gui::OptionAction& typeAction() { return _typeAction; }
+    const mv::gui::OptionAction& typeAction() const { return _typeAction; }
+
+    PopulationSettings settings() const { return { static_cast<Population>(_typeAction.getCurrentIndex()), static_cast<std::uint32_t>(_nonzeroPercentAction.getValue()) }; }
+
+    void setNonzeroPercent(const std::int32_t value) { _nonzeroPercentAction.setValue(value); }
+
+    void fromVariantMap(const QVariantMap& variantMap) override
+    {
+        HorizontalGroupAction::fromVariantMap(variantMap);
+
+        if (variantMap.contains("Type"))
+        {
+            auto typeMap = variantMap.value("Type").toMap();
+
+            if (typeMap.value("Value").toString() == QStringLiteral("Sparse random floats (1% nonzero)"))
+                typeMap.insert("Value", QStringLiteral("Sparse random floats"));
+
+            _typeAction.fromVariantMap(typeMap);
+        }
+        else if (variantMap.contains("Value"))
+        {
+            const auto name = variantMap.value("Value").toString();
+            _typeAction.setCurrentText(name == QStringLiteral("Sparse random floats (1% nonzero)") ? QStringLiteral("Sparse random floats") : name);
+        }
+
+        _nonzeroPercentAction.fromParentVariantMap(variantMap, true);
+        updateParameters();
+    }
+
+    QVariantMap toVariantMap() const override
+    {
+        auto variantMap = HorizontalGroupAction::toVariantMap();
+        _typeAction.insertIntoVariantMap(variantMap);
+        _nonzeroPercentAction.insertIntoVariantMap(variantMap);
+        return variantMap;
+    }
+
+private:
+    void updateParameters()
+    {
+        const auto configurable = settings().type == Population::SparseRandomFloat;
+        _parametersAction.setEnabled(configurable);
+    }
+
+    mv::gui::OptionAction         _typeAction;
+    mv::gui::VerticalGroupAction  _parametersAction;
+    mv::gui::IntegralAction       _nonzeroPercentAction;
+};
 
 class PhantomSettingsAction final : public mv::gui::VerticalGroupAction
 {
@@ -391,7 +496,7 @@ public:
         _columnsAction(&_settingsGroupAction, "Dimensions", "32"),
         _dimensionNameAction(&_settingsGroupAction, "Dimension names", { "DIM_<index>", "Lorem ipsum" }, "DIM_<index>"),
         _typeAction(&_settingsGroupAction, "Element type"),
-        _populationAction(&_settingsGroupAction, "Population", { "Deterministic", "Random floats", "Random zeros and ones", "All zeros", "Sparse random floats (1% nonzero)" }, "Deterministic"),
+        _populationAction(&_settingsGroupAction),
         _storageBackendAction(&_settingsGroupAction, "Storage backend", { "Eager", "Tiled" }, "Tiled"),
         _tileAsymmetryAction(&_settingsGroupAction),
         _rowTileSizeAction(&_settingsGroupAction, "Tile heights", "256"),
@@ -423,7 +528,6 @@ public:
         _columnsAction.setDefaultWidgetFlags(mv::gui::StringAction::LineEdit);
         _dimensionNameAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
         _typeAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
-        _populationAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
         _storageBackendAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
         _rowTileSizeAction.setDefaultWidgetFlags(mv::gui::StringAction::LineEdit);
         _columnTileSizeAction.setDefaultWidgetFlags(mv::gui::StringAction::LineEdit);
@@ -442,7 +546,6 @@ public:
         _columnsAction.setToolTip("Number of dimensions, or columns, in each generated dataset. More columns increase the raw footprint and can make column access and wide row access more expensive; comma-separated values create multiple sizes.");
         _dimensionNameAction.setToolTip("How dimensions are named. This affects labels and metadata, but has no meaningful effect on numeric access performance.");
         _typeAction.setToolTip("Element type stored for every point value. Smaller types reduce disk and memory traffic; larger or more precise types increase storage, I/O, and decoding work.");
-        _populationAction.setToolTip("How values are generated. Sparse random floats leave approximately 99% of values at zero; the choice may affect compression ratio and therefore disk footprint and I/O time.");
         _storageBackendAction.setToolTip("Storage representation. Eager storage keeps the complete dataset materialized, while Tiled storage loads bounded tiles on demand and is the relevant choice for tile and cache experiments.");
         _tileAsymmetryAction.setToolTip("Balances tile shape between row-oriented and column-oriented access. Row-oriented tiles can accelerate contiguous row access, while column-oriented tiles can accelerate contiguous column access; the wrong orientation can increase tile reads.");
         _rowTileSizeAction.setToolTip("Number of dataset rows in each tile. Larger values help contiguous row scans but make random access fetch more unrelated data; comma-separated values create one dataset for every combination.");
@@ -503,7 +606,7 @@ public:
 
         connect(&_rowsAction, &mv::gui::StringAction::stringChanged, this, [this] { updateName(); updateEstimate(); });
         connect(&_columnsAction, &mv::gui::StringAction::stringChanged, this, [this] { updateName(); updateEstimate(); });
-        connect(&_populationAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateName(); });
+        connect(&_populationAction.typeAction(), &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateName(); });
         connect(&_nameOverrideAction, &mv::gui::ToggleAction::toggled, this, [this] { updateName(); });
         connect(&_storageBackendAction, &mv::gui::OptionAction::currentIndexChanged, this, [this] { updateActions(); });
         connect(&_tileAsymmetryAction.getAsymmetryAction(), &mv::gui::IntegralAction::valueChanged, this, [this] { updateTileGeometryFromAsymmetry(); });
@@ -551,7 +654,7 @@ public:
 
     Points::ElementTypeSpecifier type() const { return Points::elementTypeSpecifier(_typeAction.getCurrentText()); }
 
-    Population population() const { return static_cast<Population>(_populationAction.getCurrentIndex()); }
+    PopulationSettings population() const { return _populationAction.settings(); }
 
     DimensionNameType dimensionNameType() const { return static_cast<DimensionNameType>(_dimensionNameAction.getCurrentIndex()); }
 
@@ -638,7 +741,8 @@ public:
         application->setSetting("Developer/PhantomPointGenerator/Columns", _columnsAction.getString());
         application->setSetting("Developer/PhantomPointGenerator/DimensionNames", _dimensionNameAction.getCurrentText());
         application->setSetting("Developer/PhantomPointGenerator/ElementType", _typeAction.getCurrentText());
-        application->setSetting("Developer/PhantomPointGenerator/Population", _populationAction.getCurrentText());
+        application->setSetting("Developer/PhantomPointGenerator/Population", _populationAction.typeAction().getCurrentText());
+        application->setSetting("Developer/PhantomPointGenerator/SparseNonzeroPercent", _populationAction.settings().nonzeroPercent);
         application->setSetting("Developer/PhantomPointGenerator/StorageBackend", _storageBackendAction.getCurrentText());
         application->setSetting("Developer/PhantomPointGenerator/TileAsymmetry", _tileAsymmetryAction.getAsymmetryAction().getValue());
         application->setSetting("Developer/PhantomPointGenerator/RowTileSizes", _rowTileSizeAction.getString());
@@ -660,7 +764,11 @@ private:
         _columnsAction.setString(application->getSetting("Developer/PhantomPointGenerator/Columns", _columnsAction.getString()).toString());
         _dimensionNameAction.setCurrentText(application->getSetting("Developer/PhantomPointGenerator/DimensionNames", _dimensionNameAction.getCurrentText()).toString());
         _typeAction.setCurrentText(application->getSetting("Developer/PhantomPointGenerator/ElementType", _typeAction.getCurrentText()).toString());
-        _populationAction.setCurrentText(application->getSetting("Developer/PhantomPointGenerator/Population", _populationAction.getCurrentText()).toString());
+        auto populationName = application->getSetting("Developer/PhantomPointGenerator/Population", _populationAction.typeAction().getCurrentText()).toString();
+        if (populationName == QStringLiteral("Sparse random floats (1% nonzero)"))
+            populationName = QStringLiteral("Sparse random floats");
+        _populationAction.typeAction().setCurrentText(populationName);
+        _populationAction.setNonzeroPercent(application->getSetting("Developer/PhantomPointGenerator/SparseNonzeroPercent", 1).toInt());
         _storageBackendAction.setCurrentText(application->getSetting("Developer/PhantomPointGenerator/StorageBackend", _storageBackendAction.getCurrentText()).toString());
         const auto asymmetry = application->getSetting("Developer/PhantomPointGenerator/TileAsymmetry", application->getSetting("Developer/PhantomPointGenerator/TileDominance", _tileAsymmetryAction.getAsymmetryAction().getValue())).toInt();
         _tileAsymmetryAction.getAsymmetryAction().setValue(asymmetry);
@@ -820,7 +928,7 @@ private:
     mv::gui::StringAction                _columnsAction;
     mv::gui::OptionAction                _dimensionNameAction;
     mv::gui::OptionAction                _typeAction;
-    mv::gui::OptionAction                _populationAction;
+    PopulationAction                      _populationAction;
     mv::gui::OptionAction                _storageBackendAction;
     mv::gui::TiledStorageAsymmetryAction _tileAsymmetryAction;
     mv::gui::StringAction                _rowTileSizeAction;
@@ -852,39 +960,60 @@ void PointDataPhantomGenerator::populateMenu(QMenu& menu, QWidget* owner)
             const auto population     = dialog.population();
             const auto recommendationProfile = configurations.size() == 1 ? dialog.storageRecommendationProfile() : QVariantMap();
 
-            for (std::size_t index = 0; index < configurations.size(); ++index)
+            ForegroundTask generationTask(&dialog, "Generate phantom point data", Task::Status::Running);
+            generationTask.setAlwaysProcessEvents(true);
+            generationTask.setProgressDescription("Generating phantom point data");
+
+            try
             {
-                const auto& configuration = configurations[index];
-                const auto datasetName = dialog.datasetName(configuration, index, configurations.size());
-                auto dataset = mv::data().createDataset<Points>("Points", datasetName);
-
-                if (!recommendationProfile.isEmpty())
-                    dataset.getDataset()->setProperty(QStringLiteral("PointDataStorageRecommendation"), QVariant::fromValue(recommendationProfile));
-
-                if (dialog.isTiled())
+                for (std::size_t index = 0; index < configurations.size(); ++index)
                 {
-                    auto creation = std::make_shared<storage::TiledStorageBackendCreationOptions>();
-                    creation->rows              = configuration.rows;
-                    creation->columns           = configuration.columns;
-                    creation->elementSize       = elementSizeForType(type);
-                    creation->elementTypeIndex  = static_cast<std::uint32_t>(type);
-                    creation->rowTileSize       = configuration.rowTileSize;
-                    creation->columnTileSize    = configuration.columnTileSize;
-                    creation->cacheCapacity    = configuration.cacheCapacity;
-                    creation->packedTiles      = dialog.packedTiles();
-                    creation->superTileRows    = configuration.superTileRows;
-                    creation->superTileColumns = configuration.superTileColumns;
-                    creation->generator        = [type, population](const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t rows, const std::uint64_t columns) {
-                        return makeTile(type, population, rowOffset, columnOffset, rows, columns);
+                    const auto& configuration = configurations[index];
+                    const auto datasetName = dialog.datasetName(configuration, index, configurations.size());
+                    generationTask.setProgressDescription(QObject::tr("Generating %1").arg(datasetName));
+                    const auto updateProgress = [&generationTask, index, count = configurations.size()](const float value) {
+                        generationTask.setProgress((static_cast<float>(index) + value * 0.95f) / static_cast<float>(count));
+                        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
                     };
 
-                    dataset->convertToStorageBackend(Points::StorageBackendType::Tiled, creation);
-                }
-                else
-                    populateEager(*dataset, type, population, configuration.rows, configuration.columns);
+                    auto dataset = mv::data().createDataset<Points>("Points", datasetName);
 
-                dataset->setDimensionNames(makeDimensionNames(dialog.dimensionNameType(), configuration.columns));
-                mv::events().notifyDatasetDataChanged(dataset);
+                    if (!recommendationProfile.isEmpty())
+                        dataset.getDataset()->setProperty(QStringLiteral("PointDataStorageRecommendation"), QVariant::fromValue(recommendationProfile));
+
+                    if (dialog.isTiled())
+                    {
+                        auto creation = std::make_shared<storage::TiledStorageBackendCreationOptions>();
+                        creation->rows              = configuration.rows;
+                        creation->columns           = configuration.columns;
+                        creation->elementSize       = elementSizeForType(type);
+                        creation->elementTypeIndex  = static_cast<std::uint32_t>(type);
+                        creation->rowTileSize       = configuration.rowTileSize;
+                        creation->columnTileSize    = configuration.columnTileSize;
+                        creation->cacheCapacity    = configuration.cacheCapacity;
+                        creation->packedTiles      = dialog.packedTiles();
+                        creation->superTileRows    = configuration.superTileRows;
+                        creation->superTileColumns = configuration.superTileColumns;
+                        creation->generator        = [type, population](const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t rows, const std::uint64_t columns) {
+                            return makeTile(type, population, rowOffset, columnOffset, rows, columns);
+                        };
+
+                        dataset->convertToStorageBackend(Points::StorageBackendType::Tiled, creation, updateProgress);
+                    }
+                    else
+                        populateEager(*dataset, type, population, configuration.rows, configuration.columns, updateProgress);
+
+                    dataset->setDimensionNames(makeDimensionNames(dialog.dimensionNameType(), configuration.columns));
+                    mv::events().notifyDatasetDataChanged(dataset);
+                    generationTask.setProgress(static_cast<float>(index + 1) / static_cast<float>(configurations.size()));
+                }
+
+                generationTask.setFinished();
+            }
+            catch (...)
+            {
+                generationTask.setAborted();
+                throw;
             }
 
             mv::help().addNotification(QObject::tr("Phantom points datasets created"),
