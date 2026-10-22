@@ -168,6 +168,9 @@ void TiledPointsStorageBackend::visitRange(const std::uint64_t firstRow, const s
         while (column < endColumn)
         {
             const auto tile = _storage->acquire(row / _storage->rowTileSize(), column / _storage->columnTileSize());
+            if (!tile || tile.columns() == 0 || tile.rows() == 0)
+                throw std::runtime_error("Unable to load tiled point-data payload for range access");
+
             const auto segmentEnd = std::min(endColumn, tile.columnOffset() + tile.columns());
 
             visitor(makeTileAccessView(tile, row - tile.rowOffset(), column - tile.columnOffset(), 1, segmentEnd - column, _elementTypeIndex));

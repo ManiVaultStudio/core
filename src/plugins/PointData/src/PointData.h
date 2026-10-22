@@ -23,6 +23,7 @@
 #include <QDebug>
 #include <QMap>
 #include <QString>
+#include <QStringList>
 #include <QVariantMap>
 
 #include <array>
@@ -318,6 +319,14 @@ public:
 
     /** Initializes an empty dataset as generator-backed tiled storage without materializing its values. */
     void initializeTiledStorage(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, const mv::pointdata::storage::StorageBackendConfiguration& configuration, TiledTileGenerator generator);
+
+    /**
+     * Attaches packed tiled files produced by an importer or staging pipeline.
+     * The files remain owned by the staging area until project serialization
+     * copies them into project storage. The metadata vectors must describe one
+     * packed block per logical tile in row-major order.
+     */
+    void attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices);
 
     /**
      * Persists the currently configured tiled storage immediately.
@@ -1080,6 +1089,9 @@ public:
 
     /** Initializes an empty dataset as generator-backed tiled storage without materializing its values. */
     void initializeTiledStorage(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, const StorageBackendConfiguration& configuration, TiledTileGenerator generator);
+
+    /** Attaches packed tiled files produced by an importer or staging pipeline to this concrete dataset. */
+    void attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices);
 
     /** Persists the currently configured tiled storage and detaches it from its source tile generator. */
     void persistTiledStorage(StorageBackendProgressCallback progress = {});

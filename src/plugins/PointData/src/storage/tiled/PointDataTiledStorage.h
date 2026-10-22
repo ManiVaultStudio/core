@@ -10,6 +10,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <QStringList>
 #include <unordered_set>
 #include <vector>
 
@@ -170,6 +171,22 @@ public:
     /** Returns the number of base tile columns in one serialized super tile. */
     std::size_t superTileColumns() const { return _superTileColumns; }
 
+    /**
+     * Attaches already encoded packed supertile files produced by an import
+     * staging workflow. The files remain owned by the staging directory; the
+     * storage only retains their paths and block metadata until serialization.
+     */
+    void setPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<mv::util::PackedBlobBlock>& blocks, const std::vector<std::size_t>& superTileIndices);
+
+    /** Returns whether serialization can copy pre-encoded staged supertiles. */
+    bool hasPackedTileSource() const { return !_packedTileSourcePaths.isEmpty(); }
+
+    /** Returns the staged packed supertile paths. */
+    const QStringList& packedTileSourcePaths() const { return _packedTileSourcePaths; }
+
+    /** Returns the codec name used for the staged packed supertiles. */
+    const QString& packedTileSourceCodec() const { return _packedTileSourceCodec; }
+
     /** Returns the number of currently cached tile payloads. */
     std::size_t cacheSize() const;
 
@@ -201,6 +218,8 @@ private:
     bool                         _packedTiles = false; /**< Whether serialized tiles are grouped into super tiles. */
     std::size_t                  _superTileRows = 1; /**< Number of base tile rows in one serialized super tile. */
     std::size_t                  _superTileColumns = 1; /**< Number of base tile columns in one serialized super tile. */
+    QStringList                  _packedTileSourcePaths; /**< Source paths for pre-encoded staged supertiles. */
+    QString                      _packedTileSourceCodec; /**< Codec name used by pre-encoded staged supertiles. */
     std::vector<TileDescriptor>  _descriptors;    /**< Resident row/column tile index. */
     TileLoader                   _loader;         /**< Optional callback that decodes or generates tile bytes. */
     bool                         _loaderThreadSafe = false; /**< Whether the loader can run concurrently on multiple threads. */

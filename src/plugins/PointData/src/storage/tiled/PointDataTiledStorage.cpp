@@ -1,6 +1,7 @@
 #include "PointDataTiledStorage.h"
 
 #include <biovault_bfloat16/biovault_bfloat16.h>
+#include <util/CodecRegistry.h>
 
 #include <QString>
 
@@ -342,6 +343,39 @@ void PointDataTiledStorage::setPackedTiles(const bool enabled, const std::size_t
     _packedTiles       = enabled;
     _superTileRows     = enabled ? superTileRows : 1;
     _superTileColumns  = enabled ? superTileColumns : 1;
+}
+
+void PointDataTiledStorage::setPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<mv::util::PackedBlobBlock>& blocks, const std::vector<std::size_t>& superTileIndices)
+{
+    if (!packedTiles())
+        throw std::logic_error("Packed tile source requires packed tiled storage");
+
+    if (filePaths.isEmpty() || codecName.isEmpty() || blocks.size() != _descriptors.size() || superTileIndices.size() != _descriptors.size())
+        throw std::invalid_argument("Invalid packed tile source metadata");
+
+    const auto codec = mv::util::codecRegistry().createCodec(nullptr, codecName);
+    auto readers = std::make_shared<std::vector<std::shared_ptr<mv::util::PackedBlobFileReader>>>();
+    readers->reserve(filePaths.size());
+    for (const auto& filePath : filePaths)
+        readers->push_back(std::make_shared<mv::util::PackedBlobFileReader>(filePath, codec));
+
+    for (std::size_t tileIndex = 0; tileIndex < _descriptors.size(); ++tileIndex)
+    {
+        if (superTileIndices[tileIndex] >= static_cast<std::size_t>(filePaths.size()))
+            throw std::out_of_range("Packed tile source contains an invalid super-tile index");
+
+        _descriptors[tileIndex].packedBlock = blocks[tileIndex];
+        _descriptors[tileIndex].superTileIndex = superTileIndices[tileIndex];
+    }
+
+    _loader = [readers](const TileDescriptor& descriptor) {
+        if (descriptor.superTileIndex >= readers->size())
+            throw std::out_of_range("Packed tile source contains an invalid super-tile index");
+
+        return (*readers)[descriptor.superTileIndex]->read(descriptor.packedBlock);
+    };
+    _packedTileSourcePaths = filePaths;
+    _packedTileSourceCodec = codecName;
 }
 
 std::size_t PointDataTiledStorage::cacheSize() const

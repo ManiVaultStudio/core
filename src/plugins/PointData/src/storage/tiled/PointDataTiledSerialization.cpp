@@ -13,6 +13,7 @@
 
 #include <QDir>
 #include <QElapsedTimer>
+#include <QFileInfo>
 #include <QUuid>
 #include <QVector>
 #include <QString>
@@ -296,8 +297,75 @@ QVariantMap makeTiledVariantMap(const mv::pointdata::tiled::PointDataTiledStorag
     return result;
 }
 
+QVariantMap makeStagedPackedTiledVariantMap(const mv::pointdata::tiled::PointDataTiledStorage& storage, const std::function<void(float)>& progress)
+{
+    const auto tileRows = storage.tileRowCount();
+    const auto tileColumns = storage.tileColumnCount();
+    const auto superTileColumnCount = (tileColumns + storage.superTileColumns() - 1) / storage.superTileColumns();
+    const auto sourcePaths = storage.packedTileSourcePaths();
+    const auto saveDirectory = QDir::cleanPath(mv::projects().getTemporaryDirPath(mv::AbstractProjectManager::TemporaryDirType::Save));
+    QVector<QVariantMap> tiles;
+    QVector<QVariantMap> superTiles;
+    tiles.resize(static_cast<qsizetype>(storage.descriptors().size()));
+    superTiles.resize(sourcePaths.size());
+
+    if (!QDir().mkpath(saveDirectory))
+        throw std::runtime_error(QString("Unable to create packed tiled save directory: %1").arg(saveDirectory).toStdString());
+
+    std::uint64_t totalBytes = 0;
+    for (const auto& sourcePath : sourcePaths)
+    {
+        const QFileInfo sourceInfo(sourcePath);
+        if (!sourceInfo.isFile())
+            throw std::runtime_error(QString("Unable to access staged packed supertile: %1").arg(sourcePath).toStdString());
+
+        totalBytes += static_cast<std::uint64_t>(sourceInfo.size());
+    }
+
+    std::uint64_t copiedBytes = 0;
+    if (progress)
+        progress(0.0f);
+
+    for (std::size_t superTileIndex = 0; superTileIndex < static_cast<std::size_t>(sourcePaths.size()); ++superTileIndex)
+    {
+        const auto fileName = QUuid::createUuid().toString(QUuid::WithoutBraces) + QStringLiteral(".ptpack");
+        const auto destinationPath = QDir(saveDirectory).filePath(fileName);
+        if (!QFile::copy(sourcePaths[static_cast<qsizetype>(superTileIndex)], destinationPath))
+            throw std::runtime_error(QString("Unable to copy staged packed supertile: %1").arg(sourcePaths[static_cast<qsizetype>(superTileIndex)]).toStdString());
+
+        const auto superTileRow = static_cast<std::uint64_t>(superTileIndex) / superTileColumnCount;
+        const auto superTileColumn = static_cast<std::uint64_t>(superTileIndex) % superTileColumnCount;
+        QVariantMap superTileMap;
+        superTileMap["TileRow"] = QVariant::fromValue(static_cast<qulonglong>(superTileRow * storage.superTileRows()));
+        superTileMap["TileColumn"] = QVariant::fromValue(static_cast<qulonglong>(superTileColumn * storage.superTileColumns()));
+        superTileMap["URI"] = fileName;
+        superTileMap["Codec"] = storage.packedTileSourceCodec();
+        superTiles[static_cast<qsizetype>(superTileIndex)] = superTileMap;
+
+        copiedBytes += static_cast<std::uint64_t>(QFileInfo(destinationPath).size());
+        if (progress)
+            progress(totalBytes == 0 ? 1.0f : static_cast<float>(copiedBytes) / static_cast<float>(totalBytes));
+    }
+
+    for (std::size_t tileIndex = 0; tileIndex < storage.descriptors().size(); ++tileIndex)
+    {
+        const auto& descriptor = storage.descriptors()[tileIndex];
+        auto tileMap = makeTileMetadata(descriptor);
+        tileMap["SuperTileIndex"] = QVariant::fromValue(static_cast<qulonglong>(descriptor.superTileIndex));
+        tileMap["PackedTileOffset"] = QVariant::fromValue(static_cast<qulonglong>(descriptor.packedBlock.offset));
+        tileMap["PackedTileCompressedSize"] = QVariant::fromValue(static_cast<qulonglong>(descriptor.packedBlock.compressedSize));
+        tileMap["PackedTileUncompressedSize"] = QVariant::fromValue(static_cast<qulonglong>(descriptor.packedBlock.uncompressedSize));
+        tiles[static_cast<qsizetype>(tileIndex)] = tileMap;
+    }
+
+    return makeTiledVariantMap(storage, tiles, superTiles);
+}
+
 QVariantMap makePackedTiledVariantMap(const mv::pointdata::tiled::PointDataTiledStorage& storage, const std::function<void(float)>& progress)
 {
+    if (storage.hasPackedTileSource())
+        return makeStagedPackedTiledVariantMap(storage, progress);
+
     QVector<QVariantMap> tiles;
     QVector<QVariantMap> superTiles;
     const auto tileRows = storage.tileRowCount();
@@ -385,6 +453,17 @@ QVariantMap PointDataTiledSerialization::toVariantMap(const PointDataTiledStorag
 
 mv::workflow::UniqueWorkflowPlan PointDataTiledSerialization::toVariantMapWorkflow(const PointDataTiledStorage& storage)
 {
+    if (storage.hasPackedTileSource())
+    {
+        auto plan = std::make_unique<mv::workflow::WorkflowPlan>("Serialize staged packed tiled point data");
+        plan->addSequentialStage("Copy staged packed tiled point-data files", [&storage](const mv::workflow::WorkflowPlan::Job&, const mv::workflow::SharedWorkflowExecutionContext& executionContext) {
+            executionContext->setOutput(makeStagedPackedTiledVariantMap(storage, [executionContext](const float progress) {
+                executionContext->setProgress(progress);
+            }));
+        }, mv::workflow::WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, std::max(1.0, static_cast<double>(storage.memoryEstimate().rawDataBytes)));
+        return plan;
+    }
+
     if (storage.packedTiles())
     {
         const auto tileRows       = storage.tileRowCount();

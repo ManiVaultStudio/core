@@ -279,6 +279,23 @@ void PointData::initializeTiledStorage(const std::uint64_t rows, const std::uint
     convertToStorageBackend(pointdata::storage::StorageBackendType::Tiled, creation);
 }
 
+void PointData::attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices)
+{
+    const auto tiledStorage = getTiledStorage();
+    if (!tiledStorage)
+        throw std::invalid_argument("Packed tile sources require tiled storage");
+
+    if (offsets.size() != compressedSizes.size() || offsets.size() != uncompressedSizes.size() || offsets.size() != superTileIndices.size())
+        throw std::invalid_argument("Packed tile source metadata has inconsistent lengths");
+
+    std::vector<mv::util::PackedBlobBlock> blocks;
+    blocks.reserve(offsets.size());
+    for (std::size_t index = 0; index < offsets.size(); ++index)
+        blocks.push_back({ offsets[index], compressedSizes[index], uncompressedSizes[index] });
+
+    tiledStorage->setPackedTileSource(filePaths, codecName, blocks, superTileIndices);
+}
+
 void PointData::persistTiledStorage(pointdata::storage::StorageBackendProgressCallback progress)
 {
     const auto lock = lockData();
@@ -301,7 +318,7 @@ UniqueWorkflowPlan PointData::persistTiledStorageWorkflow()
         return {};
 
     auto plan = std::make_unique<WorkflowPlan>("Persist tiled point data");
-    const auto serializeStage = plan->addNestedWorkflowStage("Encode tiled point data", [tiledStorage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+    const auto serializeStage = plan->addNestedWorkflowStage("Serialize tiled point data", [tiledStorage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
         return pointdata::tiled::PointDataTiledSerialization::toVariantMapWorkflow(*tiledStorage);
     });
 
@@ -764,7 +781,7 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
     if (isTiled)
     {
         const auto tiledDataWeight = std::max(1.0, static_cast<double>(tiledStorage->memoryEstimate().rawDataBytes));
-        const auto serializeTiledStage = plan->addNestedWorkflowStage("Encode tiled point data", [tiledStorage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        const auto serializeTiledStage = plan->addNestedWorkflowStage("Serialize tiled point data", [tiledStorage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
             return mv::pointdata::tiled::PointDataTiledSerialization::toVariantMapWorkflow(*tiledStorage);
         }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, tiledDataWeight);
 
@@ -1549,6 +1566,14 @@ void Points::initializeTiledStorage(const std::uint64_t rows, const std::uint64_
 
     getRawData<PointData>()->initializeTiledStorage(rows, columns, elementType, configuration, std::move(generator));
     mv::events().notifyDatasetDataChanged(this);
+}
+
+void Points::attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices)
+{
+    if (isProxy())
+        throw std::invalid_argument("Packed tile sources can only be attached to concrete point datasets");
+
+    getRawData<PointData>()->attachPackedTileSource(filePaths, codecName, offsets, compressedSizes, uncompressedSizes, superTileIndices);
 }
 
 void Points::persistTiledStorage(StorageBackendProgressCallback progress)
