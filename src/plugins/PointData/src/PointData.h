@@ -321,10 +321,22 @@ public:
     void initializeTiledStorage(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, const mv::pointdata::storage::StorageBackendConfiguration& configuration, TiledTileGenerator generator);
 
     /**
-     * Attaches packed tiled files produced by an importer or staging pipeline.
-     * The files remain owned by the staging area until project serialization
-     * copies them into project storage. The metadata vectors must describe one
-     * packed block per logical tile in row-major order.
+     * @brief Attaches pre-encoded packed tiled files to tiled point data.
+     *
+     * The storage keeps the source paths and uses them for lazy tile reads.
+     * Project serialization copies the files into project storage and writes
+     * the corresponding tile metadata without decoding and re-encoding them.
+     * The caller must keep the source files available until that serialization
+     * has completed.
+     *
+     * @param filePaths Packed supertile files in super-tile index order.
+     * @param codecName Registered codec used for the packed blocks.
+     * @param offsets Byte offsets of logical tiles within their supertile.
+     * @param compressedSizes Compressed byte sizes of logical tiles.
+     * @param uncompressedSizes Uncompressed byte sizes of logical tiles.
+     * @param superTileIndices Super-tile index for each logical tile.
+     * @throws std::invalid_argument If no tiled storage exists or metadata vectors have different lengths.
+     * @throws std::logic_error If the storage is not configured for packed tiles.
      */
     void attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices);
 
@@ -1090,7 +1102,21 @@ public:
     /** Initializes an empty dataset as generator-backed tiled storage without materializing its values. */
     void initializeTiledStorage(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, const StorageBackendConfiguration& configuration, TiledTileGenerator generator);
 
-    /** Attaches packed tiled files produced by an importer or staging pipeline to this concrete dataset. */
+    /**
+     * @brief Attaches pre-encoded packed tiled files to this concrete dataset.
+     *
+     * Proxy datasets cannot own a packed tile source. The source files remain
+     * externally owned and must stay available while the dataset reads tiles
+     * and until project serialization has copied them.
+     *
+     * @param filePaths Packed supertile files in super-tile index order.
+     * @param codecName Registered codec used for the packed blocks.
+     * @param offsets Byte offsets of logical tiles within their supertile.
+     * @param compressedSizes Compressed byte sizes of logical tiles.
+     * @param uncompressedSizes Uncompressed byte sizes of logical tiles.
+     * @param superTileIndices Super-tile index for each logical tile.
+     * @throws std::invalid_argument If called on a proxy dataset or metadata vectors have different lengths.
+     */
     void attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices);
 
     /** Persists the currently configured tiled storage and detaches it from its source tile generator. */

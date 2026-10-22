@@ -4,13 +4,13 @@
 #include "PointDataTileCache.h"
 
 #include <QByteArray>
+#include <QStringList>
 
 #include <cstdint>
 #include <condition_variable>
 #include <functional>
 #include <memory>
 #include <mutex>
-#include <QStringList>
 #include <unordered_set>
 #include <vector>
 
@@ -28,7 +28,9 @@ namespace mv::pointdata::tiled
  * callers can choose a layout appropriate for row-oriented inspection,
  * column-oriented analysis, or mixed range access. The implementation is
  * intentionally read-only at this stage; write-back and dirty-tile tracking
- * can be added without changing the descriptor and lease model.
+ * can be added without changing the descriptor and lease model. Importers may
+ * attach externally owned packed supertile files so tiles can be read lazily
+ * and copied directly during project serialization.
  *
  * @author Thomas Kroes
  */
@@ -172,19 +174,29 @@ public:
     std::size_t superTileColumns() const { return _superTileColumns; }
 
     /**
-     * Attaches already encoded packed supertile files produced by an import
-     * staging workflow. The files remain owned by the staging directory; the
-     * storage only retains their paths and block metadata until serialization.
+     * @brief Attaches already encoded packed supertile files as the tile source.
+     *
+     * The storage remains read-only and retains file-backed readers for lazy
+     * tile access. The caller owns the files and must keep them available while
+     * tiles may be requested and until project serialization copies them.
+     *
+     * @param filePaths Packed supertile files in super-tile index order.
+     * @param codecName Registered codec used for the packed blocks.
+     * @param blocks Packed block metadata, one entry per logical tile descriptor.
+     * @param superTileIndices Super-tile index for each logical tile descriptor.
+     * @throws std::logic_error If packed tiled storage is not enabled.
+     * @throws std::invalid_argument If paths, codec, or metadata sizes are invalid.
+     * @throws std::out_of_range If a tile refers to a nonexistent supertile.
      */
     void setPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<mv::util::PackedBlobBlock>& blocks, const std::vector<std::size_t>& superTileIndices);
 
-    /** Returns whether serialization can copy pre-encoded staged supertiles. */
+    /** @return Whether pre-encoded supertiles are attached for lazy reads and direct serialization. */
     bool hasPackedTileSource() const { return !_packedTileSourcePaths.isEmpty(); }
 
-    /** Returns the staged packed supertile paths. */
+    /** @return The externally owned packed supertile paths in super-tile index order. */
     const QStringList& packedTileSourcePaths() const { return _packedTileSourcePaths; }
 
-    /** Returns the codec name used for the staged packed supertiles. */
+    /** @return The registered codec name used for the attached packed supertiles. */
     const QString& packedTileSourceCodec() const { return _packedTileSourceCodec; }
 
     /** Returns the number of currently cached tile payloads. */
@@ -218,8 +230,8 @@ private:
     bool                         _packedTiles = false; /**< Whether serialized tiles are grouped into super tiles. */
     std::size_t                  _superTileRows = 1; /**< Number of base tile rows in one serialized super tile. */
     std::size_t                  _superTileColumns = 1; /**< Number of base tile columns in one serialized super tile. */
-    QStringList                  _packedTileSourcePaths; /**< Source paths for pre-encoded staged supertiles. */
-    QString                      _packedTileSourceCodec; /**< Codec name used by pre-encoded staged supertiles. */
+    QStringList                  _packedTileSourcePaths; /**< Non-owning paths for pre-encoded staged supertiles. */
+    QString                      _packedTileSourceCodec; /**< Registered codec name used by pre-encoded staged supertiles. */
     std::vector<TileDescriptor>  _descriptors;    /**< Resident row/column tile index. */
     TileLoader                   _loader;         /**< Optional callback that decodes or generates tile bytes. */
     bool                         _loaderThreadSafe = false; /**< Whether the loader can run concurrently on multiple threads. */
