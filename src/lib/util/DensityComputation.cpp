@@ -64,11 +64,11 @@ void GaussianTexture::generate()
 
 DensityComputation::DensityComputation() :
     QOpenGLFunctions_3_3_Core(),
-    _initialized(false),
-    _ctx(nullptr),
+    _vao(0),
     _points(nullptr),
     _weights(nullptr),
-    _vao(0)
+    _ctx(nullptr),
+    _initialized(false)
 {
 
 }

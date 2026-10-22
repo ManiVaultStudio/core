@@ -24,8 +24,8 @@ OptionAction::OptionAction(QObject* parent, const QString& title, const QStringL
     WidgetAction(parent, title),
     _customModel(nullptr),
     _currentIndex(-1),
-    _completerPopupFixedWidth(0),
-    _completionMatchMode(Qt::MatchContains)
+    _completionMatchMode(Qt::MatchContains),
+    _completerPopupFixedWidth(0)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
