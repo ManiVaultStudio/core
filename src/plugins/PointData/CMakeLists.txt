@@ -26,16 +26,6 @@ set(POINTS_SOURCES
     src/DimensionsPickerProxyModel.cpp
     src/DimensionsPickerSelectAction.cpp
     src/ModelResetter.cpp
-    src/storage/widgets/StorageBackendConfigurationDialog.cpp
-    src/storage/eager/EagerPointsStorageBackend.cpp
-    src/storage/tiled/TiledPointsStorageBackend.cpp
-    src/storage/actions/TiledStorageBackendConversionAction.cpp
-    src/storage/tiled/TiledStorageAsymmetryAction.cpp
-    src/storage/tiled/PointDataStorageRecommendationDialog.cpp
-    src/storage/tiled/PointDataTileCache.cpp
-    src/storage/tiled/PackedTileFile.cpp
-    src/storage/tiled/PointDataTiledStorage.cpp
-    src/storage/tiled/PointDataTiledSerialization.cpp
     src/developer/PointDataPhantomGenerator.cpp
     src/developer/PointDataBenchmark.cpp
 )
@@ -92,8 +82,17 @@ set(POINTS_STORAGE_ACTION_HEADERS
     src/storage/actions/TiledStorageBackendConversionAction.h
 )
 
+set(POINTS_STORAGE_ACTION_SOURCES
+    src/storage/widgets/StorageBackendConfigurationDialog.cpp
+    src/storage/actions/TiledStorageBackendConversionAction.cpp
+)
+
 set(POINTS_STORAGE_EAGER_HEADERS
     src/storage/eager/EagerPointsStorageBackend.h
+)
+
+set(POINTS_STORAGE_EAGER_SOURCES
+    src/storage/eager/EagerPointsStorageBackend.cpp
 )
 
 set(POINTS_STORAGE_TILED_HEADERS
@@ -107,6 +106,16 @@ set(POINTS_STORAGE_TILED_HEADERS
     src/storage/tiled/TiledStorageGeometry.h
     src/storage/tiled/PointDataStorageRecommendation.h
     src/storage/tiled/PointDataStorageRecommendationDialog.h
+)
+
+set(POINTS_STORAGE_TILED_SOURCES
+    src/storage/tiled/TiledPointsStorageBackend.cpp
+    src/storage/tiled/TiledStorageAsymmetryAction.cpp
+    src/storage/tiled/PointDataStorageRecommendationDialog.cpp
+    src/storage/tiled/PointDataTileCache.cpp
+    src/storage/tiled/PackedTileFile.cpp
+    src/storage/tiled/PointDataTiledStorage.cpp
+    src/storage/tiled/PointDataTiledSerialization.cpp
 )
 
 set(POINTS_STORAGE_HEADERS ${POINTS_STORAGE_COMMON_HEADERS} ${POINTS_STORAGE_ACTION_HEADERS} ${POINTS_STORAGE_EAGER_HEADERS} ${POINTS_STORAGE_TILED_HEADERS})
@@ -165,33 +174,26 @@ source_group(View FILES
 )
 source_group(Storage\\widgets FILES
     src/storage/widgets/StorageBackendConfigurationDialog.h
-    src/storage/widgets/StorageBackendConfigurationDialog.cpp
 )
 source_group(Storage\\Actions FILES
     ${POINTS_STORAGE_ACTION_HEADERS}
-    src/storage/actions/TiledStorageBackendConversionAction.cpp
+    ${POINTS_STORAGE_ACTION_SOURCES}
 )
 source_group(Storage\\Interface FILES
     ${POINTS_STORAGE_COMMON_HEADERS}
 )
 source_group(Storage\\Eager FILES
-    src/storage/eager/EagerPointsStorageBackend.h
-    src/storage/eager/EagerPointsStorageBackend.cpp
+    ${POINTS_STORAGE_EAGER_HEADERS}
+    ${POINTS_STORAGE_EAGER_SOURCES}
 )
 source_group(Storage\\Tiled FILES
     ${POINTS_STORAGE_TILED_HEADERS}
-    src/storage/tiled/TiledPointsStorageBackend.cpp
-    src/storage/tiled/TiledStorageAsymmetryAction.cpp
-    src/storage/tiled/PointDataStorageRecommendationDialog.cpp
-    src/storage/tiled/PointDataTileCache.cpp
-    src/storage/tiled/PackedTileFile.cpp
-    src/storage/tiled/PointDataTiledStorage.cpp
-    src/storage/tiled/PointDataTiledSerialization.cpp
+    ${POINTS_STORAGE_TILED_SOURCES}
 )
 source_group(BFloat FILES ${BFLOAT_HEADER})
 source_group(Aux FILES ${POINT_DATA_AUX})
 
-add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINTS_VIEW_WIDGETS} ${POINTS_STORAGE_HEADERS} ${POINT_DATA_AUX})
+add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINTS_VIEW_WIDGETS} ${POINTS_STORAGE_HEADERS} ${POINTS_STORAGE_ACTION_SOURCES} ${POINTS_STORAGE_EAGER_SOURCES} ${POINTS_STORAGE_TILED_SOURCES} ${POINT_DATA_AUX})
 
 add_library(ManiVault::${POINTDATA} ALIAS ${POINTDATA})
 
