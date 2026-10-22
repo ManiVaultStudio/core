@@ -281,8 +281,15 @@ float PointDataTiledStorage::valueAt(const std::uint64_t flatIndex, const std::u
     }
 }
 
-void PointDataTiledStorage::materialize(char* destination) const
+void PointDataTiledStorage::materialize(char* destination, ProgressCallback progress) const
 {
+    const auto totalTiles       = _descriptors.size();
+    const auto progressInterval = std::max<std::size_t>(1, totalTiles / 100);
+    std::size_t tileIndex       = 0;
+
+    if (progress)
+        progress(0.0f);
+
     for (std::uint64_t tileRow = 0; tileRow < tileRowCount(); ++tileRow)
     {
         for (std::uint64_t tileColumn = 0; tileColumn < tileColumnCount(); ++tileColumn)
@@ -296,8 +303,16 @@ void PointDataTiledStorage::materialize(char* destination) const
                     static_cast<const char*>(tile.data()) + row * tile.columns() * _elementSize,
                     tile.columns() * _elementSize);
             }
+
+            ++tileIndex;
+
+            if (progress && (tileIndex == 1 || tileIndex == totalTiles || tileIndex % progressInterval == 0))
+                progress(static_cast<float>(tileIndex) / static_cast<float>(totalTiles));
         }
     }
+
+    if (progress && totalTiles == 0)
+        progress(1.0f);
 }
 
 void PointDataTiledStorage::setCacheCapacity(const std::size_t capacity) const

@@ -381,10 +381,7 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
 
     if (type == pointdata::storage::StorageBackendType::Eager)
     {
-        materializeTiled();
-
-        if (progress)
-            progress(1.0f);
+        materializeTiled(std::move(progress));
 
         return;
     }
@@ -558,7 +555,7 @@ void PointData::visitRange(const std::uint64_t firstRow, const std::uint64_t row
         _storageBackend->visitRange(firstRow, rowCount, firstColumn, columnCount, visitor);
 }
 
-void PointData::materializeTiled()
+void PointData::materializeTiled(pointdata::storage::StorageBackendProgressCallback progress)
 {
     const auto tiledStorage = getTiledStorage();
 
@@ -569,7 +566,10 @@ void PointData::materializeTiled()
     const auto elementSize  = tiledStorage->elementSize();
     std::vector<char> materializedBytes(elementCount * elementSize);
 
-    tiledStorage->materialize(materializedBytes.data());
+    tiledStorage->materialize(materializedBytes.data(), [&progress](const float tileProgress) {
+        if (progress)
+            progress(tileProgress * 0.95f);
+    });
 
     resizeVector(elementCount);
     std::visit([&materializedBytes](auto& vector) {
@@ -579,6 +579,9 @@ void PointData::materializeTiled()
 
     clearStorageBackend();
     refreshStorageBackend();
+
+    if (progress)
+        progress(1.0f);
 }
 
 const std::vector<QString>& PointData::getDimensionNames() const

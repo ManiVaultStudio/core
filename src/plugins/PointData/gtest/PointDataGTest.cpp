@@ -105,10 +105,29 @@ GTEST_TEST(PointData, materializesTilesInRowMajorOrder)
     const auto values = makeValues(5, 4);
     const auto storage = PointDataTiledStorage::fromDense(reinterpret_cast<const char*>(values.data()), 5, 4, sizeof(float), 2, 3);
     std::vector<float> materialized(values.size());
+    std::vector<float> progress;
 
-    storage->materialize(reinterpret_cast<char*>(materialized.data()));
+    storage->materialize(reinterpret_cast<char*>(materialized.data()), [&progress](const float value) {
+        progress.push_back(value);
+    });
 
     ASSERT_EQ(materialized, values);
+    ASSERT_GT(progress.size(), 2U);
+    EXPECT_FLOAT_EQ(progress.front(), 0.0f);
+    EXPECT_FLOAT_EQ(progress.back(), 1.0f);
+    EXPECT_TRUE(std::is_sorted(progress.begin(), progress.end()));
+}
+
+GTEST_TEST(PointData, emptyMaterializationCompletesProgress)
+{
+    const PointDataTiledStorage storage(0, 0, sizeof(float), 2, 2);
+    std::vector<float> progress;
+
+    storage.materialize(nullptr, [&progress](const float value) {
+        progress.push_back(value);
+    });
+
+    EXPECT_EQ(progress, (std::vector<float>{ 0.0f, 1.0f }));
 }
 
 GTEST_TEST(PointData, retilePreservesLazyDataAccess)

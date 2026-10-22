@@ -137,8 +137,14 @@ public:
     /** Reads one row-major element and converts it to float using \p typeIndex. */
     float valueAt(std::uint64_t flatIndex, std::uint32_t typeIndex) const;
 
-    /** Materializes the complete tiled matrix into a caller-owned row-major destination buffer. */
-    void materialize(char* destination) const;
+    /**
+     * Materializes the complete tiled matrix into a caller-owned row-major destination buffer.
+     * The destination must hold rows * columns * elementSize bytes. The optional
+     * callback reports progress as tiles are copied, starting at 0 and reaching
+     * 1 after all tiles have been copied (also for an empty matrix). Loading a
+     * tile or invoking the callback may throw.
+     */
+    void materialize(char* destination, ProgressCallback progress = {}) const;
 
     /** Returns the mutable tile descriptor index used by serialization and lazy blob assignment. */
     std::vector<TileDescriptor>& descriptors() { return _descriptors; }

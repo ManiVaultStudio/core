@@ -701,7 +701,7 @@ private:
     void visitEagerRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
     float getEagerValueAt(std::size_t index) const;
 
-    void materializeTiled();
+    void materializeTiled(mv::pointdata::storage::StorageBackendProgressCallback progress = {});
     mutable std::recursive_mutex _dataMutex;
 
     VariantOfVectors _variantOfVectors;
