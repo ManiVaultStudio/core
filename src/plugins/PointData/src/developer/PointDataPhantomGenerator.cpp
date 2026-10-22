@@ -46,7 +46,8 @@ enum class Population
     Deterministic,
     RandomFloat,
     RandomZeroOne,
-    Zero
+    Zero,
+    SparseRandomFloat
 };
 
 enum class DimensionNameType
@@ -206,6 +207,7 @@ QByteArray makeTile(const Points::ElementTypeSpecifier type, const Population po
             const auto value         = population == Population::Zero ? 0.0f
                 : population == Population::RandomZeroOne ? (random() & 1ULL ? 1.0f : 0.0f)
                 : population == Population::RandomFloat ? unit(random)
+                : population == Population::SparseRandomFloat ? (random() % 100 == 0 ? 1.0f + unit(random) * 0.2f : 0.0f)
                 : deterministic;
 
             switch (type)
@@ -259,6 +261,7 @@ float makeValue(const Population population, const std::uint64_t row, const std:
     return population == Population::Zero ? 0.0f
         : population == Population::RandomZeroOne ? (random() & 1ULL ? 1.0f : 0.0f)
         : population == Population::RandomFloat ? unit(random)
+        : population == Population::SparseRandomFloat ? (random() % 100 == 0 ? 1.0f + unit(random) * 0.2f : 0.0f)
         : deterministic;
 }
 
@@ -388,7 +391,7 @@ public:
         _columnsAction(&_settingsGroupAction, "Dimensions", "32"),
         _dimensionNameAction(&_settingsGroupAction, "Dimension names", { "DIM_<index>", "Lorem ipsum" }, "DIM_<index>"),
         _typeAction(&_settingsGroupAction, "Element type"),
-        _populationAction(&_settingsGroupAction, "Population", { "Deterministic", "Random floats", "Random zeros and ones", "All zeros" }, "Deterministic"),
+        _populationAction(&_settingsGroupAction, "Population", { "Deterministic", "Random floats", "Random zeros and ones", "All zeros", "Sparse random floats (1% nonzero)" }, "Deterministic"),
         _storageBackendAction(&_settingsGroupAction, "Storage backend", { "Eager", "Tiled" }, "Tiled"),
         _tileAsymmetryAction(&_settingsGroupAction),
         _rowTileSizeAction(&_settingsGroupAction, "Tile heights", "256"),
@@ -439,7 +442,7 @@ public:
         _columnsAction.setToolTip("Number of dimensions, or columns, in each generated dataset. More columns increase the raw footprint and can make column access and wide row access more expensive; comma-separated values create multiple sizes.");
         _dimensionNameAction.setToolTip("How dimensions are named. This affects labels and metadata, but has no meaningful effect on numeric access performance.");
         _typeAction.setToolTip("Element type stored for every point value. Smaller types reduce disk and memory traffic; larger or more precise types increase storage, I/O, and decoding work.");
-        _populationAction.setToolTip("How values are generated. Deterministic, random, and zero-filled data are useful for different tests; the choice may affect compression ratio and therefore disk footprint and I/O time.");
+        _populationAction.setToolTip("How values are generated. Sparse random floats leave approximately 99% of values at zero; the choice may affect compression ratio and therefore disk footprint and I/O time.");
         _storageBackendAction.setToolTip("Storage representation. Eager storage keeps the complete dataset materialized, while Tiled storage loads bounded tiles on demand and is the relevant choice for tile and cache experiments.");
         _tileAsymmetryAction.setToolTip("Balances tile shape between row-oriented and column-oriented access. Row-oriented tiles can accelerate contiguous row access, while column-oriented tiles can accelerate contiguous column access; the wrong orientation can increase tile reads.");
         _rowTileSizeAction.setToolTip("Number of dataset rows in each tile. Larger values help contiguous row scans but make random access fetch more unrelated data; comma-separated values create one dataset for every combination.");
