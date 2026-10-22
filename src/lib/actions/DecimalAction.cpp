@@ -326,7 +326,7 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
         setToolTips();
     };
 
-    connect(decimalAction, &DecimalAction::valueChanged, this, [decimalAction, onUpdateValue](float value) {
+    connect(decimalAction, &DecimalAction::valueChanged, this, [onUpdateValue](float value) {
         onUpdateValue();
     });
 
