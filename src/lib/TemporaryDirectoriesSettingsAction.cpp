@@ -4,6 +4,9 @@
 
 #include "TemporaryDirectoriesSettingsAction.h"
 #include "Application.h"
+#include "CoreInterface.h"
+
+#include "util/StyledIcon.h"
 
 namespace mv::gui
 {
@@ -18,6 +21,10 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
     _staleTemporaryDirectoriesGroupAction(this, "Stale temporary directories")
 {
     _applicationTemporaryDirAction.setToolTip("Application temporary directory root. Changes take effect after restarting ManiVault Studio.");
+
+    connect(&_applicationTemporaryDirAction, &StringAction::stringChanged, this, [](const QString&) {
+        mv::help().addNotification("Application temporary directory changed", "The new application temporary directory will take effect after restarting ManiVault Studio.", util::StyledIcon("rotate-right"));
+    });
 
     addAction(&_applicationTemporaryDirAction);
     addAction(&_removeStaleTemporaryDirsAtStartupAction);
