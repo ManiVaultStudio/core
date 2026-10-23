@@ -34,6 +34,7 @@
 
 // Picker actions
 #include "DirectoryPickerAction.h"
+#include "file/TemporaryDirectoryAction.h"
 #include "DatasetPickerAction.h"
 
 // Miscellaneous actions

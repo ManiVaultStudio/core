@@ -1,4 +1,5 @@
 #include <Application.h>
+#include <actions/file/TemporaryDirectoryAction.h>
 
 #include <QCoreApplication>
 #include <QDir>
@@ -111,6 +112,15 @@ bool runConfiguredRootTest()
         success &= require(isWithin(categoryPath, sessionPath), QString("The %1 temporary directory is outside the session directory").arg(name));
         success &= require(categoryPath == application.getTemporaryDirectoryPath(type), QString("The %1 temporary directory path is not stable").arg(name));
     }
+
+    mv::gui::TemporaryDirectoryAction temporaryDirectoryAction(nullptr, "Temporary directory", "configured", "default");
+    temporaryDirectoryAction.setDirectory("changed");
+    success &= require(temporaryDirectoryAction.getDirectory() == "changed", "The temporary directory action did not update its directory");
+    temporaryDirectoryAction.reset();
+    success &= require(temporaryDirectoryAction.getDirectory() == "default", "The temporary directory action did not reset to its default");
+
+    const auto serializedAction = temporaryDirectoryAction.toVariantMap();
+    success &= require(serializedAction.value("Value").toString() == "default", "The temporary directory action did not serialize its directory value");
 
     return success;
 }

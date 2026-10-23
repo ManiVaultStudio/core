@@ -234,11 +234,13 @@ set(PUBLIC_TOGGLE_ACTIONS_FILES
 set(PUBLIC_FILE_ACTIONS_HEADERS
     actions/DirectoryPickerAction.h
     actions/FilePickerAction.h
+    actions/file/TemporaryDirectoryAction.h
 )
 
 set(PUBLIC_FILE_ACTIONS_SOURCES
     actions/DirectoryPickerAction.cpp
     actions/FilePickerAction.cpp
+    actions/file/TemporaryDirectoryAction.cpp
 )
 
 set(PUBLIC_FILE_ACTIONS_FILES

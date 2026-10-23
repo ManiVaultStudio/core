@@ -6,7 +6,7 @@
 
 #include "GlobalSettingsGroupAction.h"
 
-#include "actions/StringAction.h"
+#include "actions/file/TemporaryDirectoryAction.h"
 #include "actions/ToggleAction.h"
 #include "actions/OptionsAction.h"
 #include "actions/TriggerAction.h"
@@ -34,7 +34,7 @@ public:
 
 public: // Action getters
 
-    StringAction& getApplicationTemporaryDirAction() { return _applicationTemporaryDirAction; }
+    TemporaryDirectoryAction& getApplicationTemporaryDirAction() { return _applicationTemporaryDirAction; }
     ToggleAction& getRemoveStaleTemporaryDirsAtStartupAction() { return _removeStaleTemporaryDirsAtStartupAction; }
     TriggerAction& getScanForStaleTemporaryDirectoriesAction() { return _scanForStaleTemporaryDirectoriesAction; }
     OptionsAction& getStaleTemporaryDirectoriesAction() { return _selectStaleTemporaryDirectoriesAction; }
@@ -42,12 +42,12 @@ public: // Action getters
     HorizontalGroupAction& getStaleTemporaryDirectoriesGroupAction() { return _staleTemporaryDirectoriesGroupAction; }
 
 private:
-    StringAction           _applicationTemporaryDirAction;             /** String action for the application temporary dir */
-    ToggleAction           _removeStaleTemporaryDirsAtStartupAction;   /** Turn on/off the automatic removal of the application temporary directories at application startup */
-    TriggerAction          _scanForStaleTemporaryDirectoriesAction;    /** Action which scans for stale temporary directories */
-    OptionsAction          _selectStaleTemporaryDirectoriesAction;     /** Action which lists stale temporary directories */
-    TriggerAction          _removeStaleTemporaryDirectoriesAction;     /** Action which triggers the cleanup of stale temporary directories */
-    HorizontalGroupAction  _staleTemporaryDirectoriesGroupAction;      /** Group action for working with stale temporary directories */
+    TemporaryDirectoryAction _applicationTemporaryDirAction;           /** Temporary directory picker and reset action */
+    ToggleAction             _removeStaleTemporaryDirsAtStartupAction; /** Turn on/off the automatic removal of the application temporary directories at application startup */
+    TriggerAction             _scanForStaleTemporaryDirectoriesAction;  /** Action which scans for stale temporary directories */
+    OptionsAction             _selectStaleTemporaryDirectoriesAction;   /** Action which lists stale temporary directories */
+    TriggerAction             _removeStaleTemporaryDirectoriesAction;   /** Action which triggers the cleanup of stale temporary directories */
+    HorizontalGroupAction     _staleTemporaryDirectoriesGroupAction;    /** Group action for working with stale temporary directories */
 };
 
 }
