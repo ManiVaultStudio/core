@@ -227,6 +227,12 @@ public: // Serialization
     const QTemporaryDir& getTemporaryDir() const;
 
     /**
+     * Get the root directory under which the application temporary directory is created
+     * @return Root directory for application temporary data
+     */
+    QString getTemporaryDirRoot() const;
+
+    /**
      * Get ManiVault application temporary directories
      * @return Reference to temporary directories
      */
@@ -355,6 +361,7 @@ protected:
     QUrl                                    _startupProjectUrl;                 /** URL of the project to automatically open upon startup (if set) */
     ProjectMetaAction*                      _startupProjectMetaAction;          /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
     ApplicationStartupTask*                 _startupTask;                       /** Application startup task */
+    QString                                 _temporaryDirRoot;                  /** Root directory under which application temporary files reside */
     QTemporaryDir                           _temporaryDir;                      /** Directory where application temporary files reside */
     TemporaryDirs                           _temporaryDirs;                     /** ManiVault application temporary directories manager */
     QLockFile                               _lockFile;                          /** Lock file is used for fail-safe purging of the temporary directory */

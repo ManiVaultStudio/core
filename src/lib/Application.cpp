@@ -44,7 +44,8 @@ Application::Application(int& argc, char** argv) :
     _version(MV_VERSION_MAJOR, MV_VERSION_MINOR, MV_VERSION_PATCH, std::string(MV_VERSION_SUFFIX.data())),
     _startupProjectMetaAction(nullptr),
     _startupTask(nullptr),
-    _temporaryDir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + QString("%1.%2").arg("ManiVault Studio", getId().mid(0, 6)))),
+    _temporaryDirRoot(QDir::cleanPath(QDir::tempPath())),
+    _temporaryDir(QDir(_temporaryDirRoot).filePath(QString("%1.%2").arg("ManiVault Studio", getId().mid(0, 6)))),
     _temporaryDirs(this),
     _lockFile(QDir::cleanPath(_temporaryDir.path() + QDir::separator() + "app.lock")),
     _configurationAction(this, "Configuration"),
@@ -303,6 +304,11 @@ const QTemporaryDir& Application::getTemporaryDir() const
     return _temporaryDir;
 }
 
+QString Application::getTemporaryDirRoot() const
+{
+    return _temporaryDirRoot;
+}
+
 Application::TemporaryDirs& Application::getTemporaryDirs()
 {
     return _temporaryDirs;
@@ -433,7 +439,7 @@ QStringList Application::TemporaryDirs::getStale()
 {
     QStringList staleTemporaryDirectories;
 
-    auto temporaryDir = QDir(QDir::tempPath());
+    auto temporaryDir = QDir(Application::current()->getTemporaryDirRoot());
 
     temporaryDir.setFilter(QDir::Dirs);
     // Support both the current application directory name and the legacy name.
@@ -445,7 +451,7 @@ QStringList Application::TemporaryDirs::getStale()
     const auto currentTemporaryDirectory = QDir::cleanPath(Application::current()->getTemporaryDir().path());
 
     for (const auto& session : sessions) {
-        const auto staleTemporaryDirectory  = QDir::cleanPath(QDir::tempPath() + QDir::separator() + session);
+        const auto staleTemporaryDirectory  = QDir(temporaryDir).filePath(session);
         const auto lockInfoFilePath         = QDir(staleTemporaryDirectory).filePath("app.lock");
         const auto isCurrentApplication     = staleTemporaryDirectory == currentTemporaryDirectory;
 
