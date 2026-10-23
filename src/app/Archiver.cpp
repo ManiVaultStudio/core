@@ -343,10 +343,10 @@ void Archiver::compressSubDirectory(QuaZip* parentZip, const QString& directory,
         // Create directory zip file
         QuaZipFile dirZipFile(parentZip);
 
-        std::int32_t method = Z_DEFLATED, level = 0;
+        const auto method = compressionLevel == 0 ? 0 : Z_DEFLATED;
 
         // Attempt to open the directory zip file
-        if (!dirZipFile.open(QIODevice::WriteOnly, QuaZipNewInfo(origDirectory.relativeFilePath(directory) + QLatin1String("/"), directory), password.isEmpty() ? nullptr : password.toLatin1(), 0U, Z_DEFLATED, compressionLevel, compressionLevel == -1))
+        if (!dirZipFile.open(QIODevice::WriteOnly, QuaZipNewInfo(origDirectory.relativeFilePath(directory) + QLatin1String("/"), directory), password.isEmpty() ? nullptr : password.toLatin1(), 0U, method, compressionLevel, compressionLevel == -1))
             throw std::runtime_error("Unable to open directory zip file");
 
         // Close the directory zip file
@@ -408,7 +408,9 @@ void Archiver::compressFile(QuaZip* zip, const QString& sourceFilePath, const QS
     QuaZipFile compressedFile(zip);
 
     // Open compressed file and except if an error occurs
-    if (!compressedFile.open(QIODevice::WriteOnly, QuaZipNewInfo(compressedFilePath, sourceFilePath), password.isEmpty() ? nullptr : password.toLocal8Bit().data(), 0U, Z_DEFLATED, compressionLevel))
+    const auto method = compressionLevel == 0 ? 0 : Z_DEFLATED;
+
+    if (!compressedFile.open(QIODevice::WriteOnly, QuaZipNewInfo(compressedFilePath, sourceFilePath), password.isEmpty() ? nullptr : password.toLocal8Bit().data(), 0U, method, compressionLevel))
         throw std::runtime_error("Unable to open zip file");
 
     QFileInfo input(sourceFilePath);
