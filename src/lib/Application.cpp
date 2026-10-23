@@ -536,6 +536,22 @@ QStringList Application::TemporaryDirs::getStale()
 
 void Application::TemporaryDirs::removeStale(const QStringList& stale /*= QStringList()*/)
 {
+    removeStale(stale, &_task, nullptr);
+}
+
+void Application::TemporaryDirs::removeStaleAsync()
+{
+    auto workflowPlan = std::make_unique<workflow::WorkflowPlan>("Remove stale ManiVault temporary directories");
+
+    workflowPlan->addSequentialStage("Remove stale temporary directories", [this](const auto&, const auto& workflowContext) {
+        removeStale(QStringList(), nullptr, workflowContext.get());
+    });
+
+    [[maybe_unused]] const auto workflowResult = Application::getWorkflowPlanExecutor().execute(std::move(workflowPlan), nullptr, workflow::WorkflowOptions());
+}
+
+void Application::TemporaryDirs::removeStale(const QStringList& stale, Task* task, workflow::WorkflowExecutionContext* workflowContext)
+{
     const auto staleTemporaryDirectories = getStale();
 
     qDebug() << "Found" << staleTemporaryDirectories.count() << QString("stale temporary ManiVault director%1 eligible for removal").arg(staleTemporaryDirectories.count() == 1 ? "y" : "ies");
@@ -553,17 +569,21 @@ void Application::TemporaryDirs::removeStale(const QStringList& stale /*= QStrin
         selectedStaleTemporaryDirs = staleTemporaryDirectories;
     }
 
-    _task.setSubtasks(selectedStaleTemporaryDirs);
-    _task.setRunning();
+    if (task != nullptr) {
+        task->setSubtasks(selectedStaleTemporaryDirs);
+        task->setRunning();
+    }
 
-    processEvents();
+    for (qsizetype index = 0; index < selectedStaleTemporaryDirs.count(); ++index) {
+        const auto& selectedStaleTemporaryDir = selectedStaleTemporaryDirs.at(index);
 
-    for (const auto& selectedStaleTemporaryDir : selectedStaleTemporaryDirs) {
         try
         {
             const auto dirName = selectedStaleTemporaryDir.split("/").last();
 
-            _task.setSubtaskStarted(selectedStaleTemporaryDir, QString("Removing %1").arg(dirName));
+            if (task != nullptr)
+                task->setSubtaskStarted(selectedStaleTemporaryDir, QString("Removing %1").arg(dirName));
+
             {
                 qDebug() << "Removing" << selectedStaleTemporaryDir;
 
@@ -574,22 +594,31 @@ void Application::TemporaryDirs::removeStale(const QStringList& stale /*= QStrin
 
                 ++numberOfRemovedSessions;
             }
-            _task.setSubtaskFinished(selectedStaleTemporaryDir, QString("Removed %1").arg(dirName));
-
-            processEvents();
+            if (task != nullptr)
+                task->setSubtaskFinished(selectedStaleTemporaryDir, QString("Removed %1").arg(dirName));
         }
         catch (std::exception& e)
         {
-            exceptionMessageBox("Unable to remove the ManiVault application temporary directory", e);
+            if (workflowContext != nullptr)
+                workflowContext->error(QString("Unable to remove the ManiVault application temporary directory: %1").arg(QString::fromUtf8(e.what())), "Temporary directory cleanup");
+            else
+                exceptionMessageBox("Unable to remove the ManiVault application temporary directory", e);
         }
         catch (...) {
-            exceptionMessageBox("Unable to remove the ManiVault application temporary directory");
+            if (workflowContext != nullptr)
+                workflowContext->error("Unable to remove the ManiVault application temporary directory", "Temporary directory cleanup");
+            else
+                exceptionMessageBox("Unable to remove the ManiVault application temporary directory");
         }
+
+        if (workflowContext != nullptr && !selectedStaleTemporaryDirs.isEmpty())
+            workflowContext->setProgress(static_cast<double>(index + 1) / selectedStaleTemporaryDirs.count());
     }
 
     qDebug() << "Removed" << numberOfRemovedSessions << QString("ManiVault application temporary director%1").arg(numberOfRemovedSessions == 1 ? "y" : "ies");
 
-    _task.setFinished();
+    if (task != nullptr)
+        task->setFinished();
 }
 
 }

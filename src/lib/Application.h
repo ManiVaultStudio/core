@@ -80,6 +80,15 @@ public:
         void removeStale(const QStringList& stale = QStringList());
 
         /**
+         * Removes stale application directories asynchronously through the workflow system.
+         *
+         * The cleanup runs on a worker thread so application startup is not blocked. Errors
+         * are reported through the workflow result instead of showing dialogs from the worker
+         * thread.
+         */
+        void removeStaleAsync();
+
+        /**
          * Get progress task
          * @return Reference to progress task
          */
@@ -88,6 +97,8 @@ public:
         }
 
     private:
+        void removeStale(const QStringList& stale, Task* task, workflow::WorkflowExecutionContext* workflowContext);
+
         Task  _task;     /** Task for reporting clean-up progress in the background */
     };
 

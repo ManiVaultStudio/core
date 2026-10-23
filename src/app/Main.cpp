@@ -162,8 +162,7 @@ int main(int argc, char *argv[])
     splashScreenAction.getOpenAction().trigger();
 
     if (settings().getTemporaryDirectoriesSettingsAction().getRemoveStaleTemporaryDirsAtStartupAction().isChecked()) {
-        application.getTemporaryDirs().getTask().setParentTask(&application.getStartupTask());
-        application.getTemporaryDirs().removeStale();
+        application.getTemporaryDirs().removeStaleAsync();
         
         settings().getTemporaryDirectoriesSettingsAction().getScanForStaleTemporaryDirectoriesAction().trigger();
     }
