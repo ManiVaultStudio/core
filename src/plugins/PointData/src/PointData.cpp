@@ -6,8 +6,14 @@
 #include "PointDataLegacySerialization.h"
 
 #include "DimensionsPickerAction.h"
-#include "InfoAction.h"
+#include "actions/InfoAction.h"
+#include "actions/PointsAction.h"
 #include "DimensionNamesSerializer.h"
+#include "storage/eager/EagerPointsStorageBackend.h"
+#include "storage/actions/StorageBackendConversionAction.h"
+#include "storage/tiled/PointDataTiledSerialization.h"
+#include "storage/tiled/PointDataTiledStorage.h"
+#include "storage/tiled/TiledPointsStorageBackend.h"
 
 #include <Application.h>
 
@@ -24,7 +30,9 @@
 #include <QtCore>
 
 #include <cstring>
+#include <algorithm>
 #include <set>
+#include <stdexcept>
 #include <type_traits>
 
 Q_PLUGIN_METADATA(IID "studio.manivault.PointData")
@@ -76,26 +84,42 @@ PointData::ElementTypeSpecifier PointData::elementTypeSpecifier(const QString& t
     return ElementTypeSpecifier::float32; // Default to float32 if the type name is not recognized
 }
 
+PointData::PointData(mv::plugin::PluginFactory* factory) :
+    RawData(factory, PointType),
+    _storageBackend(std::make_unique<mv::pointdata::storage::EagerPointsStorageBackend>(*this))
+{
+}
+
+PointData::~PointData() = default;
+
 QString PointData::elementTypeName(const ElementTypeSpecifier elementTypeSpecifier)
 {
-    switch (elementTypeSpecifier) 
+    switch (elementTypeSpecifier)
     {
         case ElementTypeSpecifier::float32:
             return "float32";
+
         case ElementTypeSpecifier::bfloat16:
             return "bfloat16";
+
         case ElementTypeSpecifier::int32:
             return "int32";
+
         case ElementTypeSpecifier::uint32:
             return "uint32";
+
         case ElementTypeSpecifier::int16:
             return "int16";
+
         case ElementTypeSpecifier::uint16:
             return "uint16";
+
         case ElementTypeSpecifier::int8:
             return "int8";
+
         case ElementTypeSpecifier::uint8:
             return "uint8";
+
         default:
             return "unknown";
     }
@@ -105,6 +129,22 @@ QString PointData::elementTypeName(const ElementTypeSpecifier elementTypeSpecifi
 
 void PointData::init()
 {
+}
+
+void PointData::refreshStorageBackend()
+{
+    _storageBackend = std::make_unique<mv::pointdata::storage::EagerPointsStorageBackend>(*this);
+}
+
+void PointData::clearStorageBackend()
+{
+    _storageBackend.reset();
+}
+
+std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> PointData::getTiledStorage() const
+{
+    const auto* tiledBackend = dynamic_cast<const mv::pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get());
+    return tiledBackend ? tiledBackend->getStorage() : nullptr;
 }
 
 mv::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) const
@@ -122,6 +162,8 @@ std::uint64_t PointData::getNumPoints() const
         return 0;
     }
 
+    if (const auto tiledStorage = getTiledStorage())
+        return tiledStorage->rows();
     if (_isDense)
         return static_cast<std::uint64_t>(getSizeOfVector() / _numDimensions);
     else
@@ -137,6 +179,9 @@ std::uint64_t PointData::getNumDimensions() const
 std::uint64_t PointData::getNumberOfElements() const
 {
     const auto dataLock = lockData();
+    if (const auto tiledStorage = getTiledStorage())
+        return tiledStorage->rows() * tiledStorage->columns();
+
     return getSizeOfVector();
 }
 
@@ -145,6 +190,8 @@ std::uint64_t PointData::getRawDataSize() const
 {
     const auto dataLock = lockData();
 
+    if (const auto tiledStorage = getTiledStorage())
+        return getNumberOfElements() * tiledStorage->elementSize();
     if (_isDense)
     {
         std::uint64_t elementSize = std::visit([](auto& vec) { return vec.empty() ? 0u : sizeof(vec[0]); }, _variantOfVectors);
@@ -159,13 +206,384 @@ std::uint64_t PointData::getRawDataSize() const
 void* PointData::getDataVoidPtr()
 {
     const auto dataLock = lockData();
+    if (getTiledStorage())
+        materializeTiled();
     return std::visit([](auto& vec) { return (void*)vec.data(); }, _variantOfVectors);
 }
 
 const void* PointData::getDataConstVoidPtr() const
 {
     const auto dataLock = lockData();
+    if (getTiledStorage())
+        const_cast<PointData*>(this)->materializeTiled();
     return std::visit([](const auto& vec) { return (const void*)vec.data(); }, _variantOfVectors);
+}
+
+pointdata::storage::StorageBackendType PointData::getStorageBackendType() const
+{
+    const auto lock = lockData();
+
+    return _storageBackend ? _storageBackend->getType() : pointdata::storage::StorageBackendType::Eager;
+}
+
+pointdata::storage::StorageBackendCapabilities PointData::getStorageBackendCapabilities() const
+{
+    const auto lock = lockData();
+
+    return _storageBackend ? _storageBackend->getCapabilities() : 0;
+}
+
+const pointdata::storage::PointsStorageBackend* PointData::getStorageBackend() const
+{
+    const auto lock = lockData();
+
+    return _storageBackend.get();
+}
+
+std::unique_ptr<mv::gui::StorageBackendConversionAction> PointData::createStorageBackendConversionAction(const pointdata::storage::StorageBackendType targetType, QObject* parent) const
+{
+    const auto lock = lockData();
+
+    return _storageBackend ? _storageBackend->createConversionAction(targetType, parent) : nullptr;
+}
+
+void PointData::convertToStorageBackend(const pointdata::storage::StorageBackendType type, const pointdata::storage::StorageBackendConfiguration& configuration, pointdata::storage::StorageBackendProgressCallback progress)
+{
+    convertToStorageBackend(type, std::make_shared<const pointdata::storage::StorageBackendConfiguration>(configuration), std::move(progress));
+}
+
+void PointData::initializeTiledStorage(const std::uint64_t rows, const std::uint64_t columns, const ElementTypeSpecifier elementType, const pointdata::storage::StorageBackendConfiguration& configuration, TiledTileGenerator generator)
+{
+    auto creation = std::make_shared<pointdata::storage::TiledStorageBackendCreationOptions>();
+    creation->rows = rows;
+    creation->columns = columns;
+    creation->elementSize = 4;
+    switch (elementType)
+    {
+    case ElementTypeSpecifier::bfloat16:
+    case ElementTypeSpecifier::int16:
+    case ElementTypeSpecifier::uint16: creation->elementSize = 2; break;
+    case ElementTypeSpecifier::int8:
+    case ElementTypeSpecifier::uint8: creation->elementSize = 1; break;
+    default: creation->elementSize = 4; break;
+    }
+    creation->elementTypeIndex = static_cast<std::uint32_t>(elementType);
+    creation->rowTileSize = configuration.rowTileSize;
+    creation->columnTileSize = configuration.columnTileSize;
+    creation->cacheCapacity = configuration.cacheCapacity;
+    creation->cacheCapacityBytes = configuration.cacheCapacityBytes;
+    creation->packedTiles = configuration.packedTiles;
+    creation->superTileRows = configuration.superTileRows;
+    creation->superTileColumns = configuration.superTileColumns;
+    creation->generator = std::move(generator);
+    convertToStorageBackend(pointdata::storage::StorageBackendType::Tiled, creation);
+}
+
+void PointData::attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices, std::shared_ptr<void> sourceLifetime)
+{
+    const auto tiledStorage = getTiledStorage();
+    if (!tiledStorage)
+        throw std::invalid_argument("Packed tile sources require tiled storage");
+
+    if (offsets.size() != compressedSizes.size() || offsets.size() != uncompressedSizes.size() || offsets.size() != superTileIndices.size())
+        throw std::invalid_argument("Packed tile source metadata has inconsistent lengths");
+
+    std::vector<mv::util::PackedBlobBlock> blocks;
+    blocks.reserve(offsets.size());
+    for (std::size_t index = 0; index < offsets.size(); ++index)
+        blocks.push_back({ offsets[index], compressedSizes[index], uncompressedSizes[index] });
+
+    tiledStorage->setPackedTileSource(filePaths, codecName, blocks, superTileIndices, std::move(sourceLifetime));
+}
+
+void PointData::persistTiledStorage(pointdata::storage::StorageBackendProgressCallback progress)
+{
+    const auto lock = lockData();
+    const auto tiledStorage = getTiledStorage();
+
+    if (!tiledStorage)
+        return;
+
+    const auto serializedStorage = pointdata::tiled::PointDataTiledSerialization::toVariantMap(*tiledStorage, progress);
+    const auto persistedStorage = pointdata::tiled::PointDataTiledSerialization::fromVariantMap(serializedStorage, tiledStorage->rows(), tiledStorage->columns(), tiledStorage->elementSize());
+    dynamic_cast<pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get())->setStorage(persistedStorage);
+}
+
+UniqueWorkflowPlan PointData::persistTiledStorageWorkflow()
+{
+    const auto lock = lockData();
+    const auto tiledStorage = getTiledStorage();
+
+    if (!tiledStorage)
+        return {};
+
+    auto plan = std::make_unique<WorkflowPlan>("Persist tiled point data");
+    const auto serializeStage = plan->addNestedWorkflowStage("Serialize tiled point data", [tiledStorage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        return pointdata::tiled::PointDataTiledSerialization::toVariantMapWorkflow(*tiledStorage);
+    });
+
+    plan->addSequentialStage("Install persisted tiled storage", [this, tiledStorage, serializeStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        const auto serializedStorage = executionContext->takeOutput(serializeStage).toMap();
+        const auto persistedStorage = pointdata::tiled::PointDataTiledSerialization::fromVariantMap(serializedStorage, tiledStorage->rows(), tiledStorage->columns(), tiledStorage->elementSize());
+        const auto dataLock = lockData();
+        dynamic_cast<pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get())->setStorage(persistedStorage);
+    }, WorkflowPlan::JobThreadAffinity::GuiThread);
+
+    return plan;
+}
+
+void PointData::convertToStorageBackend(const pointdata::storage::StorageBackendType type, const pointdata::storage::StorageBackendConversionOptionsPtr options, pointdata::storage::StorageBackendProgressCallback progress)
+{
+    const auto lock = lockData();
+
+    if (type == pointdata::storage::StorageBackendType::Tiled)
+    {
+        const auto creation = std::dynamic_pointer_cast<const pointdata::storage::TiledStorageBackendCreationOptions>(options);
+
+        if (creation)
+        {
+            if (_numRows != 0 || getSizeOfVector() != 0 || getTiledStorage())
+                throw std::invalid_argument("Point-data storage creation requires an empty dataset");
+
+            auto tiledStorage = pointdata::storage::TiledPointsStorageBackend::create(*creation, progress);
+
+            setElementTypeSpecifier(static_cast<ElementTypeSpecifier>(creation->elementTypeIndex));
+            _numDimensions = creation->columns;
+            _numRows       = creation->rows;
+            _isDense       = true;
+            _storageBackend = std::make_unique<pointdata::storage::TiledPointsStorageBackend>(std::move(tiledStorage), static_cast<std::uint32_t>(getElementTypeSpecifier()));
+
+            if (progress)
+                progress(1.0f);
+
+            return;
+        }
+
+        const auto configuration = std::dynamic_pointer_cast<const pointdata::storage::StorageBackendConfiguration>(options);
+
+        if (!configuration)
+            throw std::invalid_argument("Missing tiled storage conversion configuration");
+
+        if (const auto tiledStorage = getTiledStorage())
+        {
+            if (tiledStorage->rowTileSize() != configuration->rowTileSize || tiledStorage->columnTileSize() != configuration->columnTileSize)
+            {
+                const auto retiledStorage = mv::pointdata::tiled::PointDataTiledStorage::retile(tiledStorage, configuration->rowTileSize, configuration->columnTileSize, progress);
+                dynamic_cast<pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get())->setStorage(retiledStorage);
+            }
+        }
+        else
+            makeTiled(configuration->rowTileSize, configuration->columnTileSize, progress);
+
+        if (_storageBackend)
+            _storageBackend->applyConfiguration(options);
+
+        return;
+    }
+
+    if (type == pointdata::storage::StorageBackendType::Eager)
+    {
+        materializeTiled(std::move(progress));
+
+        return;
+    }
+
+    throw std::invalid_argument("Unsupported point-data storage backend");
+}
+
+void PointData::configureStorageBackend(const pointdata::storage::StorageBackendConversionOptionsPtr options)
+{
+    const auto lock = lockData();
+
+    if (!_storageBackend)
+        throw std::invalid_argument("Point-data storage backend is unavailable");
+
+    _storageBackend->applyConfiguration(options);
+}
+
+void PointData::makeTiled(const std::size_t rowTileSize, const std::size_t columnTileSize, std::function<void(float)> progress)
+{
+    const auto lock = lockData();
+
+    if (_isDense && !getTiledStorage() && _numDimensions > 0)
+    {
+        const auto rows = static_cast<std::uint64_t>(getSizeOfVector() / _numDimensions);
+
+        const auto elementSize = std::visit([](const auto& vector) { return sizeof(typename std::decay_t<decltype(vector)>::value_type); }, _variantOfVectors);
+        const auto* data = static_cast<const char*>(std::visit([](const auto& vector) { return static_cast<const void*>(vector.data()); }, _variantOfVectors));
+
+        const auto tiledStorage = mv::pointdata::tiled::PointDataTiledStorage::fromDense(data, rows, _numDimensions, elementSize, rowTileSize, columnTileSize, std::move(progress));
+
+        _numRows = rows;
+        _storageBackend = std::make_unique<pointdata::storage::TiledPointsStorageBackend>(tiledStorage, static_cast<std::uint32_t>(getElementTypeSpecifier()));
+    }
+}
+
+namespace
+{
+PointDataAccessView makeFloatAccessView(std::vector<float>&& values)
+{
+    auto bytes = std::make_shared<QByteArray>(reinterpret_cast<const char*>(values.data()), static_cast<qsizetype>(values.size() * sizeof(float)));
+    PointDataAccessView view;
+    view.data = bytes->constData();
+    view.rows = 1;
+    view.columns = static_cast<std::uint64_t>(values.size());
+    view.rowStrideBytes = static_cast<std::uint64_t>(bytes->size());
+    view.elementTypeIndex = static_cast<std::uint32_t>(PointData::ElementTypeSpecifier::float32);
+    view.elementSizeBytes = sizeof(float);
+    view.lifetime = std::shared_ptr<const void>(bytes, bytes->constData());
+    return view;
+}
+
+}
+
+PointDataAccessView PointData::getEagerRow(const std::uint64_t row) const
+{
+    if (row >= getNumPoints())
+        return {};
+
+    std::vector<float> values(static_cast<std::size_t>(_numDimensions));
+
+    for (std::uint64_t column = 0; column < _numDimensions; ++column)
+    {
+        values[static_cast<std::size_t>(column)] = getEagerValueAt(static_cast<std::size_t>(row * _numDimensions + column));
+    }
+
+    return makeFloatAccessView(std::move(values));
+}
+
+PointDataAccessView PointData::getRow(const std::uint64_t row) const
+{
+    return _storageBackend ? _storageBackend->getRow(row) : PointDataAccessView{};
+}
+
+void PointData::visitRows(const std::uint64_t firstRow, const std::uint64_t rowCount, const PointDataAccessVisitor& visitor) const
+{
+    if (firstRow > getNumPoints() || rowCount > getNumPoints() - firstRow)
+        throw std::out_of_range("Point-data row range is out of bounds");
+
+    for (std::uint64_t row = firstRow; row < firstRow + rowCount; ++row)
+        visitRange(row, 1, 0, _numDimensions, visitor);
+}
+
+void PointData::visitRows(const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
+{
+    for (const auto row : rowIds)
+        visitRows(row, 1, visitor);
+}
+
+void PointData::visitColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
+{
+    if (firstColumn > _numDimensions || columnCount > _numDimensions - firstColumn)
+        throw std::out_of_range("Point-data column range is out of bounds");
+
+    for (std::uint64_t row = 0; row < getNumPoints(); ++row)
+        visitRange(row, 1, firstColumn, columnCount, visitor);
+}
+
+void PointData::visitColumns(const std::vector<std::uint64_t>& columnIds, const PointDataAccessVisitor& visitor) const
+{
+    std::vector<std::uint64_t> rowIds(getNumPoints());
+    std::iota(rowIds.begin(), rowIds.end(), 0);
+
+    visitColumns(columnIds, rowIds, visitor);
+}
+
+void PointData::visitColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
+{
+    if (firstColumn > _numDimensions || columnCount > _numDimensions - firstColumn)
+        throw std::out_of_range("Point-data column range is out of bounds");
+
+    for (const auto row : rowIds)
+    {
+        if (row >= getNumPoints())
+            throw std::out_of_range("Point-data row ID is out of bounds");
+        visitRange(row, 1, firstColumn, columnCount, visitor);
+    }
+}
+
+void PointData::visitColumns(const std::vector<std::uint64_t>& columnIds, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
+{
+    if (!visitor)
+        throw std::invalid_argument("Point-data visitor is invalid");
+
+    for (const auto column : columnIds)
+    {
+        if (column >= getNumDimensions())
+            throw std::out_of_range("Point-data column ID is out of bounds");
+    }
+
+    for (const auto row : rowIds)
+    {
+        if (row >= getNumPoints())
+            throw std::out_of_range("Point-data row ID is out of bounds");
+
+        for (std::size_t index = 0; index < columnIds.size();)
+        {
+            const auto firstColumn = columnIds[index];
+            auto end = index + 1;
+
+            while (end < columnIds.size() && columnIds[end] == columnIds[end - 1] + 1)
+                ++end;
+
+            visitRange(row, 1, firstColumn, end - index, visitor);
+            index = end;
+        }
+    }
+}
+
+void PointData::visitEagerRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
+{
+    if (!visitor || firstRow > getNumPoints() || rowCount > getNumPoints() - firstRow ||
+        firstColumn > _numDimensions || columnCount > _numDimensions - firstColumn)
+        throw std::out_of_range("Point-data range is invalid");
+    if (rowCount == 0 || columnCount == 0)
+        return;
+
+    for (std::uint64_t row = firstRow; row < firstRow + rowCount; ++row)
+    {
+        std::vector<float> values(static_cast<std::size_t>(columnCount));
+
+        for (std::uint64_t column = 0; column < columnCount; ++column)
+            values[static_cast<std::size_t>(column)] = getEagerValueAt(static_cast<std::size_t>(row * _numDimensions + firstColumn + column));
+
+        visitor(makeFloatAccessView(std::move(values)));
+    }
+}
+
+void PointData::visitRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
+{
+    if (_storageBackend)
+        _storageBackend->visitRange(firstRow, rowCount, firstColumn, columnCount, visitor);
+}
+
+void PointData::materializeTiled(pointdata::storage::StorageBackendProgressCallback progress)
+{
+    const auto tiledStorage = getTiledStorage();
+
+    if (!tiledStorage)
+        return;
+
+    const auto elementCount = static_cast<std::size_t>(tiledStorage->rows() * tiledStorage->columns());
+    const auto elementSize  = tiledStorage->elementSize();
+    std::vector<char> materializedBytes(elementCount * elementSize);
+
+    tiledStorage->materialize(materializedBytes.data(), [&progress](const float tileProgress) {
+        if (progress)
+            progress(tileProgress * 0.95f);
+    });
+
+    resizeVector(elementCount);
+    std::visit([&materializedBytes](auto& vector) {
+        if (!vector.empty())
+            std::memcpy(vector.data(), materializedBytes.data(), vector.size() * sizeof(typename std::decay_t<decltype(vector)>::value_type));
+    }, _variantOfVectors);
+
+    clearStorageBackend();
+    refreshStorageBackend();
+
+    if (progress)
+        progress(1.0f);
 }
 
 const std::vector<QString>& PointData::getDimensionNames() const
@@ -178,8 +596,10 @@ void PointData::setData(const std::nullptr_t, const std::size_t numPoints, const
 {
     const auto dataLock = lockData();
 
+    clearStorageBackend();
     resizeVector(numPoints * numDimensions);
     _numDimensions = static_cast<std::uint64_t>(numDimensions);
+    refreshStorageBackend();
 }
 
 void PointData::setDimensionNames(const std::vector<QString>& dimNames)
@@ -195,41 +615,45 @@ void PointData::setDimensionNames(const std::vector<QString>& dimNames)
         qWarning() << "PointData: Number of dimension names does not equal the number of data dimensions";
 }
 
-float PointData::getValueAt(const std::size_t index) const
+float PointData::getEagerValueAt(const std::size_t index) const
 {
     // Intentionally not locking here.
-   //
-   // This is a fine-grained legacy accessor and is frequently used from
-   // parallel loops. Callers must ensure that the underlying point-data
-   // storage is not modified concurrently.
-   //
-   // Use lockData() / the bulk-access APIs when synchronized access is
-   // required.
+    //
+    // This is a fine-grained legacy accessor and is frequently used from
+    // parallel loops. Callers must ensure that the underlying point-data
+    // storage is not modified concurrently.
+    //
+    // Use lockData() / the bulk-access APIs when synchronized access is
+    // required.
 
-    return std::visit([index](const auto& vec)
-        {
-            return static_cast<float>(vec[index]);
-        },
-        _variantOfVectors);
+    return std::visit([index](const auto& vec) {
+        return static_cast<float>(vec[index]);
+    }, _variantOfVectors);
+}
+
+float PointData::getValueAt(const std::size_t index) const
+{
+    return _storageBackend ? _storageBackend->getValueAt(index) : 0.0f;
 }
 
 void PointData::setValueAt(const std::size_t index, const float newValue)
 {
     // Intentionally not locking here.
-   //
-   // This is a fine-grained legacy setter and is frequently used from
-   // parallel loops. Callers must ensure that the underlying point-data
-   // storage is not modified concurrently.
-   //
-   // Use lockData() / the bulk-access APIs when synchronized access is
-   // required.
+    //
+    // This is a fine-grained legacy setter and is frequently used from
+    // parallel loops. Callers must ensure that the underlying point-data
+    // storage is not modified concurrently.
+    //
+    // Use lockData() / the bulk-access APIs when synchronized access is
+    // required.
 
-    std::visit([index, newValue](auto& vec)
-        {
-            using value_type = typename std::remove_reference_t<decltype(vec)>::value_type;
-            vec[index] = static_cast<value_type>(newValue);
-        },
-        _variantOfVectors);
+    if (getTiledStorage())
+        materializeTiled();
+
+    std::visit([index, newValue](auto& vec) {
+        using value_type = typename std::remove_reference_t<decltype(vec)>::value_type;
+        vec[index] = static_cast<value_type>(newValue);
+    }, _variantOfVectors);
 }
 
 UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
@@ -258,21 +682,35 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
 
         const auto dataMap  = variantMap["Data"].toMap();
         _isDense            = variantMap.value("Dense", true).toBool();
-        _numDimensions      = static_cast<std::size_t>( variantMap["NumberOfDimensions"].toULongLong());
+        _numDimensions      = static_cast<std::size_t>(variantMap["NumberOfDimensions"].toULongLong());
+        clearStorageBackend();
 
-        if (dataMap.contains("Raw") && dataMap["Raw"].canConvert<QVariantMap>()) {
-          variantMapMustContain(dataMap, "NumberOfElements");
+        if (dataMap.contains("Tiled") && dataMap["Tiled"].canConvert<QVariantMap>())
+        {
+            const auto elementType = dataMap.contains("TypeName")
+                ? elementTypeSpecifier(dataMap.value("TypeName").toString())
+                : static_cast<ElementTypeSpecifier>(dataMap.value("TypeIndex").toInt());
 
-          const auto numberOfElements = static_cast<std::size_t>(
-                dataMap["NumberOfElements"].toULongLong());
+            setElementTypeSpecifier(elementType);
+            _numRows = variantMap["NumberOfPoints"].toULongLong();
 
-            const auto elementTypeIndex = dataMap.contains("TypeName") 
-              ? elementTypeSpecifier(dataMap.value("TypeName").toString()) 
-              : static_cast<ElementTypeSpecifier>(dataMap.value("TypeIndex").toInt());
+            const auto elementSize = std::visit([](const auto& vector) { return sizeof(typename std::decay_t<decltype(vector)>::value_type); }, _variantOfVectors);
+            const auto tiledStorage = mv::pointdata::tiled::PointDataTiledSerialization::fromVariantMap(dataMap["Tiled"].toMap(), _numRows, _numDimensions, elementSize);
+            _storageBackend = std::make_unique<pointdata::storage::TiledPointsStorageBackend>(tiledStorage, static_cast<std::uint32_t>(elementType));
+        }
+        else if (dataMap.contains("Raw") && dataMap["Raw"].canConvert<QVariantMap>())
+        {
+            variantMapMustContain(dataMap, "NumberOfElements");
+
+            const auto numberOfElements = static_cast<std::size_t>(dataMap["NumberOfElements"].toULongLong());
+
+            const auto elementTypeIndex = dataMap.contains("TypeName")
+                ? elementTypeSpecifier(dataMap.value("TypeName").toString())
+                : static_cast<ElementTypeSpecifier>(dataMap.value("TypeIndex").toInt());
 
             setElementTypeSpecifier(elementTypeIndex);
             resizeVector(numberOfElements);
-          
+
             // Keep allocation and all writes to the exposed buffer mutually
             // exclusive. The synchronous decoder is intentional here: a
             // std::mutex lock may not be handed from this workflow worker to
@@ -281,6 +719,8 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
 
             if (rawDataSize > 0)
                 populateBytesFromBlobMap(dataMap["Raw"].toMap(), static_cast<char*>(getDataVoidPtr()), rawDataSize);
+
+            refreshStorageBackend();
         }
     });
 
@@ -291,10 +731,14 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 {
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
     bool isDense;
+    bool isTiled;
+    std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> tiledStorage;
 
     {
         const auto dataLock = lockData();
         isDense = _isDense;
+        tiledStorage = getTiledStorage();
+        isTiled = static_cast<bool>(tiledStorage);
     }
 
     //const auto baseSaveStage = plan->addNestedWorkflowStage("Save raw data base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
@@ -304,7 +748,27 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
     //
     //;
 
-    if (isDense) {
+    if (isTiled)
+    {
+        const auto tiledDataWeight = std::max(1.0, static_cast<double>(tiledStorage->memoryEstimate().rawDataBytes));
+        const auto serializeTiledStage = plan->addNestedWorkflowStage("Serialize tiled point data", [tiledStorage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+            return mv::pointdata::tiled::PointDataTiledSerialization::toVariantMapWorkflow(*tiledStorage);
+        }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, tiledDataWeight);
+
+        plan->addSequentialStage("Build tiled point data map", [this, serializeTiledStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            const auto dataLock = lockData();
+            QVariantMap outputMap;
+
+            outputMap["TypeIndex"]        = static_cast<std::int32_t>(getElementTypeSpecifier());
+            outputMap["TypeName"]         = elementTypeName(getElementTypeSpecifier());
+            outputMap["Tiled"]            = executionContext->takeOutput(serializeTiledStage).toMap();
+            outputMap["NumberOfElements"] = QVariant::fromValue(static_cast<qulonglong>(getNumberOfElements()));
+
+            executionContext->setOutput(outputMap);
+        });
+    }
+    else if (isDense)
+    {
         const auto storeRawStage = plan->addNestedWorkflowStage("Save raw", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
             const auto dataLock = lockData();
             const auto rawMap   = bytesToBlobVariantMap(static_cast<const char*>(getDataConstVoidPtr()), getRawDataSize());
@@ -334,7 +798,8 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
             const auto expectedBytes = getRawDataSize();
             const auto blobTotalSize = rawMap["Size"].toULongLong();
 
-            if (blobTotalSize != expectedBytes) {
+            if (blobTotalSize != expectedBytes)
+            {
                 throw ManiVaultException(
                     SeverityLevel::Error,
                     "PointData blob size does not match declared point-data dimensions",
@@ -350,7 +815,9 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 
             executionContext->setOutput(outputMap);
         });
-    } else {
+    }
+    else
+    {
         plan->addSequentialStage("Build map", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
             const auto dataLock = lockData();
             QVariantMap outputMap;
@@ -386,6 +853,13 @@ void PointData::extractFullDataForDimension(std::vector<float>& result, const in
 
     result.resize(getNumPoints());
 
+    if (getTiledStorage())
+    {
+        for (std::size_t i = 0; i < result.size(); ++i)
+            result[i] = getValueAt(i * _numDimensions + static_cast<std::size_t>(dimensionIndex));
+        return;
+    }
+
     std::visit(
         [&result, this, dimensionIndex](const auto& vec)
         {
@@ -409,6 +883,16 @@ void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, 
         CheckDimensionIndex(dimensionIndex2);
 
         result.resize(getNumPoints());
+
+        if (getTiledStorage())
+        {
+            for (std::size_t i = 0; i < result.size(); ++i)
+            {
+                const auto n = i * _numDimensions;
+                result[i].set(getValueAt(n + dimensionIndex1), getValueAt(n + dimensionIndex2));
+            }
+            return;
+        }
 
         std::visit(
             [&result, this, dimensionIndex1, dimensionIndex2](const auto& vec)
@@ -435,22 +919,28 @@ void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, 
     }
 }
 
-
-void PointData::extractDataForDimension(std::vector<float> &result, const int dimensionIndex, const std::vector<std::uint32_t> &indices) const
+void PointData::extractDataForDimension(std::vector<float>& result, const int dimensionIndex, const std::vector<std::uint32_t>& indices) const
 {
     CheckDimensionIndex(dimensionIndex);
 
     result.resize(indices.size());
 
-    std::visit(
-        [&result, this, dimensionIndex,
-         indices](const auto &vec) {
-          const auto resultSize = result.size();
+    if (getTiledStorage())
+    {
+        for (std::size_t i = 0; i < result.size(); ++i)
+            result[i] = getValueAt(static_cast<std::size_t>(indices[i]) * _numDimensions + static_cast<std::size_t>(dimensionIndex));
+        return;
+    }
 
-          for (std::size_t i{}; i < resultSize; ++i) {
-            const auto n = std::size_t{indices[i]} * _numDimensions;
-            result[i] = vec[n + dimensionIndex];
-          }
+    std::visit([&result, this, dimensionIndex, indices](const auto& vec)
+        {
+            const auto resultSize = result.size();
+
+            for (std::size_t i{}; i < resultSize; ++i)
+            {
+                const auto n = std::size_t{ indices[i] } * _numDimensions;
+                result[i] = vec[n + dimensionIndex];
+            }
         },
         _variantOfVectors);
 }
@@ -463,6 +953,16 @@ void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, cons
     CheckDimensionIndex(dimensionIndex2);
 
     result.resize(indices.size());
+
+    if (getTiledStorage())
+    {
+        for (std::size_t i = 0; i < result.size(); ++i)
+        {
+            const auto n = static_cast<std::size_t>(indices[i]) * _numDimensions;
+            result[i].set(getValueAt(n + dimensionIndex1), getValueAt(n + dimensionIndex2));
+        }
+        return;
+    }
 
     std::visit(
         [&result, this, dimensionIndex1, dimensionIndex2, indices](const auto& vec)
@@ -481,6 +981,7 @@ void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, cons
 Points::Points(QString dataName, bool mayUnderive /*= true*/, const QString& guid /*= ""*/) :
     DatasetImpl(dataName, mayUnderive, guid),
     _infoAction(nullptr),
+    _pointsAction(nullptr),
     _dimensionsPickerGroupAction(nullptr),
     _dimensionsPickerAction(nullptr)
 {
@@ -491,6 +992,7 @@ void Points::init()
     DatasetImpl::init();
 
     _infoAction = new InfoAction(this, *this);
+    _pointsAction = new PointsAction(this, getSmartPointer());
 
     const auto updateDimensionsPickerAction = [this]() -> void {
         _dimensionsPickerAction->setPointsDataset(*this);
@@ -907,6 +1409,11 @@ InfoAction& Points::getInfoAction()
     return *_infoAction;
 }
 
+PointsAction& Points::getPointsAction()
+{
+    return *_pointsAction;
+}
+
 mv::gui::GroupAction& Points::getDimensionsPickerGroupAction()
 {
     if (!isFull())
@@ -949,6 +1456,267 @@ void Points::setDimensionNames(const std::vector<QString>& dimNames)
     getRawData<PointData>()->setDimensionNames(dimNames);
 
     mv::events().notifyDatasetDataDimensionsChanged(this);
+}
+
+QString Points::getElementTypeName() const
+{
+    if (isProxy())
+    {
+        const auto proxyMembers = getProxyMembers();
+
+        return proxyMembers.isEmpty() ? PointData::elementTypeName(ElementTypeSpecifier::float32) : mv::Dataset<Points>(proxyMembers.first())->getElementTypeName();
+    }
+
+    return getRawData<PointData>()->getElementTypeName();
+}
+
+Points::StorageBackendType Points::getStorageBackendType() const
+{
+    if (isProxy())
+    {
+        const auto proxyMembers = getProxyMembers();
+
+        if (proxyMembers.isEmpty())
+            return StorageBackendType::Unknown;
+
+        const auto firstType = mv::Dataset<Points>(proxyMembers.first())->getStorageBackendType();
+
+        for (const auto& proxyMember : proxyMembers)
+        {
+            if (mv::Dataset<Points>(proxyMember)->getStorageBackendType() != firstType)
+                return StorageBackendType::Mixed;
+        }
+
+        return firstType;
+    }
+
+    return getRawData<PointData>()->getStorageBackendType();
+}
+
+pointdata::storage::StorageBackendCapabilities Points::getStorageBackendCapabilities() const
+{
+    if (isProxy())
+        return 0;
+
+    return getRawData<PointData>()->getStorageBackendCapabilities();
+}
+
+const pointdata::storage::PointsStorageBackend* Points::getStorageBackend() const
+{
+    return isProxy() ? nullptr : getRawData<PointData>()->getStorageBackend();
+}
+
+std::shared_ptr<pointdata::tiled::PointDataTiledStorage> Points::getTiledStorage() const
+{
+    return isProxy() ? nullptr : getRawData<PointData>()->getTiledStorage();
+}
+
+void Points::setTiledLoaderThreadSafe(const bool threadSafe)
+{
+    if (!isProxy())
+    {
+        if (const auto tiledStorage = getRawData<PointData>()->getTiledStorage())
+            tiledStorage->setLoaderThreadSafe(threadSafe);
+    }
+}
+
+void Points::convertToStorageBackend(const StorageBackendType type, const StorageBackendConfiguration& configuration, StorageBackendProgressCallback progress)
+{
+    if (isProxy())
+        throw std::invalid_argument("Storage backend conversion is only supported for concrete point datasets");
+
+    getRawData<PointData>()->convertToStorageBackend(type, configuration, std::move(progress));
+    mv::events().notifyDatasetDataChanged(this);
+}
+
+void Points::initializeTiledStorage(const std::uint64_t rows, const std::uint64_t columns, const ElementTypeSpecifier elementType, const StorageBackendConfiguration& configuration, TiledTileGenerator generator)
+{
+    if (isProxy())
+        throw std::invalid_argument("Storage backend initialization is only supported for concrete point datasets");
+
+    getRawData<PointData>()->initializeTiledStorage(rows, columns, elementType, configuration, std::move(generator));
+    mv::events().notifyDatasetDataChanged(this);
+}
+
+void Points::attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices, std::shared_ptr<void> sourceLifetime)
+{
+    if (isProxy())
+        throw std::invalid_argument("Packed tile sources can only be attached to concrete point datasets");
+
+    getRawData<PointData>()->attachPackedTileSource(filePaths, codecName, offsets, compressedSizes, uncompressedSizes, superTileIndices, std::move(sourceLifetime));
+}
+
+void Points::persistTiledStorage(StorageBackendProgressCallback progress)
+{
+    if (isProxy())
+        throw std::invalid_argument("Tiled storage persistence is only supported for concrete point datasets");
+
+    getRawData<PointData>()->persistTiledStorage(std::move(progress));
+    mv::events().notifyDatasetDataChanged(this);
+}
+
+UniqueWorkflowPlan Points::persistTiledStorageWorkflow()
+{
+    if (isProxy())
+        throw std::invalid_argument("Tiled storage persistence is only supported for concrete point datasets");
+
+    return getRawData<PointData>()->persistTiledStorageWorkflow();
+}
+
+std::unique_ptr<mv::gui::StorageBackendConversionAction> Points::createStorageBackendConversionAction(const StorageBackendType targetType, QObject* parent) const
+{
+    if (isProxy())
+        return nullptr;
+
+    return getRawData<PointData>()->createStorageBackendConversionAction(targetType, parent);
+}
+
+void Points::convertToStorageBackend(const StorageBackendType type, const StorageBackendConversionOptionsPtr options, StorageBackendProgressCallback progress)
+{
+    if (isProxy())
+        throw std::invalid_argument("Storage backend conversion is only supported for concrete point datasets");
+
+    getRawData<PointData>()->convertToStorageBackend(type, std::move(options), std::move(progress));
+    mv::events().notifyDatasetDataChanged(this);
+}
+
+void Points::configureStorageBackend(const StorageBackendConversionOptionsPtr options)
+{
+    if (isProxy())
+        throw std::invalid_argument("Storage backend configuration is only supported for concrete point datasets");
+
+    getRawData<PointData>()->configureStorageBackend(std::move(options));
+    mv::events().notifyDatasetDataChanged(this);
+}
+
+PointDataAccessView Points::getRow(const std::uint64_t row) const
+{
+    if (row >= getNumPoints())
+        return {};
+
+    if (isProxy())
+    {
+        auto rowOffset = row;
+
+        for (const auto& proxyMember : getProxyMembers())
+        {
+            const auto member = mv::Dataset<Points>(proxyMember);
+            const auto memberRowCount = member->getNumPoints();
+
+            if (rowOffset < memberRowCount)
+                return member->getRow(rowOffset);
+
+            rowOffset -= memberRowCount;
+        }
+
+        return {};
+    }
+
+    return isFull() ? getRawData<PointData>()->getRow(row) : getRawData<PointData>()->getRow(indices[static_cast<std::size_t>(row)]);
+}
+
+void Points::visitRows(const std::uint64_t firstRow, const std::uint64_t rowCount, const PointDataAccessVisitor& visitor) const
+{
+    visitRange(firstRow, rowCount, 0, getNumDimensions(), visitor);
+}
+
+void Points::visitRows(const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
+{
+    for (const auto row : rowIds)
+        visitRange(row, 1, 0, getNumDimensions(), visitor);
+}
+
+void Points::visitColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
+{
+    visitRange(0, getNumPoints(), firstColumn, columnCount, visitor);
+}
+
+void Points::visitColumns(const std::vector<std::uint64_t>& columnIds, const PointDataAccessVisitor& visitor) const
+{
+    for (const auto column : columnIds)
+    {
+        if (column >= getNumDimensions())
+            throw std::out_of_range("Point-data column ID is out of bounds");
+    }
+
+    if (isProxy())
+    {
+        for (const auto& proxyMember : getProxyMembers())
+            mv::Dataset<Points>(proxyMember)->visitColumns(columnIds, visitor);
+
+        return;
+    }
+
+    const auto* rawPointData = getRawData<PointData>();
+    if (isFull())
+    {
+        rawPointData->visitColumns(columnIds, visitor);
+        return;
+    }
+
+    std::vector<std::uint64_t> rowIds;
+    rowIds.reserve(static_cast<std::size_t>(getNumPoints()));
+
+    for (std::uint64_t row = 0; row < getNumPoints(); ++row)
+        rowIds.push_back(indices[static_cast<std::size_t>(row)]);
+
+    rawPointData->visitColumns(columnIds, rowIds, visitor);
+}
+
+void Points::visitColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
+{
+    for (const auto row : rowIds)
+        visitRange(row, 1, firstColumn, columnCount, visitor);
+}
+
+void Points::visitRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
+{
+    if (!visitor || firstRow > getNumPoints() || rowCount > getNumPoints() - firstRow || firstColumn > getNumDimensions() || columnCount > getNumDimensions() - firstColumn)
+        throw std::out_of_range("Point-data range is invalid");
+
+    if (rowCount == 0 || columnCount == 0)
+        return;
+
+    if (isProxy())
+    {
+        std::uint64_t proxyRowOffset = 0;
+        const auto requestedEnd = firstRow + rowCount;
+
+        for (const auto& proxyMember : getProxyMembers())
+        {
+            const auto member = mv::Dataset<Points>(proxyMember);
+            const auto memberRowCount = member->getNumPoints();
+            const auto memberEnd = proxyRowOffset + memberRowCount;
+            const auto overlapBegin = std::max(firstRow, proxyRowOffset);
+            const auto overlapEnd = std::min(requestedEnd, memberEnd);
+
+            if (overlapBegin < overlapEnd)
+                member->visitRange(overlapBegin - proxyRowOffset, overlapEnd - overlapBegin, firstColumn, columnCount, visitor);
+
+            proxyRowOffset = memberEnd;
+
+            if (proxyRowOffset >= requestedEnd)
+                break;
+        }
+
+        return;
+    }
+
+    const auto* rawPointData = getRawData<PointData>();
+
+    if (isFull())
+    {
+        rawPointData->visitRange(firstRow, rowCount, firstColumn, columnCount, visitor);
+        return;
+    }
+
+    std::vector<std::uint64_t> rowIds;
+    rowIds.reserve(static_cast<std::size_t>(rowCount));
+
+    for (std::uint64_t row = firstRow; row < firstRow + rowCount; ++row)
+        rowIds.push_back(indices[static_cast<std::size_t>(row)]);
+
+    rawPointData->visitColumns(firstColumn, columnCount, rowIds, visitor);
 }
 
 float Points::getValueAt(const std::size_t index) const
@@ -1210,6 +1978,8 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
 {
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
+    const auto rawDataWeight = isFull() ? std::max(1.0, static_cast<double>(getRawData<PointData>()->getRawDataSize())) : 1.0;
+
     const auto saveDatasetBaseStage = plan->addNestedWorkflowStage("Save dataset base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
         return this->DatasetImpl::toVariantMapWorkflow();
     });
@@ -1219,7 +1989,7 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
     if (isFull()) {
         encodeRawDataStage = plan->addNestedWorkflowStage("Encode raw data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
             return getRawData<PointData>()->toVariantMapWorkflow();
-        });
+        }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, rawDataWeight);
     }
 
     const auto storeRawDataStage = plan->addSequentialStage("Store raw data", [this, saveDatasetBaseStage, encodeRawDataStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> void {

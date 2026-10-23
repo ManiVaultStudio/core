@@ -1,0 +1,113 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// A corresponding LICENSE file is located in the root directory of this source tree
+// Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft)
+
+#pragma once
+
+#include "../interface/PointsStorageBackend.h"
+
+#include "PointDataTiledStorage.h"
+
+#include <functional>
+#include <memory>
+
+namespace mv::pointdata::storage
+{
+
+/**
+ * @brief Describes generator-backed tiled storage to be created by the tiled backend.
+ *
+ * The generator returns row-major bytes for the requested tile. The cache
+ * capacity is applied while the tiled storage is constructed. The options
+ * object itself is not retained by the backend after creation.
+ *
+ * @author T. Kroes
+ */
+struct TiledStorageBackendCreationOptions final : StorageBackendCreationOptions
+{
+    using TileGenerator = std::function<QByteArray(std::uint64_t rowOffset, std::uint64_t columnOffset, std::uint64_t rows, std::uint64_t columns)>;
+
+    std::uint64_t rows                 = 0;   /**< Number of logical matrix rows. */
+    std::uint64_t columns              = 0;   /**< Number of logical matrix columns. */
+    std::size_t   elementSize          = 0;   /**< Size of one generated element in bytes. */
+    std::uint32_t elementTypeIndex     = 0;   /**< PointData element-type index used by access views. */
+    std::size_t   rowTileSize          = 256; /**< Maximum number of rows per tile. */
+    std::size_t   columnTileSize       = 8;   /**< Maximum number of columns per tile. */
+    std::size_t   cacheCapacity        = 8;   /**< Maximum number of generated tile payloads retained in memory. */
+    std::size_t   cacheCapacityBytes   = defaultTileCacheCapacityBytes; /**< Maximum decoded tile payload bytes retained in memory. */
+    bool          packedTiles          = false; /**< Whether serialized tiles are grouped into super tiles. */
+    std::size_t   superTileRows        = 1;   /**< Number of base tile rows in one super tile. */
+    std::size_t   superTileColumns     = 1;   /**< Number of base tile columns in one super tile. */
+    TileGenerator generator;                 /**< Callback that generates one tile on first access. */
+};
+
+/**
+ * @brief Storage-backend adapter for read-only rectangular tiled point data.
+ *
+ * The adapter exposes the existing tile index, bounded cache, and lifetime-safe
+ * tile views through the common backend contract. It does not duplicate tile
+ * ownership: PointDataTiledStorage remains responsible for descriptors,
+ * loading, caching, and serialization.
+ *
+ * @author Thomas Kroes
+ */
+class POINTDATA_EXPORT TiledPointsStorageBackend final : public PointsStorageBackend
+{
+public:
+    /**
+     * Creates an adapter around \p storage and retains shared ownership of it.
+     *
+     * The element-type index is the PointData representation used when tile
+     * bytes are converted to the facade's floating-point access API.
+     */
+    TiledPointsStorageBackend(const std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage>& storage, std::uint32_t elementTypeIndex);
+
+    /** Creates tiled storage from backend-owned creation options, optionally reporting descriptor-index progress. */
+    static std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> create(const TiledStorageBackendCreationOptions& options, StorageBackendProgressCallback progress = {});
+
+    /** Returns the tiled storage owned by this backend. */
+    std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> getStorage() const;
+
+    /** Replaces the tiled storage owned by this backend. */
+    void setStorage(std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> storage);
+
+    /** Returns the tiled backend type. */
+    StorageBackendType getType() const override;
+
+    /** Returns tiled access, lazy loading, and materialization capabilities. */
+    StorageBackendCapabilities getCapabilities() const override;
+
+    /** Creates controls for converting to or configuring the requested backend. */
+    std::unique_ptr<mv::gui::StorageBackendConversionAction> createConversionAction(StorageBackendType targetType, QObject* parent) const override;
+    /** Applies the tiled cache setting without changing tile geometry or backend type. */
+    void applyConfiguration(const StorageBackendConversionOptionsPtr& options) override;
+    /** Returns the number of logical rows in the tiled storage. */
+    std::uint64_t getNumPoints() const override;
+
+    /** Returns the number of logical columns in the tiled storage. */
+    std::uint64_t getNumDimensions() const override;
+
+    /** Returns the size of one stored element in bytes. */
+    std::size_t getElementSize() const override;
+
+    /** Returns the PointData element-type index used by access views. */
+    std::uint32_t getElementTypeIndex() const override;
+
+    /** Loads the requested row and returns a lifetime-safe read-only view. */
+    PointDataAccessView getRow(std::uint64_t row) const override;
+
+    /** Visits a bounded range without materializing unrelated tiles. */
+    void visitRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const override;
+
+    /** Loads one row-major element and converts it to float. */
+    float getValueAt(std::uint64_t flatIndex) const override;
+
+    /** Materializes all tiled values into the caller-owned destination buffer. */
+    void materialize(char* destination) const override;
+
+private:
+    std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> _storage; /**< Tiled payload and cache owner. */
+    std::uint32_t                                               _elementTypeIndex = 0; /**< Stored PointData element type. */
+};
+
+}

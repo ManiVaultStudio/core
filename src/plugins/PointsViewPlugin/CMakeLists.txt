@@ -1,0 +1,54 @@
+cmake_minimum_required(VERSION 3.22)
+
+set(POINTSVIEWPLUGIN "PointsViewPlugin")
+project(${POINTSVIEWPLUGIN} LANGUAGES CXX)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+set(PLUGIN
+    src/PointsViewPlugin.h
+    src/PointsViewPlugin.cpp
+)
+
+set(AUX
+    PluginInfo.json
+)
+
+set(POINTS_VIEW_SOURCES ${PLUGIN} ${AUX})
+
+source_group(Plugin FILES ${PLUGIN})
+source_group(Aux FILES ${AUX})
+
+add_library(${POINTSVIEWPLUGIN} SHARED ${POINTS_VIEW_SOURCES})
+
+target_include_directories(${POINTSVIEWPLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
+target_include_directories(${POINTSVIEWPLUGIN} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/PointData/")
+target_compile_features(${POINTSVIEWPLUGIN} PRIVATE cxx_std_${MV_CXX_STANDARD})
+
+target_link_libraries(${POINTSVIEWPLUGIN} PRIVATE Qt6::Core Qt6::Widgets Qt6::Network Qt6::WebEngineWidgets ${MV_PUBLIC_LIB} PointData)
+
+mv_check_and_set_AVX(${POINTSVIEWPLUGIN} ${MV_USE_AVX})
+
+set_target_properties(${POINTSVIEWPLUGIN} PROPERTIES
+    AUTOMOC ON
+    UNITY_BUILD ${MV_UNITY_BUILD}
+)
+
+install(TARGETS ${POINTSVIEWPLUGIN}
+    RUNTIME DESTINATION Plugins COMPONENT PLUGINS
+    LIBRARY DESTINATION Plugins COMPONENT PLUGINS
+)
+
+add_custom_command(TARGET ${POINTSVIEWPLUGIN} POST_BUILD
+    COMMAND ${CMAKE_COMMAND}
+        --install ${CMAKE_CURRENT_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
+)
+
+mv_handle_plugin_config(${POINTSVIEWPLUGIN})
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set_property(TARGET ${POINTSVIEWPLUGIN} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<IF:$<CONFIG:DEBUG>,${MV_INSTALL_DIR}/Debug,$<IF:$<CONFIG:RELWITHDEBINFO>,${MV_INSTALL_DIR}/RelWithDebInfo,${MV_INSTALL_DIR}/Release>>)
+    set_property(TARGET ${POINTSVIEWPLUGIN} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,"${MV_INSTALL_DIR}/Debug/${MV_APPLICATION_NAME}.exe",$<IF:$<CONFIG:RELWITHDEBINFO>,"${MV_INSTALL_DIR}/RelWithDebInfo/${MV_APPLICATION_NAME}.exe","${MV_INSTALL_DIR}/Release/${MV_APPLICATION_NAME}.exe">>)
+endif()

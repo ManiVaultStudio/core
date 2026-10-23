@@ -11,31 +11,50 @@
 #include "LinkedData.h"
 #include "PointDataRange.h"
 #include "Set.h"
+#include "storage/interface/PointDataAccess.h"
 #include "SparseMatrix.h"
+#include "storage/interface/PointsStorageBackendTypes.h"
 
 #include "event/EventListener.h"
 
 #include <biovault_bfloat16/biovault_bfloat16.h>
 
+#include <QByteArray>
 #include <QDebug>
 #include <QMap>
 #include <QString>
+#include <QStringList>
 #include <QVariantMap>
 
 #include <array>
 #include <cassert>
+#include <memory>
 #include <mutex>
 #include <utility>
 #include <variant>
 #include <vector>
 
+class QObject;
+
 namespace mv
 {
+    namespace pointdata::tiled
+    {
+        class PointDataTiledStorage;
+    }
+
+    namespace pointdata::storage
+    {
+        class EagerPointsStorageBackend;
+        class PointsStorageBackend;
+    }
+
     // From "graphics/Vector2f.h"
     class Vector2f;
 
     namespace gui {
         class GroupAction;
+        class StorageBackendConversionAction;
     }
 
     namespace legacy
@@ -52,18 +71,38 @@ namespace mv
 const mv::DataType PointType = mv::DataType(QString("Points"));
 
 class InfoAction;
+class PointsAction;
 class DimensionsPickerAction;
 class ClusterAction;
+class Points;
 
 // =============================================================================
 // Raw Data
 // =============================================================================
 
+/**
+ * @brief Dense point-data storage and access interface.
+ *
+ * PointData is the storage-neutral entry point for datasets whose values are
+ * arranged as rows of points and columns of dimensions. It retains the
+ * established eager vector representation for compatibility with existing
+ * consumers, while also providing an experimental tiled representation for
+ * datasets that are too large to load and decode as one contiguous buffer.
+ *
+ * The tiled functionality is deliberately exposed through this class without
+ * making the tiled implementation part of the public header. This keeps the
+ * common PointData include lightweight and allows other storage backends to
+ * implement the same row, column, range, and visitor APIs in the future.
+ * Tiled storage is currently read-only; legacy raw-pointer and mutation APIs
+ * materialize tiled data when a contiguous eager buffer is required.
+ *
+ * @author Thomas Kroes
+ */
 class POINTDATA_EXPORT PointData : public mv::plugin::RawData
 {
 public:
     using DataLock = std::unique_lock<std::recursive_mutex>;
-
+    using TiledTileGenerator = std::function<QByteArray(std::uint64_t rowOffset, std::uint64_t columnOffset, std::uint64_t rows, std::uint64_t columns)>;
     enum class ElementTypeSpecifier
     {
         float32,
@@ -215,8 +254,8 @@ public:
     template <std::size_t N>
     using ElementTypeAt = typename std::variant_alternative_t<N, VariantOfVectors>::value_type;
 
-    PointData(mv::plugin::PluginFactory* factory) : RawData(factory, PointType) { }
-    ~PointData() override = default;
+    PointData(mv::plugin::PluginFactory* factory);
+    ~PointData() override;
 
     /**
      * Acquires exclusive access to the point-data storage and its metadata.
@@ -245,11 +284,114 @@ public:
      */
     std::uint64_t getRawDataSize() const override;
 
+    /** Get the name of the currently stored element type. */
+    QString getElementTypeName() const { return elementTypeName(getElementTypeSpecifier()); }
+
     /**
      *Returns void pointer to the underlying array serving as element storage.
      */
     void* getDataVoidPtr();
     const void* getDataConstVoidPtr() const;
+
+    /** Returns the physical storage backend used by this concrete dataset. */
+    mv::pointdata::storage::StorageBackendType getStorageBackendType() const;
+
+    /** Returns the backend capability flags for this concrete dataset. */
+    mv::pointdata::storage::StorageBackendCapabilities getStorageBackendCapabilities() const;
+
+    /** Returns the active storage backend without exposing its concrete representation. */
+    const mv::pointdata::storage::PointsStorageBackend* getStorageBackend() const;
+
+    /** Creates controls for converting to the requested storage backend. */
+    std::unique_ptr<mv::gui::StorageBackendConversionAction> createStorageBackendConversionAction(mv::pointdata::storage::StorageBackendType targetType, QObject* parent = nullptr) const;
+
+    /**
+     * Converts this concrete dataset to the requested storage backend. When
+     * backend-specific creation options are supplied for an empty dataset,
+     * this operation initializes the requested backend instead.
+     *
+     * Conversion is transactional: the current backend remains active until
+     * the requested backend has been created successfully. The experimental
+     * implementation currently supports Eager-to-Tiled conversion and
+     * materialization back to Eager storage.
+     */
+    void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, const mv::pointdata::storage::StorageBackendConfiguration& configuration = {}, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
+
+    /** Initializes an empty dataset as generator-backed tiled storage without materializing its values. */
+    void initializeTiledStorage(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, const mv::pointdata::storage::StorageBackendConfiguration& configuration, TiledTileGenerator generator);
+
+    /**
+     * @brief Attaches pre-encoded packed tiled files to tiled point data.
+     *
+     * The storage keeps the source paths and uses them for lazy tile reads.
+     * Project serialization copies the files into project storage and writes
+     * the corresponding tile metadata without decoding and re-encoding them.
+     * The caller must keep the source files available until that serialization
+     * has completed. When supplied, a copy of \p sourceLifetime is retained
+     * by the source-backed storage and released when that source is no longer
+     * used. The token is opaque to PointData and may own the source files.
+     *
+     * @param filePaths Packed supertile files in super-tile index order.
+     * @param codecName Registered codec used for the packed blocks.
+     * @param offsets Byte offsets of logical tiles within their supertile.
+     * @param compressedSizes Compressed byte sizes of logical tiles.
+     * @param uncompressedSizes Uncompressed byte sizes of logical tiles.
+     * @param superTileIndices Super-tile index for each logical tile.
+     * @param sourceLifetime Optional opaque lifetime token for the source files.
+     * @throws std::invalid_argument If no tiled storage exists or metadata vectors have different lengths.
+     * @throws std::logic_error If the storage is not configured for packed tiles.
+     */
+    void attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices, std::shared_ptr<void> sourceLifetime = {});
+
+    /**
+     * Persists the currently configured tiled storage immediately.
+     *
+     * This is useful for importers that use a temporary source-backed tile
+     * generator, such as an HDF5 reader. After this call, the tiled payloads
+     * are owned by the project storage and no longer depend on the source
+     * generator or source file.
+     */
+    void persistTiledStorage(mv::pointdata::storage::StorageBackendProgressCallback progress = {});
+
+    /** Creates a workflow that persists tiled storage and installs the persisted backend on completion. */
+    mv::workflow::UniqueWorkflowPlan persistTiledStorageWorkflow();
+
+    /** Converts or initializes using backend-specific options supplied by a conversion action or backend factory. */
+    void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, mv::pointdata::storage::StorageBackendConversionOptionsPtr options, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
+
+    /**
+     * Applies options owned by the current storage backend without converting
+     * the point data to another backend.
+     *
+     * The options must be compatible with the active backend. The operation
+     * throws std::invalid_argument when no backend is available or the backend
+     * rejects the supplied options.
+     */
+    void configureStorageBackend(mv::pointdata::storage::StorageBackendConversionOptionsPtr options);
+
+    /** Returns one row as a storage-neutral read-only view, or an empty view when row is out of bounds. */
+    PointDataAccessView getRow(std::uint64_t row) const;
+
+    /** Visits a contiguous range of rows in row-major order and throws for invalid bounds. */
+    void visitRows(std::uint64_t firstRow, std::uint64_t rowCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits selected rows in the order given by rowIds; invalid IDs throw. */
+    void visitRows(const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a contiguous column range for every row and throws for invalid bounds. */
+    void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits selected columns for every row in columnIds order; invalid IDs throw. */
+    void visitColumns(const std::vector<std::uint64_t>& columnIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a contiguous column range for selected rows; invalid row IDs throw. */
+    void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits selected columns for selected rows, grouping contiguous columns where possible. */
+    void visitColumns(const std::vector<std::uint64_t>& columnIds, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a rectangular row and column range without materializing the complete dataset. */
+    void visitRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
 
     static constexpr std::array<const char*, std::variant_size_v<VariantOfVectors>> getElementTypeNames()
     {
@@ -386,8 +528,10 @@ public:
     {
         const auto dataLock = lockData();
 
+        clearStorageBackend();
         convertData(data, numPoints * numDimensions);
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
+        refreshStorageBackend();
     }
 
     /// Converts the specified data to the internal data, using static_cast for each data element.
@@ -398,8 +542,10 @@ public:
     {
         const auto dataLock = lockData();
 
+        clearStorageBackend();
         convertData(inputDataContainer.data(), inputDataContainer.size());
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
+        refreshStorageBackend();
     }
 
     /// Copies the specified data into the internal data, sets the number of
@@ -410,8 +556,10 @@ public:
     {
          const auto dataLock = lockData();
 
+         clearStorageBackend();
          _variantOfVectors = VariantOfVectors( std::vector<T>(data, data + numPoints * numDimensions) );
          _numDimensions = static_cast<std::uint64_t>(numDimensions);
+         refreshStorageBackend();
     }
 
 
@@ -427,8 +575,10 @@ public:
     {
         const auto dataLock = lockData();
 
+        clearStorageBackend();
         _variantOfVectors = VariantOfVectors(data);
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
+        refreshStorageBackend();
     }
 
     /// Efficiently "moves" the data from the specified vector into the internal
@@ -439,8 +589,10 @@ public:
     {
         const auto dataLock = lockData();
 
+        clearStorageBackend();
         _variantOfVectors = VariantOfVectors(std::move(data));
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
+        refreshStorageBackend();
     }
 
     void setDimensionNames(const std::vector<QString>& dimNames);
@@ -543,28 +695,59 @@ public: // Serialization
     mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const final;
 
 private:
+    void makeTiled(std::size_t rowTileSize, std::size_t columnTileSize, std::function<void(float)> progress = {});
+    void refreshStorageBackend();
+    void clearStorageBackend();
+    std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> getTiledStorage() const;
+
+    PointDataAccessView getEagerRow(std::uint64_t row) const;
+    void visitEagerRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+    float getEagerValueAt(std::size_t index) const;
+
+    void materializeTiled(mv::pointdata::storage::StorageBackendProgressCallback progress = {});
     mutable std::recursive_mutex _dataMutex;
 
     VariantOfVectors _variantOfVectors;
 
     /** Number of features of each data point */
     std::uint64_t _numDimensions = 1;
+    std::unique_ptr<mv::pointdata::storage::PointsStorageBackend> _storageBackend;
 
     std::vector<QString> _dimNames;
 
 private: // Sparse data, experimental
-    std::uint64_t _numRows = 0;
+    std::uint64_t                    _numRows    = 0;
     SparseMatrix<size_t, size_t, float> _sparseData = {};
 
     bool _isDense = true;
 
     friend class mv::legacy::PointDataLegacySerializer;
+    friend class mv::pointdata::storage::EagerPointsStorageBackend;
+    friend class Points;
 };
 
 // =============================================================================
 // Point Set
 // =============================================================================
 
+/**
+ * @brief Logical point-data dataset and storage facade.
+ *
+ * Points is the public dataset-level facade for PointData. It represents a
+ * complete point set, a subset selected by source indices, or a proxy that
+ * combines several point datasets. The facade keeps consumers independent of
+ * whether a concrete member uses eager vectors or read-only tiled storage and
+ * translates logical row IDs when subsets or proxies are involved.
+ *
+ * The tiled and visitor APIs are intentionally exposed here first as an
+ * experimental storage-neutral access layer. Consumers should use these
+ * functions instead of reaching through the dataset to its PointData object.
+ * Returned views are read-only and retain their payload through their lifetime
+ * token; legacy raw-pointer and mutation paths preserve their existing eager
+ * materialization behavior.
+ *
+ * @author Thomas Kroes
+ */
 class POINTDATA_EXPORT Points : public mv::DatasetImpl
 {
 private:
@@ -667,6 +850,13 @@ private:
 public:
     Points(QString dataName, bool mayUnderive = true, const QString& guid = "");
     ~Points() override = default;
+
+    using ElementTypeSpecifier = PointData::ElementTypeSpecifier;
+    using StorageBackendType = mv::pointdata::storage::StorageBackendType;
+    using StorageBackendConfiguration = mv::pointdata::storage::StorageBackendConfiguration;
+    using StorageBackendProgressCallback = mv::pointdata::storage::StorageBackendProgressCallback;
+    using StorageBackendConversionOptionsPtr = mv::pointdata::storage::StorageBackendConversionOptionsPtr;
+    using TiledTileGenerator = PointData::TiledTileGenerator;
 
     void init() override;
 
@@ -888,6 +1078,108 @@ public:
         }
     }
 
+    /** Returns the name of the element type used by this logical dataset. */
+    QString getElementTypeName() const;
+
+    /** Returns the physical backend type used by this concrete point dataset. */
+    StorageBackendType getStorageBackendType() const;
+
+    /** Returns the capability flags of the physical backend used by this dataset. */
+    mv::pointdata::storage::StorageBackendCapabilities getStorageBackendCapabilities() const;
+
+    /** Returns the active storage backend for a concrete point dataset. */
+    const mv::pointdata::storage::PointsStorageBackend* getStorageBackend() const;
+
+    /** Returns the tiled storage implementation for a concrete tiled dataset, or an empty pointer otherwise. */
+    std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> getTiledStorage() const;
+
+    /** Enables concurrent tiled-storage loader callbacks for this concrete dataset. */
+    void setTiledLoaderThreadSafe(bool threadSafe);
+
+    /** Creates controls for converting to the requested storage backend. */
+    std::unique_ptr<mv::gui::StorageBackendConversionAction> createStorageBackendConversionAction(StorageBackendType targetType, QObject* parent = nullptr) const;
+
+    /** Converts this concrete dataset to a storage backend transactionally. An empty dataset may be initialized with backend creation options. */
+    void convertToStorageBackend(StorageBackendType type, const StorageBackendConfiguration& configuration = {}, StorageBackendProgressCallback progress = {});
+
+    /** Initializes an empty dataset as generator-backed tiled storage without materializing its values. */
+    void initializeTiledStorage(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, const StorageBackendConfiguration& configuration, TiledTileGenerator generator);
+
+    /**
+     * @brief Attaches pre-encoded packed tiled files to this concrete dataset.
+     *
+     * Proxy datasets cannot own a packed tile source. The source files must
+     * stay available while the dataset reads tiles and until project
+     * serialization has copied them. An optional lifetime token can keep an
+     * owner for the files alive until the source is no longer used.
+     *
+     * @param filePaths Packed supertile files in super-tile index order.
+     * @param codecName Registered codec used for the packed blocks.
+     * @param offsets Byte offsets of logical tiles within their supertile.
+     * @param compressedSizes Compressed byte sizes of logical tiles.
+     * @param uncompressedSizes Uncompressed byte sizes of logical tiles.
+     * @param superTileIndices Super-tile index for each logical tile.
+     * @param sourceLifetime Optional opaque lifetime token retained until the
+     * source-backed storage is no longer used.
+     * @throws std::invalid_argument If called on a proxy dataset or metadata vectors have different lengths.
+     */
+    void attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices, std::shared_ptr<void> sourceLifetime = {});
+
+    /** Persists the currently configured tiled storage and detaches it from its source tile generator. */
+    void persistTiledStorage(StorageBackendProgressCallback progress = {});
+
+    /** Creates a workflow that persists tiled storage and installs the persisted backend on completion. */
+    mv::workflow::UniqueWorkflowPlan persistTiledStorageWorkflow();
+
+    /** Converts or initializes using backend-specific options supplied by a conversion action or backend factory. */
+    void convertToStorageBackend(StorageBackendType type, StorageBackendConversionOptionsPtr options, StorageBackendProgressCallback progress = {});
+
+    /**
+     * Applies options owned by the current storage backend of this concrete
+     * dataset. Proxy datasets are rejected because their members may use
+     * different physical backends and configurations.
+     */
+    void configureStorageBackend(StorageBackendConversionOptionsPtr options);
+
+    /** Returns one logical row as a storage-neutral read-only view, translating subset or proxy indices. */
+    PointDataAccessView getRow(std::uint64_t row) const;
+
+    /** Visits a contiguous range of logical rows, translating proxy and subset indices. */
+    void visitRows(std::uint64_t firstRow, std::uint64_t rowCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits selected logical rows in rowIds order. */
+    void visitRows(const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a contiguous column range for every logical row. */
+    void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits selected logical columns in columnIds order for the logical dataset. */
+    void visitColumns(const std::vector<std::uint64_t>& columnIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a contiguous column range for selected logical rows. */
+    void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a rectangular range of logical rows and columns without full materialization. */
+    void visitRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Returns the element type represented by a type name. */
+    static ElementTypeSpecifier elementTypeSpecifier(const QString& typeName)
+    {
+        return PointData::elementTypeSpecifier(typeName);
+    }
+
+    /** Returns the display name for an element type. */
+    static QString elementTypeName(const ElementTypeSpecifier elementTypeSpecifier)
+    {
+        return PointData::elementTypeName(elementTypeSpecifier);
+    }
+
+    /** Returns the names of all supported element types. */
+    static constexpr auto getElementTypeNames()
+    {
+        return PointData::getElementTypeNames();
+    }
+
     const std::vector<QString>& getDimensionNames() const;
 
     void setDimensionNames(const std::vector<QString>& dimNames);
@@ -1011,6 +1303,7 @@ public: // Index transformation
 public: // Action getters
 
     InfoAction& getInfoAction();
+    PointsAction& getPointsAction();
     mv::gui::GroupAction& getDimensionsPickerGroupAction();
     DimensionsPickerAction& getDimensionsPickerAction();
 
@@ -1085,6 +1378,7 @@ public:
     std::vector<std::uint32_t> indices;
 
     InfoAction*                 _infoAction;                    /** Non-owning pointer to info action */
+    PointsAction*               _pointsAction;                   /** Non-owning pointer to points action */
     mv::gui::GroupAction*       _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
     DimensionsPickerAction*     _dimensionsPickerAction;        /** Non-owning pointer to dimensions picker action */
     mv::EventListener           _eventListener;                 /** Listen to ManiVault core events */
@@ -1096,6 +1390,17 @@ public:
 // Factory
 // =============================================================================
 
+/**
+ * @brief Registers and constructs the PointData raw-data plugin.
+ *
+ * PointDataFactory connects the Points dataset type to the plugin manager and
+ * keeps creation, metadata, and serialization discovery separate from the
+ * PointData storage implementation. The factory supports the established
+ * eager serialized representation while PointData may restore an additive
+ * tiled representation when present in a project.
+ *
+ * @author Thomas Kroes
+ */
 class PointDataFactory : public mv::plugin::RawDataFactory
 {
     Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)

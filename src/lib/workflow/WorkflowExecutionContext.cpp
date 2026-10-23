@@ -14,6 +14,32 @@ using namespace mv::util;
 namespace mv::workflow
 {
 
+namespace
+{
+
+QString findActiveStage(const WorkflowProgressNode::Snapshot& snapshot)
+{
+    for (const auto& child : snapshot.children)
+    {
+        if (child.status != WorkflowProgressNode::Status::Running)
+            continue;
+
+        const auto nestedStage = findActiveStage(child);
+        if (!nestedStage.isEmpty())
+            return nestedStage;
+
+        if (child.type == WorkflowExecutionNodeType::SequentialStage || child.type == WorkflowExecutionNodeType::ParallelStage)
+            return child.name;
+
+        if (child.type == WorkflowExecutionNodeType::NestedWorkflow)
+            return child.name;
+    }
+
+    return {};
+}
+
+}
+
 WorkflowExecutionContext::WorkflowExecutionContext() :
     _id(QUuid::createUuid()),
     _outputId(_id)
@@ -492,10 +518,17 @@ void WorkflowExecutionContext::syncTaskProgress() const
         return;
 
     const auto progress = static_cast<float>(_state->getOverallProgress());
+    const auto progressRoot = _state->getProgressRoot();
+    const auto activeStage = progressRoot ? findActiveStage(progressRoot->createSnapshot()) : QString{};
 
-    QMetaObject::invokeMethod(_task, [task = _task, progress]() {
-    	if (task)
-			task->setProgress(progress);
+    QMetaObject::invokeMethod(_task, [task = _task, progress, activeStage]() {
+        if (task)
+        {
+            task->setProgress(progress);
+
+            if (!activeStage.isEmpty())
+                task->setProgressDescription(activeStage);
+        }
     }, Qt::QueuedConnection);
 }
 

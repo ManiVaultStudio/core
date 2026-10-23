@@ -9,6 +9,8 @@
 #include <QDir>
 #include <QCryptographicHash>
 
+#include <cstdint>
+
 class QuaZip;
 
 namespace mv::util {
@@ -87,6 +89,17 @@ public:
      * @return Byte array containing the file data
      */
     static QByteArray readZipEntryToMemory(const QString& zipPath, const QString& entryName);
+
+    /**
+     * Reads a byte range from a file in a ZIP archive directly to memory.
+     *
+     * @param zipPath File path of the compressed input file.
+     * @param entryName File name of the compressed source file.
+     * @param offset Byte offset within the archive entry.
+     * @param size Number of bytes to read.
+     * @return Byte array containing the requested range.
+     */
+    static QByteArray readZipEntryRangeToMemory(const QString& zipPath, const QString& entryName, std::uint64_t offset, std::uint64_t size);
 
 protected:
 

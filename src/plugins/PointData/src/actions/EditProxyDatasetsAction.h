@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "PointData.h"
+#include "../PointData.h"
 
 /**
  * Edit proxy datasets action class

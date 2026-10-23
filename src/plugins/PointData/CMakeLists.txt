@@ -12,11 +12,29 @@ set(POINTS_SOURCES
     src/PointDataLegacySerialization.cpp
     src/PointDataIterator.h
     src/PointDataRange.h
-    src/PointView.h
+    src/view/PointView.h
     src/RandomAccessRange.h
     src/SparseMatrix.h
-	src/DimensionNamesSerializer.h
-	src/DimensionNamesSerializer.cpp
+    src/DimensionNamesSerializer.h
+    src/DimensionNamesSerializer.cpp
+    src/DimensionPickerAction.cpp
+    src/DimensionsPickerAction.cpp
+    src/DimensionsPickerFilterAction.cpp
+    src/DimensionsPickerHolder.cpp
+    src/DimensionsPickerItemModel.cpp
+    src/DimensionsPickerMiscellaneousAction.cpp
+    src/DimensionsPickerProxyModel.cpp
+    src/DimensionsPickerSelectAction.cpp
+    src/ModelResetter.cpp
+    src/developer/PointDataPhantomGenerator.cpp
+    src/developer/PointDataBenchmark.cpp
+)
+
+set(POINTS_VIEW_WIDGETS
+    src/view/PointsTableModel.h
+    src/view/PointsTableModel.cpp
+    src/view/PointsViewWidget.h
+    src/view/PointsViewWidget.cpp
 )
 
 set(POINTS_HEADERS
@@ -24,13 +42,8 @@ set(POINTS_HEADERS
     src/PointDataLegacySerialization.h
     src/PointDataIterator.h
     src/PointDataRange.h
-    src/PointView.h
+    src/view/PointView.h
     src/RandomAccessRange.h
-    src/InfoAction.h
-    src/SelectedIndicesAction.h
-    src/ProxyDatasetsAction.h
-    src/EditProxyDatasetsAction.h
-    src/NumberOfSelectedPointsAction.h
     src/DimensionPickerAction.h
     src/DimensionsPickerAction.h
     src/DimensionsPickerFilterAction.h
@@ -40,10 +53,76 @@ set(POINTS_HEADERS
     src/DimensionsPickerItemModel.h
     src/DimensionsPickerProxyModel.h
     src/ModelResetter.h
-    src/CreateSetFromSelectionAction.h
+    src/actions/InfoAction.h
+    src/actions/SelectedIndicesAction.h
+    src/actions/ProxyDatasetsAction.h
+    src/actions/EditProxyDatasetsAction.h
+    src/actions/NumberOfSelectedPointsAction.h
+    src/actions/CreateSetFromSelectionAction.h
     src/SparseMatrix.h
-	src/DimensionNamesSerializer.h
+    src/DimensionNamesSerializer.h
+    src/actions/PointsAction.h
+    src/actions/PointsViewAction.h
+    src/actions/StorageBackendAction.h
+    src/actions/StorageBackendConfiguratorAction.h
+    src/view/PointsTableModel.h
+    src/view/PointsViewWidget.h
+    src/developer/PointDataPhantomGenerator.h
+    src/developer/PointDataBenchmark.h
 )
+
+set(POINTS_STORAGE_COMMON_HEADERS
+    src/storage/interface/PointDataAccess.h
+    src/storage/interface/PointsStorageBackend.h
+    src/storage/interface/PointsStorageBackendTypes.h
+)
+
+set(POINTS_STORAGE_ACTION_HEADERS
+    src/storage/actions/StorageBackendConversionAction.h
+    src/storage/actions/TiledStorageBackendConversionAction.h
+)
+
+set(POINTS_STORAGE_WIDGET_HEADERS
+    src/storage/widgets/StorageBackendConfigurationDialog.h
+)
+
+set(POINTS_STORAGE_ACTION_SOURCES
+    src/storage/widgets/StorageBackendConfigurationDialog.cpp
+    src/storage/actions/TiledStorageBackendConversionAction.cpp
+)
+
+set(POINTS_STORAGE_EAGER_HEADERS
+    src/storage/eager/EagerPointsStorageBackend.h
+)
+
+set(POINTS_STORAGE_EAGER_SOURCES
+    src/storage/eager/EagerPointsStorageBackend.cpp
+)
+
+set(POINTS_STORAGE_TILED_HEADERS
+    src/storage/tiled/PointDataTile.h
+    src/storage/tiled/PointDataTileCache.h
+    src/storage/tiled/PointDataTiledStorage.h
+    src/storage/tiled/PointDataTiledSerialization.h
+    src/storage/tiled/PackedTileFile.h
+    src/storage/tiled/TiledPointsStorageBackend.h
+    src/storage/tiled/TiledStorageAsymmetryAction.h
+    src/storage/tiled/TiledStorageGeometry.h
+    src/storage/tiled/PointDataStorageRecommendation.h
+    src/storage/tiled/PointDataStorageRecommendationDialog.h
+)
+
+set(POINTS_STORAGE_TILED_SOURCES
+    src/storage/tiled/TiledPointsStorageBackend.cpp
+    src/storage/tiled/TiledStorageAsymmetryAction.cpp
+    src/storage/tiled/PointDataStorageRecommendationDialog.cpp
+    src/storage/tiled/PointDataTileCache.cpp
+    src/storage/tiled/PackedTileFile.cpp
+    src/storage/tiled/PointDataTiledStorage.cpp
+    src/storage/tiled/PointDataTiledSerialization.cpp
+)
+
+set(POINTS_STORAGE_HEADERS ${POINTS_STORAGE_COMMON_HEADERS} ${POINTS_STORAGE_ACTION_HEADERS} ${POINTS_STORAGE_EAGER_HEADERS} ${POINTS_STORAGE_TILED_HEADERS})
 
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects
 set(BFLOAT_HEADER
@@ -51,18 +130,6 @@ set(BFLOAT_HEADER
 )
 
 set(ACTIONS_SOURCES
-    src/InfoAction.h
-    src/InfoAction.cpp
-    src/ProxyDatasetsAction.h
-    src/ProxyDatasetsAction.cpp
-    src/EditProxyDatasetsAction.h
-    src/EditProxyDatasetsAction.cpp
-    src/NumberOfSelectedPointsAction.h
-    src/NumberOfSelectedPointsAction.cpp
-    src/SelectedIndicesAction.h
-    src/SelectedIndicesAction.cpp
-    src/CreateSetFromSelectionAction.h
-    src/CreateSetFromSelectionAction.cpp
     src/DimensionPickerAction.h
     src/DimensionPickerAction.cpp
     src/DimensionsPickerAction.h
@@ -79,8 +146,26 @@ set(ACTIONS_SOURCES
     src/DimensionsPickerSelectAction.cpp
     src/DimensionsPickerMiscellaneousAction.h
     src/DimensionsPickerMiscellaneousAction.cpp
-    src/ModelResetter.h
-    src/ModelResetter.cpp
+    src/actions/InfoAction.h
+    src/actions/InfoAction.cpp
+    src/actions/ProxyDatasetsAction.h
+    src/actions/ProxyDatasetsAction.cpp
+    src/actions/EditProxyDatasetsAction.h
+    src/actions/EditProxyDatasetsAction.cpp
+    src/actions/NumberOfSelectedPointsAction.h
+    src/actions/NumberOfSelectedPointsAction.cpp
+    src/actions/SelectedIndicesAction.h
+    src/actions/SelectedIndicesAction.cpp
+    src/actions/CreateSetFromSelectionAction.h
+    src/actions/CreateSetFromSelectionAction.cpp
+    src/actions/PointsAction.h
+    src/actions/PointsAction.cpp
+    src/actions/PointsViewAction.h
+    src/actions/PointsViewAction.cpp
+    src/actions/StorageBackendAction.h
+    src/actions/StorageBackendAction.cpp
+    src/actions/StorageBackendConfiguratorAction.h
+    src/actions/StorageBackendConfiguratorAction.cpp
 )
 
 set(POINT_DATA_AUX
@@ -89,14 +174,37 @@ set(POINT_DATA_AUX
 
 source_group(Plugin FILES ${POINTS_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
+source_group(Widgets FILES ${POINTS_VIEW_WIDGETS})
+source_group(View FILES
+    src/view/PointView.h
+)
+source_group(Storage\\widgets FILES
+    ${POINTS_STORAGE_WIDGET_HEADERS}
+)
+source_group(Storage\\Actions FILES
+    ${POINTS_STORAGE_ACTION_HEADERS}
+    ${POINTS_STORAGE_ACTION_SOURCES}
+)
+source_group(Storage\\Interface FILES
+    ${POINTS_STORAGE_COMMON_HEADERS}
+)
+source_group(Storage\\Eager FILES
+    ${POINTS_STORAGE_EAGER_HEADERS}
+    ${POINTS_STORAGE_EAGER_SOURCES}
+)
+source_group(Storage\\Tiled FILES
+    ${POINTS_STORAGE_TILED_HEADERS}
+    ${POINTS_STORAGE_TILED_SOURCES}
+)
 source_group(BFloat FILES ${BFLOAT_HEADER})
 source_group(Aux FILES ${POINT_DATA_AUX})
 
-add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINT_DATA_AUX})
+add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINTS_VIEW_WIDGETS} ${POINTS_STORAGE_HEADERS} ${POINTS_STORAGE_ACTION_SOURCES} ${POINTS_STORAGE_EAGER_SOURCES} ${POINTS_STORAGE_TILED_SOURCES} ${POINT_DATA_AUX})
 
 add_library(ManiVault::${POINTDATA} ALIAS ${POINTDATA})
 
 target_include_directories(${POINTDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
+target_include_directories(${POINTDATA} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src" "${CMAKE_CURRENT_SOURCE_DIR}/src/view")
 target_include_directories(${POINTDATA} PRIVATE ${MV_ROOT_DIR}/external/biovault/)
 
 target_compile_features(${POINTDATA} PUBLIC cxx_std_${MV_CXX_STANDARD})
@@ -115,7 +223,7 @@ file(GLOB EXPORT_HEADER_FILE_NAME
     RELATIVE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/*_export.h)
 list(APPEND POINTS_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAME})
 
-target_link_libraries(${POINTDATA} PRIVATE Qt6::Widgets)
+target_link_libraries(${POINTDATA} PRIVATE Qt6::Concurrent Qt6::Widgets)
 target_link_libraries(${POINTDATA} PRIVATE Qt6::WebEngineWidgets)
 target_link_libraries(${POINTDATA} PRIVATE ${MV_PUBLIC_LIB})
 
@@ -141,6 +249,31 @@ install(TARGETS ${POINTDATA}
     PUBLIC_HEADER DESTINATION "$<CONFIGURATION>/include/${POINTDATA}/" COMPONENT HEADERS
 )
 
+install(FILES ${POINTS_STORAGE_COMMON_HEADERS}
+    DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/interface/"
+    COMPONENT HEADERS
+)
+
+install(FILES ${POINTS_STORAGE_ACTION_HEADERS}
+    DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/actions/"
+    COMPONENT HEADERS
+)
+
+install(FILES ${POINTS_STORAGE_WIDGET_HEADERS}
+    DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/widgets/"
+    COMPONENT HEADERS
+)
+
+install(FILES ${POINTS_STORAGE_EAGER_HEADERS}
+    DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/eager/"
+    COMPONENT HEADERS
+)
+
+install(FILES ${POINTS_STORAGE_TILED_HEADERS}
+    DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/tiled/"
+    COMPONENT HEADERS
+)
+
 # Copy the external biovault_bfloat16 header into its own subfolder - cmake's install PUBLIC_HEADER flattens all subdirs
 install(FILES "${BFLOAT_HEADER}" DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/biovault_bfloat16/")
 
@@ -154,7 +287,6 @@ add_custom_command(TARGET ${POINTDATA} POST_BUILD
 
 mv_handle_plugin_config(${POINTDATA})
 
-# Currentlt, no tests are available
-#if (MV_USE_GTEST)
-#    add_subdirectory(gtest)
-#endif()
+if(MV_BUILD_TESTING)
+    add_subdirectory(gtest)
+endif()

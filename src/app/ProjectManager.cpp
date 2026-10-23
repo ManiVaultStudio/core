@@ -767,6 +767,9 @@ void ProjectManager::saveProject(QString filePath)
                     .operationName  = "Save project",
                     .subjectName    = QFileInfo(filePath).fileName()
                 }
+            },
+            .profiling = {
+                .sinkType = WorkflowProfilingOptions::SinkType::ChromeTracing
             }
         }));
 
