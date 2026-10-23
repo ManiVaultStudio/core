@@ -5,7 +5,7 @@
 #include "../interface/PointsStorageBackendTypes.h"
 
 #include <actions/GroupAction.h>
-#include <pointdata_export.h>
+#include <PointData/pointdata_export.h>
 
 namespace mv::gui
 {

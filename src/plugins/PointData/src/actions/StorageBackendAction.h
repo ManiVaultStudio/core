@@ -4,11 +4,9 @@
 
 #include "pointdata_export.h"
 #include "../storage/interface/PointsStorageBackendTypes.h"
+#include "StorageBackendConfiguratorAction.h"
 
 #include <Dataset.h>
-#include <actions/HorizontalGroupAction.h>
-#include <actions/OptionAction.h>
-#include <actions/TriggerAction.h>
 
 class Points;
 
@@ -23,7 +21,7 @@ class Points;
  *
  * @author T. Kroes
  */
-class POINTDATA_EXPORT StorageBackendAction final : public mv::gui::HorizontalGroupAction
+class POINTDATA_EXPORT StorageBackendAction final : public StorageBackendConfiguratorAction
 {
     Q_OBJECT
 
@@ -31,20 +29,12 @@ public:
     /** Constructs a storage backend action for \p points. */
     StorageBackendAction(QObject* parent, const mv::Dataset<Points>& points);
 
-    /** Returns the backend selector action. */
-    mv::gui::OptionAction& getBackendTypeAction();
-
-    /** Returns the backend configuration trigger action. */
-    mv::gui::TriggerAction& getConfigureAction();
-
 private:
     void updateBackendType();
     void changeBackendType(const QString& backendType);
     void convertBackend(mv::pointdata::storage::StorageBackendType type, mv::pointdata::storage::StorageBackendConversionOptionsPtr options = {});
 
     mv::Dataset<Points>         _points;                 /**< Points dataset whose backend is displayed and converted. */
-    mv::gui::OptionAction       _backendTypeAction;      /**< Storage backend selector and conversion action. */
-    mv::gui::TriggerAction      _configureAction;        /**< Opens the active backend configuration dialog. */
     bool                        _updatingBackendType = false; /**< Whether the selector is being synchronized with the dataset. */
     bool                        _conversionInProgress = false; /**< Whether a backend conversion is currently running. */
 };

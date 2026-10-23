@@ -18,27 +18,14 @@ using namespace mv;
 using namespace mv::gui;
 
 StorageBackendAction::StorageBackendAction(QObject* parent, const Dataset<Points>& points) :
-    HorizontalGroupAction(parent, "Storage backend"),
-    _points(points),
-    _backendTypeAction(this, "Type", { "Eager", "Tiled", "Unknown" }, "Eager"),
-    _configureAction(this, "Configure...")
+    StorageBackendConfiguratorAction(parent, { "Eager", "Tiled", "Unknown" }, "Eager"),
+    _points(points)
 {
-    setShowLabels(false);
-
-    _backendTypeAction.setDefaultWidgetFlags(OptionAction::ComboBox);
-    _backendTypeAction.setToolTip("Select the storage backend for this points dataset");
-
-    _configureAction.setIconByName("ellipsis");
-    _configureAction.setToolTip("Show the properties of the active storage backend");
-
-    addAction(&_backendTypeAction);
-    addAction(&_configureAction, TriggerAction::Icon);
-
-    connect(&_backendTypeAction, &OptionAction::currentTextChanged, this, [this](const QString& backendType) {
+    connect(this, &StorageBackendConfiguratorAction::backendTypeChanged, this, [this](const QString& backendType) {
         changeBackendType(backendType);
     });
 
-    connect(&_configureAction, &TriggerAction::triggered, this, [this] {
+    connect(this, &StorageBackendConfiguratorAction::configureRequested, this, [this] {
         changeBackendType("Configure");
     });
 
@@ -46,16 +33,6 @@ StorageBackendAction::StorageBackendAction(QObject* parent, const Dataset<Points
         connect(&_points, &Dataset<Points>::dataChanged, this, &StorageBackendAction::updateBackendType);
 
     updateBackendType();
-}
-
-OptionAction& StorageBackendAction::getBackendTypeAction()
-{
-    return _backendTypeAction;
-}
-
-TriggerAction& StorageBackendAction::getConfigureAction()
-{
-    return _configureAction;
 }
 
 void StorageBackendAction::updateBackendType()
@@ -69,24 +46,24 @@ void StorageBackendAction::updateBackendType()
     switch (backendType)
     {
         case Points::StorageBackendType::Eager:
-            _backendTypeAction.setCurrentText("Eager");
+            getBackendTypeAction().setCurrentText("Eager");
             break;
 
         case Points::StorageBackendType::Tiled:
-            _backendTypeAction.setCurrentText("Tiled");
+            getBackendTypeAction().setCurrentText("Tiled");
             break;
 
         case Points::StorageBackendType::Mixed:
-            _backendTypeAction.setCurrentText("Mixed");
+            getBackendTypeAction().setCurrentText("Mixed");
             break;
 
         case Points::StorageBackendType::Unknown:
-            _backendTypeAction.setCurrentText("Unknown");
+            getBackendTypeAction().setCurrentText("Unknown");
             break;
     }
 
-    _backendTypeAction.setEnabled(pointsAreValid && !isProxy && !_conversionInProgress);
-    _configureAction.setEnabled(pointsAreValid && !isProxy && backendType == Points::StorageBackendType::Tiled && !_conversionInProgress);
+    getBackendTypeAction().setEnabled(pointsAreValid && !isProxy && !_conversionInProgress);
+    setConfigureEnabled(pointsAreValid && !isProxy && backendType == Points::StorageBackendType::Tiled && !_conversionInProgress);
 
     _updatingBackendType = false;
 }

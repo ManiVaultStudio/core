@@ -64,7 +64,7 @@ set(POINTS_HEADERS
     src/actions/PointsAction.h
     src/actions/PointsViewAction.h
     src/actions/StorageBackendAction.h
-    src/storage/widgets/StorageBackendConfigurationDialog.h
+    src/actions/StorageBackendConfiguratorAction.h
     src/view/PointsTableModel.h
     src/view/PointsViewWidget.h
     src/developer/PointDataPhantomGenerator.h
@@ -80,6 +80,10 @@ set(POINTS_STORAGE_COMMON_HEADERS
 set(POINTS_STORAGE_ACTION_HEADERS
     src/storage/actions/StorageBackendConversionAction.h
     src/storage/actions/TiledStorageBackendConversionAction.h
+)
+
+set(POINTS_STORAGE_WIDGET_HEADERS
+    src/storage/widgets/StorageBackendConfigurationDialog.h
 )
 
 set(POINTS_STORAGE_ACTION_SOURCES
@@ -160,6 +164,8 @@ set(ACTIONS_SOURCES
     src/actions/PointsViewAction.cpp
     src/actions/StorageBackendAction.h
     src/actions/StorageBackendAction.cpp
+    src/actions/StorageBackendConfiguratorAction.h
+    src/actions/StorageBackendConfiguratorAction.cpp
 )
 
 set(POINT_DATA_AUX
@@ -173,7 +179,7 @@ source_group(View FILES
     src/view/PointView.h
 )
 source_group(Storage\\widgets FILES
-    src/storage/widgets/StorageBackendConfigurationDialog.h
+    ${POINTS_STORAGE_WIDGET_HEADERS}
 )
 source_group(Storage\\Actions FILES
     ${POINTS_STORAGE_ACTION_HEADERS}
@@ -250,6 +256,11 @@ install(FILES ${POINTS_STORAGE_COMMON_HEADERS}
 
 install(FILES ${POINTS_STORAGE_ACTION_HEADERS}
     DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/actions/"
+    COMPONENT HEADERS
+)
+
+install(FILES ${POINTS_STORAGE_WIDGET_HEADERS}
+    DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/widgets/"
     COMPONENT HEADERS
 )
 

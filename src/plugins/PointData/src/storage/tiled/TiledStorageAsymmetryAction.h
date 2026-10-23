@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "pointdata_export.h"
+#include <PointData/pointdata_export.h>
 
 #include <actions/HorizontalGroupAction.h>
 #include <actions/IntegralAction.h>
