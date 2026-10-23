@@ -327,7 +327,9 @@ public:
      * Project serialization copies the files into project storage and writes
      * the corresponding tile metadata without decoding and re-encoding them.
      * The caller must keep the source files available until that serialization
-     * has completed.
+     * has completed. When supplied, a copy of \p sourceLifetime is retained
+     * by the source-backed storage and released when that source is no longer
+     * used. The token is opaque to PointData and may own the source files.
      *
      * @param filePaths Packed supertile files in super-tile index order.
      * @param codecName Registered codec used for the packed blocks.
@@ -335,10 +337,11 @@ public:
      * @param compressedSizes Compressed byte sizes of logical tiles.
      * @param uncompressedSizes Uncompressed byte sizes of logical tiles.
      * @param superTileIndices Super-tile index for each logical tile.
+     * @param sourceLifetime Optional opaque lifetime token for the source files.
      * @throws std::invalid_argument If no tiled storage exists or metadata vectors have different lengths.
      * @throws std::logic_error If the storage is not configured for packed tiles.
      */
-    void attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices);
+    void attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices, std::shared_ptr<void> sourceLifetime = {});
 
     /**
      * Persists the currently configured tiled storage immediately.
@@ -1105,9 +1108,10 @@ public:
     /**
      * @brief Attaches pre-encoded packed tiled files to this concrete dataset.
      *
-     * Proxy datasets cannot own a packed tile source. The source files remain
-     * externally owned and must stay available while the dataset reads tiles
-     * and until project serialization has copied them.
+     * Proxy datasets cannot own a packed tile source. The source files must
+     * stay available while the dataset reads tiles and until project
+     * serialization has copied them. An optional lifetime token can keep an
+     * owner for the files alive until the source is no longer used.
      *
      * @param filePaths Packed supertile files in super-tile index order.
      * @param codecName Registered codec used for the packed blocks.
@@ -1115,9 +1119,11 @@ public:
      * @param compressedSizes Compressed byte sizes of logical tiles.
      * @param uncompressedSizes Uncompressed byte sizes of logical tiles.
      * @param superTileIndices Super-tile index for each logical tile.
+     * @param sourceLifetime Optional opaque lifetime token retained until the
+     * source-backed storage is no longer used.
      * @throws std::invalid_argument If called on a proxy dataset or metadata vectors have different lengths.
      */
-    void attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices);
+    void attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices, std::shared_ptr<void> sourceLifetime = {});
 
     /** Persists the currently configured tiled storage and detaches it from its source tile generator. */
     void persistTiledStorage(StorageBackendProgressCallback progress = {});

@@ -30,7 +30,9 @@ namespace mv::pointdata::tiled
  * intentionally read-only at this stage; write-back and dirty-tile tracking
  * can be added without changing the descriptor and lease model. Importers may
  * attach externally owned packed supertile files so tiles can be read lazily
- * and copied directly during project serialization.
+ * and copied directly during project serialization. A caller may provide an
+ * opaque lifetime owner for externally staged files; the owner is retained by
+ * the source loader until that loader is replaced or destroyed.
  *
  * @author Thomas Kroes
  */
@@ -186,18 +188,24 @@ public:
      * @brief Attaches already encoded packed supertile files as the tile source.
      *
      * The storage remains read-only and retains file-backed readers for lazy
-     * tile access. The caller owns the files and must keep them available while
-     * tiles may be requested and until project serialization copies them.
+     * tile access. The caller must keep the files available while tiles may be
+     * requested and until project serialization copies them. When supplied,
+     * \p sourceLifetime is copied into the source loader and released when
+     * that loader is replaced or destroyed. The storage does not inspect or
+     * otherwise manage the pointed-to object.
      *
      * @param filePaths Packed supertile files in super-tile index order.
      * @param codecName Registered codec used for the packed blocks.
      * @param blocks Packed block metadata, one entry per logical tile descriptor.
      * @param superTileIndices Super-tile index for each logical tile descriptor.
+     * @param sourceLifetime Optional lifetime token for the source files. A
+     * copy is retained by the source loader; the caller remains responsible
+     * for making the files available until that loader is released.
      * @throws std::logic_error If packed tiled storage is not enabled.
      * @throws std::invalid_argument If paths, codec, or metadata sizes are invalid.
      * @throws std::out_of_range If a tile refers to a nonexistent supertile.
      */
-    void setPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<mv::util::PackedBlobBlock>& blocks, const std::vector<std::size_t>& superTileIndices);
+    void setPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<mv::util::PackedBlobBlock>& blocks, const std::vector<std::size_t>& superTileIndices, std::shared_ptr<void> sourceLifetime = {});
 
     /** @return Whether pre-encoded supertiles are attached for lazy reads and direct serialization. */
     bool hasPackedTileSource() const { return !_packedTileSourcePaths.isEmpty(); }

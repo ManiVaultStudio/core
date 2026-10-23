@@ -279,7 +279,7 @@ void PointData::initializeTiledStorage(const std::uint64_t rows, const std::uint
     convertToStorageBackend(pointdata::storage::StorageBackendType::Tiled, creation);
 }
 
-void PointData::attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices)
+void PointData::attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices, std::shared_ptr<void> sourceLifetime)
 {
     const auto tiledStorage = getTiledStorage();
     if (!tiledStorage)
@@ -293,7 +293,7 @@ void PointData::attachPackedTileSource(const QStringList& filePaths, const QStri
     for (std::size_t index = 0; index < offsets.size(); ++index)
         blocks.push_back({ offsets[index], compressedSizes[index], uncompressedSizes[index] });
 
-    tiledStorage->setPackedTileSource(filePaths, codecName, blocks, superTileIndices);
+    tiledStorage->setPackedTileSource(filePaths, codecName, blocks, superTileIndices, std::move(sourceLifetime));
 }
 
 void PointData::persistTiledStorage(pointdata::storage::StorageBackendProgressCallback progress)
@@ -1538,12 +1538,12 @@ void Points::initializeTiledStorage(const std::uint64_t rows, const std::uint64_
     mv::events().notifyDatasetDataChanged(this);
 }
 
-void Points::attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices)
+void Points::attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices, std::shared_ptr<void> sourceLifetime)
 {
     if (isProxy())
         throw std::invalid_argument("Packed tile sources can only be attached to concrete point datasets");
 
-    getRawData<PointData>()->attachPackedTileSource(filePaths, codecName, offsets, compressedSizes, uncompressedSizes, superTileIndices);
+    getRawData<PointData>()->attachPackedTileSource(filePaths, codecName, offsets, compressedSizes, uncompressedSizes, superTileIndices, std::move(sourceLifetime));
 }
 
 void Points::persistTiledStorage(StorageBackendProgressCallback progress)
