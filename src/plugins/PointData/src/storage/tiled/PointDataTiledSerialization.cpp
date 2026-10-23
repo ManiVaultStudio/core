@@ -13,6 +13,7 @@
 
 #include <QDir>
 #include <QElapsedTimer>
+#include <QFile>
 #include <QFileInfo>
 #include <QString>
 #include <QUuid>
@@ -23,14 +24,32 @@
 #include <condition_variable>
 #include <deque>
 #include <exception>
+#include <filesystem>
 #include <memory>
 #include <mutex>
 #include <stdexcept>
 #include <thread>
 #include <vector>
 
+#ifndef Q_OS_WIN
+#include <unistd.h>
+#endif
+
 namespace
 {
+bool createHardLink(const QString& sourcePath, const QString& destinationPath)
+{
+#ifdef Q_OS_WIN
+    std::error_code error;
+    std::filesystem::create_hard_link(std::filesystem::path(sourcePath.toStdWString()), std::filesystem::path(destinationPath.toStdWString()), error);
+    return !error;
+#else
+    const auto sourceFileName      = QFile::encodeName(sourcePath);
+    const auto destinationFileName = QFile::encodeName(destinationPath);
+    return ::link(sourceFileName.constData(), destinationFileName.constData()) == 0;
+#endif
+}
+
 struct TileEncodingItem
 {
     std::size_t tileIndex = 0;
@@ -322,7 +341,7 @@ QVariantMap makeStagedPackedTiledVariantMap(const mv::pointdata::tiled::PointDat
         totalBytes += static_cast<std::uint64_t>(sourceInfo.size());
     }
 
-    std::uint64_t copiedBytes = 0;
+    std::uint64_t processedBytes = 0;
     if (progress)
         progress(0.0f);
 
@@ -330,8 +349,10 @@ QVariantMap makeStagedPackedTiledVariantMap(const mv::pointdata::tiled::PointDat
     {
         const auto fileName = QUuid::createUuid().toString(QUuid::WithoutBraces) + QStringLiteral(".ptpack");
         const auto destinationPath = QDir(saveDirectory).filePath(fileName);
-        if (!QFile::copy(sourcePaths[static_cast<qsizetype>(superTileIndex)], destinationPath))
-            throw std::runtime_error(QString("Unable to copy staged packed supertile: %1").arg(sourcePaths[static_cast<qsizetype>(superTileIndex)]).toStdString());
+        const auto& sourcePath = sourcePaths[static_cast<qsizetype>(superTileIndex)];
+        const QFileInfo sourceInfo(sourcePath);
+        if (!createHardLink(sourcePath, destinationPath) && !QFile::copy(sourcePath, destinationPath))
+            throw std::runtime_error(QString("Unable to link or copy staged packed supertile: %1").arg(sourcePath).toStdString());
 
         const auto superTileRow = static_cast<std::uint64_t>(superTileIndex) / superTileColumnCount;
         const auto superTileColumn = static_cast<std::uint64_t>(superTileIndex) % superTileColumnCount;
@@ -342,9 +363,9 @@ QVariantMap makeStagedPackedTiledVariantMap(const mv::pointdata::tiled::PointDat
         superTileMap["Codec"] = storage.packedTileSourceCodec();
         superTiles[static_cast<qsizetype>(superTileIndex)] = superTileMap;
 
-        copiedBytes += static_cast<std::uint64_t>(QFileInfo(destinationPath).size());
+        processedBytes += static_cast<std::uint64_t>(sourceInfo.size());
         if (progress)
-            progress(totalBytes == 0 ? 1.0f : static_cast<float>(copiedBytes) / static_cast<float>(totalBytes));
+            progress(totalBytes == 0 ? 1.0f : static_cast<float>(processedBytes) / static_cast<float>(totalBytes));
     }
 
     for (std::size_t tileIndex = 0; tileIndex < storage.descriptors().size(); ++tileIndex)
@@ -456,7 +477,7 @@ mv::workflow::UniqueWorkflowPlan PointDataTiledSerialization::toVariantMapWorkfl
     if (storage.hasPackedTileSource())
     {
         auto plan = std::make_unique<mv::workflow::WorkflowPlan>("Serialize staged packed tiled point data");
-        plan->addSequentialStage("Copy staged packed tiled point-data files", [&storage](const mv::workflow::WorkflowPlan::Job&, const mv::workflow::SharedWorkflowExecutionContext& executionContext) {
+        plan->addSequentialStage("Prepare staged packed point-data files", [&storage](const mv::workflow::WorkflowPlan::Job&, const mv::workflow::SharedWorkflowExecutionContext& executionContext) {
             executionContext->setOutput(makeStagedPackedTiledVariantMap(storage, [executionContext](const float progress) {
                 executionContext->setProgress(progress);
             }));
