@@ -55,7 +55,9 @@ public:
     enum class TemporaryDirType {
         Open,       /** Opening of a project */
         Save,       /** Saving of a project */
-        Publish     /** Publishing of a project */
+        Publish,    /** Publishing of a project */
+        Staging,    /** Staging imported data for later serialization */
+        Other       /** Temporary data without a more specific project category */
     };
 
     /**
@@ -67,7 +69,9 @@ public:
         static QMap<TemporaryDirType, QString> temporaryDirTypeNames{
             { TemporaryDirType::Open, "Open" },
             { TemporaryDirType::Save, "Save" },
-            { TemporaryDirType::Publish, "Publish" }
+            { TemporaryDirType::Publish, "Publish" },
+            { TemporaryDirType::Staging, "Staging" },
+            { TemporaryDirType::Other, "Other" }
         };
         
         return temporaryDirTypeNames[temporaryDirType];
@@ -305,6 +309,48 @@ public: // Temporary directories
 
             return Application::current()->getTemporaryDir().path();
         }
+    }
+
+    /**
+     * Ensure that an application-managed temporary directory exists for p temporaryDirType
+     * and return its path.
+     * @param temporaryDirType Type of temporary directory, see AbstractProjectManager#TemporaryDirType
+     * @return Path of the application-managed temporary directory
+     * @throws std::runtime_error If the directory cannot be created
+     */
+    QString ensureTemporaryDirPath(const TemporaryDirType& temporaryDirType) {
+        if (_temporaryDirPaths.contains(temporaryDirType))
+            return _temporaryDirPaths[temporaryDirType];
+
+        auto applicationTemporaryDirectoryType = Application::TemporaryDirectoryType::Other;
+
+        switch (temporaryDirType)
+        {
+            case TemporaryDirType::Open:
+                applicationTemporaryDirectoryType = Application::TemporaryDirectoryType::Open;
+                break;
+
+            case TemporaryDirType::Save:
+                applicationTemporaryDirectoryType = Application::TemporaryDirectoryType::Save;
+                break;
+
+            case TemporaryDirType::Publish:
+                applicationTemporaryDirectoryType = Application::TemporaryDirectoryType::Publish;
+                break;
+
+            case TemporaryDirType::Staging:
+                applicationTemporaryDirectoryType = Application::TemporaryDirectoryType::Staging;
+                break;
+
+            case TemporaryDirType::Other:
+                applicationTemporaryDirectoryType = Application::TemporaryDirectoryType::Other;
+                break;
+        }
+
+        const auto temporaryDirPath = Application::current()->getTemporaryDirectoryPath(applicationTemporaryDirectoryType);
+        setTemporaryDirPath(temporaryDirType, temporaryDirPath);
+
+        return temporaryDirPath;
     }
 
 protected: // Temporary directories

@@ -21,7 +21,7 @@ using namespace QtTaskTree;
 
 ProjectSaveWorkflow::ProjectSaveWorkflow(const QString& filePath) :
     AbstractWorkflow(createContext(filePath), "Project Save"),
-	_temporaryDir((QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "SaveProject")))
+	_temporaryDir(Application::current()->getTemporaryDirectoryPath(Application::TemporaryDirectoryType::Save))
 {
 }
 

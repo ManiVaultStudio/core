@@ -220,6 +220,15 @@ public: // Logging
 
 public: // Serialization
 
+    /** Categories of temporary data managed by the application. */
+    enum class TemporaryDirectoryType {
+        Open,       /** Temporary files created while opening a project */
+        Save,       /** Temporary files created while saving a project */
+        Publish,    /** Temporary files created while publishing a project */
+        Staging,    /** Staged data that must remain available after an import operation */
+        Other       /** Temporary data without a more specific category */
+    };
+
     /**
      * Get the current application session temporary directory
      * @return Directory where this application session's temporary files reside
@@ -238,6 +247,14 @@ public: // Serialization
      * @return Root directory for application temporary data
      */
     QString getTemporaryDirRoot() const;
+
+    /**
+     * Get or create an application-managed temporary-data category directory
+     * @param temporaryDirectoryType Category of temporary data
+     * @return Path to the category directory beneath the current application session directory
+     * @throws std::runtime_error If the category directory cannot be created
+     */
+    QString getTemporaryDirectoryPath(const TemporaryDirectoryType& temporaryDirectoryType) const;
 
     /**
      * Get ManiVault application temporary directories

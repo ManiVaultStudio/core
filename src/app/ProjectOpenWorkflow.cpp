@@ -159,7 +159,7 @@ void ProjectOpenWorkflow::setup(ProjectOpenContext& context)
     if (QFileInfo(context._filePath).isDir())
         throw std::runtime_error("Project file path may not be a directory");
 
-    QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "OpenProject"));
+    QTemporaryDir temporaryDirectory(Application::current()->getTemporaryDirectoryPath(Application::TemporaryDirectoryType::Open));
 
     if (!temporaryDirectory.isValid())
         throw std::runtime_error("Unable to create temporary open-project directory");

@@ -39,6 +39,29 @@ namespace {
 
 const QString applicationTemporaryDirSettingPath = QStringLiteral("GlobalSettings/Temporary/ApplicationTemporaryDirectory");
 
+QString getTemporaryDirectoryTypeName(const Application::TemporaryDirectoryType& temporaryDirectoryType)
+{
+    switch (temporaryDirectoryType)
+    {
+        case Application::TemporaryDirectoryType::Open:
+            return QStringLiteral("Open");
+
+        case Application::TemporaryDirectoryType::Save:
+            return QStringLiteral("Save");
+
+        case Application::TemporaryDirectoryType::Publish:
+            return QStringLiteral("Publish");
+
+        case Application::TemporaryDirectoryType::Staging:
+            return QStringLiteral("Staging");
+
+        case Application::TemporaryDirectoryType::Other:
+            return QStringLiteral("Other");
+    }
+
+    throw std::runtime_error("Unknown application temporary directory type");
+}
+
 QString getConfiguredTemporaryDirRoot()
 {
     const auto configuredValue = QSettings().value(applicationTemporaryDirSettingPath);
@@ -333,6 +356,16 @@ const QTemporaryDir& Application::getTemporaryDir() const
 QString Application::getTemporaryDirRoot() const
 {
     return _temporaryDirRoot;
+}
+
+QString Application::getTemporaryDirectoryPath(const TemporaryDirectoryType& temporaryDirectoryType) const
+{
+    const auto temporaryDirectoryPath = QDir(_temporaryDir.path()).filePath(getTemporaryDirectoryTypeName(temporaryDirectoryType));
+
+    if (!QDir().mkpath(temporaryDirectoryPath))
+        throw std::runtime_error(QString("Unable to create application temporary directory: %1").arg(temporaryDirectoryPath).toStdString());
+
+    return temporaryDirectoryPath;
 }
 
 Application::TemporaryDirs& Application::getTemporaryDirs()
