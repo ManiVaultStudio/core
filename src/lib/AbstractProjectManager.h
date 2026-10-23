@@ -57,7 +57,8 @@ public:
         Open,       /** Opening of a project */
         Save,       /** Saving of a project */
         Publish,    /** Publishing of a project */
-        Staging     /** Staging imported data for later serialization */
+        Staging,    /** Staging imported data for later serialization */
+        Other       /** Temporary data without a more specific project category */
     };
 
     /**
@@ -70,7 +71,8 @@ public:
             { TemporaryDirType::Open, "Open" },
             { TemporaryDirType::Save, "Save" },
             { TemporaryDirType::Publish, "Publish" },
-            { TemporaryDirType::Staging, "Staging" }
+            { TemporaryDirType::Staging, "Staging" },
+            { TemporaryDirType::Other, "Other" }
         };
         
         return temporaryDirTypeNames[temporaryDirType];
@@ -311,10 +313,10 @@ public: // Temporary directories
     }
 
     /**
-     * Ensures that a temporary directory for \p temporaryDirType exists and returns its path.
+     * Ensures that an application-managed temporary directory for \p temporaryDirType exists and returns its path.
      *
      * Existing workflow-owned directories are preserved. If no directory has
-     * been registered, an application-temporary directory is created and
+     * been registered, an application-managed temporary directory is created and
      * registered for operations that need project-style file storage outside a
      * project save workflow.
      *
@@ -326,12 +328,32 @@ public: // Temporary directories
         if (_temporaryDirPaths.contains(temporaryDirType))
             return _temporaryDirPaths[temporaryDirType];
 
-        const auto temporaryDirPath = QDir(Application::current()->getTemporaryDir().path()).filePath(getTemporaryDirTypeName(temporaryDirType));
-        QDir temporaryDir;
+        auto applicationTemporaryDirectoryType = Application::TemporaryDirectoryType::Other;
 
-        if (!temporaryDir.mkpath(temporaryDirPath))
-            throw std::runtime_error(QString("Unable to create temporary directory: %1").arg(temporaryDirPath).toStdString());
+        switch (temporaryDirType)
+        {
+            case TemporaryDirType::Open:
+                applicationTemporaryDirectoryType = Application::TemporaryDirectoryType::Open;
+                break;
 
+            case TemporaryDirType::Save:
+                applicationTemporaryDirectoryType = Application::TemporaryDirectoryType::Save;
+                break;
+
+            case TemporaryDirType::Publish:
+                applicationTemporaryDirectoryType = Application::TemporaryDirectoryType::Publish;
+                break;
+
+            case TemporaryDirType::Staging:
+                applicationTemporaryDirectoryType = Application::TemporaryDirectoryType::Staging;
+                break;
+
+            case TemporaryDirType::Other:
+                applicationTemporaryDirectoryType = Application::TemporaryDirectoryType::Other;
+                break;
+        }
+
+        const auto temporaryDirPath = Application::current()->getTemporaryDirectoryPath(applicationTemporaryDirectoryType);
         setTemporaryDirPath(temporaryDirType, temporaryDirPath);
 
         return temporaryDirPath;

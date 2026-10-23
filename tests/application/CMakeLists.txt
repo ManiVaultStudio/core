@@ -68,3 +68,47 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         VS_DEBUGGER_ENVIRONMENT "PATH=${QT_DIR}/../../../bin"
     )
 endif()
+
+add_executable(MV_Application_TemporaryDirectoriesTest
+    ApplicationTemporaryDirectoriesTest.cpp
+)
+
+source_group("Tests/Application" FILES ApplicationTemporaryDirectoriesTest.cpp)
+
+target_include_directories(MV_Application_TemporaryDirectoriesTest PRIVATE
+    ${MV_ROOT_DIR}/src/lib
+)
+
+target_link_libraries(MV_Application_TemporaryDirectoriesTest PRIVATE
+    ManiVault::Core
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets
+    Qt6::WebEngineWidgets
+)
+
+target_compile_features(MV_Application_TemporaryDirectoriesTest PRIVATE cxx_std_${MV_CXX_STANDARD})
+set_target_properties(MV_Application_TemporaryDirectoriesTest PROPERTIES
+    AUTOMOC ON
+    FOLDER "Tests/Application"
+)
+
+add_test(NAME MV_Application_TemporaryDirectoriesTest COMMAND MV_Application_TemporaryDirectoriesTest)
+set_tests_properties(MV_Application_TemporaryDirectoriesTest PROPERTIES
+    LABELS "unit;application"
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+    ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:ManiVault::Core>;PATH=path_list_prepend:${QT_DIR}/../../../bin"
+)
+
+add_test(NAME MV_Application_TemporaryDirectoriesFallbackTest COMMAND MV_Application_TemporaryDirectoriesTest --invalid-root)
+set_tests_properties(MV_Application_TemporaryDirectoriesFallbackTest PROPERTIES
+    LABELS "unit;application"
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+    ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:ManiVault::Core>;PATH=path_list_prepend:${QT_DIR}/../../../bin"
+)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set_property(TARGET MV_Application_TemporaryDirectoriesTest PROPERTY
+        VS_DEBUGGER_ENVIRONMENT "QT_QPA_PLATFORM=offscreen;PATH=$<TARGET_FILE_DIR:ManiVault::Core>"
+    )
+endif()

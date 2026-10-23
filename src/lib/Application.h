@@ -80,6 +80,15 @@ public:
         void removeStale(const QStringList& stale = QStringList());
 
         /**
+         * Removes stale application directories asynchronously through the workflow system.
+         *
+         * The cleanup runs on a worker thread so application startup is not blocked. Errors
+         * are reported through the workflow result instead of showing dialogs from the worker
+         * thread.
+         */
+        void removeStaleAsync();
+
+        /**
          * Get progress task
          * @return Reference to progress task
          */
@@ -88,6 +97,8 @@ public:
         }
 
     private:
+        void removeStale(const QStringList& stale, Task* task, workflow::WorkflowExecutionContext* workflowContext);
+
         Task  _task;     /** Task for reporting clean-up progress in the background */
     };
 
@@ -220,11 +231,41 @@ public: // Logging
 
 public: // Serialization
 
+    /** Categories of temporary data managed by the application. */
+    enum class TemporaryDirectoryType {
+        Open,       /** Temporary files created while opening a project */
+        Save,       /** Temporary files created while saving a project */
+        Publish,    /** Temporary files created while publishing a project */
+        Staging,    /** Staged data that must remain available after an import operation */
+        Other       /** Temporary data without a more specific category */
+    };
+
     /**
-     * Get temporary dir
-     * @return Directory where application temporary files reside
+     * Get the current application session temporary directory
+     * @return Directory where this application session's temporary files reside
      */
     const QTemporaryDir& getTemporaryDir() const;
+
+    /**
+     * Get the configured root directory for application temporary data
+     *
+     * The session directory returned by getTemporaryDir() is created beneath this
+     * root. The configured value is read before session-directory creation and
+     * falls back to the operating system temporary directory when it is empty or
+     * cannot be created. Changing the setting takes effect on the next application
+     * restart.
+     *
+     * @return Root directory for application temporary data
+     */
+    QString getTemporaryDirRoot() const;
+
+    /**
+     * Get or create an application-managed temporary-data category directory
+     * @param temporaryDirectoryType Category of temporary data
+     * @return Path to the category directory beneath the current application session directory
+     * @throws std::runtime_error If the category directory cannot be created
+     */
+    QString getTemporaryDirectoryPath(const TemporaryDirectoryType& temporaryDirectoryType) const;
 
     /**
      * Get ManiVault application temporary directories
@@ -355,6 +396,7 @@ protected:
     QUrl                                    _startupProjectUrl;                 /** URL of the project to automatically open upon startup (if set) */
     ProjectMetaAction*                      _startupProjectMetaAction;          /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
     ApplicationStartupTask*                 _startupTask;                       /** Application startup task */
+    QString                                 _temporaryDirRoot;                  /** Configured root directory under which application session temporary files reside */
     QTemporaryDir                           _temporaryDir;                      /** Directory where application temporary files reside */
     TemporaryDirs                           _temporaryDirs;                     /** ManiVault application temporary directories manager */
     QLockFile                               _lockFile;                          /** Lock file is used for fail-safe purging of the temporary directory */
