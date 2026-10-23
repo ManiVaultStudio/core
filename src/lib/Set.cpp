@@ -442,11 +442,12 @@ void DatasetImpl::removeLinkedDataMapping(const QString& mappingID)
 
 DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/, const QString& id /*= ""*/) :
     WidgetAction(nullptr, "Set"),
-    _storageType(StorageType::Owner),
     _rawData(nullptr),
     _rawDataName(rawDataName),
+    _storageType(StorageType::Owner),
     _all(true),
     _derived(false),
+    _mayUnderive(mayUnderive),
     _groupIndex(-1),
     _analysis(nullptr),
     _linkedDataFlags(LinkedDataFlag::SendReceive),
@@ -454,7 +455,6 @@ DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/
     _lockedCache(false),
     _smartPointer(this),
     _task(this, ""),
-    _mayUnderive(mayUnderive),
     _aboutToBeRemoved(false),
     _dirtySelection(false)
 {

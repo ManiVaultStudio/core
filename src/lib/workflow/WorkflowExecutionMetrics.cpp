@@ -31,23 +31,23 @@ void WorkflowExecutionMetrics::addInteger(const QString& name, std::uint64_t amo
 {
     std::scoped_lock lock(_mutex);
 
-    auto it = _metrics.find(name);
+    const auto it = _metrics.find(name);
 
     if (it == _metrics.end())
         return;
 
-    const auto before = it->second.intValue.load(std::memory_order_relaxed);
+    [[maybe_unused]] const auto before = it->second.intValue.load(std::memory_order_relaxed);
 
 	it->second.intValue.fetch_add(amount, std::memory_order_relaxed);
 
-	const auto after = it->second.intValue.load(std::memory_order_relaxed);
+    [[maybe_unused]] const auto after = it->second.intValue.load(std::memory_order_relaxed);
 }
 
 void WorkflowExecutionMetrics::addDouble(const QString& name, double amount)
 {
     std::scoped_lock lock(_mutex);
 
-    auto it = _metrics.find(name);
+    const auto it = _metrics.find(name);
 
     if (it == _metrics.end())
         return;

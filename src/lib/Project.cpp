@@ -143,9 +143,7 @@ UniqueWorkflowPlan Project::fromVariantMapWorkflow(QVariantMap variantMap)
 		    _statusBarOptionsAction.fromParentVariantMap(variantMap);
     }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
 
-    WorkflowPlan::Jobs loadManagerJobs;
-
-    const auto addManagerLoadStage = [&plan, &loadManagerJobs, variantMap](AbstractManager& manager, double weight) {
+    const auto addManagerLoadStage = [&plan, variantMap](AbstractManager& manager, double weight) {
         const auto managerMap = variantMap[manager.getSerializationName()].toMap();
 
         plan->addNestedWorkflowStage(QString("Load %1").arg(manager.getSerializationName()), [managerMap, &manager](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
@@ -200,7 +198,7 @@ UniqueWorkflowPlan Project::toVariantMapWorkflow() const
         return mv::events().toVariantMapWorkflow();
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 1.0);
 
-    plan->addSequentialStage("Publish result", [this, saveCommonStage, savePluginsStage, saveActionsStage, saveDataHierarchyStage, saveEventsStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+    plan->addSequentialStage("Publish result", [saveCommonStage, savePluginsStage, saveActionsStage, saveDataHierarchyStage, saveEventsStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         auto outputMap = executionContext->takeOutput(saveCommonStage).toMap();
 
         outputMap[mv::plugins().getSerializationName()]         = executionContext->takeOutput(savePluginsStage).toMap();

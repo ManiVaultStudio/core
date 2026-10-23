@@ -142,7 +142,7 @@ ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* togg
         setVisible(_toggleAction->isVisible());
     };
 
-    connect(toggleAction, &ToggleAction::changed, this, [this, update]() {
+    connect(toggleAction, &ToggleAction::changed, this, [update]() {
         update();
     });
 
@@ -155,11 +155,11 @@ ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* togg
             setChecked(_toggleAction->isChecked());
     };
 
-    connect(_toggleAction, &ToggleAction::toggled, this, [this, updateToggle]() {
+    connect(_toggleAction, &ToggleAction::toggled, this, [updateToggle]() {
         updateToggle();
     });
 
-    connect(_toggleAction, &ToggleAction::indeterminateChanged, this, [this, updateToggle]() {
+    connect(_toggleAction, &ToggleAction::indeterminateChanged, this, [updateToggle]() {
         updateToggle();
     });
 

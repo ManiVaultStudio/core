@@ -233,7 +233,7 @@ Task::TasksPtrs Task::getChildTasksForGuiScopes(bool recursively /*= false*/, bo
     auto childTasks = getChildTasks(recursively, enabledOnly);
 
     auto iterator = std::remove_if(childTasks.begin(), childTasks.end(), [this, &guiScopes](Task* task) -> bool {
-        return !doGuiScopesOverlap(task->getGuiScopes(), _guiScopes);
+        return !doGuiScopesOverlap(task->getGuiScopes(), guiScopes);
     });
 
     childTasks.erase(iterator, childTasks.end());
@@ -246,7 +246,7 @@ Task::TasksPtrs Task::getChildTasksForGuiScopesAndStatuses(bool recursively /*= 
     auto childTasks = getChildTasks(recursively, enabledOnly);
 
     auto iterator = std::remove_if(childTasks.begin(), childTasks.end(), [this, &guiScopes, &statuses](Task* task) -> bool {
-        return !doGuiScopesOverlap(task->getGuiScopes(), _guiScopes) || !statuses.contains(task->getStatus());
+        return !doGuiScopesOverlap(task->getGuiScopes(), guiScopes) || !statuses.contains(task->getStatus());
     });
 
     childTasks.erase(iterator, childTasks.end());
@@ -1040,6 +1040,10 @@ void Task::updateProgress()
         case Status::Aborted:
             _progress = 0.f;
             break;
+
+        case Status::AboutToBeAborted:
+        case Status::Aborting:
+            break;
     }
 
     privateEmitProgressChanged();
@@ -1068,7 +1072,7 @@ void Task::registerChildTask(Task* childTask)
     if (childTask == nullptr)
         return;
 
-    connect(childTask, &Task::statusChanged, this, [this, childTask](const Status& previousStatus, const Status& status) -> void {
+    connect(childTask, &Task::statusChanged, this, [this](const Status& previousStatus, const Status& status) -> void {
         if (getProgressMode() != ProgressMode::Aggregate)
             return;
 
@@ -1123,7 +1127,7 @@ void Task::updateAggregateStatus()
     const auto enabledChildTasks            = getChildTasks(false, true);
     const auto numberOfEnabledChildTasks    = enabledChildTasks.size();
 
-    const auto getNumberOfChildTaskWithStatus = [this, &enabledChildTasks](const Status& status) -> std::size_t {
+    const auto getNumberOfChildTaskWithStatus = [this](const Status& status) -> std::size_t {
         return getChildTasksForStatuses(false, true, { status }).count();
     };
     

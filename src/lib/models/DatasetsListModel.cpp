@@ -28,7 +28,7 @@ DatasetsListModel::DatasetsListModel(PopulationMode populationMode /*= Populatio
 
     if (getPopulationMode() == AbstractDatasetsModel::PopulationMode::Automatic)
         for (auto dataset : mv::data().getAllDatasets())
-            addDataset(dataset);
+            DatasetsListModel::addDataset(dataset);
 }
 
 void DatasetsListModel::addDataset(Dataset<DatasetImpl> dataset)

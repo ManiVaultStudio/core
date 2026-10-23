@@ -39,7 +39,7 @@ PluginTriggerActions LoaderPluginFactory::getPluginTriggerActions(const Datasets
 
 PluginTriggerActions LoaderPluginFactory::getPluginTriggerActions(const DataTypes& dataTypes) const
 {
-    return getPluginTriggerActions(DataTypes({}));
+    return gui::PluginTriggerActions{};
 }
 
 }

@@ -27,7 +27,7 @@ TasksListModel::TasksListModel(QObject* parent /*= nullptr*/) :
         setHorizontalHeaderItem(static_cast<int>(column), new HeaderItem(columnInfo[column]));
 
     for (auto task : tasks().getTasks())
-        addTask(task);
+        TasksListModel::addTask(task);
 }
 
 QPointer<Task> TasksListModel::getTask(const std::int32_t& rowIndex) const

@@ -73,7 +73,7 @@ void WidgetFader::setOpacity(float opacity, std::uint32_t duration /*= 0*/, std:
     //qDebug() << __FUNCTION__;
 #endif
 
-    const auto startOpacityAnimation = [this, opacity, duration, delay]() -> void {
+    const auto startOpacityAnimation = [this, opacity, duration]() -> void {
         if (duration == 0) {
             _opacityEffect.setOpacity(opacity);
         }

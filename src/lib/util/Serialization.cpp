@@ -564,45 +564,6 @@ bool isVariantMapRawBlockObject(const QVariantMap& map)
 }
 
 /**
- * Find the first serialized raw-data block object contained within a variant.
- *
- * The search is performed recursively through nested QVariantMaps and
- * QVariantLists. Traversal stops as soon as a variant map satisfying
- * isVariantMapRawBlockObject() is found.
- *
- * @param value Variant to search.
- * @return The first raw-data block object found, or an empty QVariantMap if no
- *         matching object exists within the variant hierarchy.
- */
-QVariantMap findRawBlockObject(const QVariant& value)
-{
-    if (value.canConvert<QVariantMap>()) {
-        auto map = value.toMap();
-
-        if (isVariantMapRawBlockObject(map))
-            return map;
-
-        for (auto it = map.begin(); it != map.end(); ++it) {
-            auto found = findRawBlockObject(it.value());
-
-            if (!found.isEmpty())
-                return found;
-        }
-    }
-
-    if (value.canConvert<QVariantList>()) {
-        for (const QVariant& item : value.toList()) {
-            auto found = findRawBlockObject(item);
-
-            if (!found.isEmpty())
-                return found;
-        }
-    }
-
-    return {};
-}
-
-/**
  * Get the uncompressed size stored in a serialized raw-data block object.
  *
  * The size is read from the "Size" field and converted to a 64-bit unsigned

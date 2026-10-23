@@ -20,8 +20,8 @@ ColorMapEditor1DNodeAction::ColorMapEditor1DNodeAction(QObject* parent, const QS
     _colorMapEditor1DAction(*static_cast<ColorMapEditor1DAction*>(parent)),
     _currentNode(nullptr),
     _colorAction(this, "Color", Qt::yellow),
-    _opacityAction(this, "Intensity", 0.0f, 100.0f, 0.0f, 0),
-    _valueAction(this, "Value", 0.0f, 100.0f, 0.0f, 2)
+    _valueAction(this, "Value", 0.0f, 100.0f, 0.0f, 2),
+    _opacityAction(this, "Intensity", 0.0f, 100.0f, 0.0f, 0)
 {
     _colorAction.setEnabled(false);
     _opacityAction.setEnabled(false);

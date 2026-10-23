@@ -362,7 +362,7 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
         _selectedRows = QModelIndexList();
     };
     
-    const auto updateNameAction = [this, isStringLocked]() -> void {
+    const auto updateNameAction = [this]() -> void {
         const auto numberOfSelectedRows = _selectedRows.count();
 
         if (numberOfSelectedRows == 0) {
@@ -381,7 +381,7 @@ StringsAction::ListWidget::ListWidget(QWidget* parent, StringsAction* stringsAct
         }
     };
 
-    const auto updateAddAction = [this, isStringLocked]() -> void {
+    const auto updateAddAction = [this]() -> void {
         const auto numberOfSelectedRows = _selectedRows.count();
 
         if (numberOfSelectedRows == 0)

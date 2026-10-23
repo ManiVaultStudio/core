@@ -43,7 +43,7 @@ private:
     struct Changing
     {
         QModelIndex parent;
-        int oldSize;
+        int oldSize = 0;
         QVariant last;
         QVariant next;
     };

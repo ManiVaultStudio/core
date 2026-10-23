@@ -208,7 +208,7 @@ public: // Meta data
      * @return Vector of plugin trigger actions
      */
     virtual gui::PluginTriggerActions getPluginTriggerActions(const Datasets& datasets) const {
-        return gui::PluginTriggerActions();
+        return gui::PluginTriggerActions{};
     }
 
     /**
@@ -217,7 +217,7 @@ public: // Meta data
      * @return Vector of plugin trigger actions
      */
     virtual gui::PluginTriggerActions getPluginTriggerActions(const DataTypes& dataTypes) const {
-        return gui::PluginTriggerActions();
+        return gui::PluginTriggerActions{};
     }
 
     /**

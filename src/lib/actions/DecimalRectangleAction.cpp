@@ -47,7 +47,7 @@ void DecimalRectangleAction::connectToPublicAction(WidgetAction* publicAction, b
 
     publicDecimalRectangleAction->setRectangle(getLeft(), getRight(), getBottom(), getTop());
 
-    connect(this, &DecimalRectangleAction::rectangleChanged, publicDecimalRectangleAction, [this, publicDecimalRectangleAction](float left, float right, float bottom, float top) -> void {
+    connect(this, &DecimalRectangleAction::rectangleChanged, publicDecimalRectangleAction, [publicDecimalRectangleAction](float left, float right, float bottom, float top) -> void {
         publicDecimalRectangleAction->setRectangle(left, right, bottom, top);
         });
 

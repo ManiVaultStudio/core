@@ -899,12 +899,6 @@ QString variantMapToPrettyString(const QVariantMap& variantMap, int indent)
     return QJsonDocument(QJsonObject::fromVariantMap(variantMap)).toJson(QJsonDocument::Indented);
 }
 
-static QString cssColor(QPalette::ColorRole role)
-{
-    const auto pal = QToolTip::palette();
-    return pal.color(QPalette::Active, role).name();
-}
-
 QString variantMapToHtml(const QVariantMap& map, int depth /*= 0*/, int maxDepth /*= 2*/)
 {
     if (depth >= maxDepth) {

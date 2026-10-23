@@ -65,7 +65,7 @@ ApplicationConfigurationAction::ApplicationConfigurationAction(QObject* parent, 
 
         connect(this, &ApplicationConfigurationAction::mayConfigureChanged, this, updateSaveButtonReadOnly);
 
-        connect(&dialogButtonBox, &QDialogButtonBox::accepted, this, [this, &customizeDialog]() -> void {
+        connect(&dialogButtonBox, &QDialogButtonBox::accepted, this, []() -> void {
             const auto configurationFilePath = Application::getConfigurationFilePath();
 
             if (!configurationFilePath.isEmpty())

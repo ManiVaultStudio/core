@@ -70,13 +70,17 @@ WidgetAction::WidgetAction(QObject* parent, const QString& title) :
 
 WidgetAction::~WidgetAction()
 {
-    if (!core() || !core()->isInitialized())
+    const auto coreInterface = core();
+    if (!coreInterface)
         return;
 
-    if (!core()->getManager(CoreInterface::ManagerType::Actions))
+    if (!coreInterface->isInitialized())
         return;
 
-    if (!core()->isAboutToBeDestroyed())
+    if (!coreInterface->getManager(CoreInterface::ManagerType::Actions))
+        return;
+
+    if (!coreInterface->isAboutToBeDestroyed())
         actions().removeAction(this);
 }
 

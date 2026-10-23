@@ -22,9 +22,7 @@ QString CpuComponentSpec::getFailureString(const HardwareComponentSpec& required
     if (meets(required))
         return {};
 
-    const auto& cpuComponentSpec = dynamic_cast<const CpuComponentSpec&>(required);
-
-    return "CPU does not meet requirements";
+    return QStringLiteral("CPU does not meet requirements");
 }
 
 QStandardItem* CpuComponentSpec::getStandardItem() const

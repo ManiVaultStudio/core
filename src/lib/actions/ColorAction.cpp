@@ -182,10 +182,7 @@ void ColorAction::PushButtonWidget::ToolButton::paintEvent(QPaintEvent* paintEve
     styleOption.initFrom(this);
 
     // Set inset margins
-    const auto margin = 10;
-
-    // Rect offset
-    QPoint offset(margin, margin);
+    constexpr auto margin = 10;
 
     // Deflated fill rectangle for color inset
     auto colorRect = pixmapRect.marginsRemoved(QMargins(margin, margin, margin + 1, margin + 1));
