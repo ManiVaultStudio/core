@@ -940,7 +940,7 @@ QImage ProjectManager::getWorkspacePreview(const QString& projectFilePath, const
 {
     try
     {
-        QTemporaryDir temporaryDir(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "WorkspacePreview"));
+        QTemporaryDir temporaryDir(Application::current()->getTemporaryDirectoryPath(Application::TemporaryDirectoryType::Other));
 
         const auto workspacePreviewFilePath = projects().extractFileFromManiVaultProject(projectFilePath, temporaryDir, "workspace.jpg");
 
@@ -1461,7 +1461,7 @@ ProjectMetaAction* ProjectManager::getProjectMetaAction(const QString& projectFi
     try {
         const QString metaJsonFilePath("meta.json");
 
-        QFileInfo extractFileInfo(Application::current()->getTemporaryDir().path(), metaJsonFilePath);
+        QFileInfo extractFileInfo(Application::current()->getTemporaryDirectoryPath(Application::TemporaryDirectoryType::Other), metaJsonFilePath);
 
         Archiver archiver;
 

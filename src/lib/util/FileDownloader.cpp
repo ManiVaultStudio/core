@@ -115,7 +115,7 @@ QMutex FileDownloader::resolvedFileNamesMutex;
 
 bool FileDownloader::FileSink::open(QNetworkReply* reply, const QUrl& url, const QString& targetDirectory, bool overwriteAllowed, QString* error)
 {
-    const QString baseDir   = targetDirectory.isEmpty() ? Application::current()->getTemporaryDir().path() : targetDirectory;
+    const QString baseDir   = targetDirectory.isEmpty() ? Application::current()->getTemporaryDirectoryPath(Application::TemporaryDirectoryType::Other) : targetDirectory;
     const QString safeName  = chooseSafeFilenameFromHeaders(reply, url);
 
     _finalPath = QFileInfo(QDir(baseDir).filePath(safeName)).absoluteFilePath();

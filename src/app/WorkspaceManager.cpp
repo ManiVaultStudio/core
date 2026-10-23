@@ -356,7 +356,7 @@ workflow::UniqueWorkflowPlan WorkspaceManager::loadWorkspaceWorkflowPlan(QString
 
 void WorkspaceManager::importWorkspaceFromProjectFile(QString projectFilePath /*= ""*/, bool addToRecentWorkspaces /*= true*/)
 {
-    QTemporaryDir temporaryDirectory(QDir::cleanPath(Application::current()->getTemporaryDir().path() + QDir::separator() + "ImportWorkspace"));
+    QTemporaryDir temporaryDirectory(Application::current()->getTemporaryDirectoryPath(Application::TemporaryDirectoryType::Other));
 
     const auto temporaryDirectoryPath = temporaryDirectory.path();
 
