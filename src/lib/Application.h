@@ -221,13 +221,20 @@ public: // Logging
 public: // Serialization
 
     /**
-     * Get temporary dir
-     * @return Directory where application temporary files reside
+     * Get the current application session temporary directory
+     * @return Directory where this application session's temporary files reside
      */
     const QTemporaryDir& getTemporaryDir() const;
 
     /**
-     * Get the root directory under which the application temporary directory is created
+     * Get the configured root directory for application temporary data
+     *
+     * The session directory returned by getTemporaryDir() is created beneath this
+     * root. The configured value is read before session-directory creation and
+     * falls back to the operating system temporary directory when it is empty or
+     * cannot be created. Changing the setting takes effect on the next application
+     * restart.
+     *
      * @return Root directory for application temporary data
      */
     QString getTemporaryDirRoot() const;
@@ -361,7 +368,7 @@ protected:
     QUrl                                    _startupProjectUrl;                 /** URL of the project to automatically open upon startup (if set) */
     ProjectMetaAction*                      _startupProjectMetaAction;          /** Pointer to project meta action (non-nullptr case ManiVault starts up with a project) */
     ApplicationStartupTask*                 _startupTask;                       /** Application startup task */
-    QString                                 _temporaryDirRoot;                  /** Root directory under which application temporary files reside */
+    QString                                 _temporaryDirRoot;                  /** Configured root directory under which application session temporary files reside */
     QTemporaryDir                           _temporaryDir;                      /** Directory where application temporary files reside */
     TemporaryDirs                           _temporaryDirs;                     /** ManiVault application temporary directories manager */
     QLockFile                               _lockFile;                          /** Lock file is used for fail-safe purging of the temporary directory */

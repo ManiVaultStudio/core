@@ -35,6 +35,32 @@ using namespace mv::workflow;
 
 namespace mv {
 
+namespace {
+
+const QString applicationTemporaryDirSettingPath = QStringLiteral("GlobalSettings/Temporary/ApplicationTemporaryDirectory");
+
+QString getConfiguredTemporaryDirRoot()
+{
+    const auto configuredValue = QSettings().value(applicationTemporaryDirSettingPath);
+    const auto configuredRoot  = configuredValue.toMap().value(QStringLiteral("Value"), configuredValue).toString().trimmed();
+    const auto defaultRoot     = QDir::cleanPath(QDir::tempPath());
+
+    if (configuredRoot.isEmpty())
+        return defaultRoot;
+
+    const auto absoluteRoot = QDir::cleanPath(QFileInfo(configuredRoot).absoluteFilePath());
+    QDir rootDirectory(absoluteRoot);
+
+    if ((!rootDirectory.exists() && !QDir().mkpath(absoluteRoot)) || !QFileInfo(absoluteRoot).isDir()) {
+        qWarning() << "Unable to use configured application temporary directory" << absoluteRoot << "; falling back to" << defaultRoot;
+        return defaultRoot;
+    }
+
+    return absoluteRoot;
+}
+
+}
+
 QList<Application::CursorShapeCount> Application::cursorOverridesCount;
 
 Application::Application(int& argc, char** argv) :
@@ -44,7 +70,7 @@ Application::Application(int& argc, char** argv) :
     _version(MV_VERSION_MAJOR, MV_VERSION_MINOR, MV_VERSION_PATCH, std::string(MV_VERSION_SUFFIX.data())),
     _startupProjectMetaAction(nullptr),
     _startupTask(nullptr),
-    _temporaryDirRoot(QDir::cleanPath(QDir::tempPath())),
+    _temporaryDirRoot(getConfiguredTemporaryDirRoot()),
     _temporaryDir(QDir(_temporaryDirRoot).filePath(QString("%1.%2").arg("ManiVault Studio", getId().mid(0, 6)))),
     _temporaryDirs(this),
     _lockFile(QDir::cleanPath(_temporaryDir.path() + QDir::separator() + "app.lock")),
