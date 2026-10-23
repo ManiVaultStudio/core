@@ -30,7 +30,7 @@ public:
      */
     explicit ProjectSaveContext(const QString& filePath) :
 		_filePath(filePath),
-		_temporaryDirectory(new QTemporaryDir(QDir::cleanPath(mv::Application::current()->getTemporaryDir().path() + QDir::separator() + "SaveProject")))
+		_temporaryDirectory(new QTemporaryDir(mv::Application::current()->getTemporaryDirectoryPath(mv::Application::TemporaryDirectoryType::Save)))
     {
     }
 

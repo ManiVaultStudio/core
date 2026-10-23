@@ -4,20 +4,30 @@
 
 #include "TemporaryDirectoriesSettingsAction.h"
 #include "Application.h"
+#include "CoreInterface.h"
+
+#include "util/StyledIcon.h"
+
+#include <QDir>
 
 namespace mv::gui
 {
 
 TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Temporary"),
-    _applicationTemporaryDirAction(this, "Application temporary directory", Application::current()->getTemporaryDir().path()),
-    _removeStaleTemporaryDirsAtStartupAction(this, "Remove stale temporary directories at startup",true),
+    _applicationTemporaryDirAction(this, "Application temporary directory", Application::current()->getTemporaryDirRoot(), QDir::tempPath()),
+    _removeStaleTemporaryDirsAtStartupAction(this, "Remove stale temporary directories at startup", true),
     _scanForStaleTemporaryDirectoriesAction(this, "Refresh"),
     _selectStaleTemporaryDirectoriesAction(this, "Stale temporary directories"),
     _removeStaleTemporaryDirectoriesAction(this, "Remove all stale"),
     _staleTemporaryDirectoriesGroupAction(this, "Stale temporary directories")
 {
-    _applicationTemporaryDirAction.setEnabled(false);
+    _applicationTemporaryDirAction.setToolTip("Application temporary directory root. Changes take effect after restarting ManiVault Studio.");
+
+    connect(&_applicationTemporaryDirAction, &TemporaryDirectoryAction::directoryChanged, this, [this](const QString&) {
+        mv::help().addNotification("Application temporary directory changed", "The new application temporary directory will take effect after restarting ManiVault Studio.", util::StyledIcon("rotate-right"));
+        _scanForStaleTemporaryDirectoriesAction.trigger();
+    });
 
     addAction(&_applicationTemporaryDirAction);
     addAction(&_removeStaleTemporaryDirsAtStartupAction);

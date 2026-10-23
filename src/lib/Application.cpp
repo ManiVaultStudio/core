@@ -35,6 +35,55 @@ using namespace mv::workflow;
 
 namespace mv {
 
+namespace {
+
+const QString applicationTemporaryDirSettingPath = QStringLiteral("GlobalSettings/Temporary/ApplicationTemporaryDirectory");
+
+QString getTemporaryDirectoryTypeName(const Application::TemporaryDirectoryType& temporaryDirectoryType)
+{
+    switch (temporaryDirectoryType)
+    {
+        case Application::TemporaryDirectoryType::Open:
+            return QStringLiteral("Open");
+
+        case Application::TemporaryDirectoryType::Save:
+            return QStringLiteral("Save");
+
+        case Application::TemporaryDirectoryType::Publish:
+            return QStringLiteral("Publish");
+
+        case Application::TemporaryDirectoryType::Staging:
+            return QStringLiteral("Staging");
+
+        case Application::TemporaryDirectoryType::Other:
+            return QStringLiteral("Other");
+    }
+
+    throw std::runtime_error("Unknown application temporary directory type");
+}
+
+QString getConfiguredTemporaryDirRoot()
+{
+    const auto configuredValue = QSettings().value(applicationTemporaryDirSettingPath);
+    const auto configuredRoot  = configuredValue.toMap().value(QStringLiteral("Value"), configuredValue).toString().trimmed();
+    const auto defaultRoot     = QDir::cleanPath(QDir::tempPath());
+
+    if (configuredRoot.isEmpty())
+        return defaultRoot;
+
+    const auto absoluteRoot = QDir::cleanPath(QFileInfo(configuredRoot).absoluteFilePath());
+    QDir rootDirectory(absoluteRoot);
+
+    if ((!rootDirectory.exists() && !QDir().mkpath(absoluteRoot)) || !QFileInfo(absoluteRoot).isDir()) {
+        qWarning() << "Unable to use configured application temporary directory" << absoluteRoot << "; falling back to" << defaultRoot;
+        return defaultRoot;
+    }
+
+    return absoluteRoot;
+}
+
+}
+
 QList<Application::CursorShapeCount> Application::cursorOverridesCount;
 
 Application::Application(int& argc, char** argv) :
@@ -44,7 +93,8 @@ Application::Application(int& argc, char** argv) :
     _version(MV_VERSION_MAJOR, MV_VERSION_MINOR, MV_VERSION_PATCH, std::string(MV_VERSION_SUFFIX.data())),
     _startupProjectMetaAction(nullptr),
     _startupTask(nullptr),
-    _temporaryDir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + QString("%1.%2").arg("ManiVault Studio", getId().mid(0, 6)))),
+    _temporaryDirRoot(getConfiguredTemporaryDirRoot()),
+    _temporaryDir(QDir(_temporaryDirRoot).filePath(QString("%1.%2").arg("ManiVault Studio", getId().mid(0, 6)))),
     _temporaryDirs(this),
     _lockFile(QDir::cleanPath(_temporaryDir.path() + QDir::separator() + "app.lock")),
     _configurationAction(this, "Configuration"),
@@ -303,6 +353,21 @@ const QTemporaryDir& Application::getTemporaryDir() const
     return _temporaryDir;
 }
 
+QString Application::getTemporaryDirRoot() const
+{
+    return _temporaryDirRoot;
+}
+
+QString Application::getTemporaryDirectoryPath(const TemporaryDirectoryType& temporaryDirectoryType) const
+{
+    const auto temporaryDirectoryPath = QDir(_temporaryDir.path()).filePath(getTemporaryDirectoryTypeName(temporaryDirectoryType));
+
+    if (!QDir().mkpath(temporaryDirectoryPath))
+        throw std::runtime_error(QString("Unable to create application temporary directory: %1").arg(temporaryDirectoryPath).toStdString());
+
+    return temporaryDirectoryPath;
+}
+
 Application::TemporaryDirs& Application::getTemporaryDirs()
 {
     return _temporaryDirs;
@@ -433,7 +498,7 @@ QStringList Application::TemporaryDirs::getStale()
 {
     QStringList staleTemporaryDirectories;
 
-    auto temporaryDir = QDir(QDir::tempPath());
+    auto temporaryDir = QDir(Application::current()->getTemporaryDirRoot());
 
     temporaryDir.setFilter(QDir::Dirs);
     // Support both the current application directory name and the legacy name.
@@ -445,7 +510,7 @@ QStringList Application::TemporaryDirs::getStale()
     const auto currentTemporaryDirectory = QDir::cleanPath(Application::current()->getTemporaryDir().path());
 
     for (const auto& session : sessions) {
-        const auto staleTemporaryDirectory  = QDir::cleanPath(QDir::tempPath() + QDir::separator() + session);
+        const auto staleTemporaryDirectory  = QDir(temporaryDir).filePath(session);
         const auto lockInfoFilePath         = QDir(staleTemporaryDirectory).filePath("app.lock");
         const auto isCurrentApplication     = staleTemporaryDirectory == currentTemporaryDirectory;
 
@@ -471,6 +536,22 @@ QStringList Application::TemporaryDirs::getStale()
 
 void Application::TemporaryDirs::removeStale(const QStringList& stale /*= QStringList()*/)
 {
+    removeStale(stale, &_task, nullptr);
+}
+
+void Application::TemporaryDirs::removeStaleAsync()
+{
+    auto workflowPlan = std::make_unique<workflow::WorkflowPlan>("Remove stale ManiVault temporary directories");
+
+    workflowPlan->addSequentialStage("Remove stale temporary directories", [this](const auto&, const auto& workflowContext) {
+        removeStale(QStringList(), nullptr, workflowContext.get());
+    });
+
+    [[maybe_unused]] const auto workflowResult = Application::getWorkflowPlanExecutor().execute(std::move(workflowPlan), nullptr, workflow::WorkflowOptions());
+}
+
+void Application::TemporaryDirs::removeStale(const QStringList& stale, Task* task, workflow::WorkflowExecutionContext* workflowContext)
+{
     const auto staleTemporaryDirectories = getStale();
 
     qDebug() << "Found" << staleTemporaryDirectories.count() << QString("stale temporary ManiVault director%1 eligible for removal").arg(staleTemporaryDirectories.count() == 1 ? "y" : "ies");
@@ -488,17 +569,21 @@ void Application::TemporaryDirs::removeStale(const QStringList& stale /*= QStrin
         selectedStaleTemporaryDirs = staleTemporaryDirectories;
     }
 
-    _task.setSubtasks(selectedStaleTemporaryDirs);
-    _task.setRunning();
+    if (task != nullptr) {
+        task->setSubtasks(selectedStaleTemporaryDirs);
+        task->setRunning();
+    }
 
-    processEvents();
+    for (qsizetype index = 0; index < selectedStaleTemporaryDirs.count(); ++index) {
+        const auto& selectedStaleTemporaryDir = selectedStaleTemporaryDirs.at(index);
 
-    for (const auto& selectedStaleTemporaryDir : selectedStaleTemporaryDirs) {
         try
         {
             const auto dirName = selectedStaleTemporaryDir.split("/").last();
 
-            _task.setSubtaskStarted(selectedStaleTemporaryDir, QString("Removing %1").arg(dirName));
+            if (task != nullptr)
+                task->setSubtaskStarted(selectedStaleTemporaryDir, QString("Removing %1").arg(dirName));
+
             {
                 qDebug() << "Removing" << selectedStaleTemporaryDir;
 
@@ -509,22 +594,31 @@ void Application::TemporaryDirs::removeStale(const QStringList& stale /*= QStrin
 
                 ++numberOfRemovedSessions;
             }
-            _task.setSubtaskFinished(selectedStaleTemporaryDir, QString("Removed %1").arg(dirName));
-
-            processEvents();
+            if (task != nullptr)
+                task->setSubtaskFinished(selectedStaleTemporaryDir, QString("Removed %1").arg(dirName));
         }
         catch (std::exception& e)
         {
-            exceptionMessageBox("Unable to remove the ManiVault application temporary directory", e);
+            if (workflowContext != nullptr)
+                workflowContext->error(QString("Unable to remove the ManiVault application temporary directory: %1").arg(QString::fromUtf8(e.what())), "Temporary directory cleanup");
+            else
+                exceptionMessageBox("Unable to remove the ManiVault application temporary directory", e);
         }
         catch (...) {
-            exceptionMessageBox("Unable to remove the ManiVault application temporary directory");
+            if (workflowContext != nullptr)
+                workflowContext->error("Unable to remove the ManiVault application temporary directory", "Temporary directory cleanup");
+            else
+                exceptionMessageBox("Unable to remove the ManiVault application temporary directory");
         }
+
+        if (workflowContext != nullptr && !selectedStaleTemporaryDirs.isEmpty())
+            workflowContext->setProgress(static_cast<double>(index + 1) / selectedStaleTemporaryDirs.count());
     }
 
     qDebug() << "Removed" << numberOfRemovedSessions << QString("ManiVault application temporary director%1").arg(numberOfRemovedSessions == 1 ? "y" : "ies");
 
-    _task.setFinished();
+    if (task != nullptr)
+        task->setFinished();
 }
 
 }

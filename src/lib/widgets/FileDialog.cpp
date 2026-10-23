@@ -19,7 +19,10 @@ FileDialog::FileDialog(QWidget* parent , const QString& caption, const QString& 
 {
     setWindowTitle(caption);
     setDirectory(directory);
-    setNameFilter(filter);
+
+    if (!filter.isEmpty())
+        setNameFilter(filter);
+
     setOption(DontUseNativeDialog, true);
 }
 
