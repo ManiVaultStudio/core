@@ -31,6 +31,7 @@
 
 #include <cstring>
 #include <algorithm>
+#include <limits>
 #include <set>
 #include <stdexcept>
 #include <type_traits>
@@ -555,6 +556,39 @@ void PointData::visitRange(const std::uint64_t firstRow, const std::uint64_t row
 {
     if (_storageBackend)
         _storageBackend->visitRange(firstRow, rowCount, firstColumn, columnCount, visitor);
+}
+
+void PointData::setRows(const std::uint64_t firstRow, const std::uint64_t rowCount, const PointDataAccessView& values)
+{
+    setRange(firstRow, rowCount, 0, getNumDimensions(), values);
+}
+
+void PointData::setColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessView& values)
+{
+    setRange(0, getNumPoints(), firstColumn, columnCount, values);
+}
+
+void PointData::setRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessView& values)
+{
+    const auto dataLock = lockData();
+    const auto numPoints     = getNumPoints();
+    const auto numDimensions = getNumDimensions();
+
+    if (firstRow > numPoints || rowCount > numPoints - firstRow || firstColumn > numDimensions || columnCount > numDimensions - firstColumn)
+        throw std::out_of_range("Point-data range is out of bounds");
+
+    if (!_storageBackend)
+        throw std::logic_error("Point-data storage backend is unavailable");
+
+    const auto elementSize = _storageBackend->getElementSize();
+
+    if (values.rows != rowCount || values.columns != columnCount || values.elementTypeIndex != _storageBackend->getElementTypeIndex() || values.elementSizeBytes != elementSize)
+        throw std::invalid_argument("Point-data range view shape or element type does not match the destination");
+
+    if (elementSize == 0 || columnCount > std::numeric_limits<std::uint64_t>::max() / elementSize || values.rowStrideBytes < columnCount * elementSize || (rowCount != 0 && columnCount != 0 && values.data == nullptr))
+        throw std::invalid_argument("Point-data range view has an invalid layout");
+
+    _storageBackend->setRange(firstRow, rowCount, firstColumn, columnCount, values);
 }
 
 void PointData::materializeTiled(pointdata::storage::StorageBackendProgressCallback progress)
@@ -1717,6 +1751,25 @@ void Points::visitRange(const std::uint64_t firstRow, const std::uint64_t rowCou
         rowIds.push_back(indices[static_cast<std::size_t>(row)]);
 
     rawPointData->visitColumns(firstColumn, columnCount, rowIds, visitor);
+}
+
+void Points::setRows(const std::uint64_t firstRow, const std::uint64_t rowCount, const PointDataAccessView& values)
+{
+    setRange(firstRow, rowCount, 0, getNumDimensions(), values);
+}
+
+void Points::setColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessView& values)
+{
+    setRange(0, getNumPoints(), firstColumn, columnCount, values);
+}
+
+void Points::setRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessView& values)
+{
+    if (isProxy() || !isFull())
+        throw std::logic_error("Point-data range mutation is unavailable for proxy and subset datasets");
+
+    getRawData<PointData>()->setRange(firstRow, rowCount, firstColumn, columnCount, values);
+    mv::events().notifyDatasetDataChanged(this);
 }
 
 float Points::getValueAt(const std::size_t index) const

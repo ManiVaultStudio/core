@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <stdexcept>
 #include <vector>
 
 class QObject;
@@ -30,8 +31,9 @@ namespace mv::pointdata::storage
  * The backend owns the physical representation of a row-major point matrix.
  * PointData owns the backend and preserves the established eager APIs around
  * it, while Points remains responsible for logical facade behavior such as
- * subsets and proxy datasets. The contract deliberately contains only access
- * operations that can be implemented by eager and lazy representations alike.
+ * subsets and proxy datasets. Read operations can be implemented by eager
+ * and lazy representations alike; optional write operations fail explicitly
+ * until a backend implements them.
  *
  * Mutation and backend-specific diagnostics are capability-dependent. A
  * read-only backend must not be forced to implement artificial write-back
@@ -83,6 +85,29 @@ public:
 
     /** Reads one row-major element as a float. */
     virtual float getValueAt(std::uint64_t flatIndex) const = 0;
+
+    /**
+     * Sets one row-major element from a typed one-element view when supported.
+     *
+     * Backends without element mutation throw std::logic_error. A writable
+     * backend can override this without changing the read-only access API.
+     */
+    virtual void setValueAt(std::uint64_t, const PointDataAccessView&)
+    {
+        throw std::logic_error("Point-data storage does not support element mutation");
+    }
+
+    /**
+     * Sets a rectangular range from a row-major view when supported.
+     *
+     * The view describes the source element type and row stride. Its payload
+     * must remain valid for the duration of the call. Backends without range
+     * mutation throw std::logic_error.
+     */
+    virtual void setRange(std::uint64_t, std::uint64_t, std::uint64_t, std::uint64_t, const PointDataAccessView&)
+    {
+        throw std::logic_error("Point-data storage does not support range mutation");
+    }
 
     /** Materializes the complete matrix into a row-major destination buffer. */
     virtual void materialize(char* destination) const = 0;

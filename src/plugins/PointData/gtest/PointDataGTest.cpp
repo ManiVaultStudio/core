@@ -4,6 +4,7 @@
 
 #include <storage/tiled/PointDataTiledStorage.h>
 #include <storage/tiled/PackedTileFile.h>
+#include <storage/tiled/TiledPointsStorageBackend.h>
 
 #include <gtest/gtest.h>
 
@@ -18,6 +19,7 @@
 using mv::pointdata::tiled::PointDataTiledStorage;
 using mv::pointdata::tiled::PackedTileFileReader;
 using mv::pointdata::tiled::PackedTileFileWriter;
+using mv::pointdata::storage::TiledPointsStorageBackend;
 
 namespace
 {
@@ -47,6 +49,25 @@ GTEST_TEST(PointData, supportsRectangularTiledReadsAndBoundaryTiles)
     ASSERT_EQ(boundaryTile.rows(), 1U);
     ASSERT_EQ(boundaryTile.columns(), 1U);
     ASSERT_FLOAT_EQ(*static_cast<const float*>(boundaryTile.data()), 19.0f);
+}
+
+GTEST_TEST(PointData, tiledBackendRejectsPlaceholderWritesWithoutChangingData)
+{
+    constexpr std::uint32_t uint16TypeIndex = 5;
+    const std::vector<std::uint16_t> values{ 1, 2, 3, 4 };
+    const auto storage = PointDataTiledStorage::fromDense(reinterpret_cast<const char*>(values.data()), 2, 2, sizeof(std::uint16_t), 1, 1);
+    TiledPointsStorageBackend backend(storage, uint16TypeIndex);
+    PointDataAccessView input;
+    input.data             = values.data();
+    input.rows             = 1;
+    input.columns          = 1;
+    input.rowStrideBytes   = sizeof(std::uint16_t);
+    input.elementTypeIndex = uint16TypeIndex;
+    input.elementSizeBytes = sizeof(std::uint16_t);
+
+    EXPECT_THROW(backend.setValueAt(0, input), std::logic_error);
+    EXPECT_THROW(backend.setRange(0, 1, 0, 1, input), std::logic_error);
+    EXPECT_FLOAT_EQ(backend.getValueAt(0), values.front());
 }
 
 GTEST_TEST(PointData, deterministicRandomAccessMatchesRowMajorReference)

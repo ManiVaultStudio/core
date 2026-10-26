@@ -93,8 +93,9 @@ class Points;
  * making the tiled implementation part of the public header. This keeps the
  * common PointData include lightweight and allows other storage backends to
  * implement the same row, column, range, and visitor APIs in the future.
- * Tiled storage is currently read-only; legacy raw-pointer and mutation APIs
- * materialize tiled data when a contiguous eager buffer is required.
+ * Tiled storage is currently read-only; legacy raw-pointer and single-value
+ * mutation APIs materialize tiled data when a contiguous eager buffer is
+ * required. The bulk setter entry points report unsupported writes for now.
  *
  * @author Thomas Kroes
  */
@@ -392,6 +393,24 @@ public:
 
     /** Visits a rectangular row and column range without materializing the complete dataset. */
     void visitRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Sets a contiguous row range from a typed row-major view when the backend supports range writes. */
+    void setRows(std::uint64_t firstRow, std::uint64_t rowCount, const PointDataAccessView& values);
+
+    /** Sets a contiguous column range for every row from a typed row-major view when supported. */
+    void setColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessView& values);
+
+    /**
+     * Sets a rectangular range from a typed row-major view.
+     *
+     * The view shape must match the requested rectangle, and its element type
+     * must match the stored type. The caller keeps the view payload valid until
+     * this call returns. Current backends reject range writes after validation.
+     * @throws std::out_of_range If the requested rectangle exceeds the matrix.
+     * @throws std::invalid_argument If the view shape, type, or stride is invalid.
+     * @throws std::logic_error If the backend cannot write the rectangle.
+     */
+    void setRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessView& values);
 
     static constexpr std::array<const char*, std::variant_size_v<VariantOfVectors>> getElementTypeNames()
     {
@@ -1161,6 +1180,21 @@ public:
 
     /** Visits a rectangular range of logical rows and columns without full materialization. */
     void visitRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Sets a contiguous logical row range from a typed row-major view when supported. */
+    void setRows(std::uint64_t firstRow, std::uint64_t rowCount, const PointDataAccessView& values);
+
+    /** Sets a contiguous logical column range from a typed row-major view when supported. */
+    void setColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessView& values);
+
+    /**
+     * Sets a rectangular logical range from a typed row-major view.
+     *
+     * Proxy and subset datasets currently reject writes. Concrete full
+     * datasets forward to their backend, which currently rejects range writes.
+     * @throws std::logic_error If this is a proxy, subset, or backend without range writes.
+     */
+    void setRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessView& values);
 
     /** Returns the element type represented by a type name. */
     static ElementTypeSpecifier elementTypeSpecifier(const QString& typeName)

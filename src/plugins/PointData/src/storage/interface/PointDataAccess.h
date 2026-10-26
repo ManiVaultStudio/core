@@ -18,8 +18,9 @@
  * The lifetime token is intentionally separate from the data pointer. A
  * visitor may retain a copy of the view while it processes the callback, and
  * the token keeps the referenced tile or temporary buffer alive for that
- * period. The view is read-only; mutation must go through the existing
- * PointData mutation APIs, which may materialize tiled storage.
+ * period. The view is also a typed source for optional write operations; the
+ * pointed-to bytes remain read-only. Existing PointData mutation APIs may
+ * materialize tiled storage.
  *
  * @author Thomas Kroes
  */
