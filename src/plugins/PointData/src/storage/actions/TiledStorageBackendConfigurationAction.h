@@ -26,11 +26,18 @@ class POINTDATA_EXPORT TiledStorageBackendConfigurationAction : public StorageBa
 {
 public:
     /**
-     * Constructs controls for a matrix with the supplied shape and element size.
+     * @brief Constructs controls for configuring tiled storage for a matrix.
+     *
      * The tile-size and asymmetry controls calculate a suggested geometry;
      * the row and column dimensions remain directly editable. When requested,
      * the current physical geometry and cache capacity are copied from
      * \p configuration for backend inspection or reconfiguration.
+     * @param parent Parent action that owns this configuration action.
+     * @param rows Logical matrix row count used to bound tile geometry.
+     * @param columns Logical matrix column count used to bound tile geometry.
+     * @param elementSize Size of one matrix element in bytes.
+     * @param configuration Existing tiled settings to display when initializing from configuration.
+     * @param initializeFromConfiguration Whether to display existing geometry and cache values instead of suggestions.
      */
     TiledStorageBackendConfigurationAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration = {}, bool initializeFromConfiguration = false);
 
