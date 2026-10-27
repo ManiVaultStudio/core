@@ -147,7 +147,7 @@ WidgetActions StatusBarAction::getMenuActions()
     return _menuActions;
 }
 
-std::int32_t StatusBarAction::getIndex()
+std::int32_t StatusBarAction::getIndex() const
 {
     return _index;
 }
