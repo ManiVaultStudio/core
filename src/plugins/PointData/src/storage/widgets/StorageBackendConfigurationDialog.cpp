@@ -11,11 +11,54 @@
 #include <utility>
 
 StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique_ptr<mv::gui::StorageBackendConversionAction> conversionAction, const bool updateMode, QWidget* parent) :
+    StorageBackendConfigurationDialog(std::move(conversionAction), updateMode ? Purpose::Configure : Purpose::Convert, parent)
+{
+}
+
+StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique_ptr<mv::gui::StorageBackendConversionAction> conversionAction, const Purpose purpose, QWidget* parent) :
     QDialog(parent),
     _conversionAction(std::move(conversionAction))
 {
-    setWindowIcon(mv::util::StyledIcon("shuffle"));
-    setWindowTitle(tr("Configure point-data conversion"));
+    setWindowIcon(mv::util::StyledIcon("gear"));
+
+    auto backendName = tr("Storage");
+
+    if (_conversionAction)
+    {
+        switch (_conversionAction->getTargetBackendType())
+        {
+            case mv::pointdata::storage::StorageBackendType::Eager:
+                backendName = tr("In-Memory Storage");
+                break;
+
+            case mv::pointdata::storage::StorageBackendType::Tiled:
+                backendName = tr("Tiled Storage");
+                break;
+
+            case mv::pointdata::storage::StorageBackendType::Mixed:
+                backendName = tr("Mixed Storage");
+                break;
+
+            case mv::pointdata::storage::StorageBackendType::Unknown:
+                break;
+        }
+    }
+
+    switch (purpose)
+    {
+        case Purpose::Configure:
+            setWindowTitle(tr("Configure %1").arg(backendName));
+            break;
+
+        case Purpose::Convert:
+            setWindowTitle(tr("Convert to %1").arg(backendName));
+            break;
+
+        case Purpose::Import:
+            setWindowTitle(tr("Configure %1 for Import").arg(backendName));
+            break;
+    }
+
     resize(400, 500);
 
     auto* layout = new QVBoxLayout(this);
@@ -25,7 +68,7 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique
 
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
 
-    if (updateMode)
+    if (purpose == Purpose::Configure)
     {
         auto* updateButton = buttons->button(QDialogButtonBox::Ok);
         updateButton->setText(tr("Update"));

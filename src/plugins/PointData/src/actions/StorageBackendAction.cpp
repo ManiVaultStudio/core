@@ -96,7 +96,7 @@ void StorageBackendAction::changeBackendType(const QString& backendType)
             return;
         }
 
-        StorageBackendConfigurationDialog dialog(std::move(configurationAction), true, QApplication::activeWindow());
+        StorageBackendConfigurationDialog dialog(std::move(configurationAction), StorageBackendConfigurationDialog::Purpose::Configure, QApplication::activeWindow());
 
         if (dialog.exec() == QDialog::Accepted)
             convertBackend(targetType, dialog.getConversionOptions());
@@ -109,7 +109,7 @@ void StorageBackendAction::changeBackendType(const QString& backendType)
     if (backendType == "Tiled")
     {
         auto configurationAction = _points->createStorageBackendConversionAction(Points::StorageBackendType::Tiled);
-        StorageBackendConfigurationDialog dialog(std::move(configurationAction), false, QApplication::activeWindow());
+        StorageBackendConfigurationDialog dialog(std::move(configurationAction), StorageBackendConfigurationDialog::Purpose::Convert, QApplication::activeWindow());
 
         if (dialog.exec() != QDialog::Accepted)
         {
