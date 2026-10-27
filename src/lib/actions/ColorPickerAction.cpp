@@ -133,19 +133,19 @@ ColorPickerAction::Widget::Widget(QWidget* parent, ColorPickerAction* colorPicke
         colorPickerAction->setColor(QColor::fromHsl(_hueAction.getValue(), _saturationAction.getValue(), _lightnessAction.getValue()));
     };
 
-    connect(&_hueAction, &IntegralAction::valueChanged, this, [this, updateColorFromHSL](const std::int32_t& value) {
+    connect(&_hueAction, &IntegralAction::valueChanged, this, [updateColorFromHSL](const std::int32_t& value) {
         updateColorFromHSL();
     });
 
-    connect(&_saturationAction, &IntegralAction::valueChanged, this, [this, updateColorFromHSL](const std::int32_t& value) {
+    connect(&_saturationAction, &IntegralAction::valueChanged, this, [updateColorFromHSL](const std::int32_t& value) {
         updateColorFromHSL();
     });
 
-    connect(&_lightnessAction, &IntegralAction::valueChanged, this, [this, updateColorFromHSL](const std::int32_t& value) {
+    connect(&_lightnessAction, &IntegralAction::valueChanged, this, [updateColorFromHSL](const std::int32_t& value) {
         updateColorFromHSL();
     });
 
-    connect(colorPickerAction, &ColorPickerAction::colorChanged, this, [this, colorPickerAction](const QColor& color) {
+    connect(colorPickerAction, &ColorPickerAction::colorChanged, this, [this](const QColor& color) {
         _updateColorPickerAction = false;
         {
             _colorDialog.setCurrentColor(color);

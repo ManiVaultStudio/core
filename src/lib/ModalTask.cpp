@@ -16,7 +16,7 @@ ModalTaskHandler* ModalTask::modalTaskHandler = nullptr;
 ModalTask::ModalTask(QObject* parent, const QString& name, const Status& status /*= Status::Undefined*/, bool mayKill /*= false*/) :
     Task(parent, name, GuiScopes{ GuiScope::Modal }, status, mayKill, nullptr)
 {
-    connect(Application::current(), &Application::coreInitialized, this, [this](CoreInterface* core) { createHandler(Application::current()); });
+    connect(Application::current(), &Application::coreInitialized, this, [](CoreInterface* core) { createHandler(Application::current()); });
 }
 
 void ModalTask::createHandler(QObject* parent)

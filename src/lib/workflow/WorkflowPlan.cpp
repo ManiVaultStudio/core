@@ -27,8 +27,8 @@ WorkflowPlan::Job::Job(QString name, NestedWorkflowFunction nestedWorkflowFuncti
 	_kind(JobKind::NestedWorkflow),
 	_nestedWorkflowFunction(std::move(nestedWorkflowFunction)),
 	_threadAffinity(threadAffinity),
-	_progressMode(progressMode),
-	_weight(weight)
+    _weight(weight),
+    _progressMode(progressMode)
 {
 }
 
@@ -37,8 +37,8 @@ WorkflowPlan::Job::Job(QString name, NestedWorkflowJob job, JobThreadAffinity th
 	_kind(JobKind::NestedWorkflow),
 	_nestedWorkflowFunction(std::move(job.function)),
 	_threadAffinity(threadAffinity),
-    _progressMode(progressMode),
-	_weight(weight)
+	_weight(weight),
+    _progressMode(progressMode)
 {
 }
 

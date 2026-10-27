@@ -186,7 +186,7 @@ void StatusBarAction::initialize(const QIcon& icon)
 
         _iconAction.setEnabled(false);
         _iconAction.setDefaultWidgetFlags(StringAction::Label);
-        _iconAction.setWidgetConfigurationFunction([this, icon](WidgetAction* action, QWidget* widget) -> void {
+        _iconAction.setWidgetConfigurationFunction([icon](WidgetAction* action, QWidget* widget) -> void {
             auto labelWidget = widget->findChild<QLabel*>("Label");
 
             Q_ASSERT(labelWidget != nullptr);

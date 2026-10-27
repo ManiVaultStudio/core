@@ -22,7 +22,7 @@ ForegroundTaskTester::ForegroundTaskTester(QObject* parent, const QString& name)
 
 void ForegroundTaskTester::testRunningIndeterminate()
 {
-    TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
+    TaskTesterRunner::createAndRun(this, [](TaskTesterRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
         auto indeterminateTask = std::make_unique<ForegroundTask>(taskRunner, "Indeterminate Task", Task::Status::RunningIndeterminate);
@@ -76,7 +76,7 @@ void ForegroundTaskTester::testRunningIndeterminate()
 
 void ForegroundTaskTester::testPerformance()
 {
-    TaskTesterRunner::createAndRun(this, [this](TaskTesterRunner* taskRunner) -> void {
+    TaskTesterRunner::createAndRun(this, [](TaskTesterRunner* taskRunner) -> void {
         QEventLoop eventLoop(taskRunner);
 
         auto performanceTask = std::make_unique<ForegroundTask>(taskRunner, "Performance Task", Task::Status::Running);

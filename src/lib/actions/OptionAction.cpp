@@ -24,8 +24,8 @@ OptionAction::OptionAction(QObject* parent, const QString& title, const QStringL
     WidgetAction(parent, title),
     _customModel(nullptr),
     _currentIndex(-1),
-    _completerPopupFixedWidth(0),
-    _completionMatchMode(Qt::MatchContains)
+    _completionMatchMode(Qt::MatchContains),
+    _completerPopupFixedWidth(0)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -148,7 +148,7 @@ void OptionAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
     if (publicOptionAction->getCurrentText().isEmpty() && !getCurrentText().isEmpty())
         publicOptionAction->setCurrentText(getCurrentText());
 
-    const auto currentTextChanged = [this, publicOptionAction](const QString& currentText) -> void {
+    const auto currentTextChanged = [publicOptionAction](const QString& currentText) -> void {
         if (currentText.isEmpty())
             return;
 
@@ -157,7 +157,7 @@ void OptionAction::connectToPublicAction(WidgetAction* publicAction, bool recurs
 
     connect(this, &OptionAction::currentTextChanged, this, currentTextChanged);
 
-    connect(publicOptionAction, &OptionAction::currentTextChanged, this, [this, publicOptionAction, currentTextChanged](const QString& currentText) -> void {
+    connect(publicOptionAction, &OptionAction::currentTextChanged, this, [this, currentTextChanged](const QString& currentText) -> void {
         disconnect(this, &OptionAction::currentTextChanged, this, nullptr);
         {
             setCurrentText(currentText);
@@ -414,6 +414,9 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     connect(optionAction, &OptionAction::modelChanged, this, updateComboBoxModel);
 
     const auto updateComboBoxSelection = [this, optionAction]() -> void {
+        if (!optionAction)
+            return;
+
         if (optionAction->getCurrentText() == currentText())
             return;
 
@@ -435,7 +438,7 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
         update();
     });
 
-    connect(this, qOverload<int>(&QComboBox::activated), this, [this, optionAction](const int& currentIndex) {
+    connect(this, qOverload<int>(&QComboBox::activated), this, [optionAction](const int& currentIndex) {
         optionAction->setCurrentIndex(currentIndex);
     });
 
@@ -656,7 +659,7 @@ void OptionAction::LazyIndicesModel::setSourceAndMatches(QAbstractItemModel* sou
     beginResetModel();
     {
         _sourceModel = sourceModel;
-        _all         = std::move(matches);
+        _all         = matches;
         _loaded      = 0;
     }
     endResetModel();

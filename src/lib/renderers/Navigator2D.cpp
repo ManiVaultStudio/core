@@ -199,6 +199,9 @@ void Navigator2D::initialize(QWidget* sourceWidget)
 
 bool Navigator2D::eventFilter(QObject* watched, QEvent* event)
 {
+    if (!watched || !event)
+        return false;
+
     if (!_initialized || !_enabled)
         return false;
 

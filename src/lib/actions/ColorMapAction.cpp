@@ -163,7 +163,7 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title, const Colo
 
     updateDiscretizationActions();
     updateEditorActionReadOnly();
-    updateRangeActionReadOnly;
+    updateRangeActionReadOnly();
 }
 
 void ColorMapAction::initialize(const QString& colorMap)

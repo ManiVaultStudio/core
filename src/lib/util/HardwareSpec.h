@@ -35,9 +35,9 @@ public:
 
     /** System compatibility information */
     struct SystemCompatibilityInfo {
-        SystemCompatibility     _compatibility;     /** System compatibility */
-        QString                 _message;           /** Compatibility/incompatibility message */
-        QIcon                   _icon;              /** Icon representing the compatibility/incompatibility */
+        SystemCompatibility     _compatibility = SystemCompatibility::Unknown;      /** System compatibility */
+        QString                 _message;                                           /** Compatibility/incompatibility message */
+        QIcon                   _icon;                                              /** Icon representing the compatibility/incompatibility */
     };
 
     /**

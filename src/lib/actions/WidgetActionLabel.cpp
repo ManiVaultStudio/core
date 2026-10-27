@@ -110,6 +110,9 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 
                     break;
                 }
+
+                default:
+                    break;
             }
 
             break;

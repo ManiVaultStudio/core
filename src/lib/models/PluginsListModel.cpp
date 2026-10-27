@@ -49,7 +49,7 @@ void PluginsListModel::setPlugins(const plugin::Plugins& plugins)
     setRowCount(0);
 
     for (const auto plugin : plugins)
-        addPlugin(plugin);
+        PluginsListModel::addPlugin(plugin);
 }
 
 void PluginsListModel::populateFromPluginManager()

@@ -34,8 +34,6 @@ DataHierarchyFilterModel::DataHierarchyFilterModel(QObject* parent /*= nullptr*/
 
 bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
-    auto sourceStandardItemModel = static_cast<QStandardItemModel*>(sourceModel());
-
     const auto index = sourceModel()->index(row, 0, parent);
 
     if (!index.isValid())
