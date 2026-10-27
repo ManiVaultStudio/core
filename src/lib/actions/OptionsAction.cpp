@@ -432,6 +432,12 @@ OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* op
     _tableAction.initialize(&optionsAction->getOptionsModel(), &_filterModel, "Option");
     _tableAction.setIconByName("list-check");
     _tableAction.getShowHeaderSettingsAction().setChecked(false);
+    _tableAction.getModelFilterAction().setVisible(widgetFlags & WidgetFlag::Filter);
+    _tableAction.getModelSelectionAction().setVisible(widgetFlags & WidgetFlag::Selection);
+    _tableAction.getToolbarGroupAction().setVisible(widgetFlags & (WidgetFlag::Filter | WidgetFlag::Selection | WidgetFlag::File));
+    if (widgetFlags & WidgetFlag::File)
+        _tableAction.getToolbarGroupAction().addAction(&optionsAction->getFileAction());
+
     _tableAction.setWidgetConfigurationFunction([this](WidgetAction* action, QWidget* widget) -> void {
         auto tableView = widget->findChild<QTableView*>("TableView");
 
@@ -468,8 +474,6 @@ OptionsAction::ListViewWidget::ListViewWidget(QWidget* parent, OptionsAction* op
 
     modelFilterAction.getFilterGroupAction().setShowLabels(false);
     modelFilterAction.getFilterColumnAction().setVisible(false);
-
-    _tableAction.getToolbarGroupAction().addAction(&optionsAction->getFileAction());
 
     auto& modelSelectionAction = _tableAction.getModelSelectionAction();
 
@@ -594,6 +598,30 @@ void OptionsAction::TagsViewWidget::TagLabel::leaveEvent(QEvent* leaveEvent)
 void OptionsAction::TagsViewWidget::TagLabel::updateStyle()
 {
     const auto isOptionSelected = _optionsAction->isOptionSelected(_option);
+
+    if (_type == Type::Regular)
+    {
+        const auto widgetPalette = palette();
+        auto backgroundColor = isOptionSelected ? widgetPalette.color(QPalette::Highlight) : widgetPalette.color(QPalette::Button);
+
+        if (underMouse())
+            backgroundColor = isOptionSelected ? backgroundColor.lighter(115) : widgetPalette.color(QPalette::Midlight);
+
+        const auto textColor = widgetPalette.color(isOptionSelected ? QPalette::HighlightedText : QPalette::ButtonText);
+        const auto borderColor = widgetPalette.color(isOptionSelected ? QPalette::Highlight : QPalette::Mid);
+
+        setToolTip(QString("%1 %2 selected, click to toggle").arg(_option, isOptionSelected ? "is" : "is not"));
+        setStyleSheet(QString("QLabel#Tag { \
+            background-color: %1; \
+            color: %2; \
+            font-size: 90%; \
+            font-weight: normal; \
+            border: 1px solid %3; \
+            border-radius: 5px; \
+            padding: 2px 5px; \
+        }").arg(getColorAsCssString(backgroundColor), getColorAsCssString(textColor), getColorAsCssString(borderColor)));
+        return;
+    }
 
     QColor textColor;
 

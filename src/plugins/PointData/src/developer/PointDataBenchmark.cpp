@@ -880,7 +880,7 @@ public:
         _settingsGroupAction.setDefaultWidgetFlag(mv::gui::GroupAction::NoMargins);
         _descriptionAction.setDefaultWidgetFlags(mv::gui::StringAction::TextEdit);
         _descriptionAction.setEnabled(false);
-        _datasetsAction.setDefaultWidgetFlags(mv::gui::OptionsAction::ListView | mv::gui::OptionsAction::Selection);
+        _datasetsAction.setDefaultWidgetFlags(mv::gui::OptionsAction::ListView | mv::gui::OptionsAction::Filter | mv::gui::OptionsAction::Selection | mv::gui::OptionsAction::File);
         _datasetsAction.setSerializeAllOptions(false);
         _scanModeAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
         _samplesAction.setDefaultWidgetFlags(mv::gui::IntegralAction::SpinBox);

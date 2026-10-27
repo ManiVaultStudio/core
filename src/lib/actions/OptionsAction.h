@@ -66,6 +66,7 @@ public:
         Selection       = 0x00004,      /** The widget includes a selection control */
         File            = 0x00008,      /** The widget includes a file control */
         Tags            = 0x00010,      /** The widget includes a flow layout with tags */
+        Filter          = 0x00020,      /** The list view includes filtering controls */
 
         Default = ComboBox
     };
