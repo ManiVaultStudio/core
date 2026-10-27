@@ -54,8 +54,8 @@ GroupAction* GroupSectionTreeItem::getGroupAction() const
 GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, GroupAction* groupAction, QWidget* parent /*= nullptr*/) :
     QPushButton(groupAction->text(), parent),
     _widgetActionGroup(groupAction),
-    _groupTreeWidgetItem(nullptr),
     _parentTreeWidgetItem(treeWidgetItem),
+    _groupTreeWidgetItem(nullptr),
     _groupWidget(nullptr),
     _overlayWidget(this)
 {
