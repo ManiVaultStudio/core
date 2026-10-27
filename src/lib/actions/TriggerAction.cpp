@@ -66,7 +66,7 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
     	this->update();
     };
 
-    connect(triggerAction, &QAction::changed, this, [this, update]() {
+    connect(triggerAction, &QAction::changed, this, [update]() {
         update();
     });
 
