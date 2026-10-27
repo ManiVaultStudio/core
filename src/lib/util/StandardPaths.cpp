@@ -53,15 +53,6 @@ QString StandardPaths::getDownloadsDirectory()
     const auto applicationDataDir   = QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     const auto dirName              = QString("Downloads");
 
-    /*if constexpr (isMacOS()) {
-        const auto pathSuffix = applicationDir.dirName() == "MacOS" ? QString("../../../../%1").arg(dirName) : QString("/../%1").arg(dirName);
-        const auto finalPath = QDir::cleanPath(applicationDir.path() + pathSuffix);
-
-        [[maybe_unused]] auto resultMacOS = QDir().mkpath(finalPath);
-
-        return finalPath;
-    }*/
-
     [[maybe_unused]] auto resultOther = applicationDataDir.mkpath(QString("/%1").arg(dirName));
 
     return QDir::cleanPath(applicationDataDir.path() + QString("/%1").arg(dirName));
