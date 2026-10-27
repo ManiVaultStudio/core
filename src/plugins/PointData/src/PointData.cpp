@@ -261,12 +261,20 @@ void PointData::initializeTiledStorage(const std::uint64_t rows, const std::uint
     creation->elementSize = 4;
     switch (elementType)
     {
-    case ElementTypeSpecifier::bfloat16:
-    case ElementTypeSpecifier::int16:
-    case ElementTypeSpecifier::uint16: creation->elementSize = 2; break;
-    case ElementTypeSpecifier::int8:
-    case ElementTypeSpecifier::uint8: creation->elementSize = 1; break;
-    default: creation->elementSize = 4; break;
+        case ElementTypeSpecifier::bfloat16:
+        case ElementTypeSpecifier::int16:
+        case ElementTypeSpecifier::uint16:
+            creation->elementSize = 2;
+            break;
+
+        case ElementTypeSpecifier::int8:
+        case ElementTypeSpecifier::uint8:
+            creation->elementSize = 1;
+            break;
+
+        default:
+            creation->elementSize = 4;
+            break;
     }
     creation->elementTypeIndex = static_cast<std::uint32_t>(elementType);
     creation->rowTileSize = configuration.rowTileSize;
