@@ -245,14 +245,6 @@ StatusBarAction::Widget::Widget(QWidget* parent, StatusBarAction* statusBarActio
         _toolButton.setAction(popupAction);
     });
 
-    connect(_statusBarAction, &StatusBarAction::requirePopupShow, this, [this]() -> void {
-        //_toolButton.getMenu().popup(_toolButton.mapToGlobal(_toolButton.pos()));// .show();
-    });
-
-    connect(_statusBarAction, &StatusBarAction::requirePopupHide, this, [this]() -> void {
-        //_toolButton.getMenu().hide();
-    });
-
     const auto statusBarEnabledChanged = [this]() -> void {
         _toolButton.setEnabled(_statusBarAction->isEnabled());
     };
