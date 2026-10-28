@@ -157,6 +157,18 @@ void OptionsAction::setSelectedOptions(const CheckableStringListModel::CheckedIn
     saveToSettings();
 }
 
+void OptionsAction::setOptionToolTips(const QMap<QString, QString>& toolTips)
+{
+    _optionToolTips = toolTips;
+
+    emit optionToolTipsChanged();
+}
+
+QString OptionsAction::getOptionToolTip(const QString& option) const
+{
+    return _optionToolTips.value(option);
+}
+
 void OptionsAction::selectAll()
 {
     setSelectedOptions(getOptions());
@@ -505,6 +517,7 @@ OptionsAction::TagsViewWidget::TagsViewWidget(QWidget* parent, OptionsAction* op
     _flowLayout.setContentsMargins(0, 0, 0, 0);
 
     connect(_optionsAction, &OptionsAction::optionsChanged, this, &TagsViewWidget::updateFlowLayout);
+    connect(_optionsAction, &OptionsAction::optionToolTipsChanged, this, &TagsViewWidget::updateFlowLayout);
 
     updateFlowLayout();
 }
@@ -610,7 +623,9 @@ void OptionsAction::TagsViewWidget::TagLabel::updateStyle()
         const auto textColor = widgetPalette.color(isOptionSelected ? QPalette::HighlightedText : QPalette::ButtonText);
         const auto borderColor = widgetPalette.color(isOptionSelected ? QPalette::Highlight : QPalette::Mid);
 
-        setToolTip(QString("%1 %2 selected, click to toggle").arg(_option, isOptionSelected ? "is" : "is not"));
+        const auto selectionToolTip = QString("%1 %2 selected, click to toggle").arg(_option, isOptionSelected ? "is" : "is not");
+        const auto optionToolTip = _optionsAction->getOptionToolTip(_option);
+        setToolTip(optionToolTip.isEmpty() ? selectionToolTip : QString("%1\n%2").arg(selectionToolTip, optionToolTip));
         setStyleSheet(QString("QLabel#Tag { \
             background-color: %1; \
             color: %2; \
