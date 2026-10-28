@@ -33,6 +33,12 @@ public:
     /** Returns the backend choice control. */
     mv::gui::OptionAction& getBackendTypeAction();
 
+    /** Returns the selected canonical backend type, without its capability suffix. */
+    QString getBackendType() const;
+
+    /** Selects a canonical backend type, resolving its displayed capability suffix. */
+    void setBackendType(const QString& backendType);
+
     /** Returns the configure trigger control. */
     mv::gui::TriggerAction& getConfigureAction();
 
@@ -40,13 +46,14 @@ public:
     void setConfigureEnabled(bool enabled);
 
 signals:
-    /** Emitted when the selected backend type changes. */
+    /** Emitted with the canonical backend type when the selection changes. */
     void backendTypeChanged(const QString& backendType);
 
     /** Emitted when the user requests configuration; the consumer presents backend-specific controls. */
     void configureRequested();
 
 private:
+    QStringList _backendTypes;
     mv::gui::OptionAction _backendTypeAction;
     mv::gui::TriggerAction _configureAction;
 };

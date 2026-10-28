@@ -20,41 +20,18 @@ using namespace mv::gui;
 namespace
 {
 
-QString storageBackendTypeLabel(const pointdata::storage::StorageBackendType type)
-{
-    const auto capabilities = pointdata::storage::getStorageBackendCapabilities(type);
-    QStringList accessModes;
-
-    if (pointdata::storage::hasStorageBackendCapability(capabilities, pointdata::storage::StorageBackendCapability::RandomAccess))
-        accessModes.append("read");
-    if (pointdata::storage::hasStorageBackendCapability(capabilities, pointdata::storage::StorageBackendCapability::Writable))
-        accessModes.append("write");
-
-    const auto backendName = pointdata::storage::getStorageBackendTypeName(type);
-    return accessModes.isEmpty() ? backendName : QString("%1 (%2)").arg(backendName, accessModes.join(" | "));
-}
-
-std::optional<pointdata::storage::StorageBackendType> storageBackendTypeFromLabel(const QString& label)
-{
-    for (const auto type : { Points::StorageBackendType::Eager, Points::StorageBackendType::Tiled })
-        if (storageBackendTypeLabel(type) == label)
-            return type;
-
-    return std::nullopt;
-}
-
 QStringList storageBackendTypes()
 {
     return {
-        storageBackendTypeLabel(Points::StorageBackendType::Eager),
-        storageBackendTypeLabel(Points::StorageBackendType::Tiled)
+        pointdata::storage::getStorageBackendTypeName(Points::StorageBackendType::Eager),
+        pointdata::storage::getStorageBackendTypeName(Points::StorageBackendType::Tiled)
     };
 }
 
 }
 
 StorageBackendAction::StorageBackendAction(QObject* parent, const Dataset<Points>& points) :
-    StorageBackendConfiguratorAction(parent, storageBackendTypes(), storageBackendTypeLabel(Points::StorageBackendType::Eager)),
+    StorageBackendConfiguratorAction(parent, storageBackendTypes(), pointdata::storage::getStorageBackendTypeName(Points::StorageBackendType::Eager)),
     _points(points)
 {
     connect(this, &StorageBackendConfiguratorAction::backendTypeChanged, this, [this](const QString& backendType) {
@@ -79,7 +56,7 @@ void StorageBackendAction::updateBackendType()
     const auto isProxy        = pointsAreValid && _points->isProxy();
     const auto backendType    = pointsAreValid ? _points->getStorageBackendType() : std::optional<Points::StorageBackendType>();
 
-    getBackendTypeAction().setCurrentText(backendType ? storageBackendTypeLabel(*backendType) : QString());
+    setBackendType(backendType ? pointdata::storage::getStorageBackendTypeName(*backendType) : QString());
 
     getBackendTypeAction().setEnabled(pointsAreValid && !isProxy && !_conversionInProgress);
     setConfigureEnabled(pointsAreValid && !isProxy && backendType && *backendType == Points::StorageBackendType::Tiled && !_conversionInProgress);
@@ -127,7 +104,7 @@ void StorageBackendAction::changeBackendType(const QString& backendType)
         return;
     }
 
-    const auto requestedBackendType = storageBackendTypeFromLabel(backendType);
+    const auto requestedBackendType = pointdata::storage::getStorageBackendType(backendType);
 
     if (!requestedBackendType || *requestedBackendType == *currentBackendType)
     {
