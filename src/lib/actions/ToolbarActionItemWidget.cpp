@@ -74,8 +74,6 @@ bool ToolbarActionItemWidget::eventFilter(QObject* target, QEvent* event)
     {
         case QEvent::Resize:
         {
-            const auto resizeEvent = static_cast<QResizeEvent*>(event);
-
             if (target == &_collapsedWidget)
                 synchronizeWidgetSize(ToolbarActionItem::State::Collapsed);
 
