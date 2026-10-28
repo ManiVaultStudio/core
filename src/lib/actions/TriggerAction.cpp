@@ -39,7 +39,7 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
 {
     setIconSize(QSize(12, 12));
 
-    connect(this, &QPushButton::clicked, this, [this, triggerAction]() {
+    connect(this, &QPushButton::clicked, this, [triggerAction]() {
         triggerAction->trigger();
     });
 
