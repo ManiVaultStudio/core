@@ -24,7 +24,7 @@ StorageBackendType EagerPointsStorageBackend::getType() const
 
 StorageBackendCapabilities EagerPointsStorageBackend::getCapabilities() const
 {
-    return StorageBackendCapability::RandomAccess | StorageBackendCapability::RangeAccess | StorageBackendCapability::Writable | StorageBackendCapability::Materializable;
+    return getStorageBackendCapabilities(StorageBackendType::Eager);
 }
 
 std::unique_ptr<mv::gui::StorageBackendConversionAction> EagerPointsStorageBackend::createConversionAction(const StorageBackendType targetType, QObject* parent) const

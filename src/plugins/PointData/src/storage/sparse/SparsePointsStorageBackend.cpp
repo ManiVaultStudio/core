@@ -84,7 +84,7 @@ StorageBackendType SparsePointsStorageBackend::getType() const
 
 StorageBackendCapabilities SparsePointsStorageBackend::getCapabilities() const
 {
-    return StorageBackendCapability::RandomAccess | StorageBackendCapability::RangeAccess | StorageBackendCapability::Materializable;
+    return getStorageBackendCapabilities(StorageBackendType::Sparse);
 }
 
 std::unique_ptr<mv::gui::StorageBackendConversionAction> SparsePointsStorageBackend::createConversionAction(const StorageBackendType, QObject*) const

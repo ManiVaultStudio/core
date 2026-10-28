@@ -86,7 +86,7 @@ StorageBackendType TiledPointsStorageBackend::getType() const
 
 StorageBackendCapabilities TiledPointsStorageBackend::getCapabilities() const
 {
-    return StorageBackendCapability::RandomAccess | StorageBackendCapability::RangeAccess | StorageBackendCapability::Lazy | StorageBackendCapability::Materializable;
+    return getStorageBackendCapabilities(StorageBackendType::Tiled);
 }
 
 std::unique_ptr<mv::gui::StorageBackendConversionAction> TiledPointsStorageBackend::createConversionAction(const StorageBackendType targetType, QObject* parent) const

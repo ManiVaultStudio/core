@@ -141,4 +141,22 @@ constexpr bool hasStorageBackendCapability(const StorageBackendCapabilities capa
     return (capabilities & static_cast<StorageBackendCapabilities>(capability)) != 0;
 }
 
+/** Returns the built-in capabilities advertised by a concrete backend type. */
+constexpr StorageBackendCapabilities getStorageBackendCapabilities(const StorageBackendType type)
+{
+    switch (type)
+    {
+        case StorageBackendType::Eager:
+            return StorageBackendCapability::RandomAccess | StorageBackendCapability::RangeAccess | StorageBackendCapability::Writable | StorageBackendCapability::Materializable;
+
+        case StorageBackendType::Tiled:
+            return StorageBackendCapability::RandomAccess | StorageBackendCapability::RangeAccess | StorageBackendCapability::Lazy | StorageBackendCapability::Materializable;
+
+        case StorageBackendType::Sparse:
+            return StorageBackendCapability::RandomAccess | StorageBackendCapability::RangeAccess | StorageBackendCapability::Materializable;
+    }
+
+    return static_cast<StorageBackendCapabilities>(StorageBackendCapability::None);
+}
+
 }

@@ -16,7 +16,8 @@
  * The action owns the backend choice and configure trigger, but does not own
  * backend settings or perform conversions. Consumers handle the emitted
  * requests, allowing the controls to serve both existing datasets and import
- * dialogs. Backend-specific settings are supplied by
+ * dialogs. The backend choice includes read and write capability text derived
+ * from the selected backend type. Backend-specific settings are supplied by
  * StorageBackendConversionAction implementations.
  *
  * @author T. Kroes
