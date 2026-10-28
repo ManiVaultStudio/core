@@ -117,7 +117,7 @@ void GroupAction::setShowLabels(bool showLabels)
 }
 
 void GroupAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -1*/, WidgetConfigurationFunction widgetConfigurationFunction /*= WidgetConfigurationFunction()*/
-                            , bool        load)
+                            , bool        load/*= true*/)
 {
     Q_ASSERT(action != nullptr);
 

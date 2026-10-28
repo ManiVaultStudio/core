@@ -20,7 +20,7 @@ QString GlobalSettingsGroupAction::getSettingsPrefix() const
 }
 
 
-void GlobalSettingsGroupAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -1*/, WidgetConfigurationFunction widgetConfigurationFunction /*= WidgetConfigurationFunction()*/)
+void GlobalSettingsGroupAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -1*/, WidgetConfigurationFunction widgetConfigurationFunction /*= WidgetConfigurationFunction()*/, bool load /*= true*/)
 {
     Q_ASSERT(action != nullptr);
 
