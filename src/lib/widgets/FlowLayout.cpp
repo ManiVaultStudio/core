@@ -24,7 +24,7 @@ FlowLayout::FlowLayout(int margin, int hSpacing, int vSpacing)
 
 FlowLayout::~FlowLayout()
 {
-    QLayoutItem* item;
+    QLayoutItem* item = nullptr;
     while ((item = FlowLayout::takeAt(0)))
         delete item;
 }
@@ -102,7 +102,7 @@ QSize FlowLayout::sizeHint() const
 QSize FlowLayout::minimumSize() const
 {
     QSize size;
-    QLayoutItem* item;
+    QLayoutItem* item = nullptr;
     foreach(item, itemList)
         size = size.expandedTo(item->minimumSize());
 
@@ -112,14 +112,14 @@ QSize FlowLayout::minimumSize() const
 
 int FlowLayout::doLayout(const QRect& rect, bool testOnly) const
 {
-    int left, top, right, bottom;
+    int left{}, top{}, right{}, bottom{};
     getContentsMargins(&left, &top, &right, &bottom);
-    QRect effectiveRect = rect.adjusted(+left, +top, -right, -bottom);
+    const QRect effectiveRect = rect.adjusted(+left, +top, -right, -bottom);
     int x = effectiveRect.x();
     int y = effectiveRect.y();
     int lineHeight = 0;
 
-    QLayoutItem* item;
+    QLayoutItem* item = nullptr;
     foreach(item, itemList) {
         QWidget* wid = item->widget();
         int spaceX = horizontalSpacing();
