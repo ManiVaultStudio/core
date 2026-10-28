@@ -80,7 +80,7 @@ public:
     /** Creates controls for converting to or configuring the requested backend. */
     std::unique_ptr<mv::gui::StorageBackendConversionAction> createConversionAction(StorageBackendType targetType, QObject* parent) const override;
     /** Applies the tiled cache setting without changing tile geometry or backend type. */
-    void applyConfiguration(const StorageBackendConversionOptionsPtr& options) override;
+    void applyConfiguration(const StorageBackendConfigurationOptionsPtr& options) override;
     /** Returns the number of logical rows in the tiled storage. */
     std::uint64_t getNumPoints() const override;
 

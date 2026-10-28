@@ -117,7 +117,7 @@ pointdata::storage::StorageBackendType TiledStorageBackendConfigurationAction::g
     return pointdata::storage::StorageBackendType::Tiled;
 }
 
-pointdata::storage::StorageBackendConversionOptionsPtr TiledStorageBackendConfigurationAction::getConversionOptions() const
+pointdata::storage::StorageBackendConfigurationOptionsPtr TiledStorageBackendConfigurationAction::getConversionOptions() const
 {
     return std::make_shared<pointdata::storage::StorageBackendConfiguration>(getConfiguration());
 }

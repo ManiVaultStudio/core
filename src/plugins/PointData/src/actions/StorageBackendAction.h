@@ -32,7 +32,7 @@ public:
 private:
     void updateBackendType();
     void changeBackendType(const QString& backendType);
-    void convertBackend(mv::pointdata::storage::StorageBackendType type, mv::pointdata::storage::StorageBackendConversionOptionsPtr options = {});
+    void convertBackend(mv::pointdata::storage::StorageBackendType type, mv::pointdata::storage::StorageBackendConfigurationOptionsPtr options = {});
 
     mv::Dataset<Points>         _points;                 /**< Points dataset whose backend is displayed and converted. */
     bool                        _updatingBackendType = false; /**< Whether the selector is being synchronized with the dataset. */

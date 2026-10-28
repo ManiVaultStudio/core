@@ -38,7 +38,7 @@ public:
     explicit StorageBackendConfigurationDialog(std::unique_ptr<mv::gui::StorageBackendConversionAction> conversionAction, Purpose purpose, QWidget* parent = nullptr);
 
     /** Returns the options currently held by the embedded action, or null if it has no action. */
-    mv::pointdata::storage::StorageBackendConversionOptionsPtr getConversionOptions() const;
+    mv::pointdata::storage::StorageBackendConfigurationOptionsPtr getConversionOptions() const;
 
 private:
     std::unique_ptr<mv::gui::StorageBackendConversionAction> _conversionAction;

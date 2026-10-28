@@ -74,7 +74,7 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique
     connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
 }
 
-mv::pointdata::storage::StorageBackendConversionOptionsPtr StorageBackendConfigurationDialog::getConversionOptions() const
+mv::pointdata::storage::StorageBackendConfigurationOptionsPtr StorageBackendConfigurationDialog::getConversionOptions() const
 {
     return _conversionAction ? _conversionAction->getConversionOptions() : nullptr;
 }

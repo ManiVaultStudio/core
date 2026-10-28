@@ -38,7 +38,7 @@ public:
     virtual pointdata::storage::StorageBackendType getTargetBackendType() const = 0;
 
     /** Returns the current backend-specific conversion options. */
-    virtual pointdata::storage::StorageBackendConversionOptionsPtr getConversionOptions() const = 0;
+    virtual pointdata::storage::StorageBackendConfigurationOptionsPtr getConversionOptions() const = 0;
 
 signals:
     void optionsChanged();

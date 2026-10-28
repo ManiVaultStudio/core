@@ -107,7 +107,7 @@ std::unique_ptr<mv::gui::StorageBackendConversionAction> TiledPointsStorageBacke
     return {};
 }
 
-void TiledPointsStorageBackend::applyConfiguration(const StorageBackendConversionOptionsPtr& options)
+void TiledPointsStorageBackend::applyConfiguration(const StorageBackendConfigurationOptionsPtr& options)
 {
     const auto configuration = std::dynamic_pointer_cast<const StorageBackendConfiguration>(options);
 

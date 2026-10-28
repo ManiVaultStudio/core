@@ -87,22 +87,22 @@ using StorageBackendCapabilities = std::uint32_t;
 using StorageBackendProgressCallback = std::function<void(float)>;
 
 /**
- * Base type for backend-specific conversion and reconfiguration options passed
- * through the storage facade.
+ * Base type for backend-specific creation and runtime configuration options
+ * passed through the storage facade.
  *
  * Concrete backends own the derived option types and validate them when they
- * are applied. The shared pointer keeps the options alive while a conversion
- * or configuration operation is in progress.
+ * are applied. The shared pointer keeps the options alive while a backend
+ * configuration or representation-creation operation is in progress.
  */
-struct StorageBackendConversionOptions
+struct StorageBackendConfigurationOptions
 {
-    virtual ~StorageBackendConversionOptions() = default;
+    virtual ~StorageBackendConfigurationOptions() = default;
 };
 
-using StorageBackendConversionOptionsPtr = std::shared_ptr<const StorageBackendConversionOptions>;
+using StorageBackendConfigurationOptionsPtr = std::shared_ptr<const StorageBackendConfigurationOptions>;
 
-/** Base type for backend-specific options used to create a new representation. */
-struct StorageBackendCreationOptions : StorageBackendConversionOptions
+/** Base type for backend-specific configuration options used to create a new representation. */
+struct StorageBackendCreationOptions : StorageBackendConfigurationOptions
 {
     virtual ~StorageBackendCreationOptions() = default;
 };
@@ -115,7 +115,7 @@ struct StorageBackendCreationOptions : StorageBackendConversionOptions
  * capacity is runtime metadata and is persisted by the tiled point-data
  * serializer; changing it does not force all tiles to be loaded.
  */
-struct StorageBackendConfiguration : StorageBackendConversionOptions
+struct StorageBackendConfiguration : StorageBackendConfigurationOptions
 {
     std::size_t rowTileSize         = 256;                              /**< Maximum number of matrix rows in one tile. */
     std::size_t columnTileSize      = 8;                                /**< Maximum number of matrix columns in one tile. */

@@ -35,7 +35,7 @@ std::unique_ptr<mv::gui::StorageBackendConversionAction> EagerPointsStorageBacke
     return {};
 }
 
-void EagerPointsStorageBackend::applyConfiguration(const StorageBackendConversionOptionsPtr& options)
+void EagerPointsStorageBackend::applyConfiguration(const StorageBackendConfigurationOptionsPtr& options)
 {
     if (options)
         throw std::invalid_argument("Eager point-data storage does not accept backend configuration");

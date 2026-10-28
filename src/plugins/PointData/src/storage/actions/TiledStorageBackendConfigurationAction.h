@@ -48,7 +48,7 @@ public:
     pointdata::storage::StorageBackendType getTargetBackendType() const override;
 
     /** Returns the currently selected physical tile geometry and cache capacity. */
-    pointdata::storage::StorageBackendConversionOptionsPtr getConversionOptions() const override;
+    pointdata::storage::StorageBackendConfigurationOptionsPtr getConversionOptions() const override;
 
     /** Returns the current tiled-storage configuration. */
     pointdata::storage::StorageBackendConfiguration getConfiguration() const;

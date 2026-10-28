@@ -43,7 +43,7 @@ public:
     /** Creates conversion controls for a supported target backend. */
     std::unique_ptr<mv::gui::StorageBackendConversionAction> createConversionAction(StorageBackendType targetType, QObject* parent) const override;
     /** Rejects configuration because eager storage has no backend-owned options yet. */
-    void applyConfiguration(const StorageBackendConversionOptionsPtr& options) override;
+    void applyConfiguration(const StorageBackendConfigurationOptionsPtr& options) override;
     /** Returns the number of rows in the referenced PointData object. */
     std::uint64_t getNumPoints() const override;
 

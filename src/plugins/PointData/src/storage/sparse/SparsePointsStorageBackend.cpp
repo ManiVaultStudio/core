@@ -92,7 +92,7 @@ std::unique_ptr<mv::gui::StorageBackendConversionAction> SparsePointsStorageBack
     return {};
 }
 
-void SparsePointsStorageBackend::applyConfiguration(const StorageBackendConversionOptionsPtr& options)
+void SparsePointsStorageBackend::applyConfiguration(const StorageBackendConfigurationOptionsPtr& options)
 {
     if (options)
         throw std::invalid_argument("Sparse point-data storage does not accept runtime configuration");

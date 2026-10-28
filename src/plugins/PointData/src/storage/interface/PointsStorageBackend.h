@@ -60,10 +60,10 @@ public:
      *
      * The options object must be compatible with this backend. Implementations
      * reject unsupported or invalid options rather than silently ignoring them.
-     * Applying options may change runtime configuration, such as cache limits,
-     * without changing the backend type.
+     * Applying options may change runtime settings, such as cache limits,
+     * without changing the backend type or materializing the representation.
      */
-    virtual void applyConfiguration(const StorageBackendConversionOptionsPtr& options) = 0;
+    virtual void applyConfiguration(const StorageBackendConfigurationOptionsPtr& configurationOptions) = 0;
 
     /** Returns the number of matrix rows. */
     virtual std::uint64_t getNumPoints() const = 0;

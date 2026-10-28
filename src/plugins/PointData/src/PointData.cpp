@@ -363,7 +363,7 @@ UniqueWorkflowPlan PointData::persistTiledStorageWorkflow()
     return plan;
 }
 
-void PointData::convertToStorageBackend(const pointdata::storage::StorageBackendType type, const pointdata::storage::StorageBackendConversionOptionsPtr options, pointdata::storage::StorageBackendProgressCallback progress)
+void PointData::convertToStorageBackend(const pointdata::storage::StorageBackendType type, const pointdata::storage::StorageBackendConfigurationOptionsPtr options, pointdata::storage::StorageBackendProgressCallback progress)
 {
     const auto lock = lockData();
 
@@ -422,7 +422,7 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
     throw std::invalid_argument("Unsupported point-data storage backend");
 }
 
-void PointData::configureStorageBackend(const pointdata::storage::StorageBackendConversionOptionsPtr options)
+void PointData::configureStorageBackend(const pointdata::storage::StorageBackendConfigurationOptionsPtr options)
 {
     const auto lock = lockData();
 
@@ -1753,7 +1753,7 @@ std::unique_ptr<mv::gui::StorageBackendConversionAction> Points::createStorageBa
     return getRawData<PointData>()->createStorageBackendConversionAction(targetType, parent);
 }
 
-void Points::convertToStorageBackend(const StorageBackendType type, const StorageBackendConversionOptionsPtr options, StorageBackendProgressCallback progress)
+void Points::convertToStorageBackend(const StorageBackendType type, const StorageBackendConfigurationOptionsPtr options, StorageBackendProgressCallback progress)
 {
     if (isProxy())
         throw std::invalid_argument("Storage backend conversion is only supported for concrete point datasets");
@@ -1762,7 +1762,7 @@ void Points::convertToStorageBackend(const StorageBackendType type, const Storag
     mv::events().notifyDatasetDataChanged(this);
 }
 
-void Points::configureStorageBackend(const StorageBackendConversionOptionsPtr options)
+void Points::configureStorageBackend(const StorageBackendConfigurationOptionsPtr options)
 {
     if (isProxy())
         throw std::invalid_argument("Storage backend configuration is only supported for concrete point datasets");

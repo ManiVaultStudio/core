@@ -379,7 +379,7 @@ public:
     mv::workflow::UniqueWorkflowPlan persistTiledStorageWorkflow();
 
     /** Converts or initializes using backend-specific options supplied by a conversion action or backend factory. */
-    void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, mv::pointdata::storage::StorageBackendConversionOptionsPtr options, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
+    void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, mv::pointdata::storage::StorageBackendConfigurationOptionsPtr options, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
 
     /**
      * Applies options owned by the current storage backend without converting
@@ -389,7 +389,7 @@ public:
      * throws std::invalid_argument when no backend is available or the backend
      * rejects the supplied options.
      */
-    void configureStorageBackend(mv::pointdata::storage::StorageBackendConversionOptionsPtr options);
+    void configureStorageBackend(mv::pointdata::storage::StorageBackendConfigurationOptionsPtr options);
 
     /** Returns one row as a storage-neutral read-only view, or an empty view when row is out of bounds. */
     PointDataAccessView getRow(std::uint64_t row) const;
@@ -945,7 +945,7 @@ public:
     using StorageBackendType = mv::pointdata::storage::StorageBackendType;
     using StorageBackendConfiguration = mv::pointdata::storage::StorageBackendConfiguration;
     using StorageBackendProgressCallback = mv::pointdata::storage::StorageBackendProgressCallback;
-    using StorageBackendConversionOptionsPtr = mv::pointdata::storage::StorageBackendConversionOptionsPtr;
+    using StorageBackendConfigurationOptionsPtr = mv::pointdata::storage::StorageBackendConfigurationOptionsPtr;
     using TiledTileGenerator = PointData::TiledTileGenerator;
 
     void init() override;
@@ -1250,14 +1250,14 @@ public:
     mv::workflow::UniqueWorkflowPlan persistTiledStorageWorkflow();
 
     /** Converts or initializes using backend-specific options supplied by a conversion action or backend factory. */
-    void convertToStorageBackend(StorageBackendType type, StorageBackendConversionOptionsPtr options, StorageBackendProgressCallback progress = {});
+    void convertToStorageBackend(StorageBackendType type, StorageBackendConfigurationOptionsPtr options, StorageBackendProgressCallback progress = {});
 
     /**
      * Applies options owned by the current storage backend of this concrete
      * dataset. Proxy datasets are rejected because their members may use
      * different physical backends and configurations.
      */
-    void configureStorageBackend(StorageBackendConversionOptionsPtr options);
+    void configureStorageBackend(StorageBackendConfigurationOptionsPtr options);
 
     /** Returns one logical row as a storage-neutral read-only view, translating subset or proxy indices. */
     PointDataAccessView getRow(std::uint64_t row) const;

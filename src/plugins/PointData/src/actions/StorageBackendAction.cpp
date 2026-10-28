@@ -136,7 +136,7 @@ void StorageBackendAction::changeBackendType(const QString& backendType)
     updateBackendType();
 }
 
-void StorageBackendAction::convertBackend(const pointdata::storage::StorageBackendType type, const pointdata::storage::StorageBackendConversionOptionsPtr options)
+void StorageBackendAction::convertBackend(const pointdata::storage::StorageBackendType type, const pointdata::storage::StorageBackendConfigurationOptionsPtr options)
 {
     _conversionInProgress = true;
     updateBackendType();

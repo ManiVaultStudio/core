@@ -79,7 +79,7 @@ public:
     std::unique_ptr<mv::gui::StorageBackendConversionAction> createConversionAction(StorageBackendType targetType, QObject* parent) const override;
 
     /** @brief Accepts no options; throws std::invalid_argument when options is non-null. */
-    void applyConfiguration(const StorageBackendConversionOptionsPtr& options) override;
+    void applyConfiguration(const StorageBackendConfigurationOptionsPtr& options) override;
 
     /** @brief Returns the matrix row count. */
     std::uint64_t getNumPoints() const override;
