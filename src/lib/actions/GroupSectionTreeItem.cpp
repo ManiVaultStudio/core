@@ -20,14 +20,12 @@ namespace mv::gui {
 GroupSectionTreeItem::GroupSectionTreeItem(QTreeWidget* treeWidget, GroupAction* groupAction) :
     _groupAction(groupAction),
     _pushButton(new PushButton(this, groupAction)),
-    _groupWidgetTreeItem(nullptr)
+    _groupWidgetTreeItem(new GroupWidgetTreeItem(this, groupAction))
 {
     setSizeHint(0, QSize(0, 24));
 
     treeWidget->addTopLevelItem(this);
     treeWidget->setItemWidget(this, 0, _pushButton);
-
-    _groupWidgetTreeItem = new GroupWidgetTreeItem(this, groupAction);
 }
 
 GroupSectionTreeItem::~GroupSectionTreeItem()

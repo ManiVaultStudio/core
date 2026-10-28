@@ -76,7 +76,7 @@ bool HorizontalToolbarAction::Widget::eventFilter(QObject* target, QEvent* event
 
 void HorizontalToolbarAction::Widget::setActionWidgets()
 {
-    QLayoutItem* layoutItem;
+    QLayoutItem* layoutItem = nullptr;
 
     while ((layoutItem = _toolbarLayout->takeAt(0)) != nullptr) {
         delete layoutItem->widget();
