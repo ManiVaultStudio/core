@@ -73,10 +73,6 @@ DensityComputation::DensityComputation() :
 
 }
 
-DensityComputation::~DensityComputation()
-{
-}
-
 void DensityComputation::init(QOpenGLContext* ctx)
 {
     _ctx = ctx;
