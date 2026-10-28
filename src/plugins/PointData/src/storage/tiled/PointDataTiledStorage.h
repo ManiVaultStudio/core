@@ -48,13 +48,14 @@ public:
     /** Reports conversion or generation progress in the range [0, 1]. */
     using ProgressCallback = std::function<void(float)>;
 
+    /** Estimated dense-equivalent, tile payload, and resident descriptor/index sizes in bytes. */
     struct MemoryEstimate
     {
-        std::uint64_t rawDataBytes      = 0; /**< Logical dense matrix size in bytes. */
-        std::uint64_t largestTileBytes  = 0; /**< Payload size of the largest possible tile in bytes. */
-        std::uint64_t cachedTileBytes   = 0; /**< Conservative payload size for the configured cache. */
-        std::uint64_t tileCount         = 0; /**< Number of row/column tiles in the resident index. */
-        std::uint64_t indexBytes        = 0; /**< Conservative resident descriptor/index size in bytes. */
+        std::uint64_t rawDataBytes      = 0; /**< Dense-equivalent matrix payload size in bytes. */
+        std::uint64_t largestTileBytes  = 0; /**< Largest tile payload possible for the matrix dimensions and configured geometry. */
+        std::uint64_t cachedTileBytes   = 0; /**< Estimated decoded payload bytes retained under the tile-count and byte limits. */
+        std::uint64_t tileCount         = 0; /**< Number of row/column tiles in the resident descriptor index. */
+        std::uint64_t indexBytes        = 0; /**< Estimated descriptor bytes; excludes container and allocator overhead. */
     };
 
     /**
@@ -231,10 +232,25 @@ public:
     /** Returns the number of cache evictions. */
     std::uint64_t cacheEvictions() const;
 
-    /** Estimates logical data, resident tile, cache, and descriptor/index memory usage. */
+    /** Estimates logical data, resident tile, cache, and descriptor/index memory usage for this storage. */
     MemoryEstimate memoryEstimate() const;
 
-    /** Estimates memory usage without constructing a storage instance. */
+    /**
+     * Estimates dense-equivalent bytes, tile geometry, cache payload, and
+     * descriptor/index bytes without constructing a storage instance.
+     * Invalid zero element or tile sizes produce a zero-initialized estimate.
+     * The index estimate counts one TileDescriptor per tile and excludes
+     * container and allocator overhead.
+     *
+     * @param rows Logical matrix row count.
+     * @param columns Logical matrix column count.
+     * @param elementSize Size of one matrix element in bytes.
+     * @param rowTileSize Maximum rows per tile.
+     * @param columnTileSize Maximum columns per tile.
+     * @param cacheCapacity Maximum number of cached tile payloads.
+     * @param cacheCapacityBytes Maximum cached payload bytes.
+     * @return Estimated logical, tile, cache, and descriptor/index byte counts.
+     */
     static MemoryEstimate estimateMemory(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, std::size_t cacheCapacity, std::size_t cacheCapacityBytes = mv::pointdata::storage::defaultTileCacheCapacityBytes);
 
 private:

@@ -77,13 +77,10 @@ set(POINTS_STORAGE_COMMON_HEADERS
     src/storage/interface/PointsStorageBackendTypes.h
 )
 
-set(POINTS_STORAGE_COMMON_SOURCES
-    src/storage/interface/PointsStorageBackendTypes.cpp
-)
-
 set(POINTS_STORAGE_ACTION_HEADERS
     src/storage/actions/StorageBackendConversionAction.h
     src/storage/actions/TiledStorageBackendConfigurationAction.h
+    src/storage/actions/TiledStorageObservationAction.h
     src/storage/actions/TiledStorageBackendConversionAction.h
 )
 
@@ -94,6 +91,7 @@ set(POINTS_STORAGE_WIDGET_HEADERS
 set(POINTS_STORAGE_ACTION_SOURCES
     src/storage/widgets/StorageBackendConfigurationDialog.cpp
     src/storage/actions/TiledStorageBackendConfigurationAction.cpp
+    src/storage/actions/TiledStorageObservationAction.cpp
     src/storage/actions/TiledStorageBackendConversionAction.cpp
 )
 
@@ -201,7 +199,6 @@ source_group(Storage\\Actions FILES
 )
 source_group(Storage\\Interface FILES
     ${POINTS_STORAGE_COMMON_HEADERS}
-    ${POINTS_STORAGE_COMMON_SOURCES}
 )
 source_group(Storage\\Eager FILES
     ${POINTS_STORAGE_EAGER_HEADERS}
@@ -218,7 +215,7 @@ source_group(Storage\\Tiled FILES
 source_group(BFloat FILES ${BFLOAT_HEADER})
 source_group(Aux FILES ${POINT_DATA_AUX})
 
-add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINTS_VIEW_WIDGETS} ${POINTS_STORAGE_HEADERS} ${POINTS_STORAGE_COMMON_SOURCES} ${POINTS_STORAGE_ACTION_SOURCES} ${POINTS_STORAGE_EAGER_SOURCES} ${POINTS_STORAGE_SPARSE_SOURCES} ${POINTS_STORAGE_TILED_SOURCES} ${POINT_DATA_AUX})
+add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINTS_VIEW_WIDGETS} ${POINTS_STORAGE_HEADERS} ${POINTS_STORAGE_ACTION_SOURCES} ${POINTS_STORAGE_EAGER_SOURCES} ${POINTS_STORAGE_SPARSE_SOURCES} ${POINTS_STORAGE_TILED_SOURCES} ${POINT_DATA_AUX})
 
 add_library(ManiVault::${POINTDATA} ALIAS ${POINTDATA})
 

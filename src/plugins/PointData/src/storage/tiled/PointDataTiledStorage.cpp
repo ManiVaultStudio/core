@@ -454,7 +454,8 @@ PointDataTiledStorage::MemoryEstimate PointDataTiledStorage::estimateMemory(cons
 
     estimate.tileCount        = tileRows * tileColumns;
     estimate.rawDataBytes     = rows * columns * elementSize;
-    estimate.largestTileBytes = static_cast<std::uint64_t>(rowTileSize) * columnTileSize * elementSize;
+    estimate.largestTileBytes = std::min<std::uint64_t>(rows, rowTileSize) *
+        std::min<std::uint64_t>(columns, columnTileSize) * elementSize;
 
     const auto residentTiles = std::min<std::uint64_t>(estimate.tileCount, std::max<std::size_t>(1, cacheCapacity));
 

@@ -4,13 +4,12 @@
 
 #pragma once
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <memory>
 #include <optional>
-
-#include <pointdata_export.h>
 
 #include <QString>
 
@@ -20,7 +19,7 @@ namespace mv::pointdata::storage
 /** Default upper bound for decoded tile payloads retained by a tiled cache. */
 inline constexpr std::size_t defaultTileCacheCapacityBytes = 512U * 1024U * 1024U;
 
-/** Identifies the physical representation used by a concrete point dataset. */
+/** @brief Identifies a concrete physical representation used by point data. */
 enum class StorageBackendType
 {
     Eager,   /**< Fully materialized dense point-data vectors. */
@@ -28,11 +27,48 @@ enum class StorageBackendType
     Sparse   /**< Read-only compressed sparse point data. */
 };
 
-/** Returns the canonical name of a storage backend type for controls and diagnostics. */
-POINTDATA_EXPORT QString getStorageBackendTypeName(StorageBackendType type);
+/**
+ * @brief Returns the canonical name of a storage backend type for controls and diagnostics.
+ *
+ * @param type Concrete storage backend type.
+ * @return Exact canonical name, or an empty string for an invalid enum value.
+ */
+inline QString getStorageBackendTypeName(const StorageBackendType type)
+{
+    switch (type)
+    {
+        case StorageBackendType::Eager:
+            return QStringLiteral("Eager");
 
-/** Returns the storage backend type represented by the exact canonical @p typeName, or std::nullopt if it is unknown. */
-POINTDATA_EXPORT std::optional<StorageBackendType> getStorageBackendType(const QString& typeName);
+        case StorageBackendType::Tiled:
+            return QStringLiteral("Tiled");
+
+        case StorageBackendType::Sparse:
+            return QStringLiteral("Sparse");
+    }
+
+    return {};
+}
+
+/**
+ * @brief Parses an exact canonical storage backend name.
+ *
+ * The comparison is case-sensitive and does not trim whitespace.
+ * @param typeName Canonical name returned by getStorageBackendTypeName().
+ * @return Matching concrete type, or std::nullopt if the name is not recognized.
+ */
+inline std::optional<StorageBackendType> getStorageBackendType(const QString& typeName)
+{
+    constexpr std::array types = { StorageBackendType::Eager, StorageBackendType::Tiled, StorageBackendType::Sparse };
+
+    for (const auto type : types)
+    {
+        if (getStorageBackendTypeName(type) == typeName)
+            return type;
+    }
+
+    return std::nullopt;
+}
 
 /** Describes operations supported by a storage backend. */
 enum class StorageBackendCapability : std::uint32_t

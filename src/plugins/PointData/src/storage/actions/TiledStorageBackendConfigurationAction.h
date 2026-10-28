@@ -3,11 +3,11 @@
 #pragma once
 
 #include "StorageBackendConversionAction.h"
+#include "TiledStorageObservationAction.h"
 #include "../tiled/TiledStorageAsymmetryAction.h"
 #include "../tiled/TiledStorageGeometry.h"
 
 #include <actions/IntegralAction.h>
-#include <actions/StringAction.h>
 #include <actions/ToggleAction.h>
 
 namespace mv::gui
@@ -18,7 +18,10 @@ namespace mv::gui
  *
  * The tiled backend owns these settings because tile geometry and cache size
  * describe its physical representation. The controls can be used during import
- * as well as by the conversion-specific action specialization.
+ * as well as by the conversion-specific action specialization. Live observations
+ * report estimated tile-index size and whether a tile exceeds the cache byte
+ * limit. The high tile-count warning begins at 100,000 descriptors and is a
+ * heuristic, not a conversion failure.
  *
  * @author T. Kroes
  */
@@ -54,7 +57,7 @@ private:
     void updateTileGeometryFromPolicy();
     void updateTargetTileSizeFromGeometry();
     void updateCacheCapacity();
-    void updateCacheMemorySummary();
+    void updateStorageObservations();
     void updatePackedTileControls();
 
     std::uint64_t _rows               = 0;
@@ -67,10 +70,11 @@ private:
     IntegralAction              _rowTileSizeAction;
     IntegralAction              _columnTileSizeAction;
     IntegralAction              _cacheCapacityAction;
-    StringAction                _cacheMemorySummaryAction;
-    ToggleAction                _packedTilesAction;
-    IntegralAction              _superTileRowsAction;
-    IntegralAction              _superTileColumnsAction;
+    TiledStorageObservationAction _tileCountObservationAction;
+    TiledStorageObservationAction _tileCacheObservationAction;
+    ToggleAction                  _packedTilesAction;
+    IntegralAction                _superTileRowsAction;
+    IntegralAction                _superTileColumnsAction;
 };
 
 }
