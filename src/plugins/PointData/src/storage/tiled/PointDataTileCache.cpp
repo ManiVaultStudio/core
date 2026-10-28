@@ -64,10 +64,11 @@ void PointDataTileCache::reset()
 {
     _entries.clear();
     _lru.clear();
-    _sizeInBytes = 0;
-    _hits      = 0;
-    _misses    = 0;
-    _evictions = 0;
+
+    _sizeInBytes    = 0;
+    _hits           = 0;
+    _misses         = 0;
+    _evictions      = 0;
 }
 
 void PointDataTileCache::trim()

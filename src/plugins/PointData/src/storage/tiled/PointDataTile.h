@@ -29,7 +29,7 @@ struct TileDescriptor
     std::uint64_t              columnOffset    = 0; /**< Global column offset. */
     std::uint64_t              rows            = 0; /**< Number of rows in this tile. */
     std::uint64_t              columns         = 0; /**< Number of columns in this tile. */
-    QVariantMap                blob;               /**< Serialized blob metadata and block index. */
+    QVariantMap                blob;                /**< Serialized blob metadata and block index. */
     QByteArray                 residentBytes;       /**< Optional in-memory payload for eager/generated tiles. */
     mv::util::PackedBlobBlock  packedBlock;         /**< Optional independently encoded block in a packed blob file. */
     std::size_t                superTileIndex  = 0; /**< Index of the serialized super tile containing this tile. */
@@ -110,11 +110,12 @@ public:
 
 private:
     friend class PointDataTiledStorage;
-    std::shared_ptr<const QByteArray> _bytes;       /**< Shared tile payload that provides the lease guarantee. */
-    std::uint64_t                     _rowOffset    = 0; /**< Global row offset of the tile. */
-    std::uint64_t                     _columnOffset = 0; /**< Global column offset of the tile. */
-    std::uint64_t                     _rows         = 0; /**< Number of rows in the tile. */
-    std::uint64_t                     _columns      = 0; /**< Number of columns in the tile. */
-    std::size_t                       _elementSize  = 0; /**< Size of one tile element in bytes. */
+
+    std::shared_ptr<const QByteArray> _bytes;               /**< Shared tile payload that provides the lease guarantee. */
+    std::uint64_t                     _rowOffset    = 0;    /**< Global row offset of the tile. */
+    std::uint64_t                     _columnOffset = 0;    /**< Global column offset of the tile. */
+    std::uint64_t                     _rows         = 0;    /**< Number of rows in the tile. */
+    std::uint64_t                     _columns      = 0;    /**< Number of columns in the tile. */
+    std::size_t                       _elementSize  = 0;    /**< Size of one tile element in bytes. */
 };
 }
