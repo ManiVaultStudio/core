@@ -302,7 +302,7 @@ private:
     QString             _textFormat;            /** Text format string */
     QString             _overrideTextFormat;    /** Override text format string (when set, it overrides ProgressAction#_textFormat) */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

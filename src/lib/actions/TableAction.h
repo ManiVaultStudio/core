@@ -144,7 +144,7 @@ private:
     ModelSelectionAction        _modelSelectionAction;          /** Action for bulk selection */
     ToggleAction                _showHeaderSettingsAction;      /** Toggle header settings */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

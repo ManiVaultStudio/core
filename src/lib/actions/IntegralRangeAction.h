@@ -96,7 +96,7 @@ protected:
     static constexpr std::int32_t INIT_RANGE_MIN    = 0;         /** Default minimum range */
     static constexpr std::int32_t INIT_RANGE_MAX    = 100;       /** Default maximum range */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

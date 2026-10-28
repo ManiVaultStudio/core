@@ -89,7 +89,7 @@ signals:
 protected:
     QVariant    _variant;       /** Current variant value */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

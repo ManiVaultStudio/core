@@ -53,7 +53,7 @@ signals:
      */
     void valueChanged(std::int32_t x, std::int32_t y);
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

@@ -41,7 +41,7 @@ private:
 private:
     const util::LearningCenterVideo*    _video;    /** Pointer to video to watch */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

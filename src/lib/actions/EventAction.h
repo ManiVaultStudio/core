@@ -68,7 +68,7 @@ signals:
      */
     void eventTriggered(const QString& eventType, const QVariant& eventData);
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

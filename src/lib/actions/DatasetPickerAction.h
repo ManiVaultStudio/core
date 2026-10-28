@@ -255,7 +255,7 @@ private:
     QStringList                             _currentDatasetsIds;            /**< Cached selectable dataset identifiers. */
     QString                                 _currentDatasetId;              /**< Identifier of the currently selected dataset. */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

@@ -121,7 +121,7 @@ private:
     /** Invoked when this trigger action is triggered (needed to prevent circular calls of trigger()) */
     void selfTriggered();
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }
