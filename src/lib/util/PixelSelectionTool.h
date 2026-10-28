@@ -222,7 +222,7 @@ signals:
 
 protected:
     bool                        _enabled;                   /** Whether the tool is enabled or not */
-    std::int32_t                _drawFlags;                 /** Draw options */
+    std::int32_t                _drawFlags;                 /** Draw options (currently unused) */
     PixelSelectionType          _type;                      /** Current selection type */
     PixelSelectionModifierType  _modifier;                  /** Current selection modifier */
     bool                        _active;                    /** Whether the selection process is active */
