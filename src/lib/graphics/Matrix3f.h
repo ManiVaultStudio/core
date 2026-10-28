@@ -32,7 +32,7 @@ namespace mv
         Vector2f operator*(const Vector2f& v) const;
         Selection operator*(const Selection& s) const;
     private:
-        float a[9];
+        float a[9]{};
     };
 
     CORE_EXPORT std::ostream& operator<<(std::ostream& os, const Matrix3f& v);

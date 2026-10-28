@@ -364,7 +364,7 @@ GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupA
             layout->setColumnStretch(1, 1);
         }
 
-        QLayoutItem* layoutItem;
+        QLayoutItem* layoutItem = nullptr;
 
         while ((layoutItem = layout->takeAt(0)) != nullptr) {
             delete layoutItem->widget();
@@ -460,7 +460,7 @@ GroupAction::HorizontalWidget::HorizontalWidget(QWidget* parent, GroupAction* gr
         layout->setContentsMargins(0, 0, 0, 0);
 
     const auto updateLayout = [this, layout, groupAction]() -> void {
-        QLayoutItem* layoutItem;
+        QLayoutItem* layoutItem = nullptr;
 
         while ((layoutItem = layout->takeAt(0)) != nullptr) {
             delete layoutItem->widget();

@@ -287,7 +287,7 @@ protected:
     StringAction            _nameAction;        /** String name action */
     TriggerAction           _addAction;         /** Add string action */
     TriggerAction           _removeAction;      /** Remove string action */
-    QCompleter*             _completer;         /** Pointer to completer for auto-completion, maybe nullptr */
+    QCompleter*             _completer;         /** Pointer to completer for auto-completion, nullptr (currently unused) */
     bool                    _allowDuplicates;   /** Whether to allow string duplicates */
     Qt::TextElideMode       _textElideMode;     /** Text elide mode for the strings */
 
