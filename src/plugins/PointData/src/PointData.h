@@ -86,16 +86,16 @@ class Points;
  * PointData is the storage-neutral entry point for datasets whose values are
  * arranged as rows of points and columns of dimensions. It retains the
  * established eager vector representation for compatibility with existing
- * consumers, while also providing an experimental tiled representation for
- * datasets that are too large to load and decode as one contiguous buffer.
+ * consumers, while also providing tiled and sparse representations for data
+ * that should not be stored as one contiguous dense buffer.
  *
- * The tiled functionality is deliberately exposed through this class without
- * making the tiled implementation part of the public header. This keeps the
- * common PointData include lightweight and allows other storage backends to
- * implement the same row, column, range, and visitor APIs in the future.
- * Tiled storage is currently read-only; legacy raw-pointer and single-value
- * mutation APIs materialize tiled data when a contiguous eager buffer is
- * required. The bulk setter entry points report unsupported writes for now.
+ * Storage-specific implementations remain hidden behind the backend contract.
+ * Tiled and sparse storage are read-only; legacy raw-pointer and single-value
+ * mutation APIs materialize backend data when a contiguous eager buffer is
+ * required. Sparse storage retains a supported PointData element type and
+ * stores values with compressed row or column indices. Sparse payloads are
+ * serialized with their layout, indices, and typed value bytes; raw and tiled
+ * serialization paths remain supported.
  *
  * @author Thomas Kroes
  */
@@ -308,18 +308,39 @@ public:
 
     /**
      * Converts this concrete dataset to the requested storage backend. When
-     * backend-specific creation options are supplied for an empty dataset,
-     * this operation initializes the requested backend instead.
-     *
-     * Conversion is transactional: the current backend remains active until
-     * the requested backend has been created successfully. The experimental
-     * implementation currently supports Eager-to-Tiled conversion and
-     * materialization back to Eager storage.
+     * backend-specific tiled creation options are supplied for an empty
+     * dataset, this operation initializes tiled storage instead. Existing
+     * data can be converted to tiled storage with a configuration or
+     * materialized to eager storage when the active backend supports it.
+     * Conversion to sparse storage is not provided here; use
+     * initializeSparseStorage() to initialize an empty dataset from compressed
+     * arrays. Materializing tiled or sparse data requires memory for the full
+     * dense matrix.
      */
     void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, const mv::pointdata::storage::StorageBackendConfiguration& configuration = {}, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
 
     /** Initializes an empty dataset as generator-backed tiled storage without materializing its values. */
     void initializeTiledStorage(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, const mv::pointdata::storage::StorageBackendConfiguration& configuration, TiledTileGenerator generator);
+
+    /**
+     * @brief Initializes an empty dataset with typed CSR or CSC sparse storage.
+     *
+     * The backend takes ownership of the compressed arrays. Each value is
+     * stored as elementType's native representation. The pointer array must
+     * contain one offset per compressed row or column plus a terminal offset;
+     * each segment must contain sorted, unique indices. No dense matrix is
+     * stored, and the dataset must be empty.
+     *
+     * @param rows Number of matrix rows.
+     * @param columns Number of matrix columns.
+     * @param elementType PointData element type used by the value byte buffer.
+     * @param columnCompressed True for CSC layout; false for CSR.
+     * @param pointers Compressed segment offsets, starting at zero and ending at the stored-entry count.
+     * @param indices Sorted column indices for CSR or row indices for CSC, one per stored value.
+     * @param values Native-type byte representation for each index, in the same order.
+     * @throws std::invalid_argument If the dataset is not empty, the element type is unsupported, or the arrays do not describe a valid sparse matrix.
+     */
+    void initializeSparseStorage(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, bool columnCompressed, std::vector<std::uint64_t> pointers, std::vector<std::uint64_t> indices, std::vector<std::uint8_t> values);
 
     /**
      * @brief Attaches pre-encoded packed tiled files to tiled point data.
@@ -458,12 +479,36 @@ public:
     void extractDataForDimension(std::vector<float> &result, const int dimensionIndex, const std::vector<std::uint32_t> &indices) const;
     void extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<std::uint32_t>& indices) const;
     
+    /**
+     * Copies selected dimensions for every point into a caller-provided container.
+     *
+     * Values are written in point-major order, with dimensions in the order
+     * supplied by @p dimensionIndices. Non-eager backends are read through the
+     * storage interface without materializing a dense copy. The container must
+     * be writable by index and large enough for getNumPoints() times the number
+     * of selected dimensions. All dimension indices must be in range.
+     *
+     * @param resultContainer Destination for the selected values.
+     * @param dimensionIndices Zero-based dimension indices in output order.
+     */
     template <typename ResultContainer, typename DimensionIndices>
     void populateFullDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
     {
         const auto dataLock = lockData();
 
         CheckDimensionIndices(dimensionIndices);
+        if (getStorageBackendType() != mv::pointdata::storage::StorageBackendType::Eager)
+        {
+            std::uint64_t resultIndex = 0;
+            for (std::uint64_t pointIndex = 0; pointIndex < getNumPoints(); ++pointIndex)
+            {
+                const auto rowOffset = pointIndex * _numDimensions;
+                for (const auto dimensionIndex : dimensionIndices)
+                    resultContainer[resultIndex++] = getValueAt(static_cast<std::size_t>(rowOffset + dimensionIndex));
+            }
+            return;
+        }
+
         std::visit([&resultContainer, this, &dimensionIndices](const auto& vec)
             {
                 const std::uint64_t numPoints{ getNumPoints() };
@@ -483,12 +528,37 @@ public:
             _variantOfVectors);
     }
 
+    /**
+     * Copies selected dimensions for selected points into a caller-provided container.
+     *
+     * Values are written in the order of @p indices, with dimensions in the
+     * order supplied by @p dimensionIndices. Non-eager backends are read
+     * without materializing a dense copy. The container must be writable by
+     * index and large enough for indices.size() times the number of selected
+     * dimensions. All point and dimension indices must be in range.
+     *
+     * @param resultContainer Destination for the selected values.
+     * @param dimensionIndices Zero-based dimension indices in output order.
+     * @param indices Zero-based point indices in output order.
+     */
     template <typename ResultContainer, typename DimensionIndices, typename Indices>
     void populateDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices, const Indices& indices) const
     {
         const auto dataLock = lockData();
 
         CheckDimensionIndices(dimensionIndices);
+
+        if (getStorageBackendType() != mv::pointdata::storage::StorageBackendType::Eager)
+        {
+            std::uint64_t resultIndex = 0;
+            for (const auto pointIndex : indices)
+            {
+                const auto rowOffset = static_cast<std::uint64_t>(pointIndex) * _numDimensions;
+                for (const auto dimensionIndex : dimensionIndices)
+                    resultContainer[resultIndex++] = getValueAt(static_cast<std::size_t>(rowOffset + dimensionIndex));
+            }
+            return;
+        }
 
         std::visit([&resultContainer, this, &dimensionIndices, &indices](const auto& vec)
             {
@@ -724,6 +794,7 @@ private:
     float getEagerValueAt(std::size_t index) const;
 
     void materializeTiled(mv::pointdata::storage::StorageBackendProgressCallback progress = {});
+    void materializeStorageBackend(mv::pointdata::storage::StorageBackendProgressCallback progress = {});
     mutable std::recursive_mutex _dataMutex;
 
     VariantOfVectors _variantOfVectors;
@@ -1100,7 +1171,16 @@ public:
     /** Returns the name of the element type used by this logical dataset. */
     QString getElementTypeName() const;
 
-    /** Returns the physical backend type, or std::nullopt for an empty proxy or mixed backend types. */
+    /**
+     * @brief Returns the physical storage type for this logical dataset.
+     *
+     * Proxies report a type only when they have members and every member uses
+     * the same backend. Returns std::nullopt for empty proxies and proxies
+     * whose members use different backends; concrete datasets return their
+     * backend type.
+     *
+     * @return A concrete backend type when the dataset has one consistent storage type; otherwise std::nullopt.
+     */
     std::optional<StorageBackendType> getStorageBackendType() const;
 
     /** Returns the capability flags of the physical backend used by this dataset. */
@@ -1118,11 +1198,30 @@ public:
     /** Creates controls for converting to the requested storage backend. */
     std::unique_ptr<mv::gui::StorageBackendConversionAction> createStorageBackendConversionAction(StorageBackendType targetType, QObject* parent = nullptr) const;
 
-    /** Converts this concrete dataset to a storage backend transactionally. An empty dataset may be initialized with backend creation options. */
+    /** Converts or initializes a concrete dataset using backend-specific options; see the PointData overload for supported conversions. */
     void convertToStorageBackend(StorageBackendType type, const StorageBackendConfiguration& configuration = {}, StorageBackendProgressCallback progress = {});
 
     /** Initializes an empty dataset as generator-backed tiled storage without materializing its values. */
     void initializeTiledStorage(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, const StorageBackendConfiguration& configuration, TiledTileGenerator generator);
+
+    /**
+     * @brief Initializes an empty concrete dataset with typed CSR or CSC storage.
+     *
+     * Proxy datasets are rejected. The backend owns the moved compressed arrays
+     * and validates dimensions, offsets, element type, and sorted indices.
+     * Values use the native representation of @p elementType; this operation
+     * does not create a dense matrix.
+     *
+     * @param rows Number of matrix rows.
+     * @param columns Number of matrix columns.
+     * @param elementType PointData element type used by each value.
+     * @param columnCompressed True for CSC layout; false for CSR.
+     * @param pointers Segment offsets, starting at zero and ending at the stored-entry count.
+     * @param indices Sorted, unique column indices for CSR or row indices for CSC.
+     * @param values Native-type byte representation for each stored value.
+     * @throws std::invalid_argument If the dataset is a proxy, the element type is unsupported, or the compressed arrays are invalid.
+     */
+    void initializeSparseStorage(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, bool columnCompressed, std::vector<std::uint64_t> pointers, std::vector<std::uint64_t> indices, std::vector<std::uint8_t> values);
 
     /**
      * @brief Attaches pre-encoded packed tiled files to this concrete dataset.

@@ -4,6 +4,10 @@
 
 #include "SparsePointsStorageBackend.h"
 
+#include "../actions/StorageBackendConversionAction.h"
+
+#include <biovault_bfloat16/biovault_bfloat16.h>
+
 #include <algorithm>
 #include <cstring>
 #include <limits>
@@ -13,20 +17,38 @@
 namespace mv::pointdata::storage
 {
 
-SparsePointsStorageBackend::SparsePointsStorageBackend(const std::uint64_t rows, const std::uint64_t columns, const SparseMatrixLayout layout, std::vector<std::uint64_t> pointers, std::vector<std::uint64_t> indices, std::vector<float> values) :
-    _rows     (rows),
-    _columns  (columns),
-    _layout   (layout),
-    _pointers (std::move(pointers)),
-    _indices  (std::move(indices)),
-    _values   (std::move(values))
+namespace
+{
+    template<typename T>
+    float readValueAsFloat(const std::uint8_t* value)
+    {
+        T typedValue;
+        std::memcpy(&typedValue, value, sizeof(T));
+        return static_cast<float>(typedValue);
+    }
+}
+
+SparsePointsStorageBackend::SparsePointsStorageBackend(const std::uint64_t rows, const std::uint64_t columns, const SparseMatrixLayout layout, const std::uint32_t elementTypeIndex, const std::size_t elementSize, std::vector<std::uint64_t> pointers, std::vector<std::uint64_t> indices, std::vector<std::uint8_t> values) :
+    _rows(rows),
+    _columns(columns),
+    _layout(layout),
+    _elementTypeIndex(elementTypeIndex),
+    _elementSize(elementSize),
+    _pointers(std::move(pointers)),
+    _indices(std::move(indices)),
+    _values(std::move(values))
 {
     if (_layout != SparseMatrixLayout::RowCompressed && _layout != SparseMatrixLayout::ColumnCompressed)
         throw std::invalid_argument("Sparse matrix layout is invalid");
 
-    const auto compressedSize   = _layout == SparseMatrixLayout::RowCompressed ? _rows : _columns;
-    const auto uncompressedSize = _layout == SparseMatrixLayout::RowCompressed ? _columns : _rows;
-    const auto invalidPointers  = compressedSize >= std::numeric_limits<std::size_t>::max() || _pointers.size() != compressedSize + 1 || _indices.size() != _values.size() || _pointers.empty() || _pointers.front() != 0 || _pointers.back() != _values.size();
+    const auto compressedSize     = _layout == SparseMatrixLayout::RowCompressed ? _rows : _columns;
+    const auto uncompressedSize   = _layout == SparseMatrixLayout::RowCompressed ? _columns : _rows;
+    const auto invalidElementType = _elementTypeIndex > 7 || (_elementTypeIndex == 0 && _elementSize != 4) ||
+        (_elementTypeIndex == 1 && _elementSize != 2) || (_elementTypeIndex >= 2 && _elementTypeIndex <= 3 && _elementSize != 4) ||
+        (_elementTypeIndex >= 4 && _elementTypeIndex <= 5 && _elementSize != 2) || (_elementTypeIndex >= 6 && _elementTypeIndex <= 7 && _elementSize != 1);
+    const auto invalidValues     = _elementSize == 0 || _values.size() % _elementSize != 0 || _indices.size() != _values.size() / _elementSize;
+    const auto invalidPointers   = invalidElementType || invalidValues || compressedSize >= std::numeric_limits<std::size_t>::max() ||
+        _pointers.size() != compressedSize + 1 || _pointers.empty() || _pointers.front() != 0 || _pointers.back() != _indices.size();
 
     if (invalidPointers)
         throw std::invalid_argument("Sparse matrix pointer and value arrays are inconsistent");
@@ -88,12 +110,12 @@ std::uint64_t SparsePointsStorageBackend::getNumDimensions() const
 
 std::size_t SparsePointsStorageBackend::getElementSize() const
 {
-    return sizeof(float);
+    return _elementSize;
 }
 
 std::uint32_t SparsePointsStorageBackend::getElementTypeIndex() const
 {
-    return 0;
+    return _elementTypeIndex;
 }
 
 PointDataAccessView SparsePointsStorageBackend::getRow(const std::uint64_t row) const
@@ -101,16 +123,20 @@ PointDataAccessView SparsePointsStorageBackend::getRow(const std::uint64_t row) 
     if (row >= _rows)
         return {};
 
-    auto values = std::make_shared<std::vector<float>>(static_cast<std::size_t>(_columns), 0.0f);
+    if (_columns > std::numeric_limits<std::size_t>::max() / _elementSize)
+        throw std::overflow_error("Sparse row is too large");
+
+    auto values = std::make_shared<std::vector<std::uint8_t>>(static_cast<std::size_t>(_columns) * _elementSize, 0);
+
     copyRowRange(row, 0, _columns, values->data());
 
     PointDataAccessView view;
     view.data               = values->data();
     view.rows               = 1;
     view.columns            = _columns;
-    view.rowStrideBytes     = _columns * sizeof(float);
+    view.rowStrideBytes     = _columns * _elementSize;
     view.elementTypeIndex   = getElementTypeIndex();
-    view.elementSizeBytes   = static_cast<std::uint32_t>(sizeof(float));
+    view.elementSizeBytes   = static_cast<std::uint32_t>(_elementSize);
     view.lifetime           = std::shared_ptr<const void>(values, values->data());
     return view;
 }
@@ -125,16 +151,19 @@ void SparsePointsStorageBackend::visitRange(const std::uint64_t firstRow, const 
 
     for (auto row = firstRow; row < firstRow + rowCount; ++row)
     {
-        auto values = std::make_shared<std::vector<float>>(static_cast<std::size_t>(columnCount), 0.0f);
+        if (columnCount > std::numeric_limits<std::size_t>::max() / _elementSize)
+            throw std::overflow_error("Sparse range row is too large");
+
+        auto values = std::make_shared<std::vector<std::uint8_t>>(static_cast<std::size_t>(columnCount) * _elementSize, 0);
         copyRowRange(row, firstColumn, columnCount, values->data());
 
         PointDataAccessView view;
         view.data               = values->data();
         view.rows               = 1;
         view.columns            = columnCount;
-        view.rowStrideBytes     = columnCount * sizeof(float);
+        view.rowStrideBytes     = columnCount * _elementSize;
         view.elementTypeIndex   = getElementTypeIndex();
-        view.elementSizeBytes   = static_cast<std::uint32_t>(sizeof(float));
+        view.elementSizeBytes   = static_cast<std::uint32_t>(_elementSize);
         view.lifetime           = std::shared_ptr<const void>(values, values->data());
         visitor(view);
     }
@@ -157,10 +186,10 @@ void SparsePointsStorageBackend::materialize(char* destination) const
         throw std::overflow_error("Sparse matrix dimensions overflow the dense element count");
 
     const auto elementCount = _rows * _columns;
-    if (elementCount > std::numeric_limits<std::size_t>::max() / sizeof(float))
+    if (_elementSize == 0 || elementCount > std::numeric_limits<std::size_t>::max() / _elementSize)
         throw std::overflow_error("Sparse matrix is too large to materialize");
 
-    std::memset(destination, 0, static_cast<std::size_t>(elementCount) * sizeof(float));
+    std::memset(destination, 0, static_cast<std::size_t>(elementCount) * _elementSize);
 
     if (_layout == SparseMatrixLayout::RowCompressed)
     {
@@ -170,7 +199,7 @@ void SparsePointsStorageBackend::materialize(char* destination) const
             {
                 const auto column = _indices[static_cast<std::size_t>(index)];
                 const auto flatIndex = row * _columns + column;
-                std::memcpy(destination + flatIndex * sizeof(float), &_values[static_cast<std::size_t>(index)], sizeof(float));
+                std::memcpy(destination + flatIndex * _elementSize, _values.data() + static_cast<std::size_t>(index) * _elementSize, _elementSize);
             }
         }
     }
@@ -182,7 +211,7 @@ void SparsePointsStorageBackend::materialize(char* destination) const
             {
                 const auto row = _indices[static_cast<std::size_t>(index)];
                 const auto flatIndex = row * _columns + column;
-                std::memcpy(destination + flatIndex * sizeof(float), &_values[static_cast<std::size_t>(index)], sizeof(float));
+                std::memcpy(destination + flatIndex * _elementSize, _values.data() + static_cast<std::size_t>(index) * _elementSize, _elementSize);
             }
         }
     }
@@ -195,7 +224,27 @@ SparseMatrixLayout SparsePointsStorageBackend::getLayout() const
 
 std::uint64_t SparsePointsStorageBackend::getNumNonZeros() const
 {
-    return _values.size();
+    return _elementSize == 0 ? 0 : _values.size() / _elementSize;
+}
+
+std::uint64_t SparsePointsStorageBackend::getStorageSizeBytes() const
+{
+    return static_cast<std::uint64_t>(_pointers.size()) * sizeof(std::uint64_t) + static_cast<std::uint64_t>(_indices.size()) * sizeof(std::uint64_t) + _values.size();
+}
+
+const std::vector<std::uint64_t>& SparsePointsStorageBackend::getPointers() const
+{
+    return _pointers;
+}
+
+const std::vector<std::uint64_t>& SparsePointsStorageBackend::getIndices() const
+{
+    return _indices;
+}
+
+const std::vector<std::uint8_t>& SparsePointsStorageBackend::getValues() const
+{
+    return _values;
 }
 
 float SparsePointsStorageBackend::valueAt(const std::uint64_t row, const std::uint64_t column) const
@@ -211,24 +260,53 @@ float SparsePointsStorageBackend::valueAt(const std::uint64_t row, const std::ui
     if (found == last || *found != targetIndex)
         return 0.0f;
 
-    return _values[static_cast<std::size_t>(found - _indices.begin())];
+    const auto value = _values.data() + static_cast<std::size_t>(found - _indices.begin()) * _elementSize;
+    switch (_elementTypeIndex)
+    {
+        case 0:
+            return readValueAsFloat<float>(value);
+
+        case 1:
+            return readValueAsFloat<biovault::bfloat16_t>(value);
+
+        case 2:
+            return readValueAsFloat<std::int32_t>(value);
+
+        case 3:
+            return readValueAsFloat<std::uint32_t>(value);
+
+        case 4:
+            return readValueAsFloat<std::int16_t>(value);
+
+        case 5:
+            return readValueAsFloat<std::uint16_t>(value);
+
+        case 6:
+            return readValueAsFloat<std::int8_t>(value);
+
+        case 7:
+            return readValueAsFloat<std::uint8_t>(value);
+
+        default:
+            return 0.0f;
+    }
 }
 
-void SparsePointsStorageBackend::copyRowRange(const std::uint64_t row, const std::uint64_t firstColumn, const std::uint64_t columnCount, float* destination) const
+void SparsePointsStorageBackend::copyRowRange(const std::uint64_t row, const std::uint64_t firstColumn, const std::uint64_t columnCount, std::uint8_t* destination) const
 {
     if (_layout == SparseMatrixLayout::RowCompressed)
     {
-        const auto begin = _pointers[static_cast<std::size_t>(row)];
-        const auto end = _pointers[static_cast<std::size_t>(row + 1)];
-        const auto first = _indices.begin() + static_cast<std::ptrdiff_t>(begin);
-        const auto last = _indices.begin() + static_cast<std::ptrdiff_t>(end);
-        const auto rangeBegin = std::lower_bound(first, last, firstColumn);
-        const auto rangeEnd = std::lower_bound(rangeBegin, last, firstColumn + columnCount);
+        const auto begin        = _pointers[static_cast<std::size_t>(row)];
+        const auto end          = _pointers[static_cast<std::size_t>(row + 1)];
+        const auto first        = _indices.begin() + static_cast<std::ptrdiff_t>(begin);
+        const auto last         = _indices.begin() + static_cast<std::ptrdiff_t>(end);
+        const auto rangeBegin   = std::lower_bound(first, last, firstColumn);
+        const auto rangeEnd     = std::lower_bound(rangeBegin, last, firstColumn + columnCount);
 
         for (auto index = rangeBegin; index != rangeEnd; ++index)
         {
             const auto valueIndex = static_cast<std::size_t>(index - _indices.begin());
-            destination[*index - firstColumn] = _values[valueIndex];
+            std::memcpy(destination + (*index - firstColumn) * _elementSize, _values.data() + valueIndex * _elementSize, _elementSize);
         }
 
         return;
@@ -236,8 +314,18 @@ void SparsePointsStorageBackend::copyRowRange(const std::uint64_t row, const std
 
     for (auto column = firstColumn; column < firstColumn + columnCount; ++column)
     {
-        const auto value = valueAt(row, column);
-        destination[column - firstColumn] = value;
+        const auto compressedIndex = column;
+        const auto targetIndex     = row;
+        const auto begin            = _pointers[static_cast<std::size_t>(compressedIndex)];
+        const auto end              = _pointers[static_cast<std::size_t>(compressedIndex + 1)];
+        const auto first            = _indices.begin() + static_cast<std::ptrdiff_t>(begin);
+        const auto last             = _indices.begin() + static_cast<std::ptrdiff_t>(end);
+        const auto found            = std::lower_bound(first, last, targetIndex);
+        if (found != last && *found == targetIndex)
+        {
+            const auto valueIndex = static_cast<std::size_t>(found - _indices.begin());
+            std::memcpy(destination + (column - firstColumn) * _elementSize, _values.data() + valueIndex * _elementSize, _elementSize);
+        }
     }
 }
 

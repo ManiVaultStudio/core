@@ -11,6 +11,7 @@
 #include "DimensionNamesSerializer.h"
 #include "storage/eager/EagerPointsStorageBackend.h"
 #include "storage/actions/StorageBackendConversionAction.h"
+#include "storage/sparse/SparsePointsStorageBackend.h"
 #include "storage/tiled/PointDataTiledSerialization.h"
 #include "storage/tiled/PointDataTiledStorage.h"
 #include "storage/tiled/TiledPointsStorageBackend.h"
@@ -165,6 +166,8 @@ std::uint64_t PointData::getNumPoints() const
 
     if (const auto tiledStorage = getTiledStorage())
         return tiledStorage->rows();
+    if (_storageBackend && _storageBackend->getType() == pointdata::storage::StorageBackendType::Sparse)
+        return _storageBackend->getNumPoints();
     if (_isDense)
         return static_cast<std::uint64_t>(getSizeOfVector() / _numDimensions);
     else
@@ -182,6 +185,8 @@ std::uint64_t PointData::getNumberOfElements() const
     const auto dataLock = lockData();
     if (const auto tiledStorage = getTiledStorage())
         return tiledStorage->rows() * tiledStorage->columns();
+    if (_storageBackend && _storageBackend->getType() == pointdata::storage::StorageBackendType::Sparse)
+        return _storageBackend->getNumPoints() * _storageBackend->getNumDimensions();
 
     return getSizeOfVector();
 }
@@ -193,6 +198,8 @@ std::uint64_t PointData::getRawDataSize() const
 
     if (const auto tiledStorage = getTiledStorage())
         return getNumberOfElements() * tiledStorage->elementSize();
+    if (const auto sparseStorage = dynamic_cast<const pointdata::storage::SparsePointsStorageBackend*>(_storageBackend.get()))
+        return sparseStorage->getStorageSizeBytes();
     if (_isDense)
     {
         std::uint64_t elementSize = std::visit([](auto& vec) { return vec.empty() ? 0u : sizeof(vec[0]); }, _variantOfVectors);
@@ -207,16 +214,14 @@ std::uint64_t PointData::getRawDataSize() const
 void* PointData::getDataVoidPtr()
 {
     const auto dataLock = lockData();
-    if (getTiledStorage())
-        materializeTiled();
+    materializeStorageBackend();
     return std::visit([](auto& vec) { return (void*)vec.data(); }, _variantOfVectors);
 }
 
 const void* PointData::getDataConstVoidPtr() const
 {
     const auto dataLock = lockData();
-    if (getTiledStorage())
-        const_cast<PointData*>(this)->materializeTiled();
+    const_cast<PointData*>(this)->materializeStorageBackend();
     return std::visit([](const auto& vec) { return (const void*)vec.data(); }, _variantOfVectors);
 }
 
@@ -286,6 +291,23 @@ void PointData::initializeTiledStorage(const std::uint64_t rows, const std::uint
     creation->superTileColumns = configuration.superTileColumns;
     creation->generator = std::move(generator);
     convertToStorageBackend(pointdata::storage::StorageBackendType::Tiled, creation);
+}
+
+void PointData::initializeSparseStorage(const std::uint64_t rows, const std::uint64_t columns, const ElementTypeSpecifier elementType, const bool columnCompressed, std::vector<std::uint64_t> pointers, std::vector<std::uint64_t> indices, std::vector<std::uint8_t> values)
+{
+    const auto lock = lockData();
+    if (_numRows != 0 || getSizeOfVector() != 0 || getTiledStorage())
+        throw std::invalid_argument("Point-data storage creation requires an empty dataset");
+
+    const auto layout      = columnCompressed ? pointdata::storage::SparseMatrixLayout::ColumnCompressed : pointdata::storage::SparseMatrixLayout::RowCompressed;
+    const auto elementSize = elementType == ElementTypeSpecifier::bfloat16 || elementType == ElementTypeSpecifier::int16 || elementType == ElementTypeSpecifier::uint16 ? 2 :
+        elementType == ElementTypeSpecifier::int8 || elementType == ElementTypeSpecifier::uint8 ? 1 : 4;
+    auto sparseStorage = std::make_unique<pointdata::storage::SparsePointsStorageBackend>(rows, columns, layout, static_cast<std::uint32_t>(elementType), elementSize, std::move(pointers), std::move(indices), std::move(values));
+    setElementTypeSpecifier(elementType);
+    _numDimensions  = columns;
+    _numRows        = rows;
+    _isDense        = true;
+    _storageBackend = std::move(sparseStorage);
 }
 
 void PointData::attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices, std::shared_ptr<void> sourceLifetime)
@@ -392,7 +414,7 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
 
     if (type == pointdata::storage::StorageBackendType::Eager)
     {
-        materializeTiled(std::move(progress));
+        materializeStorageBackend(std::move(progress));
 
         return;
     }
@@ -413,6 +435,8 @@ void PointData::configureStorageBackend(const pointdata::storage::StorageBackend
 void PointData::makeTiled(const std::size_t rowTileSize, const std::size_t columnTileSize, std::function<void(float)> progress)
 {
     const auto lock = lockData();
+
+    materializeStorageBackend();
 
     if (_isDense && !getTiledStorage() && _numDimensions > 0)
     {
@@ -628,6 +652,42 @@ void PointData::materializeTiled(pointdata::storage::StorageBackendProgressCallb
         progress(1.0f);
 }
 
+void PointData::materializeStorageBackend(pointdata::storage::StorageBackendProgressCallback progress)
+{
+    if (getTiledStorage())
+    {
+        materializeTiled(std::move(progress));
+        return;
+    }
+
+    if (!_storageBackend || _storageBackend->getType() == pointdata::storage::StorageBackendType::Eager)
+        return;
+
+    const auto rows        = _storageBackend->getNumPoints();
+    const auto columns     = _storageBackend->getNumDimensions();
+    const auto elementSize = _storageBackend->getElementSize();
+    if (rows != 0 && columns > std::numeric_limits<std::uint64_t>::max() / rows)
+        throw std::overflow_error("Sparse matrix dimensions overflow the dense element count");
+
+    const auto elementCount = rows * columns;
+    if (elementSize == 0 || elementCount > std::numeric_limits<std::size_t>::max() / elementSize)
+        throw std::overflow_error("Sparse matrix is too large to materialize");
+
+    std::vector<std::uint8_t> materializedBytes(static_cast<std::size_t>(elementCount) * elementSize);
+    _storageBackend->materialize(reinterpret_cast<char*>(materializedBytes.data()));
+    setElementTypeSpecifier(static_cast<ElementTypeSpecifier>(_storageBackend->getElementTypeIndex()));
+    resizeVector(static_cast<std::size_t>(elementCount));
+    std::visit([&materializedBytes](auto& vector) {
+        if (!vector.empty())
+            std::memcpy(vector.data(), materializedBytes.data(), materializedBytes.size());
+    }, _variantOfVectors);
+    clearStorageBackend();
+    refreshStorageBackend();
+
+    if (progress)
+        progress(1.0f);
+}
+
 const std::vector<QString>& PointData::getDimensionNames() const
 {
     const auto dataLock = lockData();
@@ -689,8 +749,7 @@ void PointData::setValueAt(const std::size_t index, const float newValue)
     // Use lockData() / the bulk-access APIs when synchronized access is
     // required.
 
-    if (getTiledStorage())
-        materializeTiled();
+    materializeStorageBackend();
 
     std::visit([index, newValue](auto& vec) {
         using value_type = typename std::remove_reference_t<decltype(vec)>::value_type;
@@ -740,6 +799,48 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
             const auto tiledStorage = mv::pointdata::tiled::PointDataTiledSerialization::fromVariantMap(dataMap["Tiled"].toMap(), _numRows, _numDimensions, elementSize);
             _storageBackend = std::make_unique<pointdata::storage::TiledPointsStorageBackend>(tiledStorage, static_cast<std::uint32_t>(elementType));
         }
+        else if (dataMap.contains("Sparse") && dataMap["Sparse"].canConvert<QVariantMap>())
+        {
+            const auto sparseMap = dataMap["Sparse"].toMap();
+            variantMapMustContain(sparseMap, "Layout");
+            variantMapMustContain(sparseMap, "Pointers");
+            variantMapMustContain(sparseMap, "Indices");
+            variantMapMustContain(sparseMap, "Values");
+
+            const auto elementType = dataMap.contains("TypeName")
+                ? elementTypeSpecifier(dataMap.value("TypeName").toString())
+                : static_cast<ElementTypeSpecifier>(dataMap.value("TypeIndex").toInt());
+            setElementTypeSpecifier(elementType);
+            resizeVector(0);
+            _numRows = 0;
+
+            auto pointerBlob = sparseMap["Pointers"].toMap();
+            auto indexBlob   = sparseMap["Indices"].toMap();
+            auto valueBlob   = sparseMap["Values"].toMap();
+            const auto pointerByteSize = pointerBlob.value("Size").toULongLong();
+            const auto indexByteSize = indexBlob.value("Size").toULongLong();
+            const auto valueByteSize = valueBlob.value("Size").toULongLong();
+            const auto elementSize = elementType == ElementTypeSpecifier::bfloat16 || elementType == ElementTypeSpecifier::int16 || elementType == ElementTypeSpecifier::uint16 ? 2 :
+                elementType == ElementTypeSpecifier::int8 || elementType == ElementTypeSpecifier::uint8 ? 1 : 4;
+            const auto layout = sparseMap["Layout"].toInt();
+            if (pointerByteSize % sizeof(std::uint64_t) != 0 || indexByteSize % sizeof(std::uint64_t) != 0 || valueByteSize % elementSize != 0 ||
+                pointerByteSize > std::numeric_limits<std::size_t>::max() || indexByteSize > std::numeric_limits<std::size_t>::max() || valueByteSize > std::numeric_limits<std::size_t>::max() ||
+                (layout != static_cast<int>(pointdata::storage::SparseMatrixLayout::RowCompressed) && layout != static_cast<int>(pointdata::storage::SparseMatrixLayout::ColumnCompressed)))
+                throw std::invalid_argument("Serialized sparse point-data arrays have invalid byte sizes");
+
+            std::vector<std::uint64_t> pointers(static_cast<std::size_t>(pointerByteSize / sizeof(std::uint64_t)));
+            std::vector<std::uint64_t> indices(static_cast<std::size_t>(indexByteSize / sizeof(std::uint64_t)));
+            std::vector<std::uint8_t> values(static_cast<std::size_t>(valueByteSize));
+            if (pointerByteSize > 0)
+                populateBytesFromBlobMap(pointerBlob, reinterpret_cast<char*>(pointers.data()), pointerByteSize);
+            if (indexByteSize > 0)
+                populateBytesFromBlobMap(indexBlob, reinterpret_cast<char*>(indices.data()), indexByteSize);
+            if (valueByteSize > 0)
+                populateBytesFromBlobMap(valueBlob, reinterpret_cast<char*>(values.data()), valueByteSize);
+
+            const auto rows = variantMap["NumberOfPoints"].toULongLong();
+            initializeSparseStorage(rows, _numDimensions, elementType, layout == static_cast<int>(pointdata::storage::SparseMatrixLayout::ColumnCompressed), std::move(pointers), std::move(indices), std::move(values));
+        }
         else if (dataMap.contains("Raw") && dataMap["Raw"].canConvert<QVariantMap>())
         {
             variantMapMustContain(dataMap, "NumberOfElements");
@@ -774,6 +875,7 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
     bool isDense;
     bool isTiled;
+    bool isSparse;
     std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> tiledStorage;
 
     {
@@ -781,6 +883,7 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
         isDense = _isDense;
         tiledStorage = getTiledStorage();
         isTiled = static_cast<bool>(tiledStorage);
+        isSparse = _storageBackend && _storageBackend->getType() == pointdata::storage::StorageBackendType::Sparse;
     }
 
     //const auto baseSaveStage = plan->addNestedWorkflowStage("Save raw data base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
@@ -806,6 +909,31 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
             outputMap["Tiled"]            = executionContext->takeOutput(serializeTiledStage).toMap();
             outputMap["NumberOfElements"] = QVariant::fromValue(static_cast<qulonglong>(getNumberOfElements()));
 
+            executionContext->setOutput(outputMap);
+        });
+    }
+    else if (isSparse)
+    {
+        plan->addSequentialStage("Serialize sparse point data", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+            const auto dataLock = lockData();
+            const auto* sparseStorage = dynamic_cast<const pointdata::storage::SparsePointsStorageBackend*>(_storageBackend.get());
+            if (!sparseStorage)
+                throw std::logic_error("Sparse point-data storage is unavailable");
+
+            const auto& pointers = sparseStorage->getPointers();
+            const auto& indices = sparseStorage->getIndices();
+            const auto& values = sparseStorage->getValues();
+            QVariantMap sparseMap;
+            sparseMap["Layout"] = static_cast<std::int32_t>(sparseStorage->getLayout());
+            sparseMap["Pointers"] = bytesToBlobVariantMap(reinterpret_cast<const char*>(pointers.data()), pointers.size() * sizeof(std::uint64_t));
+            sparseMap["Indices"] = bytesToBlobVariantMap(reinterpret_cast<const char*>(indices.data()), indices.size() * sizeof(std::uint64_t));
+            sparseMap["Values"] = bytesToBlobVariantMap(reinterpret_cast<const char*>(values.data()), values.size());
+
+            QVariantMap outputMap;
+            outputMap["TypeIndex"] = static_cast<std::int32_t>(getElementTypeSpecifier());
+            outputMap["TypeName"] = elementTypeName(getElementTypeSpecifier());
+            outputMap["Sparse"] = sparseMap;
+            outputMap["NumberOfElements"] = QVariant::fromValue(static_cast<qulonglong>(getNumberOfElements()));
             executionContext->setOutput(outputMap);
         });
     }
@@ -895,7 +1023,7 @@ void PointData::extractFullDataForDimension(std::vector<float>& result, const in
 
     result.resize(getNumPoints());
 
-    if (getTiledStorage())
+    if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Eager)
     {
         for (std::size_t i = 0; i < result.size(); ++i)
             result[i] = getValueAt(i * _numDimensions + static_cast<std::size_t>(dimensionIndex));
@@ -926,7 +1054,7 @@ void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, 
 
         result.resize(getNumPoints());
 
-        if (getTiledStorage())
+        if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Eager)
         {
             for (std::size_t i = 0; i < result.size(); ++i)
             {
@@ -967,7 +1095,7 @@ void PointData::extractDataForDimension(std::vector<float>& result, const int di
 
     result.resize(indices.size());
 
-    if (getTiledStorage())
+    if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Eager)
     {
         for (std::size_t i = 0; i < result.size(); ++i)
             result[i] = getValueAt(static_cast<std::size_t>(indices[i]) * _numDimensions + static_cast<std::size_t>(dimensionIndex));
@@ -996,7 +1124,7 @@ void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, cons
 
     result.resize(indices.size());
 
-    if (getTiledStorage())
+    if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Eager)
     {
         for (std::size_t i = 0; i < result.size(); ++i)
         {
@@ -1580,6 +1708,15 @@ void Points::initializeTiledStorage(const std::uint64_t rows, const std::uint64_
         throw std::invalid_argument("Storage backend initialization is only supported for concrete point datasets");
 
     getRawData<PointData>()->initializeTiledStorage(rows, columns, elementType, configuration, std::move(generator));
+    mv::events().notifyDatasetDataChanged(this);
+}
+
+void Points::initializeSparseStorage(const std::uint64_t rows, const std::uint64_t columns, const ElementTypeSpecifier elementType, const bool columnCompressed, std::vector<std::uint64_t> pointers, std::vector<std::uint64_t> indices, std::vector<std::uint8_t> values)
+{
+    if (isProxy())
+        throw std::invalid_argument("Storage backend initialization is only supported for concrete point datasets");
+
+    getRawData<PointData>()->initializeSparseStorage(rows, columns, elementType, columnCompressed, std::move(pointers), std::move(indices), std::move(values));
     mv::events().notifyDatasetDataChanged(this);
 }
 
