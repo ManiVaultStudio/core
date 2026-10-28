@@ -183,7 +183,7 @@ protected:
     static constexpr std::int32_t INIT_MAX      = 100;      /** Initialization maximum value */
     static constexpr std::int32_t INIT_VALUE    = 0;        /** Initialization value */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

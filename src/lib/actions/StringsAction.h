@@ -291,7 +291,7 @@ protected:
     bool                    _allowDuplicates;   /** Whether to allow string duplicates */
     Qt::TextElideMode       _textElideMode;     /** Text elide mode for the strings */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

@@ -200,7 +200,7 @@ signals:
 protected:
     bool    _indeterminate;     /** Whether the setEnabled action is in an indeterminate state */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }
