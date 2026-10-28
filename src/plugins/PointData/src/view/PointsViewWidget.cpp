@@ -410,12 +410,14 @@ void PointsViewWidget::refreshPoints()
 
     _model->setPoints(_points.get(), _points->getNumPoints(), _points->getNumDimensions());
     updateUiState();
+    const auto backendType = _points->getStorageBackendType();
+
     if (_datasetLabel)
         _datasetLabel->setText(QString("%1 — %2 points × %3 dimensions (%4)")
             .arg(_points->getGuiName())
             .arg(_points->getNumPoints())
             .arg(_points->getNumDimensions())
-            .arg(_points->getStorageBackendType() == Points::StorageBackendType::Tiled ? "tiled" : "eager"));
+            .arg(backendType ? mv::pointdata::storage::getStorageBackendTypeName(*backendType).toLower() : QStringLiteral("not uniform")));
     setStatus("Fetching the visible table window...");
     QTimer::singleShot(0, this, &PointsViewWidget::fetchVisibleRange);
 }

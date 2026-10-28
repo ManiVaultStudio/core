@@ -699,24 +699,9 @@ struct FixtureResult
     std::size_t recommendedSuperTileColumns = 0;
 };
 
-QString backendName(const Points::StorageBackendType backend)
+QString backendName(const std::optional<Points::StorageBackendType>& backend)
 {
-    switch (backend)
-    {
-        case Points::StorageBackendType::Eager:
-            return QStringLiteral("eager");
-
-        case Points::StorageBackendType::Tiled:
-            return QStringLiteral("tiled");
-
-        case Points::StorageBackendType::Mixed:
-            return QStringLiteral("mixed");
-
-        case Points::StorageBackendType::Unknown:
-            return QStringLiteral("unknown");
-    }
-
-    return QStringLiteral("unknown");
+    return backend ? mv::pointdata::storage::getStorageBackendTypeName(*backend).toLower() : QStringLiteral("not uniform");
 }
 
 QString csvValue(const QString& value)

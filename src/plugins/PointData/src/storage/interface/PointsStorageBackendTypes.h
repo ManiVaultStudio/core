@@ -8,6 +8,11 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <optional>
+
+#include <pointdata_export.h>
+
+#include <QString>
 
 namespace mv::pointdata::storage
 {
@@ -20,9 +25,14 @@ enum class StorageBackendType
 {
     Eager,   /**< Fully materialized dense point-data vectors. */
     Tiled,   /**< Read-only rectangular tiles loaded on demand. */
-    Mixed,   /**< A transitional or combined representation. */
-    Unknown  /**< No recognized concrete representation. */
+    Sparse   /**< Read-only compressed sparse point data. */
 };
+
+/** Returns the canonical name of a storage backend type for controls and diagnostics. */
+POINTDATA_EXPORT QString getStorageBackendTypeName(StorageBackendType type);
+
+/** Returns the storage backend type represented by the exact canonical @p typeName, or std::nullopt if it is unknown. */
+POINTDATA_EXPORT std::optional<StorageBackendType> getStorageBackendType(const QString& typeName);
 
 /** Describes operations supported by a storage backend. */
 enum class StorageBackendCapability : std::uint32_t

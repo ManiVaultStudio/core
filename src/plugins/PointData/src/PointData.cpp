@@ -1512,21 +1512,24 @@ QString Points::getElementTypeName() const
     return getRawData<PointData>()->getElementTypeName();
 }
 
-Points::StorageBackendType Points::getStorageBackendType() const
+std::optional<Points::StorageBackendType> Points::getStorageBackendType() const
 {
     if (isProxy())
     {
         const auto proxyMembers = getProxyMembers();
 
         if (proxyMembers.isEmpty())
-            return StorageBackendType::Unknown;
+            return std::nullopt;
 
         const auto firstType = mv::Dataset<Points>(proxyMembers.first())->getStorageBackendType();
+
+        if (!firstType)
+            return std::nullopt;
 
         for (const auto& proxyMember : proxyMembers)
         {
             if (mv::Dataset<Points>(proxyMember)->getStorageBackendType() != firstType)
-                return StorageBackendType::Mixed;
+                return std::nullopt;
         }
 
         return firstType;

@@ -1100,8 +1100,8 @@ public:
     /** Returns the name of the element type used by this logical dataset. */
     QString getElementTypeName() const;
 
-    /** Returns the physical backend type used by this concrete point dataset. */
-    StorageBackendType getStorageBackendType() const;
+    /** Returns the physical backend type, or std::nullopt for an empty proxy or mixed backend types. */
+    std::optional<StorageBackendType> getStorageBackendType() const;
 
     /** Returns the capability flags of the physical backend used by this dataset. */
     mv::pointdata::storage::StorageBackendCapabilities getStorageBackendCapabilities() const;

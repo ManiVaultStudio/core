@@ -25,23 +25,11 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique
 
     if (_conversionAction)
     {
-        switch (_conversionAction->getTargetBackendType())
-        {
-            case mv::pointdata::storage::StorageBackendType::Eager:
-                backendName = tr("In-Memory Storage");
-                break;
+        const auto backendType = _conversionAction->getTargetBackendType();
+        backendName = tr("%1 Storage").arg(mv::pointdata::storage::getStorageBackendTypeName(backendType));
 
-            case mv::pointdata::storage::StorageBackendType::Tiled:
-                backendName = tr("Tiled Storage");
-                break;
-
-            case mv::pointdata::storage::StorageBackendType::Mixed:
-                backendName = tr("Mixed Storage");
-                break;
-
-            case mv::pointdata::storage::StorageBackendType::Unknown:
-                break;
-        }
+        if (backendType == mv::pointdata::storage::StorageBackendType::Eager)
+            backendName = tr("In-Memory Storage");
     }
 
     switch (purpose)
