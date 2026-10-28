@@ -66,7 +66,7 @@ void MeanShift::init()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, RESOLUTION, RESOLUTION, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, RESOLUTION, RESOLUTION, 0, GL_RGB, GL_FLOAT, nullptr);
 
     _meanshiftFramebuffer.addColorTexture(1, &_gradientTexture);
     _meanshiftFramebuffer.validate();
@@ -78,7 +78,7 @@ void MeanShift::init()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, RESOLUTION, RESOLUTION, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, RESOLUTION, RESOLUTION, 0, GL_RGB, GL_FLOAT, nullptr);
 
     _meanshiftFramebuffer.addColorTexture(2, &_meanshiftTexture);
     _meanshiftFramebuffer.validate();
