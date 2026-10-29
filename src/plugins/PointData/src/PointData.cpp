@@ -31,6 +31,7 @@
 #include <biovault_bfloat16/biovault_bfloat16.h>
 
 #include <QDebug>
+#include <QPointer>
 #include <QtCore>
 
 #include <cstring>
@@ -363,7 +364,23 @@ std::unique_ptr<mv::gui::StorageBackendConversionAction> PointData::createStorag
 {
     const auto lock = lockData();
 
-    return _storageBackend ? _storageBackend->createConversionAction(targetType, parent) : nullptr;
+    if (!_storageBackend)
+        return nullptr;
+
+    auto conversionAction = _storageBackend->createConversionAction(targetType, parent);
+    if (!conversionAction)
+        return nullptr;
+
+    QPointer<PointData> pointData(const_cast<PointData*>(this));
+    conversionAction->setSourceData(_storageBackend->getNumPoints(), _storageBackend->getNumDimensions(), _storageBackend->getElementTypeIndex(), [pointData](const std::uint64_t row) {
+        if (!pointData)
+            return PointDataAccessView {};
+
+        const auto rowLock = pointData->lockData();
+        return pointData->_storageBackend ? pointData->_storageBackend->getRow(row) : PointDataAccessView {};
+    });
+
+    return conversionAction;
 }
 
 void PointData::convertToStorageBackend(const pointdata::storage::StorageBackendType type, const pointdata::storage::StorageBackendConfiguration& configuration, pointdata::storage::StorageBackendProgressCallback progress)
