@@ -79,8 +79,11 @@ set(POINTS_STORAGE_COMMON_HEADERS
 
 set(POINTS_STORAGE_ACTION_HEADERS
     src/storage/actions/StorageBackendConversionAction.h
+    src/storage/actions/EagerStorageBackendConversionAction.h
+    src/storage/actions/SparseStorageBackendConversionAction.h
     src/storage/actions/TiledStorageBackendConfigurationAction.h
-    src/storage/actions/TiledStorageObservationAction.h
+    src/storage/actions/StorageBackendObservationAction.h
+    src/storage/actions/StorageBackendMemory.h
     src/storage/actions/TiledStorageBackendConversionAction.h
 )
 
@@ -90,8 +93,11 @@ set(POINTS_STORAGE_WIDGET_HEADERS
 
 set(POINTS_STORAGE_ACTION_SOURCES
     src/storage/widgets/StorageBackendConfigurationDialog.cpp
+    src/storage/actions/EagerStorageBackendConversionAction.cpp
+    src/storage/actions/SparseStorageBackendConversionAction.cpp
     src/storage/actions/TiledStorageBackendConfigurationAction.cpp
-    src/storage/actions/TiledStorageObservationAction.cpp
+    src/storage/actions/StorageBackendObservationAction.cpp
+    src/storage/actions/StorageBackendMemory.cpp
     src/storage/actions/TiledStorageBackendConversionAction.cpp
 )
 

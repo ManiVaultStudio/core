@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <limits>
 #include <stdexcept>
 
 namespace mv::pointdata::tiled
@@ -89,12 +90,50 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromDense(const ch
     return storage;
 }
 
-std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromGenerator(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, TileGenerator generator, ProgressCallback progress)
+std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromGenerator(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, TileGenerator generator, ProgressCallback progress, const bool materializeGeneratedTiles)
 {
     if (!generator)
         throw std::invalid_argument("Tile generator is empty");
 
-    return std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize, std::move(generator), std::move(progress));
+    auto descriptorProgress = progress;
+    if (materializeGeneratedTiles && progress)
+        descriptorProgress = [progress](const float value) { progress(value * 0.1f); };
+
+    auto storage = std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize, std::move(generator), std::move(descriptorProgress));
+
+    if (!materializeGeneratedTiles)
+        return storage;
+
+    const auto totalTiles       = storage->_descriptors.size();
+    const auto progressInterval = std::max<std::size_t>(1, totalTiles / 100);
+    std::size_t tileIndex       = 0;
+
+    if (progress)
+        progress(0.1f);
+
+    for (auto& descriptor : storage->_descriptors)
+    {
+        if (descriptor.rows != 0 && descriptor.columns > (std::numeric_limits<std::uint64_t>::max)() / descriptor.rows)
+            throw std::overflow_error("Generated tile dimensions exceed the supported byte size");
+
+        const auto elementCount = descriptor.rows * descriptor.columns;
+        if (elementSize == 0 || elementCount > static_cast<std::uint64_t>((std::numeric_limits<qsizetype>::max)()) / elementSize)
+            throw std::overflow_error("Generated tile payload exceeds the supported byte size");
+
+        auto bytes = storage->_loader(descriptor);
+        const auto expectedBytes = elementCount * elementSize;
+        if (bytes.size() != static_cast<qsizetype>(expectedBytes))
+            throw std::runtime_error("Generated tile payload size does not match its descriptor");
+
+        descriptor.residentBytes = std::move(bytes);
+        ++tileIndex;
+
+        if (progress && (tileIndex == 1 || tileIndex == totalTiles || tileIndex % progressInterval == 0))
+            progress(0.1f + static_cast<float>(tileIndex) / static_cast<float>(totalTiles) * 0.9f);
+    }
+
+    storage->_loader = {};
+    return storage;
 }
 
 std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromPackedFile(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, const QString& filePath, const mv::util::SharedCodec& codec, const std::vector<mv::util::PackedBlobBlock>& blocks)

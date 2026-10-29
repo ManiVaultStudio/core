@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "TiledStorageObservationAction.h"
+#include "StorageBackendObservationAction.h"
 
 #include <util/StyledIcon.h>
 
@@ -29,13 +29,13 @@ QColor getSeverityColor(const util::SeverityLevel severity)
 
 }
 
-TiledStorageObservationAction::TiledStorageObservationAction(QObject* parent, const QString& category) :
+StorageBackendObservationAction::StorageBackendObservationAction(QObject* parent, const QString& category) :
     WidgetAction(parent, category)
 {
     setConfigurationFlag(ConfigurationFlag::NoLabelInGroup);
 }
 
-void TiledStorageObservationAction::setObservation(const util::SeverityLevel severity, const QString& description)
+void StorageBackendObservationAction::setObservation(const util::SeverityLevel severity, const QString& description)
 {
     _severity = severity;
     _description = description;
@@ -45,10 +45,10 @@ void TiledStorageObservationAction::setObservation(const util::SeverityLevel sev
             updateWidget(widget);
 }
 
-QWidget* TiledStorageObservationAction::getWidget(QWidget* parent, const std::int32_t&)
+QWidget* StorageBackendObservationAction::getWidget(QWidget* parent, const std::int32_t&)
 {
     auto* row = new QFrame(parent);
-    row->setObjectName(QStringLiteral("TiledStorageObservationRow"));
+    row->setObjectName(QStringLiteral("StorageBackendObservationRow"));
 
     auto* layout = new QHBoxLayout(row);
     layout->setContentsMargins(8, 6, 8, 6);
@@ -91,7 +91,7 @@ QWidget* TiledStorageObservationAction::getWidget(QWidget* parent, const std::in
     return row;
 }
 
-void TiledStorageObservationAction::updateWidget(QWidget* widget) const
+void StorageBackendObservationAction::updateWidget(QWidget* widget) const
 {
     const auto color = getSeverityColor(_severity);
     const auto severityName = util::getSeverityLevelName(_severity);
@@ -106,7 +106,7 @@ void TiledStorageObservationAction::updateWidget(QWidget* widget) const
     descriptionLabel->setText(_description);
 
     const auto tint = QStringLiteral("rgba(%1, %2, %3, 24)").arg(color.red()).arg(color.green()).arg(color.blue());
-    widget->setStyleSheet(QStringLiteral("QFrame#TiledStorageObservationRow { background-color: %1; border-left: 3px solid %2; border-radius: 3px; }")
+    widget->setStyleSheet(QStringLiteral("QFrame#StorageBackendObservationRow { background-color: %1; border-left: 3px solid %2; border-radius: 3px; }")
         .arg(tint, color.name()));
     widget->setAccessibleDescription(QStringLiteral("%1: %2").arg(severityName, _description));
 }

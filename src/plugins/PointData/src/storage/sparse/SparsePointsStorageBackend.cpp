@@ -4,7 +4,9 @@
 
 #include "SparsePointsStorageBackend.h"
 
+#include "../actions/EagerStorageBackendConversionAction.h"
 #include "../actions/StorageBackendConversionAction.h"
+#include "../actions/TiledStorageBackendConversionAction.h"
 
 #include <biovault_bfloat16/biovault_bfloat16.h>
 
@@ -87,8 +89,14 @@ StorageBackendCapabilities SparsePointsStorageBackend::getCapabilities() const
     return getStorageBackendCapabilities(StorageBackendType::Sparse);
 }
 
-std::unique_ptr<mv::gui::StorageBackendConversionAction> SparsePointsStorageBackend::createConversionAction(const StorageBackendType, QObject*) const
+std::unique_ptr<mv::gui::StorageBackendConversionAction> SparsePointsStorageBackend::createConversionAction(const StorageBackendType targetType, QObject* parent) const
 {
+    if (targetType == StorageBackendType::Tiled)
+        return std::make_unique<mv::gui::TiledStorageBackendConversionAction>(parent, _rows, _columns, _elementSize, StorageBackendConfiguration{}, false, true);
+
+    if (targetType == StorageBackendType::Eager)
+        return std::make_unique<mv::gui::EagerStorageBackendConversionAction>(parent, _rows, _columns, _elementSize);
+
     return {};
 }
 

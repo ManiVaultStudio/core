@@ -24,7 +24,8 @@ QStringList storageBackendTypes()
 {
     return {
         pointdata::storage::getStorageBackendTypeName(Points::StorageBackendType::Eager),
-        pointdata::storage::getStorageBackendTypeName(Points::StorageBackendType::Tiled)
+        pointdata::storage::getStorageBackendTypeName(Points::StorageBackendType::Tiled),
+        pointdata::storage::getStorageBackendTypeName(Points::StorageBackendType::Sparse)
     };
 }
 
@@ -112,28 +113,20 @@ void StorageBackendAction::changeBackendType(const QString& backendType)
         return;
     }
 
-    if (*requestedBackendType == Points::StorageBackendType::Tiled)
+    auto conversionAction = _points->createStorageBackendConversionAction(*requestedBackendType);
+    if (!conversionAction)
     {
-        auto configurationAction = _points->createStorageBackendConversionAction(Points::StorageBackendType::Tiled);
-        StorageBackendConfigurationDialog dialog(std::move(configurationAction), StorageBackendConfigurationDialog::Purpose::Convert, QApplication::activeWindow());
-
-        if (dialog.exec() != QDialog::Accepted)
-        {
-            updateBackendType();
-            return;
-        }
-
-        convertBackend(Points::StorageBackendType::Tiled, dialog.getConversionOptions());
+        help().addNotification("Storage conversion unavailable", QString("Converting from %1 to %2 is not supported for this dataset.")
+            .arg(pointdata::storage::getStorageBackendTypeName(*currentBackendType), pointdata::storage::getStorageBackendTypeName(*requestedBackendType)), util::StyledIcon("circle-exclamation"));
+        updateBackendType();
         return;
     }
 
-    if (*requestedBackendType == Points::StorageBackendType::Eager)
-    {
-        convertBackend(Points::StorageBackendType::Eager);
-        return;
-    }
-
-    updateBackendType();
+    StorageBackendConfigurationDialog dialog(std::move(conversionAction), StorageBackendConfigurationDialog::Purpose::Convert, QApplication::activeWindow());
+    if (dialog.exec() == QDialog::Accepted)
+        convertBackend(*requestedBackendType, dialog.getConversionOptions());
+    else
+        updateBackendType();
 }
 
 void StorageBackendAction::convertBackend(const pointdata::storage::StorageBackendType type, const pointdata::storage::StorageBackendConfigurationOptionsPtr options)

@@ -93,10 +93,11 @@ public:
      * The generator must return row-major bytes matching the descriptor's
      * extent and element size. It is invoked on cache misses and may therefore
      * be called again after eviction.
-     * The optional progress callback covers descriptor-index construction only;
-     * tile payloads remain lazy and are not generated during this call.
+     * The optional progress callback covers descriptor-index construction. When
+     * materializeGeneratedTiles is true, it also reports generated tile payloads
+     * and the returned storage retains those payloads without its generator.
      */
-    static std::shared_ptr<PointDataTiledStorage> fromGenerator(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileGenerator generator, ProgressCallback progress = {});
+    static std::shared_ptr<PointDataTiledStorage> fromGenerator(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileGenerator generator, ProgressCallback progress = {}, bool materializeGeneratedTiles = false);
 
     /**
      * Creates read-only tiled storage whose payloads are independently encoded in one pack file.

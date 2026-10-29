@@ -5,10 +5,13 @@
 #include "TiledPointsStorageBackend.h"
 
 #include "../actions/StorageBackendConversionAction.h"
+#include "../actions/EagerStorageBackendConversionAction.h"
+#include "../actions/SparseStorageBackendConversionAction.h"
 #include "../actions/TiledStorageBackendConversionAction.h"
 
 #include <algorithm>
 #include <cstring>
+#include <limits>
 #include <stdexcept>
 
 namespace mv::pointdata::storage
@@ -16,20 +19,6 @@ namespace mv::pointdata::storage
 
 namespace
 {
-
-PointDataAccessView makeFloatAccessView(std::vector<float>&& values)
-{
-    auto bytes = std::make_shared<QByteArray>(reinterpret_cast<const char*>(values.data()), static_cast<qsizetype>(values.size() * sizeof(float)));
-    PointDataAccessView view;
-    view.data              = bytes->constData();
-    view.rows              = 1;
-    view.columns           = static_cast<std::uint64_t>(values.size());
-    view.rowStrideBytes    = static_cast<std::uint64_t>(bytes->size());
-    view.elementTypeIndex  = 0;
-    view.elementSizeBytes  = sizeof(float);
-    view.lifetime           = std::shared_ptr<const void>(bytes, bytes->constData());
-    return view;
-}
 
 PointDataAccessView makeTileAccessView(const mv::pointdata::tiled::TileView& tile, const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t rows, const std::uint64_t columns, const std::uint32_t typeIndex)
 {
@@ -61,7 +50,7 @@ std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> TiledPointsStorageB
 
     const auto storage = mv::pointdata::tiled::PointDataTiledStorage::fromGenerator(options.rows, options.columns, options.elementSize, options.rowTileSize, options.columnTileSize, [generator = options.generator](const mv::pointdata::tiled::TileDescriptor& descriptor) {
         return generator(descriptor.rowOffset, descriptor.columnOffset, descriptor.rows, descriptor.columns);
-    }, std::move(progress));
+    }, std::move(progress), options.materializeGeneratedTiles);
 
     storage->setCacheCapacity(options.cacheCapacity);
     storage->setCacheCapacityBytes(options.cacheCapacityBytes);
@@ -104,6 +93,12 @@ std::unique_ptr<mv::gui::StorageBackendConversionAction> TiledPointsStorageBacke
         return std::make_unique<mv::gui::TiledStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _storage->elementSize(), configuration, true);
     }
 
+    if (targetType == StorageBackendType::Eager && _storage)
+        return std::make_unique<mv::gui::EagerStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _storage->elementSize());
+
+    if (targetType == StorageBackendType::Sparse && _storage)
+        return std::make_unique<mv::gui::SparseStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _storage->elementSize());
+
     return {};
 }
 
@@ -144,12 +139,34 @@ PointDataAccessView TiledPointsStorageBackend::getRow(const std::uint64_t row) c
     if (!_storage || row >= _storage->rows())
         return {};
 
-    std::vector<float> values(static_cast<std::size_t>(_storage->columns()));
+    if (_storage->elementSize() == 0 || _storage->columns() > std::numeric_limits<std::size_t>::max() / _storage->elementSize())
+        throw std::overflow_error("Tiled point-data row is too large");
 
-    for (std::uint64_t column = 0; column < _storage->columns(); ++column)
-        values[static_cast<std::size_t>(column)] = getValueAt(row * _storage->columns() + column);
+    auto values = std::make_shared<std::vector<std::uint8_t>>(static_cast<std::size_t>(_storage->columns() * _storage->elementSize()));
 
-    return makeFloatAccessView(std::move(values));
+    for (std::uint64_t column = 0; column < _storage->columns();)
+    {
+        const auto tile = _storage->acquire(row / _storage->rowTileSize(), column / _storage->columnTileSize());
+        if (!tile || tile.columns() == 0 || tile.rows() == 0)
+            throw std::runtime_error("Unable to load tiled point-data row");
+
+        const auto segmentEnd = std::min(_storage->columns(), tile.columnOffset() + tile.columns());
+        const auto source = static_cast<const std::uint8_t*>(tile.data()) + (row - tile.rowOffset()) * tile.columns() * tile.elementSize();
+        const auto destinationOffset = column * _storage->elementSize();
+        const auto byteCount = (segmentEnd - column) * _storage->elementSize();
+        std::memcpy(values->data() + destinationOffset, source, static_cast<std::size_t>(byteCount));
+        column = segmentEnd;
+    }
+
+    PointDataAccessView view;
+    view.data              = reinterpret_cast<const char*>(values->data());
+    view.rows              = 1;
+    view.columns           = _storage->columns();
+    view.rowStrideBytes    = _storage->columns() * _storage->elementSize();
+    view.elementTypeIndex  = _elementTypeIndex;
+    view.elementSizeBytes  = static_cast<std::uint32_t>(_storage->elementSize());
+    view.lifetime          = std::shared_ptr<const void>(values, values->data());
+    return view;
 }
 
 void TiledPointsStorageBackend::visitRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const

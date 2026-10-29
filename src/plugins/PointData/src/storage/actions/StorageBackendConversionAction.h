@@ -40,6 +40,9 @@ public:
     /** Returns the current backend-specific conversion options. */
     virtual pointdata::storage::StorageBackendConfigurationOptionsPtr getConversionOptions() const = 0;
 
+    /** Returns whether the current settings pass the action's known preflight checks. */
+    virtual bool canApply() const { return true; }
+
 signals:
     void optionsChanged();
 

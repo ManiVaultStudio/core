@@ -66,6 +66,16 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique
             updateButton->setEnabled(true);
         });
     }
+    else if (_conversionAction)
+    {
+        auto* convertButton = buttons->button(QDialogButtonBox::Ok);
+        convertButton->setText(tr("Convert"));
+        convertButton->setEnabled(_conversionAction->canApply());
+
+        connect(_conversionAction.get(), &mv::gui::StorageBackendConversionAction::optionsChanged, convertButton, [this, convertButton] {
+            convertButton->setEnabled(_conversionAction->canApply());
+        });
+    }
 
     layout->addStretch(1);
     layout->addWidget(buttons);

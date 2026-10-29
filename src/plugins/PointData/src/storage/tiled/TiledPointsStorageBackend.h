@@ -36,6 +36,7 @@ struct TiledStorageBackendCreationOptions final : StorageBackendCreationOptions
     std::size_t   cacheCapacity        = 8;   /**< Maximum number of generated tile payloads retained in memory. */
     std::size_t   cacheCapacityBytes   = defaultTileCacheCapacityBytes; /**< Maximum decoded tile payload bytes retained in memory. */
     bool          packedTiles          = false; /**< Whether serialized tiles are grouped into super tiles. */
+    bool          materializeGeneratedTiles = false; /**< Whether generated tiles should be retained immediately instead of loading lazily. */
     std::size_t   superTileRows        = 1;   /**< Number of base tile rows in one super tile. */
     std::size_t   superTileColumns     = 1;   /**< Number of base tile columns in one super tile. */
     TileGenerator generator;                 /**< Callback that generates one tile on first access. */

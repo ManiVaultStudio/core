@@ -13,7 +13,7 @@ namespace mv::gui
 {
 
 /**
- * @brief Displays a severity-coded observation for tiled-storage settings.
+ * @brief Displays a severity-coded observation for storage-backend settings.
  *
  * The action stores its severity and description independently of its widgets.
  * Existing widgets are updated when the observation changes, and widgets
@@ -22,7 +22,7 @@ namespace mv::gui
  *
  * @author T. Kroes
  */
-class POINTDATA_EXPORT TiledStorageObservationAction : public WidgetAction
+class POINTDATA_EXPORT StorageBackendObservationAction : public WidgetAction
 {
 public:
     /**
@@ -30,7 +30,7 @@ public:
      * @param parent Owning action or QObject.
      * @param category Heading shown beside the severity.
      */
-    TiledStorageObservationAction(QObject* parent, const QString& category);
+    StorageBackendObservationAction(QObject* parent, const QString& category);
 
     /**
      * Updates the stored state and every currently live widget.

@@ -126,6 +126,12 @@ struct StorageBackendConfiguration : StorageBackendConfigurationOptions
     std::size_t superTileColumns    = 1;                                /**< Number of base tile columns in one serialized super tile. */
 };
 
+/** Selects the compressed orientation used when converting a dense matrix to sparse storage. */
+struct SparseStorageBackendConfiguration : StorageBackendConfigurationOptions
+{
+    bool columnCompressed = false; /**< Use CSC when true, otherwise CSR. */
+};
+
 constexpr StorageBackendCapabilities operator|(const StorageBackendCapability left, const StorageBackendCapability right)
 {
     return static_cast<StorageBackendCapabilities>(left) | static_cast<StorageBackendCapabilities>(right);

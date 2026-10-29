@@ -10,6 +10,7 @@
 #include "actions/PointsAction.h"
 #include "DimensionNamesSerializer.h"
 #include "storage/eager/EagerPointsStorageBackend.h"
+#include "storage/actions/SparseStorageBackendConversionAction.h"
 #include "storage/actions/StorageBackendConversionAction.h"
 #include "storage/sparse/SparsePointsStorageBackend.h"
 #include "storage/tiled/PointDataTiledSerialization.h"
@@ -26,6 +27,8 @@
 #include <util/JSON.h>
 
 #include <workflow/WorkflowContextVariantMap.h>
+
+#include <biovault_bfloat16/biovault_bfloat16.h>
 
 #include <QDebug>
 #include <QtCore>
@@ -50,6 +53,33 @@ using namespace mv::workflow;
 
 namespace
 {
+    template<typename T>
+    bool isNonZeroValue(const char* valueBytes)
+    {
+        T value;
+        std::memcpy(&value, valueBytes, sizeof(T));
+        if constexpr (std::is_same_v<T, biovault::bfloat16_t>)
+            return static_cast<float>(value) != 0.0f;
+        else
+            return value != T {};
+    }
+
+    bool isNonZeroValue(const std::uint32_t elementTypeIndex, const char* valueBytes)
+    {
+        switch (elementTypeIndex)
+        {
+            case 0: return isNonZeroValue<float>(valueBytes);
+            case 1: return isNonZeroValue<biovault::bfloat16_t>(valueBytes);
+            case 2: return isNonZeroValue<std::int32_t>(valueBytes);
+            case 3: return isNonZeroValue<std::uint32_t>(valueBytes);
+            case 4: return isNonZeroValue<std::int16_t>(valueBytes);
+            case 5: return isNonZeroValue<std::uint16_t>(valueBytes);
+            case 6: return isNonZeroValue<std::int8_t>(valueBytes);
+            case 7: return isNonZeroValue<std::uint8_t>(valueBytes);
+            default: throw std::invalid_argument("Sparse conversion encountered an unsupported element type");
+        }
+    }
+
     namespace local
     {
         template<typename outT, typename inT>
@@ -395,6 +425,48 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
         if (!configuration)
             throw std::invalid_argument("Missing tiled storage conversion configuration");
 
+        if (const auto sparseStorage = dynamic_cast<const pointdata::storage::SparsePointsStorageBackend*>(_storageBackend.get()))
+        {
+            auto creation = std::make_shared<pointdata::storage::TiledStorageBackendCreationOptions>();
+            creation->rows = sparseStorage->getNumPoints();
+            creation->columns = sparseStorage->getNumDimensions();
+            creation->elementSize = sparseStorage->getElementSize();
+            creation->elementTypeIndex = sparseStorage->getElementTypeIndex();
+            creation->rowTileSize = configuration->rowTileSize;
+            creation->columnTileSize = configuration->columnTileSize;
+            creation->cacheCapacity = configuration->cacheCapacity;
+            creation->cacheCapacityBytes = configuration->cacheCapacityBytes;
+            creation->packedTiles = configuration->packedTiles;
+            creation->materializeGeneratedTiles = true;
+            creation->superTileRows = configuration->superTileRows;
+            creation->superTileColumns = configuration->superTileColumns;
+            creation->generator = [sparseStorage, elementSize = creation->elementSize](const std::uint64_t rowOffset, const std::uint64_t, const std::uint64_t tileRows, const std::uint64_t tileColumns) {
+                if (elementSize == 0 || tileColumns > std::numeric_limits<std::uint64_t>::max() / elementSize)
+                    throw std::overflow_error("Sparse-to-tiled payload exceeds the supported byte size");
+
+                const auto rowBytes = tileColumns * elementSize;
+                if (rowBytes != 0 && tileRows > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max()) / rowBytes)
+                    throw std::overflow_error("Sparse-to-tiled payload exceeds the supported byte size");
+
+                QByteArray payload;
+                payload.resize(static_cast<qsizetype>(tileRows * rowBytes));
+                for (std::uint64_t localRow = 0; localRow < tileRows; ++localRow)
+                {
+                    const auto row = sparseStorage->getRow(rowOffset + localRow);
+                    if (row.columns != tileColumns || row.elementSizeBytes != elementSize)
+                        throw std::runtime_error("Sparse row shape changed during tiled conversion");
+                    if (rowBytes != 0)
+                        std::memcpy(payload.data() + localRow * rowBytes, row.data, static_cast<std::size_t>(rowBytes));
+                }
+
+                return payload;
+            };
+
+            auto tiledStorage = pointdata::storage::TiledPointsStorageBackend::create(*creation, std::move(progress));
+            _storageBackend = std::make_unique<pointdata::storage::TiledPointsStorageBackend>(std::move(tiledStorage), creation->elementTypeIndex);
+            return;
+        }
+
         if (const auto tiledStorage = getTiledStorage())
         {
             if (tiledStorage->rowTileSize() != configuration->rowTileSize || tiledStorage->columnTileSize() != configuration->columnTileSize)
@@ -415,6 +487,120 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
     if (type == pointdata::storage::StorageBackendType::Eager)
     {
         materializeStorageBackend(std::move(progress));
+
+        return;
+    }
+
+    if (type == pointdata::storage::StorageBackendType::Sparse)
+    {
+        const auto configuration = std::dynamic_pointer_cast<const pointdata::storage::SparseStorageBackendConfiguration>(options);
+        if (!configuration)
+            throw std::invalid_argument("Missing sparse storage conversion configuration");
+
+        const auto rows = _storageBackend ? _storageBackend->getNumPoints() : _numRows;
+        const auto columns = _storageBackend ? _storageBackend->getNumDimensions() : _numDimensions;
+        const auto elementSize = _storageBackend ? _storageBackend->getElementSize() : std::visit([](const auto& vector) { return sizeof(typename std::decay_t<decltype(vector)>::value_type); }, _variantOfVectors);
+        const auto elementTypeIndex = _storageBackend ? _storageBackend->getElementTypeIndex() : static_cast<std::uint32_t>(getElementTypeSpecifier());
+
+        if (rows != 0 && columns > std::numeric_limits<std::uint64_t>::max() / rows)
+            throw std::overflow_error("Sparse conversion dimensions overflow the dense element count");
+        if (rows >= std::numeric_limits<std::size_t>::max() || elementSize == 0 || columns > std::numeric_limits<std::size_t>::max() / elementSize)
+            throw std::overflow_error("Sparse conversion row is too large");
+
+        std::vector<std::uint64_t> rowPointers(static_cast<std::size_t>(rows) + 1, 0);
+        std::vector<std::uint64_t> rowIndices;
+        std::vector<std::uint8_t> sparseValues;
+
+        const auto appendRow = [&](const char* rowData, const std::uint64_t row) {
+            if (columns != 0 && rowData == nullptr)
+                throw std::runtime_error("Unable to access a source row during sparse conversion");
+
+            for (std::uint64_t column = 0; column < columns; ++column)
+            {
+                const auto* value = rowData + column * elementSize;
+                if (!isNonZeroValue(elementTypeIndex, value))
+                    continue;
+
+                rowIndices.push_back(column);
+                const auto oldSize = sparseValues.size();
+                if (elementSize > std::numeric_limits<std::size_t>::max() - oldSize)
+                    throw std::overflow_error("Sparse conversion value array exceeds the process address space");
+                sparseValues.resize(oldSize + elementSize);
+                std::memcpy(sparseValues.data() + oldSize, value, elementSize);
+            }
+
+            rowPointers[static_cast<std::size_t>(row + 1)] = rowIndices.size();
+        };
+
+        for (std::uint64_t row = 0; row < rows; ++row)
+        {
+            if (_storageBackend && _storageBackend->getType() == pointdata::storage::StorageBackendType::Tiled)
+            {
+                const auto view = _storageBackend->getRow(row);
+                if (view.elementTypeIndex != elementTypeIndex || view.elementSizeBytes != elementSize)
+                    throw std::runtime_error("Tiled row element type changed during sparse conversion");
+                appendRow(static_cast<const char*>(view.data), row);
+            }
+            else
+            {
+                std::visit([&](const auto& vector) {
+                    using ValueType = typename std::decay_t<decltype(vector)>::value_type;
+                    const auto* rowData = columns == 0 ? nullptr : reinterpret_cast<const char*>(vector.data() + static_cast<std::size_t>(row * columns));
+                    if (sizeof(ValueType) != elementSize)
+                        throw std::runtime_error("Source element size changed during sparse conversion");
+                    appendRow(rowData, row);
+                }, _variantOfVectors);
+            }
+
+            if (progress && (row % std::max<std::uint64_t>(1, rows / 100) == 0))
+                progress(rows == 0 ? 1.0f : static_cast<float>(row) / static_cast<float>(rows));
+        }
+
+        auto pointers = std::move(rowPointers);
+        auto indices = std::move(rowIndices);
+        auto values = std::move(sparseValues);
+        auto layout = pointdata::storage::SparseMatrixLayout::RowCompressed;
+
+        if (configuration->columnCompressed)
+        {
+            if (columns >= std::numeric_limits<std::size_t>::max())
+                throw std::overflow_error("Column-compressed sparse storage has too many column pointers");
+
+            std::vector<std::uint64_t> columnPointers(static_cast<std::size_t>(columns) + 1, 0);
+            for (const auto column : indices)
+                ++columnPointers[static_cast<std::size_t>(column + 1)];
+            for (std::size_t column = 1; column < columnPointers.size(); ++column)
+                columnPointers[column] += columnPointers[column - 1];
+
+            auto next = columnPointers;
+            std::vector<std::uint64_t> columnIndices(indices.size());
+            std::vector<std::uint8_t> columnValues(values.size());
+            for (std::uint64_t row = 0; row < rows; ++row)
+            {
+                for (auto index = pointers[static_cast<std::size_t>(row)]; index < pointers[static_cast<std::size_t>(row + 1)]; ++index)
+                {
+                    const auto column = indices[static_cast<std::size_t>(index)];
+                    const auto destination = next[static_cast<std::size_t>(column)]++;
+                    columnIndices[static_cast<std::size_t>(destination)] = row;
+                    std::memcpy(columnValues.data() + static_cast<std::size_t>(destination) * elementSize, values.data() + static_cast<std::size_t>(index) * elementSize, elementSize);
+                }
+            }
+
+            pointers = std::move(columnPointers);
+            indices = std::move(columnIndices);
+            values = std::move(columnValues);
+            layout = pointdata::storage::SparseMatrixLayout::ColumnCompressed;
+        }
+
+        auto sparseBackend = std::make_unique<pointdata::storage::SparsePointsStorageBackend>(rows, columns, layout, elementTypeIndex, elementSize, std::move(pointers), std::move(indices), std::move(values));
+        setElementTypeSpecifier(static_cast<ElementTypeSpecifier>(elementTypeIndex));
+        _numDimensions = columns;
+        _numRows = rows;
+        _isDense = true;
+        _storageBackend = std::move(sparseBackend);
+
+        if (progress)
+            progress(1.0f);
 
         return;
     }
@@ -454,17 +640,23 @@ void PointData::makeTiled(const std::size_t rowTileSize, const std::size_t colum
 
 namespace
 {
-PointDataAccessView makeFloatAccessView(std::vector<float>&& values)
+PointDataAccessView makeTypedAccessView(const void* source, const std::uint64_t columns, const std::uint32_t elementTypeIndex, const std::uint32_t elementSize)
 {
-    auto bytes = std::make_shared<QByteArray>(reinterpret_cast<const char*>(values.data()), static_cast<qsizetype>(values.size() * sizeof(float)));
+    if (elementSize == 0 || columns > std::numeric_limits<std::size_t>::max() / elementSize)
+        throw std::overflow_error("Point-data access row is too large");
+
+    auto bytes = std::make_shared<std::vector<std::uint8_t>>(static_cast<std::size_t>(columns) * elementSize);
+    if (!bytes->empty())
+        std::memcpy(bytes->data(), source, bytes->size());
+
     PointDataAccessView view;
-    view.data = bytes->constData();
+    view.data = bytes->data();
     view.rows = 1;
-    view.columns = static_cast<std::uint64_t>(values.size());
+    view.columns = columns;
     view.rowStrideBytes = static_cast<std::uint64_t>(bytes->size());
-    view.elementTypeIndex = static_cast<std::uint32_t>(PointData::ElementTypeSpecifier::float32);
-    view.elementSizeBytes = sizeof(float);
-    view.lifetime = std::shared_ptr<const void>(bytes, bytes->constData());
+    view.elementTypeIndex = elementTypeIndex;
+    view.elementSizeBytes = elementSize;
+    view.lifetime = std::shared_ptr<const void>(bytes, bytes->data());
     return view;
 }
 
@@ -475,14 +667,11 @@ PointDataAccessView PointData::getEagerRow(const std::uint64_t row) const
     if (row >= getNumPoints())
         return {};
 
-    std::vector<float> values(static_cast<std::size_t>(_numDimensions));
-
-    for (std::uint64_t column = 0; column < _numDimensions; ++column)
-    {
-        values[static_cast<std::size_t>(column)] = getEagerValueAt(static_cast<std::size_t>(row * _numDimensions + column));
-    }
-
-    return makeFloatAccessView(std::move(values));
+    return std::visit([&](const auto& vector) {
+        using ValueType = typename std::decay_t<decltype(vector)>::value_type;
+        const auto* rowData = _numDimensions == 0 ? nullptr : vector.data() + static_cast<std::size_t>(row * _numDimensions);
+        return makeTypedAccessView(rowData, _numDimensions, static_cast<std::uint32_t>(getElementTypeSpecifier()), sizeof(ValueType));
+    }, _variantOfVectors);
 }
 
 PointDataAccessView PointData::getRow(const std::uint64_t row) const
@@ -575,12 +764,11 @@ void PointData::visitEagerRange(const std::uint64_t firstRow, const std::uint64_
 
     for (std::uint64_t row = firstRow; row < firstRow + rowCount; ++row)
     {
-        std::vector<float> values(static_cast<std::size_t>(columnCount));
-
-        for (std::uint64_t column = 0; column < columnCount; ++column)
-            values[static_cast<std::size_t>(column)] = getEagerValueAt(static_cast<std::size_t>(row * _numDimensions + firstColumn + column));
-
-        visitor(makeFloatAccessView(std::move(values)));
+        std::visit([&](const auto& vector) {
+            using ValueType = typename std::decay_t<decltype(vector)>::value_type;
+            const auto* rowData = vector.data() + static_cast<std::size_t>(row * _numDimensions + firstColumn);
+            visitor(makeTypedAccessView(rowData, columnCount, static_cast<std::uint32_t>(getElementTypeSpecifier()), sizeof(ValueType)));
+        }, _variantOfVectors);
     }
 }
 
@@ -630,20 +818,21 @@ void PointData::materializeTiled(pointdata::storage::StorageBackendProgressCallb
     if (!tiledStorage)
         return;
 
-    const auto elementCount = static_cast<std::size_t>(tiledStorage->rows() * tiledStorage->columns());
-    const auto elementSize  = tiledStorage->elementSize();
-    std::vector<char> materializedBytes(elementCount * elementSize);
+    if (tiledStorage->rows() != 0 && tiledStorage->columns() > std::numeric_limits<std::uint64_t>::max() / tiledStorage->rows())
+        throw std::overflow_error("Tiled point-data dimensions overflow the element count");
 
-    tiledStorage->materialize(materializedBytes.data(), [&progress](const float tileProgress) {
+    const auto elementCount = tiledStorage->rows() * tiledStorage->columns();
+    const auto elementSize  = tiledStorage->elementSize();
+    if (elementSize == 0 || elementCount > std::numeric_limits<std::size_t>::max() / elementSize)
+        throw std::overflow_error("Tiled point-data is too large to materialize");
+
+    resizeVector(static_cast<std::size_t>(elementCount));
+    auto* destination = static_cast<char*>(std::visit([](auto& vector) { return static_cast<void*>(vector.data()); }, _variantOfVectors));
+
+    tiledStorage->materialize(destination, [&progress](const float tileProgress) {
         if (progress)
             progress(tileProgress * 0.95f);
     });
-
-    resizeVector(elementCount);
-    std::visit([&materializedBytes](auto& vector) {
-        if (!vector.empty())
-            std::memcpy(vector.data(), materializedBytes.data(), vector.size() * sizeof(typename std::decay_t<decltype(vector)>::value_type));
-    }, _variantOfVectors);
 
     clearStorageBackend();
     refreshStorageBackend();
@@ -673,14 +862,10 @@ void PointData::materializeStorageBackend(pointdata::storage::StorageBackendProg
     if (elementSize == 0 || elementCount > std::numeric_limits<std::size_t>::max() / elementSize)
         throw std::overflow_error("Sparse matrix is too large to materialize");
 
-    std::vector<std::uint8_t> materializedBytes(static_cast<std::size_t>(elementCount) * elementSize);
-    _storageBackend->materialize(reinterpret_cast<char*>(materializedBytes.data()));
     setElementTypeSpecifier(static_cast<ElementTypeSpecifier>(_storageBackend->getElementTypeIndex()));
     resizeVector(static_cast<std::size_t>(elementCount));
-    std::visit([&materializedBytes](auto& vector) {
-        if (!vector.empty())
-            std::memcpy(vector.data(), materializedBytes.data(), materializedBytes.size());
-    }, _variantOfVectors);
+    auto* destination = static_cast<char*>(std::visit([](auto& vector) { return static_cast<void*>(vector.data()); }, _variantOfVectors));
+    _storageBackend->materialize(destination);
     clearStorageBackend();
     refreshStorageBackend();
 
