@@ -35,10 +35,13 @@ edited.
 4. Review the implementation before describing behavior. Document what the
    class is for, why it exists, the problem it solves, ownership and lifetime
    rules, important limits, and compatibility behavior.
-5. Document public and non-obvious structure/class data members when their
-   purpose, units, defaults, ownership, lifetime, serialization role, or
-   invariants are not self-evident. Keep member documentation adjacent to the
-   declaration and aligned with related members in the surrounding style.
+5. Audit every data member in each changed class or struct, including private
+   state. Document members whose role, relationship to other state, default,
+   ownership, lifetime, units, serialization role, or invariant is not clear
+   from the declaration alone. Keep documentation adjacent to the declaration
+   and align trailing member comments to a consistent column within each
+   related member group; do not assume that class-level documentation replaces
+   member-level documentation.
 6. Add parameter, return-value, lifetime, thread-safety, read-only, caching,
    serialization, and failure details when they are non-obvious or relevant.
 7. Keep comments concise enough to remain useful. Do not restate the function
@@ -104,6 +107,9 @@ data or workflow it exposes without documenting incidental widget construction.
 Before handing off the change, verify:
 
 - public classes and APIs in scope have useful header documentation;
+- every changed class or struct has been checked member by member, and all
+  non-obvious data members have adjacent documentation with related trailing
+  comments aligned to a consistent column;
 - class rationale, ownership/lifetime, and important limits are explained;
 - non-obvious parameters, returns, failure behavior, and compatibility rules
   are documented;
