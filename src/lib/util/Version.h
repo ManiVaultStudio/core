@@ -123,14 +123,14 @@ public:
     void setPatch(std::int32_t patch);
 
     /**
-     * Get minor version number
-     * @return Minor version number
+     * Get version suffix
+     * @return Version suffix
      */
     std::string getSuffix() const;
 
     /**
-     * Set minor version number to \p minor
-     * @param minor Minor version number
+     * Set version suffix
+     * @param suffix Version suffix
      */
     void setSuffix(const std::string& suffix);
 

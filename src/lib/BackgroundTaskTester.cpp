@@ -63,7 +63,7 @@ BackgroundTaskTester::BackgroundTaskTester(QObject* parent, const QString& name)
             return childTask;
         };
 
-        auto childTaskA = addChildTask("Reading large file", {
+        [[maybe_unused]] auto childTaskA = addChildTask("Reading large file", {
             "Import file 1",
             "Import file 2",
             "Import file 3",
@@ -76,7 +76,7 @@ BackgroundTaskTester::BackgroundTaskTester(QObject* parent, const QString& name)
             "Import file 10"
             }, 2502, true);
 
-        auto childTaskB = addChildTask("Updating ManiVault", {
+        [[maybe_unused]] auto childTaskB = addChildTask("Updating ManiVault", {
             "Downloading update 1",
             "Downloading update 2",
             "Downloading update 3",

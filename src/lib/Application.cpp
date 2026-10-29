@@ -112,7 +112,7 @@ Application::Application(int& argc, char** argv) :
         _configurationAction.getBrandingConfigurationAction().getSplashScreenAction().setStartupTask(_startupTask);
 	});
 
-    connect(Application::current(), &Application::coreInitialized, this, [this](CoreInterface* core) {
+    connect(Application::current(), &Application::coreInitialized, this, [](CoreInterface* core) {
         BackgroundTask::createHandler(Application::current());
         ForegroundTask::createHandler(Application::current());
         ModalTask::createHandler(Application::current());
@@ -121,7 +121,7 @@ Application::Application(int& argc, char** argv) :
     if (hasConfigurationFile()) {
         fromJsonFile(getConfigurationFilePath());
     } else {
-        const auto baseName = "ManiVault Studio";
+        const auto baseName = QStringLiteral("ManiVault Studio");
 
         auto& brandingConfigurationAction = _configurationAction.getBrandingConfigurationAction();
 

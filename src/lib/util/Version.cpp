@@ -12,11 +12,11 @@ namespace mv::util {
 const QString Version::semanticVersioningRegex = QString(R"((0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-([\da-zA-Z-]+(?:\.[\da-zA-Z-]+)*))?(?:\+([\da-zA-Z-]+(?:\.[\da-zA-Z-]+)*))?)");
 
 Version::Version(std::int32_t major, std::int32_t minor, std::int32_t patch, const std::string& suffix) :
+    Serializable("Version"),
     _major(major),
     _minor(minor),
     _patch(patch),
-    _suffix(suffix),
-    Serializable("Version")
+    _suffix(suffix)
 {
     // getVersionNumber() relies on minor and patch being smaller than 100
     assert(minor < 100);

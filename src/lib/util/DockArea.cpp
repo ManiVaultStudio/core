@@ -15,7 +15,7 @@ namespace mv::gui
 
 QIcon getDockAreaIcon(DockAreaFlag dockArea)
 {
-    const auto size = 128;
+    constexpr int size = 128;
 
     QPixmap pixmap(size, size);
 
@@ -25,13 +25,11 @@ QIcon getDockAreaIcon(DockAreaFlag dockArea)
 
     painter.setWindow(0, 0, 128, 128);
 
-    const auto t1                   = 5;
-    const auto t2                   = 20;
-    const auto t3                   = 35;
-    const auto t4                   = 50;
-    const auto rectangleSize        = size - (2 * t3);
-    const auto halfRectangleSize    = rectangleSize / 2;
-    const auto lineThickness        = 2.5;
+    constexpr int t1                = 5;
+    constexpr int t2                = 20;
+    constexpr int t3                = 35;
+    constexpr int t4                = 50;
+    constexpr double lineThickness  = 2.5;
 
     const auto drawRectangle = [&]() -> void {
         painter.setBrush(Qt::NoBrush);
@@ -48,7 +46,7 @@ QIcon getDockAreaIcon(DockAreaFlag dockArea)
     switch (static_cast<std::uint32_t>(dockArea))
     {
         case static_cast<std::uint32_t>(DockAreaFlag::None):
-            return QIcon();
+            return {};
 
         case static_cast<std::uint32_t>(DockAreaFlag::Left):
             drawRectangle();

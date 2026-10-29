@@ -68,6 +68,9 @@ void IconLabel::leaveEvent(QEvent* event)
 
 bool IconLabel::event(QEvent* event)
 {
+    if (!event)
+        return false;
+
     if (event->type() == QEvent::ToolTip) {
         if (auto helpEvent = dynamic_cast<QHelpEvent*>(event)) {
             QToolTip::showText(helpEvent->globalPos(), _tooltipCallback ? _tooltipCallback() : "", this);

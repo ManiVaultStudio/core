@@ -238,7 +238,7 @@ void OptionsAction::connectToPublicAction(WidgetAction* publicAction, bool recur
         publicOptionsAction->setSelectedOptions(publicSelectedOptions);
     });
 
-    connect(publicOptionsAction, &OptionsAction::selectedOptionsChanged, this, [this, publicOptionsAction, initializePublicOptionsSelection](const QStringList& selectedOptions) -> void {
+    connect(publicOptionsAction, &OptionsAction::selectedOptionsChanged, this, [this](const QStringList& selectedOptions) -> void {
         setSelectedOptions(selectedOptions);
     });
 

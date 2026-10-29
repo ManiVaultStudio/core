@@ -32,7 +32,7 @@ void IntegralRectangleAction::connectToPublicAction(WidgetAction* publicAction, 
 
     publicIntegralRectangleAction->setRectangle(getLeft(), getRight(), getBottom(), getTop());
 
-    connect(this, &IntegralRectangleAction::rectangleChanged, publicIntegralRectangleAction, [this, publicIntegralRectangleAction](std::int32_t left, std::int32_t right, std::int32_t bottom, std::int32_t top) -> void {
+    connect(this, &IntegralRectangleAction::rectangleChanged, publicIntegralRectangleAction, [publicIntegralRectangleAction](std::int32_t left, std::int32_t right, std::int32_t bottom, std::int32_t top) -> void {
         publicIntegralRectangleAction->setRectangle(left, right, bottom, top);
         });
 

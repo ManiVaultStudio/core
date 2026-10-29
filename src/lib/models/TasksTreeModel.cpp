@@ -35,10 +35,10 @@ TasksTreeModel::TasksTreeModel(QObject* parent /*= nullptr*/) :
     topLevelTasks.erase(iterator, topLevelTasks.end());
 
     for (auto topLevelTask : topLevelTasks) {
-        addTask(topLevelTask);
+        TasksTreeModel::addTask(topLevelTask);
 
         for (auto childTask : topLevelTask->getChildTasks(true, false))
-            addTask(childTask);
+            TasksTreeModel::addTask(childTask);
     }
 }
 

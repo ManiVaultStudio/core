@@ -42,6 +42,13 @@ do not answer a local layout question.
 - Align related structure and class data members locally, including member
   initializers and aligned inline documentation when present. Keep one member
   group visually consistent without forcing alignment across unrelated groups.
+- In Qt widget construction, separate creating a widget or layout from
+  configuring it with a blank line. Use blank lines to distinguish widget
+  creation, property setup, and adding the widget to its parent layout; keep
+  related property calls together.
+- Separate public declarations and distinct private helper/state groups with
+  blank lines. A second access label is appropriate when it makes those groups
+  easier to scan.
 - Use empty lines to separate setup, validation, processing, and reporting.
   Leave an empty line after an early exception or validation guard before the
   main loop or operation.
@@ -50,6 +57,9 @@ do not answer a local layout question.
   contains a nested loop or another multi-line body.
 - Indent `case` and `default` labels inside `switch` statements and separate
   non-trivial cases with empty lines.
+- For short mapping switches, keep simple `case` labels and their return on one
+  line, align the return expressions, and put the fallback `default` in its
+  own block after a blank line.
 - Keep four-space indentation and match the opening-brace layout of nearby
   core files.
 - Keep action construction compact and readable; do not split every argument
@@ -67,6 +77,8 @@ Before handing off the change, inspect the changed lines for:
 - aligned related assignments;
 - aligned related structure and class members, including their initializers
   and inline documentation where applicable;
+- clear blank-line grouping between Qt widget creation, configuration, and
+  layout insertion;
 - useful empty lines between logical sections;
 - braces around multi-line and nested `for` loops;
 - indented and separated switch cases;

@@ -188,8 +188,6 @@ int PixelSelectionTypeModel::columnCount(const QModelIndex& parent /*= QModelInd
 
 QVariant PixelSelectionTypeModel::data(const QModelIndex& index, int role) const
 {
-    // Get column and line type
-    const auto column   = index.column();
     const auto lineType = _pixelSelectionTypes[index.row()];
 
     switch (role)

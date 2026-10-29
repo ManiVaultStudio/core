@@ -294,6 +294,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_HEADERS
     actions/PluginStatusBarAction.h
     actions/EventAction.h
     actions/CodecSettingsAction.h
+    actions/MessageCardAction.h
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
@@ -311,6 +312,7 @@ set(PUBLIC_MISCELLANEOUS_ACTIONS_SOURCES
     actions/PluginStatusBarAction.cpp
     actions/EventAction.cpp
     actions/CodecSettingsAction.cpp
+    actions/MessageCardAction.cpp
 )
 
 set(PUBLIC_MISCELLANEOUS_ACTIONS_FILES
