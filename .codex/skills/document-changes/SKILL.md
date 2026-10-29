@@ -36,12 +36,12 @@ edited.
    class is for, why it exists, the problem it solves, ownership and lifetime
    rules, important limits, and compatibility behavior.
 5. Audit every data member in each changed class or struct, including private
-   state. Document members whose role, relationship to other state, default,
-   ownership, lifetime, units, serialization role, or invariant is not clear
-   from the declaration alone. Keep documentation adjacent to the declaration
-   and align trailing member comments to a consistent column within each
-   related member group; do not assume that class-level documentation replaces
-   member-level documentation.
+   state, and document every member with a concise adjacent comment. Describe
+   its role even when the name or type seems self-explanatory; add defaults,
+   relationships, units, ownership, lifetime, serialization meaning, or
+   invariants where relevant. Align trailing comments to one column within
+   each related member group. Class-level documentation does not replace
+   member-level comments.
 6. Add parameter, return-value, lifetime, thread-safety, read-only, caching,
    serialization, and failure details when they are non-obvious or relevant.
 7. Keep comments concise enough to remain useful. Do not restate the function
@@ -69,10 +69,10 @@ data or workflow it exposes without documenting incidental widget construction.
 ## API documentation
 
 - Document public APIs in the public header.
-- Document public and non-obvious struct/class members in the header, using
-  concise adjacent Doxygen comments or inline documentation as appropriate.
-  Explain what a member represents and, where relevant, its default, units,
-  ownership, lifetime, serialization meaning, or invariant.
+- Document every struct/class data member in the header with a concise
+  adjacent Doxygen comment or inline documentation. Explain what it represents
+  even when that seems self-evident; add its default, units, ownership,
+  lifetime, serialization meaning, and invariants where relevant.
 - Describe non-obvious preconditions, bounds, empty-input behavior, and
   exceptions or error reporting.
 - Explain whether returned pointers, views, references, callbacks, or leases
@@ -107,9 +107,8 @@ data or workflow it exposes without documenting incidental widget construction.
 Before handing off the change, verify:
 
 - public classes and APIs in scope have useful header documentation;
-- every changed class or struct has been checked member by member, and all
-  non-obvious data members have adjacent documentation with related trailing
-  comments aligned to a consistent column;
+- every changed class or struct has a concise comment for every data member,
+  and related trailing comments align to a consistent column;
 - class rationale, ownership/lifetime, and important limits are explained;
 - non-obvious parameters, returns, failure behavior, and compatibility rules
   are documented;
