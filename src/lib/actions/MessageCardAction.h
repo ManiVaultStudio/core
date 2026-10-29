@@ -19,43 +19,49 @@ namespace mv::gui
 /**
  * @brief Presents a severity-coded message card with optional user actions.
  *
- * The action renders a category, severity, explanatory text, and any supplied
- * action buttons as an inline message card. Its message state is independent of
- * the generated widgets: updates are reflected in live widgets, and widgets
- * created later display the latest message. The parent QObject owns the action;
- * QWidgetAction manages the lifetime of generated widgets.
+ * The action renders a category, severity, explanatory text, and optional
+ * buttons as an inline message card. It stores the message and callbacks
+ * independently of its generated widgets, updating live widgets and applying
+ * the latest state to widgets created later. A parent QObject owns the action
+ * when supplied; otherwise, the creator manages its lifetime. QWidgetAction
+ * manages the generated widgets.
  *
- * Action buttons are presented in the order supplied to setMessage(). Pressing
- * a button emits actionTriggered() with its zero-based index; the owning plugin
- * decides what that action does.
+ * Each button callback is copied and retained until the message is replaced or
+ * the action is destroyed. Callbacks run directly in response to button clicks
+ * and are not exception guarded. Clear or replace callbacks before destroying
+ * any objects they capture; callbacks must not throw.
  *
- * @author T. Kroes
+ * @author Thomas Kroes
  */
 class CORE_EXPORT MessageCardAction : public WidgetAction
 {
     Q_OBJECT
 
 public:
-    /** Describes one optional message button and the operation it performs. */
+
+    /** Describes one message button and the operation it performs when clicked. */
     struct ButtonAction
     {
-        QString text;                 /**< Button label shown to the user. */
-        std::function<void()> trigger; /**< Operation invoked when the button is pressed. */
+        QString                 text;    /**< Button label shown to the user. */
+        std::function<void()>   trigger; /**< Operation invoked when the button is pressed. */
     };
 
+    /** Ordered button definitions displayed by setMessage(). */
     using ButtonActions = QList<ButtonAction>;
 
-    /** Constructs an empty message action. */
+    /** Constructs an empty Info message action. The parent, when supplied, owns this action. */
     explicit MessageCardAction(QObject* parent);
 
     /**
-     * Replaces the displayed message and optional buttons.
+     * Replaces the stored message and button definitions, updating any live widgets.
      * @param severity Severity used for the icon, label, and card tint.
      * @param category Short category or heading shown beside the severity.
      * @param description Explanatory text displayed below the heading.
-     * @param buttonActions Optional buttons and their callbacks, shown in list order.
-     * Callbacks should not outlive any objects they capture; replace or clear
-     * them when those objects are destroyed.
+     * @param buttonActions Buttons and callbacks in display order. Each entry
+     * creates a button; an empty callback leaves it without an operation.
+     *
+     * Callbacks are copied and retained until replaced or this action is
+     * destroyed. They must not throw or outlive any objects they capture.
      */
     void setMessage(util::SeverityLevel severity, const QString& category, const QString& description, const ButtonActions& buttonActions = {});
 
@@ -65,11 +71,12 @@ protected:
 private:
     void updateWidget(QWidget* widget);
 
-    util::SeverityLevel      _severity = util::SeverityLevel::Info;
-    QString                  _category;
-    QString                  _description;
-    ButtonActions            _buttonActions;
-    QList<QPointer<QWidget>> _widgets;
+private:
+    util::SeverityLevel      _severity = util::SeverityLevel::Info; /**< Severity shown by the card; defaults to Info. */
+    QString                  _category;                             /**< Short heading displayed beside the severity. */
+    QString                  _description;                          /**< Explanatory text displayed below the heading. */
+    ButtonActions            _buttonActions;                        /**< Current button labels and callbacks, in display order. */
+    QList<QPointer<QWidget>> _widgets;                              /**< Generated card widgets updated when the message changes. */
 };
 
 }
