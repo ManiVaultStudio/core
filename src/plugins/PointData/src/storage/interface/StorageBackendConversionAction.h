@@ -5,6 +5,7 @@
 #include "../interface/PointsStorageBackendTypes.h"
 
 #include <actions/GroupAction.h>
+#include <actions/OptionAction.h>
 #include <PointData/pointdata_export.h>
 
 namespace mv::gui
@@ -27,12 +28,16 @@ class POINTDATA_EXPORT StorageBackendConversionAction : public GroupAction
     Q_OBJECT
 
 public:
-    StorageBackendConversionAction(QObject* parent, const QString& title) :
-        GroupAction(parent, title)
-    {
-    }
+    /** Constructs backend settings, optionally adding an element-type selector initialized to the current type. */
+    StorageBackendConversionAction(QObject* parent, const QString& title, std::optional<std::uint32_t> currentElementTypeIndex = {});
 
     ~StorageBackendConversionAction() override = default;
+
+    /** Returns the target element type selected for the conversion, when available. */
+    std::optional<std::uint32_t> getTargetElementTypeIndex() const;
+
+    /** Returns the target element size selected for the conversion, when available. */
+    std::optional<std::size_t> getTargetElementSize() const;
 
     /** Returns the backend configured by this action. */
     virtual pointdata::storage::StorageBackendType getTargetBackendType() const = 0;
@@ -48,6 +53,10 @@ signals:
 
 protected:
     void notifyOptionsChanged() { emit optionsChanged(); }
+
+private:
+    OptionAction                  _elementTypeAction;     /**< Optional selector for the converted matrix element type. */
+    bool                          _hasElementTypeAction = false; /**< Whether an element-type selector is available. */
 };
 
 }

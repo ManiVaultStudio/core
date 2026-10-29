@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "StorageBackendConversionAction.h"
-#include "../tiled/TiledStorageAsymmetryAction.h"
-#include "../tiled/TiledStorageGeometry.h"
+#include "../interface/StorageBackendConversionAction.h"
+#include "TiledStorageAsymmetryAction.h"
+#include "TiledStorageGeometry.h"
 
 #include <actions/MessageCardAction.h>
 #include <actions/IntegralAction.h>
@@ -41,8 +41,9 @@ public:
      * @param elementSize Size of one matrix element in bytes.
      * @param configuration Existing tiled settings to display when initializing from configuration.
      * @param initializeFromConfiguration Whether to display existing geometry and cache values instead of suggestions.
+     * @param currentElementTypeIndex Current matrix element type; when supplied, the action exposes a target-type selector.
      */
-    TiledStorageBackendConfigurationAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration = {}, bool initializeFromConfiguration = false);
+    TiledStorageBackendConfigurationAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration = {}, bool initializeFromConfiguration = false, std::optional<std::uint32_t> currentElementTypeIndex = {});
 
     /** Returns the tiled backend type represented by this action. */
     pointdata::storage::StorageBackendType getTargetBackendType() const override;

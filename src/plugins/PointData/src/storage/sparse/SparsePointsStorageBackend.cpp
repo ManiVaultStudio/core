@@ -4,9 +4,10 @@
 
 #include "SparsePointsStorageBackend.h"
 
-#include "../actions/EagerStorageBackendConversionAction.h"
-#include "../actions/StorageBackendConversionAction.h"
-#include "../actions/TiledStorageBackendConversionAction.h"
+#include "../eager/EagerStorageBackendConversionAction.h"
+#include "../interface/StorageBackendConversionAction.h"
+#include "SparseStorageBackendConversionAction.h"
+#include "../tiled/TiledStorageBackendConversionAction.h"
 
 #include <biovault_bfloat16/biovault_bfloat16.h>
 
@@ -91,11 +92,16 @@ StorageBackendCapabilities SparsePointsStorageBackend::getCapabilities() const
 
 std::unique_ptr<mv::gui::StorageBackendConversionAction> SparsePointsStorageBackend::createConversionAction(const StorageBackendType targetType, QObject* parent) const
 {
+    const auto elementTypeIndex = getElementTypeIndex();
+
+    if (targetType == StorageBackendType::Sparse)
+        return std::make_unique<mv::gui::SparseStorageBackendConversionAction>(parent, _rows, _columns, elementTypeIndex, _layout == SparseMatrixLayout::ColumnCompressed);
+
     if (targetType == StorageBackendType::Tiled)
-        return std::make_unique<mv::gui::TiledStorageBackendConversionAction>(parent, _rows, _columns, _elementSize, StorageBackendConfiguration{}, false, true);
+        return std::make_unique<mv::gui::TiledStorageBackendConversionAction>(parent, _rows, _columns, _elementSize, StorageBackendConfiguration{}, false, true, elementTypeIndex);
 
     if (targetType == StorageBackendType::Eager)
-        return std::make_unique<mv::gui::EagerStorageBackendConversionAction>(parent, _rows, _columns, _elementSize);
+        return std::make_unique<mv::gui::EagerStorageBackendConversionAction>(parent, _rows, _columns, elementTypeIndex);
 
     return {};
 }

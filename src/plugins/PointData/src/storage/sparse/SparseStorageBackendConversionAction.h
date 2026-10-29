@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "StorageBackendConversionAction.h"
+#include "../interface/StorageBackendConversionAction.h"
 
 #include <actions/MessageCardAction.h>
 #include <actions/OptionAction.h>
@@ -15,13 +15,15 @@ namespace mv::gui
  *
  * Sparse conversion scans the complete matrix and stores exact nonzero values.
  * The reported sparse footprint is an upper bound assuming every matrix value
- * is nonzero; actual memory use depends on the data.
+ * is nonzero; actual memory use depends on the data. The element type can be
+ * changed as part of conversion, with values outside an integer type's range
+ * causing conversion to fail without replacing the current representation.
  */
 class POINTDATA_EXPORT SparseStorageBackendConversionAction final : public StorageBackendConversionAction
 {
 public:
-    /** Constructs sparse conversion controls for a matrix with the supplied shape and element size. */
-    SparseStorageBackendConversionAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize);
+    /** Constructs sparse conversion controls for a matrix with the supplied shape and current element type. */
+    SparseStorageBackendConversionAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::uint32_t currentElementTypeIndex, bool columnCompressed = false);
 
     /** Returns the sparse backend type. */
     pointdata::storage::StorageBackendType getTargetBackendType() const override;
@@ -35,7 +37,6 @@ private:
 
     std::uint64_t _rows = 0;
     std::uint64_t _columns = 0;
-    std::size_t _elementSize = 0;
     OptionAction _layoutAction;
     MessageCardAction _memoryObservationAction;
 };

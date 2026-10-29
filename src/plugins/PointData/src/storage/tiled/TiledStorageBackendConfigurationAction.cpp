@@ -2,7 +2,7 @@
 
 #include "TiledStorageBackendConfigurationAction.h"
 
-#include "../tiled/PointDataTiledStorage.h"
+#include "PointDataTiledStorage.h"
 
 #include <util/Miscellaneous.h>
 
@@ -15,8 +15,8 @@
 namespace mv::gui
 {
 
-TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(QObject* parent, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration, const bool initializeFromConfiguration) :
-    StorageBackendConversionAction(parent, "Tiled storage"),
+TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(QObject* parent, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration, const bool initializeFromConfiguration, const std::optional<std::uint32_t> currentElementTypeIndex) :
+    StorageBackendConversionAction(parent, "Tiled storage", currentElementTypeIndex),
     _rows(rows),
     _columns(columns),
     _elementSize(elementSize),
@@ -32,6 +32,17 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _superTileColumnsAction(this, "Super-tile columns", 1, std::numeric_limits<std::int32_t>::max(), 1)
 {
     setShowLabels(true);
+
+    connect(this, &StorageBackendConversionAction::optionsChanged, this, [this] {
+        const auto targetElementSize = getTargetElementSize();
+        if (!targetElementSize || *targetElementSize == _elementSize)
+            return;
+
+        _elementSize = *targetElementSize;
+        updateTargetTileSizeFromGeometry();
+        updateCacheCapacity();
+        updateStorageObservations();
+    });
 
     _tileSizeAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _rowTileSizeAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
@@ -119,7 +130,9 @@ pointdata::storage::StorageBackendType TiledStorageBackendConfigurationAction::g
 
 pointdata::storage::StorageBackendConfigurationOptionsPtr TiledStorageBackendConfigurationAction::getConversionOptions() const
 {
-    return std::make_shared<pointdata::storage::StorageBackendConfiguration>(getConfiguration());
+    auto configuration = std::make_shared<pointdata::storage::StorageBackendConfiguration>(getConfiguration());
+    configuration->targetElementTypeIndex = getTargetElementTypeIndex();
+    return configuration;
 }
 
 pointdata::storage::StorageBackendConfiguration TiledStorageBackendConfigurationAction::getConfiguration() const

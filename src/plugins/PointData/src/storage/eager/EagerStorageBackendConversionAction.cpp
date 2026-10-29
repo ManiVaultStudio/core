@@ -2,7 +2,7 @@
 
 #include "EagerStorageBackendConversionAction.h"
 
-#include "StorageBackendMemory.h"
+#include "../interface/StorageBackendMemory.h"
 
 #include <util/Miscellaneous.h>
 
@@ -11,19 +11,25 @@
 namespace mv::gui
 {
 
-EagerStorageBackendConversionAction::EagerStorageBackendConversionAction(QObject* parent, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize) :
-    StorageBackendConversionAction(parent, "In-memory storage"),
+EagerStorageBackendConversionAction::EagerStorageBackendConversionAction(QObject* parent, const std::uint64_t rows, const std::uint64_t columns, const std::uint32_t currentElementTypeIndex) :
+    StorageBackendConversionAction(parent, "In-memory storage", currentElementTypeIndex),
     _rows(rows),
     _columns(columns),
-    _elementSize(elementSize),
     _memoryObservationAction(this)
 {
     setShowLabels(true);
     addAction(&_memoryObservationAction);
 
+    connect(this, &StorageBackendConversionAction::optionsChanged, this, &EagerStorageBackendConversionAction::updateMemoryObservation);
+    updateMemoryObservation();
+}
+
+void EagerStorageBackendConversionAction::updateMemoryObservation()
+{
+    const auto elementSize = getTargetElementSize();
     const auto invalidDimensions = _rows != 0 && _columns > (std::numeric_limits<std::uint64_t>::max)() / _rows;
     const auto elementCount = invalidDimensions ? 0 : _rows * _columns;
-    _canApply = !invalidDimensions && _elementSize != 0 && elementCount <= (std::numeric_limits<std::size_t>::max)() / _elementSize;
+    _canApply = elementSize && !invalidDimensions && *elementSize != 0 && elementCount <= (std::numeric_limits<std::size_t>::max)() / *elementSize;
 
     if (!_canApply)
     {
@@ -31,7 +37,7 @@ EagerStorageBackendConversionAction::EagerStorageBackendConversionAction(QObject
         return;
     }
 
-    const auto denseBytes = elementCount * _elementSize;
+    const auto denseBytes = elementCount * *elementSize;
     const auto availableRamBytes = getAvailablePhysicalMemoryBytes();
     const auto exceedsAvailableRam = availableRamBytes && denseBytes > *availableRamBytes;
     _canApply = !exceedsAvailableRam;
@@ -56,7 +62,9 @@ pointdata::storage::StorageBackendType EagerStorageBackendConversionAction::getT
 
 pointdata::storage::StorageBackendConfigurationOptionsPtr EagerStorageBackendConversionAction::getConversionOptions() const
 {
-    return {};
+    auto options = std::make_shared<pointdata::storage::StorageBackendConfigurationOptions>();
+    options->targetElementTypeIndex = getTargetElementTypeIndex();
+    return options;
 }
 
 bool EagerStorageBackendConversionAction::canApply() const

@@ -4,10 +4,10 @@
 
 #include "TiledPointsStorageBackend.h"
 
-#include "../actions/StorageBackendConversionAction.h"
-#include "../actions/EagerStorageBackendConversionAction.h"
-#include "../actions/SparseStorageBackendConversionAction.h"
-#include "../actions/TiledStorageBackendConversionAction.h"
+#include "../eager/EagerStorageBackendConversionAction.h"
+#include "../interface/StorageBackendConversionAction.h"
+#include "../sparse/SparseStorageBackendConversionAction.h"
+#include "TiledStorageBackendConversionAction.h"
 
 #include <algorithm>
 #include <cstring>
@@ -90,14 +90,14 @@ std::unique_ptr<mv::gui::StorageBackendConversionAction> TiledPointsStorageBacke
         configuration.packedTiles    = _storage->packedTiles();
         configuration.superTileRows  = _storage->superTileRows();
         configuration.superTileColumns = _storage->superTileColumns();
-        return std::make_unique<mv::gui::TiledStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _storage->elementSize(), configuration, true);
+        return std::make_unique<mv::gui::TiledStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _storage->elementSize(), configuration, true, true, _elementTypeIndex);
     }
 
     if (targetType == StorageBackendType::Eager && _storage)
-        return std::make_unique<mv::gui::EagerStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _storage->elementSize());
+        return std::make_unique<mv::gui::EagerStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _elementTypeIndex);
 
     if (targetType == StorageBackendType::Sparse && _storage)
-        return std::make_unique<mv::gui::SparseStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _storage->elementSize());
+        return std::make_unique<mv::gui::SparseStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _elementTypeIndex);
 
     return {};
 }

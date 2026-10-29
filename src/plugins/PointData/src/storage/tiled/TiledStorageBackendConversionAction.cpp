@@ -2,7 +2,7 @@
 
 #include "TiledStorageBackendConversionAction.h"
 
-#include "StorageBackendMemory.h"
+#include "../interface/StorageBackendMemory.h"
 
 #include <util/Miscellaneous.h>
 
@@ -11,18 +11,32 @@
 namespace mv::gui
 {
 
-TiledStorageBackendConversionAction::TiledStorageBackendConversionAction(QObject* parent, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration, const bool initializeFromConfiguration, const bool materializesFullMatrix) :
-    TiledStorageBackendConfigurationAction(parent, rows, columns, elementSize, configuration, initializeFromConfiguration),
+TiledStorageBackendConversionAction::TiledStorageBackendConversionAction(QObject* parent, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration, const bool initializeFromConfiguration, const bool materializesFullMatrix, const std::uint32_t currentElementTypeIndex) :
+    TiledStorageBackendConfigurationAction(parent, rows, columns, elementSize, configuration, initializeFromConfiguration, currentElementTypeIndex),
+    _rows(rows),
+    _columns(columns),
     _memoryObservationAction(this)
 {
     if (!materializesFullMatrix)
         return;
 
+    _checksMaterialization = true;
     addAction(&_memoryObservationAction);
 
-    const auto invalidDimensions = rows != 0 && columns > (std::numeric_limits<std::uint64_t>::max)() / rows;
-    const auto elementCount = invalidDimensions ? 0 : rows * columns;
-    const auto invalidAllocation = invalidDimensions || elementSize == 0 || elementCount > (std::numeric_limits<std::uint64_t>::max)() / elementSize;
+    connect(this, &StorageBackendConversionAction::optionsChanged, this, &TiledStorageBackendConversionAction::updateMemoryObservation);
+    updateMemoryObservation();
+}
+
+void TiledStorageBackendConversionAction::updateMemoryObservation()
+{
+    if (!_checksMaterialization)
+        return;
+
+    _canApply = true;
+    const auto invalidDimensions = _rows != 0 && _columns > (std::numeric_limits<std::uint64_t>::max)() / _rows;
+    const auto targetElementSize = getTargetElementSize();
+    const auto elementCount = invalidDimensions ? 0 : _rows * _columns;
+    const auto invalidAllocation = invalidDimensions || !targetElementSize || *targetElementSize == 0 || elementCount > (std::numeric_limits<std::uint64_t>::max)() / *targetElementSize;
     if (invalidAllocation)
     {
         _canApply = false;
@@ -30,7 +44,7 @@ TiledStorageBackendConversionAction::TiledStorageBackendConversionAction(QObject
         return;
     }
 
-    const auto denseBytes = elementCount * elementSize;
+    const auto denseBytes = elementCount * *targetElementSize;
     const auto availableRamBytes = getAvailablePhysicalMemoryBytes();
     if (!availableRamBytes)
     {

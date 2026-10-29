@@ -2,7 +2,7 @@
 
 #include "StorageBackendAction.h"
 
-#include "../storage/widgets/StorageBackendConfigurationDialog.h"
+#include "../storage/interface/StorageBackendConfigurationDialog.h"
 
 #include "../PointData.h"
 
@@ -60,7 +60,7 @@ void StorageBackendAction::updateBackendType()
     setBackendType(backendType ? pointdata::storage::getStorageBackendTypeName(*backendType) : QString());
 
     getBackendTypeAction().setEnabled(pointsAreValid && !isProxy && !_conversionInProgress);
-    setConfigureEnabled(pointsAreValid && !isProxy && backendType && *backendType == Points::StorageBackendType::Tiled && !_conversionInProgress);
+    setConfigureEnabled(pointsAreValid && !isProxy && backendType && !_conversionInProgress);
 
     _updatingBackendType = false;
 }

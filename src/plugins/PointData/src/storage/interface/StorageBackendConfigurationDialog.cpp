@@ -62,8 +62,8 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique
         updateButton->setText(tr("Update"));
         updateButton->setEnabled(false);
 
-        connect(_conversionAction.get(), &mv::gui::StorageBackendConversionAction::optionsChanged, updateButton, [updateButton] {
-            updateButton->setEnabled(true);
+        connect(_conversionAction.get(), &mv::gui::StorageBackendConversionAction::optionsChanged, updateButton, [this, updateButton] {
+            updateButton->setEnabled(_conversionAction->canApply());
         });
     }
     else if (_conversionAction)

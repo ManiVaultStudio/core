@@ -96,6 +96,8 @@ using StorageBackendProgressCallback = std::function<void(float)>;
  */
 struct StorageBackendConfigurationOptions
 {
+    std::optional<std::uint32_t> targetElementTypeIndex; /**< Requested element type for conversion, or empty to retain the source type. */
+
     virtual ~StorageBackendConfigurationOptions() = default;
 };
 

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "StorageBackendConversionAction.h"
+#include "../interface/StorageBackendConversionAction.h"
 
 #include <actions/MessageCardAction.h>
 
@@ -19,8 +19,8 @@ namespace mv::gui
 class POINTDATA_EXPORT EagerStorageBackendConversionAction final : public StorageBackendConversionAction
 {
 public:
-    /** Constructs an in-memory conversion preflight for a matrix with the supplied shape and element size. */
-    EagerStorageBackendConversionAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize);
+    /** Constructs an in-memory conversion preflight for a matrix with the supplied shape and current element type. */
+    EagerStorageBackendConversionAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::uint32_t currentElementTypeIndex);
 
     /** Returns the eager backend type. */
     pointdata::storage::StorageBackendType getTargetBackendType() const override;
@@ -30,9 +30,10 @@ public:
     bool canApply() const override;
 
 private:
+    void updateMemoryObservation();
+
     std::uint64_t _rows = 0;
     std::uint64_t _columns = 0;
-    std::size_t _elementSize = 0;
     bool _canApply = true;
     MessageCardAction _memoryObservationAction;
 };

@@ -3,7 +3,7 @@
 #include "SparseStorageBackendConversionAction.h"
 
 #include "../interface/PointsStorageBackendTypes.h"
-#include "StorageBackendMemory.h"
+#include "../interface/StorageBackendMemory.h"
 
 #include <util/Miscellaneous.h>
 
@@ -12,12 +12,11 @@
 namespace mv::gui
 {
 
-SparseStorageBackendConversionAction::SparseStorageBackendConversionAction(QObject* parent, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize) :
-    StorageBackendConversionAction(parent, "Sparse storage"),
+SparseStorageBackendConversionAction::SparseStorageBackendConversionAction(QObject* parent, const std::uint64_t rows, const std::uint64_t columns, const std::uint32_t currentElementTypeIndex, const bool columnCompressed) :
+    StorageBackendConversionAction(parent, "Sparse storage", currentElementTypeIndex),
     _rows(rows),
     _columns(columns),
-    _elementSize(elementSize),
-    _layoutAction(this, "Layout", { "Row-compressed (CSR)", "Column-compressed (CSC)" }, "Row-compressed (CSR)"),
+    _layoutAction(this, "Layout", { "Row-compressed (CSR)", "Column-compressed (CSC)" }, columnCompressed ? "Column-compressed (CSC)" : "Row-compressed (CSR)"),
     _memoryObservationAction(this)
 {
     setShowLabels(true);
@@ -28,6 +27,7 @@ SparseStorageBackendConversionAction::SparseStorageBackendConversionAction(QObje
         updateObservation();
         notifyOptionsChanged();
     });
+    connect(this, &StorageBackendConversionAction::optionsChanged, this, &SparseStorageBackendConversionAction::updateObservation);
 
     updateObservation();
 }
@@ -41,13 +41,15 @@ pointdata::storage::StorageBackendConfigurationOptionsPtr SparseStorageBackendCo
 {
     auto configuration = std::make_shared<pointdata::storage::SparseStorageBackendConfiguration>();
     configuration->columnCompressed = _layoutAction.getCurrentIndex() == 1;
+    configuration->targetElementTypeIndex = getTargetElementTypeIndex();
     return configuration;
 }
 
 bool SparseStorageBackendConversionAction::canApply() const
 {
     const auto compressedSize = _layoutAction.getCurrentIndex() == 1 ? _columns : _rows;
-    return _elementSize != 0 && _columns <= std::numeric_limits<std::size_t>::max() / _elementSize &&
+    const auto elementSize = getTargetElementSize();
+    return elementSize && *elementSize != 0 && _columns <= std::numeric_limits<std::size_t>::max() / *elementSize &&
         _rows < std::numeric_limits<std::size_t>::max() && compressedSize < std::numeric_limits<std::size_t>::max() &&
         !(_rows != 0 && _columns > std::numeric_limits<std::uint64_t>::max() / _rows);
 }
@@ -55,7 +57,8 @@ bool SparseStorageBackendConversionAction::canApply() const
 void SparseStorageBackendConversionAction::updateObservation()
 {
     const auto compressedSize = _layoutAction.getCurrentIndex() == 1 ? _columns : _rows;
-    if (_elementSize == 0 || _columns > std::numeric_limits<std::size_t>::max() / _elementSize || _rows >= std::numeric_limits<std::size_t>::max() || compressedSize >= std::numeric_limits<std::size_t>::max())
+    const auto elementSize = getTargetElementSize();
+    if (!elementSize || *elementSize == 0 || _columns > std::numeric_limits<std::size_t>::max() / *elementSize || _rows >= std::numeric_limits<std::size_t>::max() || compressedSize >= std::numeric_limits<std::size_t>::max())
     {
         _memoryObservationAction.setMessage(util::SeverityLevel::Error, "Memory", "The selected sparse conversion requires a row or pointer array larger than this process can address.");
         return;
@@ -69,7 +72,7 @@ void SparseStorageBackendConversionAction::updateObservation()
 
     const auto elementCount = _rows * _columns;
     const auto indexSize = elementCount > std::numeric_limits<std::uint64_t>::max() / sizeof(std::uint64_t) ? std::numeric_limits<std::uint64_t>::max() : elementCount * sizeof(std::uint64_t);
-    const auto valueSize = _elementSize != 0 && elementCount > std::numeric_limits<std::uint64_t>::max() / _elementSize ? std::numeric_limits<std::uint64_t>::max() : elementCount * _elementSize;
+    const auto valueSize = elementCount > std::numeric_limits<std::uint64_t>::max() / *elementSize ? std::numeric_limits<std::uint64_t>::max() : elementCount * *elementSize;
     const auto pointerCount = compressedSize + 1;
     const auto pointerSize = pointerCount > std::numeric_limits<std::uint64_t>::max() / sizeof(std::uint64_t) ? std::numeric_limits<std::uint64_t>::max() : pointerCount * sizeof(std::uint64_t);
     const auto worstCaseBytes = indexSize > std::numeric_limits<std::uint64_t>::max() - valueSize || indexSize + valueSize > std::numeric_limits<std::uint64_t>::max() - pointerSize ? std::numeric_limits<std::uint64_t>::max() : indexSize + valueSize + pointerSize;

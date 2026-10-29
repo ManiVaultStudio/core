@@ -5,8 +5,10 @@
 #include "EagerPointsStorageBackend.h"
 
 #include "../../PointData.h"
-#include "../actions/SparseStorageBackendConversionAction.h"
-#include "../actions/TiledStorageBackendConversionAction.h"
+#include "EagerStorageBackendConversionAction.h"
+#include "../interface/StorageBackendConversionAction.h"
+#include "../sparse/SparseStorageBackendConversionAction.h"
+#include "../tiled/TiledStorageBackendConversionAction.h"
 
 #include <cstring>
 
@@ -30,11 +32,16 @@ StorageBackendCapabilities EagerPointsStorageBackend::getCapabilities() const
 
 std::unique_ptr<mv::gui::StorageBackendConversionAction> EagerPointsStorageBackend::createConversionAction(const StorageBackendType targetType, QObject* parent) const
 {
+    const auto elementTypeIndex = getElementTypeIndex();
+
+    if (targetType == StorageBackendType::Eager)
+        return std::make_unique<mv::gui::EagerStorageBackendConversionAction>(parent, _pointData.getNumPoints(), _pointData.getNumDimensions(), elementTypeIndex);
+
     if (targetType == StorageBackendType::Tiled)
-        return std::make_unique<mv::gui::TiledStorageBackendConversionAction>(parent, _pointData.getNumPoints(), _pointData.getNumDimensions(), getElementSize(), pointdata::storage::StorageBackendConfiguration{}, false, true);
+        return std::make_unique<mv::gui::TiledStorageBackendConversionAction>(parent, _pointData.getNumPoints(), _pointData.getNumDimensions(), getElementSize(), pointdata::storage::StorageBackendConfiguration{}, false, true, elementTypeIndex);
 
     if (targetType == StorageBackendType::Sparse)
-        return std::make_unique<mv::gui::SparseStorageBackendConversionAction>(parent, _pointData.getNumPoints(), _pointData.getNumDimensions(), getElementSize());
+        return std::make_unique<mv::gui::SparseStorageBackendConversionAction>(parent, _pointData.getNumPoints(), _pointData.getNumDimensions(), elementTypeIndex);
 
     return {};
 }

@@ -71,48 +71,39 @@ set(POINTS_HEADERS
     src/developer/PointDataBenchmark.h
 )
 
-set(POINTS_STORAGE_COMMON_HEADERS
+set(POINTS_STORAGE_INTERFACE_HEADERS
     src/storage/interface/PointDataAccess.h
     src/storage/interface/PointsStorageBackend.h
     src/storage/interface/PointsStorageBackendTypes.h
+    src/storage/interface/StorageBackendConversionAction.h
+    src/storage/interface/StorageBackendConfigurationDialog.h
+    src/storage/interface/StorageBackendMemory.h
 )
 
-set(POINTS_STORAGE_ACTION_HEADERS
-    src/storage/actions/StorageBackendConversionAction.h
-    src/storage/actions/EagerStorageBackendConversionAction.h
-    src/storage/actions/SparseStorageBackendConversionAction.h
-    src/storage/actions/TiledStorageBackendConfigurationAction.h
-    src/storage/actions/StorageBackendMemory.h
-    src/storage/actions/TiledStorageBackendConversionAction.h
-)
-
-set(POINTS_STORAGE_WIDGET_HEADERS
-    src/storage/widgets/StorageBackendConfigurationDialog.h
-)
-
-set(POINTS_STORAGE_ACTION_SOURCES
-    src/storage/widgets/StorageBackendConfigurationDialog.cpp
-    src/storage/actions/EagerStorageBackendConversionAction.cpp
-    src/storage/actions/SparseStorageBackendConversionAction.cpp
-    src/storage/actions/TiledStorageBackendConfigurationAction.cpp
-    src/storage/actions/StorageBackendMemory.cpp
-    src/storage/actions/TiledStorageBackendConversionAction.cpp
+set(POINTS_STORAGE_INTERFACE_SOURCES
+    src/storage/interface/StorageBackendConfigurationDialog.cpp
+    src/storage/interface/StorageBackendConversionAction.cpp
+    src/storage/interface/StorageBackendMemory.cpp
 )
 
 set(POINTS_STORAGE_EAGER_HEADERS
     src/storage/eager/EagerPointsStorageBackend.h
+    src/storage/eager/EagerStorageBackendConversionAction.h
 )
 
 set(POINTS_STORAGE_EAGER_SOURCES
     src/storage/eager/EagerPointsStorageBackend.cpp
+    src/storage/eager/EagerStorageBackendConversionAction.cpp
 )
 
 set(POINTS_STORAGE_SPARSE_HEADERS
     src/storage/sparse/SparsePointsStorageBackend.h
+    src/storage/sparse/SparseStorageBackendConversionAction.h
 )
 
 set(POINTS_STORAGE_SPARSE_SOURCES
     src/storage/sparse/SparsePointsStorageBackend.cpp
+    src/storage/sparse/SparseStorageBackendConversionAction.cpp
 )
 
 set(POINTS_STORAGE_TILED_HEADERS
@@ -126,19 +117,23 @@ set(POINTS_STORAGE_TILED_HEADERS
     src/storage/tiled/TiledStorageGeometry.h
     src/storage/tiled/PointDataStorageRecommendation.h
     src/storage/tiled/PointDataStorageRecommendationDialog.h
+    src/storage/tiled/TiledStorageBackendConfigurationAction.h
+    src/storage/tiled/TiledStorageBackendConversionAction.h
 )
 
 set(POINTS_STORAGE_TILED_SOURCES
     src/storage/tiled/TiledPointsStorageBackend.cpp
     src/storage/tiled/TiledStorageAsymmetryAction.cpp
     src/storage/tiled/PointDataStorageRecommendationDialog.cpp
+    src/storage/tiled/TiledStorageBackendConfigurationAction.cpp
+    src/storage/tiled/TiledStorageBackendConversionAction.cpp
     src/storage/tiled/PointDataTileCache.cpp
     src/storage/tiled/PackedTileFile.cpp
     src/storage/tiled/PointDataTiledStorage.cpp
     src/storage/tiled/PointDataTiledSerialization.cpp
 )
 
-set(POINTS_STORAGE_HEADERS ${POINTS_STORAGE_COMMON_HEADERS} ${POINTS_STORAGE_ACTION_HEADERS} ${POINTS_STORAGE_EAGER_HEADERS} ${POINTS_STORAGE_SPARSE_HEADERS} ${POINTS_STORAGE_TILED_HEADERS})
+set(POINTS_STORAGE_HEADERS ${POINTS_STORAGE_INTERFACE_HEADERS} ${POINTS_STORAGE_EAGER_HEADERS} ${POINTS_STORAGE_SPARSE_HEADERS} ${POINTS_STORAGE_TILED_HEADERS})
 
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects
 set(BFLOAT_HEADER
@@ -194,15 +189,9 @@ source_group(Widgets FILES ${POINTS_VIEW_WIDGETS})
 source_group(View FILES
     src/view/PointView.h
 )
-source_group(Storage\\widgets FILES
-    ${POINTS_STORAGE_WIDGET_HEADERS}
-)
-source_group(Storage\\Actions FILES
-    ${POINTS_STORAGE_ACTION_HEADERS}
-    ${POINTS_STORAGE_ACTION_SOURCES}
-)
 source_group(Storage\\Interface FILES
-    ${POINTS_STORAGE_COMMON_HEADERS}
+    ${POINTS_STORAGE_INTERFACE_HEADERS}
+    ${POINTS_STORAGE_INTERFACE_SOURCES}
 )
 source_group(Storage\\Eager FILES
     ${POINTS_STORAGE_EAGER_HEADERS}
@@ -219,7 +208,7 @@ source_group(Storage\\Tiled FILES
 source_group(BFloat FILES ${BFLOAT_HEADER})
 source_group(Aux FILES ${POINT_DATA_AUX})
 
-add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINTS_VIEW_WIDGETS} ${POINTS_STORAGE_HEADERS} ${POINTS_STORAGE_ACTION_SOURCES} ${POINTS_STORAGE_EAGER_SOURCES} ${POINTS_STORAGE_SPARSE_SOURCES} ${POINTS_STORAGE_TILED_SOURCES} ${POINT_DATA_AUX})
+add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINTS_VIEW_WIDGETS} ${POINTS_STORAGE_HEADERS} ${POINTS_STORAGE_INTERFACE_SOURCES} ${POINTS_STORAGE_EAGER_SOURCES} ${POINTS_STORAGE_SPARSE_SOURCES} ${POINTS_STORAGE_TILED_SOURCES} ${POINT_DATA_AUX})
 
 add_library(ManiVault::${POINTDATA} ALIAS ${POINTDATA})
 
@@ -269,18 +258,8 @@ install(TARGETS ${POINTDATA}
     PUBLIC_HEADER DESTINATION "$<CONFIGURATION>/include/${POINTDATA}/" COMPONENT HEADERS
 )
 
-install(FILES ${POINTS_STORAGE_COMMON_HEADERS}
+install(FILES ${POINTS_STORAGE_INTERFACE_HEADERS}
     DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/interface/"
-    COMPONENT HEADERS
-)
-
-install(FILES ${POINTS_STORAGE_ACTION_HEADERS}
-    DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/actions/"
-    COMPONENT HEADERS
-)
-
-install(FILES ${POINTS_STORAGE_WIDGET_HEADERS}
-    DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/widgets/"
     COMPONENT HEADERS
 )
 
@@ -291,6 +270,11 @@ install(FILES ${POINTS_STORAGE_EAGER_HEADERS}
 
 install(FILES ${POINTS_STORAGE_TILED_HEADERS}
     DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/tiled/"
+    COMPONENT HEADERS
+)
+
+install(FILES ${POINTS_STORAGE_SPARSE_HEADERS}
+    DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/sparse/"
     COMPONENT HEADERS
 )
 

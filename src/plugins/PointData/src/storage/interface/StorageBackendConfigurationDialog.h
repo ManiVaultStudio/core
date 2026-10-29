@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../actions/StorageBackendConversionAction.h"
+#include "StorageBackendConversionAction.h"
 #include "../../pointdata_export.h"
 
 #include <QDialog>

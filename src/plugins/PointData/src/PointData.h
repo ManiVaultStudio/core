@@ -118,6 +118,7 @@ public:
 
     static ElementTypeSpecifier elementTypeSpecifier(const QString& typeName);
     static QString elementTypeName(const ElementTypeSpecifier elementTypeSpecifier);
+    static std::size_t getElementTypeSize(std::uint32_t elementTypeIndex);
 
 private:
     using VariantOfVectors = std::variant <
