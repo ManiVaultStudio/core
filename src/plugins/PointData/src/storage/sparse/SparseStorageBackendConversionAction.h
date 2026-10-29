@@ -31,12 +31,15 @@ public:
     pointdata::storage::StorageBackendConfigurationOptionsPtr getConversionOptions() const override;
     /** Returns false when matrix dimensions or pointer arrays cannot be represented. */
     bool canApply() const override;
+    /** Returns whether the element type or compressed orientation differs from its initial value. */
+    bool hasChanges() const override;
 
 private:
     void updateObservation();
 
     std::uint64_t _rows = 0;
     std::uint64_t _columns = 0;
+    bool _initialColumnCompressed = false; /**< Original compressed orientation for configuration change detection. */
     OptionAction _layoutAction;
     MessageCardAction _memoryObservationAction;
 };

@@ -121,6 +121,12 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
 
     updateStorageObservations();
     updatePackedTileControls();
+
+    if (initializeFromConfiguration)
+    {
+        _initialConfiguration = getConfiguration();
+        _hasInitialConfiguration = true;
+    }
 }
 
 pointdata::storage::StorageBackendType TiledStorageBackendConfigurationAction::getTargetBackendType() const
@@ -133,6 +139,24 @@ pointdata::storage::StorageBackendConfigurationOptionsPtr TiledStorageBackendCon
     auto configuration = std::make_shared<pointdata::storage::StorageBackendConfiguration>(getConfiguration());
     configuration->targetElementTypeIndex = getTargetElementTypeIndex();
     return configuration;
+}
+
+bool TiledStorageBackendConfigurationAction::hasChanges() const
+{
+    if (StorageBackendConversionAction::hasChanges())
+        return true;
+
+    if (!_hasInitialConfiguration)
+        return false;
+
+    const auto configuration = getConfiguration();
+    return configuration.rowTileSize != _initialConfiguration.rowTileSize ||
+        configuration.columnTileSize != _initialConfiguration.columnTileSize ||
+        configuration.cacheCapacity != _initialConfiguration.cacheCapacity ||
+        configuration.cacheCapacityBytes != _initialConfiguration.cacheCapacityBytes ||
+        configuration.packedTiles != _initialConfiguration.packedTiles ||
+        configuration.superTileRows != _initialConfiguration.superTileRows ||
+        configuration.superTileColumns != _initialConfiguration.superTileColumns;
 }
 
 pointdata::storage::StorageBackendConfiguration TiledStorageBackendConfigurationAction::getConfiguration() const

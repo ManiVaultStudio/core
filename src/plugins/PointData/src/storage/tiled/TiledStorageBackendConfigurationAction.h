@@ -51,6 +51,9 @@ public:
     /** Returns the currently selected physical tile geometry and cache capacity. */
     pointdata::storage::StorageBackendConfigurationOptionsPtr getConversionOptions() const override;
 
+    /** Returns whether the selected element type or tiled settings differ from their initial values. */
+    bool hasChanges() const override;
+
     /** Returns the current tiled-storage configuration. */
     pointdata::storage::StorageBackendConfiguration getConfiguration() const;
 
@@ -65,6 +68,8 @@ private:
     std::uint64_t _columns            = 0;
     std::size_t   _elementSize        = 0;
     std::size_t   _cacheCapacityBytes = pointdata::storage::defaultTileCacheCapacityBytes;
+    pointdata::storage::StorageBackendConfiguration _initialConfiguration; /**< Original tiled settings used to detect changes in configure mode. */
+    bool _hasInitialConfiguration = false; /**< Whether an original tiled configuration was provided. */
 
     TiledStorageAsymmetryAction _tileAsymmetryAction;
     IntegralAction              _tileSizeAction;

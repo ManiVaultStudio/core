@@ -16,6 +16,7 @@ SparseStorageBackendConversionAction::SparseStorageBackendConversionAction(QObje
     StorageBackendConversionAction(parent, "Sparse storage", currentElementTypeIndex),
     _rows(rows),
     _columns(columns),
+    _initialColumnCompressed(columnCompressed),
     _layoutAction(this, "Layout", { "Row-compressed (CSR)", "Column-compressed (CSC)" }, columnCompressed ? "Column-compressed (CSC)" : "Row-compressed (CSR)"),
     _memoryObservationAction(this)
 {
@@ -52,6 +53,11 @@ bool SparseStorageBackendConversionAction::canApply() const
     return elementSize && *elementSize != 0 && _columns <= std::numeric_limits<std::size_t>::max() / *elementSize &&
         _rows < std::numeric_limits<std::size_t>::max() && compressedSize < std::numeric_limits<std::size_t>::max() &&
         !(_rows != 0 && _columns > std::numeric_limits<std::uint64_t>::max() / _rows);
+}
+
+bool SparseStorageBackendConversionAction::hasChanges() const
+{
+    return StorageBackendConversionAction::hasChanges() || (_layoutAction.getCurrentIndex() == 1) != _initialColumnCompressed;
 }
 
 void SparseStorageBackendConversionAction::updateObservation()

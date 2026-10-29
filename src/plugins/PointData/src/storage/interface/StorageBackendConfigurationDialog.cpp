@@ -6,6 +6,7 @@
 
 #include <QDialogButtonBox>
 #include <QPushButton>
+#include <QSizePolicy>
 #include <QVBoxLayout>
 
 #include <utility>
@@ -47,12 +48,18 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique
             break;
     }
 
-    resize(400, 500);
+    resize(650, 650);
+    setFixedWidth(650);
 
     auto* layout = new QVBoxLayout(this);
 
     if (_conversionAction)
-        layout->addWidget(_conversionAction->createWidget(this));
+    {
+        auto* conversionWidget = _conversionAction->createWidget(this);
+        conversionWidget->setMinimumWidth(0);
+        conversionWidget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+        layout->addWidget(conversionWidget);
+    }
 
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
 
@@ -60,10 +67,10 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique
     {
         auto* updateButton = buttons->button(QDialogButtonBox::Ok);
         updateButton->setText(tr("Update"));
-        updateButton->setEnabled(false);
+        updateButton->setEnabled(_conversionAction && _conversionAction->canApply() && _conversionAction->hasChanges());
 
         connect(_conversionAction.get(), &mv::gui::StorageBackendConversionAction::optionsChanged, updateButton, [this, updateButton] {
-            updateButton->setEnabled(_conversionAction->canApply());
+            updateButton->setEnabled(_conversionAction->canApply() && _conversionAction->hasChanges());
         });
     }
     else if (_conversionAction)
