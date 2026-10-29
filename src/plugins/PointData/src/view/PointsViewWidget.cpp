@@ -307,7 +307,12 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
 
 void PointsViewWidget::setPoints(const mv::Dataset<Points>& points)
 {
+    disconnect(&_points, &mv::Dataset<Points>::dataChanged, this, &PointsViewWidget::refreshPoints);
     _points = points;
+
+    if (_points.isValid())
+        connect(&_points, &mv::Dataset<Points>::dataChanged, this, &PointsViewWidget::refreshPoints);
+
     refreshPoints();
 }
 
