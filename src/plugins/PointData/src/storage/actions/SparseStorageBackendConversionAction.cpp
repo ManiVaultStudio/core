@@ -18,7 +18,7 @@ SparseStorageBackendConversionAction::SparseStorageBackendConversionAction(QObje
     _columns(columns),
     _elementSize(elementSize),
     _layoutAction(this, "Layout", { "Row-compressed (CSR)", "Column-compressed (CSC)" }, "Row-compressed (CSR)"),
-    _memoryObservationAction(this, "Memory")
+    _memoryObservationAction(this)
 {
     setShowLabels(true);
     addAction(&_layoutAction);
@@ -57,13 +57,13 @@ void SparseStorageBackendConversionAction::updateObservation()
     const auto compressedSize = _layoutAction.getCurrentIndex() == 1 ? _columns : _rows;
     if (_elementSize == 0 || _columns > std::numeric_limits<std::size_t>::max() / _elementSize || _rows >= std::numeric_limits<std::size_t>::max() || compressedSize >= std::numeric_limits<std::size_t>::max())
     {
-        _memoryObservationAction.setObservation(util::SeverityLevel::Error, "The selected sparse conversion requires a row or pointer array larger than this process can address.");
+        _memoryObservationAction.setMessage(util::SeverityLevel::Error, "Memory", "The selected sparse conversion requires a row or pointer array larger than this process can address.");
         return;
     }
 
     if (_rows != 0 && _columns > std::numeric_limits<std::uint64_t>::max() / _rows)
     {
-        _memoryObservationAction.setObservation(util::SeverityLevel::Error, "The matrix dimensions overflow the supported element count.");
+        _memoryObservationAction.setMessage(util::SeverityLevel::Error, "Memory", "The matrix dimensions overflow the supported element count.");
         return;
     }
 
@@ -88,7 +88,7 @@ void SparseStorageBackendConversionAction::updateObservation()
     else
         message += " Currently available physical memory could not be determined.";
 
-    _memoryObservationAction.setObservation(severity, message);
+    _memoryObservationAction.setMessage(severity, "Memory", message);
 }
 
 }

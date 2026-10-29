@@ -3,10 +3,10 @@
 #pragma once
 
 #include "StorageBackendConversionAction.h"
-#include "StorageBackendObservationAction.h"
 #include "../tiled/TiledStorageAsymmetryAction.h"
 #include "../tiled/TiledStorageGeometry.h"
 
+#include <actions/MessageCardAction.h>
 #include <actions/IntegralAction.h>
 #include <actions/ToggleAction.h>
 
@@ -70,8 +70,8 @@ private:
     IntegralAction              _rowTileSizeAction;
     IntegralAction              _columnTileSizeAction;
     IntegralAction              _cacheCapacityAction;
-    StorageBackendObservationAction _tileCountObservationAction;
-    StorageBackendObservationAction _tileCacheObservationAction;
+    MessageCardAction              _tileCountObservationAction;
+    MessageCardAction              _tileCacheObservationAction;
     ToggleAction                  _packedTilesAction;
     IntegralAction                _superTileRowsAction;
     IntegralAction                _superTileColumnsAction;

@@ -25,8 +25,8 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _rowTileSizeAction(this, "Tile height", 1, std::numeric_limits<std::int32_t>::max(), 256),
     _columnTileSizeAction(this, "Tile width", 1, std::numeric_limits<std::int32_t>::max(), 8),
     _cacheCapacityAction(this, "Tile cache capacity", 1, std::numeric_limits<std::int32_t>::max(), 1),
-    _tileCountObservationAction(this, "Tile count"),
-    _tileCacheObservationAction(this, "Tile cache"),
+    _tileCountObservationAction(this),
+    _tileCacheObservationAction(this),
     _packedTilesAction(this, "Packed tiles", false),
     _superTileRowsAction(this, "Super-tile rows", 1, std::numeric_limits<std::int32_t>::max(), 1),
     _superTileColumnsAction(this, "Super-tile columns", 1, std::numeric_limits<std::int32_t>::max(), 1)
@@ -156,8 +156,8 @@ void TiledStorageBackendConfigurationAction::updateStorageObservations()
 {
     if (_rows == 0 || _columns == 0 || _elementSize == 0)
     {
-        _tileCountObservationAction.setObservation(util::SeverityLevel::Info, "Tile count and memory estimates are unavailable until dataset dimensions and element size are known.");
-        _tileCacheObservationAction.setObservation(util::SeverityLevel::Info, "Tile size and cache fit cannot be estimated until dataset dimensions and element size are known.");
+        _tileCountObservationAction.setMessage(util::SeverityLevel::Info, "Tile count", "Tile count and memory estimates are unavailable until dataset dimensions and element size are known.");
+        _tileCacheObservationAction.setMessage(util::SeverityLevel::Info, "Tile cache", "Tile size and cache fit cannot be estimated until dataset dimensions and element size are known.");
         return;
     }
 
@@ -177,7 +177,7 @@ void TiledStorageBackendConfigurationAction::updateStorageObservations()
     if (tileSeverity == util::SeverityLevel::Warning)
         tileDescription += " Many small tiles can increase index memory and setup time. Consider increasing tile height or width.";
 
-    _tileCountObservationAction.setObservation(tileSeverity, tileDescription);
+    _tileCountObservationAction.setMessage(tileSeverity, "Tile count", tileDescription);
 
     const auto cacheSeverity = memoryEstimate.largestTileBytes > _cacheCapacityBytes ? util::SeverityLevel::Warning : util::SeverityLevel::Info;
     auto cacheDescription = QString("A tile is estimated at up to %1; the cache byte limit is %2.")
@@ -187,7 +187,7 @@ void TiledStorageBackendConfigurationAction::updateStorageObservations()
     if (cacheSeverity == util::SeverityLevel::Warning)
         cacheDescription += " A tile larger than this limit is immediately evicted, so repeated access may reload it.";
 
-    _tileCacheObservationAction.setObservation(cacheSeverity, cacheDescription);
+    _tileCacheObservationAction.setMessage(cacheSeverity, "Tile cache", cacheDescription);
 }
 
 void TiledStorageBackendConfigurationAction::updateTargetTileSizeFromGeometry()

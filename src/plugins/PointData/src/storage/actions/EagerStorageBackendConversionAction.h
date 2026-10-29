@@ -3,7 +3,8 @@
 #pragma once
 
 #include "StorageBackendConversionAction.h"
-#include "StorageBackendObservationAction.h"
+
+#include <actions/MessageCardAction.h>
 
 namespace mv::gui
 {
@@ -33,7 +34,7 @@ private:
     std::uint64_t _columns = 0;
     std::size_t _elementSize = 0;
     bool _canApply = true;
-    StorageBackendObservationAction _memoryObservationAction;
+    MessageCardAction _memoryObservationAction;
 };
 
 }

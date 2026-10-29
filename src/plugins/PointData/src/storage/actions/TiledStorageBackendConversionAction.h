@@ -3,7 +3,6 @@
 #pragma once
 
 #include "TiledStorageBackendConfigurationAction.h"
-#include "StorageBackendObservationAction.h"
 
 namespace mv::gui
 {
@@ -27,7 +26,7 @@ public:
 
 private:
     bool _canApply = true;
-    StorageBackendObservationAction _memoryObservationAction;
+    MessageCardAction _memoryObservationAction;
 };
 
 }

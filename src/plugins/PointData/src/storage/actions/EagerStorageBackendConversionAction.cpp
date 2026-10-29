@@ -16,7 +16,7 @@ EagerStorageBackendConversionAction::EagerStorageBackendConversionAction(QObject
     _rows(rows),
     _columns(columns),
     _elementSize(elementSize),
-    _memoryObservationAction(this, "Memory")
+    _memoryObservationAction(this)
 {
     setShowLabels(true);
     addAction(&_memoryObservationAction);
@@ -27,7 +27,7 @@ EagerStorageBackendConversionAction::EagerStorageBackendConversionAction(QObject
 
     if (!_canApply)
     {
-        _memoryObservationAction.setObservation(util::SeverityLevel::Error, "The dense matrix size exceeds the addressable memory limit, so this conversion cannot run.");
+        _memoryObservationAction.setMessage(util::SeverityLevel::Error, "Memory", "The dense matrix size exceeds the addressable memory limit, so this conversion cannot run.");
         return;
     }
 
@@ -37,16 +37,16 @@ EagerStorageBackendConversionAction::EagerStorageBackendConversionAction(QObject
     _canApply = !exceedsAvailableRam;
 
     if (exceedsAvailableRam)
-        _memoryObservationAction.setObservation(util::SeverityLevel::Error, QString("Dense materialization is estimated at %1, above the %2 of currently available physical memory. Conversion is disabled; close other applications or choose a tiled representation.")
+        _memoryObservationAction.setMessage(util::SeverityLevel::Error, "Memory", QString("Dense materialization is estimated at %1, above the %2 of currently available physical memory. Conversion is disabled; close other applications or choose a tiled representation.")
             .arg(util::getNoBytesHumanReadable(denseBytes), util::getNoBytesHumanReadable(*availableRamBytes)));
     else if (availableRamBytes)
     {
         const auto severity = denseBytes > *availableRamBytes - *availableRamBytes / 4 ? util::SeverityLevel::Warning : util::SeverityLevel::Info;
-        _memoryObservationAction.setObservation(severity, QString("Dense materialization is estimated at %1; currently available physical memory is %2. Memory use can change before conversion starts, so the estimate is only a preflight check.")
+        _memoryObservationAction.setMessage(severity, "Memory", QString("Dense materialization is estimated at %1; currently available physical memory is %2. Memory use can change before conversion starts, so the estimate is only a preflight check.")
             .arg(util::getNoBytesHumanReadable(denseBytes), util::getNoBytesHumanReadable(*availableRamBytes)));
     }
     else
-        _memoryObservationAction.setObservation(util::SeverityLevel::Warning, QString("Dense materialization is estimated at %1, but currently available physical memory could not be determined. The conversion may fail if enough memory is unavailable.").arg(util::getNoBytesHumanReadable(denseBytes)));
+        _memoryObservationAction.setMessage(util::SeverityLevel::Warning, "Memory", QString("Dense materialization is estimated at %1, but currently available physical memory could not be determined. The conversion may fail if enough memory is unavailable.").arg(util::getNoBytesHumanReadable(denseBytes)));
 }
 
 pointdata::storage::StorageBackendType EagerStorageBackendConversionAction::getTargetBackendType() const
