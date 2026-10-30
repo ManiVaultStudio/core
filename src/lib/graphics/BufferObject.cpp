@@ -13,11 +13,6 @@ BufferObject::BufferObject() :
 
 }
 
-BufferObject::~BufferObject()
-{
-
-}
-
 void BufferObject::create()
 {
     initializeOpenGLFunctions();

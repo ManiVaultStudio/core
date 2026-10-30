@@ -71,7 +71,7 @@ public:
     explicit DatasetImpl(const QString& rawDataName, bool mayUnderive = true, const QString& id = "");
 
     /** Destructor */
-    ~DatasetImpl() override;
+    ~DatasetImpl() override = default;
 
     /** Performs startup initialization */
     virtual void init();

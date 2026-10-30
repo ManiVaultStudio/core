@@ -73,10 +73,6 @@ DensityComputation::DensityComputation() :
 
 }
 
-DensityComputation::~DensityComputation()
-{
-}
-
 void DensityComputation::init(QOpenGLContext* ctx)
 {
     _ctx = ctx;
@@ -106,7 +102,7 @@ void DensityComputation::init(QOpenGLContext* ctx)
     quadBuffer.create();
     quadBuffer.bind();
     quadBuffer.setData(quad);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, nullptr);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(sizeof(float) * 2));
     glEnableVertexAttribArray(1);
@@ -114,14 +110,14 @@ void DensityComputation::init(QOpenGLContext* ctx)
     // Positions of the points
     _pointBuffer.create();
     _pointBuffer.bind();
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     glVertexAttribDivisor(2, 1);
     glEnableVertexAttribArray(2);
 
     // Weights of the points
     _weightsBuffer.create();
     _weightsBuffer.bind();
-    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
     glVertexAttribDivisor(3, 1);
     glEnableVertexAttribArray(3);
 
