@@ -16,8 +16,9 @@
 
 #include <QComboBox>
 #include <QCompleter>
-#include <QTableView>
+#include <QMap>
 #include <QSortFilterProxyModel>
+#include <QTableView>
 
 namespace mv::gui {
 
@@ -66,6 +67,7 @@ public:
         Selection       = 0x00004,      /** The widget includes a selection control */
         File            = 0x00008,      /** The widget includes a file control */
         Tags            = 0x00010,      /** The widget includes a flow layout with tags */
+        Filter          = 0x00020,      /** The list view includes filtering controls */
 
         Default = ComboBox
     };
@@ -373,6 +375,12 @@ public:
      */
     void setSelectedOptions(const CheckableStringListModel::CheckedIndicesSet& selectedOptions);
 
+    /** Sets supplementary tooltip text keyed by option name. */
+    void setOptionToolTips(const QMap<QString, QString>& toolTips);
+
+    /** Returns supplementary tooltip text configured for one option, or an empty string. */
+    QString getOptionToolTip(const QString& option) const;
+
     /** Selects all options */
     void selectAll();
 
@@ -443,6 +451,9 @@ signals:
      */
     void selectedOptionsChanged(const QStringList& selectedOptions);
 
+    /** Emitted when supplementary per-option tooltip text changes. */
+    void optionToolTipsChanged();
+
 protected:
     CheckableStringListModel    _optionsModel;      /** Options model */
     FileAction                  _fileAction;        /** File action */
@@ -452,6 +463,7 @@ protected:
 
 private:
     bool    _serializeAllOptions;                   /** Whether all options should be serialzied, by default false */
+    QMap<QString, QString> _optionToolTips;          /** Supplementary tooltip text keyed by option name. */
 };
 
 }   

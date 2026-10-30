@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "PointData.h"
+#include "../PointData.h"
 
 #include <actions/TriggerAction.h>
 #include <actions/ToggleAction.h>

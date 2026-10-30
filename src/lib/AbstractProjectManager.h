@@ -19,6 +19,7 @@
 #include "util/SeverityLevel.h"
 
 #include <QObject>
+#include <QDir>
 #include <QMenu>
 #include <QTemporaryDir>
 #include <QFuture>
@@ -312,10 +313,15 @@ public: // Temporary directories
     }
 
     /**
-     * Ensure that an application-managed temporary directory exists for p temporaryDirType
-     * and return its path.
+     * Ensures that an application-managed temporary directory for \p temporaryDirType exists and returns its path.
+     *
+     * Existing workflow-owned directories are preserved. If no directory has
+     * been registered, an application-managed temporary directory is created and
+     * registered for operations that need project-style file storage outside a
+     * project save workflow.
+     *
      * @param temporaryDirType Type of temporary directory, see AbstractProjectManager#TemporaryDirType
-     * @return Path of the application-managed temporary directory
+     * @return Path of the existing or newly created temporary directory
      * @throws std::runtime_error If the directory cannot be created
      */
     QString ensureTemporaryDirPath(const TemporaryDirType& temporaryDirType) {

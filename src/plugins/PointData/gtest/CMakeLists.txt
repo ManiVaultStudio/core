@@ -1,17 +1,30 @@
-
 add_executable(PointDataGTest
+    PointDataGTestMain.cpp
     PointDataGTest.cpp
-    PointDataIteratorGTest.cpp
-    PointsGTest.cpp
+    ../src/storage/tiled/PointDataTileCache.cpp
+    ../src/storage/tiled/PointDataTiledStorage.cpp
 )
 
-target_include_directories(${CLUSTERDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
+target_include_directories(PointDataGTest PRIVATE
+    "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/"
+    "${CMAKE_CURRENT_BINARY_DIR}/.."
+    "${CMAKE_CURRENT_SOURCE_DIR}/../src"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../private"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault"
+)
 
-target_link_libraries(PointDataGTest
+target_compile_features(PointDataGTest PRIVATE cxx_std_${MV_CXX_STANDARD})
+
+target_link_libraries(PointDataGTest PRIVATE
     ${MV_PUBLIC_LIB}
     PointData
     Qt6::Widgets
-    gtest_main
+    Qt6::WebEngineWidgets
+    GTest::gtest
+)
+
+set_target_properties(PointDataGTest PROPERTIES
+    FOLDER "Tests/PointData"
 )
 
 if(MSVC)
@@ -21,16 +34,14 @@ else()
 endif()
 
 add_test(NAME PointDataGTest COMMAND PointDataGTest)
-
-
-install(TARGETS ${PROJECT}
-    RUNTIME DESTINATION . COMPONENT EXECUTABLE
+set_tests_properties(PointDataGTest PROPERTIES
+    LABELS "unit;pointdata"
+    ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Core>;PATH=path_list_prepend:$<TARGET_FILE_DIR:PointData>;PATH=path_list_prepend:${QT_DIR}/../../../bin"
 )
 
-add_custom_command(TARGET ${PROJECT} POST_BUILD
-    COMMAND ${CMAKE_COMMAND}
-        --install ${CMAKE_BINARY_DIR}
-        --config $<CONFIGURATION>
-        --prefix ${MV_INSTALL_DIR}/$<CONFIGURATION>
-)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set_property(TARGET PointDataGTest PROPERTY
+        VS_DEBUGGER_ENVIRONMENT "PATH=$<TARGET_FILE_DIR:Core>;$<TARGET_FILE_DIR:PointData>;${QT_DIR}/../../../bin"
+    )
+endif()
 

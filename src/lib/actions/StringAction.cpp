@@ -8,6 +8,7 @@
 #include "util/Serialization.h"
 
 #include <QHBoxLayout>
+#include <QApplication>
 #include <QCompleter>
 #include <QToolButton>
 #include <QGraphicsDropShadowEffect>
@@ -211,7 +212,29 @@ QWidget* StringAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
         layout->addWidget(new StringAction::LineEditWidget(parent, this));
 
     if (widgetFlags & WidgetFlag::TextEdit)
-        layout->addWidget(new StringAction::TextEditWidget(parent, this));
+    {
+        auto* textEdit = new StringAction::TextEditWidget(parent, this);
+
+        layout->addWidget(textEdit);
+
+        if (!(widgetFlags & WidgetFlag::LineEdit))
+        {
+            const auto updateTextEditEnabled = [this, widget, textEdit]() {
+                widget->setEnabled(true);
+                textEdit->setReadOnly(!isEnabled());
+
+                auto palette = textEdit->palette();
+                const auto colorGroup = isEnabled() ? QPalette::Active : QPalette::Disabled;
+                const auto applicationPalette = QApplication::palette();
+                palette.setColor(QPalette::Text, applicationPalette.color(colorGroup, QPalette::Text));
+                palette.setColor(QPalette::PlaceholderText, applicationPalette.color(colorGroup, QPalette::PlaceholderText));
+                textEdit->setPalette(palette);
+            };
+
+            connect(this, &QAction::enabledChanged, widget, updateTextEditEnabled);
+            updateTextEditEnabled();
+        }
+    }
 
     widget->setLayout(layout);
 

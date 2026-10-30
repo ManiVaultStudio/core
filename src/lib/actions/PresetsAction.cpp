@@ -126,13 +126,15 @@ QMenu* PresetsAction::getMenu(QWidget* parent /*= nullptr*/)
 
     menu->addAction(savePresetAction);
 
-    auto saveDefaultPresetAction = new QAction("Save As Default");
+    if (_saveDefaultPresetActionVisible) {
+        auto saveDefaultPresetAction = new QAction("Save As Default");
 
-    saveDefaultPresetAction->setIcon(StyledIcon("floppy-disk"));
+        saveDefaultPresetAction->setIcon(StyledIcon("floppy-disk"));
 
-    connect(saveDefaultPresetAction, &TriggerAction::triggered, this, &PresetsAction::saveDefaultPreset);
+        connect(saveDefaultPresetAction, &TriggerAction::triggered, this, &PresetsAction::saveDefaultPreset);
 
-    menu->addAction(saveDefaultPresetAction);
+        menu->addAction(saveDefaultPresetAction);
+    }
 
     auto presetNames = _presets.keys();
 
@@ -177,6 +179,11 @@ QMenu* PresetsAction::getMenu(QWidget* parent /*= nullptr*/)
     menu->addAction(&_editAction);
 
     return menu;
+}
+
+void PresetsAction::setSaveDefaultPresetActionVisible(const bool visible)
+{
+    _saveDefaultPresetActionVisible = visible;
 }
 
 void PresetsAction::loadPreset(const QString& name)

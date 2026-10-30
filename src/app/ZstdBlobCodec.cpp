@@ -11,6 +11,8 @@
 
 #include <CoreInterface.h>
 
+#include <QFileInfo>
+
 #include <exception/ManiVaultException.h>
 
 #ifdef _DEBUG
@@ -430,6 +432,21 @@ void ZstdBlobCodec::decodeFromFileTo(const QString& filePath, char* destination,
     const auto encodedData = Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
 
     return decodeTo(encodedData, destination, destinationSize);
+}
+
+void ZstdBlobCodec::decodeFromFileRangeTo(const QString& filePath, const std::uint64_t offset, const std::uint64_t encodedSize, char* destination, const std::uint64_t destinationSize) const
+{
+    if (destination == nullptr)
+        throw std::invalid_argument("Destination buffer is null");
+
+    if (QFileInfo::exists(filePath))
+    {
+        BlobCodec::decodeFromFileRangeTo(filePath, offset, encodedSize, destination, destinationSize);
+        return;
+    }
+
+    const auto encodedData = Archiver::readZipEntryRangeToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath, offset, encodedSize);
+    decodeTo(encodedData, destination, destinationSize);
 }
 
 QString ZstdBlobCodec::getFileExtension() const
