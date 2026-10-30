@@ -27,6 +27,7 @@ GroupSectionTreeItem::GroupSectionTreeItem(QTreeWidget* treeWidget, GroupAction*
     treeWidget->addTopLevelItem(this);
     treeWidget->setItemWidget(this, 0, _pushButton);
 
+    // Intentionally construct the item here and not in the init list
     _groupWidgetTreeItem = new GroupWidgetTreeItem(this, groupAction);
 }
 
@@ -54,8 +55,8 @@ GroupAction* GroupSectionTreeItem::getGroupAction() const
 GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, GroupAction* groupAction, QWidget* parent /*= nullptr*/) :
     QPushButton(groupAction->text(), parent),
     _widgetActionGroup(groupAction),
-    _groupTreeWidgetItem(nullptr),
     _parentTreeWidgetItem(treeWidgetItem),
+    _groupTreeWidgetItem(nullptr),
     _groupWidget(nullptr),
     _overlayWidget(this)
 {

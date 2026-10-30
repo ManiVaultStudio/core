@@ -334,7 +334,7 @@ void replaceLayout(QWidget* widget, QLayout* newLayout, bool removeWidgets)
 
 void clearLayout(QLayout* layout, bool removeWidgets)
 {
-    QLayoutItem* layoutItem;
+    QLayoutItem* layoutItem = nullptr;
 
     while ((layoutItem = layout->takeAt(0)) != nullptr) {
         if (removeWidgets)

@@ -96,7 +96,7 @@ private:
     TriggerAction   _killTaskAction;    /** Kill task action */
     Task*           _task;              /** Pointer to task to keep track of */
     
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

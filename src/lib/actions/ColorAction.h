@@ -155,7 +155,7 @@ protected:
     /** Default default color */
     static const QColor DEFAULT_COLOR;
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

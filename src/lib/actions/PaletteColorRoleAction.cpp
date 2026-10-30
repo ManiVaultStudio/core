@@ -14,7 +14,8 @@ QStringList PaletteColorRoleAction::colorGroupNames = {
 
 PaletteColorRoleAction::PaletteColorRoleAction(QObject* parent, const QString& title, const QPalette::ColorRole& colorRole /*= QPalette::ColorRole::Window*/) :
     HorizontalGroupAction(parent, title),
-    _nameAction(this, "Name")
+    _nameAction(this, "Name"),
+    _colorRole(colorRole)
 {
     setShowLabels(false);
     initialize(colorRole);

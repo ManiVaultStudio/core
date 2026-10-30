@@ -13,7 +13,8 @@ using namespace mv::util;
 namespace mv::gui {
 
 StatusAction::StatusAction(QObject* parent, const QString& title, const Status& status /*= Status::Undefined*/, const QString& message /*= ""*/) :
-    WidgetAction(parent, "Title")
+    WidgetAction(parent, "Title"),
+    _status(status)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);

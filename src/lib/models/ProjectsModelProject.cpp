@@ -116,10 +116,12 @@ ProjectsModelProject::ProjectsModelProject(const QString& groupTitle) :
     _uuid(Serializable::createId()),
     _visible(true),
     _serverDownloadSize(0),
+    _userSpecifiedDownloadSize(0),
     _isGroup(true),
     _iconName("folder"),
     _minimumHardwareSpec(HardwareSpec::Type::Minimum),
     _recommendedHardwareSpec(HardwareSpec::Type::Recommended),
+    _startup(false),
     _expanded(false)
 {
     updateIcon();

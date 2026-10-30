@@ -91,6 +91,7 @@ Application::Application(int& argc, char** argv) :
     Serializable("Application"),
     _core(nullptr),
     _version(MV_VERSION_MAJOR, MV_VERSION_MINOR, MV_VERSION_PATCH, std::string(MV_VERSION_SUFFIX.data())),
+    _exitAction(nullptr),
     _startupProjectMetaAction(nullptr),
     _startupTask(nullptr),
     _temporaryDirRoot(getConfiguredTemporaryDirRoot()),

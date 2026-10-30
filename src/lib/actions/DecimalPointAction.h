@@ -57,7 +57,7 @@ protected:
     static constexpr float  INIT_VALUE      = 0.0;      /** Initialization value */
     static constexpr int    INIT_DECIMALS   = 1;        /** Initialization number of decimals */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

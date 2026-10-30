@@ -52,7 +52,7 @@ OpenGLWidget::~OpenGLWidget()
 {
     // If this widget is destroyed before the OpenGL context is, then disconnect signals from the context
     if (QOpenGLContext* ctx = context())
-        disconnect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &OpenGLWidget::cleanup);
+        disconnect(ctx, &QOpenGLContext::aboutToBeDestroyed, this, &OpenGLWidget::cleanup);
 }
 
 /** Function called by QOpenGLWidget when the OpenGL context has fully initialized. */

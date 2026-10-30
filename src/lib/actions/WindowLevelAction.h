@@ -72,7 +72,7 @@ protected:
     DecimalAction   _windowAction;      /** Window action */
     DecimalAction   _levelAction;       /** Level action */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

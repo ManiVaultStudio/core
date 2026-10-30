@@ -358,7 +358,7 @@ protected:
     Qt::TextElideMode               _textElideMode;         /** Text elide mode */
     QRegularExpressionValidator     _validator;             /** Regular expression validator */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

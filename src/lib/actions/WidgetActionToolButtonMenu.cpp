@@ -26,7 +26,7 @@ WidgetActionToolButtonMenu::WidgetActionToolButtonMenu(WidgetActionToolButton& w
     addAction(&_deferredLoadWidgetAction);
 
     connect(this, &QMenu::aboutToShow, this, [this]() -> void {
-        if (auto currentAction = _widgetActionToolButton.getAction())
+        if ([[maybe_unused]] auto currentAction = _widgetActionToolButton.getAction())
             _deferredLoadWidgetAction.getActionWidget().initialize();
     });
 }

@@ -96,7 +96,7 @@ signals:
      */
     void rectangleChanged(float left, float right, float bottom, float top);
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }
