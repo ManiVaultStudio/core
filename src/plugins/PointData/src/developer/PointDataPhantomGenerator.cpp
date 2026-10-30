@@ -48,6 +48,7 @@ namespace
 enum class Population
 {
     Deterministic,
+    ConversionTest,
     RandomFloat,
     RandomZeroOne,
     Zero,
@@ -178,6 +179,9 @@ void writeValue(char* destination, const std::size_t offset, const T value)
 
 float makeValue(const PopulationSettings& population, const std::uint64_t row, const std::uint64_t column, std::mt19937_64& random, std::uniform_real_distribution<float>& unit)
 {
+    if (population.type == Population::ConversionTest)
+        return row == 0 || column == 0 || row == 6 || column == 4 ? 0.0f : static_cast<float>(static_cast<std::int32_t>(row * 17 + column * 5) - 50) / 4.0f;
+
     const auto deterministic = static_cast<float>(row % 10000) / 10000.0f + static_cast<float>(column % 1000) / 1000.0f;
 
     return population.type == Population::Zero ? 0.0f
@@ -366,7 +370,7 @@ class PopulationAction final : public mv::gui::HorizontalGroupAction
 public:
     explicit PopulationAction(QObject* parent) :
         HorizontalGroupAction(parent, "Population"),
-        _typeAction(this, "Type", { "Deterministic", "Random floats", "Random zeros and ones", "All zeros", "Sparse random floats" }, "Deterministic"),
+        _typeAction(this, "Type", { "Deterministic", "Conversion test pattern", "Random floats", "Random zeros and ones", "All zeros", "Sparse random floats" }, "Deterministic"),
         _parametersAction(this, "Parameters"),
         _nonzeroPercentAction(&_parametersAction, "Nonzero (%)", 1, 100, 1)
     {
@@ -374,7 +378,7 @@ public:
 
         _typeAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
         _typeAction.setStretch(1);
-        _typeAction.setToolTip("How values are generated. Sparse random floats leave a configurable proportion of nonzero values; the choice may affect compression ratio and I/O time.");
+        _typeAction.setToolTip("How values are generated. The conversion test pattern includes zero borders and signed fractional values for checking data retention. Sparse random floats leave a configurable proportion of nonzero values.");
 
         _parametersAction.setIconByName("gear");
         _parametersAction.setToolTip("Configure the selected population");

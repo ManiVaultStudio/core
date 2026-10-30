@@ -26,8 +26,9 @@ DeveloperMenu::DeveloperMenu(QWidget* parent /*= nullptr*/) :
     setTitle("Dev");
     setToolTip("Development and integration test tools");
 
+    auto testingMenu = addMenu(util::StyledIcon("vial"), tr("Test"));
     _gifRecorder = std::make_unique<GifRecorder>(parentWidget(), this);
-    auto gifRecordingMenu = addMenu(util::StyledIcon("video"), tr("Behavioral testing"));
+    auto gifRecordingMenu = testingMenu->addMenu(util::StyledIcon("video"), tr("Behavioral"));
     _gifRecordingAction = gifRecordingMenu->addAction(util::StyledIcon("record-vinyl"), tr("Start GIF recording…"));
     _gifRecordingAction->setToolTip(tr("Capture the ManiVault Studio main window as an animated GIF"));
     connect(_gifRecordingAction, &QAction::triggered, this, &DeveloperMenu::toggleGifRecording);
@@ -46,7 +47,7 @@ DeveloperMenu::DeveloperMenu(QWidget* parent /*= nullptr*/) :
         mv::help().addNotification(tr("GIF recording failed"), error, util::StyledIcon("circle-exclamation"));
     });
 
-    auto workflowTestingMenu = addMenu(util::StyledIcon("diagram-project"), tr("Workflow testing"));
+    auto workflowTestingMenu = testingMenu->addMenu(util::StyledIcon("diagram-project"), tr("Workflow"));
     workflowTestingMenu->setToolTip(tr("Run parallel workflow test scenarios"));
     detail::ParallelPhantomTestSuite::populateMenu(*workflowTestingMenu, parentWidget());
 
@@ -61,7 +62,7 @@ DeveloperMenu::DeveloperMenu(QWidget* parent /*= nullptr*/) :
         _dataSynthesisPopulated = true;
     });
 
-    _performanceTestingMenu = addMenu(util::StyledIcon("gauge-high"), tr("Performance testing"));
+    _performanceTestingMenu = testingMenu->addMenu(util::StyledIcon("gauge-high"), tr("Performance testing"));
     _performanceTestingMenu->setToolTip(tr("Run headed performance benchmarks"));
 
     connect(_performanceTestingMenu, &QMenu::aboutToShow, this, [this] {
@@ -72,7 +73,15 @@ DeveloperMenu::DeveloperMenu(QWidget* parent /*= nullptr*/) :
         _performanceTestingPopulated = true;
     });
 
-    auto errorReportingMenu = addMenu(util::StyledIcon("bug"), tr("Error reporting testing"));
+    auto pointDataTestingMenu = testingMenu->addMenu(util::StyledIcon("circle-nodes"), tr("Points"));
+    pointDataTestingMenu->setToolTip(tr("Run point-data integration checks"));
+
+    connect(pointDataTestingMenu, &QMenu::aboutToShow, this, [pointDataTestingMenu, this] {
+        if (pointDataTestingMenu->actions().empty())
+            developer::populateMenu(*pointDataTestingMenu, parentWidget(), QStringLiteral("PointData.Testing"));
+    });
+
+    auto errorReportingMenu = testingMenu->addMenu(util::StyledIcon("bug"), tr("Error reporting"));
     auto handledExceptionAction = errorReportingMenu->addAction(util::StyledIcon("triangle-exclamation"), tr("Handled exception"));
     handledExceptionAction->setToolTip(tr("Create a safe handled exception and show the normal exception dialog"));
 

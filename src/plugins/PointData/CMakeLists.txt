@@ -27,6 +27,7 @@ set(POINTS_SOURCES
     src/DimensionsPickerSelectAction.cpp
     src/ModelResetter.cpp
     src/developer/PointDataPhantomGenerator.cpp
+    src/developer/PointDataTestSuite.cpp
     src/developer/PointDataBenchmark.cpp
 )
 
