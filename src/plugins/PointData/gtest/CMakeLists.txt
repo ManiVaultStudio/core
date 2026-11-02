@@ -1,6 +1,7 @@
 add_executable(PointDataGTest
     PointDataGTestMain.cpp
     PointDataGTest.cpp
+    PointDataNumericConversionGTest.cpp
     ../src/storage/tiled/PointDataTileCache.cpp
     ../src/storage/tiled/PointDataTiledStorage.cpp
 )

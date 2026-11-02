@@ -10,6 +10,7 @@
 #include "actions/PointsAction.h"
 #include "DimensionNamesSerializer.h"
 #include "storage/eager/EagerPointsStorageBackend.h"
+#include "storage/interface/PointDataNumericConversion.h"
 #include "storage/interface/StorageBackendConversionAction.h"
 #include "storage/sparse/SparseStorageBackendConversionAction.h"
 #include "storage/sparse/SparsePointsStorageBackend.h"
@@ -79,72 +80,6 @@ namespace
             case 6: return isNonZeroValue<std::int8_t>(valueBytes);
             case 7: return isNonZeroValue<std::uint8_t>(valueBytes);
             default: throw std::invalid_argument("Sparse conversion encountered an unsupported element type");
-        }
-    }
-
-    template<typename TargetType, typename SourceType>
-    void convertNumericRowTo(const char* source, const std::uint64_t columns, std::uint8_t* destination)
-    {
-        for (std::uint64_t column = 0; column < columns; ++column)
-        {
-            SourceType sourceValue;
-            std::memcpy(&sourceValue, source + column * sizeof(SourceType), sizeof(SourceType));
-            const auto value = [&] {
-                if constexpr (std::is_same_v<SourceType, biovault::bfloat16_t>)
-                    return static_cast<long double>(static_cast<float>(sourceValue));
-                else
-                    return static_cast<long double>(sourceValue);
-            }();
-
-            TargetType targetValue;
-            if constexpr (std::is_integral_v<TargetType>)
-            {
-                if (!std::isfinite(value) || value < static_cast<long double>(std::numeric_limits<TargetType>::lowest()) || value > static_cast<long double>(std::numeric_limits<TargetType>::max()))
-                    throw std::range_error("A value cannot be represented by the selected integer element type");
-                targetValue = static_cast<TargetType>(value);
-            }
-            else if constexpr (std::is_same_v<TargetType, biovault::bfloat16_t>)
-                targetValue = biovault::bfloat16_t(static_cast<float>(value));
-            else
-                targetValue = static_cast<TargetType>(value);
-
-            std::memcpy(destination + column * sizeof(TargetType), &targetValue, sizeof(TargetType));
-        }
-    }
-
-    template<typename SourceType>
-    void convertNumericRowToType(const std::uint32_t targetTypeIndex, const char* source, const std::uint64_t columns, std::uint8_t* destination)
-    {
-        switch (targetTypeIndex)
-        {
-            case 0: return convertNumericRowTo<float, SourceType>(source, columns, destination);
-            case 1: return convertNumericRowTo<biovault::bfloat16_t, SourceType>(source, columns, destination);
-            case 2: return convertNumericRowTo<std::int32_t, SourceType>(source, columns, destination);
-            case 3: return convertNumericRowTo<std::uint32_t, SourceType>(source, columns, destination);
-            case 4: return convertNumericRowTo<std::int16_t, SourceType>(source, columns, destination);
-            case 5: return convertNumericRowTo<std::uint16_t, SourceType>(source, columns, destination);
-            case 6: return convertNumericRowTo<std::int8_t, SourceType>(source, columns, destination);
-            case 7: return convertNumericRowTo<std::uint8_t, SourceType>(source, columns, destination);
-            default: throw std::invalid_argument("Point-data conversion uses an unsupported target element type");
-        }
-    }
-
-    void convertNumericRow(const std::uint32_t sourceTypeIndex, const std::uint32_t targetTypeIndex, const char* source, const std::uint64_t columns, std::uint8_t* destination)
-    {
-        if (columns != 0 && (!source || !destination))
-            throw std::invalid_argument("Point-data conversion row is unavailable");
-
-        switch (sourceTypeIndex)
-        {
-            case 0: return convertNumericRowToType<float>(targetTypeIndex, source, columns, destination);
-            case 1: return convertNumericRowToType<biovault::bfloat16_t>(targetTypeIndex, source, columns, destination);
-            case 2: return convertNumericRowToType<std::int32_t>(targetTypeIndex, source, columns, destination);
-            case 3: return convertNumericRowToType<std::uint32_t>(targetTypeIndex, source, columns, destination);
-            case 4: return convertNumericRowToType<std::int16_t>(targetTypeIndex, source, columns, destination);
-            case 5: return convertNumericRowToType<std::uint16_t>(targetTypeIndex, source, columns, destination);
-            case 6: return convertNumericRowToType<std::int8_t>(targetTypeIndex, source, columns, destination);
-            case 7: return convertNumericRowToType<std::uint8_t>(targetTypeIndex, source, columns, destination);
-            default: throw std::invalid_argument("Point-data conversion uses an unsupported source element type");
         }
     }
 
@@ -591,9 +526,9 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
                     else
                         sourceRow = std::visit([this, row = rowOffset + localRow](const auto& vector) { return reinterpret_cast<const char*>(vector.data() + static_cast<std::size_t>(row * _numDimensions)); }, _variantOfVectors);
                     const auto* sourceTileData = tileColumns == 0 ? sourceRow : sourceRow + columnOffset * sourceElementSize;
-                    convertNumericRow(sourceElementTypeIndex, targetElementTypeIndex, sourceTileData, tileColumns, convertedRow.data());
+                    pointdata::storage::detail::convertNumericRow(sourceElementTypeIndex, targetElementTypeIndex, sourceTileData, tileColumns, convertedRow.data());
                     if (rowBytes != 0)
-                        std::memcpy(payload.data() + localRow * rowBytes, convertedRow.data() + columnOffset * targetElementSize, static_cast<std::size_t>(rowBytes));
+                        std::memcpy(payload.data() + localRow * rowBytes, convertedRow.data(), static_cast<std::size_t>(rowBytes));
                 }
 
                 return payload;
@@ -623,7 +558,7 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
             creation->materializeGeneratedTiles = true;
             creation->superTileRows = configuration->superTileRows;
             creation->superTileColumns = configuration->superTileColumns;
-            creation->generator = [sparseStorage, elementSize = creation->elementSize](const std::uint64_t rowOffset, const std::uint64_t, const std::uint64_t tileRows, const std::uint64_t tileColumns) {
+            creation->generator = [sparseStorage, elementSize = creation->elementSize, columns = creation->columns](const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t tileRows, const std::uint64_t tileColumns) {
                 if (elementSize == 0 || tileColumns > std::numeric_limits<std::uint64_t>::max() / elementSize)
                     throw std::overflow_error("Sparse-to-tiled payload exceeds the supported byte size");
 
@@ -636,10 +571,12 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
                 for (std::uint64_t localRow = 0; localRow < tileRows; ++localRow)
                 {
                     const auto row = sparseStorage->getRow(rowOffset + localRow);
-                    if (row.columns != tileColumns || row.elementSizeBytes != elementSize)
+                    if (row.columns != columns || row.elementSizeBytes != elementSize)
                         throw std::runtime_error("Sparse row shape changed during tiled conversion");
+                    if (columnOffset > row.columns || tileColumns > row.columns - columnOffset || columnOffset > std::numeric_limits<std::size_t>::max() / elementSize)
+                        throw std::out_of_range("Sparse row tile columns exceed the source row");
                     if (rowBytes != 0)
-                        std::memcpy(payload.data() + localRow * rowBytes, row.data, static_cast<std::size_t>(rowBytes));
+                        std::memcpy(payload.data() + localRow * rowBytes, static_cast<const char*>(row.data) + columnOffset * elementSize, static_cast<std::size_t>(rowBytes));
                 }
 
                 return payload;
@@ -690,7 +627,7 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
             {
                 PointDataAccessView sourceView;
                 const auto* sourceRow = getSourceRow(row, sourceView);
-                convertNumericRow(sourceElementTypeIndex, targetElementTypeIndex, sourceRow, columns, convertedRow.data());
+                pointdata::storage::detail::convertNumericRow(sourceElementTypeIndex, targetElementTypeIndex, sourceRow, columns, convertedRow.data());
                 if (!convertedRow.empty())
                     std::memcpy(destination + static_cast<std::size_t>(row * columns) * targetElementSize, convertedRow.data(), convertedRow.size());
                 if (progress && (row % std::max<std::uint64_t>(1, rows / 100) == 0))
@@ -761,7 +698,7 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
             const auto* sourceRow = getSourceRow(row, sourceView);
             if (sourceView.data && sourceView.elementSizeBytes != getElementTypeSize(sourceElementTypeIndex))
                 throw std::runtime_error("Source row element size changed during sparse conversion");
-            convertNumericRow(sourceElementTypeIndex, elementTypeIndex, sourceRow, columns, convertedRow.data());
+            pointdata::storage::detail::convertNumericRow(sourceElementTypeIndex, elementTypeIndex, sourceRow, columns, convertedRow.data());
             appendRow(reinterpret_cast<const char*>(convertedRow.data()), row);
 
             if (progress && (row % std::max<std::uint64_t>(1, rows / 100) == 0))
