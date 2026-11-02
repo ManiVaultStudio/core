@@ -157,11 +157,8 @@ namespace mv
             i++;
         }
 
-        QVariantMap kvKeys = mv::util::storeOnDisk(kvMapKeys);
-        QVariantMap kvValues = mv::util::storeOnDisk(kvMapValues);
-
-        variantMap["kvKeys"] = kvKeys;
-        variantMap["kvValues"] = kvValues;
+        variantMap["kvKeys"] = mv::util::storeOnDisk(kvMapKeys);
+        variantMap["kvValues"] = mv::util::storeOnDisk(kvMapValues);
 
         return variantMap;
     }
@@ -216,9 +213,7 @@ namespace mv
             Dataset<DatasetImpl> d = _datasets[i];
             if (d != dataset && d.isValid())
             {
-                std::vector<uint32_t> indices = _biMaps[i].getValuesByKeys(keys);
-                
-                d->setSelectionIndices(indices);
+                d->setSelectionIndices(_biMaps[i].getValuesByKeys(keys));
 
                 d->markSelectionDirty(true);
             }
@@ -249,27 +244,26 @@ namespace mv
 
     QVariantMap KeyBasedSelectionGroup::toVariantMap() const
     {
-        QVariantMap variantMap;
-
         QStringList datasetIds;
-        for (int i = 0; i < _datasets.size(); i++)
+        datasetIds.reserve(static_cast<qsizetype>(_datasets.size()));
+        for (const auto& dataset: _datasets)
         {
-            datasetIds.push_back(_datasets[i].getDatasetId());
+            datasetIds.push_back(dataset.getDatasetId());
         }
         QVariantMap datasetIdsMap = mv::util::storeOnDisk(datasetIds);
 
         QVariantList bimapVariantList;
-        bimapVariantList.reserve(_biMaps.size());
+        bimapVariantList.reserve(static_cast<qsizetype>(_biMaps.size()));
 
         for (const BiMap& biMap : _biMaps)
         {
             bimapVariantList.push_back(biMap.toVariantMap());
         }
 
-        variantMap.insert({
+        QVariantMap variantMap = {
             { "DatasetIds", datasetIdsMap },
             { "BiMaps", QVariant::fromValue(bimapVariantList) }
-        });
+        };
 
         return variantMap;
     }
@@ -296,7 +290,7 @@ namespace mv
         bool foundDataset1 = false;
         bool foundDataset2 = false;
 
-        for (Dataset<DatasetImpl> d : _datasets)
+        for (const auto& d : _datasets)
         {
             if (d.getDatasetId() == d1.getDatasetId())
                 foundDataset1 = true;
