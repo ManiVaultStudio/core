@@ -360,15 +360,15 @@ void PixelSelectionAction::initMiscellaneous()
         _lineAngleAction.setValue(lineAngle);
     });
 
-    connect(&_brushRadiusAction, &DecimalAction::valueChanged, this, [this](const double& value) {
+    connect(&_brushRadiusAction, &DecimalAction::valueChanged, this, [this](const float& value) {
         _pixelSelectionTool->setBrushRadius(value);
     });
 
-    connect(&_lineWidthAction, &DecimalAction::valueChanged, this, [this](const double& value) {
+    connect(&_lineWidthAction, &DecimalAction::valueChanged, this, [this](const float& value) {
         _pixelSelectionTool->setLineWidth(value);
     });
 
-    connect(&_lineAngleAction, &DecimalAction::valueChanged, this, [this](const double& value) {
+    connect(&_lineAngleAction, &DecimalAction::valueChanged, this, [this](const float& value) {
         _pixelSelectionTool->setLineAngle(value);
     });
 
