@@ -27,19 +27,24 @@
 #include "../storage/tiled/PointDataTiledStorage.h"
 #include "../storage/tiled/TiledPointsStorageBackend.h"
 
+#include <QAbstractItemView>
 #include <QCoreApplication>
+#include <QDesktopServices>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QDateTime>
 #include <QDir>
 #include <QEventLoop>
 #include <QFileInfo>
+#include <QHeaderView>
 #include <QHBoxLayout>
+#include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
 #include <QStorageInfo>
 #include <QSysInfo>
+#include <QTableWidget>
 #include <QTextEdit>
 #include <QThread>
 #include <QTemporaryDir>
@@ -47,9 +52,12 @@
 #include <QTextStream>
 #include <QVariantMap>
 #include <QVBoxLayout>
+#include <QUrl>
 
 #include <algorithm>
+#include <array>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <cstring>
 #include <fstream>
@@ -57,6 +65,7 @@
 #include <initializer_list>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <random>
 #include <stdexcept>
 #include <vector>
@@ -699,6 +708,29 @@ struct FixtureResult
     std::size_t recommendedSuperTileColumns = 0;
 };
 
+using FixtureMeasurements = std::array<FixtureResult, 4>;
+
+bool comparableMeasurements(const FixtureMeasurements& first, const FixtureMeasurements& second)
+{
+    for (std::size_t index = 0; index < first.size(); ++index)
+    {
+        const auto& left  = first[index];
+        const auto& right = second[index];
+
+        if (left.rows != right.rows || left.columns != right.columns || left.elementType != right.elementType || left.accessPattern != right.accessPattern || left.operations != right.operations || left.checksum != right.checksum)
+            return false;
+    }
+
+    return true;
+}
+
+bool hasValidTimings(const FixtureMeasurements& measurements)
+{
+    return std::all_of(measurements.begin(), measurements.end(), [](const auto& measurement) {
+        return std::isfinite(measurement.elapsedMilliseconds) && measurement.elapsedMilliseconds > 0.0;
+    });
+}
+
 QString backendName(const std::optional<Points::StorageBackendType>& backend)
 {
     return backend ? mv::pointdata::storage::getStorageBackendTypeName(*backend).toLower() : QStringLiteral("not uniform");
@@ -831,6 +863,62 @@ void writeFixtureResult(std::ofstream& output, const FixtureResult& result, cons
     output << csvValue(result.datasetName).toStdString() << ',' << result.backend.toStdString() << ',' << result.elementType.toStdString() << ',' << result.rows << ',' << result.columns << ',' << result.rowTileSize << ',' << result.columnTileSize << ',' << result.cacheCapacity << ',' << result.accessPattern.toStdString() << ',' << result.operations << ',' << result.elapsedMilliseconds << ',' << result.meanMillisecondsPerRow << ',' << result.checksum << ',' << result.cacheHits << ',' << result.cacheMisses << ',' << result.cacheEvictions << ',' << csvValue(result.rowAccess).toStdString() << ',' << csvValue(result.columnAccess).toStdString() << ',' << csvValue(result.rowAccessFrequency).toStdString() << ',' << csvValue(result.columnAccessFrequency).toStdString() << ',' << csvValue(result.pointAccessFrequency).toStdString() << ',' << csvValue(result.memoryPreference).toStdString() << ',' << result.recommendedRowTileSize << ',' << result.recommendedColumnTileSize << ',' << result.recommendedCacheCapacity << ',' << (result.recommendedPackedTiles ? 1 : 0) << ',' << result.recommendedSuperTileRows << ',' << result.recommendedSuperTileColumns << ',' << csvValue(context.benchmarkTimestamp).toStdString() << ',' << csvValue(context.cpuModel).toStdString() << ',' << csvValue(context.cpuArchitecture).toStdString() << ',' << csvValue(context.operatingSystem).toStdString() << ',' << context.logicalCores << ',' << context.physicalMemoryBytes << ',' << csvValue(context.storageVolume).toStdString() << ',' << csvValue(context.storageDevice).toStdString() << ',' << csvValue(context.storageFileSystem).toStdString() << ',' << context.storageTotalBytes << ',' << context.storageAvailableBytes << ',' << (context.projectCompressionEnabled ? 1 : 0) << ',' << csvValue(context.projectCodec).toStdString() << '\n';
 }
 
+struct ComparisonScore
+{
+    std::optional<double> performance;
+    std::size_t comparableCandidates = 0;
+};
+
+ComparisonScore calculateComparisonScore(const FixtureMeasurements& candidate, const std::vector<FixtureMeasurements>& measurements)
+{
+    std::array<double, 4> fastest;
+    fastest.fill(std::numeric_limits<double>::max());
+    std::size_t comparableCount = 0;
+
+    for (const auto& other : measurements)
+    {
+        if (!comparableMeasurements(candidate, other) || !hasValidTimings(other))
+            continue;
+
+        ++comparableCount;
+
+        for (std::size_t index = 0; index < fastest.size(); ++index)
+            fastest[index] = std::min(fastest[index], other[index].elapsedMilliseconds);
+    }
+
+    if (comparableCount < 2 || !hasValidTimings(candidate))
+        return { {}, comparableCount };
+
+    double logScore = 0.0;
+
+    for (std::size_t index = 0; index < fastest.size(); ++index)
+        logScore += std::log(fastest[index] / candidate[index].elapsedMilliseconds);
+
+    return { std::exp(logScore / fastest.size()), comparableCount };
+}
+
+void writeScoreSummary(const QString& path, const std::vector<FixtureMeasurements>& measurements)
+{
+    std::ofstream output(path.toStdString(), std::ios::trunc);
+
+    if (!output)
+        throw std::runtime_error("Unable to open the benchmark score output file");
+
+    output << "dataset,backend,element_type,rows,columns,row_tile_size,column_tile_size,cache_capacity,performance_score,comparable_candidates\n";
+
+    for (const auto& candidate : measurements)
+    {
+        const auto& result = candidate.front();
+        const auto score   = calculateComparisonScore(candidate, measurements);
+        output << csvValue(result.datasetName).toStdString() << ',' << result.backend.toStdString() << ',' << result.elementType.toStdString() << ',' << result.rows << ',' << result.columns << ',' << result.rowTileSize << ',' << result.columnTileSize << ',' << result.cacheCapacity << ',';
+
+        if (score.performance)
+            output << *score.performance;
+
+        output << ',' << score.comparableCandidates << '\n';
+    }
+}
+
 QString makeTimestampedBenchmarkOutputPath(const QString& outputPath)
 {
     const QFileInfo fileInfo(outputPath);
@@ -842,13 +930,90 @@ QString makeTimestampedBenchmarkOutputPath(const QString& outputPath)
     return QDir(directory).filePath(QStringLiteral("%1-%2.%3").arg(baseName, timestamp, suffix));
 }
 
+QString makeScoreOutputPath(const QString& benchmarkOutputPath)
+{
+    const QFileInfo fileInfo(benchmarkOutputPath);
+    return QDir(fileInfo.absolutePath()).filePath(fileInfo.completeBaseName() + QStringLiteral("-scores.csv"));
+}
+
+class BenchmarkResultsDialog final : public QDialog
+{
+public:
+    BenchmarkResultsDialog(const std::vector<FixtureMeasurements>& measurements, const QString& benchmarkOutputPath, const QString& scoreOutputPath, QWidget* parent) :
+        QDialog(parent)
+    {
+        setWindowTitle(tr("Point-data benchmark results"));
+        setWindowIcon(mv::util::StyledIcon("gauge-high"));
+        resize(1100, 520);
+
+        auto* layout = new QVBoxLayout(this);
+        auto* summary = new QLabel(tr("Performance score: equal-weight geometric mean of the four relative speeds. A score of 1 is fastest in every pattern. Only datasets with matching shape, element type, sample counts, and checksums are compared."), this);
+        summary->setWordWrap(true);
+        layout->addWidget(summary);
+
+        auto* table = new QTableWidget(static_cast<int>(measurements.size()), 11, this);
+        table->setHorizontalHeaderLabels({ tr("Dataset"), tr("Backend"), tr("Tile rows"), tr("Tile columns"), tr("Cache tiles"), tr("Score"), tr("Comparable"), tr("Random (ms)"), tr("Row scan (ms)"), tr("Column scan (ms)"), tr("Random row (ms)") });
+        table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        table->setSelectionBehavior(QAbstractItemView::SelectRows);
+        table->setAlternatingRowColors(true);
+        table->verticalHeader()->setVisible(false);
+        table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+
+        const auto numericItem = [](const double value) {
+            auto* item = new QTableWidgetItem();
+            item->setData(Qt::DisplayRole, value);
+            item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+            return item;
+        };
+
+        for (std::size_t row = 0; row < measurements.size(); ++row)
+        {
+            const auto& candidate = measurements[row];
+            const auto& result    = candidate.front();
+            const auto score      = calculateComparisonScore(candidate, measurements);
+            const auto tableRow   = static_cast<int>(row);
+
+            table->setItem(tableRow, 0, new QTableWidgetItem(result.datasetName));
+            table->setItem(tableRow, 1, new QTableWidgetItem(result.backend));
+            table->setItem(tableRow, 2, numericItem(result.rowTileSize));
+            table->setItem(tableRow, 3, numericItem(result.columnTileSize));
+            table->setItem(tableRow, 4, numericItem(result.cacheCapacity));
+            table->setItem(tableRow, 5, score.performance ? numericItem(*score.performance) : new QTableWidgetItem(tr("—")));
+            table->setItem(tableRow, 6, numericItem(score.comparableCandidates));
+
+            for (std::size_t index = 0; index < candidate.size(); ++index)
+                table->setItem(tableRow, static_cast<int>(index + 7), numericItem(candidate[index].elapsedMilliseconds));
+        }
+
+        table->setSortingEnabled(true);
+        table->sortItems(5, Qt::DescendingOrder);
+        layout->addWidget(table);
+
+        auto* buttons = new QDialogButtonBox(QDialogButtonBox::Close, this);
+        auto* openMeasurements = buttons->addButton(tr("Open measurements CSV"), QDialogButtonBox::ActionRole);
+        auto* openScores = buttons->addButton(tr("Open scores CSV"), QDialogButtonBox::ActionRole);
+
+        connect(openMeasurements, &QPushButton::clicked, this, [this, benchmarkOutputPath] { openFile(benchmarkOutputPath); });
+        connect(openScores, &QPushButton::clicked, this, [this, scoreOutputPath] { openFile(scoreOutputPath); });
+        connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
+        layout->addWidget(buttons);
+    }
+
+private:
+    void openFile(const QString& path)
+    {
+        if (!QDesktopServices::openUrl(QUrl::fromLocalFile(path)))
+            QMessageBox::warning(this, tr("Unable to open CSV"), tr("Could not open %1.").arg(path));
+    }
+};
+
 class BenchmarkDialog final : public QDialog
 {
 public:
     explicit BenchmarkDialog(QWidget* parent) :
         QDialog(parent),
         _settingsGroupAction(this, "Point Data Discovery and Benchmark", true),
-        _descriptionAction(&_settingsGroupAction, "Description", "The benchmark uses the currently loaded concrete point datasets in the data hierarchy as its fixture. It does not create or reload data. Each access pattern starts with an empty application-level tiled cache; the operating-system file cache is not cleared. Each dataset is measured for random-point, sampled or full row-major, sampled or full column-major, and random-row access. The CSV also records CPU, memory, operating-system, storage-volume, and project-codec context."),
+        _descriptionAction(&_settingsGroupAction, "Description", "The benchmark uses the currently loaded concrete point datasets in the data hierarchy as its fixture. It does not create or reload data. Each access pattern starts with an empty application-level tiled cache; the operating-system file cache is not cleared. Each dataset is measured for random-point, sampled or full row-major, sampled or full column-major, and random-row access. A results dialog opens when the benchmark completes. A companion scores CSV compares matching datasets using the equal-weight geometric mean of their four relative speeds; 1 is best for every pattern. Datasets without a matching candidate receive no score. The measurements CSV also records hardware and project context."),
         _datasetsAction(&_settingsGroupAction, "Point datasets"),
         _scanModeAction(&_settingsGroupAction, "Scan mode", { "Quick", "Standard", "Full" }, "Quick"),
         _samplesAction(&_settingsGroupAction, "Random samples", 1, std::numeric_limits<std::int32_t>::max(), 10000),
@@ -1010,7 +1175,9 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
         throw std::runtime_error("Enable at least one non-empty point dataset before running the benchmark");
 
     const auto benchmarkOutputPath = makeTimestampedBenchmarkOutputPath(outputPath);
+    const auto scoreOutputPath     = makeScoreOutputPath(benchmarkOutputPath);
     const auto output              = std::make_shared<std::ofstream>(benchmarkOutputPath.toStdString(), std::ios::trunc);
+    const auto measurements        = std::make_shared<std::vector<FixtureMeasurements>>();
 
     if (!*output)
         throw std::runtime_error("Unable to open the benchmark output file");
@@ -1024,7 +1191,7 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
 
     for (const auto& points : datasets)
     {
-        benchmarkJobs.emplace_back(points.label, [configuration, points, output, benchmarkContext](const mv::workflow::WorkflowPlan::Job&, const mv::workflow::SharedWorkflowExecutionContext& executionContext) {
+        benchmarkJobs.emplace_back(points.label, [configuration, points, output, measurements, benchmarkContext](const mv::workflow::WorkflowPlan::Job&, const mv::workflow::SharedWorkflowExecutionContext& executionContext) {
             BenchmarkConfiguration datasetConfiguration = configuration;
             const auto& pointDataset = points.points;
             datasetConfiguration.rows = pointDataset->getNumPoints();
@@ -1113,16 +1280,23 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
                 });
             };
 
-            writeFixtureResult(*output, measureAccess(QStringLiteral("random"), 0), benchmarkContext);
-            writeFixtureResult(*output, measureAccess(QStringLiteral("row_scan"), 1), benchmarkContext);
-            writeFixtureResult(*output, measureAccess(QStringLiteral("column_scan"), 2), benchmarkContext);
-            writeFixtureResult(*output, measureAccess(QStringLiteral("random_row"), 3), benchmarkContext);
+            FixtureMeasurements result;
+            result[0] = measureAccess(QStringLiteral("random"), 0);
+            writeFixtureResult(*output, result[0], benchmarkContext);
+            result[1] = measureAccess(QStringLiteral("row_scan"), 1);
+            writeFixtureResult(*output, result[1], benchmarkContext);
+            result[2] = measureAccess(QStringLiteral("column_scan"), 2);
+            writeFixtureResult(*output, result[2], benchmarkContext);
+            result[3] = measureAccess(QStringLiteral("random_row"), 3);
+            writeFixtureResult(*output, result[3], benchmarkContext);
+            measurements->push_back(std::move(result));
         });
     }
 
     plan->addSequentialStage(QObject::tr("Benchmark datasets"), std::move(benchmarkJobs));
-    plan->addFinalizationStage(QObject::tr("Close benchmark output"), [output] {
+    plan->addFinalizationStage(QObject::tr("Close benchmark output"), [output, measurements, scoreOutputPath] {
         output->flush();
+        writeScoreSummary(scoreOutputPath, *measurements);
     });
 
     mv::workflow::WorkflowOptions options;
@@ -1132,7 +1306,7 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
 
     const auto benchmarkStart = std::chrono::steady_clock::now();
     auto future = mv::Application::getWorkflowPlanExecutor().execute(std::move(plan), nullptr, options);
-    future.onFinished(owner, [output, benchmarkOutputPath, benchmarkStart](const mv::workflow::SharedWorkflowResult& result) {
+    future.onFinished(owner, [owner, output, measurements, benchmarkOutputPath, scoreOutputPath, benchmarkStart](const mv::workflow::SharedWorkflowResult& result) {
         output->flush();
 
         const auto elapsedMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - benchmarkStart).count();
@@ -1150,7 +1324,10 @@ void runBenchmark(QWidget* owner, const BenchmarkConfiguration& configuration, c
             return;
         }
 
-        mv::help().addNotification(QObject::tr("Point-data benchmark completed"), QObject::tr("The benchmark completed in %1. Results were saved to %2.").arg(elapsedTime, benchmarkOutputPath), mv::util::StyledIcon("check"));
+        mv::help().addNotification(QObject::tr("Point-data benchmark completed"), QObject::tr("The benchmark completed in %1. Comparison results are shown in the dialog.").arg(elapsedTime), mv::util::StyledIcon("check"));
+
+        BenchmarkResultsDialog dialog(*measurements, benchmarkOutputPath, scoreOutputPath, owner);
+        dialog.exec();
     });
 }
 }
