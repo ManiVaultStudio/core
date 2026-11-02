@@ -92,7 +92,7 @@ bool ColorMapEditor1DWidget::eventFilter(QObject* target, QEvent* event)
             break;
     }
 
-    return QWidget::eventFilter(target, event);
+    return QGraphicsView::eventFilter(target, event);
 }
 
 void ColorMapEditor1DWidget::selectNode(ColorMapEditor1DNode* node)
