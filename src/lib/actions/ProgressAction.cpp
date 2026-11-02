@@ -292,7 +292,7 @@ float ProgressAction::getPercentage() const
     if (getMinimum() == getMaximum())
         return 0.f;
 
-    return 100.f * ((getProgress() - getMinimum()) / static_cast<float>(getNumberOfSteps()));
+    return 100.f * (static_cast<float>(getProgress() - getMinimum()) / static_cast<float>(getNumberOfSteps()));
 }
 
 QString ProgressAction::getText() const

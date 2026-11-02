@@ -69,7 +69,7 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
                 modifierIconPixmapPainter.setRenderHint(QPainter::Antialiasing);
                 modifierIconPixmapPainter.setRenderHint(QPainter::SmoothPixmapTransform, true);
                 modifierIconPixmapPainter.setRenderHint(QPainter::LosslessImageRendering, true);
-                modifierIconPixmapPainter.drawPixmap(QPointF(std::round(size.width() / 2.f), std::round(size.height() / 2.f)), recoloredModifierIconPixmap);
+                modifierIconPixmapPainter.drawPixmap(QPointF(std::round(static_cast<float>(size.width()) / 2.f), std::round(static_cast<float>(size.height()) / 2.f)), recoloredModifierIconPixmap);
             }
             
             auto& badgeParameters = _iconSettings._badgeParameters;
@@ -97,25 +97,28 @@ QPixmap StyledIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon::Sta
                 const auto scaledIconPixmapSize = badgeScale * iconPixmapSize;
                 const auto badgeAlignment       = badgeParameters._alignment;
 
+                const float iconPixmapSizeHeight = static_cast<float>(iconPixmapSize.height());
+                const float iconPixmapSizeWidth  = static_cast<float>(iconPixmapSize.width());
+
                 QPoint origin;
 
                 if (badgeAlignment & Qt::AlignTop)
                     origin.setY(0);
 
                 if (badgeAlignment & Qt::AlignVCenter)
-                    origin.setY((0.5 * iconPixmapSize.height()) - ((0.5 * badgeScale) * iconPixmapSize.height()));
+                    origin.setY(static_cast<int>((0.5f * iconPixmapSizeHeight) - ((0.5f * badgeScale) * iconPixmapSizeHeight)));
 
                 if (badgeAlignment & Qt::AlignBottom)
-                    origin.setY((1.0f - badgeScale) * iconPixmapSize.height());
+                    origin.setY(static_cast<int>((1.0f - badgeScale) * iconPixmapSizeHeight));
 
                 if (badgeAlignment & Qt::AlignLeft)
                     origin.setX(0);
 
                 if (badgeAlignment & Qt::AlignHCenter)
-                    origin.setX((0.5 * iconPixmapSize.width()) - ((0.5 * badgeScale) * iconPixmapSize.width()));
+                    origin.setX(static_cast<int>((0.5f * iconPixmapSizeWidth) - ((0.5f * badgeScale) * iconPixmapSizeWidth)));
 
                 if (badgeAlignment & Qt::AlignRight)
-                    origin.setX((1.0f - badgeScale) * iconPixmapSize.width());
+                    origin.setX(static_cast<int>((1.0f - badgeScale) * iconPixmapSizeWidth));
 
                 badgeIconPixmapPainter.drawPixmap(QRectF(origin, scaledIconPixmapSize), badgePixmap, badgeRectangle);
 

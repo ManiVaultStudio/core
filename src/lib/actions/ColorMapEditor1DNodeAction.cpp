@@ -105,14 +105,14 @@ void ColorMapEditor1DNodeAction::nodeChanged()
     if (_currentNode == nullptr)
         return;
 
-    const auto normalizedValueToRange = [this](const float& normalizedValue) -> float {
-        auto& rangeAction = _colorMapEditor1DAction.getColorMapAction().getRangeAction(ColorMapAction::Axis::X);
+    const auto normalizedValueToRange = [this](const auto& normalizedValue) -> float {
+        const auto& rangeAction = _colorMapEditor1DAction.getColorMapAction().getRangeAction(ColorMapAction::Axis::X);
 
         const auto minimum      = rangeAction.getMinimum();
         const auto maximum      = rangeAction.getMaximum();
         const auto length       = maximum - minimum;
         
-        return minimum + (normalizedValue * length);
+        return minimum + static_cast<float>(normalizedValue * length);
     };
 
     const auto normalizedCoordinate = _currentNode->getNormalizedCoordinate();
@@ -120,7 +120,7 @@ void ColorMapEditor1DNodeAction::nodeChanged()
 
     _colorAction.setColor(_currentNode->getColor());
     _valueAction.initialize(normalizedValueToRange(limits.left()), normalizedValueToRange(limits.right()), normalizedValueToRange(normalizedCoordinate.x()), 2);
-    _opacityAction.setValue(normalizedCoordinate.y() * 100.0f);
+    _opacityAction.setValue(static_cast<float>(normalizedCoordinate.y() * 100.0));
 }
 
 ColorMapEditor1DNodeAction::Widget::Widget(QWidget* parent, ColorMapEditor1DNodeAction* colorMapEditor1DNodeAction) :

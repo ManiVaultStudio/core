@@ -99,7 +99,7 @@ void PluginTriggerPickerAction::setCurrentPluginTriggerAction(const QString& sha
 void PluginTriggerPickerAction::setCurrentPluginTriggerAction(QPointer<PluginTriggerAction> pluginTriggerAction)
 {
     if (_pluginTriggerActions.contains(pluginTriggerAction))
-        _selectTriggerAction.setCurrentIndex(_pluginTriggerActions.indexOf(pluginTriggerAction) + 1);
+        _selectTriggerAction.setCurrentIndex(static_cast<int>(_pluginTriggerActions.indexOf(pluginTriggerAction) + 1));
 }
 
 OptionAction& PluginTriggerPickerAction::getSelectTriggerAction()

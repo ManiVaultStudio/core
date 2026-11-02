@@ -247,9 +247,12 @@ void ColorMapEditor1DWidget::drawBackground(QPainter* painter,const QRectF& rect
     drawVerticalAxis(0.0f, rangeAction.getMinimum());
     drawVerticalAxis(1.0f, rangeAction.getMaximum());
 
-    painter->drawText(_graphRectangle.translated(QPoint(0, _graphRectangle.height() + 18)), "Value", QTextOption(Qt::AlignHCenter | Qt::AlignTop));
+    painter->drawText(
+        _graphRectangle.translated(QPoint(0, static_cast<int>(_graphRectangle.height() + 18))),
+        "Value", QTextOption(Qt::AlignHCenter | Qt::AlignTop)
+        );
 
-    painter->translate(QPoint(18, _graphRectangle.center().y()));
+    painter->translate(QPoint(18, static_cast<int>(_graphRectangle.center().y())));
     painter->rotate(-90);
     painter->drawText(QRectF(QPointF(-200, -20), QPointF(200, 0)), "Opacity", QTextOption(Qt::AlignHCenter | Qt::AlignBottom));
 }

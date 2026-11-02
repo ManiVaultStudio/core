@@ -821,7 +821,7 @@ void loadFromDisk(const QVariantMap& variantMap, QStringList& list)
 
 	populateBytesFromBlobMap(variantMap, (char*)bytes.data(), static_cast<std::uint64_t>(bytes.size()));
 
-	QByteArray byteArray(bytes.data(), bytes.size());
+	QByteArray byteArray(bytes.data(), static_cast<qsizetype>(bytes.size()));
     QDataStream dataStream(byteArray);
 
 	dataStream >> list;
@@ -833,7 +833,7 @@ void loadFromDisk(const QVariantMap& variantMap, QVector<uint32_t>& vec)
 
 	populateBytesFromBlobMap(variantMap, (char*)bytes.data(), static_cast<std::uint64_t>(bytes.size()));
 
-	QByteArray byteArray(bytes.data(), bytes.size());
+	QByteArray byteArray(bytes.data(), static_cast<qsizetype>(bytes.size()));
     QDataStream dataStream(byteArray);
 
 	dataStream >> vec;

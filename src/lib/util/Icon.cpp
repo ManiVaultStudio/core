@@ -93,7 +93,7 @@ QIcon combineIconsHorizontally(const QVector<QIcon>& icons)
 {
     QSet<QSize> sizes;
 
-    auto combinedWidth = 0u;
+    int combinedWidth = 0;
 
     for (const auto& icon : icons) {
         const auto largestSize = icon.availableSizes().first();
@@ -116,7 +116,7 @@ QIcon combineIconsHorizontally(const QVector<QIcon>& icons)
 
     painter.setRenderHint(QPainter::Antialiasing);
 
-    auto offset = 0u;
+    int offset = 0;
 
     for (const auto& icon : icons) {
         painter.drawPixmap(offset, 0, icon.pixmap(iconSize));
@@ -172,7 +172,7 @@ QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, const Badge& widgetAct
     if (icon.availableSizes().isEmpty())
         return {};
 
-    const auto iconPixmapSize       = icon.availableSizes().first() + QSize(2 * iconMargin, 2 * iconMargin);
+    const auto iconPixmapSize       = icon.availableSizes().first() + QSize(static_cast<int>(2 * iconMargin), static_cast<int>(2 * iconMargin));
     const auto iconPixmapRectangle  = QRectF(QPoint(0, 0), iconPixmapSize);
     const auto badgePixmap          = widgetActionBadge.getPixmap();
     const auto badgeRectangle       = QRectF(QPoint(0, 0), badgePixmap.size());
@@ -184,12 +184,19 @@ QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, const Badge& widgetAct
     QPainter iconPixmapPainter(&iconPixmap);
 
     iconPixmapPainter.setRenderHint(QPainter::Antialiasing);
-    iconPixmapPainter.drawPixmap(QRectF(QPoint(iconMargin, iconMargin), iconPixmapSize), icon.pixmap(iconPixmapSize), iconPixmapRectangle);
+    iconPixmapPainter.drawPixmap(
+        QRectF(QPoint(static_cast<int>(iconMargin), static_cast<int>(iconMargin)), iconPixmapSize),
+        icon.pixmap(iconPixmapSize), 
+        iconPixmapRectangle
+        );
 
     if (widgetActionBadge.getEnabled()) {
         const auto badgeScale           = widgetActionBadge.getScale();
         const auto scaledIconPixmapSize = badgeScale * iconPixmapSize;
         const auto badgeAlignment       = widgetActionBadge.getAlignment();
+
+        const float iconPixmapSizeHeight = static_cast<float>(iconPixmapSize.height());
+        const float iconPixmapSizeWeight = static_cast<float>(iconPixmapSize.width());
 
         QPoint origin;
 
@@ -197,19 +204,19 @@ QIcon createIconWithNumberBadgeOverlay(const QIcon& icon, const Badge& widgetAct
             origin.setY(0);
 
         if (badgeAlignment & Qt::AlignVCenter)
-            origin.setY((0.5 * iconPixmapSize.height()) - ((0.5 * badgeScale) * iconPixmapSize.height()));
+            origin.setY(static_cast<int>((0.5f * iconPixmapSizeHeight) - ((0.5f * badgeScale) * iconPixmapSizeHeight)));
 
         if (badgeAlignment & Qt::AlignBottom)
-            origin.setY((1.0f - badgeScale) * iconPixmapSize.height());
+            origin.setY(static_cast<int>((1.0f - badgeScale) * iconPixmapSizeHeight));
 
         if (badgeAlignment & Qt::AlignLeft)
             origin.setX(0);
 
         if (badgeAlignment & Qt::AlignHCenter)
-            origin.setX((0.5 * iconPixmapSize.width()) - ((0.5 * badgeScale) * iconPixmapSize.width()));
+            origin.setX(static_cast<int>((0.5f * iconPixmapSizeWeight) - ((0.5f * badgeScale) * iconPixmapSizeWeight)));
 
         if (badgeAlignment & Qt::AlignRight)
-            origin.setX((1.0f - badgeScale) * iconPixmapSize.width());
+            origin.setX(static_cast<int>((1.0f - badgeScale) * iconPixmapSizeWeight));
 
         iconPixmapPainter.drawPixmap(QRectF(origin, scaledIconPixmapSize), badgePixmap, badgeRectangle);
     }

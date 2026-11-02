@@ -202,11 +202,11 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
     setObjectName("SpinBox");
 
     connect(this, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [decimalAction](double value) {
-        decimalAction->setValue(value);
+        decimalAction->setValue(static_cast<float>(value));
     });
 
     const auto valueString = [](double value, std::uint32_t decimals) -> QString {
-        return QString::number(value, 'f', decimals);
+        return QString::number(value, 'f', static_cast<int>(decimals));
     };
 
     const auto setToolTips = [this, decimalAction, valueString]() {
@@ -251,7 +251,7 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
     const auto onUpdateDecimals = [this, decimalAction]() {
         QSignalBlocker blocker(this);
 
-        setDecimals(decimalAction->getNumberOfDecimals());
+        setDecimals(static_cast<int>(decimalAction->getNumberOfDecimals()));
     };
 
     const auto onUpdateSingleStep = [this, decimalAction]() {
@@ -288,7 +288,7 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
     const auto onUpdateAction = [this, decimalAction, sliderIntervalLength]() -> void {
         const auto sliderValueNormalized    = static_cast<float>(value() - minimum()) / sliderIntervalLength;
         const auto valueNormalized          = decimalAction->sliderPositionToValue(sliderValueNormalized);
-        decimalAction->setValue(decimalAction->getMinimum() + (valueNormalized * decimalAction->getIntervalLength()));
+        decimalAction->setValue(decimalAction->getMinimum() + static_cast<float>((valueNormalized * decimalAction->getIntervalLength())));
     };
 
     connect(this, &QSlider::valueChanged, this, [decimalAction, onUpdateAction](int value) {
@@ -306,7 +306,7 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
     });
 
     const auto valueString = [](double value, std::uint32_t decimals) -> QString {
-        return QString::number(value, 'f', decimals);
+        return QString::number(value, 'f', static_cast<int>(decimals));
     };
 
     const auto setToolTips = [this, decimalAction, valueString]() {
@@ -321,7 +321,7 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
 
         QSignalBlocker blocker(this);
 
-        setValue(sliderValue);
+        setValue(static_cast<int>(sliderValue));
 
         setToolTips();
     };
@@ -360,7 +360,7 @@ DecimalAction::LineEditWidget::LineEditWidget(QWidget* parent, DecimalAction* de
     const auto updateText = [this, decimalAction]() -> void {
         QSignalBlocker blocker(this);
 
-        setText(decimalAction->getPrefix() + ": " + QString::number(decimalAction->getValue(), 'f', decimalAction->getNumberOfDecimals()));
+        setText(decimalAction->getPrefix() + ": " + QString::number(decimalAction->getValue(), 'f', static_cast<int>(decimalAction->getNumberOfDecimals())));
     };
 
     updateText();

@@ -49,10 +49,10 @@ QRectF DensityRenderer::computeWorldBounds() const
     switch (getNavigator().getZoomMarginType()) {
         case Navigator2D::ZoomMarginType::AbsoluteScreen:
         {
-            const auto zoomMarginScreen = getNavigator().getZoomMarginScreen();
+            const float zoomMarginScreen = getNavigator().getZoomMarginScreen();
 
-            marginX = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().height()) / (static_cast<float>(getRenderSize().height() - 2.f * zoomMarginScreen));
-            marginY = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().width()) / (static_cast<float>(getRenderSize().width() - 2.f * zoomMarginScreen));
+            marginX = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().height()) / (static_cast<float>(getRenderSize().height()) - 2.f * zoomMarginScreen);
+            marginY = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().width()) / (static_cast<float>(getRenderSize().width()) - 2.f * zoomMarginScreen);
 
             break;
         }
@@ -76,7 +76,12 @@ QRectF DensityRenderer::computeWorldBounds() const
 
 void DensityRenderer::setDensityComputationDataBounds(const QRectF& bounds)
 {
-    _densityComputation.setBounds(bounds.left(), bounds.right(), bounds.bottom(), bounds.top());
+    _densityComputation.setBounds(
+        static_cast<float>(bounds.left()),
+        static_cast<float>(bounds.right()),
+        static_cast<float>(bounds.bottom()),
+        static_cast<float>(bounds.top())
+        );
 }
 
 void DensityRenderer::setRenderMode(RenderMode renderMode)

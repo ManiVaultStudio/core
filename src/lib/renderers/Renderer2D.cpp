@@ -140,7 +140,16 @@ void Renderer2D::updateModelViewProjectionMatrix()
 
 QVector3D Renderer2D::getScreenPointToWorldPosition(const QMatrix4x4& modelViewMatrix, const QPoint& screenPoint) const
 {
-    return QVector3D(screenPoint.x(), getRenderSize().height() - screenPoint.y(), 0).unproject(modelViewMatrix, getProjectionMatrix(), QRect(0, 0, getRenderSize().width(), getRenderSize().height()));
+    auto vec = QVector3D(
+        static_cast<float>(screenPoint.x()),
+        static_cast<float>(getRenderSize().height() - screenPoint.y()),
+        0);
+
+    return vec.unproject(
+        modelViewMatrix, 
+        getProjectionMatrix(), 
+        QRect(0, 0, getRenderSize().width(), getRenderSize().height())
+        );
 }
 
 QVector2D Renderer2D::getWorldPositionToNormalizedScreenPoint(const QVector3D& position) const
@@ -153,16 +162,19 @@ QVector2D Renderer2D::getWorldPositionToNormalizedScreenPoint(const QVector3D& p
 QPoint Renderer2D::getWorldPositionToScreenPoint(const QVector3D& position) const
 {
     const auto normalizedScreenPoint    = QVector2D(1.0f, -1.0f) * getWorldPositionToNormalizedScreenPoint(position);
-    const auto viewSize                 = QVector2D(getRenderSize().width(), getRenderSize().height());
+    const auto viewSize                 = QVector2D(static_cast<float>(getRenderSize().width()), static_cast<float>(getRenderSize().height()));
 
     return (viewSize * ((QVector2D(1.0f, 1.0f) + normalizedScreenPoint) / 2.0f)).toPoint();
 }
 
 QVector2D Renderer2D::getScreenPointToNormalizedScreenPoint(const QVector2D& screenPoint) const
 {
-    const auto viewSize = QVector2D(getRenderSize().width(), getRenderSize().height());
+    const auto viewSize = QVector2D(
+        static_cast<float>(getRenderSize().width()), 
+        static_cast<float>(getRenderSize().height())
+        );
 
-    return QVector2D(-1.f, -1.f) + 2.f * (QVector2D(screenPoint.x(), getRenderSize().height() - screenPoint.y()) / viewSize);
+    return QVector2D(-1.f, -1.f) + 2.f * (QVector2D(screenPoint.x(), static_cast<float>(getRenderSize().height()) - screenPoint.y()) / viewSize);
 }
 
 QMatrix4x4 Renderer2D::getScreenToNormalizedScreenMatrix() const
@@ -182,8 +194,8 @@ QMatrix4x4 Renderer2D::getNormalizedScreenToScreenMatrix() const
     const auto size     = QSizeF(getRenderSize());
     const auto halfSize = 0.5f * size;
 
-    scale.scale(halfSize.width(), halfSize.height(), 1.0f);
-    translate.translate(size.width(), 1, 0.0f);
+    scale.scale(static_cast<float>(halfSize.width()), static_cast<float>(halfSize.height()), 1.0f);
+    translate.translate(static_cast<float>(size.width()), 1, 0.0f);
 
     return translate * scale;
 }
@@ -205,7 +217,14 @@ QMatrix4x4 Renderer2D::getProjectionMatrix() const
     QMatrix4x4 matrix;
 
     // Create an orthogonal transformation matrix
-    matrix.ortho(-halfSize.width(), halfSize.width(), -halfSize.height(), halfSize.height(), -1000.0f, +1000.0f);
+    matrix.ortho(
+        static_cast<float>(-halfSize.width()),
+        static_cast<float>(halfSize.width()),
+        static_cast<float>(-halfSize.height()),
+        static_cast<float>(halfSize.height()),
+        -1000.0f, 
+        +1000.0f
+        );
 
     return matrix;
 }

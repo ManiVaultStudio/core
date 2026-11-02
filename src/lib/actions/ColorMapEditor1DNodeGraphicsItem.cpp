@@ -165,8 +165,8 @@ void ColorMapEditor1DNodeGraphicsItem::mouseMoveEvent(QGraphicsSceneMouseEvent* 
 
     QPoint scenePos;
 
-    scenePos.setX(std::max(left, std::min(event->scenePos().x(), right)));
-    scenePos.setY(std::max(graphRectangle.top(), std::min(event->scenePos().y(), graphRectangle.bottom())));
+    scenePos.setX(static_cast<int>(std::max(left, std::min(event->scenePos().x(), right))));
+    scenePos.setY(static_cast<int>(std::max(graphRectangle.top(), std::min(event->scenePos().y(), graphRectangle.bottom()))));
 
     _node.setNormalizedCoordinate(QPointF((scenePos.x() - graphRectangle.left()) / graphRectangle.width(), (graphRectangle.bottom() - scenePos.y()) / graphRectangle.height()));
 

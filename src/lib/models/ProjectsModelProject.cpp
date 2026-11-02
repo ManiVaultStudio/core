@@ -24,7 +24,7 @@ ProjectsModelProject::ProjectsModelProject(const QVariantMap& variantMap) :
     _uuid(variantMap.contains("uuid") ? variantMap["uuid"].toString() : Serializable::createId()),
     _visible(false),
     _serverDownloadSize(0),
-    _userSpecifiedDownloadSize(variantMap.contains("downloadSize") ? parseByteSize(variantMap["downloadSize"].toString()) : 0),
+    _userSpecifiedDownloadSize(variantMap.contains("downloadSize") ? static_cast<int64_t>(parseByteSize(variantMap["downloadSize"].toString())) : 0),
     _isGroup(false),
     _group(variantMap.contains("group") ? variantMap["group"].toString() : ""),
     _tags(variantMap.contains("tags") ? variantMap["tags"].toStringList() : QStringList()),
@@ -356,7 +356,7 @@ void ProjectsModelProject::determineDownloadSize()
                 throw std::runtime_error("Future is cancelled or did not finish");
 
             QMetaObject::invokeMethod(this, [this, future]() {
-                _serverDownloadSize = future.result();
+                _serverDownloadSize = static_cast<int64_t>(future.result());
 
                 emit downloadSizeDetermined(_serverDownloadSize);
             });

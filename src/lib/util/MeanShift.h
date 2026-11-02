@@ -38,7 +38,8 @@ public:
     std::uint32_t getResolution() const;
 
 private:
-    const unsigned int RESOLUTION = 256;
+    const GLint RESOLUTION = 256;
+    const float RESOLUTION_INV = 1.0f / static_cast<float>(RESOLUTION);
 
     DensityComputation densityComputation;
 

@@ -27,7 +27,7 @@ int ColorMapModel::columnCount(const QModelIndex& parent) const
 
 int ColorMapModel::rowCount(const QModelIndex& parent /* = QModelIndex() */) const
 {
-    return _colorMaps.count();
+    return static_cast<int>(_colorMaps.count());
 }
 
 QVariant ColorMapModel::data(const QModelIndex& index, int role /* = Qt::DisplayRole */) const
@@ -169,7 +169,7 @@ void ColorMapModel::setupModelData()
         _colorMaps.append(ColorMap(QFileInfo(resourcePath).baseName(), resourcePath, ColorMap::Type::TwoDimensional, QImage(resourcePath)));
     }
 
-    beginInsertRows(QModelIndex(), 0, _colorMaps.count());
+    beginInsertRows(QModelIndex(), 0, static_cast<int>(_colorMaps.count()));
     endInsertRows();
 }
 

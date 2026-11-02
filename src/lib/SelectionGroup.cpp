@@ -108,7 +108,7 @@ namespace mv
         for (size_t i = 0; i < keys.size(); i++)
         {
             if (auto it = _kvMap.find(keys[i]); it != _kvMap.end()) {
-                values.push_back(it->second);
+                values.push_back(static_cast<int>(it->second));
             }
             else
             {
@@ -146,8 +146,8 @@ namespace mv
     {
         QVariantMap variantMap;
 
-        QStringList kvMapKeys(_kvMap.size());
-        QVector<uint32_t> kvMapValues(_kvMap.size());
+        QStringList kvMapKeys(static_cast<qsizetype>(_kvMap.size()));
+        QVector<uint32_t> kvMapValues(static_cast<qsizetype>(_kvMap.size()));
 
         int i = 0;
         for (const auto& [key, value] : _kvMap)

@@ -19,7 +19,7 @@ WorkflowProgressNode::Snapshot WorkflowProgressNode::createSnapshot() const
         snapshot.status                 = _status;
         snapshot.name                   = _name;
         snapshot.weight                 = _weight;
-        snapshot.childCount             = _children.size();
+        snapshot.childCount             = static_cast<int>(_children.size());
         snapshot.elapsedMilliseconds    = getElapsedMillisecondsUnlocked();
 
         childrenCopy = _children;
@@ -160,7 +160,7 @@ QVector<WorkflowProgressNode::Ptr> WorkflowProgressNode::getChildren() const
 int WorkflowProgressNode::getChildCount() const
 {
     QMutexLocker locker(&_mutex);
-    return _children.size();
+    return static_cast<int>(_children.size());
 }
 
 int WorkflowProgressNode::getCompletedChildCount() const

@@ -61,8 +61,8 @@ bool isSafeExternalUrl(const QUrl& url)
             sizeof(pmc));
 
         MemoryStats s;
-        s.rssMB = pmc.WorkingSetSize / 1024.0 / 1024.0;
-        s.privateMB = pmc.PrivateUsage / 1024.0 / 1024.0;
+        s.rssMB = static_cast<double>(pmc.WorkingSetSize) / 1024.0 / 1024.0;
+        s.privateMB = static_cast<double>(pmc.PrivateUsage) / 1024.0 / 1024.0;
 
         return s;
     }
@@ -216,7 +216,7 @@ QString getElapsedTimeHumanReadable(std::uint64_t ms, bool compact)
         return QString("%1 ms").arg(ms);
 
     if (ms < 60'000) {
-        const double seconds = ms / 1000.0;
+        const double seconds = static_cast<double>(ms) / 1000.0;
 
         QString s = QString::number(seconds, 'f', seconds < 10.0 ? 1 : 0);
 
@@ -694,7 +694,7 @@ QString applyResourceImageToCss(QString css, const QString& pathOrResource, cons
 
     auto pixmap = QPixmap::fromImage(image);
 
-    pixmap = pixmap.scaledToHeight(pixmap.height() * scaleFactor);
+    pixmap = pixmap.scaledToHeight(static_cast<int>(scaleFactor * static_cast<float>(pixmap.height())));
 
     return applyPixmapToCss(css, pixmap, encodingFormat, quality, token);
 }
@@ -776,10 +776,10 @@ QString getFilenameFromContentDisposition(const QByteArray& contentDispositionRa
 	// Try filename*= first (RFC 5987): filename*=utf-8''percent-encoded
 	{
 		const QString key = u"filename*="_s;
-		const int     idx = contentDisposition.indexOf(key, 0, Qt::CaseInsensitive);
+		const int     idx = static_cast<int>(contentDisposition.indexOf(key, 0, Qt::CaseInsensitive));
 		if (idx >= 0) {
 			QString   v    = contentDisposition.mid(idx + key.size());
-			const int semi = v.indexOf(u';');
+			const int semi = static_cast<int>(v.indexOf(u';'));
 			if (semi >= 0) {
 				v = v.left(semi);
 			}
@@ -787,8 +787,8 @@ QString getFilenameFromContentDisposition(const QByteArray& contentDispositionRa
 			v = unquote(v);
 
 			// expected: charset'lang'value
-			const int firstTick  = v.indexOf(u'\'');
-			const int secondTick = (firstTick >= 0) ? v.indexOf(u'\'', firstTick + 1) : -1;
+			const int firstTick  = static_cast<int>(v.indexOf(u'\''));
+			const int secondTick = (firstTick >= 0) ? static_cast<int>(v.indexOf(u'\'', firstTick + 1)) : -1;
 
 			if (secondTick >= 0) {
 				// QString charset = v.left(firstTick); // usually "utf-8"
@@ -805,11 +805,11 @@ QString getFilenameFromContentDisposition(const QByteArray& contentDispositionRa
 
 	{
 		const QString key = u"filename="_s;
-		const int     idx = contentDisposition.indexOf(key, 0, Qt::CaseInsensitive);
+		const int     idx = static_cast<int>(contentDisposition.indexOf(key, 0, Qt::CaseInsensitive));
 
 		if (idx >= 0) {
 			QString   v    = contentDisposition.mid(idx + key.size());
-			const int semi = v.indexOf(u';');
+			const int semi = static_cast<int>(v.indexOf(u';'));
 			if (semi >= 0) {
 				v = v.left(semi);
 			}
@@ -874,7 +874,7 @@ void printLine(const QString& key, const QVariant& value /*= {}*/, int indent /*
         return;
     }
 
-    int spaces = colonColumn - left.size();
+    const int spaces = colonColumn - static_cast<int>(left.size());
 
     if (spaces < 1) {
         qDebug().noquote() << left + " : " + value.toString();

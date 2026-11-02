@@ -92,7 +92,12 @@ void Navigator2D::initialize(QWidget* sourceWidget)
         {
             _navigationAction.getZoomExtentsAction().setEnabled(hasUserNavigated());
 
-            _navigationAction.getZoomRectangleAction().setRectangle(currentZoomRectangleWorld.left(), currentZoomRectangleWorld.right(), currentZoomRectangleWorld.bottom(), currentZoomRectangleWorld.top());
+            _navigationAction.getZoomRectangleAction().setRectangle(
+                static_cast<float>(currentZoomRectangleWorld.left()),
+                static_cast<float>(currentZoomRectangleWorld.right()),
+                static_cast<float>(currentZoomRectangleWorld.bottom()),
+                static_cast<float>(currentZoomRectangleWorld.top())
+                );
         }
         connect(&_navigationAction.getZoomRectangleAction(), &DecimalRectangleAction::rectangleChanged, this, zoomRectangleChanged);
 
@@ -331,8 +336,8 @@ QMatrix4x4 Navigator2D::getViewMatrix() const
     const auto zoomRectangle = getZoomRectangleWorld();
 
     // Construct look-at parameters
-    const auto eye      = QVector3D(zoomRectangle.center().x(), zoomRectangle.center().y(), 1);
-    const auto center   = QVector3D(zoomRectangle.center().x(), zoomRectangle.center().y(), 0);
+    const auto eye      = QVector3D(static_cast<float>(zoomRectangle.center().x()), static_cast<float>(zoomRectangle.center().y()), 1);
+    const auto center   = QVector3D(static_cast<float>(zoomRectangle.center().x()), static_cast<float>(zoomRectangle.center().y()), 0);
     const auto up       = QVector3D(0, 1, 0);
 
 #ifdef NAVIGATOR_2D_VERBOSE
@@ -347,7 +352,7 @@ QMatrix4x4 Navigator2D::getViewMatrix() const
     const auto factorY      = static_cast<float>(viewerSize.height()) / (zoomRectangle.isValid() ? static_cast<float>(zoomRectangle.height()) : 1.0f);
     const auto scaleFactor  = factorX < factorY ? factorX : factorY;
 
-    const auto d = 1.0f - (2 * 0) / std::max(viewerSize.width(), viewerSize.height());
+    const auto d = 1.0f - (2.0f * 0.0f) / std::max(viewerSize.width(), viewerSize.height());
 
     // Create scale matrix
     scale.scale(scaleFactor * d, scaleFactor * d, scaleFactor * d);
@@ -653,8 +658,8 @@ void Navigator2D::resetView(bool force /*= false*/)
     {
         beginChangeZoomRectangleWorld();
         {
-            const auto zoomFactorX = _renderer.getWorldBounds().width() / static_cast<float>(_renderer.getRenderSize().width());
-            const auto zoomFactorY = _renderer.getWorldBounds().height() / static_cast<float>(_renderer.getRenderSize().height());
+            const auto zoomFactorX = static_cast<float>(_renderer.getWorldBounds().width()) / static_cast<float>(_renderer.getRenderSize().width());
+            const auto zoomFactorY = static_cast<float>(_renderer.getWorldBounds().height()) / static_cast<float>(_renderer.getRenderSize().height());
 
             setZoomFactor(std::max(zoomFactorX, zoomFactorY));
             setZoomCenterWorld(_renderer.getWorldBounds().center());
