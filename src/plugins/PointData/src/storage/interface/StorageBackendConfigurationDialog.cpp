@@ -75,12 +75,13 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique
     }
     else if (_conversionAction)
     {
-        auto* convertButton = buttons->button(QDialogButtonBox::Ok);
-        convertButton->setText(tr("Convert"));
-        convertButton->setEnabled(_conversionAction->canApply());
+        auto* applyButton = buttons->button(QDialogButtonBox::Ok);
+        if (purpose == Purpose::Convert)
+            applyButton->setText(tr("Convert"));
+        applyButton->setEnabled(_conversionAction->canApply());
 
-        connect(_conversionAction.get(), &mv::gui::StorageBackendConversionAction::optionsChanged, convertButton, [this, convertButton] {
-            convertButton->setEnabled(_conversionAction->canApply());
+        connect(_conversionAction.get(), &mv::gui::StorageBackendConversionAction::optionsChanged, applyButton, [this, applyButton] {
+            applyButton->setEnabled(_conversionAction->canApply());
         });
     }
 
