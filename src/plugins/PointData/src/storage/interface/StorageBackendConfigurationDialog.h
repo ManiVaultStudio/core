@@ -3,7 +3,7 @@
 #pragma once
 
 #include "StorageBackendConversionAction.h"
-#include "pointdata_export.h"
+#include <PointData/pointdata_export.h>
 
 #include <QDialog>
 
