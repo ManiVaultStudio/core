@@ -297,7 +297,9 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
         result->setMetrics(state->metrics().snapshot());
     }
 
-    result->setStatus(result->deriveStatus());
+    const auto workflowTask = rootContext->isRootExecution() ? rootContext->getTask() : nullptr;
+    const bool canceled = workflowTask && (workflowTask->isAboutToBeAborted() || workflowTask->isAborting() || workflowTask->isAborted());
+    result->setStatus(canceled ? WorkflowResultBase::Status::Canceled : result->deriveStatus());
     result->setDurationMS(durationMs);
     result->setOptions(rootContext->getState()->getOptions());
 
@@ -305,7 +307,12 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
 
     if (rootContext->isRootExecution()) {
         if (auto task = rootContext->getTask()) {
-            QMetaObject::invokeMethod(task, [task]() {
+            QMetaObject::invokeMethod(task, [task, canceled]() {
+                if (canceled) {
+                    task->setAborted();
+                    return;
+                }
+
                 task->setProgress(1.0f);
                 task->setStatus(Task::Status::Finished);
             }, Qt::QueuedConnection);
