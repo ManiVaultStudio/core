@@ -60,19 +60,19 @@ void WidgetActionToolButton::paintEvent(QPaintEvent* paintEvent)
             center.setY(margin);
 
         if (_indicatorAlignment & Qt::AlignVCenter)
-            center.setY(0.5f * height());
+            center.setY(0.5f * static_cast<float>(height()));
 
         if (_indicatorAlignment & Qt::AlignBottom)
-            center.setY(height() - margin);
+            center.setY(static_cast<float>(height()) - margin);
 
         if (_indicatorAlignment & Qt::AlignLeft)
             center.setX(margin);
 
         if (_indicatorAlignment & Qt::AlignHCenter)
-            center.setX(0.5f * width());
+            center.setX(0.5f * static_cast<float>(width()));
 
         if (_indicatorAlignment & Qt::AlignRight)
-            center.setX(width() - margin);
+            center.setX(static_cast<float>(width()) - margin);
 
         painter.setPen(QPen(QBrush(isEnabled() ? qApp->palette().text().color() : Qt::gray), 2.5, Qt::SolidLine, Qt::RoundCap));
         painter.setBrush(Qt::NoBrush);

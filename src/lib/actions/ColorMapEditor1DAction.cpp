@@ -134,7 +134,7 @@ void ColorMapEditor1DAction::updateColorMap()
         auto color = node->getColor();
 
         colorGradient.setColorAt(node->getNormalizedCoordinate().x(), color);
-        alphaGradient.setColorAt(node->getNormalizedCoordinate().x(), QColor(node->getNormalizedCoordinate().y() * 255.0f, 0, 0, 255));
+        alphaGradient.setColorAt(node->getNormalizedCoordinate().x(), QColor(static_cast<int>(node->getNormalizedCoordinate().y() * 255.0), 0, 0, 255));
     }
 
     _colorMapImage = QImage(colorMapImageSize, QImage::Format::Format_ARGB32_Premultiplied);

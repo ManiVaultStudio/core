@@ -136,7 +136,7 @@ void TaskAction::updateProgressActionRange()
             _progressAction.setRange(0, 0);
             break;
 
-        case Task::Status::Finished:
+        case Task::Status::Finished: [[fallthrough]];
         case Task::Status::Aborted:
             break;
 

@@ -281,7 +281,7 @@ void AbstractProjectsModel::addDsn(const QUrl& dsn)
 
                     QMetaObject::invokeMethod(this, [this, future, data, dsnIndex, dsn]() {
                         purge();
-                        populateFromJsonByteArray(data, dsnIndex, dsn.toString());
+                        populateFromJsonByteArray(data, static_cast<int>(dsnIndex), dsn.toString());
                     });
                 }
                 catch (std::exception& e)

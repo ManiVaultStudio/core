@@ -245,10 +245,10 @@ void Project::setStudioMode(bool studioMode)
 
         for (auto& dataset : datasets)
         {
-            for (auto& action : dataset.get()->getActions())
+            for (auto& action : dataset->getActions())
                 action->cacheConnectionPermissions(true);
 
-            for (auto& action : dataset.get()->getActions())
+            for (auto& action : dataset->getActions())
                 action->setConnectionPermissionsToAll(true);
         }
     }
@@ -257,7 +257,7 @@ void Project::setStudioMode(bool studioMode)
             plugin->restoreConnectionPermissions(true);
 
         for (auto& dataset : datasets)
-            for (auto& action : dataset.get()->getActions())
+            for (auto& action : dataset->getActions())
                 action->restoreConnectionPermissions(true);
     }
 

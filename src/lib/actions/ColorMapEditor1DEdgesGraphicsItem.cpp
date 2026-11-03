@@ -65,8 +65,11 @@ void ColorMapEditor1DEdgesGraphicsItem::paint(QPainter* painter, const QStyleOpt
 
     const auto graphRectangle = _colorMapEditor1DWidget.getGraphRectangle();
 
-    for (auto node : _colorMapEditor1DWidget.getNodes())
-        points << QPoint(graphRectangle.left() + (node->getNormalizedCoordinate().x() * graphRectangle.width()), graphRectangle.bottom() - (node->getNormalizedCoordinate().y() * graphRectangle.height()));
+    for (const auto node : _colorMapEditor1DWidget.getNodes())
+        points << QPoint(
+            static_cast<int>(graphRectangle.left() + (node->getNormalizedCoordinate().x() * graphRectangle.width())), 
+            static_cast<int>(graphRectangle.bottom() - (node->getNormalizedCoordinate().y() * graphRectangle.height()))
+            );
 
     QStyleOption styleOption;
 
@@ -78,7 +81,7 @@ void ColorMapEditor1DEdgesGraphicsItem::paint(QPainter* painter, const QStyleOpt
     pen.setColor(_colorMapEditor1DWidget.isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::ButtonText) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText));
 
     painter->setPen(pen);
-    painter->drawPolyline(points.data(), points.count());
+    painter->drawPolyline(points.data(), static_cast<int>(points.count()));
 }
 
 }

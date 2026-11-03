@@ -41,7 +41,7 @@ void WidgetActionBadgeOverlayWidget::paintEvent(QPaintEvent* paintEvent)
             origin.setY(0);
 
         if (badgeAlignment & Qt::AlignVCenter)
-            origin.setY((0.5 * height()) - (0.5 * scaledIconPixmapSize.height()));
+            origin.setY(static_cast<int>((0.5 * height()) - (0.5 * scaledIconPixmapSize.height())));
 
         if (badgeAlignment & Qt::AlignBottom)
             origin.setY(height() - scaledIconPixmapSize.height());
@@ -50,7 +50,7 @@ void WidgetActionBadgeOverlayWidget::paintEvent(QPaintEvent* paintEvent)
             origin.setX(0);
 
         if (badgeAlignment & Qt::AlignHCenter)
-            origin.setX((0.5 * width()) - (0.5 * scaledIconPixmapSize.width()));
+            origin.setX(static_cast<int>((0.5 * width()) - (0.5 * scaledIconPixmapSize.width())));
 
         if (badgeAlignment & Qt::AlignRight)
             origin.setX(width() - scaledIconPixmapSize.width());

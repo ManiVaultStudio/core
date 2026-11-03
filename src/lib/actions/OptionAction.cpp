@@ -89,7 +89,7 @@ void OptionAction::setOptions(const QStringList& options)
         _defaultModel.setStringList(options);
     }
 
-    _currentIndex = getOptions().contains(oldCurrentText) ? getOptions().indexOf(oldCurrentText) : -1;
+    _currentIndex = getOptions().contains(oldCurrentText) ? static_cast<int>(getOptions().indexOf(oldCurrentText)) : -1;
 
     emit modelChanged();
 
@@ -693,7 +693,7 @@ void OptionAction::LazyIndicesModel::fetchMore(const QModelIndex& index)
 
     static constexpr int chunk = 50;
 
-    const auto add = qMin(chunk, _all.size() - _loaded);
+    const auto add = static_cast<int>(qMin(chunk, _all.size() - _loaded));
 
     if (add <= 0)
         return;

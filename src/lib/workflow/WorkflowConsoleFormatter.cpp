@@ -73,7 +73,7 @@ QString WorkflowConsoleFormatter::format(SeverityLevel severity, const QString& 
     if (depth >= maxDepth)
         return {};
 
-    const QString indent(depth * 2, QLatin1Char(' '));
+    const QString indent(2ll * depth, QLatin1Char(' '));
     const QString icon = iconForEvent(event);
     const QString label = labelForEntity(entity);
 
@@ -119,7 +119,7 @@ QString WorkflowConsoleFormatter::formatProgressTree(const WorkflowProgressNode:
 
 void WorkflowConsoleFormatter::appendProgressNode(QStringList& lines, const WorkflowProgressNode::Snapshot& node, int depth)
 {
-    const QString indent(depth * 2, QLatin1Char(' '));
+    const QString indent(2ll * depth, QLatin1Char(' '));
 
     const auto kind     = getWorkflowExecutionNodeTypeName(node.type);
     const auto status   = statusName(node.status);

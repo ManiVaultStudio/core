@@ -329,7 +329,7 @@ WidgetActionContextMenu::ConfirmRemovePublicActionDialog::ConfirmRemovePublicAct
     std::int32_t numberOfConnectedActions = 0;
 
     for (const auto& publicAction : publicActions)
-        numberOfConnectedActions += publicAction->getConnectedActions().count();
+        numberOfConnectedActions += static_cast<std::int32_t>(publicAction->getConnectedActions().count());
 
     layout->addWidget(new QLabel(QString("Remove the parameter(s) below?")));
     layout->addWidget(_namesAction.createWidget(this, StringsAction::ListView));

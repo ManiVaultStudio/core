@@ -12,6 +12,8 @@
 #include <QPainterPath>
 #include <QtMath>
 
+#include <cmath>
+
 namespace mv::util {
 
 QIcon getPixelSelectionTypeIcon(const PixelSelectionType& selectionType)
@@ -120,18 +122,18 @@ QIcon getPixelSelectionTypeIcon(const PixelSelectionType& selectionType)
             for (int step = 0; step < 4; step++) {
 
                 // Compute angle in radians
-                const auto angle = qDegreesToRadians(step * 90.0f);
+                const auto angle = qDegreesToRadians(static_cast<float>(step) * 90.0f);
 
                 // Draw inner line
                 painter.drawPolyline(QVector<QPoint>({
                     center + QPoint(0, 0),
-                    center + QPoint(r1 * sin(angle), r1 * cos(angle))
+                    center + QPoint(static_cast<float>(r1 * std::sin(angle)), static_cast<float>(r1 * std::cos(angle)))
                     }));
 
                 // Draw outer line
                 painter.drawPolyline(QVector<QPoint>({
-                    center + QPoint(r2 * sin(angle), r2 * cos(angle)),
-                    center + QPoint(r3 * sin(angle), r3 * cos(angle))
+                    center + QPoint(static_cast<float>(r2 * std::sin(angle)), static_cast<float>(r2 * std::cos(angle))),
+                    center + QPoint(static_cast<float>(r3 * std::sin(angle)), static_cast<float>(r3 * std::cos(angle)))
                     }));
             }
 
@@ -178,7 +180,7 @@ void PixelSelectionTypeModel::setPixelSelectionTypes(const PixelSelectionTypes& 
 
 int PixelSelectionTypeModel::rowCount(const QModelIndex& parent /*= QModelIndex()*/) const
 {
-    return _pixelSelectionTypes.count();
+    return static_cast<int>(_pixelSelectionTypes.count());
 }
 
 int PixelSelectionTypeModel::columnCount(const QModelIndex& parent /*= QModelIndex()*/) const

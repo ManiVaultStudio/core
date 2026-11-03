@@ -89,7 +89,7 @@ ImageAction::PreviewWidget::PreviewWidget(QWidget* parent, ImageAction& imageAct
         setPixmap(QPixmap::fromImage(_imageAction.getImage()));
 
         const auto aspectRatio  = static_cast<float>(image.height()) / static_cast<float>(image.width());
-        const auto fixedSize    = QSize(width(), width() * aspectRatio);
+        const auto fixedSize    = QSize(width(), static_cast<int>(static_cast<float>(width()) * aspectRatio));
 
         setFixedSize(fixedSize);
 

@@ -409,7 +409,8 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                             break;
                     }
 
-                    if (_mousePositions.count() > 3 && (_mousePositions.last() - _mousePositions.first()).manhattanLength() < CP_RADIUS_CLOSING)
+                    if (_mousePositions.count() > 3 && 
+                        static_cast<float>((_mousePositions.last() - _mousePositions.first()).manhattanLength()) < CP_RADIUS_CLOSING)
                         endSelection();
 
                     break;
@@ -708,7 +709,7 @@ void PixelSelectionTool::paint()
             shapePainter.drawRect(rectangle);
 
             const auto size         = 8.0f;
-            const auto textCenter   = rectangle.topRight() + QPoint(size, -size);
+            const auto textCenter   = rectangle.topRight() + QPoint(static_cast<int>(size), static_cast<int>(-size));
 
             textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
 
@@ -758,9 +759,9 @@ void PixelSelectionTool::paint()
 
             // Draw the modifier icon near the middle of the line
             const auto size = 2.0f;
-            const auto textCenter = (p1 + p2) / 2 + QPoint(size, -size);
+            const auto textCenter = (p1 + p2) / 2 + QPoint(static_cast<int>(size), static_cast<int>(-size));
             textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
-            setLineAngle(angleDegrees);
+            setLineAngle(static_cast<float>(angleDegrees));
             break;
         }
         
@@ -776,7 +777,7 @@ void PixelSelectionTool::paint()
                 else {
                     areaPainter.setBrush(Qt::NoBrush);
                     areaPainter.setPen(QPen(_areaBrush, 2.0 * _brushRadius, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-                    areaPainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
+                    areaPainter.drawPolyline(_mousePositions.constData(), static_cast<int>(_mousePositions.count()));
                 }
             }
 
@@ -807,22 +808,22 @@ void PixelSelectionTool::paint()
 
             areaPainter.setBrush(_areaBrush);
             areaPainter.setPen(Qt::NoPen);
-            areaPainter.drawPolygon(_mousePositions.constData(), _mousePositions.count());
+            areaPainter.drawPolygon(_mousePositions.constData(), static_cast<int>(_mousePositions.count()));
 
             shapePainter.setBrush(Qt::NoBrush);
 
             shapePainter.setPen(_penLineForeGround);
-            shapePainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
+            shapePainter.drawPolyline(_mousePositions.constData(), static_cast<int>(_mousePositions.count()));
 
             controlPoints << _mousePositions.first();
             controlPoints << _mousePositions.last();
 
             shapePainter.setBrush(_areaBrush);
             shapePainter.setPen(_penLineBackGround);
-            shapePainter.drawPolyline(controlPoints.constData(), controlPoints.count());
+            shapePainter.drawPolyline(controlPoints.constData(), static_cast<int>(controlPoints.count()));
 
             const auto size = 8.0f;
-            const auto textCenter = _mousePositions.first() - QPoint(size, size);
+            const auto textCenter = _mousePositions.first() - QPoint(static_cast<int>(size), static_cast<int>(size));
 
             textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
 
@@ -836,12 +837,12 @@ void PixelSelectionTool::paint()
 
             areaPainter.setBrush(_areaBrush);
             areaPainter.setPen(Qt::NoPen);
-            areaPainter.drawPolygon(_mousePositions.constData(), _mousePositions.count());
+            areaPainter.drawPolygon(_mousePositions.constData(), static_cast<int>(_mousePositions.count()));
 
             shapePainter.setBrush(Qt::NoBrush);
 
             shapePainter.setPen(_penLineForeGround);
-            shapePainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
+            shapePainter.drawPolyline(_mousePositions.constData(), static_cast<int>(_mousePositions.count()));
 
             QVector<QPoint> connectingPoints;
 
@@ -849,16 +850,17 @@ void PixelSelectionTool::paint()
             connectingPoints << _mousePositions.last();
 
             shapePainter.setPen(_penLineBackGround);
-            shapePainter.drawPolyline(connectingPoints.constData(), connectingPoints.count());
+            shapePainter.drawPolyline(connectingPoints.constData(), static_cast<int>(connectingPoints.count()));
 
             controlPoints << _mousePositions;
 
             const auto size = 8.0f;
-            const auto textCenter = _mousePositions.first() - QPoint(size, size);
+            const auto textCenter = _mousePositions.first() - QPoint(static_cast<int>(size), static_cast<int>(size));
 
             textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
 
-            if (_mousePositions.count() > 3 && (_mousePositions.last() - _mousePositions.first()).manhattanLength() < CP_RADIUS_CLOSING) {
+            if (_mousePositions.count() > 3 && 
+                static_cast<float>((_mousePositions.last() - _mousePositions.first()).manhattanLength()) < CP_RADIUS_CLOSING) {
                 shapePainter.setPen(_penClosingPoint);
                 shapePainter.drawPoints(QVector<QPoint>({ _mousePositions.first() }));
             }
@@ -882,26 +884,26 @@ void PixelSelectionTool::paint()
             shapePainter.setBrush(Qt::NoBrush);
             shapePainter.setPen(_penLineBackGround);
 
-            constexpr auto gap  = 5.0;
+            constexpr auto gap  = 5.0f;
             const auto radius   = 0.5f * _brushRadius;
 
             shapePainter.drawPolyline(QVector<QPoint>({
-                QPoint(mousePosition.x(), mousePosition.y() - radius - gap),
+                QPoint(mousePosition.x(), static_cast<int>(static_cast<float>(mousePosition.y()) - radius - gap)),
                 QPoint(mousePosition.x(), 0.0)
             }));
 
             shapePainter.drawPolyline(QVector<QPoint>({
-                QPoint(mousePosition.x(), mousePosition.y() + radius + gap),
+                QPoint(mousePosition.x(), static_cast<int>(static_cast<float>(mousePosition.y()) + radius + gap)),
                 QPoint(mousePosition.x(), shapePixmap.size().height())
             }));
 
             shapePainter.drawPolyline(QVector<QPoint>({
-                QPoint(mousePosition.x() - radius - gap, mousePosition.y()),
+                QPoint(static_cast<int>(static_cast<float>(mousePosition.x()) - radius - gap), mousePosition.y()),
                 QPoint(0.0, mousePosition.y())
             }));
 
             shapePainter.drawPolyline(QVector<QPoint>({
-                QPoint(mousePosition.x() + radius + gap, mousePosition.y()),
+                QPoint(static_cast<int>(static_cast<float>(mousePosition.x()) + radius + gap), mousePosition.y()),
                 QPoint(shapePixmap.size().width(), mousePosition.y())
             }));
 

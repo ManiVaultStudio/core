@@ -762,7 +762,7 @@ QTimer& Task::getTimer(const TimerType& timerType)
 
 void Task::setTimerInterval(const TimerType& timerType, std::uint32_t interval)
 {
-    getTimer(timerType).setInterval(interval);
+    getTimer(timerType).setInterval(static_cast<int>(interval));
 }
 
 void Task::setSubtasks(std::uint32_t numberOfSubtasks)
@@ -884,7 +884,7 @@ std::int32_t Task::getSubtaskIndex(const QString& subtaskName) const
     if (!_subtasksNames.contains(subtaskName))
         return -1;
 
-    return _subtasksNames.indexOf(subtaskName);
+    return static_cast<std::int32_t>(_subtasksNames.indexOf(subtaskName));
 }
 
 QString Task::getSubtaskNamePrefix() const
@@ -1440,7 +1440,7 @@ void Task::privateSetStatusDeferred(const Status& status, bool recursive /*= fal
     _deferredStatus             = status;
     _deferredStatusRecursive    = recursive;
 
-    getTimer(TimerType::DeferredStatus).start(delay);
+    getTimer(TimerType::DeferredStatus).start(static_cast<int>(delay));
 }
 
 void Task::privateSetUndefined()

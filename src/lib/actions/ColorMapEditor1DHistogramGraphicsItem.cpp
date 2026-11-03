@@ -73,12 +73,15 @@ void ColorMapEditor1DHistogramGraphicsItem::paint(QPainter* painter, const QStyl
     if (histogram.isEmpty())
         return;
 
-    const auto binMax = 1.1f * *std::max_element(histogram.begin(), histogram.end());
+    const auto binMax = 1.1f * static_cast<float>(*std::ranges::max_element(histogram));
 
     std::uint32_t binIndex = 0;
 
     for (const auto& bin : histogram) {
-        const auto binNormalized = QPointF(static_cast<float>(binIndex) / (histogram.count() - 1), static_cast<float>(bin) / binMax);
+        const auto binNormalized = QPointF(
+            static_cast<float>(binIndex) / static_cast<float>(histogram.count() - 1ll),
+            static_cast<float>(bin) / binMax
+            );
 
         points << graphRectangle.bottomLeft() + QPointF(binNormalized.x() * graphRectangle.width(), -binNormalized.y() * graphRectangle.height());
 
@@ -95,14 +98,14 @@ void ColorMapEditor1DHistogramGraphicsItem::paint(QPainter* painter, const QStyl
     pen.setColor(_colorMapEditor1DWidget.isEnabled() ? QColor(150, 150, 150, 100) : QColor(150, 150, 150, 40));
 
     painter->setPen(pen);
-    painter->drawPolyline(points.data(), points.count());
+    painter->drawPolyline(points.data(), static_cast<int>(points.count()));
 
     points.insert(0, graphRectangle.bottomLeft());
     points << graphRectangle.bottomRight();
 
     painter->setPen(Qt::NoPen);
     painter->setBrush(QColor(150, 150, 150, _colorMapEditor1DWidget.isEnabled() ? 50 : 20));
-    painter->drawPolygon(points.data(), points.count());
+    painter->drawPolygon(points.data(), static_cast<int>(points.count()));
 }
 
 }
