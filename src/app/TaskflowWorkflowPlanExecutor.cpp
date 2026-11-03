@@ -22,6 +22,7 @@
 #include <QEventLoop>
 #include <QThread>
 #include <QDateTime>
+#include <QRegularExpression>
 
 #include <fstream>
 #include <chrono>
@@ -331,7 +332,9 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
             return result;
         }
 
-        const QString fileName = QDir(profilingDir).filePath(QString("workflow_trace_%1.json").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss")));
+        auto workflowName = workflowPlan.getName();
+        workflowName.replace(QRegularExpression(QStringLiteral("[^A-Za-z0-9_-]+")), QStringLiteral("_"));
+        const QString fileName = QDir(profilingDir).filePath(QString("workflow_trace_%1_%2.json").arg(workflowName, QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss")));
 
         std::ofstream traceFile(QDir::toNativeSeparators(fileName).toStdString());
 
