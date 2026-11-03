@@ -6,8 +6,10 @@
 
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QDir>
 #include <QCryptographicHash>
+#include <functional>
 
 #include <cstdint>
 
@@ -44,7 +46,7 @@ public:
      * @param fileDoneFn Callback which is called when a file compression is complete
      * @param filters File include filter
      */
-    void compressDirectory(const QString& sourceDirectory, const QString& compressedFilePath, bool recursive = true, std::int32_t compressionLevel = 0, const QString& password = "", QDir::Filters filters = QDir::Filter::Files);
+    void compressDirectory(const QString& sourceDirectory, const QString& compressedFilePath, bool recursive = true, std::int32_t compressionLevel = 0, const QString& password = "", QDir::Filters filters = QDir::Filter::Files, const QString& sourceArchivePath = "", const std::function<void(float)>& progress = {});
 
     /**
      * Decompresses a compressed file to a destination directory
@@ -113,7 +115,7 @@ protected:
      * @param password Password string if files need to be secured
      * @param filters File include filter
      */
-    void compressSubDirectory(QuaZip* parentZip, const QString& directory, const QString& parentDirectory, bool recursive = true, std::int32_t compressionLevel = 0, const QString& password = "", QDir::Filters filters = QDir::Filter::Files);
+    void compressSubDirectory(QuaZip* parentZip, const QString& directory, const QString& parentDirectory, bool recursive = true, std::int32_t compressionLevel = 0, const QString& password = "", QDir::Filters filters = QDir::Filter::Files, const std::function<void(std::uint64_t)>& bytesWritten = {});
 
     /**
      * Compresses a file
@@ -123,7 +125,10 @@ protected:
      * @param compressionLevel Compression level (zero means no compression)
      * @param password Password string if files need to be secured
      */
-    void compressFile(QuaZip* zip, const QString& sourceFilePath, const QString& compressedFilePath, std::int32_t compressionLevel = 0, const QString& password = "");
+    void compressFile(QuaZip* zip, const QString& sourceFilePath, const QString& compressedFilePath, std::int32_t compressionLevel = 0, const QString& password = "", const std::function<void(std::uint64_t)>& bytesWritten = {});
+
+    /** Copies selected root-level archive entries directly into an open destination archive. */
+    void copyArchiveEntries(QuaZip* destinationZip, const QString& sourceArchivePath, const QStringList& entryNames, const std::function<void(std::uint64_t)>& bytesWritten = {});
 
     /**
      * Extracts a file

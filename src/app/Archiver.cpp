@@ -14,6 +14,13 @@
 #include <QDir>
 #include <QThread>
 #include <QMutexLocker>
+#include <QSet>
+#include <QFile>
+#include <QFileInfo>
+#include <QUuid>
+#include <QDirIterator>
+#include <QElapsedTimer>
+#include <QStorageInfo>
 
 #include <quazip/JlCompress.h>
 
@@ -68,25 +75,150 @@ bool isPathWithinDirectory(const QString& path, const QString& directory)
     return canonicalPath == canonicalDirectory || canonicalPath.startsWith(directoryPrefix);
 }
 
+std::uint64_t getArchiveEntriesSize(const QString& archivePath, const QStringList& entryNames)
+{
+    if (entryNames.isEmpty())
+        return 0;
+
+    QuaZip zip(archivePath);
+    if (!zip.open(QuaZip::mdUnzip))
+        throw std::runtime_error(QString("Unable to open source project archive: %1").arg(archivePath).toStdString());
+
+    QSet<QString> remainingEntries;
+    for (const auto& entryName : entryNames)
+        remainingEntries.insert(entryName);
+
+    std::uint64_t totalSize = 0;
+    if (!zip.goToFirstFile())
+        throw std::runtime_error("No files found in source project archive");
+
+    do
+    {
+        const auto currentFileName = zip.getCurrentFileName();
+        if (!remainingEntries.contains(currentFileName))
+            continue;
+
+        QuaZipFileInfo64 fileInfo;
+        if (!zip.getCurrentFileInfo(&fileInfo))
+            throw std::runtime_error("Unable to read packed file information from source project archive");
+
+        totalSize += static_cast<std::uint64_t>(fileInfo.uncompressedSize);
+        remainingEntries.remove(currentFileName);
+    } while (zip.goToNextFile() && !remainingEntries.isEmpty());
+
+    zip.close();
+    if (!remainingEntries.isEmpty())
+        throw std::runtime_error(QString("Source project archive is missing %1 packed tile entry(s)").arg(remainingEntries.size()).toStdString());
+
+    return totalSize;
 }
 
-void Archiver::compressDirectory(const QString& sourceDirectory, const QString& compressedFilePath, bool recursive /*= true*/, std::int32_t compressionLevel /*= 0*/, const QString& password /*= ""*/, QDir::Filters filters /*= QDir::Filter::Files*/)
+void writeArchiveData(QuaZipFile& destinationFile, const QByteArray& data, const QString& entryName)
 {
+    qint64 bytesWritten = 0;
+    while (bytesWritten < data.size())
+    {
+        const auto remainingBytes = data.size() - bytesWritten;
+        const auto writeResult = destinationFile.write(data.constData() + bytesWritten, remainingBytes);
+        if (writeResult <= 0)
+        {
+            throw std::runtime_error(QString("Unable to write archive entry %1: %2 (ZIP error %3; wrote %4 of %5 bytes)")
+                .arg(entryName)
+                .arg(destinationFile.errorString())
+                .arg(destinationFile.getZipError())
+                .arg(bytesWritten)
+                .arg(data.size())
+                .toStdString());
+        }
+        bytesWritten += writeResult;
+    }
+}
+
+}
+
+void Archiver::compressDirectory(const QString& sourceDirectory, const QString& compressedFilePath, bool recursive /*= true*/, std::int32_t compressionLevel /*= 0*/, const QString& password /*= ""*/, QDir::Filters filters /*= QDir::Filter::Files*/, const QString& sourceArchivePath /*= ""*/, const std::function<void(float)>& progress /*= {}*/)
+{
+    const auto manifestPath = sourceDirectory + QStringLiteral(".packed-archive-entries");
+    QStringList archiveEntriesToCopy;
+    QFile manifest(manifestPath);
+    if (manifest.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        while (!manifest.atEnd())
+        {
+            const auto entryName = QString::fromUtf8(manifest.readLine()).trimmed();
+            if (!entryName.isEmpty())
+                archiveEntriesToCopy.push_back(entryName);
+        }
+        manifest.close();
+    }
+
+    auto archiveOutputPath = compressedFilePath;
+    const auto sourceAbsolutePath = QDir::cleanPath(QFileInfo(sourceArchivePath).absoluteFilePath());
+    const auto destinationAbsolutePath = QDir::cleanPath(QFileInfo(compressedFilePath).absoluteFilePath());
+#ifdef Q_OS_WIN
+    const auto sameSourceAndDestination = !archiveEntriesToCopy.isEmpty() && !sourceArchivePath.isEmpty() && QString::compare(sourceAbsolutePath, destinationAbsolutePath, Qt::CaseInsensitive) == 0;
+#else
+    const auto sameSourceAndDestination = !archiveEntriesToCopy.isEmpty() && !sourceArchivePath.isEmpty() && sourceAbsolutePath == destinationAbsolutePath;
+#endif
+    if (sameSourceAndDestination)
+        archiveOutputPath += QStringLiteral(".save-") + QUuid::createUuid().toString(QUuid::WithoutBraces);
+
+    std::uint64_t totalBytes = 0;
+    QDirIterator fileIterator(sourceDirectory, filters, QDirIterator::Subdirectories);
+    while (fileIterator.hasNext())
+    {
+        const QFileInfo fileInfo(fileIterator.next());
+        if (fileInfo.isFile())
+            totalBytes += static_cast<std::uint64_t>(fileInfo.size());
+    }
+    totalBytes += getArchiveEntriesSize(sourceArchivePath, archiveEntriesToCopy);
+
+    const QStorageInfo destinationStorage(QFileInfo(archiveOutputPath).absolutePath());
+    constexpr std::uint64_t archiveMetadataReserveBytes = 16ULL * 1024ULL * 1024ULL;
+    if (destinationStorage.isValid() && destinationStorage.isReady() && destinationStorage.bytesAvailable() >= 0 && totalBytes <= std::numeric_limits<std::uint64_t>::max() - archiveMetadataReserveBytes)
+    {
+        const auto requiredBytes = totalBytes + archiveMetadataReserveBytes;
+        const auto availableBytes = static_cast<std::uint64_t>(destinationStorage.bytesAvailable());
+        if (availableBytes < requiredBytes)
+        {
+            throw std::runtime_error(QString("Insufficient free space to save project archive: approximately %1 GiB required, %2 GiB available on %3")
+                .arg(static_cast<double>(requiredBytes) / (1024.0 * 1024.0 * 1024.0), 0, 'f', 1)
+                .arg(static_cast<double>(availableBytes) / (1024.0 * 1024.0 * 1024.0), 0, 'f', 1)
+                .arg(destinationStorage.rootPath())
+                .toStdString());
+        }
+    }
+
+    std::uint64_t processedBytes = 0;
+    QElapsedTimer progressTimer;
+    progressTimer.start();
+    if (progress)
+        progress(0.0f);
+
+    const auto bytesWritten = [&](const std::uint64_t byteCount) {
+        processedBytes += byteCount;
+        if (progress && (progressTimer.elapsed() >= 50 || processedBytes >= totalBytes))
+        {
+            progress(totalBytes == 0 ? 1.0f : static_cast<float>(static_cast<double>(processedBytes) / static_cast<double>(totalBytes)));
+            progressTimer.restart();
+        }
+    };
+
     // Clean up and throw exception if error(s) occurred
-    const auto except = [&compressedFilePath](const QString& errorMessage) {
+    const auto except = [&archiveOutputPath](const QString& errorMessage) {
 
         // Remove destination file
-        QFile::remove(compressedFilePath);
+        QFile::remove(archiveOutputPath);
 
         // Except
         throw std::runtime_error(errorMessage.toLatin1());
     };
 
     // Compressed file
-    QuaZip zip(compressedFilePath);
+    QuaZip zip(archiveOutputPath);
 
     //// Create the destination file
-    QDir().mkpath(QFileInfo(compressedFilePath).absolutePath());
+    QDir().mkpath(QFileInfo(archiveOutputPath).absolutePath());
 
     // Except if not created
     if (!zip.open(QuaZip::mdCreate))
@@ -96,17 +228,96 @@ void Archiver::compressDirectory(const QString& sourceDirectory, const QString& 
     if (zip.getZipError() != 0)
         except("Zip error(s) occurred");
 
-    // Compress the sub directory
-    Archiver::compressSubDirectory(&zip, sourceDirectory, sourceDirectory, recursive, compressionLevel, password, filters);
-
-    // Notify others that directory compression started
     emit taskStarted("Save to disk");
+
+    // Compress the sub directory
+    Archiver::compressSubDirectory(&zip, sourceDirectory, sourceDirectory, recursive, compressionLevel, password, filters, bytesWritten);
+
+    if (!archiveEntriesToCopy.isEmpty())
+    {
+        if (sourceArchivePath.isEmpty())
+            except("Packed archive entries were requested without a source project archive");
+        copyArchiveEntries(&zip, sourceArchivePath, archiveEntriesToCopy, bytesWritten);
+    }
 
     // Close the zip file
     zip.close();
 
+    if (sameSourceAndDestination)
+    {
+        const auto backupPath = compressedFilePath + QStringLiteral(".backup-") + QUuid::createUuid().toString(QUuid::WithoutBraces);
+        if (!QFile::rename(compressedFilePath, backupPath))
+        {
+            QFile::remove(archiveOutputPath);
+            throw std::runtime_error("Unable to move the original project archive for replacement");
+        }
+        if (!QFile::rename(archiveOutputPath, compressedFilePath))
+        {
+            QFile::rename(backupPath, compressedFilePath);
+            QFile::remove(archiveOutputPath);
+            throw std::runtime_error("Unable to replace the project archive with the saved archive");
+        }
+        QFile::remove(backupPath);
+    }
+
+    QFile::remove(manifestPath);
+    if (progress)
+        progress(1.0f);
+
     // Notify others that directory compression finished
     emit taskFinished("Save to disk");
+}
+
+void Archiver::copyArchiveEntries(QuaZip* destinationZip, const QString& sourceArchivePath, const QStringList& entryNames, const std::function<void(std::uint64_t)>& bytesWritten)
+{
+    if (!destinationZip || destinationZip->getMode() != QuaZip::mdCreate)
+        throw std::runtime_error("Invalid destination ZIP archive");
+
+    QuaZip sourceZip(sourceArchivePath);
+    if (!sourceZip.open(QuaZip::mdUnzip))
+        throw std::runtime_error(QString("Unable to open source project archive: %1").arg(sourceArchivePath).toStdString());
+
+    QSet<QString> remainingEntries;
+    for (const auto& entryName : entryNames)
+        remainingEntries.insert(entryName);
+
+    for (const auto& entryName : remainingEntries)
+    {
+        if (entryName.isEmpty() || QFileInfo(entryName).fileName() != entryName || entryName == QStringLiteral(".") || entryName == QStringLiteral(".."))
+            throw std::invalid_argument("Only root-level archive entries can be copied");
+
+        if (!sourceZip.setCurrentFile(entryName))
+            throw std::runtime_error(QString("Source project archive is missing packed tile entry: %1").arg(entryName).toStdString());
+
+        QuaZipFile sourceFile(&sourceZip);
+        if (!sourceFile.open(QIODevice::ReadOnly))
+            throw std::runtime_error(QString("Unable to open packed tile entry: %1").arg(entryName).toStdString());
+
+        QuaZipFile destinationFile(destinationZip);
+        if (!destinationFile.open(QIODevice::WriteOnly, QuaZipNewInfo(entryName), nullptr, 0U, 0, 0))
+            throw std::runtime_error(QString("Unable to create packed tile entry: %1").arg(entryName).toStdString());
+
+        while (!sourceFile.atEnd())
+        {
+            const auto data = sourceFile.read(1024 * 1024);
+            if (data.isEmpty() && !sourceFile.atEnd())
+                throw std::runtime_error(QString("Unable to read packed tile entry: %1").arg(entryName).toStdString());
+
+            if (!data.isEmpty())
+                writeArchiveData(destinationFile, data, entryName);
+            if (bytesWritten)
+                bytesWritten(static_cast<std::uint64_t>(data.size()));
+        }
+
+        destinationFile.close();
+        sourceFile.close();
+        if (sourceFile.getZipError() != UNZ_OK || destinationFile.getZipError() != UNZ_OK)
+            throw std::runtime_error(QString("Failed while copying packed tile entry: %1").arg(entryName).toStdString());
+    }
+
+    sourceZip.close();
+    if (sourceZip.getZipError() != 0)
+        throw std::runtime_error("Error occurred while closing the source project archive");
 }
 
 void Archiver::decompress(const QString& compressedFile, const QString& destinationDirectory, const QString& password /*= ""*/)
@@ -322,7 +533,7 @@ QByteArray Archiver::readZipEntryRangeToMemory(const QString& zipPath, const QSt
     return data;
 }
 
-void Archiver::compressSubDirectory(QuaZip* parentZip, const QString& directory, const QString& parentDirectory, bool recursive /*= true*/, std::int32_t compressionLevel /*= 0*/, const QString& password /*= ""*/, QDir::Filters filters /*= QDir::Filter::Files*/)
+void Archiver::compressSubDirectory(QuaZip* parentZip, const QString& directory, const QString& parentDirectory, bool recursive /*= true*/, std::int32_t compressionLevel /*= 0*/, const QString& password /*= ""*/, QDir::Filters filters /*= QDir::Filter::Files*/, const std::function<void(std::uint64_t)>& bytesWritten)
 {
     // Except if the parent zip is invalid
     if (!parentZip)
@@ -367,7 +578,7 @@ void Archiver::compressSubDirectory(QuaZip* parentZip, const QString& directory,
                 continue;
 
             // Compress sub directory
-            compressSubDirectory(parentZip, file.absoluteFilePath(), parentDirectory, recursive, compressionLevel, password, filters);
+            compressSubDirectory(parentZip, file.absoluteFilePath(), parentDirectory, recursive, compressionLevel, password, filters, bytesWritten);
         }
     }
 
@@ -385,11 +596,11 @@ void Archiver::compressSubDirectory(QuaZip* parentZip, const QString& directory,
         const auto filename = origDirectory.relativeFilePath(file.absoluteFilePath());
 
         // Compress the file
-        compressFile(parentZip, file.absoluteFilePath(), filename, compressionLevel, password);
+        compressFile(parentZip, file.absoluteFilePath(), filename, compressionLevel, password, bytesWritten);
     }
 }
 
-void Archiver::compressFile(QuaZip* zip, const QString& sourceFilePath, const QString& compressedFilePath, std::int32_t compressionLevel /*= 0*/, const QString& password /*= ""*/)
+void Archiver::compressFile(QuaZip* zip, const QString& sourceFilePath, const QString& compressedFilePath, std::int32_t compressionLevel /*= 0*/, const QString& password /*= ""*/, const std::function<void(std::uint64_t)>& bytesWritten)
 {
     const auto taskName = compressedFilePath;
 
@@ -419,7 +630,10 @@ void Archiver::compressFile(QuaZip* zip, const QString& sourceFilePath, const QS
         const auto path         = quazip_symlink_target(input);
         const auto relativePath = input.dir().relativeFilePath(path);
 
-        compressedFile.write(QFile::encodeName(relativePath));
+        const auto data = QFile::encodeName(relativePath);
+        writeArchiveData(compressedFile, data, compressedFilePath);
+        if (bytesWritten)
+            bytesWritten(static_cast<std::uint64_t>(data.size()));
     }
     else {
 
@@ -433,8 +647,19 @@ void Archiver::compressFile(QuaZip* zip, const QString& sourceFilePath, const QS
         if (!inFile.open(QIODevice::ReadOnly))
             throw std::runtime_error("Unable to open input file");
 
-        // Except if unable to copy data
-        if (!JlCompress::copyData(inFile, compressedFile) || compressedFile.getZipError() != UNZ_OK)
+        while (!inFile.atEnd())
+        {
+            const auto data = inFile.read(1024 * 1024);
+            if (data.isEmpty() && !inFile.atEnd())
+                throw std::runtime_error(QString("Unable to read input file: %1").arg(sourceFilePath).toStdString());
+
+            if (!data.isEmpty())
+                writeArchiveData(compressedFile, data, compressedFilePath);
+            if (bytesWritten)
+                bytesWritten(static_cast<std::uint64_t>(data.size()));
+        }
+
+        if (inFile.error() != QFileDevice::NoError || compressedFile.getZipError() != UNZ_OK)
             throw std::runtime_error("Unable to copy data");
 
         // Close the input file

@@ -3,6 +3,7 @@
 #include "PointDataTiledStorage.h"
 
 #include <CoreInterface.h>
+#include <Project.h>
 
 #include <ProjectCompressionAction.h>
 
@@ -15,6 +16,8 @@
 #include <QElapsedTimer>
 #include <QFile>
 #include <QFileInfo>
+#include <QMutexLocker>
+#include <QSet>
 #include <QString>
 #include <QUuid>
 #include <QVector>
@@ -50,6 +53,12 @@ bool createHardLink(const QString& sourcePath, const QString& destinationPath)
 #endif
 }
 
+bool isLocalPackedTileFile(const QString& path)
+{
+    const QFileInfo fileInfo(path);
+    return fileInfo.isAbsolute() && fileInfo.isFile();
+}
+
 struct TileEncodingItem
 {
     std::size_t tileIndex = 0;
@@ -57,6 +66,39 @@ struct TileEncodingItem
     QByteArray bytes;
     bool hasBytes = false;
 };
+
+void registerPackedArchiveEntries(const QString& saveDirectory, const QStringList& entryNames)
+{
+    static QMutex manifestMutex;
+    if (entryNames.isEmpty())
+        return;
+
+    const QMutexLocker lock(&manifestMutex);
+    const auto manifestPath = saveDirectory + QStringLiteral(".packed-archive-entries");
+    QSet<QString> registeredEntries;
+    QFile existingManifest(manifestPath);
+    if (existingManifest.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        while (!existingManifest.atEnd())
+            registeredEntries.insert(QString::fromUtf8(existingManifest.readLine()).trimmed());
+        existingManifest.close();
+    }
+
+    QFile manifest(manifestPath);
+    if (!manifest.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
+        throw std::runtime_error(QString("Unable to register packed entries for archive copy: %1").arg(manifest.fileName()).toStdString());
+
+    for (const auto& entryName : entryNames)
+    {
+        if (registeredEntries.contains(entryName))
+            continue;
+
+        const auto line = entryName.toUtf8() + '\n';
+        if (manifest.write(line) != line.size())
+            throw std::runtime_error("Unable to write packed archive entry manifest");
+        registeredEntries.insert(entryName);
+    }
+}
 
 class TileEncodingQueue
 {
@@ -331,14 +373,21 @@ QVariantMap makeStagedPackedTiledVariantMap(const mv::pointdata::tiled::PointDat
     if (!QDir().mkpath(saveDirectory))
         throw std::runtime_error(QString("Unable to create packed tiled save directory: %1").arg(saveDirectory).toStdString());
 
+    QStringList archiveEntryNames;
+    for (const auto& sourcePath : sourcePaths)
+        if (!isLocalPackedTileFile(sourcePath))
+            archiveEntryNames.push_back(QFileInfo(sourcePath).fileName());
+
+    registerPackedArchiveEntries(saveDirectory, archiveEntryNames);
+
     std::uint64_t totalBytes = 0;
     for (const auto& sourcePath : sourcePaths)
     {
         const QFileInfo sourceInfo(sourcePath);
-        if (!sourceInfo.isFile())
+        if (isLocalPackedTileFile(sourcePath))
+            totalBytes += static_cast<std::uint64_t>(sourceInfo.size());
+        else if (QFileInfo(sourcePath).fileName().isEmpty())
             throw std::runtime_error(QString("Unable to access staged packed supertile: %1").arg(sourcePath).toStdString());
-
-        totalBytes += static_cast<std::uint64_t>(sourceInfo.size());
     }
 
     std::uint64_t processedBytes = 0;
@@ -347,11 +396,13 @@ QVariantMap makeStagedPackedTiledVariantMap(const mv::pointdata::tiled::PointDat
 
     for (std::size_t superTileIndex = 0; superTileIndex < static_cast<std::size_t>(sourcePaths.size()); ++superTileIndex)
     {
-        const auto fileName = QUuid::createUuid().toString(QUuid::WithoutBraces) + QStringLiteral(".ptpack");
+        const auto& originalSourcePath = sourcePaths[static_cast<qsizetype>(superTileIndex)];
+        const auto sourceIsArchiveEntry = !isLocalPackedTileFile(originalSourcePath);
+        const auto fileName = sourceIsArchiveEntry ? QFileInfo(originalSourcePath).fileName() : QUuid::createUuid().toString(QUuid::WithoutBraces) + QStringLiteral(".ptpack");
         const auto destinationPath = QDir(saveDirectory).filePath(fileName);
-        const auto& sourcePath = sourcePaths[static_cast<qsizetype>(superTileIndex)];
+        const auto& sourcePath = originalSourcePath;
         const QFileInfo sourceInfo(sourcePath);
-        if (!createHardLink(sourcePath, destinationPath) && !QFile::copy(sourcePath, destinationPath))
+        if (!sourceIsArchiveEntry && !createHardLink(sourcePath, destinationPath) && !QFile::copy(sourcePath, destinationPath))
             throw std::runtime_error(QString("Unable to link or copy staged packed supertile: %1").arg(sourcePath).toStdString());
 
         const auto superTileRow = static_cast<std::uint64_t>(superTileIndex) / superTileColumnCount;
@@ -363,10 +414,14 @@ QVariantMap makeStagedPackedTiledVariantMap(const mv::pointdata::tiled::PointDat
         superTileMap["Codec"] = storage.packedTileSourceCodec();
         superTiles[static_cast<qsizetype>(superTileIndex)] = superTileMap;
 
-        processedBytes += static_cast<std::uint64_t>(sourceInfo.size());
+        if (isLocalPackedTileFile(sourcePath))
+            processedBytes += static_cast<std::uint64_t>(sourceInfo.size());
         if (progress)
             progress(totalBytes == 0 ? 1.0f : static_cast<float>(processedBytes) / static_cast<float>(totalBytes));
     }
+
+    if (progress)
+        progress(1.0f);
 
     for (std::size_t tileIndex = 0; tileIndex < storage.descriptors().size(); ++tileIndex)
     {
@@ -623,6 +678,8 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantM
     std::shared_ptr<std::vector<QVariantMap>> superTileBlobs;
     std::shared_ptr<std::vector<std::shared_ptr<QByteArray>>> superTilePayloads;
     std::shared_ptr<std::vector<std::shared_ptr<mv::util::PackedBlobFileReader>>> packedTileReaders;
+    QStringList packedTileSourcePaths;
+    QString packedTileSourceCodec;
     if (storageType == QStringLiteral("SuperTileBlobs"))
     {
         superTileBlobs = std::make_shared<std::vector<QVariantMap>>();
@@ -646,8 +703,29 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantM
             if (fileName.isEmpty() || codecName.isEmpty())
                 throw std::runtime_error("Packed tiled point-data metadata has an incomplete super-tile file entry");
 
+            if (packedTileSourceCodec.isEmpty())
+                packedTileSourceCodec = codecName;
+            else if (packedTileSourceCodec != codecName)
+                throw std::runtime_error("Packed tiled point-data files use inconsistent codecs");
+
+            auto sourcePath = fileName;
+            if (!isLocalPackedTileFile(sourcePath))
+            {
+                try
+                {
+                    const auto stagedPath = QDir(mv::projects().getTemporaryDirPath(mv::AbstractProjectManager::TemporaryDirType::Save)).filePath(fileName);
+                    if (QFileInfo(stagedPath).isFile())
+                        sourcePath = stagedPath;
+                }
+                catch (...)
+                {
+                    // During project loading, no save temporary directory may be registered.
+                }
+            }
+
             const auto codec = mv::util::codecRegistry().createCodec(nullptr, codecName);
-            packedTileReaders->push_back(std::make_shared<mv::util::PackedBlobFileReader>(fileName, codec));
+            packedTileReaders->push_back(std::make_shared<mv::util::PackedBlobFileReader>(sourcePath, codec));
+            packedTileSourcePaths.push_back(sourcePath);
         }
     }
 
@@ -712,6 +790,21 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantM
             descriptors[i].packedBlock.compressedSize  = tile.value("PackedTileCompressedSize").toULongLong();
             descriptors[i].packedBlock.uncompressedSize = tile.value("PackedTileUncompressedSize").toULongLong();
         }
+    }
+
+    if (packedTileFiles)
+    {
+        std::vector<mv::util::PackedBlobBlock> blocks;
+        std::vector<std::size_t> superTileIndices;
+        blocks.reserve(descriptors.size());
+        superTileIndices.reserve(descriptors.size());
+        for (const auto& descriptor : descriptors)
+        {
+            blocks.push_back(descriptor.packedBlock);
+            superTileIndices.push_back(descriptor.superTileIndex);
+        }
+
+        storage->setPackedTileSource(packedTileSourcePaths, packedTileSourceCodec, blocks, superTileIndices);
     }
 
     return storage;
