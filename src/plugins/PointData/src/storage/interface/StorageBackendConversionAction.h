@@ -8,7 +8,7 @@
 #include <actions/GroupAction.h>
 #include <actions/MessageCardAction.h>
 #include <actions/OptionAction.h>
-#include <PointData/pointdata_export.h>
+#include "pointdata_export.h"
 
 #include <atomic>
 #include <functional>
