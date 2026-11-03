@@ -17,7 +17,6 @@
 
 #include <exception>
 
-#include <math.h>
 #include <limits>
 
 using namespace mv::workflow;
