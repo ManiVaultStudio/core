@@ -21,6 +21,10 @@
 #include <QDirIterator>
 #include <QElapsedTimer>
 #include <QStorageInfo>
+#include <QCryptographicHash>
+#include <QHash>
+#include <QSaveFile>
+#include <QTemporaryDir>
 
 #include <quazip/JlCompress.h>
 
@@ -491,44 +495,171 @@ QByteArray Archiver::readZipEntryToMemory(const QString& zipPath, const QString&
 QByteArray Archiver::readZipEntryRangeToMemory(const QString& zipPath, const QString& entryName, const std::uint64_t offset, const std::uint64_t size)
 {
     static QMutex zipReadMutex;
+    struct StagedEntryCache
+    {
+        struct Entry
+        {
+            QString path;
+            std::uint64_t size = 0;
+            std::uint64_t lastAccess = 0;
+        };
+
+        QTemporaryDir directory { QDir(QDir::tempPath()).filePath(QStringLiteral("ManiVaultZipEntries-XXXXXX")) };
+        QHash<QString, Entry> entries;
+        std::uint64_t cachedBytes = 0;
+        std::uint64_t accessSequence = 0;
+    };
+    static StagedEntryCache stagedEntries;
+    constexpr std::uint64_t stagedEntryCacheLimit = 8ull * 1024ull * 1024ull * 1024ull;
 
     if (offset > static_cast<std::uint64_t>(std::numeric_limits<qint64>::max()) || size > static_cast<std::uint64_t>(std::numeric_limits<qint64>::max()))
         throw std::runtime_error("ZIP entry range exceeds Qt size limits");
 
     QMutexLocker lock(&zipReadMutex);
-    QuaZip zip(zipPath);
 
-    if (!zip.open(QuaZip::mdUnzip))
-        throw std::runtime_error(QString("Unable to open ZIP archive: %1").arg(zipPath).toStdString());
-
-    if (!zip.setCurrentFile(entryName))
-        throw std::runtime_error(QString("Unable to locate ZIP entry: %1").arg(entryName).toStdString());
-
-    QuaZipFile file(&zip);
-
-    if (!file.open(QIODevice::ReadOnly))
-        throw std::runtime_error(QString("Unable to open ZIP entry for reading: %1").arg(entryName).toStdString());
-
-    std::uint64_t bytesToDiscard = offset;
-
-    while (bytesToDiscard > 0)
+    if (!entryName.endsWith(QStringLiteral(".ptpack"), Qt::CaseInsensitive))
     {
-        const auto chunkSize = static_cast<qint64>(std::min<std::uint64_t>(bytesToDiscard, 1024 * 1024));
-        const auto chunk = file.read(chunkSize);
+        QuaZip zip(zipPath);
 
-        if (chunk.isEmpty())
-            throw std::runtime_error(QString("Unable to skip to ZIP entry range: %1").arg(entryName).toStdString());
+        if (!zip.open(QuaZip::mdUnzip))
+            throw std::runtime_error(QString("Unable to open ZIP archive: %1").arg(zipPath).toStdString());
 
-        bytesToDiscard -= static_cast<std::uint64_t>(chunk.size());
+        if (!zip.setCurrentFile(entryName))
+            throw std::runtime_error(QString("Unable to locate ZIP entry: %1").arg(entryName).toStdString());
+
+        QuaZipFile file(&zip);
+        if (!file.open(QIODevice::ReadOnly))
+            throw std::runtime_error(QString("Unable to open ZIP entry for reading: %1").arg(entryName).toStdString());
+
+        std::uint64_t bytesToDiscard = offset;
+        while (bytesToDiscard > 0)
+        {
+            const auto chunkSize = static_cast<qint64>(std::min<std::uint64_t>(bytesToDiscard, 1024 * 1024));
+            const auto chunk = file.read(chunkSize);
+            if (chunk.isEmpty())
+                throw std::runtime_error(QString("Unable to skip to ZIP entry range: %1").arg(entryName).toStdString());
+            bytesToDiscard -= static_cast<std::uint64_t>(chunk.size());
+        }
+
+        const auto data = file.read(static_cast<qint64>(size));
+        if (data.size() != static_cast<qsizetype>(size))
+            throw std::runtime_error(QString("Unable to read ZIP entry range: %1").arg(entryName).toStdString());
+        if (file.getZipError() != UNZ_OK)
+            throw std::runtime_error(QString("Failed while reading ZIP entry: %1").arg(entryName).toStdString());
+
+        return data;
     }
 
-    const auto data = file.read(static_cast<qint64>(size));
+    if (!stagedEntries.directory.isValid())
+        throw std::runtime_error("Unable to create temporary staging directory for ZIP entry reads");
 
+    const QFileInfo archiveInfo(zipPath);
+    const auto cacheKey = QStringLiteral("%1|%2|%3|%4")
+        .arg(archiveInfo.absoluteFilePath())
+        .arg(archiveInfo.size())
+        .arg(archiveInfo.lastModified().toMSecsSinceEpoch())
+        .arg(entryName);
+    auto cacheEntry = stagedEntries.entries.find(cacheKey);
+    auto stagedPath = cacheEntry == stagedEntries.entries.end() ? QString() : cacheEntry->path;
+
+    if (cacheEntry != stagedEntries.entries.end() && !QFileInfo::exists(stagedPath))
+    {
+        stagedEntries.cachedBytes -= cacheEntry->size;
+        stagedEntries.entries.erase(cacheEntry);
+        cacheEntry = stagedEntries.entries.end();
+        stagedPath.clear();
+    }
+
+    if (stagedPath.isEmpty() || !QFileInfo::exists(stagedPath))
+    {
+        QuaZip sourceZip(zipPath);
+
+        if (!sourceZip.open(QuaZip::mdUnzip))
+            throw std::runtime_error(QString("Unable to open ZIP archive: %1").arg(zipPath).toStdString());
+
+        if (!sourceZip.setCurrentFile(entryName))
+            throw std::runtime_error(QString("Unable to locate ZIP entry: %1").arg(entryName).toStdString());
+
+        QuaZipFileInfo64 entryInfo;
+        if (!sourceZip.getCurrentFileInfo(&entryInfo))
+            throw std::runtime_error(QString("Unable to inspect ZIP entry: %1").arg(entryName).toStdString());
+
+        if (offset > entryInfo.uncompressedSize || size > entryInfo.uncompressedSize - offset)
+            throw std::runtime_error(QString("Requested range exceeds ZIP entry size: %1").arg(entryName).toStdString());
+
+        QuaZipFile sourceFile(&sourceZip);
+        if (!sourceFile.open(QIODevice::ReadOnly))
+            throw std::runtime_error(QString("Unable to open ZIP entry for staging: %1").arg(entryName).toStdString());
+
+        const auto stagedFileName = QCryptographicHash::hash(cacheKey.toUtf8(), QCryptographicHash::Sha256).toHex() + ".entry";
+        stagedPath = QDir(stagedEntries.directory.path()).filePath(QString::fromLatin1(stagedFileName));
+        QSaveFile stagedFile(stagedPath);
+
+        if (!stagedFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+            throw std::runtime_error(QString("Unable to create staged ZIP entry: %1").arg(stagedPath).toStdString());
+
+        while (!sourceFile.atEnd())
+        {
+            const auto chunk = sourceFile.read(1024 * 1024);
+            if (chunk.isEmpty() && !sourceFile.atEnd())
+                throw std::runtime_error(QString("Unable to read ZIP entry while staging: %1").arg(entryName).toStdString());
+
+            if (!chunk.isEmpty() && stagedFile.write(chunk) != chunk.size())
+                throw std::runtime_error(QString("Unable to write staged ZIP entry: %1").arg(stagedPath).toStdString());
+        }
+
+        sourceFile.close();
+        sourceZip.close();
+
+        if (sourceFile.getZipError() != UNZ_OK || sourceZip.getZipError() != 0)
+            throw std::runtime_error(QString("Failed while staging ZIP entry: %1").arg(entryName).toStdString());
+
+        if (!stagedFile.commit())
+            throw std::runtime_error(QString("Unable to finalize staged ZIP entry: %1").arg(stagedPath).toStdString());
+
+        const auto stagedSize = static_cast<std::uint64_t>(QFileInfo(stagedPath).size());
+        stagedEntries.entries.insert(cacheKey, { stagedPath, stagedSize, ++stagedEntries.accessSequence });
+        stagedEntries.cachedBytes += stagedSize;
+    }
+    else
+    {
+        cacheEntry->lastAccess = ++stagedEntries.accessSequence;
+    }
+
+    QFile stagedFile(stagedPath);
+    if (!stagedFile.open(QIODevice::ReadOnly))
+        throw std::runtime_error(QString("Unable to open staged ZIP entry: %1").arg(stagedPath).toStdString());
+
+    if (offset > static_cast<std::uint64_t>(stagedFile.size()) || size > static_cast<std::uint64_t>(stagedFile.size()) - offset)
+        throw std::runtime_error(QString("Requested range exceeds ZIP entry size: %1").arg(entryName).toStdString());
+
+    if (!stagedFile.seek(static_cast<qint64>(offset)))
+        throw std::runtime_error(QString("Unable to seek in staged ZIP entry: %1").arg(stagedPath).toStdString());
+
+    const auto data = stagedFile.read(static_cast<qint64>(size));
     if (data.size() != static_cast<qsizetype>(size))
-        throw std::runtime_error(QString("Unable to read ZIP entry range: %1").arg(entryName).toStdString());
+        throw std::runtime_error(QString("Unable to read staged ZIP entry range: %1").arg(entryName).toStdString());
+    stagedFile.close();
 
-    if (file.getZipError() != UNZ_OK)
-        throw std::runtime_error(QString("Failed while reading ZIP entry: %1").arg(entryName).toStdString());
+    while (stagedEntries.cachedBytes > stagedEntryCacheLimit && !stagedEntries.entries.isEmpty())
+    {
+        auto oldestEntry = stagedEntries.entries.end();
+        for (auto entry = stagedEntries.entries.begin(); entry != stagedEntries.entries.end(); ++entry)
+        {
+            if (entry.key() == cacheKey && stagedEntries.entries.size() > 1)
+                continue;
+
+            if (oldestEntry == stagedEntries.entries.end() || entry->lastAccess < oldestEntry->lastAccess)
+                oldestEntry = entry;
+        }
+
+        if (oldestEntry == stagedEntries.entries.end())
+            break;
+
+        QFile::remove(oldestEntry->path);
+        stagedEntries.cachedBytes -= oldestEntry->size;
+        stagedEntries.entries.erase(oldestEntry);
+    }
 
     return data;
 }
