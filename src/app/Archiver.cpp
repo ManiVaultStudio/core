@@ -9,6 +9,11 @@
 #include <stdexcept>
 #include <algorithm>
 #include <limits>
+#include <deque>
+#include <condition_variable>
+#include <exception>
+#include <mutex>
+#include <thread>
 
 #include <QDebug>
 #include <QDir>
@@ -117,8 +122,22 @@ std::uint64_t getArchiveEntriesSize(const QString& archivePath, const QStringLis
     return totalSize;
 }
 
+struct ArchiveIoMetrics
+{
+    qint64 sourceReadMs = 0;
+    qint64 zipWriteMs = 0;
+    std::uint64_t sourceReadBytes = 0;
+    std::uint64_t zipWriteBytes = 0;
+    std::uint64_t readOperations = 0;
+};
+
+thread_local ArchiveIoMetrics* activeArchiveIoMetrics = nullptr;
+
 void writeArchiveData(QuaZipFile& destinationFile, const QByteArray& data, const QString& entryName)
 {
+    QElapsedTimer timer;
+    if (activeArchiveIoMetrics)
+        timer.start();
     qint64 bytesWritten = 0;
     while (bytesWritten < data.size())
     {
@@ -136,12 +155,110 @@ void writeArchiveData(QuaZipFile& destinationFile, const QByteArray& data, const
         }
         bytesWritten += writeResult;
     }
+    if (activeArchiveIoMetrics) {
+        activeArchiveIoMetrics->zipWriteMs += timer.elapsed();
+        activeArchiveIoMetrics->zipWriteBytes += static_cast<std::uint64_t>(data.size());
+    }
+}
+
+void pipeArchiveSourceToZip(QIODevice& source, QuaZipFile& destination, const QString& entryName, const std::function<void(std::uint64_t)>& bytesWritten)
+{
+    constexpr std::size_t chunkSize = 1024 * 1024;
+    constexpr std::size_t maxQueuedChunks = 8;
+    struct ReadAheadQueue {
+        std::mutex mutex;
+        std::condition_variable hasData;
+        std::condition_variable hasSpace;
+        std::deque<QByteArray> chunks;
+        bool done = false;
+        bool cancelled = false;
+        std::exception_ptr error;
+        qint64 readMs = 0;
+        std::uint64_t readBytes = 0;
+        std::uint64_t readOperations = 0;
+    } queue;
+
+    std::thread reader([&source, &queue, chunkSize, maxQueuedChunks]() {
+        try {
+            while (!source.atEnd()) {
+                QElapsedTimer timer;
+                timer.start();
+                auto data = source.read(static_cast<qint64>(chunkSize));
+                const auto readMs = timer.elapsed();
+                if (data.isEmpty() && !source.atEnd())
+                    throw std::runtime_error(QString("Unable to read archive source: %1").arg(source.errorString()).toStdString());
+
+                if (data.isEmpty())
+                    break;
+
+                std::unique_lock<std::mutex> lock(queue.mutex);
+                queue.hasSpace.wait(lock, [&queue, maxQueuedChunks]() { return queue.chunks.size() < maxQueuedChunks || queue.cancelled; });
+                if (queue.cancelled)
+                    break;
+                queue.readMs += readMs;
+                queue.readBytes += static_cast<std::uint64_t>(data.size());
+                ++queue.readOperations;
+                queue.chunks.push_back(std::move(data));
+                lock.unlock();
+                queue.hasData.notify_one();
+            }
+        } catch (...) {
+            std::lock_guard<std::mutex> lock(queue.mutex);
+            queue.error = std::current_exception();
+        }
+        {
+            std::lock_guard<std::mutex> lock(queue.mutex);
+            queue.done = true;
+        }
+        queue.hasData.notify_all();
+        queue.hasSpace.notify_all();
+    });
+
+    try {
+        while (true) {
+            QByteArray data;
+            {
+                std::unique_lock<std::mutex> lock(queue.mutex);
+                queue.hasData.wait(lock, [&queue]() { return !queue.chunks.empty() || queue.done; });
+                if (queue.chunks.empty())
+                    break;
+                data = std::move(queue.chunks.front());
+                queue.chunks.pop_front();
+            }
+            queue.hasSpace.notify_one();
+            writeArchiveData(destination, data, entryName);
+            if (bytesWritten)
+                bytesWritten(static_cast<std::uint64_t>(data.size()));
+        }
+    } catch (...) {
+        {
+            std::lock_guard<std::mutex> lock(queue.mutex);
+            queue.cancelled = true;
+        }
+        queue.hasSpace.notify_all();
+        reader.join();
+        throw;
+    }
+
+    reader.join();
+    if (activeArchiveIoMetrics) {
+        activeArchiveIoMetrics->sourceReadMs += queue.readMs;
+        activeArchiveIoMetrics->sourceReadBytes += queue.readBytes;
+        activeArchiveIoMetrics->readOperations += queue.readOperations;
+    }
+    if (queue.error)
+        std::rethrow_exception(queue.error);
 }
 
 }
 
 void Archiver::compressDirectory(const QString& sourceDirectory, const QString& compressedFilePath, bool recursive /*= true*/, std::int32_t compressionLevel /*= 0*/, const QString& password /*= ""*/, QDir::Filters filters /*= QDir::Filter::Files*/, const QString& sourceArchivePath /*= ""*/, const std::function<void(float)>& progress /*= {}*/)
 {
+    QElapsedTimer archiveTimer;
+    archiveTimer.start();
+    ArchiveIoMetrics ioMetrics;
+    activeArchiveIoMetrics = &ioMetrics;
+    const auto metricsGuard = qScopeGuard([]() { activeArchiveIoMetrics = nullptr; });
     const auto manifestPath = sourceDirectory + QStringLiteral(".packed-archive-entries");
     QStringList archiveEntriesToCopy;
     QFile manifest(manifestPath);
@@ -235,6 +352,7 @@ void Archiver::compressDirectory(const QString& sourceDirectory, const QString& 
     emit taskStarted("Save to disk");
 
     // Compress the sub directory
+    // The writer remains serial; these timings indicate whether source reads or ZIP writes dominate.
     Archiver::compressSubDirectory(&zip, sourceDirectory, sourceDirectory, recursive, compressionLevel, password, filters, bytesWritten);
 
     if (!archiveEntriesToCopy.isEmpty())
@@ -246,6 +364,16 @@ void Archiver::compressDirectory(const QString& sourceDirectory, const QString& 
 
     // Close the zip file
     zip.close();
+
+    qInfo().noquote() << QStringLiteral("Archive I/O: %1 ms total; %2 MiB read in %3 ms (%4 reads); ZIP write time %5 ms; %6 MiB written; copied archive entries %7; compression level %8")
+        .arg(archiveTimer.elapsed())
+        .arg(static_cast<double>(ioMetrics.sourceReadBytes) / (1024.0 * 1024.0), 0, 'f', 1)
+        .arg(ioMetrics.sourceReadMs)
+        .arg(ioMetrics.readOperations)
+        .arg(ioMetrics.zipWriteMs)
+        .arg(static_cast<double>(ioMetrics.zipWriteBytes) / (1024.0 * 1024.0), 0, 'f', 1)
+        .arg(archiveEntriesToCopy.size())
+        .arg(compressionLevel);
 
     if (sameSourceAndDestination)
     {
@@ -301,17 +429,7 @@ void Archiver::copyArchiveEntries(QuaZip* destinationZip, const QString& sourceA
         if (!destinationFile.open(QIODevice::WriteOnly, QuaZipNewInfo(entryName), nullptr, 0U, 0, 0))
             throw std::runtime_error(QString("Unable to create packed tile entry: %1").arg(entryName).toStdString());
 
-        while (!sourceFile.atEnd())
-        {
-            const auto data = sourceFile.read(1024 * 1024);
-            if (data.isEmpty() && !sourceFile.atEnd())
-                throw std::runtime_error(QString("Unable to read packed tile entry: %1").arg(entryName).toStdString());
-
-            if (!data.isEmpty())
-                writeArchiveData(destinationFile, data, entryName);
-            if (bytesWritten)
-                bytesWritten(static_cast<std::uint64_t>(data.size()));
-        }
+        pipeArchiveSourceToZip(sourceFile, destinationFile, entryName, bytesWritten);
 
         destinationFile.close();
         sourceFile.close();
@@ -778,17 +896,7 @@ void Archiver::compressFile(QuaZip* zip, const QString& sourceFilePath, const QS
         if (!inFile.open(QIODevice::ReadOnly))
             throw std::runtime_error("Unable to open input file");
 
-        while (!inFile.atEnd())
-        {
-            const auto data = inFile.read(1024 * 1024);
-            if (data.isEmpty() && !inFile.atEnd())
-                throw std::runtime_error(QString("Unable to read input file: %1").arg(sourceFilePath).toStdString());
-
-            if (!data.isEmpty())
-                writeArchiveData(compressedFile, data, compressedFilePath);
-            if (bytesWritten)
-                bytesWritten(static_cast<std::uint64_t>(data.size()));
-        }
+        pipeArchiveSourceToZip(inFile, compressedFile, compressedFilePath, bytesWritten);
 
         if (inFile.error() != QFileDevice::NoError || compressedFile.getZipError() != UNZ_OK)
             throw std::runtime_error("Unable to copy data");
