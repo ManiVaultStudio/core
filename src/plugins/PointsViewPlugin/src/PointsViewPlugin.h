@@ -39,7 +39,7 @@ private:
     mv::gui::HorizontalGroupAction _datasetSourceGroupAction;     /**< Dataset picker and hierarchy-selection controls. */
     mv::gui::ToggleAction          _useHierarchySelectionAction; /**< Whether to follow the data hierarchy selection. */
     mv::gui::DatasetPickerAction   _datasetPickerAction;         /**< Current point-dataset picker. */
-    PointsViewWidget               _widget;                      /**< Embedded diagnostic table and point-data query view. */
+    PointsViewWidget*              _widget = nullptr;             /**< Qt-owned diagnostic table and point-data query view. */
 };
 
 /**

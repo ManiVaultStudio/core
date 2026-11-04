@@ -29,7 +29,7 @@ PointsViewPlugin::PointsViewPlugin(const mv::plugin::PluginFactory* factory) :
     _datasetSourceGroupAction(this, "Dataset selection"),
     _useHierarchySelectionAction(&_datasetSourceGroupAction, "Use hierarchy selection", true),
     _datasetPickerAction(&_datasetSourceGroupAction, "Dataset"),
-    _widget(nullptr, false)
+    _widget(new PointsViewWidget(&getWidget(), false))
 {
     getGuiNameAction().setString("Points View");
     _datasetSourceGroupAction.setShowLabels(true);
@@ -79,7 +79,7 @@ void PointsViewPlugin::refreshSelection()
 
 void PointsViewPlugin::setPickedPoints(const mv::Dataset<Points>& points)
 {
-    _widget.setPoints(points);
+    _widget->setPoints(points);
 }
 
 void PointsViewPlugin::init()
@@ -88,7 +88,7 @@ void PointsViewPlugin::init()
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(6);
     layout->addWidget(_datasetSourceGroupAction.createWidget(&getWidget(), mv::gui::GroupAction::Horizontal | mv::gui::GroupAction::WithMargins));
-    layout->addWidget(&_widget);
+    layout->addWidget(_widget);
     getWidget().setLayout(layout);
     getWidget().setAcceptDrops(true);
 

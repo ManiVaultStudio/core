@@ -7,6 +7,7 @@
 
 #include <QAbstractItemView>
 #include <QEvent>
+#include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
 #include <QScrollBar>
@@ -15,6 +16,8 @@
 #include <QTableView>
 #include <QTimer>
 #include <QVBoxLayout>
+#include <QWheelEvent>
+#include <QtConcurrent/QtConcurrentRun>
 #include <algorithm>
 #include <limits>
 #include <numeric>
@@ -63,7 +66,9 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
     _showDatasetControls(showDatasetControls),
     _datasetLabel(showDatasetControls ? new QLabel("No Points dataset selected", this) : nullptr),
     _table(new QTableView(this)),
+    _rowScrollBar(new QScrollBar(Qt::Vertical, this)),
     _model(new PointsTableModel(this)),
+    _fetchWatcher(new QFutureWatcher<PointsTableModel::RangeResult>(this)),
     _fetchTimer(new QTimer(this)),
     _filterTimer(new QTimer(this)),
     _filterGroupAction(this, "Point-data filters"),
@@ -222,22 +227,29 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
     _table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     _table->setAlternatingRowColors(true);
     _table->setWordWrap(false);
+    _table->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _table->verticalHeader()->setDefaultSectionSize(22);
     _table->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
     _table->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    _rowScrollBar->setToolTip("Navigate through dataset rows");
+    auto* tableLayout = new QHBoxLayout();
+    tableLayout->setContentsMargins(0, 0, 0, 0);
+    tableLayout->setSpacing(0);
+    tableLayout->addWidget(_table, 1);
+    tableLayout->addWidget(_rowScrollBar);
     auto* layout = new QVBoxLayout(this);
     if (_datasetLabel)
         layout->addWidget(_datasetLabel);
 
     layout->addWidget(_filterGroupAction.createWidget(this));
-    layout->addWidget(_table, 1);
+    layout->addLayout(tableLayout, 1);
 
-    _table->verticalScrollBar()->installEventFilter(this);
+    _rowScrollBar->installEventFilter(this);
     _table->horizontalScrollBar()->installEventFilter(this);
     _table->installEventFilter(this);
     _table->viewport()->installEventFilter(this);
     _fetchTimer->setSingleShot(true);
-    _fetchTimer->setInterval(100);
+    _fetchTimer->setInterval(50);
     _filterTimer->setSingleShot(true);
     _filterTimer->setInterval(350);
 
@@ -300,7 +312,8 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
         updateFacadeActionState();
     });
     connect(_fetchTimer, &QTimer::timeout, this, &PointsViewWidget::fetchVisibleRange);
-    connect(_table->verticalScrollBar(), &QScrollBar::valueChanged, this, &PointsViewWidget::scheduleVisibleRangeFetch);
+    connect(_fetchWatcher, &QFutureWatcher<PointsTableModel::RangeResult>::finished, this, &PointsViewWidget::rangeFetchFinished);
+    connect(_rowScrollBar, &QScrollBar::valueChanged, this, &PointsViewWidget::rowScrollValueChanged);
     connect(_table->horizontalScrollBar(), &QScrollBar::valueChanged, this, &PointsViewWidget::scheduleVisibleRangeFetch);
 
 }
@@ -345,12 +358,28 @@ void PointsViewWidget::updateUiState()
     const auto liveTable       = _liveTableAction.isChecked();
 
     _table->setEnabled(tableEnabled);
+    _rowScrollBar->setEnabled(hasPointData);
 
     _rowFilterAction.setEnabled(controlsEnabled && !liveTable);
     _columnFilterAction.setEnabled(controlsEnabled && !liveTable);
     _liveTableAction.setEnabled(controlsEnabled);
     _facadeGroupAction.setEnabled(controlsEnabled);
     updateFacadeActionState();
+}
+
+int PointsViewWidget::visibleRowCapacity() const
+{
+    const auto rowHeight = std::max(1, _table->verticalHeader()->defaultSectionSize());
+    return std::max(1, (_table->viewport()->height() + rowHeight - 1) / rowHeight);
+}
+
+void PointsViewWidget::updateRowScrollBarRange(const std::uint64_t totalRows)
+{
+    const auto visibleRows = static_cast<std::uint64_t>(visibleRowCapacity());
+    const auto maximumFirstRow = totalRows > visibleRows ? totalRows - visibleRows : 0;
+    const auto maximumValue = static_cast<int>(std::min<std::uint64_t>(maximumFirstRow, static_cast<std::uint64_t>(std::numeric_limits<int>::max())));
+    _rowScrollBar->setPageStep(static_cast<int>(std::min<std::uint64_t>(visibleRows, static_cast<std::uint64_t>(std::numeric_limits<int>::max()))));
+    _rowScrollBar->setRange(0, maximumValue);
 }
 
 void PointsViewWidget::updateFacadeActionState()
@@ -402,11 +431,14 @@ void PointsViewWidget::updateFacadeActionState()
 
 void PointsViewWidget::refreshPoints()
 {
+    ++_fetchGeneration;
+    _fetchPending = false;
     _model->clear();
     updateUiState();
 
     if (!_points.isValid())
     {
+        _rowScrollBar->setRange(0, 0);
         if (_datasetLabel)
             _datasetLabel->setText("Select exactly one Points dataset");
         setStatus("Scroll after selecting a dataset to fetch visible values");
@@ -414,6 +446,9 @@ void PointsViewWidget::refreshPoints()
     }
 
     _model->setPoints(_points.get(), _points->getNumPoints(), _points->getNumDimensions());
+    updateRowScrollBarRange(_model->displayRowCount());
+    const auto visibleRows = visibleRowCapacity();
+    _model->setWindow(static_cast<std::uint64_t>(_rowScrollBar->value()), static_cast<std::uint64_t>(visibleRows));
     updateUiState();
     const auto backendType = _points->getStorageBackendType();
 
@@ -429,20 +464,36 @@ void PointsViewWidget::refreshPoints()
 
 void PointsViewWidget::scheduleVisibleRangeFetch()
 {
-    if (_model->hasPointData() && !_model->isQueryResult())
+    if (_model->hasPointData())
         _fetchTimer->start();
+}
+
+void PointsViewWidget::rowScrollValueChanged(const int firstRow)
+{
+    if (!_model->hasPointData())
+        return;
+
+    _model->setWindow(static_cast<std::uint64_t>(std::max(0, firstRow)), static_cast<std::uint64_t>(visibleRowCapacity()));
+    scheduleVisibleRangeFetch();
 }
 
 void PointsViewWidget::fetchVisibleRange()
 {
-    if (!_model->hasPointData() || _model->isQueryResult())
+    if (!_model->hasPointData())
         return;
 
-    if (_model->totalRows() == 0 || _model->totalColumns() == 0)
+    if (_model->displayRowCount() == 0 || _model->totalColumns() == 0)
     {
         setStatus("The selected point dataset is empty");
         return;
     }
+
+    const auto visibleRows = visibleRowCapacity();
+    updateRowScrollBarRange(_model->displayRowCount());
+    const auto logicalFirstRow = static_cast<std::uint64_t>(_rowScrollBar->value());
+    _model->setWindow(logicalFirstRow, static_cast<std::uint64_t>(visibleRows));
+    if (_model->isQueryResult())
+        return;
 
     const auto firstRow    = std::max(0, _table->rowAt(0));
     const auto lastRow     = _table->rowAt(std::max(0, _table->viewport()->height() - 1));
@@ -454,25 +505,58 @@ void PointsViewWidget::fetchVisibleRange()
     const auto columnCount = lastColumn >= firstColumn
         ? static_cast<std::uint64_t>(lastColumn - firstColumn + 1)
         : 1;
-    const auto callbacks = _model->fetchRange(static_cast<std::uint64_t>(firstRow), rowCount, static_cast<std::uint64_t>(firstColumn), columnCount);
-
-    if (!_model->getLastError().isEmpty())
+    if (_fetchInProgress)
     {
-        setStatus(QString("Unable to load the requested point-data tiles: %1").arg(_model->getLastError()));
+        _fetchPending = true;
         return;
     }
 
-    if (!_points.isValid())
+    const auto points = _points;
+    const auto totalRows = _model->totalRows();
+    const auto totalColumns = _model->totalColumns();
+    const auto generation = _fetchGeneration;
+    const auto absoluteFirstRow = logicalFirstRow + static_cast<std::uint64_t>(firstRow);
+    _fetchPending = false;
+    _fetchInProgress = true;
+    _fetchWatcher->setFuture(QtConcurrent::run([points, totalRows, totalColumns, absoluteFirstRow, rowCount, firstColumn, columnCount, generation] {
+        return PointsTableModel::loadRange(points.get(), totalRows, totalColumns, absoluteFirstRow, rowCount, static_cast<std::uint64_t>(firstColumn), columnCount, generation);
+    }));
+    setStatus("Loading the visible table window...");
+}
+
+void PointsViewWidget::rangeFetchFinished()
+{
+    _fetchInProgress = false;
+    auto result = _fetchWatcher->result();
+
+    if (result.generation == _fetchGeneration && _model->hasPointData() && !_model->isQueryResult())
     {
-        return;
+        const auto firstRow = result.firstRow;
+        const auto rowCount = result.rowCount;
+        const auto firstColumn = result.firstColumn;
+        const auto columnCount = result.columnCount;
+        const auto callbacks = _model->applyRangeResult(std::move(result));
+
+        if (!_model->getLastError().isEmpty())
+        {
+            setStatus(QString("Unable to load the requested point-data tiles: %1").arg(_model->getLastError()));
+        }
+        else
+        {
+            setStatus(QString("Fetched visible rows %1–%2, columns %3–%4 in %5 access segment(s). Drag/scroll and release to fetch again.")
+                .arg(firstRow)
+                .arg(firstRow + rowCount - 1)
+                .arg(firstColumn)
+                .arg(firstColumn + columnCount - 1)
+                .arg(callbacks));
+        }
     }
 
-    setStatus(QString("Fetched visible rows %1–%2, columns %3–%4 in %5 access segment(s). Drag/scroll and release to fetch again.")
-        .arg(firstRow)
-        .arg(firstRow + static_cast<int>(rowCount) - 1)
-        .arg(firstColumn)
-        .arg(firstColumn + static_cast<int>(columnCount) - 1)
-        .arg(callbacks));
+    if (_fetchPending)
+    {
+        _fetchPending = false;
+        QTimer::singleShot(0, this, &PointsViewWidget::fetchVisibleRange);
+    }
 }
 
 std::vector<std::uint64_t> PointsViewWidget::parseFilter(const QString& filter, const std::uint64_t maximum, QString& error, const std::vector<QString>& dimensionNames)
@@ -538,6 +622,9 @@ std::vector<std::uint64_t> PointsViewWidget::parseFilter(const QString& filter, 
 
 void PointsViewWidget::displayQuery(const std::vector<std::uint64_t>& rowIds, const std::vector<std::uint64_t>& columnIds, const std::function<void(const PointDataAccessVisitor&)>& request)
 {
+    ++_fetchGeneration;
+    _fetchPending = false;
+
     if (rowIds.empty() || columnIds.empty())
     {
         setStatus("The query must contain at least one row and one column");
@@ -585,6 +672,9 @@ void PointsViewWidget::displayQuery(const std::vector<std::uint64_t>& rowIds, co
 
     _liveTableAction.setChecked(false);
     _model->setQueryResult(rowIds, columnIds, values);
+    _rowScrollBar->setValue(0);
+    updateRowScrollBarRange(_model->displayRowCount());
+    _model->setWindow(0, static_cast<std::uint64_t>(visibleRowCapacity()));
     _table->resizeColumnsToContents();
     setStatus(QString("Displayed %1 row(s) × %2 column(s) from a facade query. Click Live to resume viewport loading.").arg(rowIds.size()).arg(columnIds.size()));
 }
@@ -869,8 +959,25 @@ void PointsViewWidget::getRange()
 bool PointsViewWidget::eventFilter(QObject* watched, QEvent* event)
 {
     const auto isTableResize = (watched == _table || watched == _table->viewport()) && event->type() == QEvent::Resize;
-    const auto isTableNavigation = (watched == _table->verticalScrollBar() || watched == _table->horizontalScrollBar() || watched == _table->viewport()) &&
+    const auto isTableNavigation = (watched == _rowScrollBar || watched == _table->horizontalScrollBar() || watched == _table->viewport()) &&
         (event->type() == QEvent::MouseButtonRelease || event->type() == QEvent::Wheel || event->type() == QEvent::KeyRelease);
+
+    if ((watched == _table || watched == _table->viewport()) && event->type() == QEvent::Wheel && _model->hasPointData())
+    {
+        const auto* wheelEvent = static_cast<QWheelEvent*>(event);
+        auto delta = wheelEvent->angleDelta().y();
+        if (delta == 0 && !wheelEvent->pixelDelta().isNull())
+            delta = wheelEvent->pixelDelta().y() * 120 / std::max(1, _table->verticalHeader()->defaultSectionSize());
+
+        if (delta != 0)
+        {
+            auto rowStep = delta / 120 * 3;
+            if (rowStep == 0)
+                rowStep = delta > 0 ? 1 : -1;
+            _rowScrollBar->setValue(_rowScrollBar->value() - rowStep);
+            return true;
+        }
+    }
 
     if (isTableResize || isTableNavigation)
         scheduleVisibleRangeFetch();
@@ -882,6 +989,6 @@ void PointsViewWidget::showEvent(QShowEvent* event)
 {
     QWidget::showEvent(event);
 
-    if (_model->hasPointData() && !_model->isQueryResult())
+    if (_model->hasPointData())
         QTimer::singleShot(0, this, &PointsViewWidget::fetchVisibleRange);
 }

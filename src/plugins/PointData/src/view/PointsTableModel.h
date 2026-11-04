@@ -28,11 +28,27 @@ class POINTDATA_EXPORT PointsTableModel final : public QAbstractTableModel
     Q_OBJECT
 
 public:
+    /** Result of fetching one visible table window away from the GUI thread. */
+    struct RangeResult
+    {
+        std::uint64_t generation = 0;
+        std::uint64_t firstRow = 0;
+        std::uint64_t rowCount = 0;
+        std::uint64_t firstColumn = 0;
+        std::uint64_t columnCount = 0;
+        std::size_t accessSegmentCount = 0;
+        std::vector<float> values;
+        QString error;
+    };
+
     /** Constructs an empty point-data table model. */
     explicit PointsTableModel(QObject* parent = nullptr);
 
     /** Selects the point data and logical table dimensions displayed by the model. */
     void setPoints(Points* points, std::uint64_t rows, std::uint64_t columns);
+
+    /** Selects the bounded logical row window exposed to the Qt table. */
+    void setWindow(std::uint64_t firstRow, std::uint64_t rowCount);
 
     /** Clears the selected data and any fetched values. */
     void clear();
@@ -55,8 +71,20 @@ public:
         return _totalColumns;
     }
 
+    /** Returns the number of rows currently represented by the table source, including query results. */
+    std::uint64_t displayRowCount() const
+    {
+        return _queryResult ? static_cast<std::uint64_t>(_queryRowIds.size()) : _totalRows;
+    }
+
     /** Fetches a rectangular window and emits a data-change notification for it. */
     std::size_t fetchRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount);
+
+    /** Loads a rectangular window without touching Qt model state; safe to call from a worker thread. */
+    static RangeResult loadRange(Points* points, std::uint64_t totalRows, std::uint64_t totalColumns, std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, std::uint64_t generation = 0);
+
+    /** Applies a completed worker result on the model's owning thread. */
+    std::size_t applyRangeResult(RangeResult result);
 
     /** Replaces the visible table with an explicitly fetched query result. */
     void setQueryResult(const std::vector<std::uint64_t>& rowIds, const std::vector<std::uint64_t>& columnIds, const std::vector<float>& values);
@@ -84,6 +112,8 @@ private:
     Points*                    _points            = nullptr; /**< Non-owning point-data source used for range requests. */
     std::uint64_t              _totalRows         = 0;       /**< Logical row count exposed to Qt. */
     std::uint64_t              _totalColumns      = 0;       /**< Logical column count exposed to Qt. */
+    std::uint64_t              _windowFirstRow    = 0;       /**< First logical row represented by the bounded table window. */
+    std::uint64_t              _windowRowCount    = 0;       /**< Number of logical rows exposed to Qt at one time. */
     std::vector<QString>       _dimensionNames;              /**< Dimension names used for horizontal headers. */
     std::uint64_t              _loadedFirstRow    = 0;       /**< First row of the currently fetched window. */
     std::uint64_t              _loadedRowCount    = 0;       /**< Number of fetched rows in the current window. */

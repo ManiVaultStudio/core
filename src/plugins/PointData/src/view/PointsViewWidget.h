@@ -16,6 +16,7 @@
 #include <actions/TriggerAction.h>
 #include <actions/VerticalGroupAction.h>
 
+#include <QFutureWatcher>
 #include <QWidget>
 
 #include <cstdint>
@@ -99,14 +100,23 @@ private:
     void setStatus(const QString& text);
     void updateUiState();
     void updateFacadeActionState();
+    int visibleRowCapacity() const;
+    void updateRowScrollBarRange(std::uint64_t totalRows);
+    void rowScrollValueChanged(int firstRow);
     static std::vector<std::uint64_t> parseFilter(const QString& filter, std::uint64_t maximum, QString& error, const std::vector<QString>& dimensionNames = {});
     void displayQuery(const std::vector<std::uint64_t>& rowIds, const std::vector<std::uint64_t>& columnIds, const std::function<void(const PointDataAccessVisitor&)>& request);
+    void rangeFetchFinished();
 
     mv::Dataset<Points>             _points;                                 /**< Dataset currently displayed by the table. */
     bool                            _showDatasetControls;                    /**< Whether standalone dataset controls are shown. */
     QLabel*                         _datasetLabel;                           /**< Optional dataset summary shown above the table. */
     QTableView*                     _table;                                  /**< Table view displaying the fetched window. */
+    QScrollBar*                     _rowScrollBar;                           /**< Logical row navigator spanning the complete dataset. */
     PointsTableModel*               _model;                                  /**< Model storing logical dimensions and fetched values. */
+    QFutureWatcher<PointsTableModel::RangeResult>* _fetchWatcher;             /**< Background worker for visible table-window reads. */
+    std::uint64_t                   _fetchGeneration = 0;                     /**< Invalidates results requested for a prior dataset or query. */
+    bool                            _fetchInProgress = false;                 /**< Whether one background visible-window read is active. */
+    bool                            _fetchPending = false;                    /**< Whether a newer viewport request arrived during a fetch. */
     QTimer*                         _fetchTimer;                             /**< Coalesces visible-range requests. */
     QTimer*                         _filterTimer;                            /**< Debounces filter-driven requests. */
     mv::gui::HorizontalGroupAction  _filterGroupAction;                      /**< Row, column, and live-table controls. */
