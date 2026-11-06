@@ -294,10 +294,13 @@ void WorkflowExecutionContext::message(SeverityLevel severity, QString text, QSt
 
 void WorkflowExecutionContext::info(QString text, QString location, QVariantMap details, MessageKind kind) const
 {
+    const auto maxDepth = _state ? _state->getOptions().reporting.maxLoggingDepth : std::numeric_limits<int>::max();
+    if (static_cast<std::uint32_t>(details.value("depth").toUInt()) >= maxDepth)
+        return;
+
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    const auto maxDepth         = _state ? _state->getOptions().reporting.maxLoggingDepth : std::numeric_limits<int>::max();
     const auto consoleDetails   = makeConsoleDetails(details);
     const auto consoleMessage   = WorkflowConsoleFormatter::format(SeverityLevel::Info, text, location, consoleDetails, maxDepth);
 
@@ -322,10 +325,13 @@ void WorkflowExecutionContext::info(QString text, QString location, QVariantMap 
 
 void WorkflowExecutionContext::warning(QString text, QString location, QVariantMap details, MessageKind kind) const
 {
+    const auto maxDepth = _state ? _state->getOptions().reporting.maxLoggingDepth : std::numeric_limits<int>::max();
+    if (static_cast<std::uint32_t>(details.value("depth").toUInt()) >= maxDepth)
+        return;
+
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    const auto maxDepth         = _state ? _state->getOptions().reporting.maxLoggingDepth : std::numeric_limits<int>::max();
     const auto consoleDetails   = makeConsoleDetails(details);
     const auto consoleMessage   = WorkflowConsoleFormatter::format(SeverityLevel::Warning, text, location, consoleDetails, maxDepth);
 
