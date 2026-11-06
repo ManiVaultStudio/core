@@ -214,7 +214,7 @@ add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINTS_VI
 add_library(ManiVault::${POINTDATA} ALIAS ${POINTDATA})
 
 target_include_directories(${POINTDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
-target_include_directories(${POINTDATA} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src" "${CMAKE_CURRENT_SOURCE_DIR}/src/view")
+target_include_directories(${POINTDATA} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src" "${CMAKE_CURRENT_SOURCE_DIR}/src/view" "${CMAKE_CURRENT_BINARY_DIR}")
 target_include_directories(${POINTDATA} PRIVATE ${MV_ROOT_DIR}/external/biovault/)
 
 target_compile_features(${POINTDATA} PUBLIC cxx_std_${MV_CXX_STANDARD})
@@ -226,12 +226,12 @@ target_compile_options(${POINTDATA}
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
-generate_export_header(${POINTDATA})
+generate_export_header(${POINTDATA}
+    EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/PointData/pointdata_export.h"
+)
 
-# Retrieve the file name of the generated export header.
-file(GLOB EXPORT_HEADER_FILE_NAME
-    RELATIVE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/*_export.h)
-list(APPEND POINTS_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAME})
+# Add the generated export header to the public headers installed below.
+list(APPEND POINTS_HEADERS "${CMAKE_CURRENT_BINARY_DIR}/PointData/pointdata_export.h")
 
 target_link_libraries(${POINTDATA} PRIVATE Qt6::Concurrent Qt6::Widgets)
 target_link_libraries(${POINTDATA} PRIVATE Qt6::WebEngineWidgets)
