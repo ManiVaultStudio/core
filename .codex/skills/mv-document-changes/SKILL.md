@@ -1,5 +1,5 @@
 ---
-name: document-changes
+name: mv-document-changes
 description: Document changed ManiVault C++ APIs and classes using the surrounding core Doxygen style, with rationale, ownership and lifetime details, limits, and accurate parameter and failure documentation.
 metadata:
   short-description: Document changed code in the ManiVault core style

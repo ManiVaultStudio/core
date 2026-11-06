@@ -1,5 +1,5 @@
 ---
-name: group-functional-commits
+name: mv-group-functional-commits
 description: Group current Git worktree changes into coherent functional commits when the user asks to commit changes separately by feature or purpose.
 metadata:
   short-description: Group and commit worktree changes

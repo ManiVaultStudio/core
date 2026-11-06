@@ -1,5 +1,5 @@
 ---
-name: format-changes
+name: mv-format-changes
 description: Reformat changed C++ files in this repository to match the local ManiVault core style, especially one-line signatures, compact calls, aligned local groups, readable whitespace, indented switch cases, and braces around multi-line loops.
 metadata:
   short-description: Format changed C++ files using the repository style
