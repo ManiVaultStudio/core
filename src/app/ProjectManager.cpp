@@ -28,6 +28,7 @@
 #include <QFutureWatcher>
 #include <QMetaObject>
 #include <QMessageBox>
+#include <QDir>
 
 #include <exception>
 
@@ -350,6 +351,16 @@ void ProjectManager::newBlankProject()
     {
         exceptionMessageBox("Unable to create blank project");
     }
+}
+
+void ProjectManager::prepareProjectStagingDirectory()
+{
+    const auto stagingRoot = ensureTemporaryDirPath(TemporaryDirType::Staging);
+    _projectStagingDirectory = std::make_unique<QTemporaryDir>(QDir(stagingRoot).filePath(QStringLiteral("project-XXXXXX")));
+    if (!_projectStagingDirectory->isValid())
+        throw std::runtime_error("Unable to create project staging directory");
+
+    setTemporaryDirPath(TemporaryDirType::Staging, _projectStagingDirectory->path());
 }
 
 void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly /*= false*/, bool loadWorkspace /*= true*/)
@@ -1498,6 +1509,9 @@ bool ProjectManager::isMvFileName(const QString& name)
 
 void ProjectManager::createProject()
 {
+    _projectStagingDirectory.reset();
+    unsetTemporaryDirPath(TemporaryDirType::Staging);
+
     emit projectAboutToBeCreated();
     {
         data().reset();

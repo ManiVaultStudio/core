@@ -10,6 +10,44 @@
 #include <CoreInterface.h>
 
 #include <QFileInfo>
+#include <QDir>
+#include <QMetaType>
+#include <QSet>
+
+namespace
+{
+void collectPackedTileUris(const QVariant& value, QStringList& uris)
+{
+    if (value.metaType().id() == QMetaType::QVariantMap)
+    {
+        const auto map = value.toMap();
+        if (map.value("Storage").toString() == QStringLiteral("PackedTileFiles"))
+            for (const auto& superTileValue : map.value("SuperTiles").toList())
+            {
+                const auto uri = superTileValue.toMap().value("URI").toString().trimmed();
+                if (!uri.isEmpty())
+                    uris.push_back(uri);
+            }
+
+        for (auto it = map.cbegin(); it != map.cend(); ++it)
+            collectPackedTileUris(it.value(), uris);
+    }
+    else if (value.metaType().id() == QMetaType::QVariantList)
+    {
+        for (const auto& item : value.toList())
+            collectPackedTileUris(item, uris);
+    }
+}
+
+bool isSafeArchiveEntryPath(const QString& path)
+{
+    if (path.isEmpty() || QDir::isAbsolutePath(path) || path.contains(QLatin1Char('\\')) || path.contains(QLatin1Char(':')))
+        return false;
+
+    const auto cleanPath = QDir::cleanPath(path);
+    return cleanPath != QStringLiteral(".") && cleanPath != QStringLiteral("..") && !cleanPath.startsWith(QStringLiteral("../"));
+}
+}
 
 using namespace mv;
 using namespace mv::gui;
@@ -66,6 +104,7 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 		workspaces().reset();
 
 		mv::projects().newProject();
+		static_cast<ProjectManager&>(mv::projects()).prepareProjectStagingDirectory();
 
 		Application::requestOverrideCursor(Qt::WaitCursor);
 
@@ -161,6 +200,40 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
     });
 
     plan->addParallelStage("Read JSON files", std::move(readJsonJobs));
+
+    plan->addSequentialStage("Stage packed point-data files", [context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        QStringList uris;
+        collectPackedTileUris(context->getProjectMap(), uris);
+
+        QStringList archiveEntries;
+        QSet<QString> extracted;
+        for (const auto& uri : uris)
+        {
+            if (!isSafeArchiveEntryPath(uri) || extracted.contains(uri))
+                continue;
+
+            extracted.insert(uri);
+            archiveEntries.push_back(uri);
+        }
+
+        executionContext->setProgress(0.0);
+        const auto stagingDirectory = mv::projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Staging);
+        Archiver archiver;
+        for (qsizetype index = 0; index < archiveEntries.size(); ++index)
+        {
+            const auto& uri = archiveEntries[index];
+
+            const auto destinationPath = QDir(stagingDirectory).filePath(QDir::cleanPath(uri));
+            if (!QDir().mkpath(QFileInfo(destinationPath).absolutePath()))
+                throw std::runtime_error(QString("Unable to create staging directory for packed point-data file: %1").arg(uri).toStdString());
+
+            archiver.extractSingleFile(context->getFilePath(), uri, destinationPath);
+            if (!QFileInfo(destinationPath).isFile())
+                throw std::runtime_error(QString("Packed point-data file is missing from the project archive: %1").arg(uri).toStdString());
+
+            executionContext->setProgress(static_cast<double>(index + 1) / static_cast<double>(archiveEntries.size()));
+        }
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 10.0);
 
     plan->addNestedWorkflowStage("Open project JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext&) mutable -> UniqueWorkflowPlan {
         return mv::projects().getCurrentProject()->fromVariantMapWorkflow(context->getProjectMap()["Project"].toMap());

@@ -11,6 +11,9 @@
 
 #include <QObject>
 #include <QFileDialog>
+#include <QTemporaryDir>
+
+#include <memory>
 
 namespace mv
 {
@@ -68,6 +71,9 @@ public:
      * @param loadWorkspace Whether to load the workspace which is accompanied by the project
      */
     void openProject(QString filePath = "", bool importDataOnly = false, bool loadWorkspace = true) override;
+
+    /** Starts a fresh session-scoped staging directory for the project being opened. */
+    void prepareProjectStagingDirectory();
 
     /**
      * Download project from \p url, store it in \p targetDir and open it
@@ -310,6 +316,7 @@ private:
     gui::TriggerAction                  _backToProjectAction;           /**< Returns from the start page to the project */
     ProjectsListModel                   _projectsListModel;             /**< Projects list model */
     ProjectsTreeModel                   _projectsTreeModel;             /**< Projects tree model */
+    std::unique_ptr<QTemporaryDir>      _projectStagingDirectory;        /**< Session-scoped staging directory for resources from the open project */
 };
 
 }

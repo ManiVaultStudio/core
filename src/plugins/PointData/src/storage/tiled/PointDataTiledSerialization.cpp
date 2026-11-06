@@ -713,13 +713,27 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantM
             {
                 try
                 {
-                    const auto stagedPath = QDir(mv::projects().getTemporaryDirPath(mv::AbstractProjectManager::TemporaryDirType::Save)).filePath(fileName);
+                    const auto stagedPath = QDir(mv::projects().getTemporaryDirPath(mv::AbstractProjectManager::TemporaryDirType::Staging)).filePath(fileName);
                     if (QFileInfo(stagedPath).isFile())
                         sourcePath = stagedPath;
                 }
                 catch (...)
                 {
-                    // During project loading, no save temporary directory may be registered.
+                    // Staging may not be registered outside project-open workflows.
+                }
+
+                if (sourcePath == fileName)
+                {
+                    try
+                    {
+                        const auto stagedPath = QDir(mv::projects().getTemporaryDirPath(mv::AbstractProjectManager::TemporaryDirType::Save)).filePath(fileName);
+                        if (QFileInfo(stagedPath).isFile())
+                            sourcePath = stagedPath;
+                    }
+                    catch (...)
+                    {
+                        // Existing projects may still use lazy archive-backed tile files.
+                    }
                 }
             }
 
