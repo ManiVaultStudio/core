@@ -4,6 +4,7 @@
 
 #include "StorageBackendConversionAction.h"
 #include <PointData/pointdata_export.h>
+#include <actions/PresetsAction.h>
 
 #include <QDialog>
 
@@ -42,4 +43,5 @@ public:
 
 private:
     std::unique_ptr<mv::gui::StorageBackendConversionAction> _conversionAction;
+    std::unique_ptr<mv::gui::PresetsAction> _presetsAction;
 };

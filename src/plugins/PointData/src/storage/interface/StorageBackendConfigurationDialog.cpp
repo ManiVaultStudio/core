@@ -5,6 +5,7 @@
 #include <util/StyledIcon.h>
 
 #include <QDialogButtonBox>
+#include <QHBoxLayout>
 #include <QPushButton>
 #include <QSizePolicy>
 #include <QVBoxLayout>
@@ -28,6 +29,9 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique
     {
         const auto backendType = _conversionAction->getTargetBackendType();
         backendName = tr("%1 Storage").arg(mv::pointdata::storage::getStorageBackendTypeName(backendType));
+
+        const auto settingsKey = QStringLiteral("PointData/StorageBackend/%1/Presets").arg(static_cast<int>(backendType));
+        _presetsAction = std::make_unique<mv::gui::PresetsAction>(nullptr, _conversionAction.get(), settingsKey, tr("Point data storage backend"), mv::util::StyledIcon("prescription"));
 
         if (backendType == mv::pointdata::storage::StorageBackendType::Eager)
             backendName = tr("In-Memory Storage");
@@ -85,8 +89,16 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique
         });
     }
 
-    layout->addStretch(1);
-    layout->addWidget(buttons);
+    auto* buttonLayout = new QHBoxLayout();
+    if (_presetsAction)
+    {
+        auto* presetsButton = new QPushButton(tr("Presets"), this);
+        presetsButton->setMenu(_presetsAction->getMenu(presetsButton));
+        buttonLayout->addWidget(presetsButton);
+    }
+    buttonLayout->addStretch(1);
+    buttonLayout->addWidget(buttons);
+    layout->addLayout(buttonLayout);
 
     connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
