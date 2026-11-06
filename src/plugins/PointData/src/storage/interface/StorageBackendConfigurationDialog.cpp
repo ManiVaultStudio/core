@@ -52,7 +52,6 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique
             break;
     }
 
-    resize(650, 650);
     setFixedWidth(650);
 
     auto* layout = new QVBoxLayout(this);
@@ -89,6 +88,8 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique
         });
     }
 
+    layout->addStretch(1);
+
     auto* buttonLayout = new QHBoxLayout();
     if (_presetsAction)
     {
@@ -102,6 +103,8 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique
 
     connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
+
+    resize(650, 490);
 }
 
 mv::pointdata::storage::StorageBackendConfigurationOptionsPtr StorageBackendConfigurationDialog::getConversionOptions() const
