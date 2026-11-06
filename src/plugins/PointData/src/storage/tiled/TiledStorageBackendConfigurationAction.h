@@ -7,8 +7,14 @@
 #include "TiledStorageGeometry.h"
 
 #include <actions/MessageCardAction.h>
+#include <actions/DirectoryPickerAction.h>
+#include <actions/HorizontalGroupAction.h>
 #include <actions/IntegralAction.h>
+#include <actions/StringAction.h>
 #include <actions/ToggleAction.h>
+#include <actions/VerticalGroupAction.h>
+
+#include <QString>
 
 namespace mv::gui
 {
@@ -43,7 +49,7 @@ public:
      * @param initializeFromConfiguration Whether to display existing geometry and cache values instead of suggestions.
      * @param currentElementTypeIndex Current matrix element type; when supplied, the action exposes a target-type selector.
      */
-    TiledStorageBackendConfigurationAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration = {}, bool initializeFromConfiguration = false, std::optional<std::uint32_t> currentElementTypeIndex = {});
+    TiledStorageBackendConfigurationAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration = {}, bool initializeFromConfiguration = false, std::optional<std::uint32_t> currentElementTypeIndex = {}, bool showImportPerformanceOptions = false, std::size_t bucketingThreadCount = 4, std::size_t stagingThreadCount = 4, std::size_t rowChunkTileFactor = 3, bool showImportStagingDirectory = false, const QString& stagingDirectory = QString(), const QString& defaultStagingDirectory = QString());
 
     /** Returns the tiled backend type represented by this action. */
     pointdata::storage::StorageBackendType getTargetBackendType() const override;
@@ -57,12 +63,26 @@ public:
     /** Returns the current tiled-storage configuration. */
     pointdata::storage::StorageBackendConfiguration getConfiguration() const;
 
+    /** Returns the optional HDF5 import bucketing worker limit. */
+    [[nodiscard]] std::size_t getBucketingThreadCount() const;
+
+    /** Returns the optional HDF5 import staging worker limit. */
+    [[nodiscard]] std::size_t getStagingThreadCount() const;
+
+    /** Returns the optional CSR row-chunk tile-height factor. */
+    [[nodiscard]] std::size_t getRowChunkTileFactor() const;
+
+    /** Returns the staging directory selected for this import configuration. */
+    [[nodiscard]] QString getStagingDirectory() const;
+
 private:
     void updateTileGeometryFromPolicy();
     void updateTargetTileSizeFromGeometry();
     void updateCacheCapacity();
     void updateStorageObservations();
     void updatePackedTileControls();
+    void updateImportPerformanceSummary();
+    void updateStagingSpaceObservation();
 
     std::uint64_t _rows               = 0;
     std::uint64_t _columns            = 0;
@@ -78,9 +98,19 @@ private:
     IntegralAction              _cacheCapacityAction;
     MessageCardAction              _tileCountObservationAction;
     MessageCardAction              _tileCacheObservationAction;
+    MessageCardAction              _stagingSpaceObservationAction;
     ToggleAction                  _packedTilesAction;
     IntegralAction                _superTileRowsAction;
     IntegralAction                _superTileColumnsAction;
+    HorizontalGroupAction         _importPerformanceAction;
+    StringAction                  _importPerformanceSummaryAction;
+    VerticalGroupAction           _importPerformanceSettingsAction;
+    IntegralAction                _bucketingThreadCountAction;
+    IntegralAction                _stagingThreadCountAction;
+    IntegralAction                _rowChunkTileFactorAction;
+    DirectoryPickerAction         _stagingDirectoryAction;
+    QString                       _defaultStagingDirectory;
+    bool                          _showImportStagingDirectory = false;
 };
 
 }
