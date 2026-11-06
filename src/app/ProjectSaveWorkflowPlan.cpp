@@ -94,7 +94,10 @@ UniqueWorkflowPlan createProjectSaveWorkflowPlan(const QString& filePath)
 
     	QStringList files = tempDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
 
-        context->getArchiver().compressDirectory(context->getTemporaryDirectoryPath(), context->getFilePath(), true, 0);
+        const auto sourceArchivePath = projects().getCurrentProject() ? projects().getCurrentProject()->getFilePath() : QString();
+        context->getArchiver().compressDirectory(context->getTemporaryDirectoryPath(), context->getFilePath(), true, 0, "", QDir::Filters(QDir::Files), sourceArchivePath, [jobExecutionContext](const float progress) {
+            jobExecutionContext->setProgress(progress);
+        });
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 10.0);
 
     plan->addSequentialStage("Finalize", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& jobExecutionContext) -> void {

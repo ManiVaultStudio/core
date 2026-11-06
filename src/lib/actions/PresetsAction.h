@@ -200,6 +200,12 @@ public:
      */
     QMenu* getMenu(QWidget* parent = nullptr);
 
+    /**
+     * Set whether the menu exposes the action for saving the current state as the default preset
+     * @param visible Boolean indicating whether the save-as-default action is visible
+     */
+    void setSaveDefaultPresetActionVisible(bool visible);
+
 public: // Presets
 
     /**
@@ -296,6 +302,7 @@ private:
     FilterModel         _filterModel;   /** Sort/filter model */
     TriggerAction       _editAction;    /** Action which triggers a dialog in which the presets can be managed */
     QVariantMap         _presets;       /** Cached presets */
+    bool                _saveDefaultPresetActionVisible = true; /** Whether the menu exposes the save-as-default action */
 };
 
 }

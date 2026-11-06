@@ -155,6 +155,7 @@ set(PRIVATE_PROJECT_MANAGER_HEADERS
     ProjectWidget.h
     ProjectSettingsDialog.h
     NewProjectDialog.h
+    ProjectResourceStagingService.h
 )
 
 set(PRIVATE_PROJECT_MANAGER_SOURCES
@@ -162,6 +163,7 @@ set(PRIVATE_PROJECT_MANAGER_SOURCES
     ProjectWidget.cpp
     ProjectSettingsDialog.cpp
     NewProjectDialog.cpp
+    ProjectResourceStagingService.cpp
 )
 
 set(PRIVATE_PROJECT_MANAGER_FILES

@@ -14,6 +14,7 @@
 #include <QFileInfo>
 #include <QFile>
 #include <QDir>
+#include <QDataStream>
 
 #include <exception>
 
@@ -26,6 +27,27 @@ namespace mv::util {
 
 namespace
 {
+
+constexpr char packedBlobMagic[] = "MVPTPK01";
+constexpr qsizetype packedBlobHeaderSize = sizeof(packedBlobMagic) - 1;
+constexpr qsizetype packedBlobBlockHeaderSize = sizeof(std::uint64_t) * 2;
+
+void writePackedBlobHeader(QFile& file)
+{
+    if (file.write(packedBlobMagic, packedBlobHeaderSize) != packedBlobHeaderSize)
+        throw std::runtime_error("Unable to write packed blob file header");
+}
+
+void validatePackedBlobHeader(QFile& file)
+{
+    if (!file.seek(0))
+        throw std::runtime_error("Unable to seek to packed blob file header");
+
+    const auto header = file.read(packedBlobHeaderSize);
+
+    if (header != QByteArray(packedBlobMagic, packedBlobHeaderSize))
+        throw std::runtime_error("Invalid packed blob file header");
+}
 
 /**
  * Encode a single raw data block and store the encoded payload at the requested location.
@@ -773,6 +795,100 @@ QByteArray bytesFromBlobVariantMap(QVariantMap variantMap)
     populateBytesFromBlobMap(variantMap, bytes.data(), static_cast<std::uint64_t>(bytes.size()));
 
     return bytes;
+}
+
+PackedBlobFileWriter::PackedBlobFileWriter(const QString& filePath, const SharedCodec& codec) :
+    _file(filePath),
+    _codec(codec)
+{
+    if (!_codec)
+        throw std::invalid_argument("Packed blob file writer requires a codec");
+
+    if (!_file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        throw std::runtime_error("Unable to open packed blob file for writing");
+
+    writePackedBlobHeader(_file);
+}
+
+PackedBlobBlock PackedBlobFileWriter::append(const char* data, const std::size_t size)
+{
+    if (_closed)
+        throw std::logic_error("Cannot append to a closed packed blob file");
+
+    if (data == nullptr || size == 0)
+        throw std::invalid_argument("Packed blob file block is empty");
+
+    if (size > static_cast<std::size_t>(std::numeric_limits<qsizetype>::max()))
+        throw std::overflow_error("Packed blob file block exceeds QByteArray size limits");
+
+	const auto encoded = _codec->encode(data, static_cast<qsizetype>(size));
+	const auto blockHeaderOffset = static_cast<std::uint64_t>(_file.pos());
+	QByteArray block;
+	block.reserve(static_cast<qsizetype>(packedBlobBlockHeaderSize + encoded.size()));
+	QDataStream stream(&block, QIODevice::WriteOnly);
+	stream.setByteOrder(QDataStream::LittleEndian);
+	stream << static_cast<quint64>(size) << static_cast<quint64>(encoded.size());
+	block.append(encoded);
+
+	if (stream.status() != QDataStream::Ok || _file.write(block) != block.size())
+		throw std::runtime_error("Unable to write packed blob block");
+
+	const auto payloadOffset = blockHeaderOffset + packedBlobBlockHeaderSize;
+
+    return { payloadOffset, static_cast<std::uint64_t>(encoded.size()), static_cast<std::uint64_t>(size) };
+}
+
+PackedBlobBlock PackedBlobFileWriter::append(const QByteArray& data)
+{
+    return append(data.constData(), static_cast<std::size_t>(data.size()));
+}
+
+void PackedBlobFileWriter::close()
+{
+    if (_closed)
+        return;
+
+    if (!_file.flush())
+        throw std::runtime_error("Unable to flush packed blob file");
+
+    _file.close();
+    _closed = true;
+}
+
+PackedBlobFileReader::PackedBlobFileReader(const QString& filePath, const SharedCodec& codec) :
+    _filePath(filePath),
+    _codec(codec)
+{
+    if (!_codec)
+        throw std::invalid_argument("Packed blob file reader requires a codec");
+
+    if (QFileInfo::exists(_filePath))
+    {
+        QFile file(_filePath);
+
+        if (!file.open(QIODevice::ReadOnly))
+            throw std::runtime_error("Unable to open packed blob file for reading");
+
+        validatePackedBlobHeader(file);
+    }
+}
+
+QByteArray PackedBlobFileReader::read(const PackedBlobBlock& block) const
+{
+    if (block.uncompressedSize > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max()))
+        throw std::overflow_error("Packed blob file block exceeds QByteArray size limits");
+
+    QByteArray result(static_cast<qsizetype>(block.uncompressedSize), '\0');
+    readTo(block, result.data(), static_cast<std::size_t>(result.size()));
+    return result;
+}
+
+void PackedBlobFileReader::readTo(const PackedBlobBlock& block, char* destination, const std::size_t destinationSize) const
+{
+    if (block.compressedSize == 0 || block.uncompressedSize == 0)
+        throw std::invalid_argument("Packed blob file block is empty");
+
+    _codec->decodeFromFileRangeTo(_filePath, block.offset, block.compressedSize, destination, destinationSize);
 }
 
 void variantMapMustContain(const QVariantMap& variantMap, const QString& key, std::source_location sourceLocation)

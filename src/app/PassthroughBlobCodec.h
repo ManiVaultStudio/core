@@ -86,6 +86,8 @@ public:
      */
     void decodeFromFileTo(const QString& filePath, char* destination, std::uint64_t destinationSize) const override;
 
+    void decodeFromFileRangeTo(const QString& filePath, std::uint64_t offset, std::uint64_t encodedSize, char* destination, std::uint64_t destinationSize) const override;
+
     /**
      * @brief Returns the file extension used by this codec.
      * @return File extension without a leading dot.

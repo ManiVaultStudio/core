@@ -30,7 +30,25 @@ add_subdirectory(plugins/LoggingPlugin)
 add_subdirectory(plugins/TasksPlugin)
 add_subdirectory(plugins/SampleScopePlugin)
 add_subdirectory(plugins/TutorialPlugin)
+add_subdirectory(plugins/PointsViewPlugin)
 
+set(MV_SYSTEM_PLUGINS
+    DataHierarchyPlugin
+    DataPropertiesPlugin
+    SharedParametersPlugin
+    LoggingPlugin
+    TasksPlugin
+    SampleScopePlugin
+    TutorialPlugin
+    PointsViewPlugin
+)
+
+foreach(system_plugin_target IN LISTS MV_SYSTEM_PLUGINS)
+    target_compile_options(${system_plugin_target}
+        PRIVATE
+            $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
+    )
+endforeach()
 # Data plugins
 add_subdirectory(plugins/PointData)
 add_subdirectory(plugins/ColorData)

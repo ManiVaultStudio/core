@@ -406,10 +406,15 @@ WorkflowHandle WorkflowPlan::addBatchedParallelStage(const QString& name, Jobs j
 
     return addBatchedParallelStage(name, std::move(jobs), [batchSize](const SharedWorkflowExecutionContext&) {
     	return batchSize;
-    });
+    }, 1.0);
 }
 
 WorkflowHandle WorkflowPlan::addBatchedParallelStage(const QString& name, Jobs jobs, WorkflowBatchSizeFunction batchSizeFunction)
+{
+    return addBatchedParallelStage(name, std::move(jobs), std::move(batchSizeFunction), 1.0);
+}
+
+WorkflowHandle WorkflowPlan::addBatchedParallelStage(const QString& name, Jobs jobs, WorkflowBatchSizeFunction batchSizeFunction, const double weight)
 {
     if (jobs.empty()) {
         qWarning() << "Attempted to add empty batched parallel stage:" << name;
@@ -422,7 +427,8 @@ WorkflowHandle WorkflowPlan::addBatchedParallelStage(const QString& name, Jobs j
     Stage stage(
         name,
         ConcurrencyMode::Parallel,
-        std::move(jobs)
+        std::move(jobs),
+        weight
     );
 
     stage.setBatchSizeFunction(std::move(batchSizeFunction));

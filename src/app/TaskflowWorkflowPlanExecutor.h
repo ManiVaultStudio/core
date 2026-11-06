@@ -16,6 +16,7 @@
 
 #include <QUuid>
 
+#include <algorithm>
 #include <mutex>
 
 namespace mv
@@ -323,8 +324,9 @@ private:
     /**
      * @brief Compiles a parallel workflow stage.
      *
-     * Creates independent Taskflow tasks for all jobs in the stage so they may run
-     * concurrently.
+     * Creates independent Taskflow tasks for each parallel batch. Batched stages
+     * connect consecutive batches through barriers so at most the resolved batch
+     * size is active at once.
      *
      * @tparam Flow Taskflow graph or subflow type.
      * @param stage Stage to compile.
@@ -339,16 +341,42 @@ private:
 
         const bool collapseSingleJob = stage.getJobs().size() == 1 && stage.getJobs().front().getName() == stage.getName();
 
-        for (const auto& job : stage.getJobs()) {
-            auto jobContext = collapseSingleJob ? stageContext : stageContext->createJobChild(job.getName(), job.getWeight(), job.getProgressMode());
-            auto task       = flow.emplace([this, job, jobContext, collapseSingleJob](tf::Subflow& subflow) mutable {
-                executeCompiledJob(job, subflow, jobContext, !collapseSingleJob);
-            });
+        const auto& jobs = stage.getJobs();
+        const auto batchSize = stage.isBatchedParallel() ? std::min(stage.resolveBatchSize(stageContext), jobs.size()) : jobs.size();
+        tf::Task previousBatchBarrier;
 
-            task.name(makeTraceName(job.isNestedWorkflow() ? "Nested" : "Job", collapseSingleJob ? stage.getName() : job.getName()));
+        for (std::size_t batchBegin = 0; batchBegin < jobs.size(); batchBegin += batchSize) {
+            TaskList batchTasks;
+            const auto batchEnd = std::min(jobs.size(), batchBegin + batchSize);
+            batchTasks.reserve(batchEnd - batchBegin);
 
-            result.starts.push_back(task);
-            result.ends.push_back(task);
+            for (auto jobIndex = batchBegin; jobIndex < batchEnd; ++jobIndex) {
+                const auto& job = jobs[jobIndex];
+                auto jobContext = collapseSingleJob ? stageContext : stageContext->createJobChild(job.getName(), job.getWeight(), job.getProgressMode());
+                auto task       = flow.emplace([this, job, jobContext, collapseSingleJob](tf::Subflow& subflow) mutable {
+                    executeCompiledJob(job, subflow, jobContext, !collapseSingleJob);
+                });
+
+                task.name(makeTraceName(job.isNestedWorkflow() ? "Nested" : "Job", collapseSingleJob ? stage.getName() : job.getName()));
+                batchTasks.push_back(task);
+            }
+
+            if (result.starts.empty()) {
+                result.starts = batchTasks;
+            } else {
+                for (auto& task : batchTasks)
+                    previousBatchBarrier.precede(task);
+            }
+
+            result.ends = batchTasks;
+
+            if (batchEnd < jobs.size()) {
+                auto barrier = flow.emplace([] {});
+                barrier.name(makeTraceName("Batch barrier", stage.getName()));
+                for (auto& task : batchTasks)
+                    task.precede(barrier);
+                previousBatchBarrier = barrier;
+            }
         }
 
         return result;

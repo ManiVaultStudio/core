@@ -10,6 +10,7 @@
 
 #include <QFile>
 
+#include <limits>
 #include <stdexcept>
 
 #ifdef _DEBUG
@@ -220,6 +221,30 @@ void BlobCodec::decodeFromFileTo(const QString& filePath, char* destination, std
         );
 
     decodeTo(file.readAll(), destination, destinationSize);
+}
+
+void BlobCodec::decodeFromFileRangeTo(const QString& filePath, const std::uint64_t offset, const std::uint64_t encodedSize, char* destination, const std::uint64_t destinationSize) const
+{
+    if (destination == nullptr)
+        throw std::invalid_argument("Destination buffer is null");
+
+    if (offset > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max()) || encodedSize > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max()))
+        throw std::invalid_argument("Encoded file range exceeds Qt size limits");
+
+    QFile file(filePath);
+
+    if (!file.open(QIODevice::ReadOnly))
+        throw std::runtime_error(QString("Unable to open encoded file: %1").arg(filePath).toStdString());
+
+    if (!file.seek(static_cast<qint64>(offset)))
+        throw std::runtime_error(QString("Unable to seek to encoded file range: %1").arg(filePath).toStdString());
+
+    const auto encodedData = file.read(static_cast<qint64>(encodedSize));
+
+    if (encodedData.size() != static_cast<qsizetype>(encodedSize))
+        throw std::runtime_error(QString("Unable to read encoded file range: %1").arg(filePath).toStdString());
+
+    decodeTo(encodedData, destination, destinationSize);
 }
 
 QString BlobCodec::typeToString(Type type)

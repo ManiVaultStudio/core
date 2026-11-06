@@ -10,6 +10,7 @@
 #include "actions/VersionAction.h"
 #include "actions/VerticalGroupAction.h"
 #include "actions/ApplicationIconAction.h"
+#include "actions/OptionAction.h"
 
 #include "ProjectCompressionAction.h"
 
@@ -87,6 +88,7 @@ public: // Action getters
     const gui::ApplicationIconAction& getApplicationIconAction() const { return _applicationIconAction; }
     const ProjectCompressionAction& getCompressionAction() const { return _compressionAction; }
     const gui::ToggleAction& getAllowProjectSwitchingAction() const { return _allowProjectSwitchingAction; }
+    gui::OptionAction& getPackedTileStagingPolicyAction() { return _packedTileStagingPolicyAction; }
     const gui::ToggleAction& getAllowedPluginsOnlyAction() const { return _allowedPluginsOnlyAction; }
     const gui::StringsAction& getAllowedPluginsAction() const { return _allowedPluginsAction; }
 
@@ -106,6 +108,7 @@ public: // Action getters
     gui::ApplicationIconAction& getApplicationIconAction() { return _applicationIconAction; }
     ProjectCompressionAction& getCompressionAction() { return _compressionAction; }
     gui::ToggleAction& getAllowProjectSwitchingAction() { return _allowProjectSwitchingAction; }
+    const gui::OptionAction& getPackedTileStagingPolicyAction() const { return _packedTileStagingPolicyAction; }
     gui::ToggleAction& getAllowedPluginsOnlyAction() { return _allowedPluginsOnlyAction; }
     gui::StringsAction& getAllowedPluginsAction() { return _allowedPluginsAction; }
 
@@ -124,6 +127,7 @@ private:
     gui::ApplicationIconAction      _applicationIconAction;             /** Application icon action (only used in application mode) */
     ProjectCompressionAction        _compressionAction;                 /** Project compression action */
     gui::ToggleAction               _allowProjectSwitchingAction;       /** Allow project switching action (only used in application mode) */
+    gui::OptionAction               _packedTileStagingPolicyAction;      /** Optional per-project override for staging packed point-tile resources. */
     gui::ToggleAction               _allowedPluginsOnlyAction;          /** Restrict to allowed plugins only action (only used in application mode) */
     gui::StringsAction              _allowedPluginsAction;              /** Allowed plugins action (only used in application mode) */
     

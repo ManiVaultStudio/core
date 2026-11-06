@@ -11,6 +11,7 @@
 namespace mv::gui {
 
 class ColorMapAction;
+class ColorMapSettingsAction;
 
 /**
  * Color map discrete action class
@@ -50,13 +51,9 @@ protected:
 
     /**
      * Constructor
-     * @param colorMapAction Reference to owning color map action
+     * @param colorMapSettingsAction Reference to owning color map settings action
      */
-<<<<<<< HEAD
     Q_INVOKABLE ColorMapDiscreteAction(ColorMapSettingsAction& colorMapSettingsAction);
-=======
-    ColorMapDiscreteAction(ColorMapAction& colorMapAction);
->>>>>>> origin/master
 
 public: // Linking
 
@@ -92,7 +89,7 @@ protected:
     
 
     /** Only color map settings action may instantiate this class */
-    friend class ColorMapAction;
+    friend class ColorMapSettingsAction;
 };
 
 }

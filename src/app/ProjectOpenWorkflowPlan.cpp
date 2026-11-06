@@ -10,6 +10,39 @@
 #include <CoreInterface.h>
 
 #include <QFileInfo>
+#include <QDir>
+#include <QMetaType>
+
+#include <algorithm>
+
+namespace
+{
+void collectPackedTileUris(const QVariant& value, QStringList& uris)
+{
+    if (value.metaType().id() == QMetaType::QVariantMap)
+    {
+        const auto map = value.toMap();
+        if (map.value("Storage").toString() == QStringLiteral("PackedTileFiles"))
+            for (const auto& superTileValue : map.value("SuperTiles").toList())
+            {
+                const auto uri = superTileValue.toMap().value("URI").toString().trimmed();
+                // Absolute URIs refer to already-local files and are handled
+                // directly by the point-data deserializer.
+                if (!uri.isEmpty() && !QDir::isAbsolutePath(uri))
+                    uris.push_back(uri);
+            }
+
+        for (auto it = map.cbegin(); it != map.cend(); ++it)
+            collectPackedTileUris(it.value(), uris);
+    }
+    else if (value.metaType().id() == QMetaType::QVariantList)
+    {
+        for (const auto& item : value.toList())
+            collectPackedTileUris(item, uris);
+    }
+}
+
+}
 
 using namespace mv;
 using namespace mv::gui;
@@ -66,6 +99,7 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 		workspaces().reset();
 
 		mv::projects().newProject();
+        static_cast<ProjectManager&>(mv::projects()).prepareProjectStagingDirectory(context->getFilePath());
 
 		Application::requestOverrideCursor(Qt::WaitCursor);
 
@@ -100,6 +134,10 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
             throw std::runtime_error("No current project found");
         }
         }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
+
+    plan->addSequentialStage("Resolve project resource staging policy", [](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        static_cast<ProjectManager&>(mv::projects()).applyProjectResourceStagingPolicyOverride();
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 0.1);
 
     WorkflowPlan::Jobs readJsonJobs;
 
@@ -161,6 +199,21 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
     });
 
     plan->addParallelStage("Read JSON files", std::move(readJsonJobs));
+
+    plan->addSequentialStage("Register project resources for staging", [context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        QStringList uris;
+        collectPackedTileUris(context->getProjectMap(), uris);
+        executionContext->setProgress(0.0);
+        static_cast<ProjectManager&>(mv::projects()).registerProjectResourceStagingRequests(uris);
+        executionContext->setProgress(1.0);
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 0.1);
+
+    plan->addNestedWorkflowStage("Stage packed point-data files", [](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        const auto executionOptions = executionContext->getOptions().execution;
+        const auto configuredConcurrency = executionOptions.parallel ? executionOptions.maxWorkerThreadCount : 1u;
+        const auto maxConcurrency = std::min<std::size_t>(8, std::max<std::size_t>(1, configuredConcurrency));
+        return static_cast<ProjectManager&>(mv::projects()).createProjectResourceStagingWorkflow(maxConcurrency);
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 10.0);
 
     plan->addNestedWorkflowStage("Open project JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext&) mutable -> UniqueWorkflowPlan {
         return mv::projects().getCurrentProject()->fromVariantMapWorkflow(context->getProjectMap()["Project"].toMap());

@@ -360,6 +360,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 
     WorkflowPlan::Jobs saveDatasetsJobs;
     saveDatasetsJobs.reserve(_items.size());
+    double saveDatasetsWeight = 0.0;
 
     QHash<QString, WorkflowHandle> datasetHandles;
 
@@ -368,6 +369,8 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 
         const auto dataset = item->getDataset();
         const auto datasetId = dataset->getId();
+        const auto datasetWeight = std::max(1.0, static_cast<double>(dataset->getRawDataSize()));
+        saveDatasetsWeight += datasetWeight;
 
         WorkflowPlan::Job job(QString("Save dataset %1").arg(datasetId), WorkflowPlan::NestedWorkflowFunction([datasetId](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
             auto dataset = mv::data().getDataset(datasetId);
@@ -376,7 +379,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
                 return {};
 
             return dataset->toVariantMapWorkflow();
-        }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Nested);
+        }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Nested, datasetWeight);
 
         datasetHandles.insert(datasetId, job.getHandle());
 
@@ -385,7 +388,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 
     plan->addBatchedParallelStage("Save datasets", std::move(saveDatasetsJobs), [](const SharedWorkflowExecutionContext& executionContext) {
         return executionContext->getState()->getOptions().batching.datasetSavingBatchSize;
-    });
+    }, saveDatasetsWeight);
 
     const auto collectDatasetMapsStage = plan->addSequentialStage("Collect dataset maps", [saveItemMapsStage, datasetHandles](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         const auto itemMaps = executionContext->takeOutput(saveItemMapsStage).toMap();

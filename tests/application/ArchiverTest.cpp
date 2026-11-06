@@ -1,6 +1,7 @@
 #include "Archiver.h"
 
 #include <quazip/JlCompress.h>
+#include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 
 #include <QCoreApplication>
@@ -140,6 +141,45 @@ bool rejectsSymbolicLinks()
         && require(!QFileInfo::exists(extractedLinkPath), QStringLiteral("Symbolic-link archive entry was materialized"));
 }
 
+bool storesFilesWhenCompressionIsDisabled()
+{
+    QTemporaryDir temporaryDirectory;
+    const auto sourceDirectory = QDir(temporaryDirectory.path()).filePath(QStringLiteral("source"));
+    const auto nestedDirectory = QDir(sourceDirectory).filePath(QStringLiteral("nested"));
+    const auto sourcePath      = QDir(nestedDirectory).filePath(QStringLiteral("file.txt"));
+    const auto archivePath      = QDir(temporaryDirectory.path()).filePath(QStringLiteral("stored.zip"));
+
+    if (!require(temporaryDirectory.isValid(), QStringLiteral("Unable to create temporary test directory"))
+        || !require(QDir().mkpath(nestedDirectory), QStringLiteral("Unable to create source directory")))
+        return false;
+
+    QFile source(sourcePath);
+    if (!require(source.open(QIODevice::WriteOnly), QStringLiteral("Unable to create source file")))
+        return false;
+
+    source.write("content");
+    source.close();
+
+    mv::util::Archiver archiver;
+    archiver.compressDirectory(sourceDirectory, archivePath, true, 0);
+
+    QuaZip zip(archivePath);
+    if (!require(zip.open(QuaZip::mdUnzip), QStringLiteral("Unable to open stored archive"))
+        || !require(zip.goToFirstFile(), QStringLiteral("Stored archive does not contain the source file")))
+        return false;
+
+    QuaZipFileInfo64 info;
+    do
+    {
+        if (!require(zip.getCurrentFileInfo(&info), QStringLiteral("Unable to inspect stored archive entry"))
+            || !require(info.method == 0, QStringLiteral("Compression-disabled archive entry was not stored")))
+            return false;
+    }
+    while (zip.goToNextFile());
+
+    return true;
+}
+
 }
 
 int main(int argc, char* argv[])
@@ -150,12 +190,14 @@ int main(int argc, char* argv[])
     const auto traversal    = rejectsTraversalEntries();
     const auto prefix       = rejectsPrefixConfusionEntries();
     const auto symlinks     = rejectsSymbolicLinks();
+    const auto stored       = storesFilesWhenCompressionIsDisabled();
 
-    std::fprintf(stderr, "valid=%s traversal=%s prefix=%s symlinks=%s\n",
+    std::fprintf(stderr, "valid=%s traversal=%s prefix=%s symlinks=%s stored=%s\n",
                  validEntries ? "pass" : "fail",
                  traversal ? "pass" : "fail",
                  prefix ? "pass" : "fail",
-                 symlinks ? "pass" : "fail");
+                 symlinks ? "pass" : "fail",
+                 stored ? "pass" : "fail");
 
-    return validEntries && traversal && prefix && symlinks ? 0 : 1;
+    return validEntries && traversal && prefix && symlinks && stored ? 0 : 1;
 }
