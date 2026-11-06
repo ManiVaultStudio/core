@@ -353,7 +353,7 @@ void ProjectManager::newBlankProject()
     }
 }
 
-void ProjectManager::prepareProjectStagingDirectory()
+void ProjectManager::prepareProjectStagingDirectory(const QString& projectArchivePath)
 {
     const auto stagingRoot = ensureTemporaryDirPath(TemporaryDirType::Staging);
     _projectStagingDirectory = std::make_unique<QTemporaryDir>(QDir(stagingRoot).filePath(QStringLiteral("project-XXXXXX")));
@@ -361,6 +361,40 @@ void ProjectManager::prepareProjectStagingDirectory()
         throw std::runtime_error("Unable to create project staging directory");
 
     setTemporaryDirPath(TemporaryDirType::Staging, _projectStagingDirectory->path());
+
+    const auto defaultPolicyText = Application::current()->getConfigurationAction().getProjectsConfigurationAction().getDefaultPackedTileStagingPolicyAction().getCurrentText();
+    const auto defaultPolicy = defaultPolicyText == QStringLiteral("Stage on demand") ? ProjectResourceStagingService::Policy::OnDemand :
+        defaultPolicyText == QStringLiteral("Stage before load") ? ProjectResourceStagingService::Policy::BeforeLoad : ProjectResourceStagingService::Policy::ArchiveBacked;
+    _projectResourceStagingService.configure(projectArchivePath, _projectStagingDirectory->path(), defaultPolicy);
+}
+
+void ProjectManager::applyProjectResourceStagingPolicyOverride()
+{
+    const auto project = getCurrentProject();
+    if (!project)
+        return;
+
+    const auto projectPolicyText = project->getProjectMetaAction().getPackedTileStagingPolicyAction().getCurrentText();
+    const auto policyText = projectPolicyText == QStringLiteral("Use application default") ?
+        Application::current()->getConfigurationAction().getProjectsConfigurationAction().getDefaultPackedTileStagingPolicyAction().getCurrentText() : projectPolicyText;
+    const auto policy = policyText == QStringLiteral("Stage on demand") ? ProjectResourceStagingService::Policy::OnDemand :
+        policyText == QStringLiteral("Stage before load") ? ProjectResourceStagingService::Policy::BeforeLoad : ProjectResourceStagingService::Policy::ArchiveBacked;
+    _projectResourceStagingService.setPolicy(policy);
+}
+
+void ProjectManager::registerProjectResourceStagingRequests(const QStringList& archiveEntries)
+{
+    _projectResourceStagingService.registerResources(archiveEntries);
+}
+
+workflow::UniqueWorkflowPlan ProjectManager::createProjectResourceStagingWorkflow(const std::size_t maxConcurrency)
+{
+    return _projectResourceStagingService.createEagerStagingWorkflow(maxConcurrency);
+}
+
+QString ProjectManager::resolveStagedProjectResourcePath(const QString& archiveEntry)
+{
+    return _projectResourceStagingService.resolvePath(archiveEntry);
 }
 
 void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly /*= false*/, bool loadWorkspace /*= true*/)
@@ -1509,6 +1543,7 @@ bool ProjectManager::isMvFileName(const QString& name)
 
 void ProjectManager::createProject()
 {
+    _projectResourceStagingService.clear();
     _projectStagingDirectory.reset();
     unsetTemporaryDirPath(TemporaryDirType::Staging);
 

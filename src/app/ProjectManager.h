@@ -9,10 +9,15 @@
 #include <models/ProjectsListModel.h>
 #include <models/ProjectsTreeModel.h>
 
+#include "ProjectResourceStagingService.h"
+
 #include <QObject>
 #include <QFileDialog>
 #include <QTemporaryDir>
 
+#include <workflow/WorkflowPlan.h>
+
+#include <cstddef>
 #include <memory>
 
 namespace mv
@@ -73,7 +78,11 @@ public:
     void openProject(QString filePath = "", bool importDataOnly = false, bool loadWorkspace = true) override;
 
     /** Starts a fresh session-scoped staging directory for the project being opened. */
-    void prepareProjectStagingDirectory();
+    void prepareProjectStagingDirectory(const QString& projectArchivePath);
+    void applyProjectResourceStagingPolicyOverride();
+    void registerProjectResourceStagingRequests(const QStringList& archiveEntries);
+    [[nodiscard]] workflow::UniqueWorkflowPlan createProjectResourceStagingWorkflow(std::size_t maxConcurrency);
+    QString resolveStagedProjectResourcePath(const QString& archiveEntry) override;
 
     /**
      * Download project from \p url, store it in \p targetDir and open it
@@ -317,6 +326,7 @@ private:
     ProjectsListModel                   _projectsListModel;             /**< Projects list model */
     ProjectsTreeModel                   _projectsTreeModel;             /**< Projects tree model */
     std::unique_ptr<QTemporaryDir>      _projectStagingDirectory;        /**< Session-scoped staging directory for resources from the open project */
+    ProjectResourceStagingService       _projectResourceStagingService;  /**< Resolves archive resources to staged files according to the active policy. */
 };
 
 }

@@ -31,6 +31,7 @@ ProjectMetaAction::ProjectMetaAction(Project* project, QObject* parent /*= nullp
     _applicationIconAction(this, "Application icon"),
     _compressionAction(this),
     _allowProjectSwitchingAction(this, "Allow project switching"),
+    _packedTileStagingPolicyAction(this, "Packed point-tile staging", { "Use application default", "Archive-backed", "Stage on demand", "Stage before load" }, "Use application default"),
     _allowedPluginsOnlyAction(this, "Limit use of plugins"),
     _allowedPluginsAction(this, "Allowed Plugins")
 {
@@ -62,6 +63,7 @@ ProjectMetaAction::ProjectMetaAction(Project* project, QObject* parent /*= nullp
     _applicationIconAction.setToolTip("Application icon settings");
 
     _allowProjectSwitchingAction.setToolTip("Allow switching to another database project from the main menu");
+    _packedTileStagingPolicyAction.setToolTip("Choose whether this project reads packed point tiles from its archive or stages them to disk for this session");
     _allowedPluginsOnlyAction.setToolTip("Only plugins in the allowed list may be created from the UI.");
     _allowedPluginsAction.setToolTip("Only plugins in this list may be created from the UI.");
 
@@ -141,6 +143,7 @@ void ProjectMetaAction::fromVariantMap(const QVariantMap& variantMap)
     _applicationIconAction.fromParentVariantMap(variantMap);
     _compressionAction.fromParentVariantMap(variantMap, true);
     _allowProjectSwitchingAction.fromParentVariantMap(variantMap, true);
+    _packedTileStagingPolicyAction.fromParentVariantMap(variantMap, true);
     _allowedPluginsOnlyAction.fromParentVariantMap(variantMap, true);
     _allowedPluginsAction.fromParentVariantMap(variantMap, true);
 }
@@ -175,6 +178,7 @@ QVariantMap ProjectMetaAction::toVariantMap() const
     _applicationIconAction.insertIntoVariantMap(variantMap);
     _compressionAction.insertIntoVariantMap(variantMap);
     _allowProjectSwitchingAction.insertIntoVariantMap(variantMap);
+    _packedTileStagingPolicyAction.insertIntoVariantMap(variantMap);
     _allowedPluginsOnlyAction.insertIntoVariantMap(variantMap);
     _allowedPluginsAction.insertIntoVariantMap(variantMap);
 

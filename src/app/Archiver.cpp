@@ -552,24 +552,91 @@ void Archiver::extractSingleFile(const QString& compressedFilePath, const QStrin
     if (!zip.open(QuaZip::mdUnzip))
         throw std::runtime_error("Unable to open ZIP file");
 
-    const auto directory = QFileInfo(targetFilePath).absoluteDir();
+    if (!zip.setCurrentFile(sourceFileName))
+        throw std::runtime_error(QString("Unable to locate archive entry: %1").arg(sourceFileName).toStdString());
 
-    if (!zip.goToFirstFile())
-        throw std::runtime_error("No files found");
-
-    do {
-        const auto fileName = zip.getCurrentFileName();
-
-        if (fileName != sourceFileName)
-            continue;
-
-        extractFile(&zip, QLatin1String(""), targetFilePath, password);
-    } while (zip.goToNextFile());
+    extractFile(&zip, QLatin1String(""), targetFilePath, password);
 
     zip.close();
 
     if (zip.getZipError() != 0)
         throw std::runtime_error("Decompression error occurred");
+}
+
+void Archiver::extractSingleFileCancellable(const QString& compressedFilePath, const QString& sourceFileName, const QString& targetFilePath, const QString& password, const std::function<bool()>& cancellationCheck, const std::function<void(std::uint64_t, std::uint64_t)>& progress)
+{
+    QuaZip zip(compressedFilePath);
+    if (!zip.open(QuaZip::mdUnzip))
+        throw std::runtime_error(QString("Unable to open ZIP archive: %1").arg(compressedFilePath).toStdString());
+
+    if (!zip.setCurrentFile(sourceFileName))
+        throw std::runtime_error(QString("Unable to locate archive entry: %1").arg(sourceFileName).toStdString());
+
+    QuaZipFile inputFile(&zip);
+    const auto passwordBytes = password.toLocal8Bit();
+    if (!inputFile.open(QIODevice::ReadOnly, password.isEmpty() ? nullptr : passwordBytes.constData()) || inputFile.getZipError() != UNZ_OK)
+        throw std::runtime_error(QString("Unable to open archive entry: %1").arg(sourceFileName).toStdString());
+
+    QuaZipFileInfo64 info;
+    if (!zip.getCurrentFileInfo(&info))
+        throw std::runtime_error(QString("Unable to read archive entry metadata: %1").arg(sourceFileName).toStdString());
+    if (info.isSymbolicLink())
+        throw std::runtime_error(QString("Symbolic links are not supported in archives: %1").arg(sourceFileName).toStdString());
+
+    const auto destinationDirectory = QFileInfo(targetFilePath).absolutePath();
+    if (!QDir().mkpath(destinationDirectory))
+        throw std::runtime_error(QString("Unable to create destination directory for archive entry: %1").arg(sourceFileName).toStdString());
+
+    QFile outputFile(targetFilePath);
+    if (!outputFile.open(QIODevice::WriteOnly))
+        throw std::runtime_error(QString("Unable to create staged archive entry: %1").arg(sourceFileName).toStdString());
+
+    constexpr qint64 bufferSize = 1024 * 1024;
+    QByteArray buffer(static_cast<qsizetype>(bufferSize), Qt::Uninitialized);
+    std::uint64_t copiedBytes = 0;
+    const auto totalBytes = static_cast<std::uint64_t>(info.uncompressedSize);
+    try
+    {
+        if (progress)
+            progress(0, totalBytes);
+
+        for (;;)
+        {
+            if (cancellationCheck && cancellationCheck())
+                throw std::runtime_error("Project resource extraction canceled");
+
+            const auto bytesRead = inputFile.read(buffer.data(), buffer.size());
+            if (bytesRead < 0)
+                throw std::runtime_error("Failed while reading archive entry");
+            if (bytesRead == 0)
+                break;
+
+            if (outputFile.write(buffer.constData(), bytesRead) != bytesRead)
+                throw std::runtime_error("Failed while writing staged archive entry");
+
+            copiedBytes += static_cast<std::uint64_t>(bytesRead);
+            if (progress)
+                progress(copiedBytes, totalBytes);
+        }
+
+        inputFile.close();
+        outputFile.close();
+        if (inputFile.getZipError() != UNZ_OK || zip.getZipError() != 0)
+            throw std::runtime_error("ZIP error occurred while extracting archive entry");
+
+        if (info.getPermissions() != 0)
+            outputFile.setPermissions(info.getPermissions());
+    }
+    catch (...)
+    {
+        inputFile.close();
+        outputFile.close();
+        QFile::remove(targetFilePath);
+        zip.close();
+        throw;
+    }
+
+    zip.close();
 }
 
 QByteArray Archiver::readZipEntryToMemory(const QString& zipPath, const QString& entryName)

@@ -202,6 +202,13 @@ public:
     virtual void openProject(QString filePath = "", bool importDataOnly = false, bool loadWorkspace = true) = 0;
 
     /**
+     * Resolve a project archive resource to its session-staged path when staging is enabled.
+     * @param archiveEntry Relative resource path stored in the project archive.
+     * @return Staged file path, or an empty string when the resource should remain archive-backed.
+     */
+    virtual QString resolveStagedProjectResourcePath(const QString& archiveEntry) { static_cast<void>(archiveEntry); return {}; }
+
+    /**
      * Download project from \p url, store it in \p targetDir and open it
      * @param url URL of the project
      * @param targetDirectory Directory where the project is stored (temporary directory when empty)

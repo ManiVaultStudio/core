@@ -83,6 +83,9 @@ public:
      */
     void extractSingleFile(const QString& compressedFilePath, const QString& sourceFileName, const QString& targetFilePath, const QString& password = "");
 
+    /** Extracts one archive entry while reporting byte progress and checking cooperative cancellation. */
+    void extractSingleFileCancellable(const QString& compressedFilePath, const QString& sourceFileName, const QString& targetFilePath, const QString& password, const std::function<bool()>& cancellationCheck, const std::function<void(std::uint64_t, std::uint64_t)>& progress);
+
     /*
      * Reads a file from a zip archive directly to memory
      * Might throw a std::runtime_error exception if an error occurs during extraction

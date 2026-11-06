@@ -12,7 +12,8 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QMetaType>
-#include <QSet>
+
+#include <algorithm>
 
 namespace
 {
@@ -25,7 +26,9 @@ void collectPackedTileUris(const QVariant& value, QStringList& uris)
             for (const auto& superTileValue : map.value("SuperTiles").toList())
             {
                 const auto uri = superTileValue.toMap().value("URI").toString().trimmed();
-                if (!uri.isEmpty())
+                // Absolute URIs refer to already-local files and are handled
+                // directly by the point-data deserializer.
+                if (!uri.isEmpty() && !QDir::isAbsolutePath(uri))
                     uris.push_back(uri);
             }
 
@@ -39,14 +42,6 @@ void collectPackedTileUris(const QVariant& value, QStringList& uris)
     }
 }
 
-bool isSafeArchiveEntryPath(const QString& path)
-{
-    if (path.isEmpty() || QDir::isAbsolutePath(path) || path.contains(QLatin1Char('\\')) || path.contains(QLatin1Char(':')))
-        return false;
-
-    const auto cleanPath = QDir::cleanPath(path);
-    return cleanPath != QStringLiteral(".") && cleanPath != QStringLiteral("..") && !cleanPath.startsWith(QStringLiteral("../"));
-}
 }
 
 using namespace mv;
@@ -104,7 +99,7 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 		workspaces().reset();
 
 		mv::projects().newProject();
-		static_cast<ProjectManager&>(mv::projects()).prepareProjectStagingDirectory();
+        static_cast<ProjectManager&>(mv::projects()).prepareProjectStagingDirectory(context->getFilePath());
 
 		Application::requestOverrideCursor(Qt::WaitCursor);
 
@@ -139,6 +134,10 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
             throw std::runtime_error("No current project found");
         }
         }, WorkflowPlan::JobThreadAffinity::GuiThread, 1.0);
+
+    plan->addSequentialStage("Resolve project resource staging policy", [](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
+        static_cast<ProjectManager&>(mv::projects()).applyProjectResourceStagingPolicyOverride();
+    }, WorkflowPlan::JobThreadAffinity::GuiThread, 0.1);
 
     WorkflowPlan::Jobs readJsonJobs;
 
@@ -201,38 +200,19 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
 
     plan->addParallelStage("Read JSON files", std::move(readJsonJobs));
 
-    plan->addSequentialStage("Stage packed point-data files", [context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+    plan->addSequentialStage("Register project resources for staging", [context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         QStringList uris;
         collectPackedTileUris(context->getProjectMap(), uris);
-
-        QStringList archiveEntries;
-        QSet<QString> extracted;
-        for (const auto& uri : uris)
-        {
-            if (!isSafeArchiveEntryPath(uri) || extracted.contains(uri))
-                continue;
-
-            extracted.insert(uri);
-            archiveEntries.push_back(uri);
-        }
-
         executionContext->setProgress(0.0);
-        const auto stagingDirectory = mv::projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Staging);
-        Archiver archiver;
-        for (qsizetype index = 0; index < archiveEntries.size(); ++index)
-        {
-            const auto& uri = archiveEntries[index];
+        static_cast<ProjectManager&>(mv::projects()).registerProjectResourceStagingRequests(uris);
+        executionContext->setProgress(1.0);
+    }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 0.1);
 
-            const auto destinationPath = QDir(stagingDirectory).filePath(QDir::cleanPath(uri));
-            if (!QDir().mkpath(QFileInfo(destinationPath).absolutePath()))
-                throw std::runtime_error(QString("Unable to create staging directory for packed point-data file: %1").arg(uri).toStdString());
-
-            archiver.extractSingleFile(context->getFilePath(), uri, destinationPath);
-            if (!QFileInfo(destinationPath).isFile())
-                throw std::runtime_error(QString("Packed point-data file is missing from the project archive: %1").arg(uri).toStdString());
-
-            executionContext->setProgress(static_cast<double>(index + 1) / static_cast<double>(archiveEntries.size()));
-        }
+    plan->addNestedWorkflowStage("Stage packed point-data files", [](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) -> UniqueWorkflowPlan {
+        const auto executionOptions = executionContext->getOptions().execution;
+        const auto configuredConcurrency = executionOptions.parallel ? executionOptions.maxWorkerThreadCount : 1u;
+        const auto maxConcurrency = std::min<std::size_t>(8, std::max<std::size_t>(1, configuredConcurrency));
+        return static_cast<ProjectManager&>(mv::projects()).createProjectResourceStagingWorkflow(maxConcurrency);
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 10.0);
 
     plan->addNestedWorkflowStage("Open project JSON", [context](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext&) mutable -> UniqueWorkflowPlan {

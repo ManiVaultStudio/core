@@ -59,6 +59,34 @@ bool isLocalPackedTileFile(const QString& path)
     return fileInfo.isAbsolute() && fileInfo.isFile();
 }
 
+struct PackedTileReaderState
+{
+    QString archiveEntry;
+    QString codecName;
+    std::mutex mutex;
+    std::shared_ptr<mv::util::PackedBlobFileReader> reader;
+
+    std::shared_ptr<mv::util::PackedBlobFileReader> getReader()
+    {
+        std::lock_guard lock(mutex);
+        if (!reader)
+        {
+            auto sourcePath = archiveEntry;
+            if (!isLocalPackedTileFile(sourcePath))
+            {
+                const auto stagedPath = mv::projects().resolveStagedProjectResourcePath(archiveEntry);
+                if (!stagedPath.isEmpty())
+                    sourcePath = stagedPath;
+            }
+
+            const auto codec = mv::util::codecRegistry().createCodec(nullptr, codecName);
+            reader = std::make_shared<mv::util::PackedBlobFileReader>(sourcePath, codec);
+        }
+
+        return reader;
+    }
+};
+
 struct TileEncodingItem
 {
     std::size_t tileIndex = 0;
@@ -677,7 +705,7 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantM
 
     std::shared_ptr<std::vector<QVariantMap>> superTileBlobs;
     std::shared_ptr<std::vector<std::shared_ptr<QByteArray>>> superTilePayloads;
-    std::shared_ptr<std::vector<std::shared_ptr<mv::util::PackedBlobFileReader>>> packedTileReaders;
+    std::shared_ptr<std::vector<std::shared_ptr<PackedTileReaderState>>> packedTileReaders;
     QStringList packedTileSourcePaths;
     QString packedTileSourceCodec;
     if (storageType == QStringLiteral("SuperTileBlobs"))
@@ -693,7 +721,7 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantM
     }
     else if (packedTileFiles)
     {
-        packedTileReaders = std::make_shared<std::vector<std::shared_ptr<mv::util::PackedBlobFileReader>>>();
+        packedTileReaders = std::make_shared<std::vector<std::shared_ptr<PackedTileReaderState>>>();
         for (const auto& value : map.value("SuperTiles").toList())
         {
             const auto superTile = value.toMap();
@@ -708,38 +736,11 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantM
             else if (packedTileSourceCodec != codecName)
                 throw std::runtime_error("Packed tiled point-data files use inconsistent codecs");
 
-            auto sourcePath = fileName;
-            if (!isLocalPackedTileFile(sourcePath))
-            {
-                try
-                {
-                    const auto stagedPath = QDir(mv::projects().getTemporaryDirPath(mv::AbstractProjectManager::TemporaryDirType::Staging)).filePath(fileName);
-                    if (QFileInfo(stagedPath).isFile())
-                        sourcePath = stagedPath;
-                }
-                catch (...)
-                {
-                    // Staging may not be registered outside project-open workflows.
-                }
-
-                if (sourcePath == fileName)
-                {
-                    try
-                    {
-                        const auto stagedPath = QDir(mv::projects().getTemporaryDirPath(mv::AbstractProjectManager::TemporaryDirType::Save)).filePath(fileName);
-                        if (QFileInfo(stagedPath).isFile())
-                            sourcePath = stagedPath;
-                    }
-                    catch (...)
-                    {
-                        // Existing projects may still use lazy archive-backed tile files.
-                    }
-                }
-            }
-
-            const auto codec = mv::util::codecRegistry().createCodec(nullptr, codecName);
-            packedTileReaders->push_back(std::make_shared<mv::util::PackedBlobFileReader>(sourcePath, codec));
-            packedTileSourcePaths.push_back(sourcePath);
+            auto readerState = std::make_shared<PackedTileReaderState>();
+            readerState->archiveEntry = fileName;
+            readerState->codecName = codecName;
+            packedTileReaders->push_back(std::move(readerState));
+            packedTileSourcePaths.push_back(fileName);
         }
     }
 
@@ -752,7 +753,7 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantM
             if (descriptor.superTileIndex >= packedTileReaders->size())
                 throw std::runtime_error("Invalid serialized packed tile file index");
 
-            return (*packedTileReaders)[descriptor.superTileIndex]->read(descriptor.packedBlock);
+            return (*packedTileReaders)[descriptor.superTileIndex]->getReader()->read(descriptor.packedBlock);
         }
 
         if (descriptor.superTileIndex >= superTileBlobs->size())
