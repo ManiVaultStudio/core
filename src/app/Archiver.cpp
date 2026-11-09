@@ -4,6 +4,7 @@
 
 #include "Archiver.h"
 
+#include <Application.h>
 #include <util/Exception.h>
 
 #include <stdexcept>
