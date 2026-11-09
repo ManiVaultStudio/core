@@ -689,7 +689,7 @@ QByteArray Archiver::readZipEntryRangeToMemory(const QString& zipPath, const QSt
             std::uint64_t lastAccess = 0;
         };
 
-        QTemporaryDir directory { QDir(QDir::tempPath()).filePath(QStringLiteral("ManiVaultZipEntries-XXXXXX")) };
+        QTemporaryDir directory { QDir(Application::current()->getTemporaryDir().path()).filePath(QStringLiteral("Zip/ZIP-XXXXXX")) };
         QHash<QString, Entry> entries;
         std::uint64_t cachedBytes = 0;
         std::uint64_t accessSequence = 0;
