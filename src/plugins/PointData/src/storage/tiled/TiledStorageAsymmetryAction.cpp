@@ -17,7 +17,9 @@ TiledStorageAsymmetryAction::TiledStorageAsymmetryAction(QObject* parent, const 
     _rowLabelAction.setDefaultWidgetFlags(StringAction::Label);
     _asymmetryAction.setDefaultWidgetFlags(IntegralAction::Slider);
     _asymmetryAction.setStretch(1);
-    _asymmetryAction.setUpdateDuringDrag(true);
+    // Geometry changes trigger cache and storage observations; apply the
+    // selected asymmetry when the user releases the slider.
+    _asymmetryAction.setUpdateDuringDrag(false);
     _asymmetryAction.setToolTip("0 = column-oriented tiles, 50 = balanced tiles, 100 = row-oriented tiles");
 
     addAction(&_columnLabelAction);

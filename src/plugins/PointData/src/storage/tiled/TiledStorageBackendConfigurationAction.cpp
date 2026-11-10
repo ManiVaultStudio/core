@@ -23,9 +23,14 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _columns(columns),
     _elementSize(elementSize),
     _tileAsymmetryAction(this),
+    _deriveTileDimensionsAction(this, "Derive dimensions from target tile size", false),
     _tileSizeAction(this, "Target tile size (MiB)", 1, 1024, 1),
+    _rowTileSizeGroupAction(this, "Tile height"),
     _rowTileSizeAction(this, "Tile height", 1, std::numeric_limits<std::int32_t>::max(), 256),
+    _rowTileSizePercentageAction(this, "Height (% of rows)", 0.1f, 100.0f, 1.0f, 1),
+    _columnTileSizeGroupAction(this, "Tile width"),
     _columnTileSizeAction(this, "Tile width", 1, std::numeric_limits<std::int32_t>::max(), 8),
+    _columnTileSizePercentageAction(this, "Width (% of columns)", 0.1f, 100.0f, 1.0f, 1),
     _cacheCapacityAction(this, "Tile cache capacity", 1, std::numeric_limits<std::int32_t>::max(), 1),
     _tileCountObservationAction(this),
     _tileCacheObservationAction(this),
@@ -57,8 +62,25 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     });
 
     _tileSizeAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
+    _deriveTileDimensionsAction.setDefaultWidgetFlags(ToggleAction::CheckBox);
+    _deriveTileDimensionsAction.setToolTip("When enabled, calculate tile height and width from the target tile size and row-to-column asymmetry. You can still edit the calculated dimensions directly.");
     _rowTileSizeAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _columnTileSizeAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
+    _rowTileSizePercentageAction.setDefaultWidgetFlags(DecimalAction::SpinBox | DecimalAction::Slider);
+    _columnTileSizePercentageAction.setDefaultWidgetFlags(DecimalAction::SpinBox | DecimalAction::Slider);
+    _rowTileSizeGroupAction.setShowLabels(false);
+    _columnTileSizeGroupAction.setShowLabels(false);
+    _rowTileSizePercentageAction.setSuffix("%");
+    _columnTileSizePercentageAction.setSuffix("%");
+    _rowTileSizeAction.setStretch(1);
+    _columnTileSizeAction.setStretch(1);
+    _rowTileSizePercentageAction.setStretch(2);
+    _columnTileSizePercentageAction.setStretch(2);
+    // Applying every intermediate value recalculates tile geometry and its
+    // storage observations on the GUI thread. Commit the selected value when
+    // the user releases the slider instead.
+    _rowTileSizePercentageAction.setUpdateDuringDrag(false);
+    _columnTileSizePercentageAction.setUpdateDuringDrag(false);
     _cacheCapacityAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _tileCountObservationAction.setToolTip("Heuristic based on the number of resident tile descriptors.");
     _tileCacheObservationAction.setToolTip("Checks whether one decoded tile fits within the configured cache byte limit.");
@@ -66,10 +88,15 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _superTileRowsAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _superTileColumnsAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
 
+    addAction(&_deriveTileDimensionsAction);
     addAction(&_tileAsymmetryAction);
     addAction(&_tileSizeAction);
-    addAction(&_rowTileSizeAction);
-    addAction(&_columnTileSizeAction);
+    _rowTileSizeGroupAction.addAction(&_rowTileSizeAction);
+    _rowTileSizeGroupAction.addAction(&_rowTileSizePercentageAction);
+    _columnTileSizeGroupAction.addAction(&_columnTileSizeAction);
+    _columnTileSizeGroupAction.addAction(&_columnTileSizePercentageAction);
+    addAction(&_rowTileSizeGroupAction);
+    addAction(&_columnTileSizeGroupAction);
     addAction(&_cacheCapacityAction);
     addAction(&_packedTilesAction);
     addAction(&_superTileRowsAction);
@@ -124,23 +151,46 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
         addAction(&_stagingSpaceObservationAction);
 
     connect(&_tileAsymmetryAction.getAsymmetryAction(), &IntegralAction::valueChanged, this, [this] {
-        updateTileGeometryFromPolicy();
-        notifyOptionsChanged();
+        if (_deriveTileDimensionsAction.isChecked())
+        {
+            updateTileGeometryFromPolicy();
+            notifyOptionsChanged();
+        }
     });
 
     connect(&_tileSizeAction, &IntegralAction::valueChanged, this, [this] {
-        updateTileGeometryFromPolicy();
-        notifyOptionsChanged();
+        if (_deriveTileDimensionsAction.isChecked())
+        {
+            updateTileGeometryFromPolicy();
+            notifyOptionsChanged();
+        }
     });
 
+    connect(&_deriveTileDimensionsAction, &ToggleAction::toggled, this, [this] { updateTileSizingMode(); });
+
     connect(&_rowTileSizeAction, &IntegralAction::valueChanged, this, [this] {
+        if (!_updatingGeometryFromPolicy && _deriveTileDimensionsAction.isChecked())
+            _deriveTileDimensionsAction.setChecked(false);
+        updateTileSizePercentages();
         updateCacheCapacity();
         notifyOptionsChanged();
     });
 
     connect(&_columnTileSizeAction, &IntegralAction::valueChanged, this, [this] {
+        if (!_updatingGeometryFromPolicy && _deriveTileDimensionsAction.isChecked())
+            _deriveTileDimensionsAction.setChecked(false);
+        updateTileSizePercentages();
         updateCacheCapacity();
         notifyOptionsChanged();
+    });
+
+    connect(&_rowTileSizePercentageAction, &DecimalAction::valueChanged, this, [this] {
+        if (!_updatingTileSizePercentage)
+            setRowTileSizeFromPercentage();
+    });
+    connect(&_columnTileSizePercentageAction, &DecimalAction::valueChanged, this, [this] {
+        if (!_updatingTileSizePercentage)
+            setColumnTileSizeFromPercentage();
     });
 
     connect(&_cacheCapacityAction, &IntegralAction::valueChanged, this, [this] {
@@ -178,6 +228,8 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     }
 
     updateStorageObservations();
+    updateTileSizePercentages();
+    updateTileSizingMode();
     updatePackedTileControls();
 
     if (initializeFromConfiguration)
@@ -185,6 +237,54 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
         _initialConfiguration = getConfiguration();
         _hasInitialConfiguration = true;
     }
+}
+
+void TiledStorageBackendConfigurationAction::updateTileSizePercentages()
+{
+    const auto updatePercentage = [this](DecimalAction& percentageAction, const std::int32_t tileSize, const std::uint64_t dimension) {
+        if (dimension == 0)
+        {
+            percentageAction.setEnabled(false);
+            return;
+        }
+
+        percentageAction.setEnabled(true);
+        const auto percentage = static_cast<float>(std::clamp(static_cast<long double>(tileSize) * 100.0L / static_cast<long double>(dimension), 0.1L, 100.0L));
+        _updatingTileSizePercentage = true;
+        percentageAction.setValue(percentage);
+        _updatingTileSizePercentage = false;
+    };
+
+    updatePercentage(_rowTileSizePercentageAction, _rowTileSizeAction.getValue(), _rows);
+    updatePercentage(_columnTileSizePercentageAction, _columnTileSizeAction.getValue(), _columns);
+}
+
+void TiledStorageBackendConfigurationAction::setRowTileSizeFromPercentage()
+{
+    if (_rows == 0)
+        return;
+
+    const auto tileSize = std::clamp(std::llround(static_cast<long double>(_rows) * _rowTileSizePercentageAction.getValue() / 100.0L), 1LL, static_cast<long long>(std::numeric_limits<std::int32_t>::max()));
+    _rowTileSizeAction.setValue(static_cast<std::int32_t>(tileSize));
+}
+
+void TiledStorageBackendConfigurationAction::setColumnTileSizeFromPercentage()
+{
+    if (_columns == 0)
+        return;
+
+    const auto tileSize = std::clamp(std::llround(static_cast<long double>(_columns) * _columnTileSizePercentageAction.getValue() / 100.0L), 1LL, static_cast<long long>(std::numeric_limits<std::int32_t>::max()));
+    _columnTileSizeAction.setValue(static_cast<std::int32_t>(tileSize));
+}
+
+void TiledStorageBackendConfigurationAction::updateTileSizingMode()
+{
+    const auto deriveGeometry = _deriveTileDimensionsAction.isChecked();
+    _tileAsymmetryAction.setEnabled(deriveGeometry);
+    _tileSizeAction.setEnabled(deriveGeometry);
+
+    if (deriveGeometry)
+        updateTileGeometryFromPolicy();
 }
 
 pointdata::storage::StorageBackendType TiledStorageBackendConfigurationAction::getTargetBackendType() const
@@ -372,9 +472,12 @@ void TiledStorageBackendConfigurationAction::updateTargetTileSizeFromGeometry()
 
 void TiledStorageBackendConfigurationAction::updateTileGeometryFromPolicy()
 {
+    _updatingGeometryFromPolicy = true;
     const auto geometry = pointdata::storage::calculateTiledStorageGeometry(_rows, _columns, _elementSize, static_cast<std::uint64_t>(_tileSizeAction.getValue()) * 1024 * 1024, _tileAsymmetryAction.getAsymmetryAction().getValue());
     _rowTileSizeAction.setValue(static_cast<std::int32_t>(geometry.rowTileSize));
     _columnTileSizeAction.setValue(static_cast<std::int32_t>(geometry.columnTileSize));
+    _updatingGeometryFromPolicy = false;
+    updateTileSizePercentages();
     updateCacheCapacity();
 }
 }

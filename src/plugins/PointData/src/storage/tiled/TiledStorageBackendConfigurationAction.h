@@ -8,6 +8,7 @@
 
 #include <actions/MessageCardAction.h>
 #include <actions/DirectoryPickerAction.h>
+#include <actions/DecimalAction.h>
 #include <actions/HorizontalGroupAction.h>
 #include <actions/IntegralAction.h>
 #include <actions/StringAction.h>
@@ -78,6 +79,10 @@ public:
 private:
     void updateTileGeometryFromPolicy();
     void updateTargetTileSizeFromGeometry();
+    void updateTileSizePercentages();
+    void setRowTileSizeFromPercentage();
+    void setColumnTileSizeFromPercentage();
+    void updateTileSizingMode();
     void updateCacheCapacity();
     void updateStorageObservations();
     void updatePackedTileControls();
@@ -92,9 +97,14 @@ private:
     bool _hasInitialConfiguration = false; /**< Whether an original tiled configuration was provided. */
 
     TiledStorageAsymmetryAction _tileAsymmetryAction;
+    ToggleAction                _deriveTileDimensionsAction;
     IntegralAction              _tileSizeAction;
+    HorizontalGroupAction       _rowTileSizeGroupAction;
     IntegralAction              _rowTileSizeAction;
+    DecimalAction              _rowTileSizePercentageAction;
+    HorizontalGroupAction       _columnTileSizeGroupAction;
     IntegralAction              _columnTileSizeAction;
+    DecimalAction              _columnTileSizePercentageAction;
     IntegralAction              _cacheCapacityAction;
     MessageCardAction              _tileCountObservationAction;
     MessageCardAction              _tileCacheObservationAction;
@@ -111,6 +121,8 @@ private:
     DirectoryPickerAction         _stagingDirectoryAction;
     QString                       _defaultStagingDirectory;
     bool                          _showImportStagingDirectory = false;
+    bool                          _updatingTileSizePercentage = false;
+    bool                          _updatingGeometryFromPolicy = false;
 };
 
 }
