@@ -11,6 +11,8 @@
 #include <QByteArray>
 #include <QString>
 
+#include <cstdint>
+
 namespace mv::gui
 {
     class CodecSettingsAction;
@@ -30,6 +32,15 @@ namespace mv::util {
 class CORE_EXPORT BlobCodec : public QObject
 {
 public:
+
+    /** Aggregate timing for encoded file-range reads and decoding. */
+    struct FileRangeTelemetry
+    {
+        std::uint64_t calls = 0;
+        std::uint64_t encodedBytes = 0;
+        std::uint64_t readNanoseconds = 0;
+        std::uint64_t decodeNanoseconds = 0;
+    };
 
     /** Blob codec type */
     enum class Type
@@ -150,6 +161,12 @@ public:
      * @param destinationSize Size of the destination buffer in bytes.
      */
     virtual void decodeFromFileRangeTo(const QString& filePath, std::uint64_t offset, std::uint64_t encodedSize, char* destination, std::uint64_t destinationSize) const;
+
+    /** Snapshot aggregate timings for file-range decoding since process start. */
+    [[nodiscard]] static FileRangeTelemetry getFileRangeTelemetry();
+
+    /** Record one encoded range read/decode operation. Intended for codec implementations. */
+    static void recordFileRangeTelemetry(std::uint64_t encodedBytes, std::uint64_t readNanoseconds, std::uint64_t decodeNanoseconds);
 
     /** Convert codec type to persistent string */
     [[nodiscard]] static QString typeToString(Type type);

@@ -413,7 +413,7 @@ void PointDataTiledStorage::setPackedTiles(const bool enabled, const std::size_t
     _superTileColumns  = enabled ? superTileColumns : 1;
 }
 
-void PointDataTiledStorage::setPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<mv::util::PackedBlobBlock>& blocks, const std::vector<std::size_t>& superTileIndices, std::shared_ptr<void> sourceLifetime)
+void PointDataTiledStorage::setPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<mv::util::PackedBlobBlock>& blocks, const std::vector<std::size_t>& superTileIndices, std::shared_ptr<void> sourceLifetime, TileLoader loader)
 {
     if (!packedTiles())
         throw std::logic_error("Packed tile source requires packed tiled storage");
@@ -421,11 +421,27 @@ void PointDataTiledStorage::setPackedTileSource(const QStringList& filePaths, co
     if (filePaths.isEmpty() || codecName.isEmpty() || blocks.size() != _descriptors.size() || superTileIndices.size() != _descriptors.size())
         throw std::invalid_argument("Invalid packed tile source metadata");
 
-    const auto codec = mv::util::codecRegistry().createCodec(nullptr, codecName);
-    auto readers = std::make_shared<std::vector<std::shared_ptr<mv::util::PackedBlobFileReader>>>();
-    readers->reserve(filePaths.size());
-    for (const auto& filePath : filePaths)
-        readers->push_back(std::make_shared<mv::util::PackedBlobFileReader>(filePath, codec));
+    if (!loader)
+    {
+        const auto codec = mv::util::codecRegistry().createCodec(nullptr, codecName);
+        auto readers = std::make_shared<std::vector<std::shared_ptr<mv::util::PackedBlobFileReader>>>();
+        readers->reserve(filePaths.size());
+        for (const auto& filePath : filePaths)
+            readers->push_back(std::make_shared<mv::util::PackedBlobFileReader>(filePath, codec));
+
+        loader = [readers, sourceLifetime = std::move(sourceLifetime)](const TileDescriptor& descriptor) {
+            if (descriptor.superTileIndex >= readers->size())
+                throw std::out_of_range("Packed tile source contains an invalid super-tile index");
+
+            return (*readers)[descriptor.superTileIndex]->read(descriptor.packedBlock);
+        };
+    }
+    else if (sourceLifetime)
+    {
+        loader = [loader = std::move(loader), sourceLifetime = std::move(sourceLifetime)](const TileDescriptor& descriptor) {
+            return loader(descriptor);
+        };
+    }
 
     for (std::size_t tileIndex = 0; tileIndex < _descriptors.size(); ++tileIndex)
     {
@@ -436,12 +452,7 @@ void PointDataTiledStorage::setPackedTileSource(const QStringList& filePaths, co
         _descriptors[tileIndex].superTileIndex = superTileIndices[tileIndex];
     }
 
-    _loader = [readers, sourceLifetime = std::move(sourceLifetime)](const TileDescriptor& descriptor) {
-        if (descriptor.superTileIndex >= readers->size())
-            throw std::out_of_range("Packed tile source contains an invalid super-tile index");
-
-        return (*readers)[descriptor.superTileIndex]->read(descriptor.packedBlock);
-    };
+    _loader = std::move(loader);
     _packedTileSourcePaths = filePaths;
     _packedTileSourceCodec = codecName;
 }

@@ -10,6 +10,7 @@
 
 #include <QFile>
 
+#include <atomic>
 #include <limits>
 #include <stdexcept>
 
@@ -20,6 +21,31 @@
 using namespace mv::gui;
 
 namespace mv::util {
+namespace
+{
+std::atomic<std::uint64_t> rangeDecodeCalls { 0 };
+std::atomic<std::uint64_t> rangeDecodeEncodedBytes { 0 };
+std::atomic<std::uint64_t> rangeDecodeReadNanoseconds { 0 };
+std::atomic<std::uint64_t> rangeDecodeDecodeNanoseconds { 0 };
+}
+
+BlobCodec::FileRangeTelemetry BlobCodec::getFileRangeTelemetry()
+{
+    return {
+        rangeDecodeCalls.load(std::memory_order_relaxed),
+        rangeDecodeEncodedBytes.load(std::memory_order_relaxed),
+        rangeDecodeReadNanoseconds.load(std::memory_order_relaxed),
+        rangeDecodeDecodeNanoseconds.load(std::memory_order_relaxed)
+    };
+}
+
+void BlobCodec::recordFileRangeTelemetry(const std::uint64_t encodedBytes, const std::uint64_t readNanoseconds, const std::uint64_t decodeNanoseconds)
+{
+    rangeDecodeCalls.fetch_add(1, std::memory_order_relaxed);
+    rangeDecodeEncodedBytes.fetch_add(encodedBytes, std::memory_order_relaxed);
+    rangeDecodeReadNanoseconds.fetch_add(readNanoseconds, std::memory_order_relaxed);
+    rangeDecodeDecodeNanoseconds.fetch_add(decodeNanoseconds, std::memory_order_relaxed);
+}
 
 BlobCodec::BlobCodec(QObject* parent, const CodecSettingsActionPtr& codecSettingsAction) :
     QObject(parent),

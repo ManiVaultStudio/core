@@ -2,6 +2,7 @@
 
 #include "PointDataTile.h"
 #include "PointDataTileCache.h"
+#include "../../pointdata_export.h"
 
 #include <QByteArray>
 #include <QStringList>
@@ -194,7 +195,9 @@ public:
      * requested and until project serialization copies them. When supplied,
      * \p sourceLifetime is copied into the source loader and released when
      * that loader is replaced or destroyed. The storage does not inspect or
-     * otherwise manage the pointed-to object.
+     * otherwise manage the pointed-to object. When \p loader is supplied, it
+     * is used for tile reads while the original paths and codec remain attached
+     * as serialization metadata.
      *
      * @param filePaths Packed supertile files in super-tile index order.
      * @param codecName Registered codec used for the packed blocks.
@@ -203,11 +206,13 @@ public:
      * @param sourceLifetime Optional lifetime token for the source files. A
      * copy is retained by the source loader; the caller remains responsible
      * for making the files available until that loader is released.
+     * @param loader Optional custom loader, for example one that resolves
+     * archive entries to staged files before falling back to archive reads.
      * @throws std::logic_error If packed tiled storage is not enabled.
      * @throws std::invalid_argument If paths, codec, or metadata sizes are invalid.
      * @throws std::out_of_range If a tile refers to a nonexistent supertile.
      */
-    void setPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<mv::util::PackedBlobBlock>& blocks, const std::vector<std::size_t>& superTileIndices, std::shared_ptr<void> sourceLifetime = {});
+    void setPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<mv::util::PackedBlobBlock>& blocks, const std::vector<std::size_t>& superTileIndices, std::shared_ptr<void> sourceLifetime = {}, TileLoader loader = {});
 
     /** @return Whether pre-encoded supertiles are attached for lazy reads and direct serialization. */
     bool hasPackedTileSource() const { return !_packedTileSourcePaths.isEmpty(); }
@@ -222,16 +227,16 @@ public:
     std::size_t cacheSize() const;
 
     /** Returns the decoded payload bytes currently retained by the cache. */
-    std::size_t cacheSizeInBytes() const;
+    POINTDATA_EXPORT std::size_t cacheSizeInBytes() const;
 
     /** Returns the number of cache hits. */
-    std::uint64_t cacheHits() const;
+    POINTDATA_EXPORT std::uint64_t cacheHits() const;
 
     /** Returns the number of cache misses. */
-    std::uint64_t cacheMisses() const;
+    POINTDATA_EXPORT std::uint64_t cacheMisses() const;
 
     /** Returns the number of cache evictions. */
-    std::uint64_t cacheEvictions() const;
+    POINTDATA_EXPORT std::uint64_t cacheEvictions() const;
 
     /** Estimates logical data, resident tile, cache, and descriptor/index memory usage for this storage. */
     MemoryEstimate memoryEstimate() const;

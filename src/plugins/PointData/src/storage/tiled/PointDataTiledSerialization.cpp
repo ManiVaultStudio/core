@@ -12,6 +12,7 @@
 
 #include <workflow/WorkflowExecutionContext.h>
 
+#include <QDebug>
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFile>
@@ -63,25 +64,36 @@ struct PackedTileReaderState
 {
     QString archiveEntry;
     QString codecName;
-    std::mutex mutex;
+    std::once_flag readerInitialization;
     std::shared_ptr<mv::util::PackedBlobFileReader> reader;
 
     std::shared_ptr<mv::util::PackedBlobFileReader> getReader()
     {
-        std::lock_guard lock(mutex);
-        if (!reader)
-        {
+        std::call_once(readerInitialization, [this] {
             auto sourcePath = archiveEntry;
-            if (!isLocalPackedTileFile(sourcePath))
+            auto sourceKind = QStringLiteral("archive-entry");
+            if (isLocalPackedTileFile(sourcePath))
+            {
+                sourceKind = QStringLiteral("local-file");
+            }
+            else
             {
                 const auto stagedPath = mv::projects().resolveStagedProjectResourcePath(archiveEntry);
                 if (!stagedPath.isEmpty())
+                {
                     sourcePath = stagedPath;
+                    sourceKind = QFileInfo(stagedPath).isFile() ? QStringLiteral("staged-file") : QStringLiteral("staged-path-missing");
+                }
             }
+
+            const QFileInfo sourceInfo(sourcePath);
+            qInfo().noquote() << QStringLiteral("[PointData] Packed tile reader: source=%1 codec=%2 entry=%3 path=%4 file-bytes=%5")
+                .arg(sourceKind, codecName, archiveEntry, sourcePath)
+                .arg(sourceInfo.isFile() ? sourceInfo.size() : -1);
 
             const auto codec = mv::util::codecRegistry().createCodec(nullptr, codecName);
             reader = std::make_shared<mv::util::PackedBlobFileReader>(sourcePath, codec);
-        }
+        });
 
         return reader;
     }
@@ -744,7 +756,7 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantM
         }
     }
 
-    auto storage = std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize, [packedTiles, packedTileFiles, superTileBlobs, superTilePayloads, packedTileReaders](const TileDescriptor& descriptor) {
+    PointDataTiledStorage::TileLoader loader = [packedTiles, packedTileFiles, superTileBlobs, superTilePayloads, packedTileReaders](const TileDescriptor& descriptor) {
         if (!packedTiles)
             return mv::util::bytesFromBlobVariantMap(descriptor.blob);
 
@@ -775,7 +787,8 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantM
         }
 
         return payload->mid(static_cast<qsizetype>(descriptor.superTileOffset), static_cast<qsizetype>(descriptor.superTileSize));
-    });
+    };
+    auto storage = std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize, loader);
     storage->setCacheCapacity(static_cast<std::size_t>(cacheCapacity));
     storage->setCacheCapacityBytes(static_cast<std::size_t>(cacheCapacityBytes));
 
@@ -819,7 +832,11 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantM
             superTileIndices.push_back(descriptor.superTileIndex);
         }
 
-        storage->setPackedTileSource(packedTileSourcePaths, packedTileSourceCodec, blocks, superTileIndices);
+        storage->setPackedTileSource(packedTileSourcePaths, packedTileSourceCodec, blocks, superTileIndices, {}, loader);
+        // H5AD import enables concurrent reads for this same packed-file
+        // loader. Keep project reloads on the same path instead of routing all
+        // tile reads through PointDataTiledStorage's serialized loader mutex.
+        storage->setLoaderThreadSafe(true);
     }
 
     return storage;
