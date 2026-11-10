@@ -2,7 +2,7 @@
 
 #include "PointDataTile.h"
 #include "PointDataTileCache.h"
-#include "../../pointdata_export.h"
+#include <PointData/pointdata_export.h>
 
 #include <util/Serialization.h>
 
