@@ -1842,24 +1842,66 @@ void Points::selectedLocalIndices(const std::vector<std::uint32_t>& selectionInd
     if (isProxy()) {
         selected.resize(getNumPoints(), false);
 
+        std::size_t invalidSelectionIndices = 0;
         for (const auto& selectionIndex : selectionIndices) {
-            selected[localGlobalIndices[selectionIndex]] = true;
+            if (selectionIndex >= localGlobalIndices.size()) {
+                ++invalidSelectionIndices;
+                continue;
+            }
+
+            const auto localIndex = localGlobalIndices[selectionIndex];
+            if (localIndex >= selected.size()) {
+                ++invalidSelectionIndices;
+                continue;
+            }
+
+            selected[localIndex] = true;
         }
+
+        if (invalidSelectionIndices > 0)
+            qWarning() << "Ignoring" << invalidSelectionIndices << "out-of-range selection indices for proxy point dataset" << getId()
+                       << "(point count:" << getNumPoints() << ")";
     }
     else {
         // In an array the size of the full raw data, mark selected points as true
-        std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
+        const auto sourceDataset = getSourceDataset<Points>();
+        const auto rawPointCount = sourceDataset->getNumRawPoints();
+        std::vector<bool> globalSelection(rawPointCount, false);
 
-        for (const std::uint32_t& selectionIndex : selectionIndices)
+        std::size_t invalidSelectionIndices = 0;
+        for (const std::uint32_t& selectionIndex : selectionIndices) {
+            if (selectionIndex >= rawPointCount) {
+                ++invalidSelectionIndices;
+                continue;
+            }
+
             globalSelection[selectionIndex] = true;
+        }
+
+        std::size_t invalidGlobalIndices = 0;
 
         // For all local points find out which are selected
         selected.resize(localGlobalIndices.size(), false);
         for (std::uint64_t i = 0; i < localGlobalIndices.size(); i++)
         {
+            if (localGlobalIndices[i] >= rawPointCount) {
+                ++invalidGlobalIndices;
+                continue;
+            }
+
             if (globalSelection[localGlobalIndices[i]])
                 selected[i] = true;
         }
+
+        if (invalidSelectionIndices > 0 || invalidGlobalIndices > 0)
+            qWarning() << "Ignoring invalid point indices while mapping selection. Dataset:" << getId() << getGuiName()
+                       << "points:" << getNumPoints() << "full:" << isFull() << "proxy:" << isProxy() << "derived:" << isDerivedData()
+                       << "source:" << sourceDataset->getId() << sourceDataset->getGuiName()
+                       << "source points:" << sourceDataset->getNumPoints() << "source raw points:" << rawPointCount
+                       << "source full:" << sourceDataset->isFull() << "source proxy:" << sourceDataset->isProxy() << "source derived:" << sourceDataset->isDerivedData()
+                       << ", selection IDs:" << selectionIndices.size()
+                       << ", invalid selection IDs:" << invalidSelectionIndices
+                       << ", invalid dataset IDs:" << invalidGlobalIndices << ")";
     }
 }
 
