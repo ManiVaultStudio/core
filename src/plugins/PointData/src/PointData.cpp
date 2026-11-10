@@ -19,6 +19,8 @@
 #include "storage/tiled/TiledPointsStorageBackend.h"
 
 #include <Application.h>
+#include <Project.h>
+#include <ProjectCompressionAction.h>
 
 #include <actions/GroupAction.h>
 #include <event/Event.h>
@@ -589,11 +591,25 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
 
         if (const auto tiledStorage = getTiledStorage())
         {
-            if (tiledStorage->rowTileSize() != configuration->rowTileSize || tiledStorage->columnTileSize() != configuration->columnTileSize)
-            {
-                const auto retiledStorage = mv::pointdata::tiled::PointDataTiledStorage::retile(tiledStorage, configuration->rowTileSize, configuration->columnTileSize, progress);
-                dynamic_cast<pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get())->setStorage(retiledStorage);
-            }
+            const auto* project = mv::projects().getCurrentProject();
+            if (!project)
+                throw std::runtime_error("Unable to convert tiled point data without an active project");
+
+            const auto codec = project->getCompressionAction().createCodec(nullptr);
+            auto convertedStorage = mv::pointdata::tiled::PointDataTiledStorage::retileToPackedFiles(
+                tiledStorage,
+                configuration->rowTileSize,
+                configuration->columnTileSize,
+                configuration->superTileRows,
+                configuration->superTileColumns,
+                codec,
+                progress);
+
+            if (!configuration->packedTiles)
+                convertedStorage->setPackedTiles(false);
+
+            auto* tiledBackend = dynamic_cast<pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get());
+            tiledBackend->setStorage(std::move(convertedStorage));
         }
         else
             makeTiled(configuration->rowTileSize, configuration->columnTileSize, progress);

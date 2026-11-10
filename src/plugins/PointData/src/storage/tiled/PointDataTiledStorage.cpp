@@ -1,9 +1,14 @@
 #include "PointDataTiledStorage.h"
+#include "PackedTileFile.h"
 
 #include <biovault_bfloat16/biovault_bfloat16.h>
 #include <util/CodecRegistry.h>
+#include <util/Serialization.h>
 
 #include <QString>
+#include <QDir>
+#include <QTemporaryDir>
+#include <QUuid>
 
 #include <algorithm>
 #include <cstring>
@@ -182,6 +187,103 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::retile(const std::
     if (progress)
         progress(1.0f);
 
+    return storage;
+}
+
+std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::retileToPackedFiles(const std::shared_ptr<const PointDataTiledStorage>& source, const std::size_t rowTileSize, const std::size_t columnTileSize, const std::size_t superTileRows, const std::size_t superTileColumns, const mv::util::SharedCodec& codec, ProgressCallback progress)
+{
+    if (!source)
+        throw std::invalid_argument("Cannot convert empty point-data storage");
+    if (rowTileSize == 0 || columnTileSize == 0 || superTileRows == 0 || superTileColumns == 0 || !codec)
+        throw std::invalid_argument("Invalid packed retile configuration");
+
+    auto storage = std::make_shared<PointDataTiledStorage>(source->rows(), source->columns(), source->elementSize(), rowTileSize, columnTileSize);
+    storage->setCacheCapacity(source->cacheCapacity());
+    storage->setCacheCapacityBytes(source->cacheCapacityBytes());
+    storage->setPackedTiles(true, superTileRows, superTileColumns);
+
+    const auto tileRows = storage->tileRowCount();
+    const auto tileColumns = storage->tileColumnCount();
+    const auto tileCount = storage->descriptors().size();
+    if (progress)
+        progress(0.0f);
+    if (tileCount == 0)
+    {
+        if (progress)
+            progress(1.0f);
+        return storage;
+    }
+
+    auto temporaryDirectory = std::make_shared<QTemporaryDir>(QDir::temp().filePath(QStringLiteral("manivault-retile-XXXXXX")));
+    if (!temporaryDirectory->isValid())
+        throw std::runtime_error("Unable to create temporary directory for tiled storage conversion");
+
+    const auto superTileColumnCount = (tileColumns + superTileColumns - 1) / superTileColumns;
+    const auto totalSuperTileRows = (tileRows + superTileRows - 1) / superTileRows;
+    const auto totalSuperTiles = totalSuperTileRows * superTileColumnCount;
+    std::vector<mv::util::PackedBlobBlock> blocks(tileCount);
+    std::vector<std::size_t> superTileIndices(tileCount);
+    QStringList filePaths;
+    filePaths.reserve(static_cast<qsizetype>(totalSuperTiles));
+    std::size_t completedTiles = 0;
+
+    for (std::uint64_t superTileRow = 0; superTileRow < tileRows; superTileRow += superTileRows)
+    {
+        for (std::uint64_t superTileColumn = 0; superTileColumn < tileColumns; superTileColumn += superTileColumns)
+        {
+            const auto superTileIndex = static_cast<std::size_t>(filePaths.size());
+            const auto fileName = QUuid::createUuid().toString(QUuid::WithoutBraces) + QStringLiteral(".ptpack");
+            const auto filePath = QDir(temporaryDirectory->path()).filePath(fileName);
+            mv::pointdata::tiled::PackedTileFileWriter writer(filePath, codec);
+            const auto lastTileRow = std::min<std::uint64_t>(tileRows, superTileRow + superTileRows);
+            const auto lastTileColumn = std::min<std::uint64_t>(tileColumns, superTileColumn + superTileColumns);
+
+            for (std::uint64_t tileRow = superTileRow; tileRow < lastTileRow; ++tileRow)
+            {
+                for (std::uint64_t tileColumn = superTileColumn; tileColumn < lastTileColumn; ++tileColumn)
+                {
+                    const auto tileIndex = static_cast<std::size_t>(tileRow * tileColumns + tileColumn);
+                    const auto& descriptor = storage->descriptors()[tileIndex];
+                    if (descriptor.rows != 0 && descriptor.columns > static_cast<std::uint64_t>((std::numeric_limits<qsizetype>::max)()) / descriptor.rows / source->elementSize())
+                        throw std::overflow_error("Converted tile exceeds supported byte size");
+
+                    const auto tileBytes = descriptor.rows * descriptor.columns * source->elementSize();
+                    QByteArray payload(static_cast<qsizetype>(tileBytes), Qt::Uninitialized);
+                    for (std::uint64_t localRow = 0; localRow < descriptor.rows; ++localRow)
+                    {
+                        std::uint64_t localColumn = 0;
+                        const auto sourceRow = descriptor.rowOffset + localRow;
+                        while (localColumn < descriptor.columns)
+                        {
+                            const auto column = descriptor.columnOffset + localColumn;
+                            const auto sourceTile = source->acquire(sourceRow / source->rowTileSize(), column / source->columnTileSize());
+                            if (!sourceTile)
+                                throw std::runtime_error("Unable to read source tile during storage conversion");
+
+                            const auto sourceRowOffset = sourceRow - sourceTile.rowOffset();
+                            const auto sourceColumnOffset = column - sourceTile.columnOffset();
+                            const auto copyColumns = std::min<std::uint64_t>(descriptor.columns - localColumn, sourceTile.columns() - sourceColumnOffset);
+                            const auto sourceOffset = (sourceRowOffset * sourceTile.columns() + sourceColumnOffset) * source->elementSize();
+                            const auto targetOffset = (localRow * descriptor.columns + localColumn) * source->elementSize();
+                            std::memcpy(payload.data() + targetOffset, static_cast<const char*>(sourceTile.data()) + sourceOffset, static_cast<std::size_t>(copyColumns * source->elementSize()));
+                            localColumn += copyColumns;
+                        }
+                    }
+
+                    blocks[tileIndex] = writer.append(payload);
+                    superTileIndices[tileIndex] = superTileIndex;
+                    ++completedTiles;
+                    if (progress)
+                        progress(static_cast<float>(completedTiles) / static_cast<float>(tileCount));
+                }
+            }
+
+            writer.close();
+            filePaths.push_back(filePath);
+        }
+    }
+
+    storage->setPackedTileSource(filePaths, codec->getName(), blocks, superTileIndices, temporaryDirectory);
     return storage;
 }
 

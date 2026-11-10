@@ -4,6 +4,8 @@
 #include "PointDataTileCache.h"
 #include "../../pointdata_export.h"
 
+#include <util/Serialization.h>
+
 #include <QByteArray>
 #include <QStringList>
 
@@ -111,6 +113,9 @@ public:
 
     /** Creates a new lazy tile layout backed by the existing tiled storage without copying all bytes immediately. */
     static std::shared_ptr<PointDataTiledStorage> retile(const std::shared_ptr<const PointDataTiledStorage>& source, std::size_t rowTileSize, std::size_t columnTileSize, ProgressCallback progress = {});
+
+    /** Re-tiles the source and streams the result to temporary packed files before returning. */
+    static std::shared_ptr<PointDataTiledStorage> retileToPackedFiles(const std::shared_ptr<const PointDataTiledStorage>& source, std::size_t rowTileSize, std::size_t columnTileSize, std::size_t superTileRows, std::size_t superTileColumns, const mv::util::SharedCodec& codec, ProgressCallback progress = {});
 
     /** Returns the number of rows in the matrix. */
     std::uint64_t rows() const { return _rows; }
