@@ -376,6 +376,9 @@ public:
      */
     void persistTiledStorage(mv::pointdata::storage::StorageBackendProgressCallback progress = {});
 
+    /** Creates a workflow that persists tiled storage and installs the persisted backend on completion. */
+    mv::workflow::UniqueWorkflowPlan persistTiledStorageWorkflow();
+
     /** Converts or initializes using backend-specific options supplied by a conversion action or backend factory. */
     void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, mv::pointdata::storage::StorageBackendConfigurationOptionsPtr options, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
 
