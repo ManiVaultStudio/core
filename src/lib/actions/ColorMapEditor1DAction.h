@@ -207,7 +207,7 @@ protected:
     static constexpr QSize colorMapImageSize = QSize(256, 1);
 
     friend class ColorMapAction;
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

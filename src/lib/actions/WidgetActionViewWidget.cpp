@@ -178,7 +178,7 @@ void WidgetActionViewWidget::enableBadge()
     WidgetActionCollapsedWidget* widgetActionCollapsedWidget = nullptr;
 
     while (currentParentWidget) {
-        if (widgetActionCollapsedWidget = dynamic_cast<WidgetActionCollapsedWidget*>(currentParentWidget))
+        if ((widgetActionCollapsedWidget = dynamic_cast<WidgetActionCollapsedWidget*>(currentParentWidget)))
             break;
 
         currentParentWidget = currentParentWidget->parentWidget();

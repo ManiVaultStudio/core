@@ -115,7 +115,7 @@ protected:
     static const QColor DEFAULT_COLOR;
 
     friend class ColorAction;
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

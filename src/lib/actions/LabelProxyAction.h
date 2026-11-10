@@ -45,7 +45,7 @@ public:
 protected:
     WidgetAction*   _sourceAction;     /** Source action for which to override the label text */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

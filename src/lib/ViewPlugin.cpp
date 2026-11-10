@@ -335,7 +335,7 @@ void ViewPlugin::addOverlayAction(WidgetAction* overlayAction, const Qt::Alignme
 
     auto actionOverlayWidget = new ActionOverlayWidget(&_widget, overlayAction, alignment);
 
-    _actionsWidgets.push_back({ overlayAction, actionOverlayWidget });
+    _actionsWidgets.emplace_back(overlayAction, actionOverlayWidget);
 
     if (overlayAction->isCheckable()) {
         actionOverlayWidget->setVisible(overlayAction->isChecked());

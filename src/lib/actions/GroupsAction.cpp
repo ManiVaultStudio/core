@@ -18,12 +18,6 @@ GroupsAction::GroupsAction(QObject* parent, const QString& title) :
     setDefaultWidgetFlags(Default);
 }
 
-GroupsAction::~GroupsAction()
-{
-    //for (auto groupAction : _groupActions)
-    //    groupAction->setParent(nullptr);
-}
-
 void GroupsAction::addGroupAction(GroupAction* groupAction, bool visible /*= true*/)
 {
 #ifdef GROUPS_ACTION_VERBOSE

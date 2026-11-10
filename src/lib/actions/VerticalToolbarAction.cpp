@@ -39,7 +39,7 @@ VerticalToolbarAction::Widget::Widget(QWidget* parent, VerticalToolbarAction* ve
 
 void VerticalToolbarAction::Widget::setActionWidgets()
 {
-    QLayoutItem* layoutItem;
+    QLayoutItem* layoutItem = nullptr;
 
     while ((layoutItem = _toolbarLayout->takeAt(0)) != nullptr) {
         delete layoutItem->widget();

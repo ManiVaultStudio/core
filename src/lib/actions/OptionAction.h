@@ -412,7 +412,7 @@ protected:
     Qt::MatchFlag           _completionMatchMode;       /** Match mode for the completer (defaults to Qt::MatchExactly) */
     std::int32_t            _completerPopupFixedWidth;  /** If non-zero, fixes the width of the auto-completion popup (this can speed up the display considerably, but is not necessary for small number of options) */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

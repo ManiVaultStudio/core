@@ -117,7 +117,7 @@ void GroupAction::setShowLabels(bool showLabels)
 }
 
 void GroupAction::addAction(WidgetAction* action, std::int32_t widgetFlags /*= -1*/, WidgetConfigurationFunction widgetConfigurationFunction /*= WidgetConfigurationFunction()*/
-                            , bool        load)
+                            , bool        load/*= true*/)
 {
     Q_ASSERT(action != nullptr);
 
@@ -364,7 +364,7 @@ GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupA
             layout->setColumnStretch(1, 1);
         }
 
-        QLayoutItem* layoutItem;
+        QLayoutItem* layoutItem = nullptr;
 
         while ((layoutItem = layout->takeAt(0)) != nullptr) {
             delete layoutItem->widget();
@@ -460,7 +460,7 @@ GroupAction::HorizontalWidget::HorizontalWidget(QWidget* parent, GroupAction* gr
         layout->setContentsMargins(0, 0, 0, 0);
 
     const auto updateLayout = [this, layout, groupAction]() -> void {
-        QLayoutItem* layoutItem;
+        QLayoutItem* layoutItem = nullptr;
 
         while ((layoutItem = layout->takeAt(0)) != nullptr) {
             delete layoutItem->widget();

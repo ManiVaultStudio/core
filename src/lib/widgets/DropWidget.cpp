@@ -176,7 +176,7 @@ void DropWidget::setDropIndicatorWidget(QWidget* dropIndicatorWidget)
 
 void DropWidget::resetLayout()
 {
-    QLayoutItem* child;
+    QLayoutItem* child = nullptr;
 
     while ((child = layout()->takeAt(0)) != nullptr) {
         delete child->widget();

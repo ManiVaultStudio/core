@@ -24,6 +24,7 @@ OptionAction::OptionAction(QObject* parent, const QString& title, const QStringL
     WidgetAction(parent, title),
     _customModel(nullptr),
     _currentIndex(-1),
+    _completionColumn(0),
     _completionMatchMode(Qt::MatchContains),
     _completerPopupFixedWidth(0)
 {
@@ -580,7 +581,7 @@ OptionAction::ButtonsWidget::ButtonsWidget(QWidget* parent, OptionAction* option
     setLayout(layout);
 
     const auto updateLayout = [this, layout, optionAction]() -> void {
-        QLayoutItem* layoutItem;
+        QLayoutItem* layoutItem = nullptr;
 
         while ((layoutItem = layout->takeAt(0)) != nullptr) {
             delete layoutItem->widget();

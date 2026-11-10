@@ -26,7 +26,7 @@ namespace
 
         f->glCompileShader(shader);
 
-        GLint status;
+        GLint status = GL_FALSE;
         
         f->glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
         if (status == GL_FALSE) {
@@ -44,7 +44,7 @@ namespace
 
         f->glLinkProgram(program);
 
-        GLint status = 0;
+        GLint status = GL_FALSE;
         f->glGetProgramiv(program, GL_LINK_STATUS, &status);
 
         if (status != GL_TRUE) {
@@ -69,7 +69,7 @@ namespace
 
         f->glValidateProgram(program);
 
-        GLint status = 0;
+        GLint status = GL_FALSE;
         f->glGetProgramiv(program, GL_VALIDATE_STATUS, &status);
         if (status != GL_TRUE)
             qCritical().noquote() << "[Shader validation] Error in shader validation with status code: " << status;
@@ -91,7 +91,7 @@ namespace
 
         // Create the shader
         shader = f->glCreateShader(type);
-        f->glShaderSource(shader, 1, &csource, NULL);
+        f->glShaderSource(shader, 1, &csource, nullptr);
         
         return compileShader(path, shader);
     }
@@ -190,7 +190,8 @@ bool ShaderProgram::loadShaderFromFile(QString vertPath, QString fragPath) {
 
     bool success = true;
 
-    GLuint vertexShader, fragmentShader;
+    GLuint vertexShader{};
+    GLuint fragmentShader{};
     success &= loadShader(vertPath, GL_VERTEX_SHADER, vertexShader);
     success &= loadShader(fragPath, GL_FRAGMENT_SHADER, fragmentShader);
 
@@ -216,7 +217,9 @@ bool ShaderProgram::loadShaderFromFile(QString vertPath, QString geomPath, QStri
 
     bool success = true;
 
-    GLuint vertexShader, geometryShader, fragmentShader;
+    GLuint vertexShader{};
+    GLuint geometryShader{};
+    GLuint fragmentShader{};
     success &= loadShader(vertPath, GL_VERTEX_SHADER, vertexShader);
     success &= loadShader(geomPath, GL_GEOMETRY_SHADER, geometryShader);
     success &= loadShader(fragPath, GL_FRAGMENT_SHADER, fragmentShader);

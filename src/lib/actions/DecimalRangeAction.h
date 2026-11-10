@@ -97,7 +97,7 @@ protected:
     static constexpr float  INIT_RANGE_MAX          = 100.0f;       /** Default maximum range */
     static constexpr float  INIT_NUMBER_OF_DECIMALS = 2;            /** Default number of decimals */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

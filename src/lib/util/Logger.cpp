@@ -259,7 +259,7 @@ namespace mv::util {
 
 Logger::~Logger()
 {
-    qInstallMessageHandler(0);
+    qInstallMessageHandler(nullptr);
 }
 
 QMap<QtMsgType, QString> Logger::messageTypeNames = {

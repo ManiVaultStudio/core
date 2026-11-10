@@ -27,7 +27,7 @@ public:
     /**
      * @brief Constructs an invalid workflow handle.
      */
-    WorkflowHandle();
+    WorkflowHandle() = default;
 
     /**
      * @brief Constructs a workflow handle.

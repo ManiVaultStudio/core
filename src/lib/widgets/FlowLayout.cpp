@@ -24,7 +24,7 @@ FlowLayout::FlowLayout(int margin, int hSpacing, int vSpacing)
 
 FlowLayout::~FlowLayout()
 {
-    QLayoutItem* item;
+    QLayoutItem* item = nullptr;
     while ((item = FlowLayout::takeAt(0)))
         delete item;
 }
@@ -69,7 +69,7 @@ QLayoutItem* FlowLayout::takeAt(int index)
     if (index >= 0 && index < itemList.size())
         return itemList.takeAt(index);
     else
-        return 0;
+        return nullptr;
 }
 
 Qt::Orientations FlowLayout::expandingDirections() const
@@ -102,7 +102,7 @@ QSize FlowLayout::sizeHint() const
 QSize FlowLayout::minimumSize() const
 {
     QSize size;
-    QLayoutItem* item;
+    QLayoutItem* item = nullptr;
     foreach(item, itemList)
         size = size.expandedTo(item->minimumSize());
 
@@ -112,14 +112,14 @@ QSize FlowLayout::minimumSize() const
 
 int FlowLayout::doLayout(const QRect& rect, bool testOnly) const
 {
-    int left, top, right, bottom;
+    int left{}, top{}, right{}, bottom{};
     getContentsMargins(&left, &top, &right, &bottom);
-    QRect effectiveRect = rect.adjusted(+left, +top, -right, -bottom);
+    const QRect effectiveRect = rect.adjusted(+left, +top, -right, -bottom);
     int x = effectiveRect.x();
     int y = effectiveRect.y();
     int lineHeight = 0;
 
-    QLayoutItem* item;
+    QLayoutItem* item = nullptr;
     foreach(item, itemList) {
         QWidget* wid = item->widget();
         int spaceX = horizontalSpacing();
@@ -154,7 +154,7 @@ int FlowLayout::smartSpacing(QStyle::PixelMetric pm) const
     }
     else if (parent->isWidgetType()) {
         QWidget* pw = static_cast<QWidget*>(parent);
-        return pw->style()->pixelMetric(pm, 0, pw);
+        return pw->style()->pixelMetric(pm, nullptr, pw);
     }
     else {
         return static_cast<QLayout*>(parent)->spacing();

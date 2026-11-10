@@ -104,7 +104,7 @@ RecentFiles RecentFilesListModel::getRecentFiles() const
         const auto dateTime = data(index(rowIndex, static_cast<int>(Column::DateTime)), Qt::EditRole).toDateTime();
 
         if (!filePath.isEmpty())
-            recentFiles.emplace_back(RecentFile(filePath, dateTime));
+            recentFiles.emplace_back(filePath, dateTime);
     }
 
     return recentFiles;

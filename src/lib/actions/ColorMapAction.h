@@ -225,7 +225,7 @@ protected:
     HorizontalGroupAction       _customColorMapGroupAction;                             /** Groups the custom color map and editor action */
     ColorMapSettingsAction      _settingsAction;                                        /** Color map settings action */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
     friend class ColorMap1DAction;
     friend class ColorMap2DAction;
 };

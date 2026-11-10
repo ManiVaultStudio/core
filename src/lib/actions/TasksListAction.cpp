@@ -147,9 +147,9 @@ void TasksListAction::Widget::updateLayout()
 
 void TasksListAction::Widget::cleanLayout()
 {
-    QLayoutItem* item;
+    QLayoutItem* item = nullptr;
 
-    while ((item = _layout.takeAt(0)) != 0)
+    while ((item = _layout.takeAt(0)) != nullptr)
         delete item;
 }
 

@@ -162,7 +162,7 @@ public: // Positioning
      * Get index (must be called prior to main window showing, otherwise it will not have an effect)
      * @return Position index
      */
-    std::int32_t getIndex();
+    std::int32_t getIndex() const;
 
     /**
      * Set index to \p index

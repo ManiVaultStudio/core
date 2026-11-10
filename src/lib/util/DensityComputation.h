@@ -27,7 +27,7 @@ class CORE_EXPORT DensityComputation : protected QOpenGLFunctions_3_3_Core
 {
 public:
     DensityComputation();
-    ~DensityComputation() override;
+    ~DensityComputation() override = default;
     void init(QOpenGLContext* ctx);
     void cleanup();
 

@@ -84,7 +84,7 @@ signals:
      */
     void rectangleChanged(std::int32_t left, std::int32_t right, std::int32_t bottom, std::int32_t top);
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

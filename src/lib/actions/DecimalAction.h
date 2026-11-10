@@ -247,7 +247,7 @@ protected:
     static constexpr bool   INIT_LOGARITHMIC         = false;        /** Linear slider mapping by default */
     static constexpr float  INIT_LOGARITHMIC_GAMMA   = 3.0f;         /** Default logarithmic skew exponent */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

@@ -526,7 +526,7 @@ void OptionsAction::TagsViewWidget::updateFlowLayout()
 {
     _widgetsMap.clear();
 
-    QLayoutItem* layoutItem;
+    QLayoutItem* layoutItem = nullptr;
 
     while ((layoutItem = _flowLayout.takeAt(0)) != nullptr) {
         delete layoutItem->widget();

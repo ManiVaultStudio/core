@@ -131,8 +131,6 @@ void ProjectsFilterModel::setSourceModel(QAbstractItemModel* sourceModel)
         if (uniqueTags == _tagsFilterAction.getOptions())
             return;
 
-        const auto firstTime = _tagsFilterAction.getOptions().isEmpty();
-
         _tagsFilterAction.setOptions(uniqueTags);
         _tagsFilterAction.setSelectedOptions(_tagsFilterAction.hasSelectedOptions() ? _tagsFilterAction.getSelectedOptions() : uniqueTags);
     };

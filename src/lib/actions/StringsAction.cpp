@@ -20,6 +20,7 @@ StringsAction::StringsAction(QObject* parent, const QString& title, const QStrin
     _nameAction(&_toolbarAction, "Name"),
     _addAction(&_toolbarAction, "Add"),
     _removeAction(&_toolbarAction, "Remove"),
+    _completer(nullptr),
     _allowDuplicates(true),
     _textElideMode(Qt::ElideRight)
 {

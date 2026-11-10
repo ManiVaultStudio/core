@@ -177,7 +177,7 @@ private:
     DecimalAction                   _lineAngleAction;                 /** Line angle action */
     ToggleAction                    _notifyDuringSelectionAction;       /** Notify during selection action */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

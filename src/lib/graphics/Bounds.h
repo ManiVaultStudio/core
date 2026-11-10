@@ -24,7 +24,7 @@ namespace mv
         const static Bounds Max;
 
         Bounds();
-        Bounds(const Bounds&);
+        Bounds(const Bounds&) = default;
         Bounds(float left, float right, float bottom, float top);
 
         void setBounds(float left, float right, float bottom, float top);
@@ -46,6 +46,8 @@ namespace mv
         void setRight(float right) { _right = right; }
         void setBottom(float bottom) { _bottom = bottom; }
         void setTop(float top) { _top = top; }
+
+        Bounds& operator=(const Bounds& other) = default;     // defaul copy assignment operator since we define a default copy constructor
 
         friend bool operator==(const Bounds& lhs, const Bounds& rhs) {
             float eps = 0.0001f;

@@ -458,7 +458,7 @@ protected:
     CheckableStringListModel    _optionsModel;      /** Options model */
     FileAction                  _fileAction;        /** File action */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
     friend class ComboBox;
 
 private:

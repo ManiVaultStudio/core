@@ -17,7 +17,7 @@ class CORE_EXPORT BufferObject : protected QOpenGLFunctions_3_3_Core
 {
 public:
     BufferObject();
-    ~BufferObject() override;
+    ~BufferObject() override = default;
 
     void create();
     void bind();

@@ -7,10 +7,6 @@
 namespace mv::workflow
 {
 
-WorkflowHandle::WorkflowHandle()
-{
-}
-
 WorkflowHandle::WorkflowHandle(QUuid id, QString name):
 	_id(std::move(id)),
 	_name(std::move(name))

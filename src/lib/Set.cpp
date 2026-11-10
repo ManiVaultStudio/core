@@ -464,10 +464,6 @@ DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/
     _task.setDataset(this);
 }
 
-DatasetImpl::~DatasetImpl()
-{
-}
-
 void DatasetImpl::init()
 {
 }

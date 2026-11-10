@@ -108,7 +108,7 @@ private:
     QSortFilterProxyModel*  _filterModel;       /** Pointer to filter model */
     QString                 _itemTypeName;      /** String that describes an individual model item type */
 
-    friend class AbstractActionsManager;
+    friend class ::mv::AbstractActionsManager;
 };
 
 }

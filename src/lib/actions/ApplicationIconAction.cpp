@@ -85,7 +85,7 @@ QIcon ApplicationIconAction::getIcon() const
     if (!_overrideAction.isChecked())
         return qApp->windowIcon();
     
-	return _iconPickerAction.getIcon();
+    return _iconPickerAction.getIcon();
 }
 
 void ApplicationIconAction::overrideMainWindowIcon() const

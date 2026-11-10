@@ -19,6 +19,7 @@ namespace mv::util {
 PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enabled /*= true*/) :
     QObject(targetWidget),
     _enabled(enabled),
+    _drawFlags(0),
     _type(PixelSelectionType::Rectangle),
     _modifier(PixelSelectionModifierType::Replace),
     _active(false),
