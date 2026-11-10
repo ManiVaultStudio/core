@@ -6,9 +6,8 @@ message(STATUS "Start downloading vendored core dependency libraries...")
 CPMAddPackage(
   NAME              ZLIB
   GITHUB_REPOSITORY madler/zlib
-  GIT_TAG           v1.3.2
+  GIT_TAG           v1.4
   OPTIONS 
-    "ZLIB_BUILD_EXAMPLES OFF" 
     "ZLIB_BUILD_SHARED OFF" 
     "ZLIB_BUILD_STATIC ON"
     "ZLIB_BUILD_TESTING OFF"
