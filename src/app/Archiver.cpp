@@ -251,6 +251,16 @@ void pipeArchiveSourceToZip(QIODevice& source, QuaZipFile& destination, const QS
         std::rethrow_exception(queue.error);
 }
 
+QString zipEntryTemporaryDirectoryTemplate()
+{
+    const auto applicationTemporaryDirectory = Application::current()->getTemporaryDir().path();
+    const auto zipTemporaryDirectory = QDir(applicationTemporaryDirectory).filePath(QStringLiteral("Zip"));
+    if (!QDir().mkpath(zipTemporaryDirectory))
+        throw std::runtime_error(QString("Unable to create ZIP entry temporary directory parent: %1").arg(zipTemporaryDirectory).toStdString());
+
+    return QDir(zipTemporaryDirectory).filePath(QStringLiteral("ZIP-XXXXXX"));
+}
+
 }
 
 void Archiver::compressDirectory(const QString& sourceDirectory, const QString& compressedFilePath, bool recursive /*= true*/, std::int32_t compressionLevel /*= 0*/, const QString& password /*= ""*/, QDir::Filters filters /*= QDir::Filter::Files*/, const QString& sourceArchivePath /*= ""*/, const std::function<void(float)>& progress /*= {}*/)
@@ -690,7 +700,8 @@ QByteArray Archiver::readZipEntryRangeToMemory(const QString& zipPath, const QSt
             std::uint64_t lastAccess = 0;
         };
 
-        QTemporaryDir directory { QDir(Application::current()->getTemporaryDir().path()).filePath(QStringLiteral("Zip/ZIP-XXXXXX")) };
+        QString directoryTemplate = zipEntryTemporaryDirectoryTemplate();
+        QTemporaryDir directory { directoryTemplate };
         QHash<QString, Entry> entries;
         std::uint64_t cachedBytes = 0;
         std::uint64_t accessSequence = 0;
@@ -737,7 +748,7 @@ QByteArray Archiver::readZipEntryRangeToMemory(const QString& zipPath, const QSt
     }
 
     if (!stagedEntries.directory.isValid())
-        throw std::runtime_error("Unable to create temporary staging directory for ZIP entry reads");
+        throw std::runtime_error(QString("Unable to create temporary staging directory for ZIP entry reads: %1").arg(stagedEntries.directoryTemplate).toStdString());
 
     const QFileInfo archiveInfo(zipPath);
     const auto cacheKey = QStringLiteral("%1|%2|%3|%4")
