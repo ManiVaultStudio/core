@@ -36,7 +36,10 @@ void SelectionMap::populateMappingIndices(std::uint32_t pointIndex, Indices& ind
 
         case Type::ImagePyramid:
         {
-            const QPoint sourcePixelPosition(pointIndex % _sourceImageSize.width(), static_cast<std::int32_t>(floorf(static_cast<float>(pointIndex) / static_cast<float>(_sourceImageSize.width()))));
+            const QPoint sourcePixelPosition(
+                static_cast<std::int32_t>(pointIndex % _sourceImageSize.width()),
+                static_cast<std::int32_t>(floorf(static_cast<float>(pointIndex) / static_cast<float>(_sourceImageSize.width())))
+                );
 
             const auto scaleFactor = static_cast<float>(_targetImageSize.width()) / static_cast<float>(_sourceImageSize.width());
 
@@ -55,7 +58,7 @@ void SelectionMap::populateMappingIndices(std::uint32_t pointIndex, Indices& ind
             }
 
             if (scaleFactor > 1.0f) {
-                const auto levelFactor = static_cast<std::uint32_t>(floorf(scaleFactor));
+                const auto levelFactor = static_cast<std::int32_t>(floorf(scaleFactor));
 
                 const QPoint targetPixelPositionStart(sourcePixelPosition.x() * levelFactor, sourcePixelPosition.y() * levelFactor);
                 const QPoint targetPixelPositionEnd(targetPixelPositionStart + QPoint(levelFactor, levelFactor));

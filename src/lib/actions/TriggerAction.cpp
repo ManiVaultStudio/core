@@ -39,29 +39,32 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
 {
     setIconSize(QSize(12, 12));
 
-    connect(this, &QPushButton::clicked, this, [triggerAction]() {
-        triggerAction->trigger();
+    connect(this, &QPushButton::clicked, this, [this]() {
+        _triggerAction->trigger();
     });
 
-    const auto update = [this, triggerAction, widgetFlags]() -> void {
+    const auto update = [this]() -> void {
+        if (!_triggerAction)
+            return;
+
         QSignalBlocker blocker(this);
 
-        setEnabled(triggerAction->isEnabled());
+        setEnabled(_triggerAction->isEnabled());
 
-        if (widgetFlags & WidgetFlag::Text) {
-            setText(triggerAction->text());
+        if (_widgetFlags & WidgetFlag::Text) {
+            setText(_triggerAction->text());
             
-            if (triggerAction->text().isEmpty())
+            if (_triggerAction->text().isEmpty())
                 setText(" ");
         }
         
-        if (widgetFlags & WidgetFlag::Icon) {
-            if ((widgetFlags & WidgetFlag::Text) == 0)
+        if (_widgetFlags & WidgetFlag::Icon) {
+            if ((_widgetFlags & WidgetFlag::Text) == 0)
                 setText(" ");
         }
 
-        setToolTip(triggerAction->toolTip());
-        setVisible(triggerAction->isVisible());
+        setToolTip(_triggerAction->toolTip());
+        setVisible(_triggerAction->isVisible());
 
     	this->update();
     };

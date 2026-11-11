@@ -57,14 +57,14 @@ void LockingAction::initialize(bool locked /*= false*/)
 
 void LockingAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    WidgetAction::fromVariantMap(variantMap);
+    GroupAction::fromVariantMap(variantMap);
 
     _lockedAction.fromParentVariantMap(variantMap);
 }
 
 QVariantMap LockingAction::toVariantMap() const
 {
-    auto variantMap = WidgetAction::toVariantMap();
+    auto variantMap = GroupAction::toVariantMap();
 
     _lockedAction.insertIntoVariantMap(variantMap);
 

@@ -33,7 +33,12 @@ QRectF DecimalRectangleAction::toRectF() const
 
 void DecimalRectangleAction::setRectF(const QRectF& rectangle)
 {
-    setRectangle(rectangle.left(), rectangle.right(), rectangle.bottom(), rectangle.top());
+    setRectangle(
+        static_cast<float>(rectangle.left()),
+        static_cast<float>(rectangle.right()),
+        static_cast<float>(rectangle.bottom()),
+        static_cast<float>(rectangle.top())
+        );
 }
 
 void DecimalRectangleAction::connectToPublicAction(WidgetAction* publicAction, bool recursive)

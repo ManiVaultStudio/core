@@ -440,7 +440,7 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
     const auto updateText = [this]() -> void {
         const auto cursorPos        = cursorPosition();
         const auto selectionStart   = this->selectionStart();
-        const auto selectionLength  = selectedText().length();
+        const auto selectionLength  = static_cast<int>(selectedText().length());
 
         setText(_stringAction->getString());
 

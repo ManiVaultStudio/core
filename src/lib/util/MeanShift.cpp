@@ -14,25 +14,30 @@
 
 #include <QImage>
 #include <QDebug>
-#include <math.h>
-#include <float.h>
+
+#include <cmath>
+#include <cfloat>
+
 //#define MEANSHIFT_IMAGE_DEBUG
 
+namespace
+{
+    mv::Matrix3f createProjectionMatrix(const QRectF& bounds)
+    {
+        mv::Matrix3f m;
+        m.setIdentity();
+        m[0] = static_cast<float>(2.0 / (bounds.right() - bounds.left()));
+        m[4] = static_cast<float>(2.0 / (bounds.top() - bounds.bottom()));
+        m[6] = static_cast<float>(-1.0 * ((bounds.right() + bounds.left()) / (bounds.right() - bounds.left())));
+        m[7] = static_cast<float>(-1.0 * ((bounds.top() + bounds.bottom()) / (bounds.top() - bounds.bottom())));
+        return m;
+    }
 
+}
 
 namespace mv
 {
 
-Matrix3f createProjectionMatrix(QRectF bounds)
-{
-    Matrix3f m;
-    m.setIdentity();
-    m[0] = 2 / (bounds.right() - bounds.left());
-    m[4] = 2 / (bounds.top() - bounds.bottom());
-    m[6] = -((bounds.right() + bounds.left()) / (bounds.right() - bounds.left()));
-    m[7] = -((bounds.top() + bounds.bottom()) / (bounds.top() - bounds.bottom()));
-    return m;
-}
 void MeanShift::init()
 {
     initializeOpenGLFunctions();
@@ -115,7 +120,12 @@ void MeanShift::setData(const std::vector<Vector2f>* points)
     _points = points;
     _bounds = bounds;
     densityComputation.setData(points);
-    densityComputation.setBounds(bounds.left(), bounds.right(), bounds.bottom(), bounds.top());
+    densityComputation.setBounds(
+        static_cast<float>(bounds.left()),
+        static_cast<float>(bounds.right()),
+        static_cast<float>(bounds.bottom()),
+        static_cast<float>(bounds.top())
+        );
     _needsDensityMapUpdate = true;
 }
 
@@ -146,7 +156,7 @@ void MeanShift::computeGradient()
     densityComputation.getDensityTexture().bind(0);
     _shaderGradientCompute.uniform1i("densityTexture", 0);
 
-    _shaderGradientCompute.uniform4f("renderParams", 1.0f / densityComputation.getMaxDensity(), 1.0f / 100000, 1.0f / RESOLUTION, 1.0f);
+    _shaderGradientCompute.uniform4f("renderParams", 1.0f / densityComputation.getMaxDensity(), 1.0f / 100000, 1.0f / static_cast<float>(RESOLUTION), 1.0f);
 
     drawFullscreenQuad();
 
@@ -222,13 +232,13 @@ void MeanShift::computeMeanShift()
     _gradientTexture.bind(0);
     _shaderMeanshiftCompute.uniform1i("gradientTexture", 0);
 
-    _shaderMeanshiftCompute.uniform4f("renderParams", 0.25f, densityComputation.getMaxDensity(), 1.0f / RESOLUTION, 1.0f / RESOLUTION);
+    _shaderMeanshiftCompute.uniform4f("renderParams", 0.25f, densityComputation.getMaxDensity(), RESOLUTION_INV, RESOLUTION_INV);
 
     drawFullscreenQuad();
 //    qDebug() << "Drawing meanshift";
     _shaderMeanshiftCompute.release();
 
-    _meanshiftPixels.resize(RESOLUTION * RESOLUTION);
+    _meanshiftPixels.resize(1ll* RESOLUTION * RESOLUTION);
 
     glReadBuffer(GL_COLOR_ATTACHMENT2);
     glReadPixels(0, 0, RESOLUTION, RESOLUTION, GL_RG, GL_FLOAT, _meanshiftPixels.data());
@@ -263,7 +273,7 @@ void MeanShift::computeMeanShift()
 
 void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::vector<unsigned int>>& clusters)
 {
-    if (points.size() == 0) return;
+    if (points.empty()) return;
 
     densityComputation.setSigma(_sigma);
     densityComputation.compute();
@@ -277,9 +287,9 @@ void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::ve
     std::vector<Vector2f> clusterCenters;
 
     // we take a distance of 2 pixels as maximum to assume points ended in the same peak
-    float epsilon = 2.0f/RESOLUTION;// 0.05f;
+    const float epsilon = 2.0f * RESOLUTION_INV;// 0.05f;
     // For every pixel in Mean Shift Map
-    for (int i = 0; i < _meanshiftPixels.size(); i++) {
+    for (size_t i = 0; i < _meanshiftPixels.size(); i++) {
         // Set center to red and green component of pixel
         Vector2f center = _meanshiftPixels[i];
 
@@ -331,7 +341,7 @@ void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::ve
     int runningIdx = 0;
     _clusterPositions.clear();
     // For every point
-    for (int i = 0; i < _points->size(); i++) {
+    for (size_t i = 0; i < _points->size(); i++) {
         // Calculate the coordinate of the pixel center on the texture
         Vector2f p = (ortho * (*_points)[i]);
 
@@ -388,8 +398,8 @@ void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::ve
         Vector2f p = (ortho * (*_points)[i]);
 
         const Vector2f point = p * 0.5 + 0.5;
-        int x = (int)(point.x * (RESOLUTION - 1) + 0.5);
-        int y = (int)(point.y * (RESOLUTION - 1) + 0.5);
+        int x = static_cast<int>(point.x * (RESOLUTION - 1) + 0.5);
+        int y = static_cast<int>(point.y * (RESOLUTION - 1) + 0.5);
 
         int pixelIndex = (x + y * RESOLUTION);
         //_clusterIds[pixelIndex] = qRgb(255, 0, 0);

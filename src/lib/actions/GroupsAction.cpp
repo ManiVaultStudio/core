@@ -167,12 +167,12 @@ std::int32_t GroupsAction::getNumberOfExpandedGroupActions(bool visibleOnly /*= 
     const auto expansions = getExpansions(visibleOnly);
 
     // Count the number of expanded group actions
-    return std::count_if(expansions.begin(), expansions.end(), [](auto expansion) -> bool { return expansion; });
+    return static_cast<std::int32_t>(std::ranges::count_if(expansions, [](auto expansion) -> bool { return expansion; }));
 }
 
 std::int32_t GroupsAction::getNumberOfVisibleGroupActions() const
 {
-    return std::count_if(_visibility.begin(), _visibility.end(), [](auto visible) -> bool { return visible; });
+    return static_cast<std::int32_t>(std::ranges::count_if(_visibility, [](auto visible) -> bool { return visible; }));
 }
 
 void GroupsAction::setGroupActionVisibility(GroupAction* groupAction, bool visible)

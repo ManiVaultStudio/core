@@ -222,9 +222,9 @@ void WidgetAction::setDefaultWidgetFlags(std::int32_t defaultWidgetFlags)
 void WidgetAction::setDefaultWidgetFlag(std::int32_t defaultWidgetFlag, bool unset /*= false*/)
 {
     if (unset)
-        _defaultWidgetFlags = _defaultWidgetFlags & ~static_cast<std::int32_t>(defaultWidgetFlag);
+        _defaultWidgetFlags = _defaultWidgetFlags & ~defaultWidgetFlag;
     else
-        _defaultWidgetFlags |= static_cast<std::int32_t>(defaultWidgetFlag);
+        _defaultWidgetFlags |= defaultWidgetFlag;
 }
 
 WidgetAction::HighlightOption WidgetAction::getHighlighting() const

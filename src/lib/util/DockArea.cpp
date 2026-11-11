@@ -43,35 +43,39 @@ QIcon getDockAreaIcon(DockAreaFlag dockArea)
         painter.drawRect(rect);
     };
 
-    switch (static_cast<std::uint32_t>(dockArea))
+    switch (dockArea)
     {
-        case static_cast<std::uint32_t>(DockAreaFlag::None):
+        case DockAreaFlag::None:
             return {};
 
-        case static_cast<std::uint32_t>(DockAreaFlag::Left):
+        case DockAreaFlag::Left:
             drawRectangle();
             drawDockRectangle(QRectF(QPointF(t1, t3), QPointF(t2, size - t3)));
             break;
 
-        case static_cast<std::uint32_t>(DockAreaFlag::Right):
+        case DockAreaFlag::Right:
             drawRectangle();
             drawDockRectangle(QRectF(QPointF(size - t1, t3), QPointF(size - t2, size - t3)));
             break;
 
-        case static_cast<std::uint32_t>(DockAreaFlag::Top):
+        case DockAreaFlag::Top:
             drawRectangle();
             drawDockRectangle(QRectF(QPointF(t3, t1), QPointF(size - t3, t2)));
             break;
 
-        case static_cast<std::uint32_t>(DockAreaFlag::Bottom):
+        case DockAreaFlag::Bottom:
             drawRectangle();
             drawDockRectangle(QRectF(QPointF(t3, size - t1), QPointF(size - t3, size - t2)));
             break;
 
-        case static_cast<std::uint32_t>(DockAreaFlag::Center):
+        case DockAreaFlag::Center:
             drawRectangle();
             drawDockRectangle(QRectF(QPointF(t4, t4), QPointF(size - t4, size - t4)));
             break;
+
+        default:
+            return {};
+
     }
 
     return QIcon(util::StyledIcon(createIcon(pixmap)));

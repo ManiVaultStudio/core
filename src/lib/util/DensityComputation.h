@@ -51,7 +51,7 @@ private:
     float calculateMaxKDE();
 
 private:
-    const unsigned int RESOLUTION       = 128;
+    const GLint RESOLUTION              = 128;
     const float DEFAULT_SIGMA           = 0.15f;
 
     float _sigma                        = DEFAULT_SIGMA;

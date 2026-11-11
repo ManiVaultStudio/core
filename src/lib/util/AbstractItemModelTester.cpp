@@ -79,31 +79,40 @@ void AbstractItemModelTester::runAllTests()
 void AbstractItemModelTester::nonDestructiveBasicTest()
 {
     Q_ASSERT(model->buddy(QModelIndex()) == QModelIndex());
+
     model->canFetchMore(QModelIndex());
+
     Q_ASSERT(model->columnCount(QModelIndex()) >= 0);
     Q_ASSERT(model->data(QModelIndex()) == QVariant());
+
     fetchingMore = true;
     model->fetchMore(QModelIndex());
     fetchingMore = false;
-    Qt::ItemFlags flags = model->flags(QModelIndex());
+
+    [[maybe_unused]] Qt::ItemFlags flags = model->flags(QModelIndex());
     Q_ASSERT(flags == Qt::ItemIsDropEnabled || flags == 0);
+
     model->hasChildren(QModelIndex());
     model->hasIndex(0, 0);
     model->headerData(0, Qt::Horizontal);
     model->index(0, 0);
     model->itemData(QModelIndex());
+
     QVariant cache;
     model->match(QModelIndex(), -1, cache);
     model->mimeTypes();
-    QModelIndex m1 = model->parent(QModelIndex());
-    QModelIndex m2 = QModelIndex();
+
+    [[maybe_unused]] QModelIndex m1 = model->parent(QModelIndex());
+    [[maybe_unused]] QModelIndex m2 = QModelIndex();
     Q_ASSERT(m1 == m2);
     Q_ASSERT(model->parent(QModelIndex()) == QModelIndex());
     Q_ASSERT(model->rowCount() >= 0);
+
     QVariant variant;
     model->setData(QModelIndex(), variant, -1);
     model->setHeaderData(-1, Qt::Horizontal, QVariant());
     model->setHeaderData(999999, Qt::Horizontal, QVariant());
+
     QMap<int, QVariant> roles;
     model->sibling(0, 0, QModelIndex());
     model->span(QModelIndex());
@@ -166,7 +175,7 @@ void AbstractItemModelTester::hasIndex()
     Q_ASSERT(model->hasIndex(0, -2) == false);
 
     int rows = model->rowCount();
-    int columns = model->columnCount();
+    [[maybe_unused]] int columns = model->columnCount();
 
     // check out of bounds
     Q_ASSERT(model->hasIndex(rows, columns) == false);
@@ -189,8 +198,8 @@ void AbstractItemModelTester::index()
     Q_ASSERT(model->index(-2, 0) == QModelIndex());
     Q_ASSERT(model->index(0, -2) == QModelIndex());
 
-    int rows = model->rowCount();
-    int columns = model->columnCount();
+    [[maybe_unused]] int rows = model->rowCount();
+    [[maybe_unused]] int columns = model->columnCount();
 
     if (rows == 0)
         return;
@@ -203,8 +212,8 @@ void AbstractItemModelTester::index()
     Q_ASSERT(tmp.isValid() == true);
 
     // Make sure that the same index is *always* returned
-    QModelIndex a = model->index(0, 0);
-    QModelIndex b = model->index(0, 0);
+    [[maybe_unused]] QModelIndex a = model->index(0, 0);
+    [[maybe_unused]] QModelIndex b = model->index(0, 0);
     Q_ASSERT(a == b);
 
     // index() is tested more extensively in checkChildren(),
@@ -249,8 +258,8 @@ void AbstractItemModelTester::parent()
     // Usually the second column shouldn't have children.
     QModelIndex topIndex1 = model->index(0, 1, QModelIndex());
     if (model->rowCount(topIndex1) > 0) {
-        QModelIndex childIndex = model->index(0, 0, topIndex);
-        QModelIndex childIndex1 = model->index(0, 0, topIndex1);
+        [[maybe_unused]] QModelIndex childIndex = model->index(0, 0, topIndex);
+        [[maybe_unused]] QModelIndex childIndex1 = model->index(0, 0, topIndex1);
         Q_ASSERT(childIndex != childIndex1);
     }
 
@@ -319,12 +328,12 @@ void AbstractItemModelTester::checkChildren(const QModelIndex &parent, int curre
             Q_ASSERT(index.isValid() == true);
 
             // index() should always return the same index when called twice in a row
-            QModelIndex modifiedIndex = model->index(r, c, parent);
+            [[maybe_unused]] QModelIndex modifiedIndex = model->index(r, c, parent);
             Q_ASSERT(index == modifiedIndex);
 
             // Make sure we get the same index if we request it twice in a row
-            QModelIndex a = model->index(r, c, parent);
-            QModelIndex b = model->index(r, c, parent);
+            [[maybe_unused]] QModelIndex a = model->index(r, c, parent);
+            [[maybe_unused]] QModelIndex b = model->index(r, c, parent);
             Q_ASSERT(a == b);
 
             // Some basic checking on the index that is returned
@@ -361,7 +370,7 @@ void AbstractItemModelTester::checkChildren(const QModelIndex &parent, int curre
             }/* else { if (currentDepth >= 10) qDebug() << "checked 10 deep"; };*/
 
             // make sure that after testing the children that the index doesn't change.
-            QModelIndex newerIndex = model->index(r, c, parent);
+            [[maybe_unused]] QModelIndex newerIndex = model->index(r, c, parent);
             Q_ASSERT(index == newerIndex);
         }
     }
@@ -408,7 +417,7 @@ void AbstractItemModelTester::data()
     // Check that the alignment is one we know about
     QVariant textAlignmentVariant = model->data(model->index(0, 0), Qt::TextAlignmentRole);
     if (textAlignmentVariant.isValid()) {
-        uint alignment = textAlignmentVariant.toUInt();
+        [[maybe_unused]] uint alignment = textAlignmentVariant.toUInt();
         Q_ASSERT(alignment == (alignment & (Qt::AlignHorizontal_Mask | Qt::AlignVertical_Mask)));
     }
 
@@ -424,7 +433,7 @@ void AbstractItemModelTester::data()
     // Check that the "check state" is one we know about.
     QVariant checkStateVariant = model->data(model->index(0, 0), Qt::CheckStateRole);
     if (checkStateVariant.isValid()) {
-        int state = checkStateVariant.toInt();
+        [[maybe_unused]] int state = checkStateVariant.toInt();
         Q_ASSERT(state == Qt::Unchecked ||
                  state == Qt::PartiallyChecked ||
                  state == Qt::Checked);

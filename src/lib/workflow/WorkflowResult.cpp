@@ -96,7 +96,7 @@ QString WorkflowResult::getSummaryText() const
 		case Status::Canceled:
 			return QStringLiteral("Canceled.");
 
-		case Status::Undefined:
+        case Status::Undefined: [[fallthrough]];
 		default:
 			return QStringLiteral("Status unknown.");
 	}

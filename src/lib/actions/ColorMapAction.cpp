@@ -16,7 +16,7 @@
 #include <QItemSelectionModel>
 
 #include <numeric>
-#include <math.h>
+#include <cmath>
 
 using namespace mv::util;
 
@@ -253,7 +253,7 @@ QImage ColorMapAction::getColorMapImage() const
             {
                 QImage discreteColorMapImage(numberOfDiscreteSteps, 1, QImage::Format::Format_ARGB32);
 
-                const auto sourceStepSizeX = static_cast<std::int32_t>(ceilf(colorMapImage.width()) / static_cast<float>(numberOfDiscreteSteps));
+                const auto sourceStepSizeX = static_cast<std::int32_t>(std::ceil(static_cast<float>(colorMapImage.width())) / static_cast<float>(numberOfDiscreteSteps));
 
                 for (int discreteStepIndex = 0; discreteStepIndex < numberOfDiscreteSteps; discreteStepIndex++) {
                     const auto rangeStartX  = discreteStepIndex * sourceStepSizeX;
@@ -283,7 +283,7 @@ QImage ColorMapAction::getColorMapImage() const
                 }
 
                 for (int pixelX = 0; pixelX < colorMapImage.width(); pixelX++) {
-                    auto pixelColor = discreteColorMapImage.pixelColor(QPoint(std::min(numberOfDiscreteSteps - 1, static_cast<std::int32_t>(floorf(static_cast<float>(pixelX) / sourceStepSizeX))), 0));
+                    auto pixelColor = discreteColorMapImage.pixelColor(QPoint(std::min(numberOfDiscreteSteps - 1, static_cast<std::int32_t>(std::floor(static_cast<float>(pixelX) / sourceStepSizeX))), 0));
 
                     if (!_discretizeAlphaAction.isChecked())
                         pixelColor.setAlphaF(colorMapImage.pixelColor(QPoint(pixelX, 0)).alphaF());
@@ -298,8 +298,8 @@ QImage ColorMapAction::getColorMapImage() const
             {
                 QImage discreteColorMapImage(numberOfDiscreteSteps, numberOfDiscreteSteps, QImage::Format::Format_ARGB32);
 
-                const auto sourceStepSizeX = static_cast<std::int32_t>(floorf(colorMapImage.width()) / static_cast<float>(numberOfDiscreteSteps));
-                const auto sourceStepSizeY = static_cast<std::int32_t>(floorf(colorMapImage.height()) / static_cast<float>(numberOfDiscreteSteps));
+                const auto sourceStepSizeX = static_cast<std::int32_t>(std::floor(static_cast<float>(colorMapImage.width())) / static_cast<float>(numberOfDiscreteSteps));
+                const auto sourceStepSizeY = static_cast<std::int32_t>(std::floor(static_cast<float>(colorMapImage.height())) / static_cast<float>(numberOfDiscreteSteps));
 
                 for (int stepY = 0; stepY < numberOfDiscreteSteps; stepY++) {
                     for (int stepX = 0; stepX < numberOfDiscreteSteps; stepX++) {

@@ -75,12 +75,12 @@ void OpenGLWidget::initializeGL()
 void OpenGLWidget::resizeGL(int w, int h)
 {
     // We need this here as we do not have the screen yet to get the actual devicePixelRatio when the view is created
-    _pixelRatio = devicePixelRatio();
+    _pixelRatio = static_cast<float>(devicePixelRatio());
 
     // Update the width and height of the widget scaled by the pixel ratio.
     // Pixel ratio might change on MacOS high dpi screens or through windows display scaling
-    w *= _pixelRatio;
-    h *= _pixelRatio;
+    w = static_cast<int>(static_cast<float>(w) * _pixelRatio);
+    h = static_cast<int>(static_cast<float>(h) * _pixelRatio);
 
     onWidgetResized(w, h);
 }
@@ -116,7 +116,7 @@ void OpenGLWidget::showEvent(QShowEvent* showEvent)
 /** Checks if the pixel ratio of the screen the widget is displayed on changed and calls resizeGL() if so. */
 void OpenGLWidget::updatePixelRatio()
 {
-    float pixelRatio = devicePixelRatio();
+    const float pixelRatio = static_cast<float>(devicePixelRatio());
 
     // Only update if the ratio actually changed
     if (_pixelRatio != pixelRatio)

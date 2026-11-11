@@ -135,6 +135,9 @@ ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* togg
     });
 
     const auto update = [this]() -> void {
+        if (!_toggleAction)
+            return;
+
         QSignalBlocker blocker(this);
 
         setEnabled(_toggleAction->isEnabled());

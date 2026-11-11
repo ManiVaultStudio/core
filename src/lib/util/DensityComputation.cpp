@@ -42,7 +42,7 @@ void GaussianTexture::generate()
     constexpr double i_c = w / 2.0;
     constexpr double j_c = h / 2.0;
 
-    float* data = new float[w * h];
+    float* data = new float[static_cast<size_t>(w) * h];
 
     for (int j = 0; j < h; j++){
         for (int i = 0; i < w; i++){
@@ -256,7 +256,7 @@ void DensityComputation::compute()
     _shaderDensityCompute.uniform1i("hasWeight", hasWeight);
 
     // Draw the splats
-    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _numPoints);
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, static_cast<GLsizei>(_numPoints));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -269,13 +269,13 @@ void DensityComputation::compute()
 
 bool DensityComputation::hasData() const
 {
-    return _points != nullptr && _points->size() > 0;
+    return _points != nullptr && !_points->empty();
 }
 
 float DensityComputation::calculateMaxKDE()
 {
     // Read back output pixels from the framebuffer
-    std::vector<float> kde(RESOLUTION * RESOLUTION * 3);
+    std::vector<float> kde(3ll * RESOLUTION * RESOLUTION);
 
     glReadBuffer(GL_COLOR_ATTACHMENT0);
     glReadPixels(0, 0, RESOLUTION, RESOLUTION, GL_RGB, GL_FLOAT, kde.data());

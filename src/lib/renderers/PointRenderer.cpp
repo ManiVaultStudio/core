@@ -406,8 +406,8 @@ namespace mv
                 {
                     const auto zoomMarginScreen = getNavigator().getZoomMarginScreen();
 
-                    marginX = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().height()) / (static_cast<float>(getRenderSize().height() - 2.f * zoomMarginScreen));
-                    marginY = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().width()) / (static_cast<float>(getRenderSize().width() - 2.f * zoomMarginScreen));
+                    marginX = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().height()) / (static_cast<float>(getRenderSize().height()) - 2.f * zoomMarginScreen);
+                    marginY = getNavigator().getZoomMarginScreen() * static_cast<float>(getDataBounds().width()) / (static_cast<float>(getRenderSize().width()) - 2.f * zoomMarginScreen);
 
                     break;
                 }
@@ -643,7 +643,12 @@ namespace mv
                 _shader.uniformMatrix4f("mvp", getModelViewProjectionMatrix().data());
                 _shader.uniform1f("pointOpacity", _pointSettings._alpha);
                 _shader.uniform1i("scalarEffect", _pointEffect);
-                _shader.uniform4f("dataBounds", getDataBounds().left(), getDataBounds().right(), getDataBounds().bottom(), getDataBounds().top());
+                _shader.uniform4f("dataBounds", 
+                    static_cast<float>(getDataBounds().left()),
+                    static_cast<float>(getDataBounds().right()),
+                    static_cast<float>(getDataBounds().bottom()),
+                    static_cast<float>(getDataBounds().top())
+                    );
                 _shader.uniform1i("selectionDisplayMode", static_cast<std::int32_t>(_selectionDisplayMode));
                 _shader.uniform1f("selectionOutlineScale", _selectionOutlineScale);
                 _shader.uniform3f("selectionOutlineColor", _selectionOutlineColor);

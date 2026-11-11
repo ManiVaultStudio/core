@@ -613,7 +613,7 @@ void Application::TemporaryDirs::removeStale(const QStringList& stale, Task* tas
         }
 
         if (workflowContext != nullptr && !selectedStaleTemporaryDirs.isEmpty())
-            workflowContext->setProgress(static_cast<double>(index + 1) / selectedStaleTemporaryDirs.count());
+            workflowContext->setProgress(static_cast<double>(index + 1) / static_cast<double>(selectedStaleTemporaryDirs.count()));
     }
 
     qDebug() << "Removed" << numberOfRemovedSessions << QString("ManiVault application temporary director%1").arg(numberOfRemovedSessions == 1 ? "y" : "ies");

@@ -191,12 +191,12 @@ namespace
 
         auto classifyOne = [](const QVariant& value) -> QMetaType::Type {
             switch (value.metaType().id()) {
-            case QMetaType::Int:
-            case QMetaType::UInt:
-            case QMetaType::LongLong:
-            case QMetaType::ULongLong:
-            case QMetaType::Double:
-            case QMetaType::Bool:
+            case QMetaType::Int:        [[fallthrough]];
+            case QMetaType::UInt:       [[fallthrough]];
+            case QMetaType::LongLong:   [[fallthrough]];
+            case QMetaType::ULongLong:  [[fallthrough]];
+            case QMetaType::Double:     [[fallthrough]];
+            case QMetaType::Bool:       [[fallthrough]];
             case QMetaType::QString:
                 return static_cast<QMetaType::Type>(value.metaType().id());
 

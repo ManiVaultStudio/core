@@ -527,15 +527,15 @@ void AbstractDataHierarchyModel::IsSubsetItem::drawExtents(QPainter& painter)
 {
     painter.setPen(QPen(Qt::black, 15.0, Qt::SolidLine, Qt::FlatCap));
 
-    const auto extents  = std::vector<float>({ 0.f, 100.f });
-    const auto length   = 15.f;
+    const auto extents  = std::vector<int>({ 0, 100 });
+    const int length    = 15;
 
     for (const auto& e : extents) {
-        painter.drawLine(0.f, e, length, e);
-        painter.drawLine(100.f - length, e, 100.f, e);
+        painter.drawLine(0, e, length, e);
+        painter.drawLine(100 - length, e, 100, e);
 
         painter.drawLine(e, 0, e, length);
-        painter.drawLine(e, 100.f - length, e, 100.f);
+        painter.drawLine(e, 100 - length, e, 100);
     }
 }
 

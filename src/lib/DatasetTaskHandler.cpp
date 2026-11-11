@@ -31,7 +31,7 @@ DatasetTaskHandler::DatasetTaskHandler(QObject* parent, DatasetTask* datasetTask
                 break;
             }
 
-            case Task::Status::Running:
+            case Task::Status::Running: [[fallthrough]];
             case Task::Status::RunningIndeterminate:
             {
                 if (previousStatus == Task::Status::Idle || previousStatus == Task::Status::Finished || previousStatus == Task::Status::Aborted)
@@ -40,7 +40,7 @@ DatasetTaskHandler::DatasetTaskHandler(QObject* parent, DatasetTask* datasetTask
                 break;
             }
 
-            case Task::Status::Finished:
+            case Task::Status::Finished: [[fallthrough]];
             case Task::Status::Aborted:
             {
                 if (previousStatus == Task::Status::Running || previousStatus == Task::Status::RunningIndeterminate)
@@ -50,7 +50,7 @@ DatasetTaskHandler::DatasetTaskHandler(QObject* parent, DatasetTask* datasetTask
             }
 
             case Task::Status::Aborting:
-                break;
+                [[fallthrough]];
 
             default:
                 break;
