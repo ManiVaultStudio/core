@@ -32,6 +32,8 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     setWindowFlag(Qt::WindowStaysOnTopHint);
     setWindowTitle("Settings");
     setMinimumWidth(800);
+    setMinimumHeight(560);
+    resize(900, 600);
 
     auto layout = new QVBoxLayout();
 
@@ -79,6 +81,7 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     }
 
     updateSettingsFilter();
+    mv::settings().getTemporaryDirectoriesSettingsAction().refreshTemporaryStorageStatus();
 
     connect(&mv::theme(), &AbstractThemeManager::colorSchemeChanged, this, &SettingsManagerDialog::updateCustomStyle);
 }
@@ -128,7 +131,7 @@ void SettingsManagerDialog::updateEmptySettingsOverlay()
 
 QSize SettingsManagerDialog::sizeHint() const
 {
-    return { 400, 500 };
+    return { 800, 600 };
 }
 
 void SettingsManagerDialog::updateCustomStyle()

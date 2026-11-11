@@ -35,7 +35,10 @@
 #include <QFileInfo>
 #include <QProcess>
 #include <QTimer>
+#include <QUrl>
 #include <QWebEnginePage>
+
+#include <exception>
 
 namespace {
 
@@ -137,6 +140,9 @@ int main(int argc, char *argv[])
     core.createManagers();
 
     workflow::AbstractWorkflowPlanExecutor::installNotificationLinkHandler();
+    mv::help().addNotificationLinkHandler("settings/temporary", [](const QUrl&) {
+        mv::settings().getEditSettingsAction().trigger();
+    });
 
     auto& splashScreenAction = application.getConfigurationAction().getBrandingConfigurationAction().getSplashScreenAction();
 
@@ -199,6 +205,18 @@ int main(int argc, char *argv[])
 
     mainWindow.show();
     mainWindow.initialize();
+
+    // MainWindow::initialize() has now created the notification UI. Queue the check for
+    // the next event-loop turn instead of relying on an elapsed-time startup delay.
+    QTimer::singleShot(0, &mainWindow, [] {
+        try {
+            mv::settings().getTemporaryDirectoriesSettingsAction().checkTemporaryStorageAtStartup();
+        } catch (const std::exception& exception) {
+            qCritical() << "Temporary storage startup check failed:" << exception.what();
+        } catch (...) {
+            qCritical() << "Temporary storage startup check failed with an unknown exception";
+        }
+    });
 
     if (softwareWebEngineFallback) {
         QTimer::singleShot(1500, &application, []() {

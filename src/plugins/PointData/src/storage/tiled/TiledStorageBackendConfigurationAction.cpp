@@ -4,10 +4,10 @@
 
 #include "PointDataTiledStorage.h"
 
+#include <CoreInterface.h>
 #include <util/Miscellaneous.h>
 
 #include <QSignalBlocker>
-#include <QDir>
 #include <QStorageInfo>
 
 #include <algorithm>
@@ -17,7 +17,7 @@
 namespace mv::gui
 {
 
-TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(QObject* parent, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration, const bool initializeFromConfiguration, const std::optional<std::uint32_t> currentElementTypeIndex, const bool showImportPerformanceOptions, const std::size_t bucketingThreadCount, const std::size_t stagingThreadCount, const std::size_t rowChunkTileFactor, const bool showImportStagingDirectory, const QString& stagingDirectory, const QString& defaultStagingDirectory) :
+TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(QObject* parent, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration, const bool initializeFromConfiguration, const std::optional<std::uint32_t> currentElementTypeIndex, const bool showImportPerformanceOptions, const std::size_t bucketingThreadCount, const std::size_t stagingThreadCount, const std::size_t rowChunkTileFactor, const bool showImportStagingSpaceObservation, const QString& stagingDirectory) :
     StorageBackendConversionAction(parent, "Tiled storage", currentElementTypeIndex),
     _rows(rows),
     _columns(columns),
@@ -44,10 +44,9 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _bucketingThreadCountAction(&_importPerformanceSettingsAction, "Bucketing thread count", 1, 32, static_cast<std::int32_t>(std::clamp<std::size_t>(bucketingThreadCount, 1, 32))),
     _stagingThreadCountAction(&_importPerformanceSettingsAction, "Staging thread count", 1, 32, static_cast<std::int32_t>(std::clamp<std::size_t>(stagingThreadCount, 1, 32))),
     _rowChunkTileFactorAction(&_importPerformanceSettingsAction, "CSR chunk tile-height factor", 1, 256, static_cast<std::int32_t>(std::clamp<std::size_t>(rowChunkTileFactor, 1, 256))),
-    _stagingDirectoryAction(this, "Temporary storage", stagingDirectory),
-    _defaultStagingDirectory(defaultStagingDirectory),
+    _stagingDirectory(stagingDirectory),
     _showImportPerformanceOptions(showImportPerformanceOptions),
-    _showImportStagingDirectory(showImportStagingDirectory)
+    _showImportStagingSpaceObservation(showImportStagingSpaceObservation)
 {
     setShowLabels(true);
 
@@ -103,12 +102,6 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     addAction(&_superTileRowsAction);
     addAction(&_superTileColumnsAction);
 
-    if (showImportStagingDirectory)
-    {
-        addAction(&_stagingDirectoryAction);
-        connect(&_stagingDirectoryAction, &DirectoryPickerAction::directoryChanged, this, [this] { updateStagingSpaceObservation(); });
-    }
-
     if (showImportPerformanceOptions)
     {
         _importPerformanceAction.setShowLabels(false);
@@ -148,7 +141,7 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
 
     addAction(&_tileCountObservationAction);
     addAction(&_tileCacheObservationAction);
-    if (showImportStagingDirectory)
+    if (showImportStagingSpaceObservation)
         addAction(&_stagingSpaceObservationAction);
 
     connect(&_tileAsymmetryAction.getAsymmetryAction(), &IntegralAction::valueChanged, this, [this] {
@@ -308,8 +301,6 @@ void TiledStorageBackendConfigurationAction::fromVariantMap(const QVariantMap& v
         }
     }
 
-    restoreAction(_stagingDirectoryAction, variantMap);
-
     // Accept value-only presets written by the short-lived experimental format.
     const auto restoreLegacyIntegralValue = [&](IntegralAction& action, const char* key, const char* legacyKey) {
         if (variantMap.contains(action.getSerializationName()))
@@ -339,10 +330,6 @@ void TiledStorageBackendConfigurationAction::fromVariantMap(const QVariantMap& v
     restoreLegacyIntegralValue(_bucketingThreadCountAction, "BucketingThreadCount", "BucketingThreadCountAction");
     restoreLegacyIntegralValue(_stagingThreadCountAction, "StagingThreadCount", "StagingThreadCountAction");
     restoreLegacyIntegralValue(_rowChunkTileFactorAction, "RowChunkTileFactor", "RowChunkTileFactorAction");
-
-    const auto stagingDirectory = settingValue("StagingDirectory", "StagingDirectoryAction");
-    if (!variantMap.contains(_stagingDirectoryAction.getSerializationName()) && stagingDirectory.isValid())
-        _stagingDirectoryAction.setDirectory(stagingDirectory.toString());
 
     if (deriveDimensionsAction.contains("Value"))
         restoreAction(_deriveTileDimensionsAction, variantMap);
@@ -398,9 +385,6 @@ QVariantMap TiledStorageBackendConfigurationAction::toVariantMap() const
         importPerformance.insert(_importPerformanceSettingsAction.getSerializationName(), performanceSettings);
         variantMap.insert(_importPerformanceAction.getSerializationName(), importPerformance);
     }
-
-    if (_showImportStagingDirectory)
-        _stagingDirectoryAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
@@ -511,11 +495,6 @@ std::size_t TiledStorageBackendConfigurationAction::getRowChunkTileFactor() cons
     return static_cast<std::size_t>(_rowChunkTileFactorAction.getValue());
 }
 
-QString TiledStorageBackendConfigurationAction::getStagingDirectory() const
-{
-    return _stagingDirectoryAction.getDirectory();
-}
-
 void TiledStorageBackendConfigurationAction::updateImportPerformanceSummary()
 {
     _importPerformanceSummaryAction.setString(QStringLiteral("%1 bucket threads, %2 staging threads, CSR chunk tile-height factor %3")
@@ -583,31 +562,26 @@ void TiledStorageBackendConfigurationAction::updateStorageObservations()
 
 void TiledStorageBackendConfigurationAction::updateStagingSpaceObservation()
 {
-    if (!_showImportStagingDirectory)
+    if (!_showImportStagingSpaceObservation)
         return;
-
-    MessageCardAction::ButtonActions buttonActions;
-    const auto currentDirectory = QDir::cleanPath(_stagingDirectoryAction.getDirectory());
-    const auto defaultDirectory = QDir::cleanPath(_defaultStagingDirectory);
-    if (!defaultDirectory.isEmpty() && currentDirectory != defaultDirectory)
-        buttonActions.append({ tr("Reset to default"), [this] { _stagingDirectoryAction.setDirectory(_defaultStagingDirectory); } });
 
     if (_rows == 0 || _columns == 0 || _elementSize == 0 ||
         _rows > std::numeric_limits<std::uint64_t>::max() / _columns ||
         _rows * _columns > std::numeric_limits<std::uint64_t>::max() / _elementSize)
     {
-        _stagingSpaceObservationAction.setMessage(util::SeverityLevel::Info, tr("Disk space"), tr("The required staging space could not be estimated."), buttonActions);
+        _stagingSpaceObservationAction.setMessage(util::SeverityLevel::Info, tr("Disk space"), tr("The required staging space could not be estimated."));
         return;
     }
 
     const auto matrixBytes = _rows * _columns * _elementSize;
     const auto matrixSize = util::getNoBytesHumanReadable(matrixBytes);
-    const auto unavailableSpaceDescription = tr("Free space could not be checked for the selected staging directory.");
-    QStorageInfo stagingStorage(_stagingDirectoryAction.getDirectory());
+    const auto settingsButtonAction = MessageCardAction::ButtonAction { tr("Temporary settings"), [] { mv::settings().getEditSettingsAction().trigger(); } };
+    const auto unavailableSpaceDescription = tr("Free space could not be checked for the app-managed staging directory: %1.").arg(_stagingDirectory.toHtmlEscaped());
+    QStorageInfo stagingStorage(_stagingDirectory);
     stagingStorage.refresh();
     if (!stagingStorage.isValid() || !stagingStorage.isReady() || stagingStorage.bytesAvailable() < 0)
     {
-        _stagingSpaceObservationAction.setMessage(util::SeverityLevel::Warning, tr("Disk space"), unavailableSpaceDescription, buttonActions);
+        _stagingSpaceObservationAction.setMessage(util::SeverityLevel::Warning, tr("Disk space"), unavailableSpaceDescription, { settingsButtonAction });
         return;
     }
 
@@ -615,15 +589,15 @@ void TiledStorageBackendConfigurationAction::updateStagingSpaceObservation()
     const auto availableSpace = util::getNoBytesHumanReadable(availableBytes);
     if (availableBytes < matrixBytes)
     {
-        const auto description = tr("Potential disk-space issue: %1 is available, below the %2 dense-equivalent estimate. Sparse data and compression may reduce actual staging use.")
-            .arg(availableSpace, matrixSize);
-        _stagingSpaceObservationAction.setMessage(util::SeverityLevel::Warning, tr("Disk space"), description, buttonActions);
+        const auto description = tr("Potentially insufficient space in the app-managed staging directory (%1): %2 is available, below the %3 dense-equivalent estimate. Sparse data and compression may reduce actual staging use. Changing the application temporary directory takes effect after restart.")
+            .arg(_stagingDirectory.toHtmlEscaped(), availableSpace, matrixSize);
+        _stagingSpaceObservationAction.setMessage(util::SeverityLevel::Warning, tr("Disk space"), description, { settingsButtonAction });
     }
     else
     {
-        const auto description = tr("%1 is available; the dense-equivalent matrix estimate is %2. Sparse data and compression may reduce actual staging use.")
-            .arg(availableSpace, matrixSize);
-        _stagingSpaceObservationAction.setMessage(util::SeverityLevel::Info, tr("Disk space"), description, buttonActions);
+        const auto description = tr("The app-managed staging directory is %1. %2 is available; the dense-equivalent matrix estimate is %3. Sparse data and compression may reduce actual staging use.")
+            .arg(_stagingDirectory.toHtmlEscaped(), availableSpace, matrixSize);
+        _stagingSpaceObservationAction.setMessage(util::SeverityLevel::Info, tr("Disk space"), description);
     }
 }
 
