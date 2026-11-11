@@ -61,6 +61,12 @@ public:
     /** Returns whether the selected element type or tiled settings differ from their initial values. */
     bool hasChanges() const override;
 
+    /** Restores the tiled backend controls from a preset map. */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /** Serializes the tiled backend controls for presets. */
+    QVariantMap toVariantMap() const override;
+
     /** Returns the current tiled-storage configuration. */
     pointdata::storage::StorageBackendConfiguration getConfiguration() const;
 

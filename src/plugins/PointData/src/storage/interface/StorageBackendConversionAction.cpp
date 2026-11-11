@@ -346,4 +346,22 @@ bool StorageBackendConversionAction::hasChanges() const
     return getTargetElementTypeIndex() != _initialElementTypeIndex;
 }
 
+void StorageBackendConversionAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    GroupAction::fromVariantMap(variantMap);
+
+    if (_hasElementTypeAction && variantMap.contains("ElementTypeAction"))
+        _elementTypeAction.fromVariantMap(variantMap.value("ElementTypeAction").toMap());
+}
+
+QVariantMap StorageBackendConversionAction::toVariantMap() const
+{
+    auto variantMap = GroupAction::toVariantMap();
+
+    if (_hasElementTypeAction)
+        variantMap.insert("ElementTypeAction", _elementTypeAction.toVariantMap());
+
+    return variantMap;
+}
+
 }

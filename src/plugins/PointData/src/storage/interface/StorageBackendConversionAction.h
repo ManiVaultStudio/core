@@ -59,6 +59,12 @@ public:
     /** Returns whether the current backend settings differ from their initial values. */
     virtual bool hasChanges() const;
 
+    /** Restores the backend conversion controls from a preset map. */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /** Serializes the backend conversion controls for presets. */
+    QVariantMap toVariantMap() const override;
+
     /** Supplies backend-neutral source access for bounded and full element-type analysis. The callback must remain safe to invoke on a worker thread. */
     void setSourceData(std::uint64_t rows, std::uint64_t columns, std::uint32_t sourceElementTypeIndex, SourceRowReader rowReader);
 

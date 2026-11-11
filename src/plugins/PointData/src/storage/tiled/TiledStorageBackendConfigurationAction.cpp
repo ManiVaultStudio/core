@@ -239,6 +239,51 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     }
 }
 
+void TiledStorageBackendConfigurationAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    StorageBackendConversionAction::fromVariantMap(variantMap);
+
+    const auto restore = [&variantMap](auto& action, const char* key) {
+        const auto serializedAction = variantMap.value(QLatin1String(key));
+        if (!serializedAction.isValid())
+            return;
+
+        const QSignalBlocker blocker(&action);
+        action.fromVariantMap(serializedAction.toMap());
+    };
+
+    restore(_deriveTileDimensionsAction, "DeriveTileDimensionsAction");
+    restore(_tileAsymmetryAction.getAsymmetryAction(), "TileAsymmetryAction");
+    restore(_tileSizeAction, "TileSizeAction");
+    restore(_rowTileSizeAction, "RowTileSizeAction");
+    restore(_columnTileSizeAction, "ColumnTileSizeAction");
+    restore(_packedTilesAction, "PackedTilesAction");
+    restore(_superTileRowsAction, "SuperTileRowsAction");
+    restore(_superTileColumnsAction, "SuperTileColumnsAction");
+
+    updateTileSizePercentages();
+    updateTileSizingMode();
+    updateCacheCapacity();
+    updateStorageObservations();
+    notifyOptionsChanged();
+}
+
+QVariantMap TiledStorageBackendConfigurationAction::toVariantMap() const
+{
+    auto variantMap = StorageBackendConversionAction::toVariantMap();
+
+    variantMap.insert("DeriveTileDimensionsAction", _deriveTileDimensionsAction.toVariantMap());
+    variantMap.insert("TileAsymmetryAction", _tileAsymmetryAction.getAsymmetryAction().toVariantMap());
+    variantMap.insert("TileSizeAction", _tileSizeAction.toVariantMap());
+    variantMap.insert("RowTileSizeAction", _rowTileSizeAction.toVariantMap());
+    variantMap.insert("ColumnTileSizeAction", _columnTileSizeAction.toVariantMap());
+    variantMap.insert("PackedTilesAction", _packedTilesAction.toVariantMap());
+    variantMap.insert("SuperTileRowsAction", _superTileRowsAction.toVariantMap());
+    variantMap.insert("SuperTileColumnsAction", _superTileColumnsAction.toVariantMap());
+
+    return variantMap;
+}
+
 void TiledStorageBackendConfigurationAction::updateTileSizePercentages()
 {
     const auto updatePercentage = [this](DecimalAction& percentageAction, const std::int32_t tileSize, const std::uint64_t dimension) {
