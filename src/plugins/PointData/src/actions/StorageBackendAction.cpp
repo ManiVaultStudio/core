@@ -23,7 +23,7 @@ namespace
 QStringList storageBackendTypes()
 {
     return {
-        pointdata::storage::getStorageBackendTypeName(Points::StorageBackendType::Eager),
+        pointdata::storage::getStorageBackendTypeName(Points::StorageBackendType::Dense),
         pointdata::storage::getStorageBackendTypeName(Points::StorageBackendType::Tiled),
         pointdata::storage::getStorageBackendTypeName(Points::StorageBackendType::Sparse)
     };
@@ -32,7 +32,7 @@ QStringList storageBackendTypes()
 }
 
 StorageBackendAction::StorageBackendAction(QObject* parent, const Dataset<Points>& points) :
-    StorageBackendConfiguratorAction(parent, storageBackendTypes(), pointdata::storage::getStorageBackendTypeName(Points::StorageBackendType::Eager)),
+    StorageBackendConfiguratorAction(parent, storageBackendTypes(), pointdata::storage::getStorageBackendTypeName(Points::StorageBackendType::Dense)),
     _points(points)
 {
     connect(this, &StorageBackendConfiguratorAction::backendTypeChanged, this, [this](const QString& backendType) {

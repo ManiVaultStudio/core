@@ -24,7 +24,7 @@ class PointDataTiledStorage;
  * that tile's byte range. This separation allows deserialization to restore
  * the complete tile index immediately and defer decoding until a tile is
  * requested. The versioned representation is additive and does not replace
- * the legacy eager point-data format.
+ * the legacy dense point-data format.
  *
  * @author Thomas Kroes
  */
@@ -56,7 +56,7 @@ public:
      * Reconstructs tiled storage while retaining serialized tile metadata for
      * lazy loading. Packed tile files are opened without decoding their
      * payloads; each requested tile is decoded directly from its recorded byte
-     * range. The map is additive to the legacy eager point-data format;
+     * range. The map is additive to the legacy dense point-data format;
      * callers provide the matrix geometry and element size from the enclosing
      * point-data metadata. Older maps without a cache-capacity field use the
      * historical default of eight tile payloads.

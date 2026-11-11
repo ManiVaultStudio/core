@@ -684,7 +684,7 @@ void startWorkflow(QWidget* owner, const bool thorough, const std::vector<Points
 {
     auto results = std::make_shared<TestResults>();
     auto plan = std::make_unique<workflow::WorkflowPlan>(QObject::tr("Point-data %1 tests").arg(thorough ? QObject::tr("thorough") : QObject::tr("quick")));
-    constexpr Points::StorageBackendType allBackends[] = { Points::StorageBackendType::Eager, Points::StorageBackendType::Tiled, Points::StorageBackendType::Sparse };
+    constexpr Points::StorageBackendType allBackends[] = { Points::StorageBackendType::Dense, Points::StorageBackendType::Tiled, Points::StorageBackendType::Sparse };
 
     for (const auto backend : backends)
     {
@@ -758,7 +758,7 @@ void startWorkflow(QWidget* owner, const bool thorough, const std::vector<Points
 const bool registered = [] {
     mv::developer::registerMenuPopulator(QStringLiteral("PointData.Testing.RowFetch"), [](QMenu& menu, QWidget* owner) {
         auto populateMode = [owner](QMenu& modeMenu, const bool thorough) {
-            constexpr Points::StorageBackendType backends[] = { Points::StorageBackendType::Eager, Points::StorageBackendType::Tiled, Points::StorageBackendType::Sparse };
+            constexpr Points::StorageBackendType backends[] = { Points::StorageBackendType::Dense, Points::StorageBackendType::Tiled, Points::StorageBackendType::Sparse };
             auto runAll = [owner, thorough, backends] {
                 startWorkflow(owner, thorough, { backends[0], backends[1], backends[2] });
             };

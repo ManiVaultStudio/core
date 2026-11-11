@@ -4,7 +4,7 @@
 
 #include "TiledPointsStorageBackend.h"
 
-#include "../eager/EagerStorageBackendConversionAction.h"
+#include "../dense/DenseStorageBackendConversionAction.h"
 #include "../interface/StorageBackendConversionAction.h"
 #include "../sparse/SparseStorageBackendConversionAction.h"
 #include "TiledStorageBackendConversionAction.h"
@@ -152,8 +152,8 @@ std::unique_ptr<mv::gui::StorageBackendConversionAction> TiledPointsStorageBacke
         return std::make_unique<mv::gui::TiledStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _storage->elementSize(), configuration, true, true, _elementTypeIndex);
     }
 
-    if (targetType == StorageBackendType::Eager && _storage)
-        return std::make_unique<mv::gui::EagerStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _elementTypeIndex);
+    if (targetType == StorageBackendType::Dense && _storage)
+        return std::make_unique<mv::gui::DenseStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _elementTypeIndex);
 
     if (targetType == StorageBackendType::Sparse && _storage)
         return std::make_unique<mv::gui::SparseStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _elementTypeIndex);

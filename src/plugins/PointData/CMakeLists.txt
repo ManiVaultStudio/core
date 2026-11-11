@@ -87,14 +87,14 @@ set(POINTS_STORAGE_INTERFACE_SOURCES
     src/storage/interface/StorageBackendMemory.cpp
 )
 
-set(POINTS_STORAGE_EAGER_HEADERS
-    src/storage/eager/EagerPointsStorageBackend.h
-    src/storage/eager/EagerStorageBackendConversionAction.h
+set(POINTS_STORAGE_DENSE_HEADERS
+    src/storage/dense/DensePointsStorageBackend.h
+    src/storage/dense/DenseStorageBackendConversionAction.h
 )
 
-set(POINTS_STORAGE_EAGER_SOURCES
-    src/storage/eager/EagerPointsStorageBackend.cpp
-    src/storage/eager/EagerStorageBackendConversionAction.cpp
+set(POINTS_STORAGE_DENSE_SOURCES
+    src/storage/dense/DensePointsStorageBackend.cpp
+    src/storage/dense/DenseStorageBackendConversionAction.cpp
 )
 
 set(POINTS_STORAGE_SPARSE_HEADERS
@@ -134,7 +134,7 @@ set(POINTS_STORAGE_TILED_SOURCES
     src/storage/tiled/PointDataTiledSerialization.cpp
 )
 
-set(POINTS_STORAGE_HEADERS ${POINTS_STORAGE_INTERFACE_HEADERS} ${POINTS_STORAGE_EAGER_HEADERS} ${POINTS_STORAGE_SPARSE_HEADERS} ${POINTS_STORAGE_TILED_HEADERS})
+set(POINTS_STORAGE_HEADERS ${POINTS_STORAGE_INTERFACE_HEADERS} ${POINTS_STORAGE_DENSE_HEADERS} ${POINTS_STORAGE_SPARSE_HEADERS} ${POINTS_STORAGE_TILED_HEADERS})
 
 # Note: This nesting of folders is intentional to allow uniform header inclusion in all projects
 set(BFLOAT_HEADER
@@ -194,9 +194,9 @@ source_group(Storage\\Interface FILES
     ${POINTS_STORAGE_INTERFACE_HEADERS}
     ${POINTS_STORAGE_INTERFACE_SOURCES}
 )
-source_group(Storage\\Eager FILES
-    ${POINTS_STORAGE_EAGER_HEADERS}
-    ${POINTS_STORAGE_EAGER_SOURCES}
+source_group(Storage\\Dense FILES
+    ${POINTS_STORAGE_DENSE_HEADERS}
+    ${POINTS_STORAGE_DENSE_SOURCES}
 )
 source_group(Storage\\Sparse FILES
     ${POINTS_STORAGE_SPARSE_HEADERS}
@@ -209,7 +209,7 @@ source_group(Storage\\Tiled FILES
 source_group(BFloat FILES ${BFLOAT_HEADER})
 source_group(Aux FILES ${POINT_DATA_AUX})
 
-add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINTS_VIEW_WIDGETS} ${POINTS_STORAGE_HEADERS} ${POINTS_STORAGE_INTERFACE_SOURCES} ${POINTS_STORAGE_EAGER_SOURCES} ${POINTS_STORAGE_SPARSE_SOURCES} ${POINTS_STORAGE_TILED_SOURCES} ${POINT_DATA_AUX})
+add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINTS_VIEW_WIDGETS} ${POINTS_STORAGE_HEADERS} ${POINTS_STORAGE_INTERFACE_SOURCES} ${POINTS_STORAGE_DENSE_SOURCES} ${POINTS_STORAGE_SPARSE_SOURCES} ${POINTS_STORAGE_TILED_SOURCES} ${POINT_DATA_AUX})
 
 add_library(ManiVault::${POINTDATA} ALIAS ${POINTDATA})
 
@@ -264,8 +264,8 @@ install(FILES ${POINTS_STORAGE_INTERFACE_HEADERS}
     COMPONENT HEADERS
 )
 
-install(FILES ${POINTS_STORAGE_EAGER_HEADERS}
-    DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/eager/"
+install(FILES ${POINTS_STORAGE_DENSE_HEADERS}
+    DESTINATION "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/${POINTDATA}/storage/dense/"
     COMPONENT HEADERS
 )
 

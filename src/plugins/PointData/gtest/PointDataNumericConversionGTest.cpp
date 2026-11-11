@@ -52,17 +52,17 @@ struct HeadlessPointMatrix
 {
     mv::pointdata::storage::StorageBackendType backendType;
     std::uint32_t elementTypeIndex;
-    std::vector<std::uint8_t> eagerData;
+    std::vector<std::uint8_t> denseData;
     std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> tiledStorage;
     std::unique_ptr<mv::pointdata::storage::SparsePointsStorageBackend> sparseStorage;
 
     std::vector<std::uint8_t> getRow(const std::uint64_t row) const
     {
         const auto rowBytes = static_cast<std::size_t>(conversionColumns) * typeSizes[elementTypeIndex];
-        if (backendType == mv::pointdata::storage::StorageBackendType::Eager)
+        if (backendType == mv::pointdata::storage::StorageBackendType::Dense)
         {
             std::vector<std::uint8_t> values(rowBytes);
-            std::memcpy(values.data(), eagerData.data() + static_cast<std::size_t>(row) * rowBytes, rowBytes);
+            std::memcpy(values.data(), denseData.data() + static_cast<std::size_t>(row) * rowBytes, rowBytes);
             return values;
         }
 
@@ -98,9 +98,9 @@ bool isNonZero(const std::uint32_t typeIndex, const std::uint8_t* bytes)
 HeadlessPointMatrix makeBackendMatrix(const mv::pointdata::storage::StorageBackendType backendType, const std::uint32_t elementTypeIndex, std::vector<std::uint8_t> denseValues)
 {
     HeadlessPointMatrix matrix{ backendType, elementTypeIndex };
-    if (backendType == mv::pointdata::storage::StorageBackendType::Eager)
+    if (backendType == mv::pointdata::storage::StorageBackendType::Dense)
     {
-        matrix.eagerData = std::move(denseValues);
+        matrix.denseData = std::move(denseValues);
         return matrix;
     }
 
@@ -336,8 +336,8 @@ void runSourceType(const mv::pointdata::storage::StorageBackendType sourceBacken
 GTEST_TEST(PointDataNumericConversion, matchesTheInAppElementTypeMatrix)
 {
     constexpr std::array<const char*, numericTypeCount> typeNames{ "float", "bfloat16", "int32", "uint32", "int16", "uint16", "int8", "uint8" };
-    constexpr std::array backendTypes{ mv::pointdata::storage::StorageBackendType::Eager, mv::pointdata::storage::StorageBackendType::Tiled, mv::pointdata::storage::StorageBackendType::Sparse };
-    constexpr std::array<const char*, 3> backendNames{ "Eager", "Tiled", "Sparse" };
+    constexpr std::array backendTypes{ mv::pointdata::storage::StorageBackendType::Dense, mv::pointdata::storage::StorageBackendType::Tiled, mv::pointdata::storage::StorageBackendType::Sparse };
+    constexpr std::array<const char*, 3> backendNames{ "Dense", "Tiled", "Sparse" };
 
     for (std::size_t sourceBackendIndex = 0; sourceBackendIndex < backendTypes.size(); ++sourceBackendIndex)
     {

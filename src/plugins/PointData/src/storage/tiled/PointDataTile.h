@@ -30,7 +30,7 @@ struct TileDescriptor
     std::uint64_t              rows            = 0; /**< Number of rows in this tile. */
     std::uint64_t              columns         = 0; /**< Number of columns in this tile. */
     QVariantMap                blob;                /**< Serialized blob metadata and block index. */
-    QByteArray                 residentBytes;       /**< Optional in-memory payload for eager/generated tiles. */
+    QByteArray                 residentBytes;       /**< Optional in-memory payload for materialized/generated tiles. */
     mv::util::PackedBlobBlock  packedBlock;         /**< Optional independently encoded block in a packed blob file. */
     std::size_t                superTileIndex  = 0; /**< Index of the serialized super tile containing this tile. */
     std::uint64_t              superTileOffset = 0; /**< Legacy byte offset within a decoded super-tile payload. */

@@ -43,7 +43,7 @@ namespace mv
 
     namespace pointdata::storage
     {
-        class EagerPointsStorageBackend;
+        class DensePointsStorageBackend;
         class PointsStorageBackend;
     }
 
@@ -83,13 +83,13 @@ class Points;
  *
  * PointData is the storage-neutral entry point for datasets whose values are
  * arranged as rows of points and columns of dimensions. It retains the
- * established eager vector representation for compatibility with existing
+ * established dense vector representation for compatibility with existing
  * consumers, while also providing tiled and sparse representations for data
  * that should not be stored as one contiguous dense buffer.
  *
  * Storage-specific implementations remain hidden behind the backend contract.
  * Tiled and sparse storage are read-only; legacy raw-pointer and single-value
- * mutation APIs materialize backend data when a contiguous eager buffer is
+ * mutation APIs materialize backend data when a contiguous dense buffer is
  * required. Sparse storage retains a supported PointData element type and
  * stores values with compressed row or column indices. Sparse payloads are
  * serialized with their layout, indices, and typed value bytes; raw and tiled
@@ -312,7 +312,7 @@ public:
      * backend-specific tiled creation options are supplied for an empty
      * dataset, this operation initializes tiled storage instead. Existing
      * data can be converted to tiled storage with a configuration or
-     * materialized to eager storage when the active backend supports it.
+     * materialized to dense storage when the active backend supports it.
      * Backend-specific creation options can initialize an empty dataset
      * directly in that backend. Materializing lazy or sparse data requires
      * memory for the full dense matrix.
@@ -424,7 +424,7 @@ public:
      * Copies selected dimensions for every point into a caller-provided container.
      *
      * Values are written in point-major order, with dimensions in the order
-     * supplied by @p dimensionIndices. Non-eager backends are read through the
+     * supplied by @p dimensionIndices. Non-dense backends are read through the
      * storage interface without materializing a dense copy. The container must
      * be writable by index and large enough for getNumPoints() times the number
      * of selected dimensions. All dimension indices must be in range.
@@ -438,7 +438,7 @@ public:
         const auto dataLock = lockData();
 
         CheckDimensionIndices(dimensionIndices);
-        if (getStorageBackendType() != mv::pointdata::storage::StorageBackendType::Eager)
+        if (getStorageBackendType() != mv::pointdata::storage::StorageBackendType::Dense)
         {
             std::uint64_t resultIndex = 0;
             for (std::uint64_t pointIndex = 0; pointIndex < getNumPoints(); ++pointIndex)
@@ -473,7 +473,7 @@ public:
      * Copies selected dimensions for selected points into a caller-provided container.
      *
      * Values are written in the order of @p indices, with dimensions in the
-     * order supplied by @p dimensionIndices. Non-eager backends are read
+     * order supplied by @p dimensionIndices. Non-dense backends are read
      * without materializing a dense copy. The container must be writable by
      * index and large enough for indices.size() times the number of selected
      * dimensions. All point and dimension indices must be in range.
@@ -489,7 +489,7 @@ public:
 
         CheckDimensionIndices(dimensionIndices);
 
-        if (getStorageBackendType() != mv::pointdata::storage::StorageBackendType::Eager)
+        if (getStorageBackendType() != mv::pointdata::storage::StorageBackendType::Dense)
         {
             std::uint64_t resultIndex = 0;
             for (const auto pointIndex : indices)
@@ -729,9 +729,9 @@ private:
     void refreshStorageBackend();
     void clearStorageBackend();
 
-    PointDataAccessView getEagerRow(std::uint64_t row) const;
-    void visitEagerRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
-    float getEagerValueAt(std::size_t index) const;
+    PointDataAccessView getDenseRow(std::uint64_t row) const;
+    void visitDenseRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+    float getDenseValueAt(std::size_t index) const;
 
     void materializeStorageBackend(mv::pointdata::storage::StorageBackendProgressCallback progress = {});
     mutable std::recursive_mutex _dataMutex;
@@ -751,7 +751,7 @@ private: // Sparse data, experimental
     bool _isDense = true;
 
     friend class mv::legacy::PointDataLegacySerializer;
-    friend class mv::pointdata::storage::EagerPointsStorageBackend;
+    friend class mv::pointdata::storage::DensePointsStorageBackend;
     friend class Points;
 };
 
@@ -765,14 +765,14 @@ private: // Sparse data, experimental
  * Points is the public dataset-level facade for PointData. It represents a
  * complete point set, a subset selected by source indices, or a proxy that
  * combines several point datasets. The facade keeps consumers independent of
- * whether a concrete member uses eager vectors or read-only tiled storage and
+ * whether a concrete member uses dense vectors or read-only tiled storage and
  * translates logical row IDs when subsets or proxies are involved.
  *
  * The tiled and visitor APIs are intentionally exposed here first as an
  * experimental storage-neutral access layer. Consumers should use these
  * functions instead of reaching through the dataset to its PointData object.
  * Returned views are read-only and retain their payload through their lifetime
- * token; legacy raw-pointer and mutation paths preserve their existing eager
+ * token; legacy raw-pointer and mutation paths preserve their existing dense
  * materialization behavior.
  *
  * @author Thomas Kroes
@@ -1416,7 +1416,7 @@ public:
  * PointDataFactory connects the Points dataset type to the plugin manager and
  * keeps creation, metadata, and serialization discovery separate from the
  * PointData storage implementation. The factory supports the established
- * eager serialized representation while PointData may restore an additive
+ * dense serialized representation while PointData may restore an additive
  * tiled representation when present in a project.
  *
  * @author Thomas Kroes

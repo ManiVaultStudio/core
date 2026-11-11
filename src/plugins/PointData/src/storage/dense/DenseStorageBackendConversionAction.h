@@ -10,21 +10,21 @@ namespace mv::gui
 {
 
 /**
- * @brief Displays a dense-allocation preflight when converting a backend to eager storage.
+ * @brief Displays a dense-allocation preflight when converting a backend to dense storage.
  *
  * Estimates the destination matrix's dense byte size and compares it with
  * currently available physical memory where the operating system exposes it.
  * The reading can change before the conversion starts.
  */
-class POINTDATA_EXPORT EagerStorageBackendConversionAction final : public StorageBackendConversionAction
+class POINTDATA_EXPORT DenseStorageBackendConversionAction final : public StorageBackendConversionAction
 {
 public:
     /** Constructs an in-memory conversion preflight for a matrix with the supplied shape and current element type. */
-    EagerStorageBackendConversionAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::uint32_t currentElementTypeIndex);
+    DenseStorageBackendConversionAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::uint32_t currentElementTypeIndex);
 
-    /** Returns the eager backend type. */
+    /** Returns the dense backend type. */
     pointdata::storage::StorageBackendType getTargetBackendType() const override;
-    /** Returns no backend-specific options for eager storage. */
+    /** Returns no backend-specific options for dense storage. */
     pointdata::storage::StorageBackendConfigurationOptionsPtr getConversionOptions() const override;
     /** Returns false when the dense allocation exceeds addressable or currently available physical memory. */
     bool canApply() const override;

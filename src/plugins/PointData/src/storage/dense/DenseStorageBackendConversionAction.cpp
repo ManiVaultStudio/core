@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "EagerStorageBackendConversionAction.h"
+#include "DenseStorageBackendConversionAction.h"
 
 #include "../interface/StorageBackendMemory.h"
 
@@ -11,8 +11,8 @@
 namespace mv::gui
 {
 
-EagerStorageBackendConversionAction::EagerStorageBackendConversionAction(QObject* parent, const std::uint64_t rows, const std::uint64_t columns, const std::uint32_t currentElementTypeIndex) :
-    StorageBackendConversionAction(parent, "In-memory storage", currentElementTypeIndex),
+DenseStorageBackendConversionAction::DenseStorageBackendConversionAction(QObject* parent, const std::uint64_t rows, const std::uint64_t columns, const std::uint32_t currentElementTypeIndex) :
+    StorageBackendConversionAction(parent, "Dense storage", currentElementTypeIndex),
     _rows(rows),
     _columns(columns),
     _memoryObservationAction(this)
@@ -20,11 +20,11 @@ EagerStorageBackendConversionAction::EagerStorageBackendConversionAction(QObject
     setShowLabels(true);
     addAction(&_memoryObservationAction);
 
-    connect(this, &StorageBackendConversionAction::optionsChanged, this, &EagerStorageBackendConversionAction::updateMemoryObservation);
+    connect(this, &StorageBackendConversionAction::optionsChanged, this, &DenseStorageBackendConversionAction::updateMemoryObservation);
     updateMemoryObservation();
 }
 
-void EagerStorageBackendConversionAction::updateMemoryObservation()
+void DenseStorageBackendConversionAction::updateMemoryObservation()
 {
     const auto elementSize = getTargetElementSize();
     const auto invalidDimensions = _rows != 0 && _columns > (std::numeric_limits<std::uint64_t>::max)() / _rows;
@@ -55,19 +55,19 @@ void EagerStorageBackendConversionAction::updateMemoryObservation()
         _memoryObservationAction.setMessage(util::SeverityLevel::Warning, "Memory", QString("Dense materialization is estimated at %1, but currently available physical memory could not be determined. The conversion may fail if enough memory is unavailable.").arg(util::getNoBytesHumanReadable(denseBytes)));
 }
 
-pointdata::storage::StorageBackendType EagerStorageBackendConversionAction::getTargetBackendType() const
+pointdata::storage::StorageBackendType DenseStorageBackendConversionAction::getTargetBackendType() const
 {
-    return pointdata::storage::StorageBackendType::Eager;
+    return pointdata::storage::StorageBackendType::Dense;
 }
 
-pointdata::storage::StorageBackendConfigurationOptionsPtr EagerStorageBackendConversionAction::getConversionOptions() const
+pointdata::storage::StorageBackendConfigurationOptionsPtr DenseStorageBackendConversionAction::getConversionOptions() const
 {
     auto options = std::make_shared<pointdata::storage::StorageBackendConfigurationOptions>();
     options->targetElementTypeIndex = getTargetElementTypeIndex();
     return options;
 }
 
-bool EagerStorageBackendConversionAction::canApply() const
+bool DenseStorageBackendConversionAction::canApply() const
 {
     return _canApply;
 }

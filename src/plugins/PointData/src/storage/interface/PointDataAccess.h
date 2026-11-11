@@ -9,7 +9,7 @@
  * @brief Read-only storage-neutral view over point-data values.
  *
  * PointDataAccessView is the common value-passing type used by the row,
- * column, and range visitor APIs. It can refer to eager point data, a tiled
+ * column, and range visitor APIs. It can refer to dense point data, a tiled
  * payload, or a temporary conversion buffer without exposing the backing
  * storage implementation to consumers. The view describes a row-major
  * rectangle and includes the element representation needed to interpret its

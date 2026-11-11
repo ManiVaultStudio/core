@@ -29,9 +29,9 @@ namespace mv::pointdata::storage
  * @brief Storage-neutral access contract for one concrete point dataset.
  *
  * The backend owns the physical representation of a row-major point matrix.
- * PointData owns the backend and preserves the established eager APIs around
+ * PointData owns the backend and preserves the established dense APIs around
  * it, while Points remains responsible for logical facade behavior such as
- * subsets and proxy datasets. Read operations can be implemented by eager
+ * subsets and proxy datasets. Read operations can be implemented by dense
  * and lazy representations alike; optional write operations fail explicitly
  * until a backend implements them.
  *

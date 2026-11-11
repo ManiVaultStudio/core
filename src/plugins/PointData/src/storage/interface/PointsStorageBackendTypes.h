@@ -22,7 +22,7 @@ inline constexpr std::size_t defaultTileCacheCapacityBytes = 512U * 1024U * 1024
 /** @brief Identifies a concrete physical representation used by point data. */
 enum class StorageBackendType
 {
-    Eager,   /**< Fully materialized dense point-data vectors. */
+    Dense,   /**< Fully materialized dense point-data vectors. */
     Tiled,   /**< Read-only rectangular tiles loaded on demand. */
     Sparse   /**< Read-only compressed sparse point data. */
 };
@@ -37,8 +37,8 @@ inline QString getStorageBackendTypeName(const StorageBackendType type)
 {
     switch (type)
     {
-        case StorageBackendType::Eager:
-            return QStringLiteral("Eager");
+        case StorageBackendType::Dense:
+            return QStringLiteral("Dense");
 
         case StorageBackendType::Tiled:
             return QStringLiteral("Tiled");
@@ -53,13 +53,17 @@ inline QString getStorageBackendTypeName(const StorageBackendType type)
 /**
  * @brief Parses an exact canonical storage backend name.
  *
- * The comparison is case-sensitive and does not trim whitespace.
+ * The comparison is case-sensitive and does not trim whitespace. The legacy
+ * name "Eager" is accepted as an alias for Dense so older saved settings remain valid.
  * @param typeName Canonical name returned by getStorageBackendTypeName().
  * @return Matching concrete type, or std::nullopt if the name is not recognized.
  */
 inline std::optional<StorageBackendType> getStorageBackendType(const QString& typeName)
 {
-    constexpr std::array types = { StorageBackendType::Eager, StorageBackendType::Tiled, StorageBackendType::Sparse };
+    if (typeName == QStringLiteral("Eager"))
+        return StorageBackendType::Dense;
+
+    constexpr std::array types = { StorageBackendType::Dense, StorageBackendType::Tiled, StorageBackendType::Sparse };
 
     for (const auto type : types)
     {
@@ -78,7 +82,7 @@ enum class StorageBackendCapability : std::uint32_t
     RangeAccess    = 1u << 1,  /**< Rectangular ranges can be visited. */
     Lazy           = 1u << 2,  /**< Data may be loaded or decoded on demand. */
     Writable       = 1u << 3,  /**< The backend supports mutation without materialization. */
-    Materializable = 1u << 4   /**< The backend can be converted to eager storage. */
+    Materializable = 1u << 4   /**< The backend can be converted to dense storage. */
 };
 
 using StorageBackendCapabilities = std::uint32_t;
@@ -154,7 +158,7 @@ constexpr StorageBackendCapabilities getStorageBackendCapabilities(const Storage
 {
     switch (type)
     {
-        case StorageBackendType::Eager:
+        case StorageBackendType::Dense:
             return StorageBackendCapability::RandomAccess | StorageBackendCapability::RangeAccess | StorageBackendCapability::Writable | StorageBackendCapability::Materializable;
 
         case StorageBackendType::Tiled:

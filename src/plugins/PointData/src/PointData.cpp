@@ -9,7 +9,7 @@
 #include "actions/InfoAction.h"
 #include "actions/PointsAction.h"
 #include "DimensionNamesSerializer.h"
-#include "storage/eager/EagerPointsStorageBackend.h"
+#include "storage/dense/DensePointsStorageBackend.h"
 #include "storage/interface/PointDataNumericConversion.h"
 #include "storage/interface/StorageBackendConversionAction.h"
 #include "storage/sparse/SparseStorageBackendConversionAction.h"
@@ -123,7 +123,7 @@ PointData::ElementTypeSpecifier PointData::elementTypeSpecifier(const QString& t
 
 PointData::PointData(mv::plugin::PluginFactory* factory) :
     RawData(factory, PointType),
-    _storageBackend(std::make_unique<mv::pointdata::storage::EagerPointsStorageBackend>(*this))
+    _storageBackend(std::make_unique<mv::pointdata::storage::DensePointsStorageBackend>(*this))
 {
 }
 
@@ -186,7 +186,7 @@ void PointData::init()
 
 void PointData::refreshStorageBackend()
 {
-    _storageBackend = std::make_unique<mv::pointdata::storage::EagerPointsStorageBackend>(*this);
+    _storageBackend = std::make_unique<mv::pointdata::storage::DensePointsStorageBackend>(*this);
 }
 
 void PointData::clearStorageBackend()
@@ -209,7 +209,7 @@ std::uint64_t PointData::getNumPoints() const
         return 0;
     }
 
-    if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Eager)
+    if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Dense)
         return _storageBackend->getNumPoints();
     if (_isDense)
         return static_cast<std::uint64_t>(getSizeOfVector() / _numDimensions);
@@ -226,7 +226,7 @@ std::uint64_t PointData::getNumDimensions() const
 std::uint64_t PointData::getNumberOfElements() const
 {
     const auto dataLock = lockData();
-    if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Eager)
+    if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Dense)
         return _storageBackend->getNumPoints() * _storageBackend->getNumDimensions();
 
     return getSizeOfVector();
@@ -268,7 +268,7 @@ pointdata::storage::StorageBackendType PointData::getStorageBackendType() const
 {
     const auto lock = lockData();
 
-    return _storageBackend ? _storageBackend->getType() : pointdata::storage::StorageBackendType::Eager;
+    return _storageBackend ? _storageBackend->getType() : pointdata::storage::StorageBackendType::Dense;
 }
 
 pointdata::storage::StorageBackendCapabilities PointData::getStorageBackendCapabilities() const
@@ -290,7 +290,7 @@ void PointData::initializeStorageBackend(std::unique_ptr<pointdata::storage::Poi
     const auto lock = lockData();
     if (!storageBackend)
         throw std::invalid_argument("Cannot install an empty point-data storage backend");
-    if (_numRows != 0 || getSizeOfVector() != 0 || (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Eager))
+    if (_numRows != 0 || getSizeOfVector() != 0 || (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Dense))
         throw std::invalid_argument("Point-data storage creation requires an empty dataset");
 
     const auto elementTypeIndex = storageBackend->getElementTypeIndex();
@@ -362,7 +362,7 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
 
         if (creation)
         {
-            if (_numRows != 0 || getSizeOfVector() != 0 || (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Eager))
+            if (_numRows != 0 || getSizeOfVector() != 0 || (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Dense))
                 throw std::invalid_argument("Point-data storage creation requires an empty dataset");
 
             auto tiledStorage = pointdata::storage::TiledPointsStorageBackend::create(*creation, progress);
@@ -522,19 +522,19 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
         return;
     }
 
-    if (type == pointdata::storage::StorageBackendType::Eager)
+    if (type == pointdata::storage::StorageBackendType::Dense)
     {
         if (targetElementTypeIndex != sourceElementTypeIndex)
         {
             const auto rows = _storageBackend ? _storageBackend->getNumPoints() : _numRows;
             const auto columns = _storageBackend ? _storageBackend->getNumDimensions() : _numDimensions;
             if (rows != 0 && columns > std::numeric_limits<std::uint64_t>::max() / rows)
-                throw std::overflow_error("Eager conversion dimensions overflow the dense element count");
+                throw std::overflow_error("Dense conversion dimensions overflow the dense element count");
             if (columns > std::numeric_limits<std::size_t>::max() / targetElementSize)
-                throw std::overflow_error("Eager conversion row exceeds the process address space");
+                throw std::overflow_error("Dense conversion row exceeds the process address space");
             const auto elementCount = rows * columns;
             if (elementCount > std::numeric_limits<std::size_t>::max() / targetElementSize)
-                throw std::overflow_error("Eager conversion exceeds the process address space");
+                throw std::overflow_error("Dense conversion exceeds the process address space");
 
             VariantOfVectors convertedVectors;
             setIndexOfVariant(convertedVectors, targetElementTypeIndex);
@@ -691,7 +691,7 @@ void PointData::makeTiled(const std::size_t rowTileSize, const std::size_t colum
 
     materializeStorageBackend();
 
-    if (_isDense && (!_storageBackend || _storageBackend->getType() == pointdata::storage::StorageBackendType::Eager) && _numDimensions > 0)
+    if (_isDense && (!_storageBackend || _storageBackend->getType() == pointdata::storage::StorageBackendType::Dense) && _numDimensions > 0)
     {
         const auto rows = static_cast<std::uint64_t>(getSizeOfVector() / _numDimensions);
 
@@ -729,7 +729,7 @@ PointDataAccessView makeTypedAccessView(const void* source, const std::uint64_t 
 
 }
 
-PointDataAccessView PointData::getEagerRow(const std::uint64_t row) const
+PointDataAccessView PointData::getDenseRow(const std::uint64_t row) const
 {
     if (row >= getNumPoints())
         return {};
@@ -821,7 +821,7 @@ void PointData::visitColumns(const std::vector<std::uint64_t>& columnIds, const 
     }
 }
 
-void PointData::visitEagerRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
+void PointData::visitDenseRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
 {
     if (!visitor || firstRow > getNumPoints() || rowCount > getNumPoints() - firstRow ||
         firstColumn > _numDimensions || columnCount > _numDimensions - firstColumn)
@@ -880,7 +880,7 @@ void PointData::setRange(const std::uint64_t firstRow, const std::uint64_t rowCo
 
 void PointData::materializeStorageBackend(pointdata::storage::StorageBackendProgressCallback progress)
 {
-    if (!_storageBackend || _storageBackend->getType() == pointdata::storage::StorageBackendType::Eager)
+    if (!_storageBackend || _storageBackend->getType() == pointdata::storage::StorageBackendType::Dense)
         return;
 
     const auto rows        = _storageBackend->getNumPoints();
@@ -933,7 +933,7 @@ void PointData::setDimensionNames(const std::vector<QString>& dimNames)
         qWarning() << "PointData: Number of dimension names does not equal the number of data dimensions";
 }
 
-float PointData::getEagerValueAt(const std::size_t index) const
+float PointData::getDenseValueAt(const std::size_t index) const
 {
     // Intentionally not locking here.
     //
@@ -1244,7 +1244,7 @@ void PointData::extractFullDataForDimension(std::vector<float>& result, const in
 
     result.resize(getNumPoints());
 
-    if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Eager)
+    if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Dense)
     {
         for (std::size_t i = 0; i < result.size(); ++i)
             result[i] = getValueAt(i * _numDimensions + static_cast<std::size_t>(dimensionIndex));
@@ -1275,7 +1275,7 @@ void PointData::extractFullDataForDimensions(std::vector<mv::Vector2f>& result, 
 
         result.resize(getNumPoints());
 
-        if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Eager)
+        if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Dense)
         {
             for (std::size_t i = 0; i < result.size(); ++i)
             {
@@ -1316,7 +1316,7 @@ void PointData::extractDataForDimension(std::vector<float>& result, const int di
 
     result.resize(indices.size());
 
-    if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Eager)
+    if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Dense)
     {
         for (std::size_t i = 0; i < result.size(); ++i)
             result[i] = getValueAt(static_cast<std::size_t>(indices[i]) * _numDimensions + static_cast<std::size_t>(dimensionIndex));
@@ -1345,7 +1345,7 @@ void PointData::extractDataForDimensions(std::vector<mv::Vector2f>& result, cons
 
     result.resize(indices.size());
 
-    if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Eager)
+    if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Dense)
     {
         for (std::size_t i = 0; i < result.size(); ++i)
         {

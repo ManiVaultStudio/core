@@ -292,7 +292,7 @@ biovault::bfloat16_t convertValue(const float value)
 }
 
 template <typename T>
-std::vector<T> makeEagerData(const PopulationSettings& population, const std::uint64_t rows, const std::uint64_t columns, const storage::StorageBackendProgressCallback& progress)
+std::vector<T> makeDenseData(const PopulationSettings& population, const std::uint64_t rows, const std::uint64_t columns, const storage::StorageBackendProgressCallback& progress)
 {
     if (progress)
         progress(0.0f);
@@ -323,40 +323,40 @@ std::vector<T> makeEagerData(const PopulationSettings& population, const std::ui
     return values;
 }
 
-void populateEager(Points& points, const Points::ElementTypeSpecifier type, const PopulationSettings& population, const std::uint64_t rows, const std::uint64_t columns, const storage::StorageBackendProgressCallback& progress)
+void populateDense(Points& points, const Points::ElementTypeSpecifier type, const PopulationSettings& population, const std::uint64_t rows, const std::uint64_t columns, const storage::StorageBackendProgressCallback& progress)
 {
     switch (type)
     {
         case Points::ElementTypeSpecifier::float32:
-            points.setData(makeEagerData<float>(population, rows, columns, progress), columns);
+            points.setData(makeDenseData<float>(population, rows, columns, progress), columns);
             break;
 
         case Points::ElementTypeSpecifier::bfloat16:
-            points.setData(makeEagerData<biovault::bfloat16_t>(population, rows, columns, progress), columns);
+            points.setData(makeDenseData<biovault::bfloat16_t>(population, rows, columns, progress), columns);
             break;
 
         case Points::ElementTypeSpecifier::int32:
-            points.setData(makeEagerData<std::int32_t>(population, rows, columns, progress), columns);
+            points.setData(makeDenseData<std::int32_t>(population, rows, columns, progress), columns);
             break;
 
         case Points::ElementTypeSpecifier::uint32:
-            points.setData(makeEagerData<std::uint32_t>(population, rows, columns, progress), columns);
+            points.setData(makeDenseData<std::uint32_t>(population, rows, columns, progress), columns);
             break;
 
         case Points::ElementTypeSpecifier::int16:
-            points.setData(makeEagerData<std::int16_t>(population, rows, columns, progress), columns);
+            points.setData(makeDenseData<std::int16_t>(population, rows, columns, progress), columns);
             break;
 
         case Points::ElementTypeSpecifier::uint16:
-            points.setData(makeEagerData<std::uint16_t>(population, rows, columns, progress), columns);
+            points.setData(makeDenseData<std::uint16_t>(population, rows, columns, progress), columns);
             break;
 
         case Points::ElementTypeSpecifier::int8:
-            points.setData(makeEagerData<std::int8_t>(population, rows, columns, progress), columns);
+            points.setData(makeDenseData<std::int8_t>(population, rows, columns, progress), columns);
             break;
 
         case Points::ElementTypeSpecifier::uint8:
-            points.setData(makeEagerData<std::uint8_t>(population, rows, columns, progress), columns);
+            points.setData(makeDenseData<std::uint8_t>(population, rows, columns, progress), columns);
             break;
     }
 
@@ -480,7 +480,7 @@ public:
  * strategy, dimension-name style, storage backend, tile geometry, and cache capacity together so the
  * developer menu can create repeatable large-data scenarios without embedding
  * configuration in the generator callback. It supports both fully materialized
- * eager data and generator-backed tiled data. Dataset dimensions and, for tiled
+ * dense data and generator-backed tiled data. Dataset dimensions and, for tiled
  * data, tile dimensions, cache capacity, and packed-tile geometry accept
  * comma-separated lists; the generator creates the Cartesian product of those
  * values.
@@ -501,7 +501,7 @@ public:
         _dimensionNameAction(&_settingsGroupAction, "Dimension names", { "DIM_<index>", "Lorem ipsum" }, "DIM_<index>"),
         _typeAction(&_settingsGroupAction, "Element type"),
         _populationAction(&_settingsGroupAction),
-        _storageBackendAction(&_settingsGroupAction, "Storage backend", { "Eager", "Tiled" }, "Tiled"),
+        _storageBackendAction(&_settingsGroupAction, "Storage backend", { "Dense", "Tiled" }, "Tiled"),
         _tileAsymmetryAction(&_settingsGroupAction),
         _rowTileSizeAction(&_settingsGroupAction, "Tile heights", "256"),
         _columnTileSizeAction(&_settingsGroupAction, "Tile widths", "8"),
@@ -550,7 +550,7 @@ public:
         _columnsAction.setToolTip("Number of dimensions, or columns, in each generated dataset. More columns increase the raw footprint and can make column access and wide row access more expensive; comma-separated values create multiple sizes.");
         _dimensionNameAction.setToolTip("How dimensions are named. This affects labels and metadata, but has no meaningful effect on numeric access performance.");
         _typeAction.setToolTip("Element type stored for every point value. Smaller types reduce disk and memory traffic; larger or more precise types increase storage, I/O, and decoding work.");
-        _storageBackendAction.setToolTip("Storage representation. Eager storage keeps the complete dataset materialized, while Tiled storage loads bounded tiles on demand and is the relevant choice for tile and cache experiments.");
+        _storageBackendAction.setToolTip("Storage representation. Dense storage keeps the complete dataset materialized, while Tiled storage loads bounded tiles on demand and is the relevant choice for tile and cache experiments.");
         _tileAsymmetryAction.setToolTip("Balances tile shape between row-oriented and column-oriented access. Row-oriented tiles can accelerate contiguous row access, while column-oriented tiles can accelerate contiguous column access; the wrong orientation can increase tile reads.");
         _rowTileSizeAction.setToolTip("Number of dataset rows in each tile. Larger values help contiguous row scans but make random access fetch more unrelated data; comma-separated values create one dataset for every combination.");
         _columnTileSizeAction.setToolTip("Number of dataset columns in each tile. Larger values help contiguous column access but increase the data fetched for individual values or narrow column requests; comma-separated values create one dataset for every combination.");
@@ -890,7 +890,7 @@ private:
 
             if (!isTiled())
             {
-                _estimateAction.setString(QString("Storage backend: Eager\nConfigurations: %1\nFirst size: %2x%3\nRaw size: %4")
+                _estimateAction.setString(QString("Storage backend: Dense\nConfigurations: %1\nFirst size: %2x%3\nRaw size: %4")
                     .arg(configurations.size())
                     .arg(configurations.front().rows)
                     .arg(configurations.front().columns)
@@ -953,7 +953,7 @@ private:
 void PointDataPhantomGenerator::populateMenu(QMenu& menu, QWidget* owner)
 {
     auto* action = menu.addAction(mv::util::StyledIcon("table"), QObject::tr("Phantom points…"));
-    action->setToolTip(QObject::tr("Create a synthetic eager or tiled points dataset"));
+    action->setToolTip(QObject::tr("Create a synthetic dense or tiled points dataset"));
     QObject::connect(action, &QAction::triggered, owner, [owner] {
         PhantomDialog dialog(owner);
         const auto createDatasets = [&dialog] {
@@ -1005,7 +1005,7 @@ void PointDataPhantomGenerator::populateMenu(QMenu& menu, QWidget* owner)
                         dataset->convertToStorageBackend(Points::StorageBackendType::Tiled, creation, updateProgress);
                     }
                     else
-                        populateEager(*dataset, type, population, configuration.rows, configuration.columns, updateProgress);
+                        populateDense(*dataset, type, population, configuration.rows, configuration.columns, updateProgress);
 
                     dataset->setDimensionNames(makeDimensionNames(dialog.dimensionNameType(), configuration.columns));
                     mv::events().notifyDatasetDataChanged(dataset);
@@ -1023,7 +1023,7 @@ void PointDataPhantomGenerator::populateMenu(QMenu& menu, QWidget* owner)
             mv::help().addNotification(QObject::tr("Phantom points datasets created"),
                 QObject::tr("Created %1 %2 dataset%3.")
                     .arg(configurations.size())
-                    .arg(dialog.isTiled() ? QObject::tr("tiled") : QObject::tr("eager"))
+                    .arg(dialog.isTiled() ? QObject::tr("tiled") : QObject::tr("dense"))
                     .arg(configurations.size() == 1 ? QString() : QStringLiteral("s")), mv::util::StyledIcon("check"));
         };
 

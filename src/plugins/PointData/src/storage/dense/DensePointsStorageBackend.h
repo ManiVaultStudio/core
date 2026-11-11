@@ -14,7 +14,7 @@ namespace pointdata::storage
 {
 
 /**
- * @brief Transitional backend adapter for PointData's existing eager vectors.
+ * @brief Transitional backend adapter for PointData's existing dense vectors.
  *
  * The adapter intentionally does not own the existing variant-of-vectors yet.
  * PointData remains the owner during this migration step, which preserves
@@ -24,7 +24,7 @@ namespace pointdata::storage
  *
  * @author Thomas Kroes
  */
-class POINTDATA_EXPORT EagerPointsStorageBackend final : public PointsStorageBackend
+class POINTDATA_EXPORT DensePointsStorageBackend final : public PointsStorageBackend
 {
 public:
     /**
@@ -32,17 +32,17 @@ public:
      *
      * The referenced PointData object must outlive this backend instance.
      */
-    explicit EagerPointsStorageBackend(const ::PointData& pointData);
+    explicit DensePointsStorageBackend(const ::PointData& pointData);
 
-    /** Returns the eager backend type. */
+    /** Returns the dense backend type. */
     StorageBackendType getType() const override;
 
-    /** Returns the eager backend capabilities, including materialization. */
+    /** Returns the dense backend capabilities, including materialization. */
     StorageBackendCapabilities getCapabilities() const override;
 
     /** Creates conversion controls for a supported target backend. */
     std::unique_ptr<mv::gui::StorageBackendConversionAction> createConversionAction(StorageBackendType targetType, QObject* parent) const override;
-    /** Rejects configuration because eager storage has no backend-owned options yet. */
+    /** Rejects configuration because dense storage has no backend-owned options yet. */
     void applyConfiguration(const StorageBackendConfigurationOptionsPtr& options) override;
     /** Returns the number of rows in the referenced PointData object. */
     std::uint64_t getNumPoints() const override;
@@ -62,17 +62,17 @@ public:
     /** Returns one row as a lifetime-safe read-only view. */
     PointDataAccessView getRow(std::uint64_t row) const override;
 
-    /** Visits a bounded row-major range in the referenced eager data. */
+    /** Visits a bounded row-major range in the referenced dense data. */
     void visitRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const override;
 
     /** Reads one row-major element and converts it to float. */
     float getValueAt(std::uint64_t flatIndex) const override;
 
-    /** Copies the complete eager matrix to the caller-owned destination buffer. */
+    /** Copies the complete dense matrix to the caller-owned destination buffer. */
     void materialize(char* destination) const override;
 
 private:
-    const ::PointData& _pointData; /**< Existing eager PointData owner. */
+    const ::PointData& _pointData; /**< Existing dense PointData owner. */
 };
 
 }

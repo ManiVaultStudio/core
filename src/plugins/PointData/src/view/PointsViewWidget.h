@@ -37,7 +37,7 @@ class Points;
  *
  * The widget is a diagnostic consumer of the storage-neutral PointData access
  * API. It fetches only the visible row and column window after table
- * navigation and can inspect both eager and tiled datasets. This makes the
+ * navigation and can inspect both dense and tiled datasets. This makes the
  * plugin useful as a basic point-data browser and as a manual test surface
  * for lazy loading behavior.
  *
