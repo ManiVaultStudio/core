@@ -27,6 +27,16 @@
 
 namespace
 {
+    QColor getSeverityColor(const mv::util::SeverityLevel severity)
+    {
+        switch (severity) {
+            case mv::util::SeverityLevel::Warning: return QColor(196, 150, 20);
+            case mv::util::SeverityLevel::Error:   return QColor(196, 32, 32);
+            case mv::util::SeverityLevel::Fatal:   return QColor(150, 0, 0);
+            default:                               return {};
+        }
+    }
+
     /**
      * @brief Converts an sRGB channel to linear space.
      * @param value Color channel value in the range 0-255.
@@ -99,8 +109,16 @@ namespace
 namespace mv::util
 {
 
+Notification::NotificationWidget::NotificationWidget(const QColor& accentColor, QWidget* parent) :
+    QWidget(parent),
+    _accentColor(accentColor)
+{
+}
+
 void Notification::NotificationWidget::paintEvent(QPaintEvent* event)
 {
+    Q_UNUSED(event);
+
     QPainter painter(this);
 
     painter.setRenderHint(QPainter::Antialiasing);
@@ -115,6 +133,18 @@ void Notification::NotificationWidget::paintEvent(QPaintEvent* event)
     path.addRoundedRect(rect().adjusted(1, 1, -1, -1), radius, radius);
 
     painter.fillPath(path, windowColor);
+
+    if (_accentColor.isValid()) {
+        auto tint = _accentColor;
+        tint.setAlpha(24);
+        painter.fillPath(path, tint);
+
+        painter.save();
+        painter.setClipPath(path);
+        painter.fillRect(QRect(1, 1, 4, height() - 2), _accentColor);
+        painter.restore();
+    }
+
     painter.setPen(QPen(borderColor, 1));
     painter.drawPath(path);
 }
@@ -127,7 +157,7 @@ QSize Notification::NotificationWidget::sizeHint() const
     };
 }
 
-Notification::Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent) :
+Notification::Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent, const SeverityLevel severity) :
     QWidget(parent),
     _icon(icon),
     _title(title),
@@ -156,7 +186,7 @@ Notification::Notification(const QString& title, const QString& description, con
     }
 
     auto mainLayout                 = new QVBoxLayout();
-    auto notificationWidget         = new NotificationWidget();
+    auto notificationWidget         = new NotificationWidget(getSeverityColor(severity));
     auto closePushButton            = new QToolButton(this);
 
     closePushButton->setFocusPolicy(Qt::NoFocus);

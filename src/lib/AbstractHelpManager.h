@@ -118,7 +118,7 @@ public:
      * @param durationType Duration type of the notification
      * @param delayMs Delay in milliseconds before the notification is shown
      */
-    virtual void addNotification(const QString& title, const QString& description, const QIcon& icon = QIcon(), const util::Notification::DurationType& durationType = util::Notification::DurationType::Calculated, std::int32_t delayMs = 0) = 0;
+    virtual void addNotification(const QString& title, const QString& description, const QIcon& icon = QIcon(), const util::Notification::DurationType& durationType = util::Notification::DurationType::Calculated, std::int32_t delayMs = 0, util::SeverityLevel severity = util::SeverityLevel::Info) = 0;
 
     /**
      * Add notification link handler for \p route

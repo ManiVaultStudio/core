@@ -5,12 +5,14 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+#include "SeverityLevel.h"
 
 #include "Task.h"
 
 #include "actions/TaskAction.h"
 
 #include <QWidget>
+#include <QColor>
 
 namespace mv::util
 {
@@ -44,7 +46,7 @@ protected:
     public:
 
         /** Inherit QWidget constructors. */
-        using QWidget::QWidget;
+        explicit NotificationWidget(const QColor& accentColor, QWidget* parent = nullptr);
 
         /**
          * @brief Paints the rounded notification background.
@@ -57,6 +59,9 @@ protected:
          * @return Size hint for the notification background widget.
          */
         [[nodiscard]] QSize sizeHint() const override;
+
+    private:
+        QColor _accentColor;
     };
 
 public:
@@ -79,7 +84,7 @@ public:
      * @param durationType Display duration policy.
      * @param parent Optional parent widget.
      */
-    explicit Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent = nullptr);
+    explicit Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent = nullptr, SeverityLevel severity = SeverityLevel::Info);
 
     /**
      * @brief Constructs a task notification.
