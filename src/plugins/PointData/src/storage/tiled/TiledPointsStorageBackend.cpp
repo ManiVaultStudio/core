@@ -16,6 +16,7 @@
 #include <stdexcept>
 
 #include <workflow/WorkflowPlan.h>
+#include <workflow/WorkflowExecutionContext.h>
 
 namespace mv::pointdata::storage
 {

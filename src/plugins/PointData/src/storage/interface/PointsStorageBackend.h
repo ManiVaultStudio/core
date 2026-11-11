@@ -7,7 +7,7 @@
 #include "PointDataAccess.h"
 #include "PointsStorageBackendTypes.h"
 
-#include <pointdata_export.h>
+#include <PointData/pointdata_export.h>
 
 #include <cstddef>
 #include <cstdint>
