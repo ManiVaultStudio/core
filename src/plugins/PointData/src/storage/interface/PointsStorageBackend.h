@@ -77,6 +77,9 @@ public:
     /** Returns the stored element-type index used by PointDataAccessView. */
     virtual std::uint32_t getElementTypeIndex() const = 0;
 
+    /** Returns the physical payload size represented by this backend in bytes. */
+    virtual std::uint64_t getStorageSizeBytes() const = 0;
+
     /** Returns one row as a lifetime-safe read-only view. */
     virtual PointDataAccessView getRow(std::uint64_t row) const = 0;
 

@@ -72,6 +72,13 @@ std::uint32_t EagerPointsStorageBackend::getElementTypeIndex() const
     return static_cast<std::uint32_t>(_pointData._variantOfVectors.index());
 }
 
+std::uint64_t EagerPointsStorageBackend::getStorageSizeBytes() const
+{
+    return std::visit([](const auto& vector) {
+        return static_cast<std::uint64_t>(vector.size()) * sizeof(typename std::decay_t<decltype(vector)>::value_type);
+    }, _pointData._variantOfVectors);
+}
+
 PointDataAccessView EagerPointsStorageBackend::getRow(const std::uint64_t row) const
 {
     return _pointData.getEagerRow(row);

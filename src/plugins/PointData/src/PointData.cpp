@@ -194,12 +194,6 @@ void PointData::clearStorageBackend()
     _storageBackend.reset();
 }
 
-std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> PointData::getTiledStorage() const
-{
-    const auto* tiledBackend = dynamic_cast<const mv::pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get());
-    return tiledBackend ? tiledBackend->getStorage() : nullptr;
-}
-
 mv::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) const
 {
     return mv::Dataset<DatasetImpl>(new Points(getName(), true, guid));
@@ -215,9 +209,7 @@ std::uint64_t PointData::getNumPoints() const
         return 0;
     }
 
-    if (const auto tiledStorage = getTiledStorage())
-        return tiledStorage->rows();
-    if (_storageBackend && _storageBackend->getType() == pointdata::storage::StorageBackendType::Sparse)
+    if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Eager)
         return _storageBackend->getNumPoints();
     if (_isDense)
         return static_cast<std::uint64_t>(getSizeOfVector() / _numDimensions);
@@ -234,9 +226,7 @@ std::uint64_t PointData::getNumDimensions() const
 std::uint64_t PointData::getNumberOfElements() const
 {
     const auto dataLock = lockData();
-    if (const auto tiledStorage = getTiledStorage())
-        return tiledStorage->rows() * tiledStorage->columns();
-    if (_storageBackend && _storageBackend->getType() == pointdata::storage::StorageBackendType::Sparse)
+    if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Eager)
         return _storageBackend->getNumPoints() * _storageBackend->getNumDimensions();
 
     return getSizeOfVector();
@@ -247,10 +237,8 @@ std::uint64_t PointData::getRawDataSize() const
 {
     const auto dataLock = lockData();
 
-    if (const auto tiledStorage = getTiledStorage())
-        return getNumberOfElements() * tiledStorage->elementSize();
-    if (const auto sparseStorage = dynamic_cast<const pointdata::storage::SparsePointsStorageBackend*>(_storageBackend.get()))
-        return sparseStorage->getStorageSizeBytes();
+    if (_storageBackend)
+        return _storageBackend->getStorageSizeBytes();
     if (_isDense)
     {
         std::uint64_t elementSize = std::visit([](auto& vec) { return vec.empty() ? 0u : sizeof(vec[0]); }, _variantOfVectors);
@@ -297,6 +285,25 @@ const pointdata::storage::PointsStorageBackend* PointData::getStorageBackend() c
     return _storageBackend.get();
 }
 
+void PointData::initializeStorageBackend(std::unique_ptr<pointdata::storage::PointsStorageBackend> storageBackend)
+{
+    const auto lock = lockData();
+    if (!storageBackend)
+        throw std::invalid_argument("Cannot install an empty point-data storage backend");
+    if (_numRows != 0 || getSizeOfVector() != 0 || (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Eager))
+        throw std::invalid_argument("Point-data storage creation requires an empty dataset");
+
+    const auto elementTypeIndex = storageBackend->getElementTypeIndex();
+    if (elementTypeIndex >= 8 || getElementTypeSize(elementTypeIndex) != storageBackend->getElementSize())
+        throw std::invalid_argument("Point-data storage backend has an unsupported element type");
+
+    setElementTypeSpecifier(static_cast<ElementTypeSpecifier>(elementTypeIndex));
+    _numDimensions = storageBackend->getNumDimensions();
+    _numRows = storageBackend->getNumPoints();
+    _isDense = true;
+    _storageBackend = std::move(storageBackend);
+}
+
 std::unique_ptr<mv::gui::StorageBackendConversionAction> PointData::createStorageBackendConversionAction(const pointdata::storage::StorageBackendType targetType, QObject* parent) const
 {
     const auto lock = lockData();
@@ -323,111 +330,6 @@ std::unique_ptr<mv::gui::StorageBackendConversionAction> PointData::createStorag
 void PointData::convertToStorageBackend(const pointdata::storage::StorageBackendType type, const pointdata::storage::StorageBackendConfiguration& configuration, pointdata::storage::StorageBackendProgressCallback progress)
 {
     convertToStorageBackend(type, std::make_shared<const pointdata::storage::StorageBackendConfiguration>(configuration), std::move(progress));
-}
-
-void PointData::initializeTiledStorage(const std::uint64_t rows, const std::uint64_t columns, const ElementTypeSpecifier elementType, const pointdata::storage::StorageBackendConfiguration& configuration, TiledTileGenerator generator)
-{
-    auto creation = std::make_shared<pointdata::storage::TiledStorageBackendCreationOptions>();
-    creation->rows = rows;
-    creation->columns = columns;
-    creation->elementSize = 4;
-    switch (elementType)
-    {
-        case ElementTypeSpecifier::bfloat16:
-        case ElementTypeSpecifier::int16:
-        case ElementTypeSpecifier::uint16:
-            creation->elementSize = 2;
-            break;
-
-        case ElementTypeSpecifier::int8:
-        case ElementTypeSpecifier::uint8:
-            creation->elementSize = 1;
-            break;
-
-        default:
-            creation->elementSize = 4;
-            break;
-    }
-    creation->elementTypeIndex = static_cast<std::uint32_t>(elementType);
-    creation->rowTileSize = configuration.rowTileSize;
-    creation->columnTileSize = configuration.columnTileSize;
-    creation->cacheCapacity = configuration.cacheCapacity;
-    creation->cacheCapacityBytes = configuration.cacheCapacityBytes;
-    creation->packedTiles = configuration.packedTiles;
-    creation->superTileRows = configuration.superTileRows;
-    creation->superTileColumns = configuration.superTileColumns;
-    creation->generator = std::move(generator);
-    convertToStorageBackend(pointdata::storage::StorageBackendType::Tiled, creation);
-}
-
-void PointData::initializeSparseStorage(const std::uint64_t rows, const std::uint64_t columns, const ElementTypeSpecifier elementType, const bool columnCompressed, std::vector<std::uint64_t> pointers, std::vector<std::uint64_t> indices, std::vector<std::uint8_t> values)
-{
-    const auto lock = lockData();
-    if (_numRows != 0 || getSizeOfVector() != 0 || getTiledStorage())
-        throw std::invalid_argument("Point-data storage creation requires an empty dataset");
-
-    const auto layout      = columnCompressed ? pointdata::storage::SparseMatrixLayout::ColumnCompressed : pointdata::storage::SparseMatrixLayout::RowCompressed;
-    const auto elementSize = elementType == ElementTypeSpecifier::bfloat16 || elementType == ElementTypeSpecifier::int16 || elementType == ElementTypeSpecifier::uint16 ? 2 :
-        elementType == ElementTypeSpecifier::int8 || elementType == ElementTypeSpecifier::uint8 ? 1 : 4;
-    auto sparseStorage = std::make_unique<pointdata::storage::SparsePointsStorageBackend>(rows, columns, layout, static_cast<std::uint32_t>(elementType), elementSize, std::move(pointers), std::move(indices), std::move(values));
-    setElementTypeSpecifier(elementType);
-    _numDimensions  = columns;
-    _numRows        = rows;
-    _isDense        = true;
-    _storageBackend = std::move(sparseStorage);
-}
-
-void PointData::attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices, std::shared_ptr<void> sourceLifetime)
-{
-    const auto tiledStorage = getTiledStorage();
-    if (!tiledStorage)
-        throw std::invalid_argument("Packed tile sources require tiled storage");
-
-    if (offsets.size() != compressedSizes.size() || offsets.size() != uncompressedSizes.size() || offsets.size() != superTileIndices.size())
-        throw std::invalid_argument("Packed tile source metadata has inconsistent lengths");
-
-    std::vector<mv::util::PackedBlobBlock> blocks;
-    blocks.reserve(offsets.size());
-    for (std::size_t index = 0; index < offsets.size(); ++index)
-        blocks.push_back({ offsets[index], compressedSizes[index], uncompressedSizes[index] });
-
-    tiledStorage->setPackedTileSource(filePaths, codecName, blocks, superTileIndices, std::move(sourceLifetime));
-}
-
-void PointData::persistTiledStorage(pointdata::storage::StorageBackendProgressCallback progress)
-{
-    const auto lock = lockData();
-    const auto tiledStorage = getTiledStorage();
-
-    if (!tiledStorage)
-        return;
-
-    const auto serializedStorage = pointdata::tiled::PointDataTiledSerialization::toVariantMap(*tiledStorage, progress);
-    const auto persistedStorage = pointdata::tiled::PointDataTiledSerialization::fromVariantMap(serializedStorage, tiledStorage->rows(), tiledStorage->columns(), tiledStorage->elementSize());
-    dynamic_cast<pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get())->setStorage(persistedStorage);
-}
-
-UniqueWorkflowPlan PointData::persistTiledStorageWorkflow()
-{
-    const auto lock = lockData();
-    const auto tiledStorage = getTiledStorage();
-
-    if (!tiledStorage)
-        return {};
-
-    auto plan = std::make_unique<WorkflowPlan>("Persist tiled point data");
-    const auto serializeStage = plan->addNestedWorkflowStage("Serialize tiled point data", [tiledStorage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
-        return pointdata::tiled::PointDataTiledSerialization::toVariantMapWorkflow(*tiledStorage);
-    });
-
-    plan->addSequentialStage("Install persisted tiled storage", [this, tiledStorage, serializeStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-        const auto serializedStorage = executionContext->takeOutput(serializeStage).toMap();
-        const auto persistedStorage = pointdata::tiled::PointDataTiledSerialization::fromVariantMap(serializedStorage, tiledStorage->rows(), tiledStorage->columns(), tiledStorage->elementSize());
-        const auto dataLock = lockData();
-        dynamic_cast<pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get())->setStorage(persistedStorage);
-    }, WorkflowPlan::JobThreadAffinity::GuiThread);
-
-    return plan;
 }
 
 void PointData::convertToStorageBackend(const pointdata::storage::StorageBackendType type, const pointdata::storage::StorageBackendConfigurationOptionsPtr options, pointdata::storage::StorageBackendProgressCallback progress)
@@ -460,7 +362,7 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
 
         if (creation)
         {
-            if (_numRows != 0 || getSizeOfVector() != 0 || getTiledStorage())
+            if (_numRows != 0 || getSizeOfVector() != 0 || (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Eager))
                 throw std::invalid_argument("Point-data storage creation requires an empty dataset");
 
             auto tiledStorage = pointdata::storage::TiledPointsStorageBackend::create(*creation, progress);
@@ -589,8 +491,9 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
             return;
         }
 
-        if (const auto tiledStorage = getTiledStorage())
+        if (const auto* tiledBackend = dynamic_cast<const pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get()))
         {
+            const auto tiledStorage = tiledBackend->getStorage();
             const auto* project = mv::projects().getCurrentProject();
             if (!project)
                 throw std::runtime_error("Unable to convert tiled point data without an active project");
@@ -608,8 +511,7 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
             if (!configuration->packedTiles)
                 convertedStorage->setPackedTiles(false);
 
-            auto* tiledBackend = dynamic_cast<pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get());
-            tiledBackend->setStorage(std::move(convertedStorage));
+            dynamic_cast<pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get())->setStorage(std::move(convertedStorage));
         }
         else
             makeTiled(configuration->rowTileSize, configuration->columnTileSize, progress);
@@ -789,7 +691,7 @@ void PointData::makeTiled(const std::size_t rowTileSize, const std::size_t colum
 
     materializeStorageBackend();
 
-    if (_isDense && !getTiledStorage() && _numDimensions > 0)
+    if (_isDense && (!_storageBackend || _storageBackend->getType() == pointdata::storage::StorageBackendType::Eager) && _numDimensions > 0)
     {
         const auto rows = static_cast<std::uint64_t>(getSizeOfVector() / _numDimensions);
 
@@ -976,44 +878,8 @@ void PointData::setRange(const std::uint64_t firstRow, const std::uint64_t rowCo
     _storageBackend->setRange(firstRow, rowCount, firstColumn, columnCount, values);
 }
 
-void PointData::materializeTiled(pointdata::storage::StorageBackendProgressCallback progress)
-{
-    const auto tiledStorage = getTiledStorage();
-
-    if (!tiledStorage)
-        return;
-
-    if (tiledStorage->rows() != 0 && tiledStorage->columns() > std::numeric_limits<std::uint64_t>::max() / tiledStorage->rows())
-        throw std::overflow_error("Tiled point-data dimensions overflow the element count");
-
-    const auto elementCount = tiledStorage->rows() * tiledStorage->columns();
-    const auto elementSize  = tiledStorage->elementSize();
-    if (elementSize == 0 || elementCount > std::numeric_limits<std::size_t>::max() / elementSize)
-        throw std::overflow_error("Tiled point-data is too large to materialize");
-
-    resizeVector(static_cast<std::size_t>(elementCount));
-    auto* destination = static_cast<char*>(std::visit([](auto& vector) { return static_cast<void*>(vector.data()); }, _variantOfVectors));
-
-    tiledStorage->materialize(destination, [&progress](const float tileProgress) {
-        if (progress)
-            progress(tileProgress * 0.95f);
-    });
-
-    clearStorageBackend();
-    refreshStorageBackend();
-
-    if (progress)
-        progress(1.0f);
-}
-
 void PointData::materializeStorageBackend(pointdata::storage::StorageBackendProgressCallback progress)
 {
-    if (getTiledStorage())
-    {
-        materializeTiled(std::move(progress));
-        return;
-    }
-
     if (!_storageBackend || _storageBackend->getType() == pointdata::storage::StorageBackendType::Eager)
         return;
 
@@ -1025,7 +891,7 @@ void PointData::materializeStorageBackend(pointdata::storage::StorageBackendProg
 
     const auto elementCount = rows * columns;
     if (elementSize == 0 || elementCount > std::numeric_limits<std::size_t>::max() / elementSize)
-        throw std::overflow_error("Sparse matrix is too large to materialize");
+        throw std::overflow_error("Point-data matrix is too large to materialize");
 
     setElementTypeSpecifier(static_cast<ElementTypeSpecifier>(_storageBackend->getElementTypeIndex()));
     resizeVector(static_cast<std::size_t>(elementCount));
@@ -1189,7 +1055,11 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
                 populateBytesFromBlobMap(valueBlob, reinterpret_cast<char*>(values.data()), valueByteSize);
 
             const auto rows = variantMap["NumberOfPoints"].toULongLong();
-            initializeSparseStorage(rows, _numDimensions, elementType, layout == static_cast<int>(pointdata::storage::SparseMatrixLayout::ColumnCompressed), std::move(pointers), std::move(indices), std::move(values));
+            const auto sparseLayout = layout == static_cast<int>(pointdata::storage::SparseMatrixLayout::ColumnCompressed)
+                ? pointdata::storage::SparseMatrixLayout::ColumnCompressed
+                : pointdata::storage::SparseMatrixLayout::RowCompressed;
+            auto sparseBackend = std::make_unique<pointdata::storage::SparsePointsStorageBackend>(rows, _numDimensions, sparseLayout, static_cast<std::uint32_t>(elementType), elementSize, std::move(pointers), std::move(indices), std::move(values));
+            initializeStorageBackend(std::move(sparseBackend));
         }
         else if (dataMap.contains("Raw") && dataMap["Raw"].canConvert<QVariantMap>())
         {
@@ -1231,7 +1101,8 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
     {
         const auto dataLock = lockData();
         isDense = _isDense;
-        tiledStorage = getTiledStorage();
+        if (const auto* tiledBackend = dynamic_cast<const pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get()))
+            tiledStorage = tiledBackend->getStorage();
         isTiled = static_cast<bool>(tiledStorage);
         isSparse = _storageBackend && _storageBackend->getType() == pointdata::storage::StorageBackendType::Sparse;
     }
@@ -2071,18 +1942,13 @@ const pointdata::storage::PointsStorageBackend* Points::getStorageBackend() cons
     return isProxy() ? nullptr : getRawData<PointData>()->getStorageBackend();
 }
 
-std::shared_ptr<pointdata::tiled::PointDataTiledStorage> Points::getTiledStorage() const
+void Points::initializeStorageBackend(std::unique_ptr<pointdata::storage::PointsStorageBackend> storageBackend)
 {
-    return isProxy() ? nullptr : getRawData<PointData>()->getTiledStorage();
-}
+    if (isProxy())
+        throw std::invalid_argument("Storage backend initialization is only supported for concrete point datasets");
 
-void Points::setTiledLoaderThreadSafe(const bool threadSafe)
-{
-    if (!isProxy())
-    {
-        if (const auto tiledStorage = getRawData<PointData>()->getTiledStorage())
-            tiledStorage->setLoaderThreadSafe(threadSafe);
-    }
+    getRawData<PointData>()->initializeStorageBackend(std::move(storageBackend));
+    mv::events().notifyDatasetDataChanged(this);
 }
 
 void Points::convertToStorageBackend(const StorageBackendType type, const StorageBackendConfiguration& configuration, StorageBackendProgressCallback progress)
@@ -2092,49 +1958,6 @@ void Points::convertToStorageBackend(const StorageBackendType type, const Storag
 
     getRawData<PointData>()->convertToStorageBackend(type, configuration, std::move(progress));
     mv::events().notifyDatasetDataChanged(this);
-}
-
-void Points::initializeTiledStorage(const std::uint64_t rows, const std::uint64_t columns, const ElementTypeSpecifier elementType, const StorageBackendConfiguration& configuration, TiledTileGenerator generator)
-{
-    if (isProxy())
-        throw std::invalid_argument("Storage backend initialization is only supported for concrete point datasets");
-
-    getRawData<PointData>()->initializeTiledStorage(rows, columns, elementType, configuration, std::move(generator));
-    mv::events().notifyDatasetDataChanged(this);
-}
-
-void Points::initializeSparseStorage(const std::uint64_t rows, const std::uint64_t columns, const ElementTypeSpecifier elementType, const bool columnCompressed, std::vector<std::uint64_t> pointers, std::vector<std::uint64_t> indices, std::vector<std::uint8_t> values)
-{
-    if (isProxy())
-        throw std::invalid_argument("Storage backend initialization is only supported for concrete point datasets");
-
-    getRawData<PointData>()->initializeSparseStorage(rows, columns, elementType, columnCompressed, std::move(pointers), std::move(indices), std::move(values));
-    mv::events().notifyDatasetDataChanged(this);
-}
-
-void Points::attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices, std::shared_ptr<void> sourceLifetime)
-{
-    if (isProxy())
-        throw std::invalid_argument("Packed tile sources can only be attached to concrete point datasets");
-
-    getRawData<PointData>()->attachPackedTileSource(filePaths, codecName, offsets, compressedSizes, uncompressedSizes, superTileIndices, std::move(sourceLifetime));
-}
-
-void Points::persistTiledStorage(StorageBackendProgressCallback progress)
-{
-    if (isProxy())
-        throw std::invalid_argument("Tiled storage persistence is only supported for concrete point datasets");
-
-    getRawData<PointData>()->persistTiledStorage(std::move(progress));
-    mv::events().notifyDatasetDataChanged(this);
-}
-
-UniqueWorkflowPlan Points::persistTiledStorageWorkflow()
-{
-    if (isProxy())
-        throw std::invalid_argument("Tiled storage persistence is only supported for concrete point datasets");
-
-    return getRawData<PointData>()->persistTiledStorageWorkflow();
 }
 
 std::unique_ptr<mv::gui::StorageBackendConversionAction> Points::createStorageBackendConversionAction(const StorageBackendType targetType, QObject* parent) const

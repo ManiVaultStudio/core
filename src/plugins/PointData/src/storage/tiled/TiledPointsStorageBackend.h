@@ -8,8 +8,13 @@
 
 #include "PointDataTiledStorage.h"
 
+#include <workflow/WorkflowPlan.h>
+
 #include <functional>
 #include <memory>
+#include <optional>
+#include <QStringList>
+#include <vector>
 
 namespace mv::pointdata::storage
 {
@@ -27,6 +32,17 @@ struct TiledStorageBackendCreationOptions final : StorageBackendCreationOptions
 {
     using TileGenerator = std::function<QByteArray(std::uint64_t rowOffset, std::uint64_t columnOffset, std::uint64_t rows, std::uint64_t columns)>;
 
+    struct PackedTileSource
+    {
+        QStringList filePaths;
+        QString codecName;
+        std::vector<std::uint64_t> offsets;
+        std::vector<std::uint64_t> compressedSizes;
+        std::vector<std::uint64_t> uncompressedSizes;
+        std::vector<std::size_t> superTileIndices;
+        std::shared_ptr<void> sourceLifetime;
+    };
+
     std::uint64_t rows                 = 0;   /**< Number of logical matrix rows. */
     std::uint64_t columns              = 0;   /**< Number of logical matrix columns. */
     std::size_t   elementSize          = 0;   /**< Size of one generated element in bytes. */
@@ -39,7 +55,9 @@ struct TiledStorageBackendCreationOptions final : StorageBackendCreationOptions
     bool          materializeGeneratedTiles = false; /**< Whether generated tiles should be retained immediately instead of loading lazily. */
     std::size_t   superTileRows        = 1;   /**< Number of base tile rows in one super tile. */
     std::size_t   superTileColumns     = 1;   /**< Number of base tile columns in one super tile. */
+    bool          loaderThreadSafe     = false; /**< Whether independent tile loader calls may run concurrently. */
     TileGenerator generator;                 /**< Callback that generates one tile on first access. */
+    std::optional<PackedTileSource> packedSource; /**< Optional packed tile source metadata attached at creation. */
 };
 
 /**
@@ -72,6 +90,15 @@ public:
     /** Replaces the tiled storage owned by this backend. */
     void setStorage(std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> storage);
 
+    /** Enables concurrent tile-loader callbacks for this tiled backend. */
+    void setLoaderThreadSafe(bool threadSafe);
+
+    /** Rewrites the current tiled payload into project-owned blob storage. */
+    void persist(StorageBackendProgressCallback progress = {});
+
+    /** Creates a workflow that rewrites the current tiled payload into project-owned blob storage. */
+    mv::workflow::UniqueWorkflowPlan persistWorkflow();
+
     /** Returns the tiled backend type. */
     StorageBackendType getType() const override;
 
@@ -93,6 +120,9 @@ public:
 
     /** Returns the PointData element-type index used by access views. */
     std::uint32_t getElementTypeIndex() const override;
+
+    /** Returns the dense logical payload size represented by tiled storage. */
+    std::uint64_t getStorageSizeBytes() const override;
 
     /** Loads the requested row and returns a lifetime-safe read-only view. */
     PointDataAccessView getRow(std::uint64_t row) const override;

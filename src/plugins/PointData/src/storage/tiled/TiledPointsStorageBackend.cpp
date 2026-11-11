@@ -8,11 +8,14 @@
 #include "../interface/StorageBackendConversionAction.h"
 #include "../sparse/SparseStorageBackendConversionAction.h"
 #include "TiledStorageBackendConversionAction.h"
+#include "PointDataTiledSerialization.h"
 
 #include <algorithm>
 #include <cstring>
 #include <limits>
 #include <stdexcept>
+
+#include <workflow/WorkflowPlan.h>
 
 namespace mv::pointdata::storage
 {
@@ -45,16 +48,37 @@ TiledPointsStorageBackend::TiledPointsStorageBackend(const std::shared_ptr<mv::p
 
 std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> TiledPointsStorageBackend::create(const TiledStorageBackendCreationOptions& options, StorageBackendProgressCallback progress)
 {
-    if (!options.generator || options.rows == 0 || options.columns == 0 || options.elementSize == 0 || options.rowTileSize == 0 || options.columnTileSize == 0 || (options.packedTiles && (options.superTileRows == 0 || options.superTileColumns == 0)))
+    if ((!options.generator && !options.packedSource) || options.rows == 0 || options.columns == 0 || options.elementSize == 0 || options.rowTileSize == 0 || options.columnTileSize == 0 || (options.packedTiles && (options.superTileRows == 0 || options.superTileColumns == 0)))
         throw std::invalid_argument("Invalid tiled storage creation options");
 
-    const auto storage = mv::pointdata::tiled::PointDataTiledStorage::fromGenerator(options.rows, options.columns, options.elementSize, options.rowTileSize, options.columnTileSize, [generator = options.generator](const mv::pointdata::tiled::TileDescriptor& descriptor) {
+    const auto tileGenerator = options.generator ? options.generator : TiledStorageBackendCreationOptions::TileGenerator([](std::uint64_t, std::uint64_t, std::uint64_t, std::uint64_t) -> QByteArray {
+        throw std::logic_error("Packed tile source has no staging loader");
+    });
+    const auto storage = mv::pointdata::tiled::PointDataTiledStorage::fromGenerator(options.rows, options.columns, options.elementSize, options.rowTileSize, options.columnTileSize, [generator = tileGenerator](const mv::pointdata::tiled::TileDescriptor& descriptor) {
         return generator(descriptor.rowOffset, descriptor.columnOffset, descriptor.rows, descriptor.columns);
     }, std::move(progress), options.materializeGeneratedTiles);
 
     storage->setCacheCapacity(options.cacheCapacity);
     storage->setCacheCapacityBytes(options.cacheCapacityBytes);
     storage->setPackedTiles(options.packedTiles, options.superTileRows, options.superTileColumns);
+    storage->setLoaderThreadSafe(options.loaderThreadSafe);
+
+    if (options.packedSource)
+    {
+        const auto& packedSource = *options.packedSource;
+        if (packedSource.offsets.size() != packedSource.compressedSizes.size() || packedSource.offsets.size() != packedSource.uncompressedSizes.size() || packedSource.offsets.size() != packedSource.superTileIndices.size())
+            throw std::invalid_argument("Packed tile source metadata has inconsistent lengths");
+
+        std::vector<mv::util::PackedBlobBlock> blocks;
+        blocks.reserve(packedSource.offsets.size());
+        for (std::size_t index = 0; index < packedSource.offsets.size(); ++index)
+            blocks.push_back({ packedSource.offsets[index], packedSource.compressedSizes[index], packedSource.uncompressedSizes[index] });
+
+        storage->setPackedTileSource(packedSource.filePaths, packedSource.codecName, blocks, packedSource.superTileIndices, packedSource.sourceLifetime, options.generator ? [generator = options.generator](const mv::pointdata::tiled::TileDescriptor& descriptor) {
+            return generator(descriptor.rowOffset, descriptor.columnOffset, descriptor.rows, descriptor.columns);
+        } : mv::pointdata::tiled::PointDataTiledStorage::TileLoader {});
+    }
+
     return storage;
 }
 
@@ -66,6 +90,40 @@ std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> TiledPointsStorageB
 void TiledPointsStorageBackend::setStorage(std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> storage)
 {
     _storage = std::move(storage);
+}
+
+void TiledPointsStorageBackend::setLoaderThreadSafe(const bool threadSafe)
+{
+    if (_storage)
+        _storage->setLoaderThreadSafe(threadSafe);
+}
+
+void TiledPointsStorageBackend::persist(StorageBackendProgressCallback progress)
+{
+    if (!_storage)
+        return;
+
+    const auto serializedStorage = mv::pointdata::tiled::PointDataTiledSerialization::toVariantMap(*_storage, progress);
+    _storage = mv::pointdata::tiled::PointDataTiledSerialization::fromVariantMap(serializedStorage, _storage->rows(), _storage->columns(), _storage->elementSize());
+}
+
+mv::workflow::UniqueWorkflowPlan TiledPointsStorageBackend::persistWorkflow()
+{
+    if (!_storage)
+        return {};
+
+    const auto storage = _storage;
+    auto plan = std::make_unique<mv::workflow::WorkflowPlan>("Persist tiled point data");
+    const auto serializeStage = plan->addNestedWorkflowStage("Serialize tiled point data", [storage](const mv::workflow::WorkflowPlan::Job&, const mv::workflow::SharedWorkflowExecutionContext&) {
+        return mv::pointdata::tiled::PointDataTiledSerialization::toVariantMapWorkflow(*storage);
+    });
+
+    plan->addSequentialStage("Install persisted tiled storage", [this, storage, serializeStage](const mv::workflow::WorkflowPlan::Job&, const mv::workflow::SharedWorkflowExecutionContext& executionContext) {
+        const auto serializedStorage = executionContext->takeOutput(serializeStage).toMap();
+        _storage = mv::pointdata::tiled::PointDataTiledSerialization::fromVariantMap(serializedStorage, storage->rows(), storage->columns(), storage->elementSize());
+    }, mv::workflow::WorkflowPlan::JobThreadAffinity::GuiThread);
+
+    return plan;
 }
 
 StorageBackendType TiledPointsStorageBackend::getType() const
@@ -132,6 +190,19 @@ std::size_t TiledPointsStorageBackend::getElementSize() const
 std::uint32_t TiledPointsStorageBackend::getElementTypeIndex() const
 {
     return _elementTypeIndex;
+}
+
+std::uint64_t TiledPointsStorageBackend::getStorageSizeBytes() const
+{
+    if (!_storage)
+        return 0;
+
+    if (_storage->rows() != 0 && _storage->columns() > std::numeric_limits<std::uint64_t>::max() / _storage->rows())
+        throw std::overflow_error("Tiled point-data dimensions overflow the element count");
+    const auto elementCount = _storage->rows() * _storage->columns();
+    if (_storage->elementSize() != 0 && elementCount > std::numeric_limits<std::uint64_t>::max() / _storage->elementSize())
+        throw std::overflow_error("Tiled point-data byte size exceeds the supported range");
+    return elementCount * _storage->elementSize();
 }
 
 PointDataAccessView TiledPointsStorageBackend::getRow(const std::uint64_t row) const

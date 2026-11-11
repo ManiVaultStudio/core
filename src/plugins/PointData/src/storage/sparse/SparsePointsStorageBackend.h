@@ -147,7 +147,7 @@ public:
     std::uint64_t getNumNonZeros() const;
 
     /** Returns the logical byte size of the compressed arrays, excluding allocator overhead. */
-    std::uint64_t getStorageSizeBytes() const;
+    std::uint64_t getStorageSizeBytes() const override;
 
     /** Returns the backend-owned segment pointers. */
     const std::vector<std::uint64_t>& getPointers() const;

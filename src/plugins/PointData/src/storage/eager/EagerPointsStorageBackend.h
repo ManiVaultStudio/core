@@ -56,6 +56,9 @@ public:
     /** Returns the PointData element-type index used by access views. */
     std::uint32_t getElementTypeIndex() const override;
 
+    /** Returns the allocated dense payload size in bytes. */
+    std::uint64_t getStorageSizeBytes() const override;
+
     /** Returns one row as a lifetime-safe read-only view. */
     PointDataAccessView getRow(std::uint64_t row) const override;
 

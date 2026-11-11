@@ -23,7 +23,6 @@
 #include <QDebug>
 #include <QMap>
 #include <QString>
-#include <QStringList>
 #include <QVariantMap>
 
 #include <array>
@@ -40,7 +39,6 @@ namespace mv
 {
     namespace pointdata::tiled
     {
-        class PointDataTiledStorage;
     }
 
     namespace pointdata::storage
@@ -103,7 +101,6 @@ class POINTDATA_EXPORT PointData : public mv::plugin::RawData
 {
 public:
     using DataLock = std::unique_lock<std::recursive_mutex>;
-    using TiledTileGenerator = std::function<QByteArray(std::uint64_t rowOffset, std::uint64_t columnOffset, std::uint64_t rows, std::uint64_t columns)>;
     enum class ElementTypeSpecifier
     {
         float32,
@@ -304,6 +301,9 @@ public:
     /** Returns the active storage backend without exposing its concrete representation. */
     const mv::pointdata::storage::PointsStorageBackend* getStorageBackend() const;
 
+    /** Installs a backend implementation on an empty concrete dataset. */
+    void initializeStorageBackend(std::unique_ptr<mv::pointdata::storage::PointsStorageBackend> storageBackend);
+
     /** Creates controls for converting to the requested storage backend. */
     std::unique_ptr<mv::gui::StorageBackendConversionAction> createStorageBackendConversionAction(mv::pointdata::storage::StorageBackendType targetType, QObject* parent = nullptr) const;
 
@@ -313,71 +313,11 @@ public:
      * dataset, this operation initializes tiled storage instead. Existing
      * data can be converted to tiled storage with a configuration or
      * materialized to eager storage when the active backend supports it.
-     * Conversion to sparse storage is not provided here; use
-     * initializeSparseStorage() to initialize an empty dataset from compressed
-     * arrays. Materializing tiled or sparse data requires memory for the full
-     * dense matrix.
+     * Backend-specific creation options can initialize an empty dataset
+     * directly in that backend. Materializing lazy or sparse data requires
+     * memory for the full dense matrix.
      */
     void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, const mv::pointdata::storage::StorageBackendConfiguration& configuration = {}, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
-
-    /** Initializes an empty dataset as generator-backed tiled storage without materializing its values. */
-    void initializeTiledStorage(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, const mv::pointdata::storage::StorageBackendConfiguration& configuration, TiledTileGenerator generator);
-
-    /**
-     * @brief Initializes an empty dataset with typed CSR or CSC sparse storage.
-     *
-     * The backend takes ownership of the compressed arrays. Each value is
-     * stored as elementType's native representation. The pointer array must
-     * contain one offset per compressed row or column plus a terminal offset;
-     * each segment must contain sorted, unique indices. No dense matrix is
-     * stored, and the dataset must be empty.
-     *
-     * @param rows Number of matrix rows.
-     * @param columns Number of matrix columns.
-     * @param elementType PointData element type used by the value byte buffer.
-     * @param columnCompressed True for CSC layout; false for CSR.
-     * @param pointers Compressed segment offsets, starting at zero and ending at the stored-entry count.
-     * @param indices Sorted column indices for CSR or row indices for CSC, one per stored value.
-     * @param values Native-type byte representation for each index, in the same order.
-     * @throws std::invalid_argument If the dataset is not empty, the element type is unsupported, or the arrays do not describe a valid sparse matrix.
-     */
-    void initializeSparseStorage(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, bool columnCompressed, std::vector<std::uint64_t> pointers, std::vector<std::uint64_t> indices, std::vector<std::uint8_t> values);
-
-    /**
-     * @brief Attaches pre-encoded packed tiled files to tiled point data.
-     *
-     * The storage keeps the source paths and uses them for lazy tile reads.
-     * Project serialization copies the files into project storage and writes
-     * the corresponding tile metadata without decoding and re-encoding them.
-     * The caller must keep the source files available until that serialization
-     * has completed. When supplied, a copy of \p sourceLifetime is retained
-     * by the source-backed storage and released when that source is no longer
-     * used. The token is opaque to PointData and may own the source files.
-     *
-     * @param filePaths Packed supertile files in super-tile index order.
-     * @param codecName Registered codec used for the packed blocks.
-     * @param offsets Byte offsets of logical tiles within their supertile.
-     * @param compressedSizes Compressed byte sizes of logical tiles.
-     * @param uncompressedSizes Uncompressed byte sizes of logical tiles.
-     * @param superTileIndices Super-tile index for each logical tile.
-     * @param sourceLifetime Optional opaque lifetime token for the source files.
-     * @throws std::invalid_argument If no tiled storage exists or metadata vectors have different lengths.
-     * @throws std::logic_error If the storage is not configured for packed tiles.
-     */
-    void attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices, std::shared_ptr<void> sourceLifetime = {});
-
-    /**
-     * Persists the currently configured tiled storage immediately.
-     *
-     * This is useful for importers that use a temporary source-backed tile
-     * generator, such as an HDF5 reader. After this call, the tiled payloads
-     * are owned by the project storage and no longer depend on the source
-     * generator or source file.
-     */
-    void persistTiledStorage(mv::pointdata::storage::StorageBackendProgressCallback progress = {});
-
-    /** Creates a workflow that persists tiled storage and installs the persisted backend on completion. */
-    mv::workflow::UniqueWorkflowPlan persistTiledStorageWorkflow();
 
     /** Converts or initializes using backend-specific options supplied by a conversion action or backend factory. */
     void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, mv::pointdata::storage::StorageBackendConfigurationOptionsPtr options, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
@@ -788,13 +728,11 @@ private:
     void makeTiled(std::size_t rowTileSize, std::size_t columnTileSize, std::function<void(float)> progress = {});
     void refreshStorageBackend();
     void clearStorageBackend();
-    std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> getTiledStorage() const;
 
     PointDataAccessView getEagerRow(std::uint64_t row) const;
     void visitEagerRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
     float getEagerValueAt(std::size_t index) const;
 
-    void materializeTiled(mv::pointdata::storage::StorageBackendProgressCallback progress = {});
     void materializeStorageBackend(mv::pointdata::storage::StorageBackendProgressCallback progress = {});
     mutable std::recursive_mutex _dataMutex;
 
@@ -947,7 +885,6 @@ public:
     using StorageBackendConfiguration = mv::pointdata::storage::StorageBackendConfiguration;
     using StorageBackendProgressCallback = mv::pointdata::storage::StorageBackendProgressCallback;
     using StorageBackendConfigurationOptionsPtr = mv::pointdata::storage::StorageBackendConfigurationOptionsPtr;
-    using TiledTileGenerator = PointData::TiledTileGenerator;
 
     void init() override;
 
@@ -1190,65 +1127,14 @@ public:
     /** Returns the active storage backend for a concrete point dataset. */
     const mv::pointdata::storage::PointsStorageBackend* getStorageBackend() const;
 
-    /** Returns the tiled storage implementation for a concrete tiled dataset, or an empty pointer otherwise. */
-    std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> getTiledStorage() const;
-
-    /** Enables concurrent tiled-storage loader callbacks for this concrete dataset. */
-    void setTiledLoaderThreadSafe(bool threadSafe);
+    /** Installs a backend implementation on an empty concrete dataset. Proxies are rejected. */
+    void initializeStorageBackend(std::unique_ptr<mv::pointdata::storage::PointsStorageBackend> storageBackend);
 
     /** Creates controls for converting to the requested storage backend. */
     std::unique_ptr<mv::gui::StorageBackendConversionAction> createStorageBackendConversionAction(StorageBackendType targetType, QObject* parent = nullptr) const;
 
     /** Converts or initializes a concrete dataset using backend-specific options; see the PointData overload for supported conversions. */
     void convertToStorageBackend(StorageBackendType type, const StorageBackendConfiguration& configuration = {}, StorageBackendProgressCallback progress = {});
-
-    /** Initializes an empty dataset as generator-backed tiled storage without materializing its values. */
-    void initializeTiledStorage(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, const StorageBackendConfiguration& configuration, TiledTileGenerator generator);
-
-    /**
-     * @brief Initializes an empty concrete dataset with typed CSR or CSC storage.
-     *
-     * Proxy datasets are rejected. The backend owns the moved compressed arrays
-     * and validates dimensions, offsets, element type, and sorted indices.
-     * Values use the native representation of @p elementType; this operation
-     * does not create a dense matrix.
-     *
-     * @param rows Number of matrix rows.
-     * @param columns Number of matrix columns.
-     * @param elementType PointData element type used by each value.
-     * @param columnCompressed True for CSC layout; false for CSR.
-     * @param pointers Segment offsets, starting at zero and ending at the stored-entry count.
-     * @param indices Sorted, unique column indices for CSR or row indices for CSC.
-     * @param values Native-type byte representation for each stored value.
-     * @throws std::invalid_argument If the dataset is a proxy, the element type is unsupported, or the compressed arrays are invalid.
-     */
-    void initializeSparseStorage(std::uint64_t rows, std::uint64_t columns, ElementTypeSpecifier elementType, bool columnCompressed, std::vector<std::uint64_t> pointers, std::vector<std::uint64_t> indices, std::vector<std::uint8_t> values);
-
-    /**
-     * @brief Attaches pre-encoded packed tiled files to this concrete dataset.
-     *
-     * Proxy datasets cannot own a packed tile source. The source files must
-     * stay available while the dataset reads tiles and until project
-     * serialization has copied them. An optional lifetime token can keep an
-     * owner for the files alive until the source is no longer used.
-     *
-     * @param filePaths Packed supertile files in super-tile index order.
-     * @param codecName Registered codec used for the packed blocks.
-     * @param offsets Byte offsets of logical tiles within their supertile.
-     * @param compressedSizes Compressed byte sizes of logical tiles.
-     * @param uncompressedSizes Uncompressed byte sizes of logical tiles.
-     * @param superTileIndices Super-tile index for each logical tile.
-     * @param sourceLifetime Optional opaque lifetime token retained until the
-     * source-backed storage is no longer used.
-     * @throws std::invalid_argument If called on a proxy dataset or metadata vectors have different lengths.
-     */
-    void attachPackedTileSource(const QStringList& filePaths, const QString& codecName, const std::vector<std::uint64_t>& offsets, const std::vector<std::uint64_t>& compressedSizes, const std::vector<std::uint64_t>& uncompressedSizes, const std::vector<std::size_t>& superTileIndices, std::shared_ptr<void> sourceLifetime = {});
-
-    /** Persists the currently configured tiled storage and detaches it from its source tile generator. */
-    void persistTiledStorage(StorageBackendProgressCallback progress = {});
-
-    /** Creates a workflow that persists tiled storage and installs the persisted backend on completion. */
-    mv::workflow::UniqueWorkflowPlan persistTiledStorageWorkflow();
 
     /** Converts or initializes using backend-specific options supplied by a conversion action or backend factory. */
     void convertToStorageBackend(StorageBackendType type, StorageBackendConfigurationOptionsPtr options, StorageBackendProgressCallback progress = {});
