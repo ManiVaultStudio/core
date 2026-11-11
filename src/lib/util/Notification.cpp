@@ -27,16 +27,6 @@
 
 namespace
 {
-    QColor getSeverityColor(const mv::util::SeverityLevel severity)
-    {
-        switch (severity) {
-            case mv::util::SeverityLevel::Warning: return QColor(196, 150, 20);
-            case mv::util::SeverityLevel::Error:   return QColor(196, 32, 32);
-            case mv::util::SeverityLevel::Fatal:   return QColor(150, 0, 0);
-            default:                               return {};
-        }
-    }
-
     /**
      * @brief Converts an sRGB channel to linear space.
      * @param value Color channel value in the range 0-255.
@@ -109,12 +99,6 @@ namespace
 namespace mv::util
 {
 
-Notification::NotificationWidget::NotificationWidget(const QColor& accentColor, QWidget* parent) :
-    QWidget(parent),
-    _accentColor(accentColor)
-{
-}
-
 void Notification::NotificationWidget::paintEvent(QPaintEvent* event)
 {
     Q_UNUSED(event);
@@ -133,18 +117,6 @@ void Notification::NotificationWidget::paintEvent(QPaintEvent* event)
     path.addRoundedRect(rect().adjusted(1, 1, -1, -1), radius, radius);
 
     painter.fillPath(path, windowColor);
-
-    if (_accentColor.isValid()) {
-        auto tint = _accentColor;
-        tint.setAlpha(24);
-        painter.fillPath(path, tint);
-
-        painter.save();
-        painter.setClipPath(path);
-        painter.fillRect(QRect(1, 1, 4, height() - 2), _accentColor);
-        painter.restore();
-    }
-
     painter.setPen(QPen(borderColor, 1));
     painter.drawPath(path);
 }
@@ -160,6 +132,7 @@ QSize Notification::NotificationWidget::sizeHint() const
 Notification::Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent, const SeverityLevel severity) :
     QWidget(parent),
     _icon(icon),
+    _severity(severity),
     _title(title),
     _description(description),
     _previousNotification(previousNotification),
@@ -186,7 +159,7 @@ Notification::Notification(const QString& title, const QString& description, con
     }
 
     auto mainLayout                 = new QVBoxLayout();
-    auto notificationWidget         = new NotificationWidget(getSeverityColor(severity));
+    auto notificationWidget         = new NotificationWidget();
     auto closePushButton            = new QToolButton(this);
 
     closePushButton->setFocusPolicy(Qt::NoFocus);
@@ -361,7 +334,24 @@ void Notification::slideOut()
 
 void Notification::updateIconLabel()
 {
-    _iconLabel.setPixmap(_icon.pixmap(32, 32));
+    auto pixmap = _icon.pixmap(32, 32);
+    if (pixmap.isNull()) {
+        pixmap = QPixmap(32, 32);
+        pixmap.fill(Qt::transparent);
+    }
+
+    const QRect badgeRect(18, 18, 14, 14);
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(QPen(QApplication::palette().color(QPalette::Window), 1));
+    painter.setBrush(QApplication::palette().color(QPalette::Window));
+    painter.drawEllipse(badgeRect.adjusted(-1, -1, 1, 1));
+    auto severityIcon = getSeverityLevelIcon(_severity);
+    if (_severity == SeverityLevel::Info)
+        severityIcon = StyledIcon("circle-info").withColor(QColor(64, 145, 220));
+    severityIcon.paint(&painter, badgeRect);
+
+    _iconLabel.setPixmap(pixmap);
 }
 
 void Notification::updateMessageLabel()

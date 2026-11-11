@@ -12,7 +12,6 @@
 #include "actions/TaskAction.h"
 
 #include <QWidget>
-#include <QColor>
 
 namespace mv::util
 {
@@ -46,7 +45,7 @@ protected:
     public:
 
         /** Inherit QWidget constructors. */
-        explicit NotificationWidget(const QColor& accentColor, QWidget* parent = nullptr);
+        using QWidget::QWidget;
 
         /**
          * @brief Paints the rounded notification background.
@@ -60,8 +59,6 @@ protected:
          */
         [[nodiscard]] QSize sizeHint() const override;
 
-    private:
-        QColor _accentColor;
     };
 
 public:
@@ -223,6 +220,7 @@ signals:
 
 private:
     QIcon                   _icon;                          /**< Notification icon, may be empty */
+    SeverityLevel           _severity;                      /**< Severity shown in the colored icon badge */
     QString                 _title;                         /**< Notification title, may contain rich text */
     QString                 _description;                   /**< Notification description, may contain rich text */
     QPointer<Task>          _task;                          /**< Task associated with this notification, or nullptr */
