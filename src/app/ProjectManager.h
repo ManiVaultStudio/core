@@ -81,6 +81,7 @@ public:
     void prepareProjectStagingDirectory(const QString& projectArchivePath);
     void applyProjectResourceStagingPolicyOverride();
     void registerProjectResourceStagingRequests(const QStringList& archiveEntries);
+    void registerProjectResourceStagingRequests(const QList<ProjectResourceStagingService::ResourceRequest>& requests);
     [[nodiscard]] workflow::UniqueWorkflowPlan createProjectResourceStagingWorkflow(std::size_t maxConcurrency);
     QString resolveStagedProjectResourcePath(const QString& archiveEntry) override;
 

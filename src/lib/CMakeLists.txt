@@ -600,6 +600,7 @@ set(PUBLIC_UTIL_HEADERS
     util/HeadsUpDisplayItem.h
     util/SplashScreenBridge.h
     util/StandardPaths.h
+    util/ProjectResourceStagingPolicy.h
     util/CustomAssetsUrlSchemeHandler.h
     util/BlobCodec.h
     util/BlobCodecFactory.h

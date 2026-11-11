@@ -17,28 +17,32 @@
 
 namespace
 {
-void collectPackedTileUris(const QVariant& value, QStringList& uris)
+void collectPackedTileUris(const QVariant& value, QList<mv::ProjectResourceStagingService::ResourceRequest>& requests, const mv::util::ProjectResourceStagingPolicy inheritedPolicy = mv::util::ProjectResourceStagingPolicy::Inherit)
 {
     if (value.metaType().id() == QMetaType::QVariantMap)
     {
         const auto map = value.toMap();
+        const auto declaredPolicy = mv::util::projectResourceStagingPolicyFromName(map.value("ProjectOpenStagingPolicy").toString());
+        const auto effectivePolicy = declaredPolicy == mv::util::ProjectResourceStagingPolicy::Inherit ? inheritedPolicy : declaredPolicy;
         if (map.value("Storage").toString() == QStringLiteral("PackedTileFiles"))
+        {
             for (const auto& superTileValue : map.value("SuperTiles").toList())
             {
                 const auto uri = superTileValue.toMap().value("URI").toString().trimmed();
                 // Absolute URIs refer to already-local files and are handled
                 // directly by the point-data deserializer.
                 if (!uri.isEmpty() && !QDir::isAbsolutePath(uri))
-                    uris.push_back(uri);
+                    requests.push_back({ uri, effectivePolicy });
             }
+        }
 
         for (auto it = map.cbegin(); it != map.cend(); ++it)
-            collectPackedTileUris(it.value(), uris);
+            collectPackedTileUris(it.value(), requests, effectivePolicy);
     }
     else if (value.metaType().id() == QMetaType::QVariantList)
     {
         for (const auto& item : value.toList())
-            collectPackedTileUris(item, uris);
+            collectPackedTileUris(item, requests, inheritedPolicy);
     }
 }
 
@@ -201,10 +205,10 @@ UniqueWorkflowPlan createProjectOpenWorkflowPlan(const QString& filePath)
     plan->addParallelStage("Read JSON files", std::move(readJsonJobs));
 
     plan->addSequentialStage("Register project resources for staging", [context](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
-        QStringList uris;
-        collectPackedTileUris(context->getProjectMap(), uris);
+        QList<mv::ProjectResourceStagingService::ResourceRequest> requests;
+        collectPackedTileUris(context->getProjectMap(), requests);
         executionContext->setProgress(0.0);
-        static_cast<ProjectManager&>(mv::projects()).registerProjectResourceStagingRequests(uris);
+        static_cast<ProjectManager&>(mv::projects()).registerProjectResourceStagingRequests(requests);
         executionContext->setProgress(1.0);
     }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, 0.1);
 

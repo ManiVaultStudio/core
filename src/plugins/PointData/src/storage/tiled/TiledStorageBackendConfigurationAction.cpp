@@ -17,7 +17,7 @@
 namespace mv::gui
 {
 
-TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(QObject* parent, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration, const bool initializeFromConfiguration, const std::optional<std::uint32_t> currentElementTypeIndex, const bool showImportPerformanceOptions, const std::size_t bucketingThreadCount, const std::size_t stagingThreadCount, const std::size_t rowChunkTileFactor, const bool showImportStagingSpaceObservation, const QString& stagingDirectory) :
+TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(QObject* parent, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration, const bool initializeFromConfiguration, const std::optional<std::uint32_t> currentElementTypeIndex, const bool showImportPerformanceOptions, const std::size_t bucketingThreadCount, const std::size_t stagingThreadCount, const std::size_t rowChunkTileFactor, const bool showImportStagingSpaceObservation, const QString& stagingDirectory, const mv::util::ProjectResourceStagingPolicy projectOpenStagingPolicy) :
     StorageBackendConversionAction(parent, "Tiled storage", currentElementTypeIndex),
     _rows(rows),
     _columns(columns),
@@ -44,10 +44,12 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _bucketingThreadCountAction(&_importPerformanceSettingsAction, "Bucketing thread count", 1, 32, static_cast<std::int32_t>(std::clamp<std::size_t>(bucketingThreadCount, 1, 32))),
     _stagingThreadCountAction(&_importPerformanceSettingsAction, "Staging thread count", 1, 32, static_cast<std::int32_t>(std::clamp<std::size_t>(stagingThreadCount, 1, 32))),
     _rowChunkTileFactorAction(&_importPerformanceSettingsAction, "CSR chunk tile-height factor", 1, 256, static_cast<std::int32_t>(std::clamp<std::size_t>(rowChunkTileFactor, 1, 256))),
+    _projectOpenStagingPolicyAction(this, "Project-open tile staging", { "Inherit project policy", "Archive-backed", "Stage on demand", "Stage before load" }, "Inherit project policy"),
     _stagingDirectory(stagingDirectory),
     _showImportPerformanceOptions(showImportPerformanceOptions),
     _showImportStagingSpaceObservation(showImportStagingSpaceObservation)
 {
+    _projectOpenStagingPolicyAction.setCurrentText(mv::util::projectResourceStagingPolicyName(projectOpenStagingPolicy) == QStringLiteral("Inherit") ? QStringLiteral("Inherit project policy") : mv::util::projectResourceStagingPolicyName(projectOpenStagingPolicy));
     setShowLabels(true);
 
     connect(this, &StorageBackendConversionAction::optionsChanged, this, [this] {
@@ -128,6 +130,9 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
         _importPerformanceAction.addAction(&_importPerformanceSettingsAction);
         updateImportPerformanceSummary();
         addAction(&_importPerformanceAction);
+        _projectOpenStagingPolicyAction.setToolTip("Controls how this dataset's packed tiles are sourced when opening a saved project. This does not change staging during HDF5 import.");
+        _projectOpenStagingPolicyAction.setDefaultWidgetFlags(OptionAction::ComboBox);
+        addAction(&_projectOpenStagingPolicyAction);
 
         const auto notifyTuningOptionsChanged = [this] { this->notifyOptionsChanged(); };
         const auto updateTuningOptions = [this, notifyTuningOptionsChanged] {
@@ -300,6 +305,7 @@ void TiledStorageBackendConfigurationAction::fromVariantMap(const QVariantMap& v
             restoreAction(_rowChunkTileFactorAction, performanceSettings);
         }
     }
+    restoreAction(_projectOpenStagingPolicyAction, variantMap);
 
     // Accept value-only presets written by the short-lived experimental format.
     const auto restoreLegacyIntegralValue = [&](IntegralAction& action, const char* key, const char* legacyKey) {
@@ -384,9 +390,21 @@ QVariantMap TiledStorageBackendConfigurationAction::toVariantMap() const
         _importPerformanceSummaryAction.insertIntoVariantMap(importPerformance);
         importPerformance.insert(_importPerformanceSettingsAction.getSerializationName(), performanceSettings);
         variantMap.insert(_importPerformanceAction.getSerializationName(), importPerformance);
+        _projectOpenStagingPolicyAction.insertIntoVariantMap(variantMap);
     }
 
     return variantMap;
+}
+
+mv::util::ProjectResourceStagingPolicy TiledStorageBackendConfigurationAction::getProjectOpenStagingPolicy() const
+{
+    if (_projectOpenStagingPolicyAction.getCurrentText() == QStringLiteral("Archive-backed"))
+        return mv::util::ProjectResourceStagingPolicy::ArchiveBacked;
+    if (_projectOpenStagingPolicyAction.getCurrentText() == QStringLiteral("Stage on demand"))
+        return mv::util::ProjectResourceStagingPolicy::OnDemand;
+    if (_projectOpenStagingPolicyAction.getCurrentText() == QStringLiteral("Stage before load"))
+        return mv::util::ProjectResourceStagingPolicy::BeforeLoad;
+    return mv::util::ProjectResourceStagingPolicy::Inherit;
 }
 
 void TiledStorageBackendConfigurationAction::updateTileSizePercentages()

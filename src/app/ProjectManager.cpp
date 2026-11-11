@@ -363,8 +363,9 @@ void ProjectManager::prepareProjectStagingDirectory(const QString& projectArchiv
     setTemporaryDirPath(TemporaryDirType::Staging, _projectStagingDirectory->path());
 
     const auto defaultPolicyText = Application::current()->getConfigurationAction().getProjectsConfigurationAction().getDefaultPackedTileStagingPolicyAction().getCurrentText();
-    const auto defaultPolicy = defaultPolicyText == QStringLiteral("Stage on demand") ? ProjectResourceStagingService::Policy::OnDemand :
-        defaultPolicyText == QStringLiteral("Stage before load") ? ProjectResourceStagingService::Policy::BeforeLoad : ProjectResourceStagingService::Policy::ArchiveBacked;
+    auto defaultPolicy = util::projectResourceStagingPolicyFromName(defaultPolicyText);
+    if (defaultPolicy == ProjectResourceStagingService::Policy::Inherit)
+        defaultPolicy = ProjectResourceStagingService::Policy::ArchiveBacked;
     _projectResourceStagingService.configure(projectArchivePath, _projectStagingDirectory->path(), defaultPolicy);
 }
 
@@ -375,16 +376,18 @@ void ProjectManager::applyProjectResourceStagingPolicyOverride()
         return;
 
     const auto projectPolicyText = project->getProjectMetaAction().getPackedTileStagingPolicyAction().getCurrentText();
-    const auto policyText = projectPolicyText == QStringLiteral("Use application default") ?
-        Application::current()->getConfigurationAction().getProjectsConfigurationAction().getDefaultPackedTileStagingPolicyAction().getCurrentText() : projectPolicyText;
-    const auto policy = policyText == QStringLiteral("Stage on demand") ? ProjectResourceStagingService::Policy::OnDemand :
-        policyText == QStringLiteral("Stage before load") ? ProjectResourceStagingService::Policy::BeforeLoad : ProjectResourceStagingService::Policy::ArchiveBacked;
-    _projectResourceStagingService.setPolicy(policy);
+    const auto policy = projectPolicyText == QStringLiteral("Use application default") ? ProjectResourceStagingService::Policy::Inherit : util::projectResourceStagingPolicyFromName(projectPolicyText);
+    _projectResourceStagingService.setProjectPolicy(policy);
 }
 
 void ProjectManager::registerProjectResourceStagingRequests(const QStringList& archiveEntries)
 {
     _projectResourceStagingService.registerResources(archiveEntries);
+}
+
+void ProjectManager::registerProjectResourceStagingRequests(const QList<ProjectResourceStagingService::ResourceRequest>& requests)
+{
+    _projectResourceStagingService.registerResources(requests);
 }
 
 workflow::UniqueWorkflowPlan ProjectManager::createProjectResourceStagingWorkflow(const std::size_t maxConcurrency)

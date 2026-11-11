@@ -23,6 +23,7 @@
 #include <QDebug>
 #include <QMap>
 #include <QString>
+#include <util/ProjectResourceStagingPolicy.h>
 #include <QVariantMap>
 
 #include <array>
@@ -627,6 +628,12 @@ public:
 
     void setDimensionNames(const std::vector<QString>& dimNames);
 
+    /** Gets the dataset-level override used when opening archive-backed project resources. */
+    [[nodiscard]] mv::util::ProjectResourceStagingPolicy getProjectOpenStagingPolicy() const;
+
+    /** Sets the dataset-level project-open staging override; Inherit follows project then application policy. */
+    void setProjectOpenStagingPolicy(mv::util::ProjectResourceStagingPolicy policy);
+
     // Returns the value of the element at the specified position in the current
     // data vector, converted to float.
     // Will work fine, even when the internal data element type is not float.
@@ -743,6 +750,7 @@ private:
     std::unique_ptr<mv::pointdata::storage::PointsStorageBackend> _storageBackend;
 
     std::vector<QString> _dimNames;
+    mv::util::ProjectResourceStagingPolicy _projectOpenStagingPolicy = mv::util::ProjectResourceStagingPolicy::Inherit;
 
 private: // Sparse data, experimental
     std::uint64_t                    _numRows    = 0;

@@ -28,7 +28,8 @@ void ProjectResourceStagingService::configure(QString archivePath, QString stagi
     std::lock_guard lock(_mutex);
     _archivePath = std::move(archivePath);
     _stagingDirectory = QDir::cleanPath(std::move(stagingDirectory));
-    _policy = policy;
+    _systemPolicy = policy;
+    _projectPolicy = Policy::Inherit;
     _resources.clear();
 }
 
@@ -37,20 +38,21 @@ void ProjectResourceStagingService::clear()
     std::lock_guard lock(_mutex);
     _archivePath.clear();
     _stagingDirectory.clear();
-    _policy = Policy::ArchiveBacked;
+    _systemPolicy = Policy::ArchiveBacked;
+    _projectPolicy = Policy::Inherit;
     _resources.clear();
 }
 
-void ProjectResourceStagingService::setPolicy(const Policy policy)
+void ProjectResourceStagingService::setProjectPolicy(const Policy policy)
 {
     std::lock_guard lock(_mutex);
-    _policy = policy;
+    _projectPolicy = policy;
 }
 
-ProjectResourceStagingService::Policy ProjectResourceStagingService::getPolicy() const
+ProjectResourceStagingService::Policy ProjectResourceStagingService::getEffectiveDefaultPolicy() const
 {
     std::lock_guard lock(_mutex);
-    return _policy;
+    return _projectPolicy == Policy::Inherit ? _systemPolicy : _projectPolicy;
 }
 
 QString ProjectResourceStagingService::validateArchiveEntry(const QString& archiveEntry)
@@ -68,12 +70,43 @@ QString ProjectResourceStagingService::validateArchiveEntry(const QString& archi
 
 void ProjectResourceStagingService::registerResources(const QStringList& archiveEntries)
 {
+    QList<ResourceRequest> requests;
+    requests.reserve(archiveEntries.size());
+    for (const auto& entry : archiveEntries)
+        requests.push_back({ entry, Policy::Inherit });
+    registerResources(requests);
+}
+
+void ProjectResourceStagingService::registerResources(const QList<ResourceRequest>& requests)
+{
     std::lock_guard lock(_mutex);
-    for (const auto& archiveEntry : archiveEntries)
+    const auto effectivePolicy = [this](const Policy requestedPolicy) {
+        if (requestedPolicy != Policy::Inherit)
+            return requestedPolicy;
+        return _projectPolicy != Policy::Inherit ? _projectPolicy : _systemPolicy;
+    };
+    const auto policyRank = [](const Policy policy) {
+        switch (policy)
+        {
+            case Policy::ArchiveBacked: return 0;
+            case Policy::OnDemand: return 1;
+            case Policy::BeforeLoad: return 2;
+            case Policy::Inherit: return -1;
+        }
+        return -1;
+    };
+    for (const auto& request : requests)
     {
-        const auto safeEntry = validateArchiveEntry(archiveEntry);
+        const auto safeEntry = validateArchiveEntry(request.archiveEntry);
+        const auto resolvedPolicy = effectivePolicy(request.policy);
         if (!_resources.contains(safeEntry))
-            _resources.insert(safeEntry, std::make_shared<ResourceState>());
+        {
+            auto state = std::make_shared<ResourceState>();
+            state->policy = resolvedPolicy;
+            _resources.insert(safeEntry, std::move(state));
+        }
+        else if (policyRank(resolvedPolicy) > policyRank(_resources.value(safeEntry)->policy))
+            _resources.value(safeEntry)->policy = resolvedPolicy;
     }
 }
 
@@ -83,8 +116,9 @@ workflow::UniqueWorkflowPlan ProjectResourceStagingService::createEagerStagingWo
     QStringList archiveEntries;
     {
         std::lock_guard lock(_mutex);
-        if (_policy == Policy::BeforeLoad)
-            archiveEntries = _resources.keys();
+        for (auto it = _resources.cbegin(); it != _resources.cend(); ++it)
+            if (it.value()->policy == Policy::BeforeLoad)
+                archiveEntries.push_back(it.key());
     }
 
     if (archiveEntries.isEmpty())
@@ -118,13 +152,16 @@ workflow::UniqueWorkflowPlan ProjectResourceStagingService::createEagerStagingWo
 
 QString ProjectResourceStagingService::resolvePath(const QString& archiveEntry)
 {
-    Policy policy;
+    std::shared_ptr<ResourceState> resourceState;
     {
         std::lock_guard lock(_mutex);
-        policy = _policy;
+        resourceState = _resources.value(validateArchiveEntry(archiveEntry));
     }
 
-    if (policy == Policy::ArchiveBacked)
+    if (!resourceState)
+        throw std::runtime_error(QString("Project resource was not registered for staging: %1").arg(archiveEntry).toStdString());
+
+    if (resourceState->policy == Policy::ArchiveBacked)
         return {};
 
     return stage(archiveEntry);

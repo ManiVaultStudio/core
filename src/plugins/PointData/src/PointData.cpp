@@ -1000,6 +1000,7 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
         const auto dataMap  = variantMap["Data"].toMap();
         _isDense            = variantMap.value("Dense", true).toBool();
         _numDimensions      = static_cast<std::size_t>(variantMap["NumberOfDimensions"].toULongLong());
+        _projectOpenStagingPolicy = mv::util::ProjectResourceStagingPolicy::Inherit;
         clearStorageBackend();
 
         if (dataMap.contains("Tiled") && dataMap["Tiled"].canConvert<QVariantMap>())
@@ -1010,6 +1011,7 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
 
             setElementTypeSpecifier(elementType);
             _numRows = variantMap["NumberOfPoints"].toULongLong();
+            _projectOpenStagingPolicy = mv::util::projectResourceStagingPolicyFromName(dataMap.value("ProjectOpenStagingPolicy").toString());
 
             const auto elementSize = std::visit([](const auto& vector) { return sizeof(typename std::decay_t<decltype(vector)>::value_type); }, _variantOfVectors);
             const auto tiledStorage = mv::pointdata::tiled::PointDataTiledSerialization::fromVariantMap(dataMap["Tiled"].toMap(), _numRows, _numDimensions, elementSize);
@@ -1090,6 +1092,18 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
     return plan;
 }
 
+mv::util::ProjectResourceStagingPolicy PointData::getProjectOpenStagingPolicy() const
+{
+    const auto dataLock = lockData();
+    return _projectOpenStagingPolicy;
+}
+
+void PointData::setProjectOpenStagingPolicy(const mv::util::ProjectResourceStagingPolicy policy)
+{
+    const auto dataLock = lockData();
+    _projectOpenStagingPolicy = policy;
+}
+
 UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
 {
     auto plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
@@ -1097,10 +1111,12 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
     bool isTiled;
     bool isSparse;
     std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> tiledStorage;
+    mv::util::ProjectResourceStagingPolicy projectOpenStagingPolicy = mv::util::ProjectResourceStagingPolicy::Inherit;
 
     {
         const auto dataLock = lockData();
         isDense = _isDense;
+        projectOpenStagingPolicy = _projectOpenStagingPolicy;
         if (const auto* tiledBackend = dynamic_cast<const pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get()))
             tiledStorage = tiledBackend->getStorage();
         isTiled = static_cast<bool>(tiledStorage);
@@ -1121,13 +1137,14 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
             return mv::pointdata::tiled::PointDataTiledSerialization::toVariantMapWorkflow(*tiledStorage);
         }, WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, tiledDataWeight);
 
-        plan->addSequentialStage("Build tiled point data map", [this, serializeTiledStage](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
+        plan->addSequentialStage("Build tiled point data map", [this, serializeTiledStage, projectOpenStagingPolicy](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
             const auto dataLock = lockData();
             QVariantMap outputMap;
 
             outputMap["TypeIndex"]        = static_cast<std::int32_t>(getElementTypeSpecifier());
             outputMap["TypeName"]         = elementTypeName(getElementTypeSpecifier());
             outputMap["Tiled"]            = executionContext->takeOutput(serializeTiledStage).toMap();
+            outputMap["ProjectOpenStagingPolicy"] = mv::util::projectResourceStagingPolicyName(projectOpenStagingPolicy);
             outputMap["NumberOfElements"] = QVariant::fromValue(static_cast<qulonglong>(getNumberOfElements()));
 
             executionContext->setOutput(outputMap);

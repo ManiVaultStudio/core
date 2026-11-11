@@ -5,8 +5,10 @@
 #pragma once
 
 #include <workflow/WorkflowPlan.h>
+#include <util/ProjectResourceStagingPolicy.h>
 
 #include <QHash>
+#include <QList>
 #include <QString>
 #include <QStringList>
 
@@ -25,11 +27,12 @@ class ProjectResourceStagingService
 {
 public:
 
-    enum class Policy
+    using Policy = util::ProjectResourceStagingPolicy;
+
+    struct ResourceRequest
     {
-        ArchiveBacked,
-        OnDemand,
-        BeforeLoad
+        QString archiveEntry;
+        Policy policy = Policy::Inherit;
     };
 
     using CancellationCheck = std::function<bool()>;
@@ -37,9 +40,10 @@ public:
 
     void configure(QString archivePath, QString stagingDirectory, Policy policy);
     void clear();
-    void setPolicy(Policy policy);
-    [[nodiscard]] Policy getPolicy() const;
+    void setProjectPolicy(Policy policy);
+    [[nodiscard]] Policy getEffectiveDefaultPolicy() const;
     void registerResources(const QStringList& archiveEntries);
+    void registerResources(const QList<ResourceRequest>& requests);
     [[nodiscard]] workflow::UniqueWorkflowPlan createEagerStagingWorkflow(std::size_t maxConcurrency);
     [[nodiscard]] QString resolvePath(const QString& archiveEntry);
 
@@ -51,6 +55,7 @@ private:
         std::condition_variable changed;
         bool staging = false;
         bool ready = false;
+        Policy policy = Policy::ArchiveBacked;
     };
 
     [[nodiscard]] static QString validateArchiveEntry(const QString& archiveEntry);
@@ -61,7 +66,8 @@ private:
     mutable std::mutex _mutex;                                      /**< Protects session configuration and registered requests. */
     QString _archivePath;                                           /**< Archive that owns the resources in this session. */
     QString _stagingDirectory;                                      /**< Session-only root for staged resources. */
-    Policy _policy = Policy::ArchiveBacked;                         /**< Effective policy after applying the project override. */
+    Policy _systemPolicy = Policy::ArchiveBacked;                   /**< Application-wide fallback policy. */
+    Policy _projectPolicy = Policy::Inherit;                        /**< Optional policy override for this project. */
     QHash<QString, std::shared_ptr<ResourceState>> _resources;      /**< Registered archive entries and their single-flight state. */
 };
 
