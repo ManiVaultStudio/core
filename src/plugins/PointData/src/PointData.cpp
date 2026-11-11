@@ -1908,6 +1908,22 @@ void Points::setDimensionNames(const std::vector<QString>& dimNames)
     mv::events().notifyDatasetDataDimensionsChanged(this);
 }
 
+mv::util::ProjectResourceStagingPolicy Points::getProjectOpenStagingPolicy() const
+{
+    if (isProxy())
+        return mv::util::ProjectResourceStagingPolicy::Inherit;
+
+    return getRawData<PointData>()->getProjectOpenStagingPolicy();
+}
+
+void Points::setProjectOpenStagingPolicy(const mv::util::ProjectResourceStagingPolicy policy)
+{
+    if (isProxy())
+        throw std::logic_error("Cannot set project-open staging policy on proxy points");
+
+    getRawData<PointData>()->setProjectOpenStagingPolicy(policy);
+}
+
 QString Points::getElementTypeName() const
 {
     if (isProxy())

@@ -1212,6 +1212,12 @@ public:
 
     void setDimensionNames(const std::vector<QString>& dimNames);
 
+    /** Gets the project-open staging policy override for this concrete point dataset. */
+    [[nodiscard]] mv::util::ProjectResourceStagingPolicy getProjectOpenStagingPolicy() const;
+
+    /** Sets the project-open staging policy override for this concrete point dataset. */
+    void setProjectOpenStagingPolicy(mv::util::ProjectResourceStagingPolicy policy);
+
     /**
      * Get amount of data occupied by the raw data
      * @return Size of the raw data in bytes
