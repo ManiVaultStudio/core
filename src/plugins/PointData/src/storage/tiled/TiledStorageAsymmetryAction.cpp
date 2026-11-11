@@ -37,4 +37,21 @@ const IntegralAction& TiledStorageAsymmetryAction::getAsymmetryAction() const
     return _asymmetryAction;
 }
 
+void TiledStorageAsymmetryAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    HorizontalGroupAction::fromVariantMap(variantMap);
+    _columnLabelAction.fromParentVariantMap(variantMap, true);
+    _asymmetryAction.fromParentVariantMap(variantMap, true);
+    _rowLabelAction.fromParentVariantMap(variantMap, true);
+}
+
+QVariantMap TiledStorageAsymmetryAction::toVariantMap() const
+{
+    auto variantMap = HorizontalGroupAction::toVariantMap();
+    _columnLabelAction.insertIntoVariantMap(variantMap);
+    _asymmetryAction.insertIntoVariantMap(variantMap);
+    _rowLabelAction.insertIntoVariantMap(variantMap);
+    return variantMap;
+}
+
 }

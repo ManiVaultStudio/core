@@ -34,6 +34,8 @@ namespace mv::gui
  */
 class POINTDATA_EXPORT TiledStorageBackendConfigurationAction : public StorageBackendConversionAction
 {
+    Q_OBJECT
+
 public:
     /**
      * @brief Constructs controls for configuring tiled storage for a matrix.
@@ -126,6 +128,7 @@ private:
     IntegralAction                _rowChunkTileFactorAction;
     DirectoryPickerAction         _stagingDirectoryAction;
     QString                       _defaultStagingDirectory;
+    bool                          _showImportPerformanceOptions = false;
     bool                          _showImportStagingDirectory = false;
     bool                          _updatingTileSizePercentage = false;
     bool                          _updatingGeometryFromPolicy = false;

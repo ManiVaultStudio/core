@@ -17,6 +17,8 @@ namespace mv::gui
  */
 class POINTDATA_EXPORT TiledStorageBackendConversionAction final : public TiledStorageBackendConfigurationAction
 {
+    Q_OBJECT
+
 public:
     /** Constructs tiled-storage controls for converting a matrix with the supplied shape, element size, and current type. */
     TiledStorageBackendConversionAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration = {}, bool initializeFromConfiguration = false, bool materializesFullMatrix = false, std::uint32_t currentElementTypeIndex = 0);

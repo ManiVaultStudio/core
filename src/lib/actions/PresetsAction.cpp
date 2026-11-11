@@ -11,7 +11,16 @@
 #include <QHeaderView>
 #include <QMenu>
 #include <QFileDialog>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonParseError>
 #include <QStringListModel>
+#include <QJsonObject>
+
+#include "util/Exception.h"
+#include "exception/ManiVaultException.h"
+
+#include <stdexcept>
 
 #ifdef _DEBUG
     //#define PRESETS_ACTION_VERBOSE
@@ -298,11 +307,85 @@ void PresetsAction::importPreset()
 
     connect(fileDialog, &QFileDialog::accepted, this, [this, fileDialog]() -> void {
         if (fileDialog->selectedFiles().count() != 1)
-            throw std::runtime_error("Only one file may be selected");
+            return;
 
         const auto presetFilePath = fileDialog->selectedFiles().first();
 
-        _sourceAction->fromJsonFile(presetFilePath);
+        QVariantMap previousState;
+        try
+        {
+            previousState = _sourceAction->toVariantMap();
+
+            QFile presetFile(presetFilePath);
+            if (!presetFile.open(QIODevice::ReadOnly))
+                throw ManiVaultException(SeverityLevel::Error, "Preset import failed", "Unable to open preset file for reading", __FUNCTION__, { { "FilePath", presetFilePath } });
+
+            QJsonParseError parseError;
+            const auto presetDocument = QJsonDocument::fromJson(presetFile.readAll(), &parseError);
+            if (presetDocument.isNull() || !presetDocument.isObject())
+                throw ManiVaultException(SeverityLevel::Error, "Preset JSON is invalid", parseError.errorString(), __FUNCTION__, { { "FilePath", presetFilePath } });
+
+            auto presetMap = presetDocument.object().toVariantMap();
+
+            // Presets exported by toJsonFile() contain the action map at the
+            // JSON root. Also accept older wrapped documents for compatibility.
+            const auto serializationName = _sourceAction->getSerializationName();
+            if (presetMap.contains(serializationName) && !presetMap.contains("ActionType"))
+                presetMap = presetMap.value(serializationName).toMap();
+
+            _sourceAction->fromVariantMap(presetMap);
+        }
+        catch (const ManiVaultException& exception)
+        {
+            if (!previousState.isEmpty())
+            {
+                try
+                {
+                    _sourceAction->fromVariantMap(previousState);
+                }
+                catch (...)
+                {
+                    // Keep the original import error visible if rollback also fails.
+                }
+            }
+
+            util::exceptionMessageBox(tr("Preset Import Failed"), exception, fileDialog);
+            return;
+        }
+        catch (const std::exception& exception)
+        {
+            if (!previousState.isEmpty())
+            {
+                try
+                {
+                    _sourceAction->fromVariantMap(previousState);
+                }
+                catch (...)
+                {
+                    // Keep the original import error visible if rollback also fails.
+                }
+            }
+
+            util::exceptionMessageBox(tr("Preset Import Failed"), exception, fileDialog);
+            return;
+        }
+        catch (...)
+        {
+            if (!previousState.isEmpty())
+            {
+                try
+                {
+                    _sourceAction->fromVariantMap(previousState);
+                }
+                catch (...)
+                {
+                    // Keep the original import error visible if rollback also fails.
+                }
+            }
+
+            util::exceptionMessageBox(tr("Preset Import Failed"), fileDialog);
+            return;
+        }
 
         savePreset(QFileInfo(presetFilePath).baseName());
 

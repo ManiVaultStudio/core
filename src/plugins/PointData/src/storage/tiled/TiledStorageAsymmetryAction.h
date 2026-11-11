@@ -35,6 +35,12 @@ public:
     /** Returns the row-to-column asymmetry slider action. */
     const IntegralAction& getAsymmetryAction() const;
 
+    /** Restores the asymmetry group and its child actions from a variant map. */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /** Serializes the asymmetry group and its child actions. */
+    QVariantMap toVariantMap() const override;
+
 private:
     StringAction   _columnLabelAction;
     IntegralAction _asymmetryAction;

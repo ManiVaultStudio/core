@@ -46,6 +46,7 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _rowChunkTileFactorAction(&_importPerformanceSettingsAction, "CSR chunk tile-height factor", 1, 256, static_cast<std::int32_t>(std::clamp<std::size_t>(rowChunkTileFactor, 1, 256))),
     _stagingDirectoryAction(this, "Temporary storage", stagingDirectory),
     _defaultStagingDirectory(defaultStagingDirectory),
+    _showImportPerformanceOptions(showImportPerformanceOptions),
     _showImportStagingDirectory(showImportStagingDirectory)
 {
     setShowLabels(true);
@@ -243,27 +244,122 @@ void TiledStorageBackendConfigurationAction::fromVariantMap(const QVariantMap& v
 {
     StorageBackendConversionAction::fromVariantMap(variantMap);
 
-    const auto restore = [&variantMap](auto& action, const char* key) {
-        const auto serializedAction = variantMap.value(QLatin1String(key));
-        if (!serializedAction.isValid())
-            return;
+    const auto configuration = variantMap.value("TiledConfiguration").toMap();
+    const auto restoreAction = [](auto& action, const QVariantMap& parentMap) {
+        const auto serializationName = action.getSerializationName();
+        if (!parentMap.contains(serializationName))
+            return false;
 
-        const QSignalBlocker blocker(&action);
-        action.fromVariantMap(serializedAction.toMap());
+        action.fromVariantMap(parentMap.value(serializationName).toMap());
+        return true;
+    };
+    const auto settingValue = [&variantMap, &configuration](const char* key, const char* legacyKey) {
+        const auto currentValue = configuration.value(QLatin1String(key));
+        if (currentValue.isValid())
+            return currentValue;
+
+        const auto legacyAction = variantMap.value(QLatin1String(legacyKey)).toMap();
+        return legacyAction.value("Value");
     };
 
-    restore(_deriveTileDimensionsAction, "DeriveTileDimensionsAction");
-    restore(_tileAsymmetryAction.getAsymmetryAction(), "TileAsymmetryAction");
-    restore(_tileSizeAction, "TileSizeAction");
-    restore(_rowTileSizeAction, "RowTileSizeAction");
-    restore(_columnTileSizeAction, "ColumnTileSizeAction");
-    restore(_packedTilesAction, "PackedTilesAction");
-    restore(_superTileRowsAction, "SuperTileRowsAction");
-    restore(_superTileColumnsAction, "SuperTileColumnsAction");
+    // Disable policy-derived geometry while restoring individual action state,
+    // then re-enable it at the end if that was the serialized mode.
+    const auto deriveDimensionsAction = variantMap.value(_deriveTileDimensionsAction.getSerializationName()).toMap();
+    const auto deriveDimensions = deriveDimensionsAction.contains("Value") ?
+        deriveDimensionsAction.value("Value") : settingValue("DeriveTileDimensions", "DeriveTileDimensionsAction");
+    if (deriveDimensions.isValid())
+        _deriveTileDimensionsAction.setChecked(false);
+
+    restoreAction(_tileAsymmetryAction, variantMap);
+    restoreAction(_tileSizeAction, variantMap);
+    restoreAction(_packedTilesAction, variantMap);
+    restoreAction(_superTileRowsAction, variantMap);
+    restoreAction(_superTileColumnsAction, variantMap);
+
+    const auto rowTileSizeGroup = variantMap.value(_rowTileSizeGroupAction.getSerializationName()).toMap();
+    if (!rowTileSizeGroup.isEmpty())
+    {
+        _rowTileSizeGroupAction.fromVariantMap(rowTileSizeGroup);
+        restoreAction(_rowTileSizePercentageAction, rowTileSizeGroup);
+        restoreAction(_rowTileSizeAction, rowTileSizeGroup);
+    }
+
+    const auto columnTileSizeGroup = variantMap.value(_columnTileSizeGroupAction.getSerializationName()).toMap();
+    if (!columnTileSizeGroup.isEmpty())
+    {
+        _columnTileSizeGroupAction.fromVariantMap(columnTileSizeGroup);
+        restoreAction(_columnTileSizePercentageAction, columnTileSizeGroup);
+        restoreAction(_columnTileSizeAction, columnTileSizeGroup);
+    }
+
+    const auto importPerformance = variantMap.value(_importPerformanceAction.getSerializationName()).toMap();
+    if (!importPerformance.isEmpty())
+    {
+        _importPerformanceAction.fromVariantMap(importPerformance);
+        restoreAction(_importPerformanceSummaryAction, importPerformance);
+
+        const auto performanceSettings = importPerformance.value(_importPerformanceSettingsAction.getSerializationName()).toMap();
+        if (!performanceSettings.isEmpty())
+        {
+            _importPerformanceSettingsAction.fromVariantMap(performanceSettings);
+            restoreAction(_bucketingThreadCountAction, performanceSettings);
+            restoreAction(_stagingThreadCountAction, performanceSettings);
+            restoreAction(_rowChunkTileFactorAction, performanceSettings);
+        }
+    }
+
+    restoreAction(_stagingDirectoryAction, variantMap);
+
+    // Accept value-only presets written by the short-lived experimental format.
+    const auto restoreLegacyIntegralValue = [&](IntegralAction& action, const char* key, const char* legacyKey) {
+        if (variantMap.contains(action.getSerializationName()))
+            return;
+
+        const auto value = settingValue(key, legacyKey);
+        if (value.isValid())
+            action.setValue(value.toInt());
+    };
+
+    const auto restoreLegacyToggleValue = [&](ToggleAction& action, const char* key, const char* legacyKey) {
+        if (variantMap.contains(action.getSerializationName()))
+            return;
+
+        const auto value = settingValue(key, legacyKey);
+        if (value.isValid())
+            action.setChecked(value.toBool());
+    };
+
+    restoreLegacyIntegralValue(_tileAsymmetryAction.getAsymmetryAction(), "TileAsymmetry", "TileAsymmetryAction");
+    restoreLegacyIntegralValue(_tileSizeAction, "TileSizeMiB", "TileSizeAction");
+    restoreLegacyIntegralValue(_rowTileSizeAction, "TileHeight", "RowTileSizeAction");
+    restoreLegacyIntegralValue(_columnTileSizeAction, "TileWidth", "ColumnTileSizeAction");
+    restoreLegacyToggleValue(_packedTilesAction, "PackedTiles", "PackedTilesAction");
+    restoreLegacyIntegralValue(_superTileRowsAction, "SuperTileRows", "SuperTileRowsAction");
+    restoreLegacyIntegralValue(_superTileColumnsAction, "SuperTileColumns", "SuperTileColumnsAction");
+    restoreLegacyIntegralValue(_bucketingThreadCountAction, "BucketingThreadCount", "BucketingThreadCountAction");
+    restoreLegacyIntegralValue(_stagingThreadCountAction, "StagingThreadCount", "StagingThreadCountAction");
+    restoreLegacyIntegralValue(_rowChunkTileFactorAction, "RowChunkTileFactor", "RowChunkTileFactorAction");
+
+    const auto stagingDirectory = settingValue("StagingDirectory", "StagingDirectoryAction");
+    if (!variantMap.contains(_stagingDirectoryAction.getSerializationName()) && stagingDirectory.isValid())
+        _stagingDirectoryAction.setDirectory(stagingDirectory.toString());
+
+    if (deriveDimensionsAction.contains("Value"))
+        restoreAction(_deriveTileDimensionsAction, variantMap);
+    else if (deriveDimensions.isValid())
+        _deriveTileDimensionsAction.setChecked(deriveDimensions.toBool());
 
     updateTileSizePercentages();
     updateTileSizingMode();
-    updateCacheCapacity();
+
+    // Tile-cache capacity can be overridden by the user, although geometry
+    // changes normally reset it to a suggested value. Restore the preset value
+    // after geometry policy updates so the explicit override is preserved.
+    restoreAction(_cacheCapacityAction, variantMap);
+    restoreLegacyIntegralValue(_cacheCapacityAction, "CacheCapacity", "CacheCapacityAction");
+
+    updatePackedTileControls();
+    updateImportPerformanceSummary();
     updateStorageObservations();
     notifyOptionsChanged();
 }
@@ -272,14 +368,39 @@ QVariantMap TiledStorageBackendConfigurationAction::toVariantMap() const
 {
     auto variantMap = StorageBackendConversionAction::toVariantMap();
 
-    variantMap.insert("DeriveTileDimensionsAction", _deriveTileDimensionsAction.toVariantMap());
-    variantMap.insert("TileAsymmetryAction", _tileAsymmetryAction.getAsymmetryAction().toVariantMap());
-    variantMap.insert("TileSizeAction", _tileSizeAction.toVariantMap());
-    variantMap.insert("RowTileSizeAction", _rowTileSizeAction.toVariantMap());
-    variantMap.insert("ColumnTileSizeAction", _columnTileSizeAction.toVariantMap());
-    variantMap.insert("PackedTilesAction", _packedTilesAction.toVariantMap());
-    variantMap.insert("SuperTileRowsAction", _superTileRowsAction.toVariantMap());
-    variantMap.insert("SuperTileColumnsAction", _superTileColumnsAction.toVariantMap());
+    _tileAsymmetryAction.insertIntoVariantMap(variantMap);
+    _deriveTileDimensionsAction.insertIntoVariantMap(variantMap);
+    _tileSizeAction.insertIntoVariantMap(variantMap);
+    _cacheCapacityAction.insertIntoVariantMap(variantMap);
+    _packedTilesAction.insertIntoVariantMap(variantMap);
+    _superTileRowsAction.insertIntoVariantMap(variantMap);
+    _superTileColumnsAction.insertIntoVariantMap(variantMap);
+
+    auto rowTileSizeGroup = _rowTileSizeGroupAction.toVariantMap();
+    _rowTileSizeAction.insertIntoVariantMap(rowTileSizeGroup);
+    _rowTileSizePercentageAction.insertIntoVariantMap(rowTileSizeGroup);
+    variantMap.insert(_rowTileSizeGroupAction.getSerializationName(), rowTileSizeGroup);
+
+    auto columnTileSizeGroup = _columnTileSizeGroupAction.toVariantMap();
+    _columnTileSizeAction.insertIntoVariantMap(columnTileSizeGroup);
+    _columnTileSizePercentageAction.insertIntoVariantMap(columnTileSizeGroup);
+    variantMap.insert(_columnTileSizeGroupAction.getSerializationName(), columnTileSizeGroup);
+
+    if (_showImportPerformanceOptions)
+    {
+        auto performanceSettings = _importPerformanceSettingsAction.toVariantMap();
+        _bucketingThreadCountAction.insertIntoVariantMap(performanceSettings);
+        _stagingThreadCountAction.insertIntoVariantMap(performanceSettings);
+        _rowChunkTileFactorAction.insertIntoVariantMap(performanceSettings);
+
+        auto importPerformance = _importPerformanceAction.toVariantMap();
+        _importPerformanceSummaryAction.insertIntoVariantMap(importPerformance);
+        importPerformance.insert(_importPerformanceSettingsAction.getSerializationName(), performanceSettings);
+        variantMap.insert(_importPerformanceAction.getSerializationName(), importPerformance);
+    }
+
+    if (_showImportStagingDirectory)
+        _stagingDirectoryAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }

@@ -350,8 +350,26 @@ void StorageBackendConversionAction::fromVariantMap(const QVariantMap& variantMa
 {
     GroupAction::fromVariantMap(variantMap);
 
-    if (_hasElementTypeAction && variantMap.contains("ElementTypeAction"))
-        _elementTypeAction.fromVariantMap(variantMap.value("ElementTypeAction").toMap());
+    if (!_hasElementTypeAction)
+        return;
+
+    if (variantMap.contains(_elementTypeAction.getSerializationName()))
+    {
+        _elementTypeAction.fromParentVariantMap(variantMap, true);
+        return;
+    }
+
+    if (variantMap.contains("TargetElementType"))
+    {
+        _elementTypeAction.setCurrentText(variantMap.value("TargetElementType").toString());
+        return;
+    }
+
+    // Older presets stored the whole widget action. Read only its setting so
+    // importing a preset does not replace this dialog's action identity.
+    const auto legacyElementTypeAction = variantMap.value("ElementTypeAction").toMap();
+    if (legacyElementTypeAction.contains("Value"))
+        _elementTypeAction.setCurrentText(legacyElementTypeAction.value("Value").toString());
 }
 
 QVariantMap StorageBackendConversionAction::toVariantMap() const
@@ -359,7 +377,7 @@ QVariantMap StorageBackendConversionAction::toVariantMap() const
     auto variantMap = GroupAction::toVariantMap();
 
     if (_hasElementTypeAction)
-        variantMap.insert("ElementTypeAction", _elementTypeAction.toVariantMap());
+        _elementTypeAction.insertIntoVariantMap(variantMap);
 
     return variantMap;
 }
