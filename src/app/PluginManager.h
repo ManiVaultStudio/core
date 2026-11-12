@@ -32,6 +32,9 @@ public:
     /** Resets the contents of the plugin manager */
     void reset() override;
 
+    /** Destroy view instances before application shutdown removes their datasets. */
+    void destroyViewPlugins();
+
     /** Loads all plugin factories from the plugin directory */
     void loadPluginFactories() override;
 
