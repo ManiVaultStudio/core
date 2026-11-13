@@ -215,6 +215,8 @@ add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINTS_VI
 set_source_files_properties(
     src/view/PointsTableModel.cpp
     src/view/PointsViewWidget.cpp
+    src/developer/PointDataPhantomGenerator.cpp
+    src/developer/PointDataTestSuite.cpp
     PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON
 )
 
