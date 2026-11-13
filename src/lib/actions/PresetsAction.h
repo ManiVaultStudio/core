@@ -294,6 +294,8 @@ signals:
     void presetExported(const QString& filePath);
 
 private:
+    void populateMenu(QMenu* menu);
+
     WidgetAction*       _sourceAction;  /** Non-owning pointer to widget action of which to save presets */
     QString             _settingsKey;   /** Settings key where the preset will be stored */
     QString             _presetType;    /** Preset type */

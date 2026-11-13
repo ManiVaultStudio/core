@@ -109,15 +109,28 @@ void PresetsAction::savePresetsToApplicationSettings() const
 
 QMenu* PresetsAction::getMenu(QWidget* parent /*= nullptr*/)
 {
-    loadPresetsFromApplicationSettings();
-
     auto menu = new QMenu("Presets", parent);
+
+    connect(menu, &QMenu::aboutToShow, this, [this, menu]() -> void {
+        loadPresetsFromApplicationSettings();
+        populateMenu(menu);
+    });
+
+    loadPresetsFromApplicationSettings();
+    populateMenu(menu);
+
+    return menu;
+}
+
+void PresetsAction::populateMenu(QMenu* menu)
+{
+    menu->clear();
 
     const auto presetIcon = StyledIcon("prescription");
 
     menu->setIcon(presetIcon);
 
-    auto savePresetAction = new QAction("Save");
+    auto savePresetAction = new QAction("Save", menu);
 
     savePresetAction->setIcon(StyledIcon("floppy-disk"));
 
@@ -136,7 +149,7 @@ QMenu* PresetsAction::getMenu(QWidget* parent /*= nullptr*/)
     menu->addAction(savePresetAction);
 
     if (_saveDefaultPresetActionVisible) {
-        auto saveDefaultPresetAction = new QAction("Save As Default");
+        auto saveDefaultPresetAction = new QAction("Save As Default", menu);
 
         saveDefaultPresetAction->setIcon(StyledIcon("floppy-disk"));
 
@@ -156,7 +169,7 @@ QMenu* PresetsAction::getMenu(QWidget* parent /*= nullptr*/)
     }
 
     for (const auto& presetName : presetNames) {
-        auto loadPresetAction = new QAction(presetName);
+        auto loadPresetAction = new QAction(presetName, menu);
 
         loadPresetAction->setIcon(presetIcon);
 
@@ -172,8 +185,8 @@ QMenu* PresetsAction::getMenu(QWidget* parent /*= nullptr*/)
 
     menu->addSeparator();
 
-    auto importPresetAction = new QAction("Import...");
-    auto exportPresetAction = new QAction("Export...");
+    auto importPresetAction = new QAction("Import...", menu);
+    auto exportPresetAction = new QAction("Export...", menu);
 
     importPresetAction->setIcon(StyledIcon("file-import"));
     exportPresetAction->setIcon(StyledIcon("file-export"));
@@ -186,8 +199,6 @@ QMenu* PresetsAction::getMenu(QWidget* parent /*= nullptr*/)
 
     menu->addSeparator();
     menu->addAction(&_editAction);
-
-    return menu;
 }
 
 void PresetsAction::setSaveDefaultPresetActionVisible(const bool visible)
