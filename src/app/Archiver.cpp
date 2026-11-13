@@ -13,6 +13,7 @@
 #include <deque>
 #include <condition_variable>
 #include <exception>
+#include <memory>
 #include <mutex>
 #include <thread>
 
@@ -33,6 +34,8 @@
 #include <QTemporaryDir>
 
 #include <quazip/JlCompress.h>
+#include <quazip/quazip.h>
+#include <quazip/quazipfile.h>
 
 namespace mv {
 
@@ -690,6 +693,86 @@ QByteArray Archiver::readZipEntryToMemory(const QString& zipPath, const QString&
 
 QByteArray Archiver::readZipEntryRangeToMemory(const QString& zipPath, const QString& entryName, const std::uint64_t offset, const std::uint64_t size)
 {
+    struct StoredEntryRange
+    {
+        std::uint64_t offset = 0;
+        std::uint64_t size = 0;
+    };
+    struct StoredEntryIndex
+    {
+        QHash<QString, StoredEntryRange> entries;
+    };
+    static QMutex storedIndexMutex;
+    static QHash<QString, std::shared_ptr<const StoredEntryIndex>> storedEntryIndices;
+
+    const QFileInfo storedArchiveInfo(zipPath);
+    if (storedArchiveInfo.isFile())
+    {
+        const auto cacheKey = QStringLiteral("%1|%2|%3")
+            .arg(storedArchiveInfo.absoluteFilePath())
+            .arg(storedArchiveInfo.size())
+            .arg(storedArchiveInfo.lastModified().toMSecsSinceEpoch());
+        std::shared_ptr<const StoredEntryIndex> storedIndex;
+        {
+            const QMutexLocker lock(&storedIndexMutex);
+            storedIndex = storedEntryIndices.value(cacheKey);
+            if (!storedIndex)
+            {
+                auto newIndex = std::make_shared<StoredEntryIndex>();
+                QuaZip zip(zipPath);
+                if (zip.open(QuaZip::mdUnzip))
+                {
+                    if (zip.goToFirstFile())
+                    {
+                        do
+                        {
+                            QuaZipFileInfo64 entryInfo;
+                            if (!zip.getCurrentFileInfo(&entryInfo))
+                                throw std::runtime_error("Unable to inspect project ZIP entry");
+                            if (entryInfo.method != 0 || (entryInfo.flags & 1) || entryInfo.compressedSize != entryInfo.uncompressedSize)
+                                continue;
+
+                            QuaZipFile entryFile(&zip);
+                            if (!entryFile.open(QIODevice::ReadOnly))
+                                throw std::runtime_error("Unable to open stored project ZIP entry");
+                            const auto dataOffset = unzGetCurrentFileZStreamPos64(zip.getUnzFile());
+                            entryFile.close();
+                            const auto archiveSize = static_cast<std::uint64_t>(storedArchiveInfo.size());
+                            if (dataOffset > archiveSize || entryInfo.uncompressedSize > archiveSize - dataOffset)
+                                throw std::runtime_error("Stored project ZIP entry exceeds the archive size");
+
+                            newIndex->entries.insert(zip.getCurrentFileName(), { dataOffset, entryInfo.uncompressedSize });
+                        }
+                        while (zip.goToNextFile());
+                    }
+                    zip.close();
+                    storedIndex = newIndex;
+                    if (storedEntryIndices.size() >= 4)
+                        storedEntryIndices.erase(storedEntryIndices.begin());
+                    storedEntryIndices.insert(cacheKey, storedIndex);
+                }
+            }
+        }
+
+        if (storedIndex)
+        {
+            const auto entry = storedIndex->entries.constFind(entryName);
+            if (entry != storedIndex->entries.cend())
+            {
+                if (offset > entry->size || size > entry->size - offset || size > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max()))
+                    throw std::out_of_range("Requested range exceeds stored project ZIP entry");
+
+                QFile archiveFile(zipPath);
+                if (!archiveFile.open(QIODevice::ReadOnly) || !archiveFile.seek(static_cast<qint64>(entry->offset + offset)))
+                    throw std::runtime_error("Unable to seek to stored project ZIP entry range");
+                auto bytes = archiveFile.read(static_cast<qint64>(size));
+                if (static_cast<std::uint64_t>(bytes.size()) != size)
+                    throw std::runtime_error("Unable to read stored project ZIP entry range");
+                return bytes;
+            }
+        }
+    }
+
     static QMutex zipReadMutex;
     struct StagedEntryCache
     {

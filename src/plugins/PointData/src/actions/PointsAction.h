@@ -8,6 +8,7 @@
 
 #include <Dataset.h>
 #include <actions/GroupAction.h>
+#include <actions/OptionAction.h>
 #include <actions/TriggerAction.h>
 
 class Points;
@@ -43,8 +44,13 @@ public:
     /** Returns the action for opening the standalone Points View plugin. */
     mv::gui::TriggerAction& getOpenInPointsViewAction();
 
+    /** Returns the per-dataset project resource staging policy action. */
+    mv::gui::OptionAction& getProjectResourceStagingPolicyAction();
+
 private:
+    mv::Dataset<Points> _points; /**< Dataset whose project resource policy is edited by this action. */
     StorageBackendAction _storageBackendAction; /**< Storage backend selector and configuration action. */
     PointsViewAction     _pointsViewAction;     /**< Embedded point-data view action. */
     mv::gui::TriggerAction _openInPointsViewAction; /**< Opens the standalone Points View plugin. */
+    mv::gui::OptionAction _projectResourceStagingPolicyAction; /**< Per-dataset project resource staging policy. */
 };

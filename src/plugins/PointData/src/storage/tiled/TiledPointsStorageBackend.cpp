@@ -57,7 +57,7 @@ std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> TiledPointsStorageB
     });
     const auto storage = mv::pointdata::tiled::PointDataTiledStorage::fromGenerator(options.rows, options.columns, options.elementSize, options.rowTileSize, options.columnTileSize, [generator = tileGenerator](const mv::pointdata::tiled::TileDescriptor& descriptor) {
         return generator(descriptor.rowOffset, descriptor.columnOffset, descriptor.rows, descriptor.columns);
-    }, std::move(progress), options.materializeGeneratedTiles);
+    }, std::move(progress), options.materializeGeneratedTiles, options.loaderThreadSafe, options.materializationWorkerCount, options.materializationChunkTileRows);
 
     storage->setCacheCapacity(options.cacheCapacity);
     storage->setCacheCapacityBytes(options.cacheCapacityBytes);
@@ -273,10 +273,14 @@ float TiledPointsStorageBackend::getValueAt(const std::uint64_t flatIndex) const
     return _storage ? _storage->valueAt(flatIndex, _elementTypeIndex) : 0.0f;
 }
 
-void TiledPointsStorageBackend::materialize(char* destination) const
+void TiledPointsStorageBackend::materialize(char* destination, StorageBackendProgressCallback progress) const
 {
-    if (_storage && destination != nullptr)
-        _storage->materialize(destination);
+    if (destination == nullptr)
+        return;
+    if (!_storage)
+        throw std::logic_error("Tiled point-data storage is unavailable for materialization");
+
+    _storage->materialize(destination, progress);
 }
 
 }

@@ -628,12 +628,6 @@ public:
 
     void setDimensionNames(const std::vector<QString>& dimNames);
 
-    /** Gets the dataset-level override used when opening archive-backed project resources. */
-    [[nodiscard]] mv::util::ProjectResourceStagingPolicy getProjectOpenStagingPolicy() const;
-
-    /** Sets the dataset-level project-open staging override; Inherit follows project then application policy. */
-    void setProjectOpenStagingPolicy(mv::util::ProjectResourceStagingPolicy policy);
-
     // Returns the value of the element at the specified position in the current
     // data vector, converted to float.
     // Will work fine, even when the internal data element type is not float.
@@ -732,7 +726,7 @@ public: // Serialization
     mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const final;
 
 private:
-    void makeTiled(std::size_t rowTileSize, std::size_t columnTileSize, std::function<void(float)> progress = {});
+    void makeTiled(std::size_t rowTileSize, std::size_t columnTileSize, std::function<void(float)> progress = {}, std::size_t maxWorkerCount = 4, std::size_t chunkTileRowFactor = 3);
     void refreshStorageBackend();
     void clearStorageBackend();
 
@@ -750,7 +744,6 @@ private:
     std::unique_ptr<mv::pointdata::storage::PointsStorageBackend> _storageBackend;
 
     std::vector<QString> _dimNames;
-    mv::util::ProjectResourceStagingPolicy _projectOpenStagingPolicy = mv::util::ProjectResourceStagingPolicy::Inherit;
 
 private: // Sparse data, experimental
     std::uint64_t                    _numRows    = 0;
@@ -1212,11 +1205,17 @@ public:
 
     void setDimensionNames(const std::vector<QString>& dimNames);
 
-    /** Gets the project-open staging policy override for this concrete point dataset. */
-    [[nodiscard]] mv::util::ProjectResourceStagingPolicy getProjectOpenStagingPolicy() const;
+    /** Gets the resource staging policy shared by datasets backed by this raw data. */
+    [[nodiscard]] mv::util::ProjectResourceStagingPolicy getProjectResourceStagingPolicy() const;
 
-    /** Sets the project-open staging policy override for this concrete point dataset. */
-    void setProjectOpenStagingPolicy(mv::util::ProjectResourceStagingPolicy policy);
+    /** Sets the resource staging policy shared by datasets backed by this raw data. */
+    void setProjectResourceStagingPolicy(mv::util::ProjectResourceStagingPolicy policy);
+
+    /** Gets the project-open staging policy through the legacy API. */
+    [[deprecated("Use getProjectResourceStagingPolicy()")]] [[nodiscard]] mv::util::ProjectResourceStagingPolicy getProjectOpenStagingPolicy() const;
+
+    /** Sets the project-open staging policy through the legacy API. */
+    [[deprecated("Use setProjectResourceStagingPolicy()")]] void setProjectOpenStagingPolicy(mv::util::ProjectResourceStagingPolicy policy);
 
     /**
      * Get amount of data occupied by the raw data

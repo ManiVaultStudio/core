@@ -6,19 +6,26 @@
 
 #include "../PointData.h"
 
-#include <ForegroundTask.h>
+#include <ModalTask.h>
+#include <Application.h>
 #include <util/StyledIcon.h>
 
 #include <QApplication>
 #include <QCoreApplication>
+#include <QElapsedTimer>
 
 #include <exception>
+#include <stdexcept>
 
 using namespace mv;
 using namespace mv::gui;
 
 namespace
 {
+
+struct StorageBackendConversionCancelled
+{
+};
 
 QStringList storageBackendTypes()
 {
@@ -134,25 +141,75 @@ void StorageBackendAction::convertBackend(const pointdata::storage::StorageBacke
     _conversionInProgress = true;
     updateBackendType();
 
-    ForegroundTask conversionTask(this, "Convert point-data storage", Task::Status::Running);
+    const auto sourceType = _points->getStorageBackendType();
+    const auto rows = _points->getNumPoints();
+    const auto columns = _points->getNumDimensions();
+    const auto sourceBytes = _points->getRawDataSize();
+    QElapsedTimer conversionTimer;
+    conversionTimer.start();
+    qInfo() << "Point-data storage conversion started:"
+        << (sourceType ? pointdata::storage::getStorageBackendTypeName(*sourceType) : QStringLiteral("unknown"))
+        << "->" << pointdata::storage::getStorageBackendTypeName(type)
+        << "dimensions" << rows << "x" << columns
+        << "source storage bytes" << sourceBytes;
+
+    ModalTask conversionTask(Application::current(), "Convert point-data storage", Task::Status::Running, true);
     conversionTask.setAlwaysProcessEvents(true);
     conversionTask.setProgressDescription("Converting point-data storage");
+    conversionTask.setProgress(0.0f);
+    QCoreApplication::processEvents();
+    std::size_t progressCallbackCount = 0;
 
     try
     {
-        _points->convertToStorageBackend(type, options, [&conversionTask](const float progress) {
+        if (conversionTask.isAboutToBeAborted() || conversionTask.isAborting() || conversionTask.isAborted())
+            throw StorageBackendConversionCancelled {};
+
+        _points->convertToStorageBackend(type, options, [&conversionTask, &progressCallbackCount](const float progress) {
+            ++progressCallbackCount;
             conversionTask.setProgress(progress);
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+            // Keep the task's cancel control responsive while conversion is in a long-running row or tile loop.
+            // A final progress update is emitted after the new backend may already have been installed.
+            if (progress < 1.0f)
+            {
+                QCoreApplication::processEvents();
+
+                if (conversionTask.isAboutToBeAborted() || conversionTask.isAborting() || conversionTask.isAborted())
+                    throw StorageBackendConversionCancelled {};
+            }
         });
+
+        const auto resultingType = _points->getStorageBackendType();
+        if (!resultingType || *resultingType != type)
+            throw std::runtime_error("Storage conversion completed without installing the requested backend");
+
+        qInfo() << "Point-data storage conversion completed in" << conversionTimer.elapsed() << "ms; backend:"
+            << pointdata::storage::getStorageBackendTypeName(*resultingType)
+            << "result storage bytes" << _points->getRawDataSize()
+            << "progress callbacks" << progressCallbackCount;
 
         conversionTask.setProgress(1.0f);
         conversionTask.setFinished();
         help().addNotification("Point-data storage converted", "The point-data storage backend was converted successfully.", util::StyledIcon("check"));
     }
+    catch (const StorageBackendConversionCancelled&)
+    {
+        qInfo() << "Point-data storage conversion cancelled after" << conversionTimer.elapsed() << "ms; progress callbacks" << progressCallbackCount;
+        conversionTask.setAborted();
+        help().addNotification("Point-data storage conversion cancelled", "The storage conversion was cancelled.", util::StyledIcon("circle-exclamation"));
+    }
     catch (const std::exception& exception)
     {
+        qWarning() << "Point-data storage conversion failed after" << conversionTimer.elapsed() << "ms; progress callbacks" << progressCallbackCount << ":" << exception.what();
         conversionTask.setAborted();
         help().addNotification("Point-data storage conversion failed", QString::fromUtf8(exception.what()), util::StyledIcon("circle-exclamation"));
+    }
+    catch (...)
+    {
+        qWarning() << "Point-data storage conversion failed after" << conversionTimer.elapsed() << "ms; progress callbacks" << progressCallbackCount << "with an unknown exception";
+        conversionTask.setAborted();
+        help().addNotification("Point-data storage conversion failed", "An unknown error occurred during storage conversion.", util::StyledIcon("circle-exclamation"));
     }
 
     _conversionInProgress = false;

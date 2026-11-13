@@ -55,6 +55,8 @@ struct TiledStorageBackendCreationOptions final : StorageBackendCreationOptions
     bool          materializeGeneratedTiles = false; /**< Whether generated tiles should be retained immediately instead of loading lazily. */
     std::size_t   superTileRows        = 1;   /**< Number of base tile rows in one super tile. */
     std::size_t   superTileColumns     = 1;   /**< Number of base tile columns in one super tile. */
+    std::size_t   materializationWorkerCount = 4; /**< Maximum workers used to materialize generated tiles. */
+    std::size_t   materializationChunkTileRows = 3; /**< Tile-row height of one bounded materialization chunk. */
     bool          loaderThreadSafe     = false; /**< Whether independent tile loader calls may run concurrently. */
     TileGenerator generator;                 /**< Callback that generates one tile on first access. */
     std::optional<PackedTileSource> packedSource; /**< Optional packed tile source metadata attached at creation. */
@@ -134,7 +136,7 @@ public:
     float getValueAt(std::uint64_t flatIndex) const override;
 
     /** Materializes all tiled values into the caller-owned destination buffer. */
-    void materialize(char* destination) const override;
+    void materialize(char* destination, StorageBackendProgressCallback progress = {}) const override;
 
 private:
     std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> _storage; /**< Tiled payload and cache owner. */

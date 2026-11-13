@@ -69,7 +69,7 @@ public:
     float getValueAt(std::uint64_t flatIndex) const override;
 
     /** Copies the complete dense matrix to the caller-owned destination buffer. */
-    void materialize(char* destination) const override;
+    void materialize(char* destination, StorageBackendProgressCallback progress = {}) const override;
 
 private:
     const ::PointData& _pointData; /**< Existing dense PointData owner. */

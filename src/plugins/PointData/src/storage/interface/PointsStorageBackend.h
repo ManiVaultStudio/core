@@ -112,8 +112,8 @@ public:
         throw std::logic_error("Point-data storage does not support range mutation");
     }
 
-    /** Materializes the complete matrix into a row-major destination buffer. */
-    virtual void materialize(char* destination) const = 0;
+    /** Materializes the complete matrix into a row-major destination buffer and reports normalized progress when requested. */
+    virtual void materialize(char* destination, StorageBackendProgressCallback progress = {}) const = 0;
 };
 
 }

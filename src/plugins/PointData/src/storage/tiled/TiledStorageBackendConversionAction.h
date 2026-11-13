@@ -31,6 +31,8 @@ private:
 
     std::uint64_t _rows = 0;
     std::uint64_t _columns = 0;
+    std::uint32_t _sourceElementTypeIndex = 0;
+    bool _hasTiledSource = false;
     bool _canApply = true;
     bool _checksMaterialization = false;
     MessageCardAction _memoryObservationAction;

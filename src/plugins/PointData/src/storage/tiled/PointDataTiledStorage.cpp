@@ -5,15 +5,23 @@
 #include <util/CodecRegistry.h>
 #include <util/Serialization.h>
 
+#include <QDebug>
 #include <QString>
 #include <QDir>
 #include <QTemporaryDir>
 #include <QUuid>
 
 #include <algorithm>
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
 #include <cstring>
+#include <exception>
+#include <future>
 #include <limits>
+#include <mutex>
 #include <stdexcept>
+#include <thread>
 
 namespace mv::pointdata::tiled
 {
@@ -95,7 +103,7 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromDense(const ch
     return storage;
 }
 
-std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromGenerator(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, TileGenerator generator, ProgressCallback progress, const bool materializeGeneratedTiles)
+std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromGenerator(const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::size_t rowTileSize, const std::size_t columnTileSize, TileGenerator generator, ProgressCallback progress, const bool materializeGeneratedTiles, const bool parallelMaterialization, const std::size_t maxWorkerCount, const std::size_t chunkTileRowFactor)
 {
     if (!generator)
         throw std::invalid_argument("Tile generator is empty");
@@ -110,31 +118,141 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromGenerator(cons
         return storage;
 
     const auto totalTiles       = storage->_descriptors.size();
-    const auto progressInterval = std::max<std::size_t>(1, totalTiles / 100);
-    std::size_t tileIndex       = 0;
-
     if (progress)
         progress(0.1f);
 
-    for (auto& descriptor : storage->_descriptors)
+    const auto maxWorkers = parallelMaterialization ? std::clamp<std::size_t>(maxWorkerCount, 1, 256) : 1;
+    const auto chunkTileRows = std::max<std::size_t>(1, chunkTileRowFactor);
+    const auto tileColumnCount = storage->tileColumnCount();
+    const auto chunkTileCount = tileColumnCount != 0 && chunkTileRows > std::numeric_limits<std::size_t>::max() / tileColumnCount ? totalTiles : std::max<std::size_t>(1, chunkTileRows * tileColumnCount);
+    const auto chunkCount = totalTiles == 0 ? 0 : 1 + (totalTiles - 1) / chunkTileCount;
+    std::atomic<std::size_t> activeWorkers{ 0 };
+    std::atomic<std::size_t> maximumActiveWorkers{ 0 };
+    std::atomic<std::uint64_t> workerNanoseconds{ 0 };
+    std::atomic<std::size_t> completedTiles{ 0 };
+    std::atomic<bool> failed{ false };
+    std::mutex exceptionMutex;
+    std::mutex progressWaitMutex;
+    std::condition_variable progressCondition;
+    std::exception_ptr failure;
+    std::exception_ptr progressFailure;
+    const auto conversionStart = std::chrono::steady_clock::now();
+    for (std::size_t chunkStart = 0; chunkStart < totalTiles && !failed.load(std::memory_order_relaxed); chunkStart += chunkTileCount)
     {
-        if (descriptor.rows != 0 && descriptor.columns > (std::numeric_limits<std::uint64_t>::max)() / descriptor.rows)
-            throw std::overflow_error("Generated tile dimensions exceed the supported byte size");
+        const auto chunkEnd = std::min(totalTiles, chunkStart + chunkTileCount);
+        std::atomic<std::size_t> nextTile{ chunkStart };
+        const auto workerCount = std::min<std::size_t>(chunkEnd - chunkStart, maxWorkers);
+        const auto worker = [&]() {
+            while (!failed.load(std::memory_order_relaxed))
+            {
+                const auto index = nextTile.fetch_add(1, std::memory_order_relaxed);
+                if (index >= chunkEnd)
+                    return;
 
-        const auto elementCount = descriptor.rows * descriptor.columns;
-        if (elementSize == 0 || elementCount > static_cast<std::uint64_t>((std::numeric_limits<qsizetype>::max)()) / elementSize)
-            throw std::overflow_error("Generated tile payload exceeds the supported byte size");
+                bool generatorActive = false;
+                try
+                {
+                    auto& descriptor = storage->_descriptors[index];
+                    if (descriptor.rows != 0 && descriptor.columns > (std::numeric_limits<std::uint64_t>::max)() / descriptor.rows)
+                        throw std::overflow_error("Generated tile dimensions exceed the supported byte size");
 
-        auto bytes = storage->_loader(descriptor);
-        const auto expectedBytes = elementCount * elementSize;
-        if (bytes.size() != static_cast<qsizetype>(expectedBytes))
-            throw std::runtime_error("Generated tile payload size does not match its descriptor");
+                    const auto elementCount = descriptor.rows * descriptor.columns;
+                    if (elementSize == 0 || elementCount > static_cast<std::uint64_t>((std::numeric_limits<qsizetype>::max)()) / elementSize)
+                        throw std::overflow_error("Generated tile payload exceeds the supported byte size");
 
-        descriptor.residentBytes = std::move(bytes);
-        ++tileIndex;
+                    const auto active = activeWorkers.fetch_add(1, std::memory_order_relaxed) + 1;
+                    generatorActive = true;
+                    auto maximum = maximumActiveWorkers.load(std::memory_order_relaxed);
+                    while (active > maximum && !maximumActiveWorkers.compare_exchange_weak(maximum, active, std::memory_order_relaxed))
+                    {
+                    }
+                    const auto tileStart = std::chrono::steady_clock::now();
+                    auto bytes = storage->_loader(descriptor);
+                    workerNanoseconds.fetch_add(static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - tileStart).count()), std::memory_order_relaxed);
+                    activeWorkers.fetch_sub(1, std::memory_order_relaxed);
+                    generatorActive = false;
+                    const auto expectedBytes = elementCount * elementSize;
+                    if (bytes.size() != static_cast<qsizetype>(expectedBytes))
+                        throw std::runtime_error("Generated tile payload size does not match its descriptor");
+                    descriptor.residentBytes = std::move(bytes);
 
-        if (progress && (tileIndex == 1 || tileIndex == totalTiles || tileIndex % progressInterval == 0))
-            progress(0.1f + static_cast<float>(tileIndex) / static_cast<float>(totalTiles) * 0.9f);
+                    const auto completed = completedTiles.fetch_add(1, std::memory_order_relaxed) + 1;
+                    progressCondition.notify_one();
+                    if (progress && workerCount == 1)
+                    {
+                        progress(0.1f + static_cast<float>(completed) / static_cast<float>(totalTiles) * 0.9f);
+                    }
+                }
+                catch (...)
+                {
+                    if (generatorActive)
+                        activeWorkers.fetch_sub(1, std::memory_order_relaxed);
+                    failed.store(true, std::memory_order_relaxed);
+                    progressCondition.notify_all();
+                    std::lock_guard<std::mutex> guard(exceptionMutex);
+                    if (!failure)
+                        failure = std::current_exception();
+                    return;
+                }
+            }
+        };
+
+        if (workerCount == 1)
+            worker();
+        else
+        {
+            std::vector<std::jthread> workers;
+            workers.reserve(workerCount);
+            for (std::size_t workerIndex = 0; workerIndex < workerCount; ++workerIndex)
+                workers.emplace_back(worker);
+            if (progress)
+            {
+                auto reportedTiles = chunkStart;
+                while (reportedTiles < chunkEnd && !failed.load(std::memory_order_relaxed))
+                {
+                    std::unique_lock<std::mutex> lock(progressWaitMutex);
+                    progressCondition.wait_for(lock, std::chrono::milliseconds(20), [&] {
+                        return completedTiles.load(std::memory_order_relaxed) > reportedTiles || failed.load(std::memory_order_relaxed);
+                    });
+                    reportedTiles = completedTiles.load(std::memory_order_relaxed);
+                    lock.unlock();
+                    if (reportedTiles > chunkStart)
+                    {
+                        try
+                        {
+                            progress(0.1f + static_cast<float>(reportedTiles) / static_cast<float>(totalTiles) * 0.9f);
+                        }
+                        catch (...)
+                        {
+                            progressFailure = std::current_exception();
+                            failed.store(true, std::memory_order_relaxed);
+                            progressCondition.notify_all();
+                        }
+                    }
+                }
+            }
+            workers.clear(); // jthread destruction joins every worker.
+        }
+    }
+
+    if (progressFailure)
+        std::rethrow_exception(progressFailure);
+
+    if (failure)
+        std::rethrow_exception(failure);
+
+    if (parallelMaterialization)
+    {
+        const auto elapsedMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - conversionStart).count();
+        const auto workerMilliseconds = workerNanoseconds.load(std::memory_order_relaxed) / 1000000;
+        qInfo().noquote() << QStringLiteral("[PointData] Tiled materialization: %1 tiles in %2 chunks (%3 tile rows per chunk); requested workers %4; maximum concurrent generators %5; aggregate generator time %6 ms; elapsed %7 ms")
+            .arg(totalTiles)
+            .arg(chunkCount)
+            .arg(chunkTileRows)
+            .arg(maxWorkers)
+            .arg(maximumActiveWorkers.load(std::memory_order_relaxed))
+            .arg(workerMilliseconds)
+            .arg(elapsedMilliseconds);
     }
 
     storage->_loader = {};
@@ -190,7 +308,7 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::retile(const std::
     return storage;
 }
 
-std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::retileToPackedFiles(const std::shared_ptr<const PointDataTiledStorage>& source, const std::size_t rowTileSize, const std::size_t columnTileSize, const std::size_t superTileRows, const std::size_t superTileColumns, const mv::util::SharedCodec& codec, ProgressCallback progress)
+std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::retileToPackedFiles(const std::shared_ptr<const PointDataTiledStorage>& source, const std::size_t rowTileSize, const std::size_t columnTileSize, const std::size_t superTileRows, const std::size_t superTileColumns, const mv::util::SharedCodec& codec, ProgressCallback progress, const std::size_t maxWorkerCount, const std::size_t chunkTileRowFactor, std::function<mv::util::SharedCodec()> codecFactory)
 {
     if (!source)
         throw std::invalid_argument("Cannot convert empty point-data storage");
@@ -224,64 +342,136 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::retileToPackedFile
     std::vector<mv::util::PackedBlobBlock> blocks(tileCount);
     std::vector<std::size_t> superTileIndices(tileCount);
     QStringList filePaths;
-    filePaths.reserve(static_cast<qsizetype>(totalSuperTiles));
+    filePaths.resize(static_cast<qsizetype>(totalSuperTiles));
     std::size_t completedTiles = 0;
-
-    for (std::uint64_t superTileRow = 0; superTileRow < tileRows; superTileRow += superTileRows)
+    for (std::size_t superTileIndex = 0; superTileIndex < totalSuperTiles; ++superTileIndex)
     {
-        for (std::uint64_t superTileColumn = 0; superTileColumn < tileColumns; superTileColumn += superTileColumns)
+        const auto fileName = QUuid::createUuid().toString(QUuid::WithoutBraces) + QStringLiteral(".ptpack");
+        filePaths[static_cast<qsizetype>(superTileIndex)] = QDir(temporaryDirectory->path()).filePath(fileName);
+    }
+
+    const auto maximumWorkers = codecFactory ? std::clamp<std::size_t>(maxWorkerCount, 1, 256) : 1;
+    std::vector<mv::util::SharedCodec> workerCodecs;
+    workerCodecs.reserve(maximumWorkers);
+    for (std::size_t workerIndex = 0; workerIndex < maximumWorkers; ++workerIndex)
+    {
+        auto workerCodec = codecFactory ? codecFactory() : codec;
+        if (!workerCodec)
+            throw std::runtime_error("Unable to create a packed-tile conversion codec");
+        workerCodecs.push_back(std::move(workerCodec));
+    }
+
+    const auto materializeSuperTile = [&](const std::size_t superTileIndex, const mv::util::SharedCodec& jobCodec) {
+        const auto superTileRow = (superTileIndex / superTileColumnCount) * superTileRows;
+        const auto superTileColumn = (superTileIndex % superTileColumnCount) * superTileColumns;
+        const auto lastTileRow = std::min<std::uint64_t>(tileRows, superTileRow + superTileRows);
+        const auto lastTileColumn = std::min<std::uint64_t>(tileColumns, superTileColumn + superTileColumns);
+        mv::pointdata::tiled::PackedTileFileWriter writer(filePaths[static_cast<qsizetype>(superTileIndex)], jobCodec);
+        std::size_t tileCountInSuperTile = 0;
+
+        for (std::uint64_t tileRow = superTileRow; tileRow < lastTileRow; ++tileRow)
         {
-            const auto superTileIndex = static_cast<std::size_t>(filePaths.size());
-            const auto fileName = QUuid::createUuid().toString(QUuid::WithoutBraces) + QStringLiteral(".ptpack");
-            const auto filePath = QDir(temporaryDirectory->path()).filePath(fileName);
-            mv::pointdata::tiled::PackedTileFileWriter writer(filePath, codec);
-            const auto lastTileRow = std::min<std::uint64_t>(tileRows, superTileRow + superTileRows);
-            const auto lastTileColumn = std::min<std::uint64_t>(tileColumns, superTileColumn + superTileColumns);
-
-            for (std::uint64_t tileRow = superTileRow; tileRow < lastTileRow; ++tileRow)
+            for (std::uint64_t tileColumn = superTileColumn; tileColumn < lastTileColumn; ++tileColumn)
             {
-                for (std::uint64_t tileColumn = superTileColumn; tileColumn < lastTileColumn; ++tileColumn)
+                const auto tileIndex = static_cast<std::size_t>(tileRow * tileColumns + tileColumn);
+                const auto& descriptor = storage->descriptors()[tileIndex];
+                if (descriptor.rows != 0 && descriptor.columns > static_cast<std::uint64_t>((std::numeric_limits<qsizetype>::max)()) / descriptor.rows / source->elementSize())
+                    throw std::overflow_error("Converted tile exceeds supported byte size");
+
+                const auto tileBytes = descriptor.rows * descriptor.columns * source->elementSize();
+                QByteArray payload(static_cast<qsizetype>(tileBytes), Qt::Uninitialized);
+                for (std::uint64_t localRow = 0; localRow < descriptor.rows; ++localRow)
                 {
-                    const auto tileIndex = static_cast<std::size_t>(tileRow * tileColumns + tileColumn);
-                    const auto& descriptor = storage->descriptors()[tileIndex];
-                    if (descriptor.rows != 0 && descriptor.columns > static_cast<std::uint64_t>((std::numeric_limits<qsizetype>::max)()) / descriptor.rows / source->elementSize())
-                        throw std::overflow_error("Converted tile exceeds supported byte size");
-
-                    const auto tileBytes = descriptor.rows * descriptor.columns * source->elementSize();
-                    QByteArray payload(static_cast<qsizetype>(tileBytes), Qt::Uninitialized);
-                    for (std::uint64_t localRow = 0; localRow < descriptor.rows; ++localRow)
+                    std::uint64_t localColumn = 0;
+                    const auto sourceRow = descriptor.rowOffset + localRow;
+                    while (localColumn < descriptor.columns)
                     {
-                        std::uint64_t localColumn = 0;
-                        const auto sourceRow = descriptor.rowOffset + localRow;
-                        while (localColumn < descriptor.columns)
-                        {
-                            const auto column = descriptor.columnOffset + localColumn;
-                            const auto sourceTile = source->acquire(sourceRow / source->rowTileSize(), column / source->columnTileSize());
-                            if (!sourceTile)
-                                throw std::runtime_error("Unable to read source tile during storage conversion");
+                        const auto column = descriptor.columnOffset + localColumn;
+                        const auto sourceTile = source->acquire(sourceRow / source->rowTileSize(), column / source->columnTileSize());
+                        if (!sourceTile)
+                            throw std::runtime_error("Unable to read source tile during storage conversion");
 
-                            const auto sourceRowOffset = sourceRow - sourceTile.rowOffset();
-                            const auto sourceColumnOffset = column - sourceTile.columnOffset();
-                            const auto copyColumns = std::min<std::uint64_t>(descriptor.columns - localColumn, sourceTile.columns() - sourceColumnOffset);
-                            const auto sourceOffset = (sourceRowOffset * sourceTile.columns() + sourceColumnOffset) * source->elementSize();
-                            const auto targetOffset = (localRow * descriptor.columns + localColumn) * source->elementSize();
-                            std::memcpy(payload.data() + targetOffset, static_cast<const char*>(sourceTile.data()) + sourceOffset, static_cast<std::size_t>(copyColumns * source->elementSize()));
-                            localColumn += copyColumns;
-                        }
+                        const auto sourceRowOffset = sourceRow - sourceTile.rowOffset();
+                        const auto sourceColumnOffset = column - sourceTile.columnOffset();
+                        const auto copyColumns = std::min<std::uint64_t>(descriptor.columns - localColumn, sourceTile.columns() - sourceColumnOffset);
+                        const auto sourceOffset = (sourceRowOffset * sourceTile.columns() + sourceColumnOffset) * source->elementSize();
+                        const auto targetOffset = (localRow * descriptor.columns + localColumn) * source->elementSize();
+                        std::memcpy(payload.data() + targetOffset, static_cast<const char*>(sourceTile.data()) + sourceOffset, static_cast<std::size_t>(copyColumns * source->elementSize()));
+                        localColumn += copyColumns;
                     }
-
-                    blocks[tileIndex] = writer.append(payload);
-                    superTileIndices[tileIndex] = superTileIndex;
-                    ++completedTiles;
-                    if (progress)
-                        progress(static_cast<float>(completedTiles) / static_cast<float>(tileCount));
                 }
+
+                blocks[tileIndex] = writer.append(payload);
+                superTileIndices[tileIndex] = superTileIndex;
+                ++tileCountInSuperTile;
+            }
+        }
+
+        writer.close();
+        return tileCountInSuperTile;
+    };
+
+    const auto chunkTileRows = std::clamp<std::size_t>(chunkTileRowFactor, 1, 256);
+    const auto requestedSuperTileRowsPerChunk = 1 + (chunkTileRows - 1) / superTileRows;
+    const auto superTileRowsPerChunk = std::min<std::size_t>(static_cast<std::size_t>(totalSuperTileRows), std::max(requestedSuperTileRowsPerChunk, maximumWorkers));
+    const auto superTileChunkSize = superTileColumnCount != 0 && superTileRowsPerChunk > std::numeric_limits<std::size_t>::max() / superTileColumnCount ? totalSuperTiles : std::max<std::size_t>(1, superTileRowsPerChunk * superTileColumnCount);
+    const auto effectiveChunkTileRows = superTileRowsPerChunk > std::numeric_limits<std::size_t>::max() / superTileRows ? tileRows : std::min<std::size_t>(static_cast<std::size_t>(tileRows), superTileRowsPerChunk * superTileRows);
+    std::atomic<std::size_t> activeWorkers{ 0 };
+    std::atomic<std::size_t> maximumActiveWorkers{ 0 };
+    std::atomic<std::uint64_t> workerNanoseconds{ 0 };
+    const auto conversionStart = std::chrono::steady_clock::now();
+    for (std::size_t chunkStart = 0; chunkStart < totalSuperTiles; chunkStart += superTileChunkSize)
+    {
+        const auto chunkEnd = std::min(totalSuperTiles, chunkStart + superTileChunkSize);
+        for (std::size_t batchStart = chunkStart; batchStart < chunkEnd; batchStart += maximumWorkers)
+        {
+            const auto batchEnd = std::min(chunkEnd, batchStart + maximumWorkers);
+            std::vector<std::future<std::size_t>> jobs;
+            jobs.reserve(batchEnd - batchStart);
+            for (std::size_t superTileIndex = batchStart; superTileIndex < batchEnd; ++superTileIndex)
+            {
+                jobs.emplace_back(std::async(std::launch::async, [&, superTileIndex] {
+                    const auto active = activeWorkers.fetch_add(1, std::memory_order_relaxed) + 1;
+                    auto maximum = maximumActiveWorkers.load(std::memory_order_relaxed);
+                    while (active > maximum && !maximumActiveWorkers.compare_exchange_weak(maximum, active, std::memory_order_relaxed))
+                    {
+                    }
+                    const auto jobStart = std::chrono::steady_clock::now();
+                    try
+                    {
+                        const auto workerIndex = superTileIndex - batchStart;
+                        const auto jobTileCount = materializeSuperTile(superTileIndex, workerCodecs[workerIndex]);
+                        workerNanoseconds.fetch_add(static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - jobStart).count()), std::memory_order_relaxed);
+                        activeWorkers.fetch_sub(1, std::memory_order_relaxed);
+                        return jobTileCount;
+                    }
+                    catch (...)
+                    {
+                        activeWorkers.fetch_sub(1, std::memory_order_relaxed);
+                        throw;
+                    }
+                }));
             }
 
-            writer.close();
-            filePaths.push_back(filePath);
+            for (auto& job : jobs)
+            {
+                completedTiles += job.get();
+                if (progress)
+                    progress(static_cast<float>(completedTiles) / static_cast<float>(tileCount));
+            }
         }
     }
+
+    const auto elapsedMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - conversionStart).count();
+    qInfo().noquote() << QStringLiteral("[PointData] Packed tiled conversion: %1 tiles across %2 files in row chunks of %3 tile rows (factor %4); requested workers %5; maximum concurrent workers %6; aggregate worker time %7 ms; elapsed %8 ms")
+        .arg(tileCount)
+        .arg(totalSuperTiles)
+        .arg(effectiveChunkTileRows)
+        .arg(chunkTileRows)
+        .arg(maximumWorkers)
+        .arg(maximumActiveWorkers.load(std::memory_order_relaxed))
+        .arg(workerNanoseconds.load(std::memory_order_relaxed) / 1000000)
+        .arg(elapsedMilliseconds);
 
     storage->setPackedTileSource(filePaths, codec->getName(), blocks, superTileIndices, temporaryDirectory);
     return storage;
@@ -439,6 +629,8 @@ float PointDataTiledStorage::valueAt(const std::uint64_t flatIndex, const std::u
 void PointDataTiledStorage::materialize(char* destination, ProgressCallback progress) const
 {
     const auto totalTiles       = _descriptors.size();
+    if (destination == nullptr && totalTiles != 0)
+        throw std::invalid_argument("Tiled materialization destination is null");
     const auto progressInterval = std::max<std::size_t>(1, totalTiles / 100);
     std::size_t tileIndex       = 0;
 

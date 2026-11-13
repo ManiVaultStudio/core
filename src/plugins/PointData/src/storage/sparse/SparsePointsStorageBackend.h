@@ -138,7 +138,7 @@ public:
      * @param destination Caller-owned buffer receiving row-major values.
      * @throws std::overflow_error If the dense element or byte count overflows.
      */
-    void materialize(char* destination) const override;
+    void materialize(char* destination, StorageBackendProgressCallback progress = {}) const override;
 
     /** @brief Returns whether the owned arrays are CSR or CSC. */
     SparseMatrixLayout getLayout() const;

@@ -130,6 +130,8 @@ struct StorageBackendConfiguration : StorageBackendConfigurationOptions
     bool        packedTiles         = false;                            /**< Whether serialized tiles are grouped into jointly encoded super tiles. */
     std::size_t superTileRows       = 1;                                /**< Number of base tile rows in one serialized super tile. */
     std::size_t superTileColumns    = 1;                                /**< Number of base tile columns in one serialized super tile. */
+    std::size_t conversionWorkerCount = 4;                               /**< Maximum workers used to generate converted tiles. */
+    std::size_t conversionChunkTileRows = 3;                             /**< Tile-row height of one bounded conversion work chunk. */
 };
 
 /** Selects the compressed orientation used when converting a dense matrix to sparse storage. */

@@ -10,7 +10,9 @@
 #include "../sparse/SparseStorageBackendConversionAction.h"
 #include "../tiled/TiledStorageBackendConversionAction.h"
 
+#include <algorithm>
 #include <cstring>
+#include <stdexcept>
 
 namespace mv::pointdata::storage
 {
@@ -94,14 +96,35 @@ float DensePointsStorageBackend::getValueAt(const std::uint64_t flatIndex) const
     return _pointData.getDenseValueAt(static_cast<std::size_t>(flatIndex));
 }
 
-void DensePointsStorageBackend::materialize(char* destination) const
+void DensePointsStorageBackend::materialize(char* destination, StorageBackendProgressCallback progress) const
 {
-    if (destination == nullptr)
-        return;
+    std::visit([destination, &progress](const auto& vector) {
+        using ValueType = typename std::decay_t<decltype(vector)>::value_type;
+        const auto totalBytes = vector.size() * sizeof(ValueType);
+        if (destination == nullptr && totalBytes != 0)
+            throw std::invalid_argument("Dense materialization destination is null");
+        if (progress)
+            progress(0.0f);
 
-    std::visit([destination](const auto& vector) {
-        if (!vector.empty())
-            std::memcpy(destination, vector.data(), vector.size() * sizeof(typename std::decay_t<decltype(vector)>::value_type));
+        if (totalBytes == 0)
+        {
+            if (progress)
+                progress(1.0f);
+            return;
+        }
+
+        const auto chunkBytes = std::max<std::size_t>(64U * 1024U * 1024U, totalBytes / 100);
+        for (std::size_t offset = 0; offset < totalBytes;)
+        {
+            const auto bytes = std::min(chunkBytes, totalBytes - offset);
+            std::memcpy(destination + offset, reinterpret_cast<const char*>(vector.data()) + offset, bytes);
+            offset += bytes;
+            if (progress)
+                progress(totalBytes == 0 ? 1.0f : static_cast<float>(offset) / static_cast<float>(totalBytes));
+        }
+
+        if (progress && totalBytes == 0)
+            progress(1.0f);
     }, _pointData._variantOfVectors);
 }
 

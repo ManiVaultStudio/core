@@ -71,25 +71,12 @@ struct PackedTileReaderState
     {
         std::call_once(readerInitialization, [this] {
             auto sourcePath = archiveEntry;
-            auto sourceKind = QStringLiteral("archive-entry");
-            if (isLocalPackedTileFile(sourcePath))
-            {
-                sourceKind = QStringLiteral("local-file");
-            }
-            else
+            if (!isLocalPackedTileFile(sourcePath))
             {
                 const auto stagedPath = mv::projects().resolveStagedProjectResourcePath(archiveEntry);
                 if (!stagedPath.isEmpty())
-                {
                     sourcePath = stagedPath;
-                    sourceKind = QFileInfo(stagedPath).isFile() ? QStringLiteral("staged-file") : QStringLiteral("staged-path-missing");
-                }
             }
-
-            const QFileInfo sourceInfo(sourcePath);
-            qInfo().noquote() << QStringLiteral("[PointData] Packed tile reader: source=%1 codec=%2 entry=%3 path=%4 file-bytes=%5")
-                .arg(sourceKind, codecName, archiveEntry, sourcePath)
-                .arg(sourceInfo.isFile() ? sourceInfo.size() : -1);
 
             const auto codec = mv::util::codecRegistry().createCodec(nullptr, codecName);
             reader = std::make_shared<mv::util::PackedBlobFileReader>(sourcePath, codec);

@@ -99,8 +99,10 @@ public:
      * The optional progress callback covers descriptor-index construction. When
      * materializeGeneratedTiles is true, it also reports generated tile payloads
      * and the returned storage retains those payloads without its generator.
+     * Set parallelMaterialization only when independent generator calls are
+     * thread-safe; progress notifications are serialized.
      */
-    static std::shared_ptr<PointDataTiledStorage> fromGenerator(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileGenerator generator, ProgressCallback progress = {}, bool materializeGeneratedTiles = false);
+    static std::shared_ptr<PointDataTiledStorage> fromGenerator(std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, std::size_t rowTileSize, std::size_t columnTileSize, TileGenerator generator, ProgressCallback progress = {}, bool materializeGeneratedTiles = false, bool parallelMaterialization = false, std::size_t maxWorkerCount = 4, std::size_t chunkTileRowFactor = 3);
 
     /**
      * Creates read-only tiled storage whose payloads are independently encoded in one pack file.
@@ -115,7 +117,7 @@ public:
     static std::shared_ptr<PointDataTiledStorage> retile(const std::shared_ptr<const PointDataTiledStorage>& source, std::size_t rowTileSize, std::size_t columnTileSize, ProgressCallback progress = {});
 
     /** Re-tiles the source and streams the result to temporary packed files before returning. */
-    static std::shared_ptr<PointDataTiledStorage> retileToPackedFiles(const std::shared_ptr<const PointDataTiledStorage>& source, std::size_t rowTileSize, std::size_t columnTileSize, std::size_t superTileRows, std::size_t superTileColumns, const mv::util::SharedCodec& codec, ProgressCallback progress = {});
+    static std::shared_ptr<PointDataTiledStorage> retileToPackedFiles(const std::shared_ptr<const PointDataTiledStorage>& source, std::size_t rowTileSize, std::size_t columnTileSize, std::size_t superTileRows, std::size_t superTileColumns, const mv::util::SharedCodec& codec, ProgressCallback progress = {}, std::size_t maxWorkerCount = 4, std::size_t chunkTileRowFactor = 3, std::function<mv::util::SharedCodec()> codecFactory = {});
 
     /** Returns the number of rows in the matrix. */
     std::uint64_t rows() const { return _rows; }

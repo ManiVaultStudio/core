@@ -15,7 +15,6 @@
 #include <actions/ToggleAction.h>
 #include <actions/VerticalGroupAction.h>
 #include <util/ProjectResourceStagingPolicy.h>
-
 #include <QString>
 
 namespace mv::gui
@@ -53,7 +52,7 @@ public:
      * @param initializeFromConfiguration Whether to display existing geometry and cache values instead of suggestions.
      * @param currentElementTypeIndex Current matrix element type; when supplied, the action exposes a target-type selector.
      */
-    TiledStorageBackendConfigurationAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration = {}, bool initializeFromConfiguration = false, std::optional<std::uint32_t> currentElementTypeIndex = {}, bool showImportPerformanceOptions = false, std::size_t bucketingThreadCount = 4, std::size_t stagingThreadCount = 4, std::size_t rowChunkTileFactor = 3, bool showImportStagingSpaceObservation = false, const QString& stagingDirectory = QString(), mv::util::ProjectResourceStagingPolicy projectOpenStagingPolicy = mv::util::ProjectResourceStagingPolicy::Inherit);
+    TiledStorageBackendConfigurationAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration = {}, bool initializeFromConfiguration = false, std::optional<std::uint32_t> currentElementTypeIndex = {}, bool showImportPerformanceOptions = false, std::size_t bucketingThreadCount = 4, std::size_t stagingThreadCount = 4, std::size_t rowChunkTileFactor = 3, bool showImportStagingSpaceObservation = false, const QString& stagingDirectory = QString(), mv::util::ProjectResourceStagingPolicy projectResourceStagingPolicy = mv::util::ProjectResourceStagingPolicy::Inherit);
 
     /** Returns the tiled backend type represented by this action. */
     pointdata::storage::StorageBackendType getTargetBackendType() const override;
@@ -82,8 +81,11 @@ public:
     /** Returns the optional CSR row-chunk tile-height factor. */
     [[nodiscard]] std::size_t getRowChunkTileFactor() const;
 
-    /** Returns the dataset-level policy used when opening saved projects. */
-    [[nodiscard]] mv::util::ProjectResourceStagingPolicy getProjectOpenStagingPolicy() const;
+    /** Enables bounded parallel generation controls for backend conversion. */
+    void enableConversionPerformanceOptions(std::size_t workerCount, std::size_t chunkTileRows);
+
+    /** Returns the project resource staging policy selected in an import configuration. */
+    [[nodiscard]] mv::util::ProjectResourceStagingPolicy getProjectResourceStagingPolicy() const;
 
 private:
     void updateTileGeometryFromPolicy();
@@ -127,9 +129,11 @@ private:
     IntegralAction                _bucketingThreadCountAction;
     IntegralAction                _stagingThreadCountAction;
     IntegralAction                _rowChunkTileFactorAction;
-    OptionAction                  _projectOpenStagingPolicyAction;
+    OptionAction                  _projectResourceStagingPolicyAction;
+    mv::util::ProjectResourceStagingPolicy _initialProjectResourceStagingPolicy = mv::util::ProjectResourceStagingPolicy::Inherit;
     QString                       _stagingDirectory;
     bool                          _showImportPerformanceOptions = false;
+    bool                          _showConversionPerformanceOptions = false;
     bool                          _showImportStagingSpaceObservation = false;
     bool                          _updatingTileSizePercentage = false;
     bool                          _updatingGeometryFromPolicy = false;

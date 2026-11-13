@@ -191,10 +191,10 @@ float SparsePointsStorageBackend::getValueAt(const std::uint64_t flatIndex) cons
     return valueAt(flatIndex / _columns, flatIndex % _columns);
 }
 
-void SparsePointsStorageBackend::materialize(char* destination) const
+void SparsePointsStorageBackend::materialize(char* destination, StorageBackendProgressCallback progress) const
 {
-    if (!destination)
-        return;
+    if (progress)
+        progress(0.0f);
 
     if (_rows != 0 && _columns > std::numeric_limits<std::uint64_t>::max() / _rows)
         throw std::overflow_error("Sparse matrix dimensions overflow the dense element count");
@@ -203,10 +203,24 @@ void SparsePointsStorageBackend::materialize(char* destination) const
     if (_elementSize == 0 || elementCount > std::numeric_limits<std::size_t>::max() / _elementSize)
         throw std::overflow_error("Sparse matrix is too large to materialize");
 
-    std::memset(destination, 0, static_cast<std::size_t>(elementCount) * _elementSize);
+    const auto totalBytes = static_cast<std::size_t>(elementCount) * _elementSize;
+    if (!destination && totalBytes != 0)
+        throw std::invalid_argument("Sparse materialization destination is null");
+    const auto zeroChunkBytes = std::max<std::size_t>(64U * 1024U * 1024U, totalBytes / 100);
+    for (std::size_t offset = 0; offset < totalBytes;)
+    {
+        const auto bytes = std::min(zeroChunkBytes, totalBytes - offset);
+        std::memset(destination + offset, 0, bytes);
+        offset += bytes;
+        if (progress)
+            progress(totalBytes == 0 ? 0.1f : 0.1f * static_cast<float>(offset) / static_cast<float>(totalBytes));
+    }
+    if (progress && totalBytes == 0)
+        progress(0.1f);
 
     if (_layout == SparseMatrixLayout::RowCompressed)
     {
+        const auto progressInterval = std::max<std::uint64_t>(1, _rows / 100);
         for (std::uint64_t row = 0; row < _rows; ++row)
         {
             for (auto index = _pointers[static_cast<std::size_t>(row)]; index < _pointers[static_cast<std::size_t>(row + 1)]; ++index)
@@ -215,10 +229,13 @@ void SparsePointsStorageBackend::materialize(char* destination) const
                 const auto flatIndex = row * _columns + column;
                 std::memcpy(destination + flatIndex * _elementSize, _values.data() + static_cast<std::size_t>(index) * _elementSize, _elementSize);
             }
+            if (progress && (row == 0 || row + 1 == _rows || (row + 1) % progressInterval == 0))
+                progress(0.1f + 0.9f * static_cast<float>(row + 1) / static_cast<float>(_rows));
         }
     }
     else
     {
+        const auto progressInterval = std::max<std::uint64_t>(1, _columns / 100);
         for (std::uint64_t column = 0; column < _columns; ++column)
         {
             for (auto index = _pointers[static_cast<std::size_t>(column)]; index < _pointers[static_cast<std::size_t>(column + 1)]; ++index)
@@ -227,8 +244,13 @@ void SparsePointsStorageBackend::materialize(char* destination) const
                 const auto flatIndex = row * _columns + column;
                 std::memcpy(destination + flatIndex * _elementSize, _values.data() + static_cast<std::size_t>(index) * _elementSize, _elementSize);
             }
+            if (progress && (column == 0 || column + 1 == _columns || (column + 1) % progressInterval == 0))
+                progress(0.1f + 0.9f * static_cast<float>(column + 1) / static_cast<float>(_columns));
         }
     }
+
+    if (progress && ((_layout == SparseMatrixLayout::RowCompressed && _rows == 0) || (_layout == SparseMatrixLayout::ColumnCompressed && _columns == 0)))
+        progress(1.0f);
 }
 
 SparseMatrixLayout SparsePointsStorageBackend::getLayout() const
