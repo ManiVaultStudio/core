@@ -156,7 +156,11 @@ std::unique_ptr<mv::gui::StorageBackendConversionAction> TiledPointsStorageBacke
         return std::make_unique<mv::gui::DenseStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _elementTypeIndex);
 
     if (targetType == StorageBackendType::Sparse && _storage)
-        return std::make_unique<mv::gui::SparseStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _elementTypeIndex);
+    {
+        const auto sourceTileRows = std::max<std::size_t>(1, _storage->rowTileSize());
+        const auto chunkRows = sourceTileRows > 65536 / 3 ? 65536 : sourceTileRows * 3;
+        return std::make_unique<mv::gui::SparseStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _elementTypeIndex, false, 4, chunkRows);
+    }
 
     return {};
 }

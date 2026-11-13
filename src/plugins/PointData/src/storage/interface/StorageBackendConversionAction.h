@@ -73,6 +73,8 @@ signals:
 
 protected:
     void notifyOptionsChanged() { emit optionsChanged(); }
+    /** Moves the optional element-type analysis card after backend-specific controls and observations. */
+    void moveElementTypeAnalysisActionToEnd();
 
 private:
     void updateElementTypeAnalysis();
@@ -82,7 +84,6 @@ private:
     OptionAction                    _elementTypeAction;           /**< Optional selector for the converted matrix element type. */
     MessageCardAction               _elementTypeAnalysisAction;   /**< Sample and full-scan findings for the selected element type. */
     bool                            _hasElementTypeAction = false; /**< Whether an element-type selector is available. */
-    bool                            _elementTypeAnalysisAdded = false; /**< Whether the analysis card is currently part of the group. */
     std::optional<std::uint32_t>    _initialElementTypeIndex;     /**< Element type selected when this action was created. */
     std::uint64_t                   _sourceRows = 0;               /**< Number of source matrix rows available for analysis. */
     std::uint64_t                   _sourceColumns = 0;            /**< Number of source matrix columns available for analysis. */

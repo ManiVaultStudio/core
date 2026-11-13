@@ -5,7 +5,11 @@
 #include "../interface/StorageBackendConversionAction.h"
 
 #include <actions/MessageCardAction.h>
+#include <actions/HorizontalGroupAction.h>
+#include <actions/IntegralAction.h>
 #include <actions/OptionAction.h>
+#include <actions/StringAction.h>
+#include <actions/VerticalGroupAction.h>
 
 namespace mv::gui
 {
@@ -23,7 +27,7 @@ class POINTDATA_EXPORT SparseStorageBackendConversionAction final : public Stora
 {
 public:
     /** Constructs sparse conversion controls for a matrix with the supplied shape and current element type. */
-    SparseStorageBackendConversionAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::uint32_t currentElementTypeIndex, bool columnCompressed = false);
+    SparseStorageBackendConversionAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::uint32_t currentElementTypeIndex, bool columnCompressed = false, std::size_t workerCount = 4, std::size_t chunkRows = 128);
 
     /** Returns the sparse backend type. */
     pointdata::storage::StorageBackendType getTargetBackendType() const override;
@@ -42,6 +46,13 @@ private:
     bool _initialColumnCompressed = false; /**< Original compressed orientation for configuration change detection. */
     OptionAction _layoutAction;
     MessageCardAction _memoryObservationAction;
+    HorizontalGroupAction _performanceAction;
+    StringAction _performanceSummaryAction;
+    VerticalGroupAction _performanceSettingsAction;
+    IntegralAction _workerCountAction;
+    IntegralAction _chunkRowsAction;
+    std::size_t _initialWorkerCount = 4;
+    std::size_t _initialChunkRows = 128;
 };
 
 }

@@ -150,7 +150,7 @@ namespace
                     return result;
                 }
 
-                if (rowIndex % std::max<std::uint64_t>(1, rowSampleCount / 100) == 0)
+                if (context && rowIndex % std::max<std::uint64_t>(1, rowSampleCount / 100) == 0)
                     context->setProgress(static_cast<double>(rowIndex) / static_cast<double>(rowSampleCount));
 
                 const auto sourceRowIndex = fullScan ? rowIndex : static_cast<std::uint64_t>((static_cast<long double>(rowIndex) * rows) / rowSampleCount);
@@ -161,7 +161,8 @@ namespace
                 analyzeRow(sourceTypeIndex, targetTypeIndex, row, sampledColumns, result);
             }
 
-            context->setProgress(1.0);
+            if (context)
+                context->setProgress(1.0);
         }
         catch (const std::exception& exception)
         {
@@ -215,6 +216,11 @@ StorageBackendConversionAction::StorageBackendConversionAction(QObject* parent, 
     _elementTypeAction.setOptions(elementTypeOptions);
     _elementTypeAction.setCurrentIndex(static_cast<int>(*currentElementTypeIndex));
     addAction(&_elementTypeAction);
+    // Keep the action tree stable while the selector is active. Inserting or
+    // removing the analysis card from inside currentIndexChanged can invalidate
+    // the dialog widget's live child-action iteration.
+    _elementTypeAnalysisAction.setVisible(false);
+    addAction(&_elementTypeAnalysisAction);
 
     connect(&_elementTypeAction, &OptionAction::currentIndexChanged, this, [this] {
         notifyOptionsChanged();
@@ -225,6 +231,15 @@ StorageBackendConversionAction::StorageBackendConversionAction(QObject* parent, 
 StorageBackendConversionAction::~StorageBackendConversionAction()
 {
     cancelElementTypeAnalysis();
+}
+
+void StorageBackendConversionAction::moveElementTypeAnalysisActionToEnd()
+{
+    if (!_hasElementTypeAction)
+        return;
+
+    removeAction(&_elementTypeAnalysisAction);
+    addAction(&_elementTypeAnalysisAction);
 }
 
 void StorageBackendConversionAction::setSourceData(const std::uint64_t rows, const std::uint64_t columns, const std::uint32_t sourceElementTypeIndex, SourceRowReader rowReader)
@@ -243,19 +258,11 @@ void StorageBackendConversionAction::updateElementTypeAnalysis()
     const auto targetElementTypeIndex = getTargetElementTypeIndex();
     if (!_sourceRowReader || !targetElementTypeIndex || *targetElementTypeIndex == _sourceElementTypeIndex)
     {
-        if (_elementTypeAnalysisAdded)
-        {
-            removeAction(&_elementTypeAnalysisAction);
-            _elementTypeAnalysisAdded = false;
-        }
+        _elementTypeAnalysisAction.setVisible(false);
         return;
     }
 
-    if (!_elementTypeAnalysisAdded)
-    {
-        addAction(&_elementTypeAnalysisAction);
-        _elementTypeAnalysisAdded = true;
-    }
+    _elementTypeAnalysisAction.setVisible(true);
 
     _elementTypeAnalysisAction.setMessage(util::SeverityLevel::Info, "Element type", "Checking a bounded sample across the matrix. This may miss uncommon values.");
     startElementTypeAnalysis(false);

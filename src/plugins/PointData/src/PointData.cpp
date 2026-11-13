@@ -39,10 +39,14 @@
 
 #include <cstring>
 #include <algorithm>
+#include <atomic>
+#include <chrono>
 #include <cmath>
 #include <limits>
+#include <mutex>
 #include <set>
 #include <stdexcept>
+#include <thread>
 #include <type_traits>
 
 Q_PLUGIN_METADATA(IID "studio.manivault.PointData")
@@ -647,53 +651,145 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
         const auto columns = _storageBackend ? _storageBackend->getNumDimensions() : _numDimensions;
         const auto elementSize = targetElementSize;
         const auto elementTypeIndex = targetElementTypeIndex;
+        const auto conversionStartedAt = std::chrono::steady_clock::now();
 
         if (rows != 0 && columns > std::numeric_limits<std::uint64_t>::max() / rows)
             throw std::overflow_error("Sparse conversion dimensions overflow the dense element count");
         if (rows >= std::numeric_limits<std::size_t>::max() || elementSize == 0 || columns > std::numeric_limits<std::size_t>::max() / elementSize)
             throw std::overflow_error("Sparse conversion row is too large");
 
-        std::vector<std::uint64_t> rowPointers(static_cast<std::size_t>(rows) + 1, 0);
-        std::vector<std::uint64_t> rowIndices;
-        std::vector<std::uint8_t> sparseValues;
-        std::vector<std::uint8_t> convertedRow(static_cast<std::size_t>(columns) * elementSize);
+        struct SparseConversionChunk
+        {
+            std::uint64_t firstRow = 0;
+            std::uint64_t rowCount = 0;
+            std::vector<std::uint64_t> rowPointers;
+            std::vector<std::uint64_t> indices;
+            std::vector<std::uint8_t> values;
+        };
+
+        const auto chunkRows = std::clamp<std::size_t>(configuration->conversionChunkRows, 1, 65536);
+        const auto chunkCount = static_cast<std::size_t>(rows / chunkRows + (rows % chunkRows != 0));
+        const auto workerCount = std::min<std::size_t>(std::clamp<std::size_t>(configuration->conversionWorkerCount, 1, 32), std::max<std::size_t>(1, chunkCount));
+        std::vector<SparseConversionChunk> chunks(chunkCount);
         const auto rowScanProgressEnd = configuration->columnCompressed ? 0.65f : 0.99f;
 
         if (progress)
             progress(0.0f);
 
-        const auto appendRow = [&](const char* rowData, const std::uint64_t row) {
-            if (columns != 0 && rowData == nullptr)
-                throw std::runtime_error("Unable to access a source row during sparse conversion");
+        std::atomic_size_t nextChunk{ 0 };
+        std::atomic_size_t activeWorkers{ 0 };
+        std::atomic_size_t maximumConcurrentWorkers{ 0 };
+        std::atomic_size_t completedRows{ 0 };
+        std::atomic_bool stopWorkers{ false };
+        std::atomic_uint64_t aggregateWorkerNanoseconds{ 0 };
+        std::mutex progressMutex;
+        std::mutex exceptionMutex;
+        std::exception_ptr workerException;
+        std::size_t lastProgressRows = 0;
 
-            for (std::uint64_t column = 0; column < columns; ++column)
-            {
-                const auto* value = rowData + column * elementSize;
-                if (!isNonZeroValue(elementTypeIndex, value))
-                    continue;
-
-                rowIndices.push_back(column);
-                const auto oldSize = sparseValues.size();
-                if (elementSize > std::numeric_limits<std::size_t>::max() - oldSize)
-                    throw std::overflow_error("Sparse conversion value array exceeds the process address space");
-                sparseValues.resize(oldSize + elementSize);
-                std::memcpy(sparseValues.data() + oldSize, value, elementSize);
-            }
-
-            rowPointers[static_cast<std::size_t>(row + 1)] = rowIndices.size();
-        };
-
-        for (std::uint64_t row = 0; row < rows; ++row)
+        std::vector<std::jthread> workers;
+        workers.reserve(workerCount);
+        for (std::size_t workerIndex = 0; workerIndex < workerCount; ++workerIndex)
         {
-            PointDataAccessView sourceView;
-            const auto* sourceRow = getSourceRow(row, sourceView);
-            if (sourceView.data && sourceView.elementSizeBytes != getElementTypeSize(sourceElementTypeIndex))
-                throw std::runtime_error("Source row element size changed during sparse conversion");
-            pointdata::storage::detail::convertNumericRow(sourceElementTypeIndex, elementTypeIndex, sourceRow, columns, convertedRow.data());
-            appendRow(reinterpret_cast<const char*>(convertedRow.data()), row);
+            workers.emplace_back([&] {
+                const auto active = activeWorkers.fetch_add(1) + 1;
+                auto maximum = maximumConcurrentWorkers.load();
+                while (maximum < active && !maximumConcurrentWorkers.compare_exchange_weak(maximum, active))
+                {
+                }
 
-            if (progress && ((row + 1) % std::max<std::uint64_t>(1, rows / 100) == 0 || row + 1 == rows))
-                progress(rowScanProgressEnd * static_cast<float>(row + 1) / static_cast<float>(rows));
+                const auto workerStartedAt = std::chrono::steady_clock::now();
+                try
+                {
+                    while (!stopWorkers.load())
+                    {
+                        const auto chunkIndex = nextChunk.fetch_add(1);
+                        if (chunkIndex >= chunks.size())
+                            break;
+
+                        auto& chunk = chunks[chunkIndex];
+                        chunk.firstRow = static_cast<std::uint64_t>(chunkIndex) * chunkRows;
+                        chunk.rowCount = std::min<std::uint64_t>(rows - chunk.firstRow, chunkRows);
+                        chunk.rowPointers.resize(static_cast<std::size_t>(chunk.rowCount) + 1, 0);
+                        std::vector<std::uint8_t> convertedRow(static_cast<std::size_t>(columns) * elementSize);
+
+                        for (std::uint64_t localRow = 0; localRow < chunk.rowCount; ++localRow)
+                        {
+                            const auto row = chunk.firstRow + localRow;
+                            PointDataAccessView sourceView;
+                            const auto* sourceRow = getSourceRow(row, sourceView);
+                            if (sourceView.data && sourceView.elementSizeBytes != getElementTypeSize(sourceElementTypeIndex))
+                                throw std::runtime_error("Source row element size changed during sparse conversion");
+                            pointdata::storage::detail::convertNumericRow(sourceElementTypeIndex, elementTypeIndex, sourceRow, columns, convertedRow.data());
+
+                            const auto* rowData = reinterpret_cast<const char*>(convertedRow.data());
+                            if (columns != 0 && rowData == nullptr)
+                                throw std::runtime_error("Unable to access a source row during sparse conversion");
+                            for (std::uint64_t column = 0; column < columns; ++column)
+                            {
+                                const auto* value = rowData + column * elementSize;
+                                if (!isNonZeroValue(elementTypeIndex, value))
+                                    continue;
+
+                                chunk.indices.push_back(column);
+                                const auto oldSize = chunk.values.size();
+                                if (elementSize > std::numeric_limits<std::size_t>::max() - oldSize)
+                                    throw std::overflow_error("Sparse conversion value array exceeds the process address space");
+                                chunk.values.resize(oldSize + elementSize);
+                                std::memcpy(chunk.values.data() + oldSize, value, elementSize);
+                            }
+
+                            chunk.rowPointers[static_cast<std::size_t>(localRow + 1)] = chunk.indices.size();
+                            const auto complete = completedRows.fetch_add(1) + 1;
+                            if (progress && ((complete % std::max<std::uint64_t>(1, rows / 100) == 0) || complete == rows))
+                            {
+                                const std::lock_guard<std::mutex> lock(progressMutex);
+                                if (complete > lastProgressRows)
+                                {
+                                    lastProgressRows = complete;
+                                    progress(rowScanProgressEnd * static_cast<float>(complete) / static_cast<float>(rows));
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (...)
+                {
+                    stopWorkers.store(true);
+                    const std::lock_guard<std::mutex> lock(exceptionMutex);
+                    if (!workerException)
+                        workerException = std::current_exception();
+                }
+                aggregateWorkerNanoseconds.fetch_add(static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - workerStartedAt).count()));
+                activeWorkers.fetch_sub(1);
+            });
+        }
+        workers.clear(); // jthread destruction joins all conversion workers.
+        if (workerException)
+            std::rethrow_exception(workerException);
+
+        std::vector<std::uint64_t> rowPointers(static_cast<std::size_t>(rows) + 1, 0);
+        std::size_t nonzeroCount = 0;
+        for (const auto& chunk : chunks)
+        {
+            if (chunk.indices.size() > std::numeric_limits<std::size_t>::max() - nonzeroCount)
+                throw std::overflow_error("Sparse conversion index array exceeds the process address space");
+            nonzeroCount += chunk.indices.size();
+        }
+        std::vector<std::uint64_t> rowIndices;
+        std::vector<std::uint8_t> sparseValues;
+        rowIndices.reserve(nonzeroCount);
+        if (elementSize != 0 && nonzeroCount > std::numeric_limits<std::size_t>::max() / elementSize)
+            throw std::overflow_error("Sparse conversion value array exceeds the process address space");
+        sparseValues.reserve(nonzeroCount * elementSize);
+        std::uint64_t nonzeroOffset = 0;
+        for (const auto& chunk : chunks)
+        {
+            for (std::uint64_t localRow = 0; localRow < chunk.rowCount; ++localRow)
+                rowPointers[static_cast<std::size_t>(chunk.firstRow + localRow + 1)] = nonzeroOffset + chunk.rowPointers[static_cast<std::size_t>(localRow + 1)];
+            nonzeroOffset += chunk.indices.size();
+            rowIndices.insert(rowIndices.end(), chunk.indices.begin(), chunk.indices.end());
+            sparseValues.insert(sparseValues.end(), chunk.values.begin(), chunk.values.end());
         }
 
         if (progress && rows == 0)
@@ -769,6 +865,18 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
 
         if (progress)
             progress(1.0f);
+
+        const auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - conversionStartedAt).count();
+        const auto aggregateWorkerMs = aggregateWorkerNanoseconds.load() / 1000000;
+        qInfo().noquote() << QStringLiteral("[PointData] Sparse conversion: %1 rows x %2 columns; %3 nonzero values; requested workers %4; maximum concurrent workers %5; aggregate worker time %6 ms; elapsed %7 ms; layout %8")
+            .arg(rows)
+            .arg(columns)
+            .arg(nonzeroCount)
+            .arg(std::clamp<std::size_t>(configuration->conversionWorkerCount, 1, 32))
+            .arg(maximumConcurrentWorkers.load())
+            .arg(aggregateWorkerMs)
+            .arg(elapsedMs)
+            .arg(configuration->columnCompressed ? QStringLiteral("CSC") : QStringLiteral("CSR"));
 
         return;
     }
