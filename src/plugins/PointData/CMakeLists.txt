@@ -211,15 +211,6 @@ source_group(Aux FILES ${POINT_DATA_AUX})
 
 add_library(${POINTDATA} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES} ${POINTS_VIEW_WIDGETS} ${POINTS_STORAGE_HEADERS} ${POINTS_STORAGE_INTERFACE_SOURCES} ${POINTS_STORAGE_DENSE_SOURCES} ${POINTS_STORAGE_SPARSE_SOURCES} ${POINTS_STORAGE_TILED_SOURCES} ${POINT_DATA_AUX})
 
-# Prevent anonymous-namespace symbol collisions in unity builds.
-set_source_files_properties(
-    src/view/PointsTableModel.cpp
-    src/view/PointsViewWidget.cpp
-    src/developer/PointDataPhantomGenerator.cpp
-    src/developer/PointDataTestSuite.cpp
-    PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON
-)
-
 add_library(ManiVault::${POINTDATA} ALIAS ${POINTDATA})
 
 target_include_directories(${POINTDATA} PRIVATE "${MV_INSTALL_DIR}/$<CONFIGURATION>/include/")
