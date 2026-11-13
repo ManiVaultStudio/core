@@ -558,7 +558,22 @@ void TiledStorageBackendConfigurationAction::enableConversionPerformanceOptions(
     _importPerformanceAction.addAction(&_importPerformanceSettingsAction);
     _importPerformanceSettingsAction.addAction(&_stagingThreadCountAction);
     _importPerformanceSettingsAction.addAction(&_rowChunkTileFactorAction);
+
+    // This action is enabled after the base constructor has added the storage
+    // observation cards. Reinsert those cards after the performance controls
+    // so conversion settings remain above them in the configuration dialog.
+    removeAction(&_tileCountObservationAction);
+    removeAction(&_tileCacheObservationAction);
+    if (_showImportStagingSpaceObservation)
+        removeAction(&_stagingSpaceObservationAction);
+
     addAction(&_importPerformanceAction);
+
+    addAction(&_tileCountObservationAction);
+    addAction(&_tileCacheObservationAction);
+    if (_showImportStagingSpaceObservation)
+        addAction(&_stagingSpaceObservationAction);
+
     updateImportPerformanceSummary();
     connect(&_stagingThreadCountAction, &IntegralAction::valueChanged, this, [this] {
         updateImportPerformanceSummary();
