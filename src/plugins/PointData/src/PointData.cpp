@@ -1727,81 +1727,22 @@ void Points::setData(std::nullptr_t, const std::size_t numPoints, const std::siz
 
 void Points::extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const
 {
-    if (isProxy()) {
-        result.resize(getNumPoints());
+    const auto rawPointData = getRawData<PointData>();
 
-        auto pointIndexOffset = 0u;
-
-        for (auto proxyMember : getProxyMembers()) {
-            auto points = mv::Dataset<Points>(proxyMember);
-
-            std::vector<float> proxyPoints;
-
-            proxyPoints.resize(points->getNumPoints());
-
-            points->extractDataForDimension(proxyPoints, dimensionIndex);
-
-            std::copy(proxyPoints.begin(), proxyPoints.end(), result.begin() + pointIndexOffset);
-
-            pointIndexOffset += points->getNumPoints();
-        }
-    }
-    else {
-        const auto rawPointData = getRawData<PointData>();
-
-        if (isFull())
-            rawPointData->extractFullDataForDimension(result, dimensionIndex);
-        else
-            rawPointData->extractDataForDimension(result, dimensionIndex, indices);
-
-    }
+    if (isFull())
+        rawPointData->extractFullDataForDimension(result, dimensionIndex);
+    else
+        rawPointData->extractDataForDimension(result, dimensionIndex, indices);
 }
 
 void Points::extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const
 {
-    if (isProxy()) {
-        result.resize(getNumPoints());
+    const auto rawPointData = getRawData<PointData>();
 
-        auto pointIndexOffset = 0u;
-
-        for (auto proxyMember : getProxyMembers()) {
-            auto points = mv::Dataset<Points>(proxyMember);
-
-            std::vector<mv::Vector2f> proxyPoints;
-
-            proxyPoints.resize(points->getNumPoints());
-
-            points->extractDataForDimensions(proxyPoints, dimensionIndex1, dimensionIndex2);
-
-            std::copy(proxyPoints.begin(), proxyPoints.end(), result.begin() + pointIndexOffset);
-
-            pointIndexOffset += points->getNumPoints();
-        }
-    }
-    else {
-        const auto rawPointData = getRawData<PointData>();
-
-        if (isFull())
-            rawPointData->extractFullDataForDimensions(result, dimensionIndex1, dimensionIndex2);
-        else
-            rawPointData->extractDataForDimensions(result, dimensionIndex1, dimensionIndex2, indices);
-    }
-}
-
-bool Points::mayProxy(const Datasets& proxyDatasets) const
-{
-    if (!DatasetImpl::mayProxy(proxyDatasets))
-        return false;
-
-    QSet<std::int32_t> numberOfDimensionsSet;
-
-    for (auto proxyDataset : proxyDatasets)
-        numberOfDimensionsSet.insert(Dataset<Points>(proxyDataset)->getNumDimensions());
-    
-    if (numberOfDimensionsSet.count() > 1)
-        return false;
-
-    return true;
+    if (isFull())
+        rawPointData->extractFullDataForDimensions(result, dimensionIndex1, dimensionIndex2);
+    else
+        rawPointData->extractDataForDimensions(result, dimensionIndex1, dimensionIndex2, indices);
 }
 
 Dataset<DatasetImpl> Points::copy() const
@@ -1859,77 +1800,12 @@ Dataset<DatasetImpl> Points::createSubsetFromVisibleSelection(const QString& gui
     return mv::data().createSubsetFromSelection(subsetSelection, toSmartPointer(), guiName, parentDataSet, visible);
 }
 
-void Points::setProxyMembers(const Datasets& proxyMembers)
-{
-    DatasetImpl::setProxyMembers(proxyMembers);
-
-    getTask().setName("Creating proxy");
-    getTask().setVisible(!(projects().isOpeningProject() || projects().isImportingProject()));
-    getTask().setRunning();
-
-    std::uint64_t pointIndexOffset = 0lu;
-
-    QCoreApplication::processEvents();
-
-    for (auto proxyMember : getProxyMembers()) {
-        auto targetPoints = Dataset<Points>(proxyMember);
-
-        std::vector<std::uint32_t> targetGlobalIndices;
-
-        targetPoints->getGlobalIndices(targetGlobalIndices);
-
-        // Selection map from proxy to member
-        {
-            SelectionMap selectionMapToTarget;
-
-            for (std::uint64_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
-                selectionMapToTarget.getMap()[pointIndexOffset + pointIndex] = std::vector<std::uint32_t>({ targetGlobalIndices[pointIndex] });
-
-            addLinkedData(targetPoints, selectionMapToTarget);
-        }
-
-        // Selection map from member to proxy
-        {
-            SelectionMap selectionMapToSource;
-
-            for (std::uint64_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
-                selectionMapToSource.getMap()[targetGlobalIndices[pointIndex]] = std::vector<std::uint32_t>({ ::local::safe_numeric_cast<std::uint32_t>(pointIndexOffset + pointIndex) });
-
-            targetPoints->addLinkedData(toSmartPointer(), selectionMapToSource);
-
-            if (!targetPoints->isFull())
-                targetPoints->getFullDataset<Points>()->addLinkedData(toSmartPointer(), selectionMapToSource);
-        }
-
-        pointIndexOffset += targetPoints->getNumPoints();
-
-        getTask().setProgressDescription(QString("Creating mappings for %1").arg(proxyMember->text()));
-        getTask().setProgress(static_cast<float>(getProxyMembers().indexOf(proxyMember)) / static_cast<float>(getProxyMembers().count()));
-
-        QCoreApplication::processEvents();
-    }
-
-    if (!getProxyMembers().isEmpty()) {
-        setDimensionNames(Dataset<Points>(getProxyMembers().first())->getDimensionNames());
-        events().notifyDatasetDataDimensionsChanged(this);
-    }
-
-    getTask().setFinished();
-}
-
 /* -------------------------------------------------------------------------- */
 /*                            Index transformation                            */
 /* -------------------------------------------------------------------------- */
 
 void Points::getGlobalIndices(std::vector<std::uint32_t>& globalIndices) const
 {
-    if (isProxy())
-    {
-        globalIndices.resize(getNumPoints(), 0);
-        std::iota(globalIndices.begin(), globalIndices.end(), 0);
-        return;
-    }
-
     // Traverse the chain of datasets back to the original source data
     // Any subsets traversed along the way are stored in the a subset chain
     std::vector<Dataset<Points>> subsetChain;
@@ -1973,81 +1849,49 @@ void Points::selectedLocalIndices(const std::vector<std::uint32_t>& selectionInd
     std::vector<std::uint32_t> localGlobalIndices;
     getGlobalIndices(localGlobalIndices);
 
-    if (isProxy()) {
-        selected.resize(getNumPoints(), false);
+    // In an array the size of the full raw data, mark selected points as true
+    const auto sourceDataset = getSourceDataset<Points>();
+    const auto rawPointCount = sourceDataset->getNumRawPoints();
+    std::vector<bool> globalSelection(rawPointCount, false);
 
-        std::size_t invalidSelectionIndices = 0;
-        for (const auto& selectionIndex : selectionIndices) {
-            if (selectionIndex >= localGlobalIndices.size()) {
-                ++invalidSelectionIndices;
-                continue;
-            }
-
-            const auto localIndex = localGlobalIndices[selectionIndex];
-            if (localIndex >= selected.size()) {
-                ++invalidSelectionIndices;
-                continue;
-            }
-
-            selected[localIndex] = true;
+    std::size_t invalidSelectionIndices = 0;
+    for (const std::uint32_t& selectionIndex : selectionIndices) {
+        if (selectionIndex >= rawPointCount) {
+            ++invalidSelectionIndices;
+            continue;
         }
 
-        if (invalidSelectionIndices > 0)
-            qWarning() << "Ignoring" << invalidSelectionIndices << "out-of-range selection indices for proxy point dataset" << getId()
-                       << "(point count:" << getNumPoints() << ")";
+        globalSelection[selectionIndex] = true;
     }
-    else {
-        // In an array the size of the full raw data, mark selected points as true
-        const auto sourceDataset = getSourceDataset<Points>();
-        const auto rawPointCount = sourceDataset->getNumRawPoints();
-        std::vector<bool> globalSelection(rawPointCount, false);
 
-        std::size_t invalidSelectionIndices = 0;
-        for (const std::uint32_t& selectionIndex : selectionIndices) {
-            if (selectionIndex >= rawPointCount) {
-                ++invalidSelectionIndices;
-                continue;
-            }
+    std::size_t invalidGlobalIndices = 0;
 
-            globalSelection[selectionIndex] = true;
+    // For all local points find out which are selected
+    selected.resize(localGlobalIndices.size(), false);
+    for (std::uint64_t i = 0; i < localGlobalIndices.size(); i++)
+    {
+        if (localGlobalIndices[i] >= rawPointCount) {
+            ++invalidGlobalIndices;
+            continue;
         }
 
-        std::size_t invalidGlobalIndices = 0;
-
-        // For all local points find out which are selected
-        selected.resize(localGlobalIndices.size(), false);
-        for (std::uint64_t i = 0; i < localGlobalIndices.size(); i++)
-        {
-            if (localGlobalIndices[i] >= rawPointCount) {
-                ++invalidGlobalIndices;
-                continue;
-            }
-
-            if (globalSelection[localGlobalIndices[i]])
-                selected[i] = true;
-        }
-
-        if (invalidSelectionIndices > 0 || invalidGlobalIndices > 0)
-            qWarning() << "Ignoring invalid point indices while mapping selection. Dataset:" << getId() << getGuiName()
-                       << "points:" << getNumPoints() << "full:" << isFull() << "proxy:" << isProxy() << "derived:" << isDerivedData()
-                       << "source:" << sourceDataset->getId() << sourceDataset->getGuiName()
-                       << "source points:" << sourceDataset->getNumPoints() << "source raw points:" << rawPointCount
-                       << "source full:" << sourceDataset->isFull() << "source proxy:" << sourceDataset->isProxy() << "source derived:" << sourceDataset->isDerivedData()
-                       << ", selection IDs:" << selectionIndices.size()
-                       << ", invalid selection IDs:" << invalidSelectionIndices
-                       << ", invalid dataset IDs:" << invalidGlobalIndices << ")";
+        if (globalSelection[localGlobalIndices[i]])
+            selected[i] = true;
     }
+
+    if (invalidSelectionIndices > 0 || invalidGlobalIndices > 0)
+        qWarning() << "Ignoring invalid point indices while mapping selection. Dataset:" << getId() << getGuiName()
+                   << "points:" << getNumPoints() << "full:" << isFull() << "derived:" << isDerivedData()
+                   << "source:" << sourceDataset->getId() << sourceDataset->getGuiName()
+                   << "source points:" << sourceDataset->getNumPoints() << "source raw points:" << rawPointCount
+                   << "source full:" << sourceDataset->isFull() << "source derived:" << sourceDataset->isDerivedData()
+                   << ", selection IDs:" << selectionIndices.size()
+                   << ", invalid selection IDs:" << invalidSelectionIndices
+                   << ", invalid dataset IDs:" << invalidGlobalIndices << ")";
 }
 
 void Points::getLocalSelectionIndices(std::vector<std::uint32_t>& localSelectionIndices) const
 {
-    if (isProxy())
-    {
-        localSelectionIndices = getSelection<Points>()->indices;
-        return;
-    }
-
-
     auto selection = getSelection<Points>();
 
     // Find the global indices of this dataset
@@ -2121,12 +1965,7 @@ std::vector<std::uint32_t>& Points::getSelectionIndices()
 
 const std::vector<QString>& Points::getDimensionNames() const
 {
-    if (isProxy()) {
-        return mv::Dataset<Points>(getProxyMembers().first())->getDimensionNames();
-    }
-    else {
-        return getRawData<PointData>()->getDimensionNames();
-    }
+    return getRawData<PointData>()->getDimensionNames();
 }
 
 void Points::setDimensionNames(const std::vector<QString>& dimNames)
@@ -2140,17 +1979,12 @@ void Points::setDimensionNames(const std::vector<QString>& dimNames)
 
 mv::util::ProjectResourceStagingPolicy Points::getProjectResourceStagingPolicy() const
 {
-    if (isProxy())
-        return mv::util::ProjectResourceStagingPolicy::Inherit;
-
-    return getRawData<PointData>()->getProjectResourceStagingPolicy();
+    return _projectResourceStagingPolicy;
 }
 
 void Points::setProjectResourceStagingPolicy(const mv::util::ProjectResourceStagingPolicy policy)
 {
-    if (isProxy())
-        throw std::logic_error("Cannot set resource staging policy on proxy points");
-
+    _projectResourceStagingPolicy = policy;
     getRawData<PointData>()->setProjectResourceStagingPolicy(policy);
 }
 
@@ -2166,95 +2000,49 @@ void Points::setProjectOpenStagingPolicy(const mv::util::ProjectResourceStagingP
 
 QString Points::getElementTypeName() const
 {
-    if (isProxy())
-    {
-        const auto proxyMembers = getProxyMembers();
-
-        return proxyMembers.isEmpty() ? PointData::elementTypeName(ElementTypeSpecifier::float32) : mv::Dataset<Points>(proxyMembers.first())->getElementTypeName();
-    }
-
     return getRawData<PointData>()->getElementTypeName();
 }
 
 std::optional<Points::StorageBackendType> Points::getStorageBackendType() const
 {
-    if (isProxy())
-    {
-        const auto proxyMembers = getProxyMembers();
-
-        if (proxyMembers.isEmpty())
-            return std::nullopt;
-
-        const auto firstType = mv::Dataset<Points>(proxyMembers.first())->getStorageBackendType();
-
-        if (!firstType)
-            return std::nullopt;
-
-        for (const auto& proxyMember : proxyMembers)
-        {
-            if (mv::Dataset<Points>(proxyMember)->getStorageBackendType() != firstType)
-                return std::nullopt;
-        }
-
-        return firstType;
-    }
-
     return getRawData<PointData>()->getStorageBackendType();
 }
 
 pointdata::storage::StorageBackendCapabilities Points::getStorageBackendCapabilities() const
 {
-    if (isProxy())
-        return 0;
-
     return getRawData<PointData>()->getStorageBackendCapabilities();
 }
 
 const pointdata::storage::PointsStorageBackend* Points::getStorageBackend() const
 {
-    return isProxy() ? nullptr : getRawData<PointData>()->getStorageBackend();
+    return getRawData<PointData>()->getStorageBackend();
 }
 
 void Points::initializeStorageBackend(std::unique_ptr<pointdata::storage::PointsStorageBackend> storageBackend)
 {
-    if (isProxy())
-        throw std::invalid_argument("Storage backend initialization is only supported for concrete point datasets");
-
     getRawData<PointData>()->initializeStorageBackend(std::move(storageBackend));
     mv::events().notifyDatasetDataChanged(this);
 }
 
 void Points::convertToStorageBackend(const StorageBackendType type, const StorageBackendConfiguration& configuration, StorageBackendProgressCallback progress)
 {
-    if (isProxy())
-        throw std::invalid_argument("Storage backend conversion is only supported for concrete point datasets");
-
     getRawData<PointData>()->convertToStorageBackend(type, configuration, std::move(progress));
     mv::events().notifyDatasetDataChanged(this);
 }
 
 std::unique_ptr<mv::gui::StorageBackendConversionAction> Points::createStorageBackendConversionAction(const StorageBackendType targetType, QObject* parent) const
 {
-    if (isProxy())
-        return nullptr;
-
     return getRawData<PointData>()->createStorageBackendConversionAction(targetType, parent);
 }
 
 void Points::convertToStorageBackend(const StorageBackendType type, const StorageBackendConfigurationOptionsPtr options, StorageBackendProgressCallback progress)
 {
-    if (isProxy())
-        throw std::invalid_argument("Storage backend conversion is only supported for concrete point datasets");
-
     getRawData<PointData>()->convertToStorageBackend(type, std::move(options), std::move(progress));
     mv::events().notifyDatasetDataChanged(this);
 }
 
 void Points::configureStorageBackend(const StorageBackendConfigurationOptionsPtr options)
 {
-    if (isProxy())
-        throw std::invalid_argument("Storage backend configuration is only supported for concrete point datasets");
-
     getRawData<PointData>()->configureStorageBackend(std::move(options));
     mv::events().notifyDatasetDataChanged(this);
 }
@@ -2263,24 +2051,6 @@ PointDataAccessView Points::getRow(const std::uint64_t row) const
 {
     if (row >= getNumPoints())
         return {};
-
-    if (isProxy())
-    {
-        auto rowOffset = row;
-
-        for (const auto& proxyMember : getProxyMembers())
-        {
-            const auto member = mv::Dataset<Points>(proxyMember);
-            const auto memberRowCount = member->getNumPoints();
-
-            if (rowOffset < memberRowCount)
-                return member->getRow(rowOffset);
-
-            rowOffset -= memberRowCount;
-        }
-
-        return {};
-    }
 
     return isFull() ? getRawData<PointData>()->getRow(row) : getRawData<PointData>()->getRow(indices[static_cast<std::size_t>(row)]);
 }
@@ -2307,14 +2077,6 @@ void Points::visitColumns(const std::vector<std::uint64_t>& columnIds, const Poi
     {
         if (column >= getNumDimensions())
             throw std::out_of_range("Point-data column ID is out of bounds");
-    }
-
-    if (isProxy())
-    {
-        for (const auto& proxyMember : getProxyMembers())
-            mv::Dataset<Points>(proxyMember)->visitColumns(columnIds, visitor);
-
-        return;
     }
 
     const auto* rawPointData = getRawData<PointData>();
@@ -2347,31 +2109,6 @@ void Points::visitRange(const std::uint64_t firstRow, const std::uint64_t rowCou
     if (rowCount == 0 || columnCount == 0)
         return;
 
-    if (isProxy())
-    {
-        std::uint64_t proxyRowOffset = 0;
-        const auto requestedEnd = firstRow + rowCount;
-
-        for (const auto& proxyMember : getProxyMembers())
-        {
-            const auto member = mv::Dataset<Points>(proxyMember);
-            const auto memberRowCount = member->getNumPoints();
-            const auto memberEnd = proxyRowOffset + memberRowCount;
-            const auto overlapBegin = std::max(firstRow, proxyRowOffset);
-            const auto overlapEnd = std::min(requestedEnd, memberEnd);
-
-            if (overlapBegin < overlapEnd)
-                member->visitRange(overlapBegin - proxyRowOffset, overlapEnd - overlapBegin, firstColumn, columnCount, visitor);
-
-            proxyRowOffset = memberEnd;
-
-            if (proxyRowOffset >= requestedEnd)
-                break;
-        }
-
-        return;
-    }
-
     const auto* rawPointData = getRawData<PointData>();
 
     if (isFull())
@@ -2401,8 +2138,8 @@ void Points::setColumns(const std::uint64_t firstColumn, const std::uint64_t col
 
 void Points::setRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessView& values)
 {
-    if (isProxy() || !isFull())
-        throw std::logic_error("Point-data range mutation is unavailable for proxy and subset datasets");
+    if (!isFull())
+        throw std::logic_error("Point-data range mutation is unavailable for subset datasets");
 
     getRawData<PointData>()->setRange(firstRow, rowCount, firstColumn, columnCount, values);
     mv::events().notifyDatasetDataChanged(this);
@@ -2459,21 +2196,7 @@ static void resolveLinkedPointData(const LinkedData& linkedData, const std::vect
             }
         }
 
-        if (targetDataset->isProxy()) {
-            std::set<std::uint32_t> targetIndicesSet(targetSelection->indices.begin(), targetSelection->indices.end());
-
-            for (auto& [key, value] : const_cast<SelectionMap&>(mapping).getMap())
-                for (const auto& v : value)
-                    targetIndicesSet.erase(v);
-
-            for (const auto& linkedIndex : linkedIndices)
-                targetIndicesSet.insert(linkedIndex);
-
-            targetSelection->indices = std::vector<std::uint32_t>(targetIndicesSet.begin(), targetIndicesSet.end());
-        }
-        else {
-            targetSelection->indices = linkedIndices;
-        }
+        targetSelection->indices = linkedIndices;
     }
     
     // Add the target of the linked data (of which we updated the selection indices) to the ignore list

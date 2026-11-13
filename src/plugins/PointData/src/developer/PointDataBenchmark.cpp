@@ -774,8 +774,6 @@ double checksumView(const PointDataAccessView& view)
 
 std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> getTiledStorage(const mv::Dataset<Points>& points)
 {
-    if (points->isProxy())
-        return {};
 
     const auto* tiledBackend = dynamic_cast<const mv::pointdata::storage::TiledPointsStorageBackend*>(points->getStorageBackend());
 
@@ -848,7 +846,7 @@ std::vector<BenchmarkDataset> getPointDatasets()
     {
         const auto* points = dynamic_cast<const Points*>(dataset.getDataset());
 
-        if (points != nullptr && !points->isProxy() && points->getNumPoints() > 0 && points->getNumDimensions() > 0)
+        if (points != nullptr && points->getNumPoints() > 0 && points->getNumDimensions() > 0)
         {
             const mv::Dataset<Points> pointDataset(const_cast<Points*>(points));
             pointDatasets.push_back({ pointDataset, datasetLabel(pointDataset) });

@@ -13,8 +13,6 @@ using namespace mv::util;
 InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
     GroupAction(parent, "Group", true),
     _points(points),
-    _dataStorageAction(this, "Storage type"),
-    _proxyDatasetsAction(this, points),
     _numberOfPointsAction(this, "Number of points"),
     _numberOfDimensionsAction(this, "Number of dimensions"),
     _rawDataSizeAction(this, "Raw data size"),
@@ -24,8 +22,6 @@ InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
 {
     setText("Info");
 
-    addAction(&_dataStorageAction);
-    addAction(&_proxyDatasetsAction);
     addAction(&_numberOfPointsAction);
     addAction(&_numberOfDimensionsAction);
     addAction(&_rawDataSizeAction);
@@ -33,13 +29,10 @@ InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
     addAction(&_selectedIndicesAction);
     addAction(&_createSetFromSelection);
 
-    _dataStorageAction.setEnabled(false);
     _numberOfPointsAction.setEnabled(false);
     _numberOfDimensionsAction.setEnabled(false);
     _rawDataSizeAction.setEnabled(false);
 
-    _dataStorageAction.setToolTip("The type of data storage (e.g. owner or proxy)");
-    _proxyDatasetsAction.setToolTip("Proxy datasets");
     _numberOfPointsAction.setToolTip("The number of points");
     _numberOfDimensionsAction.setToolTip("The number of dimensions in the point data");
     _rawDataSizeAction.setToolTip("The amount of memory occupied for raw data by the dataset");
@@ -50,7 +43,6 @@ InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
         if (!_points.isValid())
             return;
 
-        _dataStorageAction.setString(_points->isProxy() ? "Group" : "Owner");
         _numberOfPointsAction.setString(QString::number(_points->getNumPoints()));
         _numberOfDimensionsAction.setString(QString::number(_points->getNumDimensions()));
         _rawDataSizeAction.setString(_points->getRawDataSizeHumanReadable());

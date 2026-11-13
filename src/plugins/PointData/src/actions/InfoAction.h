@@ -6,7 +6,6 @@
 
 #include "../PointData.h"
 
-#include "ProxyDatasetsAction.h"
 #include "NumberOfSelectedPointsAction.h"
 #include "SelectedIndicesAction.h"
 #include "CreateSetFromSelectionAction.h"
@@ -33,8 +32,6 @@ public:
 
 public: // Action getters
 
-    mv::gui::StringAction& getDataStorageAction() { return _dataStorageAction; }
-    ProxyDatasetsAction& getProxyDatasetsAction() { return _proxyDatasetsAction; }
     mv::gui::StringAction& getNumberOfPointsAction() { return _numberOfPointsAction; }
     mv::gui::StringAction& getNumberOfDimensionsAction() { return _numberOfDimensionsAction; }
     mv::gui::StringAction& getRawDataSizeAction() { return _rawDataSizeAction; }
@@ -44,8 +41,6 @@ public: // Action getters
 
 protected:
     mv::Dataset<Points>             _points;                            /** Points dataset reference */
-    mv::gui::StringAction           _dataStorageAction;                 /** Type of data storage action */
-    ProxyDatasetsAction             _proxyDatasetsAction;               /** Proxy datasets action */
     mv::gui::StringAction           _numberOfPointsAction;              /** Number of points action */
     mv::gui::StringAction           _numberOfDimensionsAction;          /** Number of dimensions action */
     mv::gui::StringAction           _rawDataSizeAction;                 /** Amount of memory for raw data */

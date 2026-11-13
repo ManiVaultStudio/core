@@ -61,13 +61,12 @@ void StorageBackendAction::updateBackendType()
     _updatingBackendType = true;
 
     const auto pointsAreValid = _points.isValid();
-    const auto isProxy        = pointsAreValid && _points->isProxy();
     const auto backendType    = pointsAreValid ? _points->getStorageBackendType() : std::optional<Points::StorageBackendType>();
 
     setBackendType(backendType ? pointdata::storage::getStorageBackendTypeName(*backendType) : QString());
 
-    getBackendTypeAction().setEnabled(pointsAreValid && !isProxy && !_conversionInProgress);
-    setConfigureEnabled(pointsAreValid && !isProxy && backendType && !_conversionInProgress);
+    getBackendTypeAction().setEnabled(pointsAreValid && !_conversionInProgress);
+    setConfigureEnabled(pointsAreValid && backendType && !_conversionInProgress);
 
     _updatingBackendType = false;
 }
@@ -77,7 +76,7 @@ void StorageBackendAction::changeBackendType(const QString& backendType)
     if (_updatingBackendType)
         return;
 
-    if (_conversionInProgress || !_points.isValid() || _points->isProxy())
+    if (_conversionInProgress || !_points.isValid())
     {
         updateBackendType();
         return;

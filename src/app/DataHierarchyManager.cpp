@@ -5,7 +5,9 @@
 #include "DataHierarchyManager.h"
 #include "DataManager.h"
 
+#include <CoreInterface.h>
 #include <util/Exception.h>
+#include <util/Miscellaneous.h>
 #include <util/Serialization.h>
 
 #include <QtConcurrent>
@@ -474,6 +476,24 @@ QVector<QVariantMap> DataHierarchyManager::sortedDataHierarchyItems(const QVaria
 void DataHierarchyManager::populateDataHierarchy(const QVariantMap& itemsMap, const Dataset<DatasetImpl>& parent)
 {
     for (const auto& itemMap : sortedDataHierarchyItems(itemsMap)) {
+        const auto datasetMap = itemMap.value("Dataset").toMap();
+
+        // Older projects represented dataset groups as proxy datasets. Those
+        // wrappers no longer exist; retain their children in the hierarchy.
+        if (datasetMap.value("StorageType").toInt() == 1) {
+            const auto datasetName = datasetMap.value("Name").toString();
+            mv::help().addNotification(
+                "Unsupported proxy dataset",
+                QString("Dataset '%1' was saved as a proxy dataset, which is no longer supported. Its child datasets were loaded without the proxy wrapper.").arg(datasetName),
+                mv::util::StyledIcon("exclamation-triangle"),
+                mv::util::Notification::DurationType::Calculated,
+                0,
+                mv::util::SeverityLevel::Warning);
+
+            populateDataHierarchy(itemMap.value("Children").toMap(), parent);
+            continue;
+        }
+
         auto dataset = createDatasetFromItem(itemMap, parent);
         populateDataHierarchy(itemMap["Children"].toMap(), dataset);
     }

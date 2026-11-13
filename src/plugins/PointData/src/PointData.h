@@ -764,10 +764,9 @@ private: // Sparse data, experimental
  * @brief Logical point-data dataset and storage facade.
  *
  * Points is the public dataset-level facade for PointData. It represents a
- * complete point set, a subset selected by source indices, or a proxy that
- * combines several point datasets. The facade keeps consumers independent of
- * whether a concrete member uses dense vectors or read-only tiled storage and
- * translates logical row IDs when subsets or proxies are involved.
+ * complete point set or a subset selected by source indices. The facade keeps
+ * consumers independent of whether its data uses dense vectors or read-only
+ * tiled storage and translates logical row IDs for subsets.
  *
  * The tiled and visitor APIs are intentionally exposed here first as an
  * experimental storage-neutral access layer. Consumers should use these
@@ -1020,38 +1019,12 @@ public:
     template <typename ResultContainer, typename DimensionIndices>
     void populateDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
     {
-        if (isProxy()) {
-            std::size_t offset = 0;
+        const auto rawPointData = getRawData<PointData>();
 
-            for (auto& proxyMember : getProxyMembers()) {
-                auto points = mv::Dataset<Points>(proxyMember);
-
-                ResultContainer proxyPointsData = {};
-
-                const auto numberOfElements = points->getNumPoints() * dimensionIndices.size();
-
-                proxyPointsData.resize(numberOfElements);
-
-                const auto rawPointData = points->getRawData<PointData>();
-
-                if (points->isFull())
-                    rawPointData->populateFullDataForDimensions(proxyPointsData, dimensionIndices);
-                else
-                    rawPointData->populateDataForDimensions(proxyPointsData, dimensionIndices, points->indices);
-
-                std::copy(proxyPointsData.begin(), proxyPointsData.end(), resultContainer.begin() + offset);
-
-                offset += numberOfElements;
-            }
-        }
-        else {
-            const auto rawPointData = getRawData<PointData>();
-
-            if (isFull())
-                rawPointData->populateFullDataForDimensions(resultContainer, dimensionIndices);
-            else
-                rawPointData->populateDataForDimensions(resultContainer, dimensionIndices, indices);
-        }
+        if (isFull())
+            rawPointData->populateFullDataForDimensions(resultContainer, dimensionIndices);
+        else
+            rawPointData->populateDataForDimensions(resultContainer, dimensionIndices, indices);
     }
 
     template <typename ResultContainer, typename DimensionIndices, typename Indices>
@@ -1062,49 +1035,17 @@ public:
 
     std::uint64_t getNumRawPoints() const
     {
-        if (isProxy()) {
-            return getNumPoints();
-        }
-        else {
-            return getRawData<PointData>()->getNumPoints();
-        }
+        return getRawData<PointData>()->getNumPoints();
     }
-
-    /**
-     * Establish whether a proxy dataset may be created with candidate \p proxyDatasets
-     * @param proxyDatasets Candidate proxy datasets
-     * @return Boolean indicating whether a proxy dataset may be created with candidate \p proxyDatasets
-     */
-    bool mayProxy(const mv::Datasets& proxyDatasets) const override;
 
     std::uint64_t getNumPoints() const
     {
-        if (isProxy()) {
-            std::uint64_t numberOfPoints = 0;
-
-            for (auto& proxyMember : getProxyMembers())
-                numberOfPoints += mv::Dataset<Points>(proxyMember)->getNumPoints();
-
-            return numberOfPoints;
-        }
-        else {
-            if (isFull()) {
-                return getRawData<PointData>()->getNumPoints();
-            }
-            else {
-                return static_cast<std::uint64_t>(indices.size());
-            }
-        }
+        return isFull() ? getRawData<PointData>()->getNumPoints() : static_cast<std::uint64_t>(indices.size());
     }
 
     std::uint64_t getNumDimensions() const
     {
-        if (isProxy()) {
-            return mv::Dataset<Points>(getProxyMembers().first())->getNumDimensions();
-        }
-        else {
-            return getRawData<PointData>()->getNumDimensions();
-        }
+        return getRawData<PointData>()->getNumDimensions();
     }
 
     /** Returns the name of the element type used by this logical dataset. */
@@ -1113,12 +1054,7 @@ public:
     /**
      * @brief Returns the physical storage type for this logical dataset.
      *
-     * Proxies report a type only when they have members and every member uses
-     * the same backend. Returns std::nullopt for empty proxies and proxies
-     * whose members use different backends; concrete datasets return their
-     * backend type.
-     *
-     * @return A concrete backend type when the dataset has one consistent storage type; otherwise std::nullopt.
+     * @return The concrete backend type when the dataset uses one.
      */
     std::optional<StorageBackendType> getStorageBackendType() const;
 
@@ -1128,7 +1064,7 @@ public:
     /** Returns the active storage backend for a concrete point dataset. */
     const mv::pointdata::storage::PointsStorageBackend* getStorageBackend() const;
 
-    /** Installs a backend implementation on an empty concrete dataset. Proxies are rejected. */
+    /** Installs a backend implementation on an empty dataset. */
     void initializeStorageBackend(std::unique_ptr<mv::pointdata::storage::PointsStorageBackend> storageBackend);
 
     /** Creates controls for converting to the requested storage backend. */
@@ -1142,15 +1078,14 @@ public:
 
     /**
      * Applies options owned by the current storage backend of this concrete
-     * dataset. Proxy datasets are rejected because their members may use
-     * different physical backends and configurations.
+     * dataset.
      */
     void configureStorageBackend(StorageBackendConfigurationOptionsPtr options);
 
-    /** Returns one logical row as a storage-neutral read-only view, translating subset or proxy indices. */
+    /** Returns one logical row as a storage-neutral read-only view, translating subset indices. */
     PointDataAccessView getRow(std::uint64_t row) const;
 
-    /** Visits a contiguous range of logical rows, translating proxy and subset indices. */
+    /** Visits a contiguous range of logical rows, translating subset indices. */
     void visitRows(std::uint64_t firstRow, std::uint64_t rowCount, const PointDataAccessVisitor& visitor) const;
 
     /** Visits selected logical rows in rowIds order. */
@@ -1177,9 +1112,9 @@ public:
     /**
      * Sets a rectangular logical range from a typed row-major view.
      *
-     * Proxy and subset datasets currently reject writes. Concrete full
+     * Subset datasets currently reject writes. Concrete full
      * datasets forward to their backend, which currently rejects range writes.
-     * @throws std::logic_error If this is a proxy, subset, or backend without range writes.
+     * @throws std::logic_error If this is a subset or backend without range writes.
      */
     void setRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessView& values);
 
@@ -1222,11 +1157,7 @@ public:
      * @return Size of the raw data in bytes
      */
     std::uint64_t getRawDataSize() const override {
-        if (isProxy())
-            return 0;
-        else {
-            return getRawData<PointData>()->getRawDataSize();
-        }
+        return getRawData<PointData>()->getRawDataSize();
     }
 
     // Returns the value of the element at the specified position in the current
@@ -1306,12 +1237,6 @@ public:
      * @return Smart pointer to the created subset
      */
     mv::Dataset<mv::DatasetImpl> createSubsetFromVisibleSelection(const QString& guiName, const mv::Dataset<mv::DatasetImpl>& parentDataSet = mv::Dataset<mv::DatasetImpl>(), const bool& visible = true) const;
-
-    /**
-     * Set the proxy member datasets (automatically sets the dataset type to Type::Proxy)
-     * @param proxyMembers Proxy member datasets
-     */
-    void setProxyMembers(const mv::Datasets& proxyMembers) override;
 
 public: // Index transformation
     /**
@@ -1416,6 +1341,10 @@ public:
     DimensionsPickerAction*     _dimensionsPickerAction;        /** Non-owning pointer to dimensions picker action */
     mv::EventListener           _eventListener;                 /** Listen to ManiVault core events */
 
+private:
+    mv::util::ProjectResourceStagingPolicy _projectResourceStagingPolicy = mv::util::ProjectResourceStagingPolicy::Inherit; /** Dataset-level project resource staging override. */
+
+public:
     friend class mv::legacy::PointsLegacySerializer;
 };
 

@@ -56,8 +56,6 @@ set(POINTS_HEADERS
     src/ModelResetter.h
     src/actions/InfoAction.h
     src/actions/SelectedIndicesAction.h
-    src/actions/ProxyDatasetsAction.h
-    src/actions/EditProxyDatasetsAction.h
     src/actions/NumberOfSelectedPointsAction.h
     src/actions/CreateSetFromSelectionAction.h
     src/SparseMatrix.h
@@ -160,10 +158,6 @@ set(ACTIONS_SOURCES
     src/DimensionsPickerMiscellaneousAction.cpp
     src/actions/InfoAction.h
     src/actions/InfoAction.cpp
-    src/actions/ProxyDatasetsAction.h
-    src/actions/ProxyDatasetsAction.cpp
-    src/actions/EditProxyDatasetsAction.h
-    src/actions/EditProxyDatasetsAction.cpp
     src/actions/NumberOfSelectedPointsAction.h
     src/actions/NumberOfSelectedPointsAction.cpp
     src/actions/SelectedIndicesAction.h

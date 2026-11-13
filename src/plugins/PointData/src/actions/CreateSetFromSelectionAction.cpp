@@ -27,18 +27,7 @@ CreateSetFromSelectionAction::CreateSetFromSelectionAction(QObject* parent, cons
     connect(&_createAction, &mv::gui::TriggerAction::triggered, this, [this]() -> void {
         auto points = _points->isDerivedData() ? _points->getSourceDataset<Points>() : _points;
 
-        if (points->isProxy()) {
-
-            Datasets subsets;
-
-            for (auto proxyMember : _points->getProxyMembers())
-                subsets << mv::data().createSubsetFromSelection(proxyMember->getSelection(), proxyMember, "Subset", proxyMember);
-
-            mv::data().groupDatasets(subsets, _nameAction.getString());
-        }
-        else {
-            points->createSubsetFromSelection(_nameAction.getString());
-        }
+        points->createSubsetFromSelection(_nameAction.getString());
 
         _nameAction.setString("");
     });

@@ -22,7 +22,7 @@ class CreateSetFromSelectionAction : public mv::gui::WidgetAction
 
 protected:
 
-    /** Widget class for proxy datasets action */
+    /** Widget class for the create-from-selection action */
     class Widget : public mv::gui::WidgetActionWidget {
     public:
 

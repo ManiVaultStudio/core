@@ -379,46 +379,6 @@ void AbstractDataHierarchyModel::IsVisibleItem::setData(const QVariant& value, i
     }
 }
 
-AbstractDataHierarchyModel::IsGroupItem::IsGroupItem(Dataset<DatasetImpl> dataset) :
-    Item(dataset)
-{
-}
-
-QVariant AbstractDataHierarchyModel::IsGroupItem::data(int role /*= Qt::UserRole + 1*/) const
-{
-    switch (role) {
-        case Qt::EditRole:
-        {
-            if (!getDataset().isValid())
-                break;
-
-            return getDataset()->isProxy();
-        }
-
-        case Qt::DisplayRole:
-            break;
-
-        case Qt::ToolTipRole:
-            return QString("Dataset is a group: %1").arg(data(Qt::EditRole).toBool() ? "yes" : "no");
-
-        case Qt::DecorationRole:
-        {
-            if (!getDataset().isValid())
-                break;
-
-            if (getDataset()->isProxy())
-                return QIcon(StyledIcon("object-group"));
-
-            break;
-        }
-
-        default:
-            break;
-    }
-
-    return Item::data(role);
-}
-
 QVariant AbstractDataHierarchyModel::IsDerivedItem::data(int role /*= Qt::UserRole + 1*/) const
 {
     switch (role) {
@@ -607,9 +567,6 @@ QVariant AbstractDataHierarchyModel::headerData(int section, Qt::Orientation ori
 
         case Column::IsVisible:
             return IsVisibleItem::headerData(orientation, role);
-
-        case Column::IsGroup:
-            return IsGroupItem::headerData(orientation, role);
 
         case Column::IsDerived:
             return IsDerivedItem::headerData(orientation, role);

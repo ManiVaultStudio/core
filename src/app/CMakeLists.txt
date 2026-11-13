@@ -92,7 +92,6 @@ set(PRIVATE_PLUGIN_MANAGER_FILES
 
 set(PRIVATE_DATA_MANAGER_HEADERS
     DataManager.h
-    GroupDataDialog.h
     RemoveDatasetsDialog.h
     DatasetsToRemoveModel.h
     DatasetsToRemoveFilterModel.h
@@ -100,7 +99,6 @@ set(PRIVATE_DATA_MANAGER_HEADERS
 
 set(PRIVATE_DATA_MANAGER_SOURCES
     DataManager.cpp
-    GroupDataDialog.cpp
     RemoveDatasetsDialog.cpp
     DatasetsToRemoveModel.cpp
     DatasetsToRemoveFilterModel.cpp
