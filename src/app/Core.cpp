@@ -78,23 +78,8 @@ void Core::setManagersCreated()
 
 void Core::reset()
 {
-    auto* pluginManager = static_cast<PluginManager*>(getManager(ManagerType::Plugins));
-    auto* dataManager   = getManager(ManagerType::Data);
-
     for (auto& manager : _managers)
-    {
-        if (_aboutToBeDestroyed && manager.get() == dataManager)
-            continue;
-        if (_aboutToBeDestroyed && manager.get() == pluginManager)
-        {
-            // Views can own dataset readers. Close them first, then remove datasets
-            // while the raw-data and analysis plugins they reference still exist.
-            pluginManager->destroyViewPlugins();
-            dataManager->reset();
-        }
-
         manager->reset();
-    }
 }
 
 void Core::initialize()

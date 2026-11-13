@@ -97,20 +97,6 @@ void PluginManager::reset()
     endReset();
 }
 
-void PluginManager::destroyViewPlugins()
-{
-    QStringList pluginIds;
-
-    for (const auto& plugin : _plugins)
-    {
-        if (plugin->getType() == plugin::Type::VIEW)
-            pluginIds << plugin->getId();
-    }
-
-    for (const auto& pluginId : pluginIds)
-        destroyPluginById(pluginId);
-}
-
 void PluginManager::loadPluginFactories()
 {
 #ifdef PLUGIN_MANAGER_VERBOSE
