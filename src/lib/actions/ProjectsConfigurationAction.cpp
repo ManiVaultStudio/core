@@ -16,7 +16,7 @@ namespace mv::gui {
 ProjectsConfigurationAction::ProjectsConfigurationAction(QObject* parent, const QString& title) :
     VerticalGroupAction(parent, title),
     _projectsDsnsAction(this, "Projects"),
-    _defaultProjectResourceStagingPolicyAction(this, "Default project resource staging", { "Read ranges on demand", "Stage on first read", "Stage immediately" }, "Read ranges on demand")
+    _defaultProjectResourceStagingPolicyAction(this, "Default resource staging policy", { "Read ranges on demand", "Stage on first read", "Stage immediately" }, "Read ranges on demand")
 {
     _defaultProjectResourceStagingPolicyAction.setSerializationName("Default packed point-tile staging");
     addAction(&_projectsDsnsAction);

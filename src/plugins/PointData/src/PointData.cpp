@@ -2337,12 +2337,14 @@ UniqueWorkflowPlan Points::fromVariantMapWorkflow(QVariantMap variantMap)
     const auto appVersion = mv::projects().getCurrentProject()->getApplicationVersionAction().getVersion();
     const auto restoreProjectResourceStagingPolicy = [this, variantMap] {
         const auto dataMap = variantMap.value("Data").toMap();
-        if (dataMap.contains("ProjectOpenStagingPolicy"))
+        if (variantMap.contains("ProjectResourceStagingPolicy"))
+            setProjectResourceStagingPolicy(mv::util::projectResourceStagingPolicyFromName(variantMap.value("ProjectResourceStagingPolicy").toString()));
+        else if (dataMap.contains("ProjectOpenStagingPolicy"))
             setProjectResourceStagingPolicy(mv::util::projectResourceStagingPolicyFromName(dataMap.value("ProjectOpenStagingPolicy").toString()));
         else if (isFull())
             setProjectResourceStagingPolicy(mv::util::ProjectResourceStagingPolicy::Inherit);
 
-        if (dataMap.contains("ProjectOpenStagingPolicy") || isFull())
+        if (variantMap.contains("ProjectResourceStagingPolicy") || dataMap.contains("ProjectOpenStagingPolicy") || isFull())
             mv::events().notifyDatasetDataChanged(this);
     };
 
@@ -2409,6 +2411,8 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
     UniqueWorkflowPlan plan = std::make_unique<WorkflowPlan>(__FUNCTION__);
 
     const auto rawDataWeight = isFull() ? std::max(1.0, static_cast<double>(getRawData<PointData>()->getRawDataSize())) : 1.0;
+    const auto hasProjectResourceStagingPolicyOverride = true;
+    const auto projectResourceStagingPolicy = hasProjectResourceStagingPolicyOverride ? getProjectResourceStagingPolicy() : mv::util::ProjectResourceStagingPolicy::Inherit;
 
     const auto saveDatasetBaseStage = plan->addNestedWorkflowStage("Save dataset base", [this](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
         return this->DatasetImpl::toVariantMapWorkflow();
@@ -2467,12 +2471,14 @@ UniqueWorkflowPlan Points::toVariantMapWorkflow() const
         return DimensionNamesSerializer::toVariantMapWorkflow(getRawData<PointData>()->getDimensionNames());
     });
 
-    const auto saveDimensionsStage = plan->addSequentialStage("Save dimensions", [this, saveSelectionStage, serializeDimensionsStage](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
+    const auto saveDimensionsStage = plan->addSequentialStage("Save dimensions", [this, saveSelectionStage, serializeDimensionsStage, hasProjectResourceStagingPolicyOverride, projectResourceStagingPolicy](const WorkflowPlan::Job& job, const SharedWorkflowExecutionContext& executionContext) {
         auto datasetMap = executionContext->takeOutput(saveSelectionStage).toMap();
 
         datasetMap["DimensionNames"]        = executionContext->takeOutput(serializeDimensionsStage).toMap();
         datasetMap["NumberOfDimensions"]    = QVariant::fromValue<std::uint64_t>(getNumDimensions());
         datasetMap["Dimensions"]            = _dimensionsPickerAction->toVariantMap();
+        if (hasProjectResourceStagingPolicyOverride)
+            datasetMap["ProjectResourceStagingPolicy"] = mv::util::projectResourceStagingPolicyName(projectResourceStagingPolicy);
 
         executionContext->setOutput(datasetMap);
     });

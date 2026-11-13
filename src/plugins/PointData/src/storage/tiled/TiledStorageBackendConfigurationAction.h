@@ -88,6 +88,7 @@ public:
     [[nodiscard]] mv::util::ProjectResourceStagingPolicy getProjectResourceStagingPolicy() const;
 
 private:
+    void updateProjectResourceStagingPolicyOption();
     void updateTileGeometryFromPolicy();
     void updateTargetTileSizeFromGeometry();
     void updateTileSizePercentages();

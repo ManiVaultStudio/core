@@ -6,8 +6,11 @@
 #include "../view/PointsViewWidget.h"
 
 #include <CoreInterface.h>
+#include <Project.h>
 #include <ViewPlugin.h>
 #include <util/StyledIcon.h>
+
+#include <QSignalBlocker>
 
 namespace
 {
@@ -46,7 +49,7 @@ PointsAction::PointsAction(QObject* parent, const mv::Dataset<Points>& points) :
     _storageBackendAction(this, points),
     _pointsViewAction(this, points),
     _openInPointsViewAction(this, "Open in Points View"),
-    _projectResourceStagingPolicyAction(this, "Project resource staging", { "Inherit", "Read ranges on demand", "Stage on first read", "Stage immediately" }, "Inherit")
+    _projectResourceStagingPolicyAction(this, "Resource staging policy", { "Inherit", "Read ranges on demand", "Stage on first read", "Stage immediately" }, "Inherit")
 {
     _openInPointsViewAction.setIconByName("external-link");
     _openInPointsViewAction.setToolTip("Open this point dataset in the standalone Points View plugin");
@@ -62,17 +65,39 @@ PointsAction::PointsAction(QObject* parent, const mv::Dataset<Points>& points) :
         if (!_points.isValid())
             return;
 
-        const auto isProxy = _points->isProxy();
-        _projectResourceStagingPolicyAction.setEnabled(!isProxy);
-        _projectResourceStagingPolicyAction.setCurrentText(mv::util::projectResourceStagingPolicyName(_points->getProjectResourceStagingPolicy()));
+        auto options = _projectResourceStagingPolicyAction.getOptions();
+        const auto datasetPolicy = _points->getProjectResourceStagingPolicy();
+        auto inheritedPolicy = mv::util::ProjectResourceStagingPolicy::Inherit;
+        if (mv::projects().hasProject())
+        {
+            const auto projectPolicyText = mv::projects().getCurrentProject()->getProjectMetaAction().getProjectResourceStagingPolicyAction().getCurrentText();
+            inheritedPolicy = mv::util::projectResourceStagingPolicyFromName(projectPolicyText);
+        }
+
+        if (inheritedPolicy == mv::util::ProjectResourceStagingPolicy::Inherit && mv::Application::current())
+        {
+            const auto defaultPolicyText = mv::Application::current()->getConfigurationAction().getProjectsConfigurationAction().getDefaultProjectResourceStagingPolicyAction().getCurrentText();
+            inheritedPolicy = mv::util::projectResourceStagingPolicyFromName(defaultPolicyText);
+        }
+
+        if (!options.isEmpty())
+            options[0] = QStringLiteral("Inherited (%1)").arg(mv::util::projectResourceStagingPolicyName(inheritedPolicy));
+
+        const QSignalBlocker blocker(&_projectResourceStagingPolicyAction);
+        _projectResourceStagingPolicyAction.setOptions(options);
+        _projectResourceStagingPolicyAction.setCurrentText(datasetPolicy == mv::util::ProjectResourceStagingPolicy::Inherit
+            ? options.value(0)
+            : mv::util::projectResourceStagingPolicyName(datasetPolicy));
     };
 
     updateProjectResourceStagingPolicy();
     connect(&_projectResourceStagingPolicyAction, &mv::gui::OptionAction::currentTextChanged, this, [this](const QString& value) {
-        if (!_points.isValid() || _points->isProxy())
+        if (!_points.isValid())
             return;
 
-        const auto policy = mv::util::projectResourceStagingPolicyFromName(value);
+        const auto policy = value.startsWith(QStringLiteral("Inherited ("))
+            ? mv::util::ProjectResourceStagingPolicy::Inherit
+            : mv::util::projectResourceStagingPolicyFromName(value);
         if (_points->getProjectResourceStagingPolicy() == policy)
             return;
 

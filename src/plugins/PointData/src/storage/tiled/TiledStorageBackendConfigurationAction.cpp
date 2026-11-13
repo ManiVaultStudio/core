@@ -4,7 +4,9 @@
 
 #include "PointDataTiledStorage.h"
 
+#include <Application.h>
 #include <CoreInterface.h>
+#include <Project.h>
 #include <util/Miscellaneous.h>
 
 #include <QSignalBlocker>
@@ -44,7 +46,7 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _bucketingThreadCountAction(&_importPerformanceSettingsAction, "Bucketing thread count", 1, 32, static_cast<std::int32_t>(std::clamp<std::size_t>(bucketingThreadCount, 1, 32))),
     _stagingThreadCountAction(&_importPerformanceSettingsAction, "Staging thread count", 1, 32, static_cast<std::int32_t>(std::clamp<std::size_t>(stagingThreadCount, 1, 32))),
     _rowChunkTileFactorAction(&_importPerformanceSettingsAction, "CSR chunk tile-height factor", 1, 256, static_cast<std::int32_t>(std::clamp<std::size_t>(rowChunkTileFactor, 1, 256))),
-    _projectResourceStagingPolicyAction(this, "Project resource staging", { "Inherit project policy", "Read ranges on demand", "Stage on first read", "Stage immediately" }, "Inherit project policy"),
+    _projectResourceStagingPolicyAction(this, "Resource staging policy", { "Inherit", "Read ranges on demand", "Stage on first read", "Stage immediately" }, "Inherit"),
     _initialProjectResourceStagingPolicy(projectResourceStagingPolicy),
     _stagingDirectory(stagingDirectory),
     _showImportPerformanceOptions(showImportPerformanceOptions),
@@ -52,9 +54,10 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
 {
     setShowLabels(true);
     _projectResourceStagingPolicyAction.setSerializationName("Project-open tile staging");
-    _projectResourceStagingPolicyAction.setCurrentText(projectResourceStagingPolicy == mv::util::ProjectResourceStagingPolicy::Inherit ? QStringLiteral("Inherit project policy") : mv::util::projectResourceStagingPolicyName(projectResourceStagingPolicy));
+    _projectResourceStagingPolicyAction.setCurrentText(mv::util::projectResourceStagingPolicyName(projectResourceStagingPolicy));
     _projectResourceStagingPolicyAction.setDefaultWidgetFlags(OptionAction::ComboBox);
     _projectResourceStagingPolicyAction.setToolTip("Select the policy stored on the imported dataset for its archive-backed resources. It takes effect when a saved project is opened; it does not change staging during HDF5 import.");
+    updateProjectResourceStagingPolicyOption();
 
     connect(this, &StorageBackendConversionAction::optionsChanged, this, [this] {
         const auto targetElementSize = getTargetElementSize();
@@ -321,6 +324,7 @@ void TiledStorageBackendConfigurationAction::fromVariantMap(const QVariantMap& v
     }
     if (!projectResourceStagingPolicyMap.isEmpty())
         _projectResourceStagingPolicyAction.fromVariantMap(projectResourceStagingPolicyMap);
+    updateProjectResourceStagingPolicyOption();
     // Accept value-only presets written by the short-lived experimental format.
     const auto restoreLegacyIntegralValue = [&](IntegralAction& action, const char* key, const char* legacyKey) {
         if (variantMap.contains(action.getSerializationName()))
@@ -587,7 +591,39 @@ void TiledStorageBackendConfigurationAction::enableConversionPerformanceOptions(
 
 mv::util::ProjectResourceStagingPolicy TiledStorageBackendConfigurationAction::getProjectResourceStagingPolicy() const
 {
-    return mv::util::projectResourceStagingPolicyFromName(_projectResourceStagingPolicyAction.getCurrentText());
+    const auto currentText = _projectResourceStagingPolicyAction.getCurrentText();
+    return currentText.startsWith(QStringLiteral("Inherited ("))
+        ? mv::util::ProjectResourceStagingPolicy::Inherit
+        : mv::util::projectResourceStagingPolicyFromName(currentText);
+}
+
+void TiledStorageBackendConfigurationAction::updateProjectResourceStagingPolicyOption()
+{
+    auto inheritedPolicy = mv::util::ProjectResourceStagingPolicy::Inherit;
+    if (mv::projects().hasProject())
+    {
+        const auto projectPolicyText = mv::projects().getCurrentProject()->getProjectMetaAction().getProjectResourceStagingPolicyAction().getCurrentText();
+        inheritedPolicy = mv::util::projectResourceStagingPolicyFromName(projectPolicyText);
+    }
+
+    if (inheritedPolicy == mv::util::ProjectResourceStagingPolicy::Inherit && mv::Application::current())
+    {
+        const auto defaultPolicyText = mv::Application::current()->getConfigurationAction().getProjectsConfigurationAction().getDefaultProjectResourceStagingPolicyAction().getCurrentText();
+        inheritedPolicy = mv::util::projectResourceStagingPolicyFromName(defaultPolicyText);
+    }
+
+    auto options = _projectResourceStagingPolicyAction.getOptions();
+    if (options.isEmpty())
+        return;
+
+    const auto selectedPolicy = getProjectResourceStagingPolicy();
+    options[0] = QStringLiteral("Inherited (%1)").arg(mv::util::projectResourceStagingPolicyName(inheritedPolicy));
+
+    const QSignalBlocker blocker(&_projectResourceStagingPolicyAction);
+    _projectResourceStagingPolicyAction.setOptions(options);
+    _projectResourceStagingPolicyAction.setCurrentText(selectedPolicy == mv::util::ProjectResourceStagingPolicy::Inherit
+        ? options[0]
+        : mv::util::projectResourceStagingPolicyName(selectedPolicy));
 }
 
 void TiledStorageBackendConfigurationAction::updateImportPerformanceSummary()

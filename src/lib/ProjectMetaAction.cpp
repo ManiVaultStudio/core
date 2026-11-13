@@ -31,7 +31,7 @@ ProjectMetaAction::ProjectMetaAction(Project* project, QObject* parent /*= nullp
     _applicationIconAction(this, "Application icon"),
     _compressionAction(this),
     _allowProjectSwitchingAction(this, "Allow project switching"),
-    _projectResourceStagingPolicyAction(this, "Project resource staging", { "Use application default", "Read ranges on demand", "Stage on first read", "Stage immediately" }, "Use application default"),
+    _projectResourceStagingPolicyAction(this, "Resource staging policy", { "Use application default", "Read ranges on demand", "Stage on first read", "Stage immediately" }, "Use application default"),
     _allowedPluginsOnlyAction(this, "Limit use of plugins"),
     _allowedPluginsAction(this, "Allowed Plugins")
 {
