@@ -19,9 +19,12 @@
 #include "util/SeverityLevel.h"
 
 #include <QObject>
+#include <QDir>
 #include <QMenu>
 #include <QTemporaryDir>
 #include <QFuture>
+
+#include <stdexcept>
 
 #include "Task.h"
 #include "exception/ManiVaultException.h"
@@ -201,6 +204,13 @@ public:
     virtual void openProject(QString filePath = "", bool importDataOnly = false, bool loadWorkspace = true) = 0;
 
     /**
+     * Resolve a project archive resource to its session-staged path when staging is enabled.
+     * @param archiveEntry Relative resource path stored in the project archive.
+     * @return Staged file path, or an empty string when the resource should remain archive-backed.
+     */
+    virtual QString resolveStagedProjectResourcePath(const QString& archiveEntry) { static_cast<void>(archiveEntry); return {}; }
+
+    /**
      * Download project from \p url, store it in \p targetDir and open it
      * @param url URL of the project
      * @param targetDirectory Directory where the project is stored (temporary directory when empty)
@@ -257,6 +267,26 @@ public:
      */
     virtual Project* getCurrentProject() = 0;
 
+    /** Adds a resource to the active project and returns its project-relative reference. */
+    ProjectResourceReference addResourceToCurrentProject(QIODevice& source, const QString& resourceName)
+    {
+        auto* const project = getCurrentProject();
+        if (!project)
+            throw std::logic_error("A project must be open before adding a project resource");
+
+        return project->getResourceService().addResource(source, resourceName);
+    }
+
+    /** Opens a resource from the active project using the requested staging policy. */
+    std::shared_ptr<ProjectResourceHandle> openCurrentProjectResource(const ProjectResourceReference& reference, const util::ProjectResourceStagingPolicy stagingPolicy = util::ProjectResourceStagingPolicy::Inherit) const
+    {
+        const auto* const project = getCurrentProject();
+        if (!project)
+            throw std::logic_error("A project must be open before opening a project resource");
+
+        return project->getResourceService().openResource(reference, stagingPolicy);
+    }
+
     /**
      * Get projects list model
      * @return Reference to the projects list model
@@ -312,10 +342,15 @@ public: // Temporary directories
     }
 
     /**
-     * Ensure that an application-managed temporary directory exists for p temporaryDirType
-     * and return its path.
+     * Ensures that an application-managed temporary directory for \p temporaryDirType exists and returns its path.
+     *
+     * Existing workflow-owned directories are preserved. If no directory has
+     * been registered, an application-managed temporary directory is created and
+     * registered for operations that need project-style file storage outside a
+     * project save workflow.
+     *
      * @param temporaryDirType Type of temporary directory, see AbstractProjectManager#TemporaryDirType
-     * @return Path of the application-managed temporary directory
+     * @return Path of the existing or newly created temporary directory
      * @throws std::runtime_error If the directory cannot be created
      */
     QString ensureTemporaryDirPath(const TemporaryDirType& temporaryDirType) {

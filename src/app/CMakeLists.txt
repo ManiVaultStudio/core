@@ -92,7 +92,6 @@ set(PRIVATE_PLUGIN_MANAGER_FILES
 
 set(PRIVATE_DATA_MANAGER_HEADERS
     DataManager.h
-    GroupDataDialog.h
     RemoveDatasetsDialog.h
     DatasetsToRemoveModel.h
     DatasetsToRemoveFilterModel.h
@@ -100,7 +99,6 @@ set(PRIVATE_DATA_MANAGER_HEADERS
 
 set(PRIVATE_DATA_MANAGER_SOURCES
     DataManager.cpp
-    GroupDataDialog.cpp
     RemoveDatasetsDialog.cpp
     DatasetsToRemoveModel.cpp
     DatasetsToRemoveFilterModel.cpp
@@ -152,16 +150,20 @@ set(PRIVATE_ACTIONS_MANAGER_FILES
 
 set(PRIVATE_PROJECT_MANAGER_HEADERS
     ProjectManager.h
+    ProjectResourceServiceProvider.h
     ProjectWidget.h
     ProjectSettingsDialog.h
     NewProjectDialog.h
+    ProjectResourceStagingService.h
 )
 
 set(PRIVATE_PROJECT_MANAGER_SOURCES
     ProjectManager.cpp
+    ProjectResourceService.cpp
     ProjectWidget.cpp
     ProjectSettingsDialog.cpp
     NewProjectDialog.cpp
+    ProjectResourceStagingService.cpp
 )
 
 set(PRIVATE_PROJECT_MANAGER_FILES

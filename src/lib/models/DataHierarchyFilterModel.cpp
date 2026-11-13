@@ -14,7 +14,6 @@ namespace mv {
 DataHierarchyFilterModel::DataHierarchyFilterModel(QObject* parent /*= nullptr*/) :
     SortFilterProxyModel(parent),
     _visibilityFilterAction(this, "Filter visibility", { "Visible", "Hidden" }, { "Visible" }),
-    _groupFilterAction(this, "Filter group", { "Yes", "No" }),
     _lockedFilterAction(this, "Filter locked", { "Yes", "No" }),
     _derivedFilterAction(this, "Filter derived", { "Yes", "No" })
 {
@@ -22,12 +21,10 @@ DataHierarchyFilterModel::DataHierarchyFilterModel(QObject* parent /*= nullptr*/
     setRecursiveFilteringEnabled(true);
 
     _visibilityFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
-    _groupFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
     _lockedFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
     _derivedFilterAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
 
     connect(&_visibilityFilterAction, &gui::OptionsAction::selectedOptionsChanged, this, &DataHierarchyFilterModel::invalidate);
-    connect(&_groupFilterAction, &gui::OptionsAction::selectedOptionsChanged, this, &DataHierarchyFilterModel::invalidate);
     connect(&_lockedFilterAction, &gui::OptionsAction::selectedOptionsChanged, this, &DataHierarchyFilterModel::invalidate);
     connect(&_derivedFilterAction, &gui::OptionsAction::selectedOptionsChanged, this, &DataHierarchyFilterModel::invalidate);
 }
@@ -55,16 +52,6 @@ bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& pare
         const auto isVisible        = index.siblingAtColumn(static_cast<int>(AbstractDataHierarchyModel::Column::IsVisible)).data(Qt::EditRole).toBool();
 
         if ((selectedOptions.contains("Visible") && isVisible) || (selectedOptions.contains("Hidden") && !isVisible))
-            numberOfMatches++;
-    }
-
-    if (_groupFilterAction.hasSelectedOptions()) {
-        numberOfActiveFilters++;
-
-        const auto selectedOptions  = _visibilityFilterAction.getSelectedOptions();
-        const auto isGroup          = index.siblingAtColumn(static_cast<int>(AbstractDataHierarchyModel::Column::IsGroup)).data(Qt::EditRole).toBool();
-
-        if ((selectedOptions.contains("Yes") && isGroup) || (selectedOptions.contains("No") && !isGroup))
             numberOfMatches++;
     }
 

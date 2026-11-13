@@ -101,6 +101,8 @@ namespace mv::util
 
 void Notification::NotificationWidget::paintEvent(QPaintEvent* event)
 {
+    Q_UNUSED(event);
+
     QPainter painter(this);
 
     painter.setRenderHint(QPainter::Antialiasing);
@@ -127,9 +129,10 @@ QSize Notification::NotificationWidget::sizeHint() const
     };
 }
 
-Notification::Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent) :
+Notification::Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent, const SeverityLevel severity) :
     QWidget(parent),
     _icon(icon),
+    _severity(severity),
     _title(title),
     _description(description),
     _previousNotification(previousNotification),
@@ -331,7 +334,24 @@ void Notification::slideOut()
 
 void Notification::updateIconLabel()
 {
-    _iconLabel.setPixmap(_icon.pixmap(32, 32));
+    auto pixmap = _icon.pixmap(32, 32);
+    if (pixmap.isNull()) {
+        pixmap = QPixmap(32, 32);
+        pixmap.fill(Qt::transparent);
+    }
+
+    const QRect badgeRect(18, 18, 14, 14);
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(QPen(QApplication::palette().color(QPalette::Window), 1));
+    painter.setBrush(QApplication::palette().color(QPalette::Window));
+    painter.drawEllipse(badgeRect.adjusted(-1, -1, 1, 1));
+    auto severityIcon = getSeverityLevelIcon(_severity);
+    if (_severity == SeverityLevel::Info)
+        severityIcon = StyledIcon("circle-info").withColor(QColor(64, 145, 220));
+    severityIcon.paint(&painter, badgeRect);
+
+    _iconLabel.setPixmap(pixmap);
 }
 
 void Notification::updateMessageLabel()

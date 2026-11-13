@@ -494,9 +494,20 @@ public:
      * @param name Stage name.
      * @param jobs Jobs to execute in batches.
      * @param batchSizeFunction Function that resolves the batch size.
+     * @param weight Relative progress weight.
      * @return Handle for the added stage.
      */
     WorkflowHandle addBatchedParallelStage(const QString& name, Jobs jobs, WorkflowBatchSizeFunction batchSizeFunction);
+
+    /**
+     * @brief Adds a weighted batched parallel stage with a dynamic batch-size resolver.
+     * @param name Stage name.
+     * @param jobs Jobs to execute in batches.
+     * @param batchSizeFunction Function that resolves the batch size.
+     * @param weight Relative progress weight.
+     * @return Handle for the added stage.
+     */
+    WorkflowHandle addBatchedParallelStage(const QString& name, Jobs jobs, WorkflowBatchSizeFunction batchSizeFunction, double weight);
 
     /**
      * @brief Adds a stage using an explicit concurrency mode.

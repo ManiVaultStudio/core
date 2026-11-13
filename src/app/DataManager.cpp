@@ -5,7 +5,6 @@
 #include "DataManager.h"
 
 #include "RemoveDatasetsDialog.h"
-#include "GroupDataDialog.h"
 
 #include <util/Exception.h>
 
@@ -684,56 +683,6 @@ void DataManager::removeSelection(const QString& rawDataName)
     catch (...) {
         exceptionMessageBox("Unable to remove selection dataset from data manager");
     }
-}
-
-mv::Dataset<mv::DatasetImpl> DataManager::groupDatasets(const Datasets& datasets, const QString& guiName /*= ""*/)
-{
-    try {
-        const auto createGroupDataset = [this, &datasets](const QString& guiName) -> Dataset<DatasetImpl> {
-            auto groupDataset = createDataset(datasets.first()->getRawDataKind(), guiName);
-
-            groupDataset->setProxyMembers(datasets);
-
-            return groupDataset;
-        };
-
-        if (guiName.isEmpty()) {
-            if (Application::current()->getSetting("AskForGroupName", true).toBool()) {
-                GroupDataDialog groupDataDialog(nullptr, datasets);
-
-                groupDataDialog.open();
-
-                QEventLoop eventLoop;
-                QObject::connect(&groupDataDialog, &QDialog::finished, &eventLoop, &QEventLoop::quit);
-                eventLoop.exec();
-
-                if (groupDataDialog.result() == QDialog::Accepted)
-                    return createGroupDataset(groupDataDialog.getGroupName());
-                else
-                    return Dataset<DatasetImpl>();
-            }
-            else {
-                QStringList datasetNames;
-
-                for (const auto& dataset : datasets)
-                    datasetNames << dataset->text();
-
-                return createGroupDataset(datasetNames.join("+"));
-            }
-        }
-        else {
-            return createGroupDataset(guiName);
-        }
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to group datasets", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to group datasets");
-    }
-
-    return Dataset<DatasetImpl>();
 }
 
 ToggleAction* DataManager::getSelectionGroupingAction()

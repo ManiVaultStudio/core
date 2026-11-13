@@ -5,6 +5,7 @@
 #pragma once
 
 #include "ManiVaultGlobals.h"
+#include "SeverityLevel.h"
 
 #include "Task.h"
 
@@ -57,6 +58,7 @@ protected:
          * @return Size hint for the notification background widget.
          */
         [[nodiscard]] QSize sizeHint() const override;
+
     };
 
 public:
@@ -79,7 +81,7 @@ public:
      * @param durationType Display duration policy.
      * @param parent Optional parent widget.
      */
-    explicit Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent = nullptr);
+    explicit Notification(const QString& title, const QString& description, const QIcon& icon, Notification* previousNotification, const DurationType& durationType, QWidget* parent = nullptr, SeverityLevel severity = SeverityLevel::Info);
 
     /**
      * @brief Constructs a task notification.
@@ -218,6 +220,7 @@ signals:
 
 private:
     QIcon                   _icon;                          /**< Notification icon, may be empty */
+    SeverityLevel           _severity;                      /**< Severity shown in the colored icon badge */
     QString                 _title;                         /**< Notification title, may contain rich text */
     QString                 _description;                   /**< Notification description, may contain rich text */
     QPointer<Task>          _task;                          /**< Task associated with this notification, or nullptr */

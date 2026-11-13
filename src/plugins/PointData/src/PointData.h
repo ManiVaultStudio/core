@@ -11,31 +11,49 @@
 #include "LinkedData.h"
 #include "PointDataRange.h"
 #include "Set.h"
+#include "storage/interface/PointDataAccess.h"
 #include "SparseMatrix.h"
+#include "storage/interface/PointsStorageBackendTypes.h"
 
 #include "event/EventListener.h"
 
 #include <biovault_bfloat16/biovault_bfloat16.h>
 
+#include <QByteArray>
 #include <QDebug>
 #include <QMap>
 #include <QString>
+#include <util/ProjectResourceStagingPolicy.h>
 #include <QVariantMap>
 
 #include <array>
 #include <cassert>
+#include <memory>
 #include <mutex>
 #include <utility>
 #include <variant>
 #include <vector>
 
+class QObject;
+
 namespace mv
 {
+    namespace pointdata::tiled
+    {
+    }
+
+    namespace pointdata::storage
+    {
+        class DensePointsStorageBackend;
+        class PointsStorageBackend;
+    }
+
     // From "graphics/Vector2f.h"
     class Vector2f;
 
     namespace gui {
         class GroupAction;
+        class StorageBackendConversionAction;
     }
 
     namespace legacy
@@ -52,18 +70,38 @@ namespace mv
 const mv::DataType PointType = mv::DataType(QString("Points"));
 
 class InfoAction;
+class PointsAction;
 class DimensionsPickerAction;
 class ClusterAction;
+class Points;
 
 // =============================================================================
 // Raw Data
 // =============================================================================
 
+/**
+ * @brief Dense point-data storage and access interface.
+ *
+ * PointData is the storage-neutral entry point for datasets whose values are
+ * arranged as rows of points and columns of dimensions. It retains the
+ * established dense vector representation for compatibility with existing
+ * consumers, while also providing tiled and sparse representations for data
+ * that should not be stored as one contiguous dense buffer.
+ *
+ * Storage-specific implementations remain hidden behind the backend contract.
+ * Tiled and sparse storage are read-only; legacy raw-pointer and single-value
+ * mutation APIs materialize backend data when a contiguous dense buffer is
+ * required. Sparse storage retains a supported PointData element type and
+ * stores values with compressed row or column indices. Sparse payloads are
+ * serialized with their layout, indices, and typed value bytes; raw and tiled
+ * serialization paths remain supported.
+ *
+ * @author Thomas Kroes
+ */
 class POINTDATA_EXPORT PointData : public mv::plugin::RawData
 {
 public:
     using DataLock = std::unique_lock<std::recursive_mutex>;
-
     enum class ElementTypeSpecifier
     {
         float32,
@@ -78,6 +116,7 @@ public:
 
     static ElementTypeSpecifier elementTypeSpecifier(const QString& typeName);
     static QString elementTypeName(const ElementTypeSpecifier elementTypeSpecifier);
+    static std::size_t getElementTypeSize(std::uint32_t elementTypeIndex);
 
 private:
     using VariantOfVectors = std::variant <
@@ -215,8 +254,8 @@ public:
     template <std::size_t N>
     using ElementTypeAt = typename std::variant_alternative_t<N, VariantOfVectors>::value_type;
 
-    PointData(mv::plugin::PluginFactory* factory) : RawData(factory, PointType) { }
-    ~PointData() override = default;
+    PointData(mv::plugin::PluginFactory* factory);
+    ~PointData() override;
 
     /**
      * Acquires exclusive access to the point-data storage and its metadata.
@@ -245,11 +284,96 @@ public:
      */
     std::uint64_t getRawDataSize() const override;
 
+    /** Get the name of the currently stored element type. */
+    QString getElementTypeName() const { return elementTypeName(getElementTypeSpecifier()); }
+
     /**
      *Returns void pointer to the underlying array serving as element storage.
      */
     void* getDataVoidPtr();
     const void* getDataConstVoidPtr() const;
+
+    /** Returns the physical storage backend used by this concrete dataset. */
+    mv::pointdata::storage::StorageBackendType getStorageBackendType() const;
+
+    /** Returns the backend capability flags for this concrete dataset. */
+    mv::pointdata::storage::StorageBackendCapabilities getStorageBackendCapabilities() const;
+
+    /** Returns the active storage backend without exposing its concrete representation. */
+    const mv::pointdata::storage::PointsStorageBackend* getStorageBackend() const;
+
+    /** Installs a backend implementation on an empty concrete dataset. */
+    void initializeStorageBackend(std::unique_ptr<mv::pointdata::storage::PointsStorageBackend> storageBackend);
+
+    /** Creates controls for converting to the requested storage backend. */
+    std::unique_ptr<mv::gui::StorageBackendConversionAction> createStorageBackendConversionAction(mv::pointdata::storage::StorageBackendType targetType, QObject* parent = nullptr) const;
+
+    /**
+     * Converts this concrete dataset to the requested storage backend. When
+     * backend-specific tiled creation options are supplied for an empty
+     * dataset, this operation initializes tiled storage instead. Existing
+     * data can be converted to tiled storage with a configuration or
+     * materialized to dense storage when the active backend supports it.
+     * Backend-specific creation options can initialize an empty dataset
+     * directly in that backend. Materializing lazy or sparse data requires
+     * memory for the full dense matrix.
+     */
+    void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, const mv::pointdata::storage::StorageBackendConfiguration& configuration = {}, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
+
+    /** Converts or initializes using backend-specific options supplied by a conversion action or backend factory. */
+    void convertToStorageBackend(mv::pointdata::storage::StorageBackendType type, mv::pointdata::storage::StorageBackendConfigurationOptionsPtr options, mv::pointdata::storage::StorageBackendProgressCallback progress = {});
+
+    /**
+     * Applies options owned by the current storage backend without converting
+     * the point data to another backend.
+     *
+     * The options must be compatible with the active backend. The operation
+     * throws std::invalid_argument when no backend is available or the backend
+     * rejects the supplied options.
+     */
+    void configureStorageBackend(mv::pointdata::storage::StorageBackendConfigurationOptionsPtr options);
+
+    /** Returns one row as a storage-neutral read-only view, or an empty view when row is out of bounds. */
+    PointDataAccessView getRow(std::uint64_t row) const;
+
+    /** Visits a contiguous range of rows in row-major order and throws for invalid bounds. */
+    void visitRows(std::uint64_t firstRow, std::uint64_t rowCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits selected rows in the order given by rowIds; invalid IDs throw. */
+    void visitRows(const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a contiguous column range for every row and throws for invalid bounds. */
+    void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits selected columns for every row in columnIds order; invalid IDs throw. */
+    void visitColumns(const std::vector<std::uint64_t>& columnIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a contiguous column range for selected rows; invalid row IDs throw. */
+    void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits selected columns for selected rows, grouping contiguous columns where possible. */
+    void visitColumns(const std::vector<std::uint64_t>& columnIds, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a rectangular row and column range without materializing the complete dataset. */
+    void visitRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Sets a contiguous row range from a typed row-major view when the backend supports range writes. */
+    void setRows(std::uint64_t firstRow, std::uint64_t rowCount, const PointDataAccessView& values);
+
+    /** Sets a contiguous column range for every row from a typed row-major view when supported. */
+    void setColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessView& values);
+
+    /**
+     * Sets a rectangular range from a typed row-major view.
+     *
+     * The view shape must match the requested rectangle, and its element type
+     * must match the stored type. The caller keeps the view payload valid until
+     * this call returns. Current backends reject range writes after validation.
+     * @throws std::out_of_range If the requested rectangle exceeds the matrix.
+     * @throws std::invalid_argument If the view shape, type, or stride is invalid.
+     * @throws std::logic_error If the backend cannot write the rectangle.
+     */
+    void setRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessView& values);
 
     static constexpr std::array<const char*, std::variant_size_v<VariantOfVectors>> getElementTypeNames()
     {
@@ -297,12 +421,36 @@ public:
     void extractDataForDimension(std::vector<float> &result, const int dimensionIndex, const std::vector<std::uint32_t> &indices) const;
     void extractDataForDimensions(std::vector<mv::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<std::uint32_t>& indices) const;
     
+    /**
+     * Copies selected dimensions for every point into a caller-provided container.
+     *
+     * Values are written in point-major order, with dimensions in the order
+     * supplied by @p dimensionIndices. Non-dense backends are read through the
+     * storage interface without materializing a dense copy. The container must
+     * be writable by index and large enough for getNumPoints() times the number
+     * of selected dimensions. All dimension indices must be in range.
+     *
+     * @param resultContainer Destination for the selected values.
+     * @param dimensionIndices Zero-based dimension indices in output order.
+     */
     template <typename ResultContainer, typename DimensionIndices>
     void populateFullDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
     {
         const auto dataLock = lockData();
 
         CheckDimensionIndices(dimensionIndices);
+        if (getStorageBackendType() != mv::pointdata::storage::StorageBackendType::Dense)
+        {
+            std::uint64_t resultIndex = 0;
+            for (std::uint64_t pointIndex = 0; pointIndex < getNumPoints(); ++pointIndex)
+            {
+                const auto rowOffset = pointIndex * _numDimensions;
+                for (const auto dimensionIndex : dimensionIndices)
+                    resultContainer[resultIndex++] = getValueAt(static_cast<std::size_t>(rowOffset + dimensionIndex));
+            }
+            return;
+        }
+
         std::visit([&resultContainer, this, &dimensionIndices](const auto& vec)
             {
                 const std::uint64_t numPoints{ getNumPoints() };
@@ -322,12 +470,37 @@ public:
             _variantOfVectors);
     }
 
+    /**
+     * Copies selected dimensions for selected points into a caller-provided container.
+     *
+     * Values are written in the order of @p indices, with dimensions in the
+     * order supplied by @p dimensionIndices. Non-dense backends are read
+     * without materializing a dense copy. The container must be writable by
+     * index and large enough for indices.size() times the number of selected
+     * dimensions. All point and dimension indices must be in range.
+     *
+     * @param resultContainer Destination for the selected values.
+     * @param dimensionIndices Zero-based dimension indices in output order.
+     * @param indices Zero-based point indices in output order.
+     */
     template <typename ResultContainer, typename DimensionIndices, typename Indices>
     void populateDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices, const Indices& indices) const
     {
         const auto dataLock = lockData();
 
         CheckDimensionIndices(dimensionIndices);
+
+        if (getStorageBackendType() != mv::pointdata::storage::StorageBackendType::Dense)
+        {
+            std::uint64_t resultIndex = 0;
+            for (const auto pointIndex : indices)
+            {
+                const auto rowOffset = static_cast<std::uint64_t>(pointIndex) * _numDimensions;
+                for (const auto dimensionIndex : dimensionIndices)
+                    resultContainer[resultIndex++] = getValueAt(static_cast<std::size_t>(rowOffset + dimensionIndex));
+            }
+            return;
+        }
 
         std::visit([&resultContainer, this, &dimensionIndices, &indices](const auto& vec)
             {
@@ -386,8 +559,10 @@ public:
     {
         const auto dataLock = lockData();
 
+        clearStorageBackend();
         convertData(data, numPoints * numDimensions);
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
+        refreshStorageBackend();
     }
 
     /// Converts the specified data to the internal data, using static_cast for each data element.
@@ -398,8 +573,10 @@ public:
     {
         const auto dataLock = lockData();
 
+        clearStorageBackend();
         convertData(inputDataContainer.data(), inputDataContainer.size());
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
+        refreshStorageBackend();
     }
 
     /// Copies the specified data into the internal data, sets the number of
@@ -410,8 +587,10 @@ public:
     {
          const auto dataLock = lockData();
 
+         clearStorageBackend();
          _variantOfVectors = VariantOfVectors( std::vector<T>(data, data + numPoints * numDimensions) );
          _numDimensions = static_cast<std::uint64_t>(numDimensions);
+         refreshStorageBackend();
     }
 
 
@@ -427,8 +606,10 @@ public:
     {
         const auto dataLock = lockData();
 
+        clearStorageBackend();
         _variantOfVectors = VariantOfVectors(data);
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
+        refreshStorageBackend();
     }
 
     /// Efficiently "moves" the data from the specified vector into the internal
@@ -439,8 +620,10 @@ public:
     {
         const auto dataLock = lockData();
 
+        clearStorageBackend();
         _variantOfVectors = VariantOfVectors(std::move(data));
         _numDimensions = static_cast<std::uint64_t>(numDimensions);
+        refreshStorageBackend();
     }
 
     void setDimensionNames(const std::vector<QString>& dimNames);
@@ -543,28 +726,57 @@ public: // Serialization
     mv::workflow::UniqueWorkflowPlan toVariantMapWorkflow() const final;
 
 private:
+    void makeTiled(std::size_t rowTileSize, std::size_t columnTileSize, std::function<void(float)> progress = {}, std::size_t maxWorkerCount = 4, std::size_t chunkTileRowFactor = 3);
+    void refreshStorageBackend();
+    void clearStorageBackend();
+
+    PointDataAccessView getDenseRow(std::uint64_t row) const;
+    void visitDenseRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+    float getDenseValueAt(std::size_t index) const;
+
+    void materializeStorageBackend(mv::pointdata::storage::StorageBackendProgressCallback progress = {});
     mutable std::recursive_mutex _dataMutex;
 
     VariantOfVectors _variantOfVectors;
 
     /** Number of features of each data point */
     std::uint64_t _numDimensions = 1;
+    std::unique_ptr<mv::pointdata::storage::PointsStorageBackend> _storageBackend;
 
     std::vector<QString> _dimNames;
 
 private: // Sparse data, experimental
-    std::uint64_t _numRows = 0;
+    std::uint64_t                    _numRows    = 0;
     SparseMatrix<size_t, size_t, float> _sparseData = {};
 
     bool _isDense = true;
 
     friend class mv::legacy::PointDataLegacySerializer;
+    friend class mv::pointdata::storage::DensePointsStorageBackend;
+    friend class Points;
 };
 
 // =============================================================================
 // Point Set
 // =============================================================================
 
+/**
+ * @brief Logical point-data dataset and storage facade.
+ *
+ * Points is the public dataset-level facade for PointData. It represents a
+ * complete point set or a subset selected by source indices. The facade keeps
+ * consumers independent of whether its data uses dense vectors or read-only
+ * tiled storage and translates logical row IDs for subsets.
+ *
+ * The tiled and visitor APIs are intentionally exposed here first as an
+ * experimental storage-neutral access layer. Consumers should use these
+ * functions instead of reaching through the dataset to its PointData object.
+ * Returned views are read-only and retain their payload through their lifetime
+ * token; legacy raw-pointer and mutation paths preserve their existing dense
+ * materialization behavior.
+ *
+ * @author Thomas Kroes
+ */
 class POINTDATA_EXPORT Points : public mv::DatasetImpl
 {
 private:
@@ -667,6 +879,12 @@ private:
 public:
     Points(QString dataName, bool mayUnderive = true, const QString& guid = "");
     ~Points() override = default;
+
+    using ElementTypeSpecifier = PointData::ElementTypeSpecifier;
+    using StorageBackendType = mv::pointdata::storage::StorageBackendType;
+    using StorageBackendConfiguration = mv::pointdata::storage::StorageBackendConfiguration;
+    using StorageBackendProgressCallback = mv::pointdata::storage::StorageBackendProgressCallback;
+    using StorageBackendConfigurationOptionsPtr = mv::pointdata::storage::StorageBackendConfigurationOptionsPtr;
 
     void init() override;
 
@@ -801,38 +1019,12 @@ public:
     template <typename ResultContainer, typename DimensionIndices>
     void populateDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
     {
-        if (isProxy()) {
-            std::size_t offset = 0;
+        const auto rawPointData = getRawData<PointData>();
 
-            for (auto& proxyMember : getProxyMembers()) {
-                auto points = mv::Dataset<Points>(proxyMember);
-
-                ResultContainer proxyPointsData = {};
-
-                const auto numberOfElements = points->getNumPoints() * dimensionIndices.size();
-
-                proxyPointsData.resize(numberOfElements);
-
-                const auto rawPointData = points->getRawData<PointData>();
-
-                if (points->isFull())
-                    rawPointData->populateFullDataForDimensions(proxyPointsData, dimensionIndices);
-                else
-                    rawPointData->populateDataForDimensions(proxyPointsData, dimensionIndices, points->indices);
-
-                std::copy(proxyPointsData.begin(), proxyPointsData.end(), resultContainer.begin() + offset);
-
-                offset += numberOfElements;
-            }
-        }
-        else {
-            const auto rawPointData = getRawData<PointData>();
-
-            if (isFull())
-                rawPointData->populateFullDataForDimensions(resultContainer, dimensionIndices);
-            else
-                rawPointData->populateDataForDimensions(resultContainer, dimensionIndices, indices);
-        }
+        if (isFull())
+            rawPointData->populateFullDataForDimensions(resultContainer, dimensionIndices);
+        else
+            rawPointData->populateDataForDimensions(resultContainer, dimensionIndices, indices);
     }
 
     template <typename ResultContainer, typename DimensionIndices, typename Indices>
@@ -843,65 +1035,129 @@ public:
 
     std::uint64_t getNumRawPoints() const
     {
-        if (isProxy()) {
-            return getNumPoints();
-        }
-        else {
-            return getRawData<PointData>()->getNumPoints();
-        }
+        return getRawData<PointData>()->getNumPoints();
     }
-
-    /**
-     * Establish whether a proxy dataset may be created with candidate \p proxyDatasets
-     * @param proxyDatasets Candidate proxy datasets
-     * @return Boolean indicating whether a proxy dataset may be created with candidate \p proxyDatasets
-     */
-    bool mayProxy(const mv::Datasets& proxyDatasets) const override;
 
     std::uint64_t getNumPoints() const
     {
-        if (isProxy()) {
-            std::uint64_t numberOfPoints = 0;
-
-            for (auto& proxyMember : getProxyMembers())
-                numberOfPoints += mv::Dataset<Points>(proxyMember)->getNumPoints();
-
-            return numberOfPoints;
-        }
-        else {
-            if (isFull()) {
-                return getRawData<PointData>()->getNumPoints();
-            }
-            else {
-                return static_cast<std::uint64_t>(indices.size());
-            }
-        }
+        return isFull() ? getRawData<PointData>()->getNumPoints() : static_cast<std::uint64_t>(indices.size());
     }
 
     std::uint64_t getNumDimensions() const
     {
-        if (isProxy()) {
-            return mv::Dataset<Points>(getProxyMembers().first())->getNumDimensions();
-        }
-        else {
-            return getRawData<PointData>()->getNumDimensions();
-        }
+        return getRawData<PointData>()->getNumDimensions();
+    }
+
+    /** Returns the name of the element type used by this logical dataset. */
+    QString getElementTypeName() const;
+
+    /**
+     * @brief Returns the physical storage type for this logical dataset.
+     *
+     * @return The concrete backend type when the dataset uses one.
+     */
+    std::optional<StorageBackendType> getStorageBackendType() const;
+
+    /** Returns the capability flags of the physical backend used by this dataset. */
+    mv::pointdata::storage::StorageBackendCapabilities getStorageBackendCapabilities() const;
+
+    /** Returns the active storage backend for a concrete point dataset. */
+    const mv::pointdata::storage::PointsStorageBackend* getStorageBackend() const;
+
+    /** Installs a backend implementation on an empty dataset. */
+    void initializeStorageBackend(std::unique_ptr<mv::pointdata::storage::PointsStorageBackend> storageBackend);
+
+    /** Creates controls for converting to the requested storage backend. */
+    std::unique_ptr<mv::gui::StorageBackendConversionAction> createStorageBackendConversionAction(StorageBackendType targetType, QObject* parent = nullptr) const;
+
+    /** Converts or initializes a concrete dataset using backend-specific options; see the PointData overload for supported conversions. */
+    void convertToStorageBackend(StorageBackendType type, const StorageBackendConfiguration& configuration = {}, StorageBackendProgressCallback progress = {});
+
+    /** Converts or initializes using backend-specific options supplied by a conversion action or backend factory. */
+    void convertToStorageBackend(StorageBackendType type, StorageBackendConfigurationOptionsPtr options, StorageBackendProgressCallback progress = {});
+
+    /**
+     * Applies options owned by the current storage backend of this concrete
+     * dataset.
+     */
+    void configureStorageBackend(StorageBackendConfigurationOptionsPtr options);
+
+    /** Returns one logical row as a storage-neutral read-only view, translating subset indices. */
+    PointDataAccessView getRow(std::uint64_t row) const;
+
+    /** Visits a contiguous range of logical rows, translating subset indices. */
+    void visitRows(std::uint64_t firstRow, std::uint64_t rowCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits selected logical rows in rowIds order. */
+    void visitRows(const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a contiguous column range for every logical row. */
+    void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits selected logical columns in columnIds order for the logical dataset. */
+    void visitColumns(const std::vector<std::uint64_t>& columnIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a contiguous column range for selected logical rows. */
+    void visitColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a rectangular range of logical rows and columns without full materialization. */
+    void visitRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+
+    /** Sets a contiguous logical row range from a typed row-major view when supported. */
+    void setRows(std::uint64_t firstRow, std::uint64_t rowCount, const PointDataAccessView& values);
+
+    /** Sets a contiguous logical column range from a typed row-major view when supported. */
+    void setColumns(std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessView& values);
+
+    /**
+     * Sets a rectangular logical range from a typed row-major view.
+     *
+     * Subset datasets currently reject writes. Concrete full
+     * datasets forward to their backend, which currently rejects range writes.
+     * @throws std::logic_error If this is a subset or backend without range writes.
+     */
+    void setRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessView& values);
+
+    /** Returns the element type represented by a type name. */
+    static ElementTypeSpecifier elementTypeSpecifier(const QString& typeName)
+    {
+        return PointData::elementTypeSpecifier(typeName);
+    }
+
+    /** Returns the display name for an element type. */
+    static QString elementTypeName(const ElementTypeSpecifier elementTypeSpecifier)
+    {
+        return PointData::elementTypeName(elementTypeSpecifier);
+    }
+
+    /** Returns the names of all supported element types. */
+    static constexpr auto getElementTypeNames()
+    {
+        return PointData::getElementTypeNames();
     }
 
     const std::vector<QString>& getDimensionNames() const;
 
     void setDimensionNames(const std::vector<QString>& dimNames);
 
+    /** Gets the resource staging policy shared by datasets backed by this raw data. */
+    [[nodiscard]] mv::util::ProjectResourceStagingPolicy getProjectResourceStagingPolicy() const;
+
+    /** Sets the resource staging policy shared by datasets backed by this raw data. */
+    void setProjectResourceStagingPolicy(mv::util::ProjectResourceStagingPolicy policy);
+
+    /** Gets the project-open staging policy through the legacy API. */
+    [[deprecated("Use getProjectResourceStagingPolicy()")]] [[nodiscard]] mv::util::ProjectResourceStagingPolicy getProjectOpenStagingPolicy() const;
+
+    /** Sets the project-open staging policy through the legacy API. */
+    [[deprecated("Use setProjectResourceStagingPolicy()")]] void setProjectOpenStagingPolicy(mv::util::ProjectResourceStagingPolicy policy);
+
     /**
      * Get amount of data occupied by the raw data
      * @return Size of the raw data in bytes
      */
     std::uint64_t getRawDataSize() const override {
-        if (isProxy())
-            return 0;
-        else {
-            return getRawData<PointData>()->getRawDataSize();
-        }
+        return getRawData<PointData>()->getRawDataSize();
     }
 
     // Returns the value of the element at the specified position in the current
@@ -982,12 +1238,6 @@ public:
      */
     mv::Dataset<mv::DatasetImpl> createSubsetFromVisibleSelection(const QString& guiName, const mv::Dataset<mv::DatasetImpl>& parentDataSet = mv::Dataset<mv::DatasetImpl>(), const bool& visible = true) const;
 
-    /**
-     * Set the proxy member datasets (automatically sets the dataset type to Type::Proxy)
-     * @param proxyMembers Proxy member datasets
-     */
-    void setProxyMembers(const mv::Datasets& proxyMembers) override;
-
 public: // Index transformation
     /**
      * Get the indices over the original source data that this dataset
@@ -1011,6 +1261,7 @@ public: // Index transformation
 public: // Action getters
 
     InfoAction& getInfoAction();
+    PointsAction& getPointsAction();
     mv::gui::GroupAction& getDimensionsPickerGroupAction();
     DimensionsPickerAction& getDimensionsPickerAction();
 
@@ -1085,10 +1336,15 @@ public:
     std::vector<std::uint32_t> indices;
 
     InfoAction*                 _infoAction;                    /** Non-owning pointer to info action */
+    PointsAction*               _pointsAction;                   /** Non-owning pointer to points action */
     mv::gui::GroupAction*       _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
     DimensionsPickerAction*     _dimensionsPickerAction;        /** Non-owning pointer to dimensions picker action */
     mv::EventListener           _eventListener;                 /** Listen to ManiVault core events */
 
+private:
+    mv::util::ProjectResourceStagingPolicy _projectResourceStagingPolicy = mv::util::ProjectResourceStagingPolicy::Inherit; /** Dataset-level project resource staging override. */
+
+public:
     friend class mv::legacy::PointsLegacySerializer;
 };
 
@@ -1096,6 +1352,17 @@ public:
 // Factory
 // =============================================================================
 
+/**
+ * @brief Registers and constructs the PointData raw-data plugin.
+ *
+ * PointDataFactory connects the Points dataset type to the plugin manager and
+ * keeps creation, metadata, and serialization discovery separate from the
+ * PointData storage implementation. The factory supports the established
+ * dense serialized representation while PointData may restore an additive
+ * tiled representation when present in a project.
+ *
+ * @author Thomas Kroes
+ */
 class PointDataFactory : public mv::plugin::RawDataFactory
 {
     Q_INTERFACES(mv::plugin::RawDataFactory mv::plugin::PluginFactory)

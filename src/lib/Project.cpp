@@ -9,6 +9,9 @@
 
 #include "util/Serialization.h"
 
+#include <stdexcept>
+#include <utility>
+
 using namespace mv::gui;
 using namespace mv::util;
 using namespace mv::workflow;
@@ -107,6 +110,30 @@ Project::Project(const QString& filePath, QObject* parent /*= nullptr*/) :
 QString Project::getFilePath() const
 {
     return _filePath;
+}
+
+ProjectResourceService& Project::getResourceService()
+{
+    if (!_resourceService)
+        throw std::logic_error("Project resource service has not been installed");
+
+    return *_resourceService;
+}
+
+const ProjectResourceService& Project::getResourceService() const
+{
+    if (!_resourceService)
+        throw std::logic_error("Project resource service has not been installed");
+
+    return *_resourceService;
+}
+
+void Project::setResourceService(std::unique_ptr<ProjectResourceService> resourceService)
+{
+    if (!resourceService)
+        throw std::invalid_argument("Project resource service cannot be null");
+
+    _resourceService = std::move(resourceService);
 }
 
 void Project::setFilePath(const QString& filePath)

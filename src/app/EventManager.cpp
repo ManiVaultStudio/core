@@ -76,9 +76,6 @@ void EventManager::initialize()
                 if (candidateDataset->getRawDataName() == dataset->getRawDataName())
                     candidateDataset->markSelectionDirty(true);
 
-                // If the dataset is a proxy and the current dataset is one of its members, notify the proxy
-                if (candidateDataset->isProxy() && candidateDataset->getProxyMembers().contains(dataset))
-                    candidateDataset->markSelectionDirty(true);
             }
         }
 

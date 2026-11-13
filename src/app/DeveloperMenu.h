@@ -10,7 +10,16 @@
 
 class GifRecorder;
 
-/** Menu containing development and integration test tools. */
+/**
+ * @brief Menu containing development and integration test tools.
+ *
+ * DeveloperMenu provides a stable host for diagnostics and experimental
+ * workflows that should not be part of the regular end-user interface. Some
+ * menus are populated lazily when opened so optional test features do not add
+ * startup work or dependencies to the main window.
+ *
+ * @author Thomas Kroes
+ */
 class DeveloperMenu : public QMenu
 {
 public:
@@ -28,6 +37,10 @@ private:
     /** Starts or stops the developer-only main-window GIF recorder. */
     void toggleGifRecording();
 
-    std::unique_ptr<GifRecorder> _gifRecorder;             /**< Developer-only GIF recorder. */
-    QAction*                     _gifRecordingAction = nullptr; /**< Start/stop recording action. */
+    std::unique_ptr<GifRecorder> _gifRecorder;                      /**< Developer-only GIF recorder. */
+    QAction*                     _gifRecordingAction     = nullptr; /**< Start/stop recording action. */
+    QMenu*                       _dataSynthesisMenu      = nullptr; /**< Runtime-populated synthetic data menu. */
+    bool                         _dataSynthesisPopulated = false;
+    QMenu*                       _performanceTestingMenu      = nullptr; /**< Runtime-populated performance testing menu. */
+    bool                         _performanceTestingPopulated = false;
 };

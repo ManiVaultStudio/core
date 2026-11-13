@@ -45,7 +45,6 @@ DataHierarchyWidgetContextMenu::DataHierarchyWidgetContextMenu(QWidget* parent, 
 
     if (_selectedDatasets.count() >= 2 && dataTypes.count() == 1) {
         addSeparator();
-        addAction(getGroupAction());
         addAction(getSelectionGroupAction());
     }
     else if (_selectedDatasets.count() == 0 && !_allDatasets.isEmpty()) {
@@ -208,20 +207,6 @@ void DataHierarchyWidgetContextMenu::addMenusForScripts()
             previousMenuPath = menuPath;
         }
     }
-}
-
-QAction* DataHierarchyWidgetContextMenu::getGroupAction()
-{
-    auto groupDataAction = new QAction("Group...");
-
-    groupDataAction->setToolTip("Group datasets into one");
-    groupDataAction->setIcon(StyledIcon("object-group"));
-
-    connect(groupDataAction, &QAction::triggered, [this]() -> void {
-        mv::data().groupDatasets(_selectedDatasets);
-    });
-
-    return groupDataAction;
 }
 
 QAction* DataHierarchyWidgetContextMenu::getSelectionGroupAction()

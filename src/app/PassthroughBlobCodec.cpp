@@ -9,6 +9,8 @@
 
 #include <CoreInterface.h>
 
+#include <QFileInfo>
+
 #ifdef _DEBUG
 	#define PASSTHROUGH_CODEC_VERBOSE
 #endif
@@ -208,6 +210,22 @@ void PassthroughBlobCodec::decodeFromFileTo(const QString& filePath, char* desti
             }
         );
     }
+
+}
+
+void PassthroughBlobCodec::decodeFromFileRangeTo(const QString& filePath, const std::uint64_t offset, const std::uint64_t encodedSize, char* destination, const std::uint64_t destinationSize) const
+{
+    if (destination == nullptr)
+        throw std::invalid_argument("Destination buffer is null");
+
+    if (QFileInfo::exists(filePath))
+    {
+        BlobCodec::decodeFromFileRangeTo(filePath, offset, encodedSize, destination, destinationSize);
+        return;
+    }
+
+    const auto encodedData = mv::util::Archiver::readZipEntryRangeToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath, offset, encodedSize);
+    decodeTo(encodedData, destination, destinationSize);
 }
 
 QString PassthroughBlobCodec::getFileExtension() const

@@ -47,12 +47,6 @@ class CORE_EXPORT DatasetImpl : public gui::WidgetAction
 {
 public:
 
-    /** Type of storage */
-    enum class StorageType {
-        Owner,      /** The set is the data owner (has raw data) */
-        Proxy       /** The set does not have raw data, it relies on proxy datasets to obtain data */
-    };
-
     /** Linked data propagation flags */
     enum LinkedDataFlag {
         Send        = 0x00001,          /** The set may send linked propagate linked data */
@@ -90,18 +84,6 @@ public:
      * @return Smart pointer to the created subset
      */
     virtual Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const = 0;
-
-    /**
-     * Get the data storage type
-     * @return Data storage type
-     */
-    StorageType getStorageType() const;
-
-    /**
-     * Set the data storage type
-     * @param type Data storage type
-     */
-    void setStorageType(const StorageType& storageType);
 
     /** Get the GUI name of the dataset */
     QString getGuiName() const;
@@ -431,31 +413,6 @@ public: // Grouping
      */
     void setGroupIndex(const std::int32_t& groupIndex);
 
-    /**
-     * Get member datasets
-     * @return Proxy member datasets
-     */
-    Datasets getProxyMembers() const;
-
-    /**
-     * Set the proxy member datasets (automatically sets the dataset type to Type::Proxy)
-     * @param proxyMembers Proxy member datasets
-     */
-    virtual void setProxyMembers(const Datasets& proxyMembers);
-
-    /**
-     * Establish whether a proxy dataset may be created with candidate \p proxyDatasets
-     * @param proxyDatasets Candidate proxy datasets
-     * @return Boolean indicating whether a proxy dataset may be created with candidate \p proxyDatasets
-     */
-    virtual bool mayProxy(const Datasets& proxyDatasets) const;
-
-    /**
-     * Establish whether the set is a proxy dataset (comprised of foreign datasets)
-     * @return Boolean indicating whether the set is a proxy dataset
-     */
-    bool isProxy() const;
-
 public: // Actions
 
     /**
@@ -597,14 +554,12 @@ public: // Operators
     DatasetImpl& operator=(const DatasetImpl& other) {
         _rawData            = other._rawData;
         _rawDataName        = other._rawDataName;
-        _storageType        = other._storageType;
         _all                = other._all;
         _derived            = other._derived;
         _sourceDataset      = other._sourceDataset;
         _properties         = other._properties;
         _groupIndex         = other._groupIndex;
         _analysis           = other._analysis;
-        _proxyMembers       = other._proxyMembers;
         _linkedData         = other._linkedData;
         _linkedDataFlags    = other._linkedDataFlags;
         _aboutToBeRemoved   = other._aboutToBeRemoved;
@@ -615,7 +570,6 @@ public: // Operators
 private:
     mutable plugin::RawData*    _rawData;               /** Pointer to the raw data referenced in this set */
     QString                     _rawDataName;           /** Name of the raw data */
-    StorageType                 _storageType;           /** Type of storage (own raw data or act as proxy for other datasets) */
     bool                        _all;                   /** Whether this is the full dataset */
     bool                        _derived;               /** Whether this dataset is derived from another dataset */
     Dataset<DatasetImpl>        _sourceDataset;         /** Smart pointer to the source dataset (if any) */
@@ -624,7 +578,6 @@ private:
     QMap<QString, QVariant>     _properties;            /** Properties map */
     std::int32_t                _groupIndex;            /** Group index (sets with identical indices can for instance share selection) */
     plugin::AnalysisPlugin*     _analysis;              /** Pointer to analysis plugin that created the set (if any) */
-    Datasets                    _proxyMembers;          /** Member datasets in case of a proxy dataset */
     std::vector<LinkedData>     _linkedData;            /** List of linked datasets */
     std::int32_t                _linkedDataFlags;       /** Flags for linked data */
     bool                        _locked;                /** Whether the dataset is locked */
