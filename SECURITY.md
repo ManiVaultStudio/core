@@ -53,6 +53,31 @@ handling of CI credentials. Workflow lockfiles are currently a GitHub public
 preview feature and should be revalidated when GitHub changes the feature or
 its availability.
 
+## WFX GitHub Actions incident review
+
+On 2026-11-13, an organization audit-log export was reviewed for indicators
+associated with the WFX GitHub Actions campaign reported to have begun on
+2026-11-10. The review covered 3,667 audit records spanning 2025-11-13 through
+2026-11-12 07:44 UTC. Fifteen records fell on or after 2026-11-10.
+
+The reviewed records contained no campaign-specific pull-request titles,
+branch names, commit messages, workflow markers, or other searched WFX
+indicators. No `workflows.delete_workflow_run` events occurred on or after
+2026-11-10. The export did contain historical workflow-run deletions, with the
+latest dated 2026-10-27, before the reported campaign period. Recent repository
+and integration activity was also present; it did not match the reported WFX
+indicators and should be checked against expected organization activity by an
+organization owner.
+
+**Assessment:** no evidence of WFX activity was found in the supplied export
+for the covered period. This is not proof that the organization was never
+exposed: the export ends at 2026-11-12 07:44 UTC, and audit records cannot by
+themselves establish whether secrets were accessed. Recheck newer audit events
+and workflow activity if investigating activity after that timestamp. If an
+unexpected workflow run or write is identified, treat the associated CI
+credentials and secrets as potentially exposed and follow the organization’s
+incident-response process.
+
 ## Compatibility and risk decisions
 
 Some possible controls were deliberately not applied globally because they could
@@ -99,3 +124,4 @@ associated changes:
 | --- | --- |
 | 2026-10-09 | Added this security hardening record covering the current targeted security stack and deferred controls. |
 | 2026-10-16 | Documented the GitHub Actions workflow lockfile rollout and its maintenance requirements. |
+| 2026-11-13 | Recorded the WFX campaign audit-log review; no indicators were found in the supplied export through 2026-11-12 07:44 UTC. |
