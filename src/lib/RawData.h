@@ -7,6 +7,7 @@
 #include "Plugin.h"
 #include "DataType.h"
 #include "Application.h"
+#include "util/ProjectResourceStagingPolicy.h"
 
 #include <QString>
 
@@ -40,6 +41,16 @@ public:
         return _dataType;
     }
 
+    /** Returns the resource staging policy shared by datasets backed by this raw-data object. */
+    [[nodiscard]] util::ProjectResourceStagingPolicy getProjectResourceStagingPolicy() const {
+        return _projectResourceStagingPolicy;
+    }
+
+    /** Sets the resource staging policy shared by datasets backed by this raw-data object. */
+    void setProjectResourceStagingPolicy(const util::ProjectResourceStagingPolicy policy) {
+        _projectResourceStagingPolicy = policy;
+    }
+
     /**
      * Create dataset for raw data
      * @param guid Globally unique dataset identifier (use only for deserialization)
@@ -61,6 +72,7 @@ public:
 
 private:
     DataType    _dataType;  /** Type of data */
+    util::ProjectResourceStagingPolicy _projectResourceStagingPolicy = util::ProjectResourceStagingPolicy::Inherit; /** Resource staging policy for datasets backed by this raw data. */
 };
 
 class CORE_EXPORT RawDataFactory : public PluginFactory

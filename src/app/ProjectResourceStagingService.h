@@ -55,7 +55,7 @@ private:
         std::condition_variable changed;
         bool staging = false;
         bool ready = false;
-        Policy policy = Policy::ArchiveBacked;
+        Policy policy = Policy::ReadRangesOnDemand;
     };
 
     [[nodiscard]] static QString validateArchiveEntry(const QString& archiveEntry);
@@ -66,7 +66,7 @@ private:
     mutable std::mutex _mutex;                                      /**< Protects session configuration and registered requests. */
     QString _archivePath;                                           /**< Archive that owns the resources in this session. */
     QString _stagingDirectory;                                      /**< Session-only root for staged resources. */
-    Policy _systemPolicy = Policy::ArchiveBacked;                   /**< Application-wide fallback policy. */
+    Policy _systemPolicy = Policy::ReadRangesOnDemand;               /**< Application-wide fallback policy. */
     Policy _projectPolicy = Policy::Inherit;                        /**< Optional policy override for this project. */
     QHash<QString, std::shared_ptr<ResourceState>> _resources;      /**< Registered archive entries and their single-flight state. */
 };

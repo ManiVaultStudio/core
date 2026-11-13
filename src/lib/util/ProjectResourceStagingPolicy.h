@@ -13,19 +13,26 @@ namespace mv::util
 enum class ProjectResourceStagingPolicy
 {
     Inherit,
-    ArchiveBacked,
-    OnDemand,
-    BeforeLoad
+    ReadRangesOnDemand,
+    StageOnFirstRead,
+    StageImmediately
 };
 
 [[nodiscard]] inline QString projectResourceStagingPolicyName(const ProjectResourceStagingPolicy policy)
 {
     switch (policy)
     {
-        case ProjectResourceStagingPolicy::Inherit: return QStringLiteral("Inherit");
-        case ProjectResourceStagingPolicy::ArchiveBacked: return QStringLiteral("Archive-backed");
-        case ProjectResourceStagingPolicy::OnDemand: return QStringLiteral("Stage on demand");
-        case ProjectResourceStagingPolicy::BeforeLoad: return QStringLiteral("Stage before load");
+        case ProjectResourceStagingPolicy::Inherit:
+            return QStringLiteral("Inherit");
+
+        case ProjectResourceStagingPolicy::ReadRangesOnDemand:
+            return QStringLiteral("Read ranges on demand");
+
+        case ProjectResourceStagingPolicy::StageOnFirstRead:
+            return QStringLiteral("Stage on first read");
+
+        case ProjectResourceStagingPolicy::StageImmediately:
+            return QStringLiteral("Stage immediately");
     }
 
     return QStringLiteral("Inherit");
@@ -33,10 +40,22 @@ enum class ProjectResourceStagingPolicy
 
 [[nodiscard]] inline ProjectResourceStagingPolicy projectResourceStagingPolicyFromName(const QString& name)
 {
-    if (name == QStringLiteral("Archive-backed")) return ProjectResourceStagingPolicy::ArchiveBacked;
-    if (name == QStringLiteral("Stage on demand")) return ProjectResourceStagingPolicy::OnDemand;
-    if (name == QStringLiteral("Stage before load")) return ProjectResourceStagingPolicy::BeforeLoad;
+    if (name == QStringLiteral("Read ranges on demand") || name == QStringLiteral("Archive-backed"))
+        return ProjectResourceStagingPolicy::ReadRangesOnDemand;
+    if (name == QStringLiteral("Stage on first read") || name == QStringLiteral("Stage on demand"))
+        return ProjectResourceStagingPolicy::StageOnFirstRead;
+    if (name == QStringLiteral("Stage immediately") || name == QStringLiteral("Stage before load"))
+        return ProjectResourceStagingPolicy::StageImmediately;
+
     return ProjectResourceStagingPolicy::Inherit;
+}
+
+[[nodiscard]] inline QString normalizeProjectResourceStagingPolicyName(const QString& name)
+{
+    if (name == QStringLiteral("Archive-backed") || name == QStringLiteral("Stage on demand") || name == QStringLiteral("Stage before load"))
+        return projectResourceStagingPolicyName(projectResourceStagingPolicyFromName(name));
+
+    return name;
 }
 
 }

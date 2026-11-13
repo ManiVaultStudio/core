@@ -326,8 +326,8 @@ private:
     gui::TriggerAction                  _backToProjectAction;           /**< Returns from the start page to the project */
     ProjectsListModel                   _projectsListModel;             /**< Projects list model */
     ProjectsTreeModel                   _projectsTreeModel;             /**< Projects tree model */
-    std::unique_ptr<QTemporaryDir>      _projectStagingDirectory;        /**< Session-scoped staging directory for resources from the open project */
-    ProjectResourceStagingService       _projectResourceStagingService;  /**< Resolves archive resources to staged files according to the active policy. */
+    std::shared_ptr<QTemporaryDir>      _projectStagingDirectory;        /**< Session-scoped staging directory retained while resource handles use it. */
+    std::shared_ptr<ProjectResourceStagingService> _projectResourceStagingService; /**< Resolves archive resources to staged files according to the active policy. */
 };
 
 }

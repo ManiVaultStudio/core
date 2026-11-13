@@ -822,12 +822,20 @@ set(PUBLIC_APPLICATION_FILES
 
 set(PUBLIC_PROJECT_HEADERS
     Project.h
+    ProjectResourceHandle.h
+    ProjectResourceReference.h
+    ProjectResourceService.h
+    StagedProjectResourceFile.h
     ProjectMetaAction.h
     ProjectCompressionAction.h
 )
 
 set(PUBLIC_PROJECT_SOURCES
     Project.cpp
+    ProjectResourceHandle.cpp
+    ProjectResourceReference.cpp
+    ProjectResourceService.cpp
+    StagedProjectResourceFile.cpp
     ProjectMetaAction.cpp
     ProjectCompressionAction.cpp
 )

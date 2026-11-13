@@ -39,7 +39,7 @@ ProjectSettingsDialog::ProjectSettingsDialog(QWidget* parent /*= nullptr*/) :
     _groupAction.addAction(&project->getCommentsAction());
     _groupAction.addAction(&project->getContributorsAction());
     _groupAction.addAction(&project->getStudioModeAction());
-    _groupAction.addAction(&project->getProjectMetaAction().getPackedTileStagingPolicyAction());
+    _groupAction.addAction(&project->getProjectMetaAction().getProjectResourceStagingPolicyAction());
     _groupAction.addAction(&workspaces().getLockingAction().getLockedAction());
 
     auto layout = new QVBoxLayout();

@@ -3,6 +3,7 @@
 // Copyright (C) 2023 BioVault (Biomedical Visual Analytics Unit LUMC - TU Delft) 
 
 #include "ProjectManager.h"
+#include "ProjectResourceServiceProvider.h"
 #include "PluginManagerDialog.h"
 #include "ProjectSettingsDialog.h"
 #include "NewProjectDialog.h"
@@ -356,17 +357,19 @@ void ProjectManager::newBlankProject()
 void ProjectManager::prepareProjectStagingDirectory(const QString& projectArchivePath)
 {
     const auto stagingRoot = ensureTemporaryDirPath(TemporaryDirType::Staging);
-    _projectStagingDirectory = std::make_unique<QTemporaryDir>(QDir(stagingRoot).filePath(QStringLiteral("project-XXXXXX")));
+    _projectStagingDirectory = std::make_shared<QTemporaryDir>(QDir(stagingRoot).filePath(QStringLiteral("project-XXXXXX")));
     if (!_projectStagingDirectory->isValid())
         throw std::runtime_error("Unable to create project staging directory");
 
     setTemporaryDirPath(TemporaryDirType::Staging, _projectStagingDirectory->path());
 
-    const auto defaultPolicyText = Application::current()->getConfigurationAction().getProjectsConfigurationAction().getDefaultPackedTileStagingPolicyAction().getCurrentText();
+    const auto defaultPolicyText = Application::current()->getConfigurationAction().getProjectsConfigurationAction().getDefaultProjectResourceStagingPolicyAction().getCurrentText();
     auto defaultPolicy = util::projectResourceStagingPolicyFromName(defaultPolicyText);
     if (defaultPolicy == ProjectResourceStagingService::Policy::Inherit)
-        defaultPolicy = ProjectResourceStagingService::Policy::ArchiveBacked;
-    _projectResourceStagingService.configure(projectArchivePath, _projectStagingDirectory->path(), defaultPolicy);
+        defaultPolicy = ProjectResourceStagingService::Policy::ReadRangesOnDemand;
+    _projectResourceStagingService->configure(projectArchivePath, _projectStagingDirectory->path(), defaultPolicy);
+    if (_project)
+        _project->setResourceService(createProjectResourceService(*_project, *this, _projectResourceStagingService, _projectStagingDirectory));
 }
 
 void ProjectManager::applyProjectResourceStagingPolicyOverride()
@@ -375,29 +378,29 @@ void ProjectManager::applyProjectResourceStagingPolicyOverride()
     if (!project)
         return;
 
-    const auto projectPolicyText = project->getProjectMetaAction().getPackedTileStagingPolicyAction().getCurrentText();
+    const auto projectPolicyText = project->getProjectMetaAction().getProjectResourceStagingPolicyAction().getCurrentText();
     const auto policy = projectPolicyText == QStringLiteral("Use application default") ? ProjectResourceStagingService::Policy::Inherit : util::projectResourceStagingPolicyFromName(projectPolicyText);
-    _projectResourceStagingService.setProjectPolicy(policy);
+    _projectResourceStagingService->setProjectPolicy(policy);
 }
 
 void ProjectManager::registerProjectResourceStagingRequests(const QStringList& archiveEntries)
 {
-    _projectResourceStagingService.registerResources(archiveEntries);
+    _projectResourceStagingService->registerResources(archiveEntries);
 }
 
 void ProjectManager::registerProjectResourceStagingRequests(const QList<ProjectResourceStagingService::ResourceRequest>& requests)
 {
-    _projectResourceStagingService.registerResources(requests);
+    _projectResourceStagingService->registerResources(requests);
 }
 
 workflow::UniqueWorkflowPlan ProjectManager::createProjectResourceStagingWorkflow(const std::size_t maxConcurrency)
 {
-    return _projectResourceStagingService.createEagerStagingWorkflow(maxConcurrency);
+    return _projectResourceStagingService->createEagerStagingWorkflow(maxConcurrency);
 }
 
 QString ProjectManager::resolveStagedProjectResourcePath(const QString& archiveEntry)
 {
-    return _projectResourceStagingService.resolvePath(archiveEntry);
+    return _projectResourceStagingService->resolvePath(archiveEntry);
 }
 
 void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly /*= false*/, bool loadWorkspace /*= true*/)
@@ -1546,7 +1549,7 @@ bool ProjectManager::isMvFileName(const QString& name)
 
 void ProjectManager::createProject()
 {
-    _projectResourceStagingService.clear();
+    _projectResourceStagingService = std::make_shared<ProjectResourceStagingService>();
     _projectStagingDirectory.reset();
     unsetTemporaryDirPath(TemporaryDirType::Staging);
 
@@ -1557,6 +1560,7 @@ void ProjectManager::createProject()
         reset();
 
         _project.reset(new Project());
+        _project->setResourceService(createProjectResourceService(*_project, *this, _projectResourceStagingService, _projectStagingDirectory));
     }
     emit projectCreated(*_project);
 

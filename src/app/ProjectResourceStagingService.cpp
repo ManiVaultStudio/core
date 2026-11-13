@@ -38,7 +38,7 @@ void ProjectResourceStagingService::clear()
     std::lock_guard lock(_mutex);
     _archivePath.clear();
     _stagingDirectory.clear();
-    _systemPolicy = Policy::ArchiveBacked;
+    _systemPolicy = Policy::ReadRangesOnDemand;
     _projectPolicy = Policy::Inherit;
     _resources.clear();
 }
@@ -88,9 +88,9 @@ void ProjectResourceStagingService::registerResources(const QList<ResourceReques
     const auto policyRank = [](const Policy policy) {
         switch (policy)
         {
-            case Policy::ArchiveBacked: return 0;
-            case Policy::OnDemand: return 1;
-            case Policy::BeforeLoad: return 2;
+            case Policy::ReadRangesOnDemand: return 0;
+            case Policy::StageOnFirstRead: return 1;
+            case Policy::StageImmediately: return 2;
             case Policy::Inherit: return -1;
         }
         return -1;
@@ -117,7 +117,7 @@ workflow::UniqueWorkflowPlan ProjectResourceStagingService::createEagerStagingWo
     {
         std::lock_guard lock(_mutex);
         for (auto it = _resources.cbegin(); it != _resources.cend(); ++it)
-            if (it.value()->policy == Policy::BeforeLoad)
+            if (it.value()->policy == Policy::StageImmediately)
                 archiveEntries.push_back(it.key());
     }
 
@@ -161,7 +161,7 @@ QString ProjectResourceStagingService::resolvePath(const QString& archiveEntry)
     if (!resourceState)
         throw std::runtime_error(QString("Project resource was not registered for staging: %1").arg(archiveEntry).toStdString());
 
-    if (resourceState->policy == Policy::ArchiveBacked)
+    if (resourceState->policy == Policy::ReadRangesOnDemand)
         return {};
 
     return stage(archiveEntry);

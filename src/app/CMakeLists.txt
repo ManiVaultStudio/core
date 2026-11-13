@@ -152,6 +152,7 @@ set(PRIVATE_ACTIONS_MANAGER_FILES
 
 set(PRIVATE_PROJECT_MANAGER_HEADERS
     ProjectManager.h
+    ProjectResourceServiceProvider.h
     ProjectWidget.h
     ProjectSettingsDialog.h
     NewProjectDialog.h
@@ -160,6 +161,7 @@ set(PRIVATE_PROJECT_MANAGER_HEADERS
 
 set(PRIVATE_PROJECT_MANAGER_SOURCES
     ProjectManager.cpp
+    ProjectResourceService.cpp
     ProjectWidget.cpp
     ProjectSettingsDialog.cpp
     NewProjectDialog.cpp

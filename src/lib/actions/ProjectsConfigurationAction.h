@@ -49,11 +49,12 @@ public: // Serialization
 public: // Action getters
 
     StringsAction& getProjectsDsnsAction() { return _projectsDsnsAction; }
-    OptionAction& getDefaultPackedTileStagingPolicyAction() { return _defaultPackedTileStagingPolicyAction; }
+    OptionAction& getDefaultProjectResourceStagingPolicyAction() { return _defaultProjectResourceStagingPolicyAction; }
+    [[deprecated("Use getDefaultProjectResourceStagingPolicyAction()")]] OptionAction& getDefaultPackedTileStagingPolicyAction() { return getDefaultProjectResourceStagingPolicyAction(); }
 
 private:
     StringsAction       _projectsDsnsAction;                  /** Projects DSNs action */
-    OptionAction        _defaultPackedTileStagingPolicyAction; /** Application default for packed point-tile project resources. */
+    OptionAction        _defaultProjectResourceStagingPolicyAction; /** Application default for archive-backed project resources. */
 };
 
 }

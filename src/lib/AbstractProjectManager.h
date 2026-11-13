@@ -24,6 +24,8 @@
 #include <QTemporaryDir>
 #include <QFuture>
 
+#include <stdexcept>
+
 #include "Task.h"
 #include "exception/ManiVaultException.h"
 
@@ -264,6 +266,26 @@ public:
      * @return Pointer to current project (nullptr if no project is loaded)
      */
     virtual Project* getCurrentProject() = 0;
+
+    /** Adds a resource to the active project and returns its project-relative reference. */
+    ProjectResourceReference addResourceToCurrentProject(QIODevice& source, const QString& resourceName)
+    {
+        auto* const project = getCurrentProject();
+        if (!project)
+            throw std::logic_error("A project must be open before adding a project resource");
+
+        return project->getResourceService().addResource(source, resourceName);
+    }
+
+    /** Opens a resource from the active project using the requested staging policy. */
+    std::shared_ptr<ProjectResourceHandle> openCurrentProjectResource(const ProjectResourceReference& reference, const util::ProjectResourceStagingPolicy stagingPolicy = util::ProjectResourceStagingPolicy::Inherit) const
+    {
+        const auto* const project = getCurrentProject();
+        if (!project)
+            throw std::logic_error("A project must be open before opening a project resource");
+
+        return project->getResourceService().openResource(reference, stagingPolicy);
+    }
 
     /**
      * Get projects list model

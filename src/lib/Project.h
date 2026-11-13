@@ -15,6 +15,9 @@
 #include "actions/HorizontalGroupAction.h"
 
 #include "ProjectMetaAction.h"
+#include "ProjectResourceService.h"
+
+#include <memory>
 
 #include <QSharedPointer>
 
@@ -51,6 +54,12 @@ public:
      * @return Location on disk where the project resides
      */
     QString getFilePath() const;
+
+    /** Returns the project-owned API for adding and reading project resources. */
+    ProjectResourceService& getResourceService();
+
+    /** Returns the project-owned API for adding and reading project resources. */
+    const ProjectResourceService& getResourceService() const;
 
     /**
      * Set project file path
@@ -173,7 +182,11 @@ signals:
     void filePathChanged(const QString& filePath);
 
 private:
+    friend class ProjectManager;
+    void setResourceService(std::unique_ptr<ProjectResourceService> resourceService);
+
     QString                 _filePath;                              /** Location on disk where the project resides */
+    std::unique_ptr<ProjectResourceService> _resourceService;       /** Project-owned resource access and staging service implementation. */
     bool                    _startupProject;                        /** Boolean determining whether this project is loaded at startup of ManiVault */
     util::Version           _applicationVersion;                    /** Version of the application with which the project is created */
     ProjectMetaAction       _projectMetaAction;                     /** Project meta info action (i.e. title and version) */
