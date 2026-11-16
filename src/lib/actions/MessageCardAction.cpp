@@ -79,12 +79,14 @@ void MessageCardAction::setMessage(const util::SeverityLevel severity, const QSt
     _buttonActions  = buttonActions;
 
     for (const auto& widget : _widgets)
+    {
         if (widget)
         {
             if (_displayMode == DisplayMode::Compact && !widget->property("MessageCardUserToggled").toBool())
                 widget->setProperty("MessageCardExpanded", _severity != util::SeverityLevel::Info);
             updateWidget(widget);
         }
+    }
 }
 
 void MessageCardAction::setDisplayMode(const DisplayMode displayMode)

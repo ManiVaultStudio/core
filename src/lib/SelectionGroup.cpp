@@ -217,7 +217,7 @@ namespace mv
             if (d != dataset && d.isValid())
             {
                 std::vector<uint32_t> indices = _biMaps[i].getValuesByKeys(keys);
-                
+
                 d->setSelectionIndices(indices);
 
                 d->markSelectionDirty(true);

@@ -766,59 +766,59 @@ static QString unquote(QString s)
 
 QString getFilenameFromContentDisposition(const QByteArray& contentDispositionRaw)
 {
-	if (contentDispositionRaw.isEmpty()) {
-		return {};
-	}
+    if (contentDispositionRaw.isEmpty())
+        return {};
+
     using namespace Qt::StringLiterals;
 
-	const auto contentDisposition = QString::fromLatin1(contentDispositionRaw);
+    const auto contentDisposition = QString::fromLatin1(contentDispositionRaw);
 
-	// Try filename*= first (RFC 5987): filename*=utf-8''percent-encoded
-	{
-		const QString key = u"filename*="_s;
-		const int     idx = contentDisposition.indexOf(key, 0, Qt::CaseInsensitive);
-		if (idx >= 0) {
-			QString   v    = contentDisposition.mid(idx + key.size());
-			const int semi = v.indexOf(u';');
-			if (semi >= 0) {
-				v = v.left(semi);
-			}
+    // Try filename*= first (RFC 5987): filename*=utf-8''percent-encoded
+    {
+        const QString key = u"filename*="_s;
+        const int     idx = contentDisposition.indexOf(key, 0, Qt::CaseInsensitive);
+        if (idx >= 0) {
+            QString   v    = contentDisposition.mid(idx + key.size());
+            const int semi = v.indexOf(u';');
+            if (semi >= 0) {
+                v = v.left(semi);
+            }
 
-			v = unquote(v);
+            v = unquote(v);
 
-			// expected: charset'lang'value
-			const int firstTick  = v.indexOf(u'\'');
-			const int secondTick = (firstTick >= 0) ? v.indexOf(u'\'', firstTick + 1) : -1;
+            // expected: charset'lang'value
+            const int firstTick  = v.indexOf(u'\'');
+            const int secondTick = (firstTick >= 0) ? v.indexOf(u'\'', firstTick + 1) : -1;
 
-			if (secondTick >= 0) {
-				// QString charset = v.left(firstTick); // usually "utf-8"
-				const QString    encoded = v.mid(secondTick + 1);
-				const QByteArray decoded = QUrl::fromPercentEncoding(encoded.toUtf8()).toUtf8();
+            if (secondTick >= 0) {
+                // QString charset = v.left(firstTick); // usually "utf-8"
+                const QString    encoded = v.mid(secondTick + 1);
+                const QByteArray decoded = QUrl::fromPercentEncoding(encoded.toUtf8()).toUtf8();
 
-				return QString::fromUtf8(decoded).trimmed();
-			}
+                return QString::fromUtf8(decoded).trimmed();
+            }
 
-			// If it doesn't match the strict pattern, still try percent-decoding as best effort.
-			return QUrl::fromPercentEncoding(v.toUtf8()).trimmed();
-		}
-	}
+            // If it doesn't match the strict pattern, still try percent-decoding as best effort.
+            return QUrl::fromPercentEncoding(v.toUtf8()).trimmed();
+        }
+    }
 
-	{
-		const QString key = u"filename="_s;
-		const int     idx = contentDisposition.indexOf(key, 0, Qt::CaseInsensitive);
+    {
+        const QString key = u"filename="_s;
+        const int     idx = contentDisposition.indexOf(key, 0, Qt::CaseInsensitive);
 
-		if (idx >= 0) {
-			QString   v    = contentDisposition.mid(idx + key.size());
-			const int semi = v.indexOf(u';');
-			if (semi >= 0) {
-				v = v.left(semi);
-			}
-			v = unquote(v);
-			return v.trimmed();
-		}
-	}
+        if (idx >= 0) {
+            QString   v    = contentDisposition.mid(idx + key.size());
+            const int semi = v.indexOf(u';');
+            if (semi >= 0) {
+                v = v.left(semi);
+            }
+            v = unquote(v);
+            return v.trimmed();
+        }
+    }
 
-	return {};
+    return {};
 }
 
 QString getFilenameFromUrlPath(const QUrl& effectiveUrl)

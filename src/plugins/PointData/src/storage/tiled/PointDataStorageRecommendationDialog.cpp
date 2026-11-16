@@ -97,9 +97,17 @@ public:
 
     TiledStorageRecommendation recommendationFor(const StorageMemoryPreference memoryPreference) const
     {
-        const auto rowAccess = rowAccessAction.isChecked() ? static_cast<StorageAxisAccess>((rowAccessPatternAction.getSelectedOptions().contains(QStringLiteral("Random")) ? static_cast<int>(StorageAxisAccess::Random) : 0) | (rowAccessPatternAction.getSelectedOptions().contains(QStringLiteral("Contiguous")) ? static_cast<int>(StorageAxisAccess::Contiguous) : 0)) : StorageAxisAccess::None;
+        const auto rowAccess = rowAccessAction.isChecked()
+            ? static_cast<StorageAxisAccess>(
+                (rowAccessPatternAction.getSelectedOptions().contains(QStringLiteral("Random")) ? static_cast<int>(StorageAxisAccess::Random) : 0) |
+                (rowAccessPatternAction.getSelectedOptions().contains(QStringLiteral("Contiguous")) ? static_cast<int>(StorageAxisAccess::Contiguous) : 0))
+            : StorageAxisAccess::None;
         const auto rowFrequency = rowAccessAction.isChecked() ? static_cast<StorageAccessFrequency>(rowAccessFrequencyAction.getCurrentIndex()) : StorageAccessFrequency::Incidental;
-        const auto columnAccess = columnAccessAction.isChecked() ? static_cast<StorageAxisAccess>((columnAccessPatternAction.getSelectedOptions().contains(QStringLiteral("Random")) ? static_cast<int>(StorageAxisAccess::Random) : 0) | (columnAccessPatternAction.getSelectedOptions().contains(QStringLiteral("Contiguous")) ? static_cast<int>(StorageAxisAccess::Contiguous) : 0)) : StorageAxisAccess::None;
+        const auto columnAccess = columnAccessAction.isChecked()
+            ? static_cast<StorageAxisAccess>(
+                (columnAccessPatternAction.getSelectedOptions().contains(QStringLiteral("Random")) ? static_cast<int>(StorageAxisAccess::Random) : 0) |
+                (columnAccessPatternAction.getSelectedOptions().contains(QStringLiteral("Contiguous")) ? static_cast<int>(StorageAxisAccess::Contiguous) : 0))
+            : StorageAxisAccess::None;
         const auto columnFrequency = columnAccessAction.isChecked() ? static_cast<StorageAccessFrequency>(columnAccessFrequencyAction.getCurrentIndex()) : StorageAccessFrequency::Incidental;
         const auto pointFrequency = pointAccessAction.isChecked() ? static_cast<StorageAccessFrequency>(pointAccessFrequencyAction.getCurrentIndex()) : StorageAccessFrequency::Incidental;
         return recommendTiledStorage(rows, columns, elementSize, rowAccess, rowFrequency, columnAccess, columnFrequency, pointAccessAction.isChecked(), pointFrequency, memoryPreference);

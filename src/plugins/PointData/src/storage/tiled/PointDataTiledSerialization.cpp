@@ -402,8 +402,10 @@ QVariantMap makeStagedPackedTiledVariantMap(const mv::pointdata::tiled::PointDat
 
     QStringList archiveEntryNames;
     for (const auto& sourcePath : sourcePaths)
+    {
         if (!isLocalPackedTileFile(sourcePath))
             archiveEntryNames.push_back(QFileInfo(sourcePath).fileName());
+    }
 
     registerPackedArchiveEntries(saveDirectory, archiveEntryNames);
 

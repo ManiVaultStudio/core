@@ -530,15 +530,15 @@ TileView PointDataTiledStorage::acquire(const std::uint64_t tileRow, const std::
     {
         try
         {
-			if (descriptor.residentBytes.isEmpty())
+            if (descriptor.residentBytes.isEmpty())
             {
-				if (_loaderThreadSafe)
-					bytes = std::make_shared<QByteArray>(load(descriptor));
-				else
-				{
-					const std::lock_guard loaderLock(_loaderMutex);
-					bytes = std::make_shared<QByteArray>(load(descriptor));
-				}
+                if (_loaderThreadSafe)
+                    bytes = std::make_shared<QByteArray>(load(descriptor));
+                else
+                {
+                    const std::lock_guard loaderLock(_loaderMutex);
+                    bytes = std::make_shared<QByteArray>(load(descriptor));
+                }
             }
             else
                 bytes = std::make_shared<QByteArray>(descriptor.residentBytes);

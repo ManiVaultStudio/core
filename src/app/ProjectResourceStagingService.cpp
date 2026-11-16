@@ -117,8 +117,10 @@ workflow::UniqueWorkflowPlan ProjectResourceStagingService::createEagerStagingWo
     {
         std::lock_guard lock(_mutex);
         for (auto it = _resources.cbegin(); it != _resources.cend(); ++it)
+        {
             if (it.value()->policy == Policy::StageImmediately)
                 archiveEntries.push_back(it.key());
+        }
     }
 
     if (archiveEntries.isEmpty())

@@ -177,7 +177,14 @@ namespace
     {
         auto description = QStringLiteral("Checked %1 value%2.").arg(result.valuesChecked).arg(result.valuesChecked == 1 ? QString() : QStringLiteral("s"));
         if (result.valuesOutOfRange != 0)
-            description += result.outOfRangeFailsConversion ? QStringLiteral(" %1 value%2 exceed the target type's range, so conversion will fail.").arg(result.valuesOutOfRange).arg(result.valuesOutOfRange == 1 ? QString() : QStringLiteral("s")) : QStringLiteral(" %1 value%2 exceed the target type's finite range and may become infinity.").arg(result.valuesOutOfRange).arg(result.valuesOutOfRange == 1 ? QString() : QStringLiteral("s"));
+        {
+            const auto valueCount = result.valuesOutOfRange;
+            const auto pluralSuffix = valueCount == 1 ? QString() : QStringLiteral("s");
+            const auto outOfRangeMessage = result.outOfRangeFailsConversion
+                ? QStringLiteral(" %1 value%2 exceed the target type's range, so conversion will fail.")
+                : QStringLiteral(" %1 value%2 exceed the target type's finite range and may become infinity.");
+            description += outOfRangeMessage.arg(valueCount).arg(pluralSuffix);
+        }
         if (result.valuesLosePrecision != 0)
             description += QStringLiteral(" %1 value%2 would be rounded or truncated.").arg(result.valuesLosePrecision).arg(result.valuesLosePrecision == 1 ? QString() : QStringLiteral("s"));
         if (result.valuesOutOfRange == 0 && result.valuesLosePrecision == 0)

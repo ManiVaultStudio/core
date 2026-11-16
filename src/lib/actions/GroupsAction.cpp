@@ -378,8 +378,10 @@ void GroupsAction::Widget::updateFiltering()
     _groupsAction->setGroupActionVisibility(filteredActionsGroup, areFiltering);
 
     for (auto groupAction : groupActions)
+    {
         if (groupAction != filteredActionsGroup && _groupSectionTreeItems.contains(groupAction))
             _groupSectionTreeItems[groupAction]->setHidden(areFiltering || _groupsAction->isGroupActionHidden(groupAction) || !_groupsAction->passesGroupActionVisibilityFilter(groupAction));
+    }
 
     // Do not include actions from the special filtering group action
     groupActions.removeOne(filteredActionsGroup);

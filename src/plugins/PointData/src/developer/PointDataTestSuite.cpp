@@ -258,13 +258,45 @@ bool expectedConversion(const long double source, const std::uint32_t targetType
     {
         case 0: expected = static_cast<float>(source); return true;
         case 1: expected = static_cast<float>(biovault::bfloat16_t(static_cast<float>(source))); return true;
-        case 2: if (!std::isfinite(source) || source < std::numeric_limits<std::int32_t>::lowest() || source > std::numeric_limits<std::int32_t>::max()) return false; expected = static_cast<std::int32_t>(source); return true;
-        case 3: if (!std::isfinite(source) || source < 0 || source > std::numeric_limits<std::uint32_t>::max()) return false; expected = static_cast<std::uint32_t>(source); return true;
-        case 4: if (!std::isfinite(source) || source < std::numeric_limits<std::int16_t>::lowest() || source > std::numeric_limits<std::int16_t>::max()) return false; expected = static_cast<std::int16_t>(source); return true;
-        case 5: if (!std::isfinite(source) || source < 0 || source > std::numeric_limits<std::uint16_t>::max()) return false; expected = static_cast<std::uint16_t>(source); return true;
-        case 6: if (!std::isfinite(source) || source < std::numeric_limits<std::int8_t>::lowest() || source > std::numeric_limits<std::int8_t>::max()) return false; expected = static_cast<std::int8_t>(source); return true;
-        case 7: if (!std::isfinite(source) || source < 0 || source > std::numeric_limits<std::uint8_t>::max()) return false; expected = static_cast<std::uint8_t>(source); return true;
-        default: throw std::invalid_argument("Unsupported conversion target type");
+
+        case 2:
+            if (!std::isfinite(source) || source < std::numeric_limits<std::int32_t>::lowest() || source > std::numeric_limits<std::int32_t>::max())
+                return false;
+            expected = static_cast<std::int32_t>(source);
+            return true;
+
+        case 3:
+            if (!std::isfinite(source) || source < 0 || source > std::numeric_limits<std::uint32_t>::max())
+                return false;
+            expected = static_cast<std::uint32_t>(source);
+            return true;
+
+        case 4:
+            if (!std::isfinite(source) || source < std::numeric_limits<std::int16_t>::lowest() || source > std::numeric_limits<std::int16_t>::max())
+                return false;
+            expected = static_cast<std::int16_t>(source);
+            return true;
+
+        case 5:
+            if (!std::isfinite(source) || source < 0 || source > std::numeric_limits<std::uint16_t>::max())
+                return false;
+            expected = static_cast<std::uint16_t>(source);
+            return true;
+
+        case 6:
+            if (!std::isfinite(source) || source < std::numeric_limits<std::int8_t>::lowest() || source > std::numeric_limits<std::int8_t>::max())
+                return false;
+            expected = static_cast<std::int8_t>(source);
+            return true;
+
+        case 7:
+            if (!std::isfinite(source) || source < 0 || source > std::numeric_limits<std::uint8_t>::max())
+                return false;
+            expected = static_cast<std::uint8_t>(source);
+            return true;
+
+        default:
+            throw std::invalid_argument("Unsupported conversion target type");
     }
 }
 
