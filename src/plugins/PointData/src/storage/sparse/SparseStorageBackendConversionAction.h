@@ -22,6 +22,8 @@ namespace mv::gui
  * is nonzero; actual memory use depends on the data. The element type can be
  * changed as part of conversion, with values outside an integer type's range
  * causing conversion to fail without replacing the current representation.
+ *
+ * @author Thomas Kroes
  */
 class POINTDATA_EXPORT SparseStorageBackendConversionAction final : public StorageBackendConversionAction
 {
@@ -41,18 +43,18 @@ public:
 private:
     void updateObservation();
 
-    std::uint64_t _rows = 0;
-    std::uint64_t _columns = 0;
-    bool _initialColumnCompressed = false; /**< Original compressed orientation for configuration change detection. */
-    OptionAction _layoutAction;
-    MessageCardAction _memoryObservationAction;
-    HorizontalGroupAction _performanceAction;
-    StringAction _performanceSummaryAction;
-    VerticalGroupAction _performanceSettingsAction;
-    IntegralAction _workerCountAction;
-    IntegralAction _chunkRowsAction;
-    std::size_t _initialWorkerCount = 4;
-    std::size_t _initialChunkRows = 128;
+    std::uint64_t _rows = 0;                        /**< Matrix row count used for the size and representability estimates. */
+    std::uint64_t _columns = 0;                     /**< Matrix column count used for the size and representability estimates. */
+    bool _initialColumnCompressed = false;          /**< Original compressed orientation for configuration change detection. */
+    OptionAction _layoutAction;                     /**< CSR or CSC selection. */
+    MessageCardAction _memoryObservationAction;     /**< Estimated sparse storage footprint and limits. */
+    HorizontalGroupAction _performanceAction;       /**< Collapsible conversion performance controls. */
+    StringAction _performanceSummaryAction;         /**< Read-only summary of conversion settings. */
+    VerticalGroupAction _performanceSettingsAction; /**< Group containing worker and chunk settings. */
+    IntegralAction _workerCountAction;              /**< Maximum conversion worker count. */
+    IntegralAction _chunkRowsAction;                /**< Source rows assigned to a sparse conversion chunk. */
+    std::size_t _initialWorkerCount = 4;            /**< Worker count used to detect changes from initial settings. */
+    std::size_t _initialChunkRows = 128;            /**< Chunk height used to detect changes from initial settings. */
 };
 
 }

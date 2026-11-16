@@ -42,9 +42,9 @@ public:
     QVariantMap toVariantMap() const override;
 
 private:
-    StringAction   _columnLabelAction;
-    IntegralAction _asymmetryAction;
-    StringAction   _rowLabelAction;
+    StringAction   _columnLabelAction; /**< Label identifying the column-oriented end of the slider. */
+    IntegralAction _asymmetryAction;   /**< Asymmetry percentage from column-oriented (0) to row-oriented (100). */
+    StringAction   _rowLabelAction;    /**< Label identifying the row-oriented end of the slider. */
 };
 
 }

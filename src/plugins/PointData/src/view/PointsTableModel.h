@@ -31,14 +31,14 @@ public:
     /** Result of fetching one visible table window away from the GUI thread. */
     struct RangeResult
     {
-        std::uint64_t generation = 0;         /**< Request generation used to discard stale worker results. */
-        std::uint64_t firstRow = 0;            /**< First logical row represented by the result. */
-        std::uint64_t rowCount = 0;            /**< Number of result rows. */
-        std::uint64_t firstColumn = 0;         /**< First logical column represented by the result. */
-        std::uint64_t columnCount = 0;          /**< Number of result columns. */
-        std::size_t accessSegmentCount = 0;    /**< Number of storage ranges visited while fetching the result. */
-        std::vector<float> values;             /**< Fetched values in row-major order. */
-        QString error;                         /**< Access failure message, or empty on success. */
+        std::uint64_t generation = 0;       /**< Request generation used to discard stale worker results. */
+        std::uint64_t firstRow = 0;         /**< First logical row represented by the result. */
+        std::uint64_t rowCount = 0;         /**< Number of result rows. */
+        std::uint64_t firstColumn = 0;      /**< First logical column represented by the result. */
+        std::uint64_t columnCount = 0;      /**< Number of result columns. */
+        std::size_t accessSegmentCount = 0; /**< Number of storage ranges visited while fetching the result. */
+        std::vector<float> values;          /**< Fetched values in row-major order. */
+        QString error;                      /**< Access failure message, or empty on success. */
     };
 
     /** Constructs an empty point-data table model. */

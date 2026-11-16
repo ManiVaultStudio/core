@@ -9,15 +9,24 @@
 namespace mv::util
 {
 
-/** Staging behavior for archive-backed dataset resources during project open. */
+/**
+ * @brief Controls when project-archive resources are copied to local staging.
+ *
+ * The policy is selected for a project at open time and applies to its
+ * archive-backed dataset resources. It trades archive range reads and lazy
+ * I/O for local-file availability; it does not change resource serialization.
+ *
+ * @author Thomas Kroes
+ */
 enum class ProjectResourceStagingPolicy
 {
-    Inherit,
-    ReadRangesOnDemand,
-    StageOnFirstRead,
-    StageImmediately
+    Inherit,             /**< Use the project policy, falling back to the application default. */
+    ReadRangesOnDemand,  /**< Keep the resource in the archive and read requested encoded ranges as needed. */
+    StageOnFirstRead,    /**< Copy the complete resource to session storage when it is first accessed. */
+    StageImmediately     /**< Copy the complete resource to session storage before project loading proceeds. */
 };
 
+/** Returns the canonical user-facing and serialized name of a policy. */
 [[nodiscard]] inline QString projectResourceStagingPolicyName(const ProjectResourceStagingPolicy policy)
 {
     switch (policy)
@@ -38,6 +47,10 @@ enum class ProjectResourceStagingPolicy
     return QStringLiteral("Inherit");
 }
 
+/**
+ * Parses a policy name, accepting legacy names used by older project settings.
+ * Unknown names resolve to Inherit so callers retain the normal fallback behavior.
+ */
 [[nodiscard]] inline ProjectResourceStagingPolicy projectResourceStagingPolicyFromName(const QString& name)
 {
     if (name == QStringLiteral("Read ranges on demand") || name == QStringLiteral("Archive-backed"))
@@ -50,6 +63,7 @@ enum class ProjectResourceStagingPolicy
     return ProjectResourceStagingPolicy::Inherit;
 }
 
+/** Converts recognized legacy policy names to their current canonical name. */
 [[nodiscard]] inline QString normalizeProjectResourceStagingPolicyName(const QString& name)
 {
     if (name == QStringLiteral("Archive-backed") || name == QStringLiteral("Stage on demand") || name == QStringLiteral("Stage before load"))

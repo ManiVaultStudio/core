@@ -16,5 +16,6 @@ class Project;
 class ProjectManager;
 class ProjectResourceStagingService;
 
+/** Creates the archive-backed resource service for a project and its staging session. */
 std::unique_ptr<ProjectResourceService> createProjectResourceService(Project& project, ProjectManager& projectManager, std::shared_ptr<ProjectResourceStagingService> stagingService, std::shared_ptr<QTemporaryDir> stagingDirectory);
 }

@@ -139,9 +139,9 @@ public:
     void close();
 
 private:
-    QFile       _file;
-    SharedCodec _codec;
-    bool        _closed = false;
+    QFile       _file;           /**< Uncompressed container receiving encoded block payloads. */
+    SharedCodec _codec;          /**< Shared codec retained for append operations. */
+    bool        _closed = false; /**< Whether close() has flushed and closed the output. */
 };
 
 /**
@@ -190,8 +190,8 @@ public:
     void readTo(const PackedBlobBlock& block, char* destination, std::size_t destinationSize) const;
 
 private:
-    QString     _filePath;
-    SharedCodec _codec;
+    QString     _filePath; /**< Packed container from which encoded ranges are read. */
+    SharedCodec _codec;    /**< Shared codec used to decode each requested range. */
 };
 
 /**

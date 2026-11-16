@@ -54,9 +54,9 @@ public:
      */
     struct ViewState
     {
-        QString rowFilter;
-        QString columnFilter;
-        bool live = true;
+        QString rowFilter;    /**< Expression used to select visible row IDs. */
+        QString columnFilter; /**< Expression used to select visible dimension IDs. */
+        bool live = true;     /**< Whether the table refreshes its visible window automatically. */
     };
 
     /**

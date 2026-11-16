@@ -34,32 +34,32 @@ struct TiledStorageBackendCreationOptions final : StorageBackendCreationOptions
 
     struct PackedTileSource
     {
-        QStringList filePaths;
-        QString codecName;
-        std::vector<std::uint64_t> offsets;
-        std::vector<std::uint64_t> compressedSizes;
-        std::vector<std::uint64_t> uncompressedSizes;
-        std::vector<std::size_t> superTileIndices;
-        std::shared_ptr<void> sourceLifetime;
+        QStringList filePaths;                        /**< Packed files in super-tile index order. */
+        QString codecName;                            /**< Registered codec used for each packed block. */
+        std::vector<std::uint64_t> offsets;           /**< Encoded byte offset for each logical tile descriptor. */
+        std::vector<std::uint64_t> compressedSizes;   /**< Encoded byte count for each logical tile descriptor. */
+        std::vector<std::uint64_t> uncompressedSizes; /**< Decoded byte count for each logical tile descriptor. */
+        std::vector<std::size_t> superTileIndices;    /**< Packed-file index containing each logical tile. */
+        std::shared_ptr<void> sourceLifetime;         /**< Owner keeping externally staged source files available. */
     };
 
-    std::uint64_t rows                 = 0;   /**< Number of logical matrix rows. */
-    std::uint64_t columns              = 0;   /**< Number of logical matrix columns. */
-    std::size_t   elementSize          = 0;   /**< Size of one generated element in bytes. */
-    std::uint32_t elementTypeIndex     = 0;   /**< PointData element-type index used by access views. */
-    std::size_t   rowTileSize          = 256; /**< Maximum number of rows per tile. */
-    std::size_t   columnTileSize       = 8;   /**< Maximum number of columns per tile. */
-    std::size_t   cacheCapacity        = 8;   /**< Maximum number of generated tile payloads retained in memory. */
+    std::uint64_t rows                 = 0;                             /**< Number of logical matrix rows. */
+    std::uint64_t columns              = 0;                             /**< Number of logical matrix columns. */
+    std::size_t   elementSize          = 0;                             /**< Size of one generated element in bytes. */
+    std::uint32_t elementTypeIndex     = 0;                             /**< PointData element-type index used by access views. */
+    std::size_t   rowTileSize          = 256;                           /**< Maximum number of rows per tile. */
+    std::size_t   columnTileSize       = 8;                             /**< Maximum number of columns per tile. */
+    std::size_t   cacheCapacity        = 8;                             /**< Maximum number of generated tile payloads retained in memory. */
     std::size_t   cacheCapacityBytes   = defaultTileCacheCapacityBytes; /**< Maximum decoded tile payload bytes retained in memory. */
-    bool          packedTiles          = false; /**< Whether serialized tiles are grouped into super tiles. */
-    bool          materializeGeneratedTiles = false; /**< Whether generated tiles should be retained immediately instead of loading lazily. */
-    std::size_t   superTileRows        = 1;   /**< Number of base tile rows in one super tile. */
-    std::size_t   superTileColumns     = 1;   /**< Number of base tile columns in one super tile. */
-    std::size_t   materializationWorkerCount = 4; /**< Maximum workers used to materialize generated tiles. */
-    std::size_t   materializationChunkTileRows = 3; /**< Tile-row height of one bounded materialization chunk. */
-    bool          loaderThreadSafe     = false; /**< Whether independent tile loader calls may run concurrently. */
-    TileGenerator generator;                 /**< Callback that generates one tile on first access. */
-    std::optional<PackedTileSource> packedSource; /**< Optional packed tile source metadata attached at creation. */
+    bool          packedTiles          = false;                         /**< Whether serialized tiles are grouped into super tiles. */
+    bool          materializeGeneratedTiles = false;                    /**< Whether generated tiles should be retained immediately instead of loading lazily. */
+    std::size_t   superTileRows        = 1;                             /**< Number of base tile rows in one super tile. */
+    std::size_t   superTileColumns     = 1;                             /**< Number of base tile columns in one super tile. */
+    std::size_t   materializationWorkerCount = 4;                       /**< Maximum workers used to materialize generated tiles. */
+    std::size_t   materializationChunkTileRows = 3;                     /**< Tile-row height of one bounded materialization chunk. */
+    bool          loaderThreadSafe     = false;                         /**< Whether independent tile loader calls may run concurrently. */
+    TileGenerator generator;                                            /**< Callback that generates one tile on first access. */
+    std::optional<PackedTileSource> packedSource;                       /**< Optional packed tile source metadata attached at creation. */
 };
 
 /**

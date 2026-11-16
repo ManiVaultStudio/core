@@ -15,6 +15,13 @@
 
 namespace mv::pointdata::storage::detail
 {
+/**
+ * Converts a row of values to a target C++ element type without aliasing the
+ * source byte buffer. Floating-point targets follow C++ conversion semantics;
+ * integral targets reject non-finite or out-of-range values with
+ * std::range_error. Source and destination buffers must hold the requested
+ * number of typed elements.
+ */
 template <typename TargetType, typename SourceType>
 void convertNumericRowTo(const char* source, const std::uint64_t columns, std::uint8_t* destination)
 {
@@ -45,6 +52,7 @@ void convertNumericRowTo(const char* source, const std::uint64_t columns, std::u
     }
 }
 
+/** Dispatches row conversion to the PointData target element type index (0-7). */
 template <typename SourceType>
 void convertNumericRowToType(const std::uint32_t targetTypeIndex, const char* source, const std::uint64_t columns, std::uint8_t* destination)
 {
@@ -62,6 +70,12 @@ void convertNumericRowToType(const std::uint32_t targetTypeIndex, const char* so
     }
 }
 
+/**
+ * Converts one row between PointData element types using their numeric type
+ * indices. A zero-column row may use null buffers. Unsupported type indices
+ * throw std::invalid_argument; integral overflow or non-finite input throws
+ * std::range_error.
+ */
 inline void convertNumericRow(const std::uint32_t sourceTypeIndex, const std::uint32_t targetTypeIndex, const char* source, const std::uint64_t columns, std::uint8_t* destination)
 {
     if (columns != 0 && (!source || !destination))

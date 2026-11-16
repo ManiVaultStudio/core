@@ -21,11 +21,14 @@ namespace mv::gui
 namespace mv::util {
 
 /**
- * Interface for encoding and decoding binary blobs.
+ * @brief Encodes and decodes binary blobs in memory or from files.
  *
  * A blob codec transforms raw binary data into a stored representation
  * and back again. Concrete implementations may perform no compression,
- * Qt compression, Zstandard compression, etc.
+ * Qt compression, Zstandard compression, etc. File-range decoding lets tiled
+ * project resources load only the encoded block they need. The codec name,
+ * type, and extension identify the persisted representation to the
+ * serialization and storage layers.
  *
  * @author Thomas Kroes
  */
@@ -36,10 +39,10 @@ public:
     /** Aggregate timing for encoded file-range reads and decoding. */
     struct FileRangeTelemetry
     {
-        std::uint64_t calls = 0;
-        std::uint64_t encodedBytes = 0;
-        std::uint64_t readNanoseconds = 0;
-        std::uint64_t decodeNanoseconds = 0;
+        std::uint64_t calls = 0;             /**< Number of recorded file-range decode operations. */
+        std::uint64_t encodedBytes = 0;      /**< Total encoded bytes read for those operations. */
+        std::uint64_t readNanoseconds = 0;   /**< Total time spent reading encoded ranges. */
+        std::uint64_t decodeNanoseconds = 0; /**< Total time spent decoding the ranges. */
     };
 
     /** Blob codec type */

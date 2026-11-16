@@ -42,6 +42,6 @@ public:
     mv::pointdata::storage::StorageBackendConfigurationOptionsPtr getConversionOptions() const;
 
 private:
-    std::unique_ptr<mv::gui::StorageBackendConversionAction> _conversionAction;
-    std::unique_ptr<mv::gui::PresetsAction> _presetsAction;
+    std::unique_ptr<mv::gui::StorageBackendConversionAction> _conversionAction; /**< Owned backend controls supplying the options shown in this dialog. */
+    std::unique_ptr<mv::gui::PresetsAction> _presetsAction;                     /**< Preset selector for the embedded backend controls. */
 };

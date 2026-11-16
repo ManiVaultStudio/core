@@ -101,43 +101,43 @@ private:
     void updateImportPerformanceSummary();
     void updateStagingSpaceObservation();
 
-    std::uint64_t _rows               = 0;
-    std::uint64_t _columns            = 0;
-    std::size_t   _elementSize        = 0;
-    std::size_t   _cacheCapacityBytes = pointdata::storage::defaultTileCacheCapacityBytes;
-    pointdata::storage::StorageBackendConfiguration _initialConfiguration; /**< Original tiled settings used to detect changes in configure mode. */
-    bool _hasInitialConfiguration = false; /**< Whether an original tiled configuration was provided. */
+    std::uint64_t _rows               = 0;                                                 /**< Logical matrix row count used to bound geometry and observations. */
+    std::uint64_t _columns            = 0;                                                 /**< Logical matrix column count used to bound geometry and observations. */
+    std::size_t   _elementSize        = 0;                                                 /**< Current target element size in bytes. */
+    std::size_t   _cacheCapacityBytes = pointdata::storage::defaultTileCacheCapacityBytes; /**< Maximum decoded tile bytes permitted in cache. */
+    pointdata::storage::StorageBackendConfiguration _initialConfiguration;                 /**< Original tiled settings used to detect changes in configure mode. */
+    bool _hasInitialConfiguration = false;                                                 /**< Whether an original tiled configuration was provided. */
 
-    TiledStorageAsymmetryAction _tileAsymmetryAction;
-    ToggleAction                _deriveTileDimensionsAction;
-    IntegralAction              _tileSizeAction;
-    HorizontalGroupAction       _rowTileSizeGroupAction;
-    IntegralAction              _rowTileSizeAction;
-    DecimalAction              _rowTileSizePercentageAction;
-    HorizontalGroupAction       _columnTileSizeGroupAction;
-    IntegralAction              _columnTileSizeAction;
-    DecimalAction              _columnTileSizePercentageAction;
-    IntegralAction              _cacheCapacityAction;
-    MessageCardAction              _tileCountObservationAction;
-    MessageCardAction              _tileCacheObservationAction;
-    MessageCardAction              _stagingSpaceObservationAction;
-    ToggleAction                  _packedTilesAction;
-    IntegralAction                _superTileRowsAction;
-    IntegralAction                _superTileColumnsAction;
-    HorizontalGroupAction         _importPerformanceAction;
-    StringAction                  _importPerformanceSummaryAction;
-    VerticalGroupAction           _importPerformanceSettingsAction;
-    IntegralAction                _bucketingThreadCountAction;
-    IntegralAction                _stagingThreadCountAction;
-    IntegralAction                _rowChunkTileFactorAction;
-    OptionAction                  _projectResourceStagingPolicyAction;
-    mv::util::ProjectResourceStagingPolicy _initialProjectResourceStagingPolicy = mv::util::ProjectResourceStagingPolicy::Inherit;
-    QString                       _stagingDirectory;
-    bool                          _showImportPerformanceOptions = false;
-    bool                          _showConversionPerformanceOptions = false;
-    bool                          _showImportStagingSpaceObservation = false;
-    bool                          _updatingTileSizePercentage = false;
-    bool                          _updatingGeometryFromPolicy = false;
+    TiledStorageAsymmetryAction _tileAsymmetryAction;                /**< Row-versus-column tile preference control. */
+    ToggleAction                _deriveTileDimensionsAction;         /**< Whether target size and asymmetry derive editable dimensions. */
+    IntegralAction              _tileSizeAction;                     /**< Desired target tile payload size in MiB. */
+    HorizontalGroupAction       _rowTileSizeGroupAction;             /**< Row tile size and percentage controls. */
+    IntegralAction              _rowTileSizeAction;                  /**< Maximum number of matrix rows per tile. */
+    DecimalAction               _rowTileSizePercentageAction;        /**< Row tile height as a percentage of matrix rows. */
+    HorizontalGroupAction       _columnTileSizeGroupAction;          /**< Column tile size and percentage controls. */
+    IntegralAction              _columnTileSizeAction;               /**< Maximum number of matrix columns per tile. */
+    DecimalAction               _columnTileSizePercentageAction;     /**< Column tile width as a percentage of matrix columns. */
+    IntegralAction              _cacheCapacityAction;                /**< Maximum resident tile count. */
+    MessageCardAction           _tileCountObservationAction;         /**< Estimated tile-index size and high tile-count notice. */
+    MessageCardAction           _tileCacheObservationAction;         /**< Estimated tile payload size compared with the cache byte limit. */
+    MessageCardAction           _stagingSpaceObservationAction;      /**< Disk-space estimate for import staging, when enabled. */
+    ToggleAction                _packedTilesAction;                  /**< Whether serialized tile blocks are grouped into super tiles. */
+    IntegralAction              _superTileRowsAction;                /**< Base tile rows per serialized super tile. */
+    IntegralAction              _superTileColumnsAction;             /**< Base tile columns per serialized super tile. */
+    HorizontalGroupAction       _importPerformanceAction;            /**< Collapsible import or conversion performance settings. */
+    StringAction                _importPerformanceSummaryAction;     /**< Read-only summary of active performance settings. */
+    VerticalGroupAction         _importPerformanceSettingsAction;    /**< Group containing worker and chunk settings. */
+    IntegralAction              _bucketingThreadCountAction;         /**< Maximum workers used to bucket HDF5 input. */
+    IntegralAction              _stagingThreadCountAction;           /**< Maximum workers used for staging or tile conversion. */
+    IntegralAction              _rowChunkTileFactorAction;           /**< Requested CSR tile-row factor per conversion chunk. */
+    OptionAction                _projectResourceStagingPolicyAction; /**< Project-open staging policy stored with imported resources. */
+    mv::util::ProjectResourceStagingPolicy _initialProjectResourceStagingPolicy = mv::util::ProjectResourceStagingPolicy::Inherit; /**< Initial policy used for change detection. */
+    QString                     _stagingDirectory;                          /**< App-managed directory checked for import staging space. */
+    bool                        _showImportPerformanceOptions = false;      /**< Whether the action exposes import worker settings. */
+    bool                        _showConversionPerformanceOptions = false;  /**< Whether the performance controls are configured for conversion. */
+    bool                        _showImportStagingSpaceObservation = false; /**< Whether to display the import disk-space estimate. */
+    bool                        _updatingTileSizePercentage = false;        /**< Guards reciprocal updates between size and percentage controls. */
+    bool                        _updatingGeometryFromPolicy = false;        /**< Guards control updates while policy-derived geometry is applied. */
 };
 
 }

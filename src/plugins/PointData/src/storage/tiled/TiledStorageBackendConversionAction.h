@@ -29,13 +29,13 @@ public:
 private:
     void updateMemoryObservation();
 
-    std::uint64_t _rows = 0;
-    std::uint64_t _columns = 0;
-    std::uint32_t _sourceElementTypeIndex = 0;
-    bool _hasTiledSource = false;
-    bool _canApply = true;
-    bool _checksMaterialization = false;
-    MessageCardAction _memoryObservationAction;
+    std::uint64_t _rows = 0;                    /**< Matrix row count used by the materialization estimate. */
+    std::uint64_t _columns = 0;                 /**< Matrix column count used by the materialization estimate. */
+    std::uint32_t _sourceElementTypeIndex = 0;  /**< Element type used by the source tiled representation. */
+    bool _hasTiledSource = false;               /**< Whether the source representation is tiled. */
+    bool _canApply = true;                      /**< Whether the latest memory preflight allows conversion. */
+    bool _checksMaterialization = false;        /**< Whether conversion will hold a fully materialized matrix. */
+    MessageCardAction _memoryObservationAction; /**< Estimated memory required by conversion and available-memory warning. */
 };
 
 }

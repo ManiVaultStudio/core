@@ -15,6 +15,8 @@ namespace mv
      * The view stores the iterator bounds and point index but does not own the
      * underlying point-data buffer. Its iterators and indexed access remain
      * valid only while that buffer remains alive and unmoved.
+     *
+     * @author Thomas Kroes
      */
     template <typename DataIteratorType>
     class PointView
@@ -85,8 +87,8 @@ namespace mv
         }
 
     private:
-        iterator _begin{};       /**< First iterator into the non-owned point buffer. */
-        iterator _end{};         /**< One-past-last iterator into the non-owned point buffer. */
-        std::uint64_t _index{};  /**< Logical index of the point represented by this view. */
+        iterator _begin{};      /**< First iterator into the non-owned point buffer. */
+        iterator _end{};        /**< One-past-last iterator into the non-owned point buffer. */
+        std::uint64_t _index{}; /**< Logical index of the point represented by this view. */
     };
 }

@@ -53,7 +53,7 @@ signals:
     void configureRequested();
 
 private:
-    QStringList _backendTypes;
-    mv::gui::OptionAction _backendTypeAction;
-    mv::gui::TriggerAction _configureAction;
+    QStringList _backendTypes;                /**< Canonical backend names offered by this control. */
+    mv::gui::OptionAction _backendTypeAction; /**< Selector showing the current backend and capability summary. */
+    mv::gui::TriggerAction _configureAction;  /**< Requests configuration of the selected backend. */
 };

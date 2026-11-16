@@ -15,6 +15,8 @@ namespace mv::gui
  * Estimates the destination matrix's dense byte size and compares it with
  * currently available physical memory where the operating system exposes it.
  * The reading can change before the conversion starts.
+ *
+ * @author Thomas Kroes
  */
 class POINTDATA_EXPORT DenseStorageBackendConversionAction final : public StorageBackendConversionAction
 {
@@ -32,10 +34,10 @@ public:
 private:
     void updateMemoryObservation();
 
-    std::uint64_t _rows = 0;
-    std::uint64_t _columns = 0;
-    bool _canApply = true;
-    MessageCardAction _memoryObservationAction;
+    std::uint64_t _rows = 0;                    /**< Matrix row count used by the allocation estimate. */
+    std::uint64_t _columns = 0;                 /**< Matrix column count used by the allocation estimate. */
+    bool _canApply = true;                      /**< Whether the latest allocation preflight allows conversion. */
+    MessageCardAction _memoryObservationAction; /**< Displays the estimated dense allocation and memory warning. */
 };
 
 }

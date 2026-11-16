@@ -22,40 +22,69 @@
 namespace mv
 {
 
-/** Session-scoped staging for resources stored inside a project archive. */
+/**
+ * @brief Resolves and stages project-archive resources for one open session.
+ *
+ * The service tracks per-resource policy and coordinates concurrent staging
+ * so a resource is copied at most once at a time. Staged files live under the
+ * session staging directory and their paths remain valid for that session.
+ * Archive range reads remain available when staging is not selected. The
+ * project manager owns the session lifecycle and uses eager staging workflows
+ * to honor StageImmediately before data loading.
+ *
+ * @author Thomas Kroes
+ */
 class ProjectResourceStagingService
 {
 public:
 
     using Policy = util::ProjectResourceStagingPolicy;
 
+    /** One archive entry and an optional policy override for that resource. */
     struct ResourceRequest
     {
-        QString archiveEntry;
-        Policy policy = Policy::Inherit;
+        QString archiveEntry;            /**< Safe project-relative path of the resource in the archive. */
+        Policy policy = Policy::Inherit; /**< Per-resource policy; Inherit uses the project and system defaults. */
     };
 
+    /** Returns true when the owning workflow has requested cancellation. */
     using CancellationCheck = std::function<bool()>;
+    /** Reports bytes copied and the total uncompressed resource size. */
     using ProgressCallback = std::function<void(std::uint64_t, std::uint64_t)>;
 
+    /** Configures the archive, session directory, and system fallback policy for a project session. */
     void configure(QString archivePath, QString stagingDirectory, Policy policy);
+
+    /** Clears session paths, policy overrides, and registered resource state. */
     void clear();
+
+    /** Sets the policy saved on the project; Inherit preserves the system fallback. */
     void setProjectPolicy(Policy policy);
+
+    /** Resolves project and system settings to the policy used for inherited resources. */
     [[nodiscard]] Policy getEffectiveDefaultPolicy() const;
+
+    /** Registers entries using the effective project policy. */
     void registerResources(const QStringList& archiveEntries);
+
+    /** Registers entries with optional resource-specific policy overrides. */
     void registerResources(const QList<ResourceRequest>& requests);
+
+    /** Creates a workflow that stages all registered StageImmediately resources. */
     [[nodiscard]] workflow::UniqueWorkflowPlan createEagerStagingWorkflow(std::size_t maxConcurrency);
+
+    /** Returns an existing staged path or stages the entry if its policy requires it. */
     [[nodiscard]] QString resolvePath(const QString& archiveEntry);
 
 private:
 
     struct ResourceState
     {
-        std::mutex mutex;
-        std::condition_variable changed;
-        bool staging = false;
-        bool ready = false;
-        Policy policy = Policy::ReadRangesOnDemand;
+        std::mutex mutex;                           /**< Guards this resource's staging and readiness flags. */
+        std::condition_variable changed;            /**< Wakes concurrent callers when staging finishes. */
+        bool staging = false;                       /**< Whether one caller currently owns the staging operation. */
+        bool ready = false;                         /**< Whether the complete resource is present in session storage. */
+        Policy policy = Policy::ReadRangesOnDemand; /**< Resolved policy assigned when the request is registered. */
     };
 
     [[nodiscard]] static QString validateArchiveEntry(const QString& archiveEntry);

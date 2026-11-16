@@ -40,7 +40,7 @@ private:
     std::unique_ptr<GifRecorder> _gifRecorder;                      /**< Developer-only GIF recorder. */
     QAction*                     _gifRecordingAction     = nullptr; /**< Start/stop recording action. */
     QMenu*                       _dataSynthesisMenu      = nullptr; /**< Runtime-populated synthetic data menu. */
-    bool                         _dataSynthesisPopulated = false;
+    bool                         _dataSynthesisPopulated = false; /**< Whether the synthetic-data menu has been populated. */
     QMenu*                       _performanceTestingMenu      = nullptr; /**< Runtime-populated performance testing menu. */
-    bool                         _performanceTestingPopulated = false;
+    bool                         _performanceTestingPopulated = false; /**< Whether the performance-testing menu has been populated. */
 };

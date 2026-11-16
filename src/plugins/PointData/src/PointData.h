@@ -116,6 +116,7 @@ public:
 
     static ElementTypeSpecifier elementTypeSpecifier(const QString& typeName);
     static QString elementTypeName(const ElementTypeSpecifier elementTypeSpecifier);
+    /** Returns the byte size for one of the eight supported PointData element-type indices; throws std::invalid_argument for an unsupported index. */
     static std::size_t getElementTypeSize(std::uint32_t elementTypeIndex);
 
 private:
@@ -735,21 +736,20 @@ private:
     float getDenseValueAt(std::size_t index) const;
 
     void materializeStorageBackend(mv::pointdata::storage::StorageBackendProgressCallback progress = {});
-    mutable std::recursive_mutex _dataMutex;
+    mutable std::recursive_mutex _dataMutex;                                       /**< Protects representation access while legacy mutators and readers run. */
 
-    VariantOfVectors _variantOfVectors;
+    VariantOfVectors _variantOfVectors;                                            /**< Legacy dense storage retained during the backend migration. */
 
-    /** Number of features of each data point */
-    std::uint64_t _numDimensions = 1;
-    std::unique_ptr<mv::pointdata::storage::PointsStorageBackend> _storageBackend;
+    std::uint64_t _numDimensions = 1;                                              /**< Logical number of dimensions in each point. */
+    std::unique_ptr<mv::pointdata::storage::PointsStorageBackend> _storageBackend; /**< Owned concrete representation used by storage-neutral access. */
 
-    std::vector<QString> _dimNames;
+    std::vector<QString> _dimNames;                                                /**< Display names for matrix columns. */
 
 private: // Sparse data, experimental
-    std::uint64_t                    _numRows    = 0;
-    SparseMatrix<size_t, size_t, float> _sparseData = {};
+    std::uint64_t _numRows = 0;                           /**< Logical row count for the experimental sparse compatibility representation. */
+    SparseMatrix<size_t, size_t, float> _sparseData = {}; /**< Legacy sparse matrix state retained for experimental accessors. */
 
-    bool _isDense = true;
+    bool _isDense = true;                                 /**< Whether legacy serialization should use the dense compatibility representation. */
 
     friend class mv::legacy::PointDataLegacySerializer;
     friend class mv::pointdata::storage::DensePointsStorageBackend;
@@ -1333,7 +1333,7 @@ public: // Linked data
 
 public:
 
-    std::vector<std::uint32_t> indices;
+    std::vector<std::uint32_t> indices; /**< Local-to-source point indices for subset and derived datasets. */
 
     InfoAction*                 _infoAction;                    /** Non-owning pointer to info action */
     PointsAction*               _pointsAction;                   /** Non-owning pointer to points action */
