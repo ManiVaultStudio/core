@@ -162,14 +162,14 @@ private:
     float valueAt(std::uint64_t row, std::uint64_t column) const;
     void copyRowRange(std::uint64_t row, std::uint64_t firstColumn, std::uint64_t columnCount, std::uint8_t* destination) const;
 
-    std::uint64_t              _rows             = 0;
-    std::uint64_t              _columns          = 0;
-    SparseMatrixLayout         _layout           = SparseMatrixLayout::RowCompressed;
-    std::uint32_t              _elementTypeIndex = 0;
-    std::size_t                _elementSize      = sizeof(float);
-    std::vector<std::uint64_t> _pointers;
-    std::vector<std::uint64_t> _indices;
-    std::vector<std::uint8_t>  _values;
+    std::uint64_t              _rows             = 0;                                  /**< Logical matrix row count. */
+    std::uint64_t              _columns          = 0;                                  /**< Logical matrix column count. */
+    SparseMatrixLayout         _layout           = SparseMatrixLayout::RowCompressed;   /**< Compressed orientation of the owned arrays. */
+    std::uint32_t              _elementTypeIndex = 0;                                  /**< PointData element-type index for each stored value. */
+    std::size_t                _elementSize      = sizeof(float);                      /**< Number of bytes in one stored value. */
+    std::vector<std::uint64_t> _pointers;                                               /**< Segment offsets, including the terminal nonzero count. */
+    std::vector<std::uint64_t> _indices;                                                /**< Sorted coordinate indices for each compressed segment. */
+    std::vector<std::uint8_t>  _values;                                                 /**< Byte-packed values corresponding to the coordinate indices. */
 };
 
 }

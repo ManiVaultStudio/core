@@ -757,4 +757,3 @@ void TiledStorageBackendConfigurationAction::updateTileGeometryFromPolicy()
     updateCacheCapacity();
 }
 }
-
