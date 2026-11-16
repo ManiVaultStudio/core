@@ -189,4 +189,9 @@ void Plugin::addNotification(const QString& description, const util::Notificatio
     mv::help().addNotification(getGuiName(), description, StyledIcon(icon()), durationType, delayMs);
 }
 
+void Plugin::addNotification(Task* task) const
+{
+    mv::help().addTaskNotification(task);
+}
+
 }

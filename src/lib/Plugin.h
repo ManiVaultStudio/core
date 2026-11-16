@@ -25,6 +25,7 @@
 #include "actions/PluginLearningCenterAction.h"
 
 class QMenu;
+namespace mv { class Task; }
 
 namespace mv::plugin
 {
@@ -182,6 +183,12 @@ public: // Miscellaneous
      * @param delayMs Delay in milliseconds before the notification is shown
      */
     void addNotification(const QString& description, const util::Notification::DurationType& durationType = util::Notification::DurationType::Fixed, std::int32_t delayMs = 0) const;
+
+    /**
+     * Add a task notification using the plugin name and icon.
+     * @param task Task whose state is displayed by the notification.
+     */
+    void addNotification(Task* task) const;
 
     /**
      * Get script trigger actions given \p datasets

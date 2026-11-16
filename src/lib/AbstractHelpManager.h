@@ -121,6 +121,12 @@ public:
     virtual void addNotification(const QString& title, const QString& description, const QIcon& icon = QIcon(), const util::Notification::DurationType& durationType = util::Notification::DurationType::Calculated, std::int32_t delayMs = 0, util::SeverityLevel severity = util::SeverityLevel::Info) = 0;
 
     /**
+     * Add a notification which displays the live state of a task.
+     * @param task Task whose state is displayed by the notification.
+     */
+    void addTaskNotification(QPointer<Task> task) { addNotification(task); }
+
+    /**
      * Add notification link handler for \p route
      * @param route Route to handle (e.g. "app://open/errors")
      * @param handler Handler function to invoke when a link with the specified route is clicked
