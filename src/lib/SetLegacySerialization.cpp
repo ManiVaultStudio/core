@@ -65,7 +65,6 @@ void SetLegacySerializer::fromVariantMapPre150(DatasetImpl& dataset, const QVari
 
     variantMapMustContain(variantMap, "Name");
     variantMapMustContain(variantMap, "Locked");
-    variantMapMustContain(variantMap, "StorageType");
     variantMapMustContain(variantMap, "DataType");
     variantMapMustContain(variantMap, "Derived");
     //    variantMapMustContain(variantMap, "Full");
@@ -73,7 +72,6 @@ void SetLegacySerializer::fromVariantMapPre150(DatasetImpl& dataset, const QVari
 
     dataset.setText(variantMap["Name"].toString());
     dataset.setLocked(variantMap["Locked"].toBool());
-    dataset.setStorageType(static_cast<DatasetImpl::StorageType>(variantMap["StorageType"].toInt()));
 
     assert(variantMap["DataType"].toString() == dataset.getDataType().getTypeString());
 
@@ -108,15 +106,6 @@ void SetLegacySerializer::fromVariantMapPre150(DatasetImpl& dataset, const QVari
     if (variantMap.contains("Properties"))
     {
         dataset._properties = loadQVariant(variantMap["Properties"]).toMap();
-    }
-
-    if (dataset.getStorageType() == DatasetImpl::StorageType::Proxy && variantMap.contains("ProxyMembers")) {
-        Datasets proxyMembers;
-
-        for (const auto& proxyMemberGuid : variantMap["ProxyMembers"].toStringList())
-            proxyMembers << mv::data().getDataset(proxyMemberGuid);
-
-        dataset.setProxyMembers(proxyMembers);
     }
 
     for (const auto& linkedDataVariant : variantMap["LinkedData"].toList()) {

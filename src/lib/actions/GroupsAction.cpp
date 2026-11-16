@@ -225,6 +225,17 @@ bool GroupsAction::isGroupActionHidden(GroupAction* groupAction) const
     return !isGroupActionVisible(groupAction);
 }
 
+void GroupsAction::setGroupActionVisibilityFilter(const GroupActionVisibilityFilter& visibilityFilter)
+{
+    _visibilityFilter = visibilityFilter;
+    emit groupActionVisibilityFilterChanged();
+}
+
+bool GroupsAction::passesGroupActionVisibilityFilter(GroupAction* groupAction) const
+{
+    return !_visibilityFilter || _visibilityFilter(groupAction);
+}
+
 Task& GroupsAction::getUpdateTask()
 {
     return _updateTask;
@@ -301,6 +312,7 @@ void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
 
     // Update properties when the filter changes
     connect(&_filterAction, &StringAction::stringChanged, this, &Widget::updateFiltering);
+    connect(_groupsAction, &GroupsAction::groupActionVisibilityFilterChanged, this, &Widget::updateFiltering);
 
     // Expand/collapse all when triggered
     connect(&_expandAllAction, &TriggerAction::triggered, _groupsAction, &GroupsAction::expandAll);
@@ -356,21 +368,28 @@ void GroupsAction::Widget::updateFiltering()
     // Get group actions
     auto groupActions = _groupsAction->getGroupActions();
 
-    // Set actions visibility
-    for (auto groupAction : groupActions) {
-        if (groupAction == groupActions.first())
-            _groupsAction->setGroupActionVisibility(groupAction, areFiltering);
-        else
-            _groupsAction->setGroupActionVisibility(groupAction, !areFiltering);
-    }
+    if (groupActions.isEmpty())
+        return;
+
+    // The temporary result section shows matching settings. Keep visibility
+    // selected by the dialog (for example its System/Plugins tags) intact while
+    // text search temporarily hides the regular sections from the tree.
+    const auto filteredActionsGroup = &_filteredActionsAction;
+    _groupsAction->setGroupActionVisibility(filteredActionsGroup, areFiltering);
+
+    for (auto groupAction : groupActions)
+        if (groupAction != filteredActionsGroup && _groupSectionTreeItems.contains(groupAction))
+            _groupSectionTreeItems[groupAction]->setHidden(areFiltering || _groupsAction->isGroupActionHidden(groupAction) || !_groupsAction->passesGroupActionVisibilityFilter(groupAction));
 
     // Do not include actions from the special filtering group action
-    if (!groupActions.isEmpty())
-        groupActions.removeFirst();
+    groupActions.removeOne(filteredActionsGroup);
 
     WidgetActions foundActions;
 
     for (auto groupAction : groupActions) {
+        if (_groupsAction->isGroupActionHidden(groupAction) || !_groupsAction->passesGroupActionVisibilityFilter(groupAction))
+            continue;
+
         for (auto action : groupAction->getActions())
             if (action->text().contains(filterString, Qt::CaseInsensitive))
                 foundActions << action;
@@ -396,7 +415,7 @@ void GroupsAction::Widget::addGroupAction(GroupAction* groupAction)
 
     // Set expansion state from group action
     _groupSectionTreeItems[groupAction]->setExpanded(groupAction->isExpanded());
-    _groupSectionTreeItems[groupAction]->setHidden(_groupsAction->isGroupActionHidden(groupAction));
+    _groupSectionTreeItems[groupAction]->setHidden(_groupsAction->isGroupActionHidden(groupAction) || !_groupsAction->passesGroupActionVisibilityFilter(groupAction));
 
     update();
 }
@@ -429,14 +448,16 @@ void GroupsAction::Widget::showGroupAction(GroupAction* groupAction)
 {
     Q_ASSERT(_groupSectionTreeItems.contains(groupAction));
 
-    _groupSectionTreeItems[groupAction]->setHidden(_groupsAction->isGroupActionHidden(groupAction));
+    const auto isFiltering = !_filterAction.getString().isEmpty();
+    const auto isFilteredActionsGroup = groupAction == &_filteredActionsAction;
+    _groupSectionTreeItems[groupAction]->setHidden(!isFilteredActionsGroup && (isFiltering || _groupsAction->isGroupActionHidden(groupAction) || !_groupsAction->passesGroupActionVisibilityFilter(groupAction)));
 }
 
 void GroupsAction::Widget::hideGroupAction(GroupAction* groupAction)
 {
     Q_ASSERT(_groupSectionTreeItems.contains(groupAction));
 
-    _groupSectionTreeItems[groupAction]->setHidden(_groupsAction->isGroupActionHidden(groupAction));
+    _groupSectionTreeItems[groupAction]->setHidden(_groupsAction->isGroupActionHidden(groupAction) || !_groupsAction->passesGroupActionVisibilityFilter(groupAction));
 }
 
 }

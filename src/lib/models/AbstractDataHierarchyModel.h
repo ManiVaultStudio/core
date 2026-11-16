@@ -43,7 +43,6 @@ public:
         Progress,               /** Task progress in percentage */
         SelectionGroupIndex,    /** Dataset selection group index */
         IsVisible,              /** Whether the dataset is visible or not */
-        IsGroup,                /** Whether the dataset is composed of other datasets */
         IsDerived,              /** Whether the dataset is derived from another dataset */
         IsSubset,               /** Whether the dataset is a subset or not */
         IsLocked,               /** Whether the dataset is locked */
@@ -450,44 +449,6 @@ public:
         }
     };
 
-    /** Standard model item class for displaying whether the dataset belongs to a group */
-    class CORE_EXPORT IsGroupItem final : public Item {
-    public:
-
-        /**
-         * Construct with \p dataset
-         * @param dataset Pointer to dataset to display item for
-         */
-        IsGroupItem(Dataset<DatasetImpl> dataset);
-
-        /**
-         * Get model data for \p role
-         * @return Data for \p role in variant form
-         */
-        QVariant data(int role = Qt::UserRole + 1) const override;
-
-        /**
-         * Get header data for \p orientation and \p role
-         * @param orientation Horizontal/vertical
-         * @param role Data role
-         * @return Header data
-         */
-        static QVariant headerData(Qt::Orientation orientation, int role) {
-            switch (role) {
-                case Qt::DisplayRole:
-                    return "";
-
-                case Qt::EditRole:
-                    return "Is group";
-
-                case Qt::ToolTipRole:
-                    return "Whether the dataset belongs to a group";
-            }
-
-            return {};
-        }
-    };
-
     /** Standard model item class for displaying whether the dataset is derived from another dataset */
     class CORE_EXPORT IsDerivedItem final : public Item {
     public:
@@ -642,7 +603,6 @@ protected:
             append(new ProgressItem(dataset));
             append(new SelectionGroupIndexItem(dataset));
             append(new IsVisibleItem(dataset));
-            append(new IsGroupItem(dataset));
             append(new IsDerivedItem(dataset));
             append(new IsSubsetItem(dataset));
             append(new IsLockedItem(dataset));

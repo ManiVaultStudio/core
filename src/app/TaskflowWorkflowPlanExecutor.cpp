@@ -22,6 +22,7 @@
 #include <QEventLoop>
 #include <QThread>
 #include <QDateTime>
+#include <QRegularExpression>
 
 #include <fstream>
 #include <chrono>
@@ -297,7 +298,9 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
         result->setMetrics(state->metrics().snapshot());
     }
 
-    result->setStatus(result->deriveStatus());
+    const auto workflowTask = rootContext->isRootExecution() ? rootContext->getTask() : nullptr;
+    const bool canceled = workflowTask && (workflowTask->isAboutToBeAborted() || workflowTask->isAborting() || workflowTask->isAborted());
+    result->setStatus(canceled ? WorkflowResultBase::Status::Canceled : result->deriveStatus());
     result->setDurationMS(durationMs);
     result->setOptions(rootContext->getState()->getOptions());
 
@@ -305,7 +308,12 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
 
     if (rootContext->isRootExecution()) {
         if (auto task = rootContext->getTask()) {
-            QMetaObject::invokeMethod(task, [task]() {
+            QMetaObject::invokeMethod(task, [task, canceled]() {
+                if (canceled) {
+                    task->setAborted();
+                    return;
+                }
+
                 task->setProgress(1.0f);
                 task->setStatus(Task::Status::Finished);
             }, Qt::QueuedConnection);
@@ -324,7 +332,9 @@ SharedWorkflowResult TaskflowWorkflowPlanExecutor::executeWithContext(WorkflowPl
             return result;
         }
 
-        const QString fileName = QDir(profilingDir).filePath(QString("workflow_trace_%1.json").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss")));
+        auto workflowName = workflowPlan.getName();
+        workflowName.replace(QRegularExpression(QStringLiteral("[^A-Za-z0-9_-]+")), QStringLiteral("_"));
+        const QString fileName = QDir(profilingDir).filePath(QString("workflow_trace_%1_%2.json").arg(workflowName, QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss")));
 
         std::ofstream traceFile(QDir::toNativeSeparators(fileName).toStdString());
 

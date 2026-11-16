@@ -9,6 +9,7 @@
 #include "util/SeverityLevel.h"
 
 #include <QList>
+#include <QEvent>
 #include <QPointer>
 
 #include <functional>
@@ -39,6 +40,13 @@ class CORE_EXPORT MessageCardAction : public WidgetAction
 
 public:
 
+    /** Controls whether the card displays a compact summary or the full message. */
+    enum class DisplayMode
+    {
+        Detailed,
+        Compact
+    };
+
     /** Describes one message button and the operation it performs when clicked. */
     struct ButtonAction
     {
@@ -65,11 +73,19 @@ public:
      */
     void setMessage(util::SeverityLevel severity, const QString& category, const QString& description, const ButtonActions& buttonActions = {});
 
+    /** Sets the display mode for existing and subsequently created card widgets. */
+    void setDisplayMode(DisplayMode displayMode);
+
+    /** Returns the display mode applied to generated card widgets. */
+    [[nodiscard]] DisplayMode getDisplayMode() const;
+
 protected:
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
     void updateWidget(QWidget* widget);
+    void toggleCard(QWidget* widget);
 
 private:
     util::SeverityLevel      _severity = util::SeverityLevel::Info; /**< Severity shown by the card; defaults to Info. */
@@ -77,6 +93,7 @@ private:
     QString                  _description;                          /**< Explanatory text displayed below the heading. */
     ButtonActions            _buttonActions;                        /**< Current button labels and callbacks, in display order. */
     QList<QPointer<QWidget>> _widgets;                              /**< Generated card widgets updated when the message changes. */
+    DisplayMode              _displayMode = DisplayMode::Compact;   /**< Severity-based compact/expanded presentation by default. */
 };
 
 }

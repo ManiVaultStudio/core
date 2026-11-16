@@ -31,6 +31,7 @@ ProjectMetaAction::ProjectMetaAction(Project* project, QObject* parent /*= nullp
     _applicationIconAction(this, "Application icon"),
     _compressionAction(this),
     _allowProjectSwitchingAction(this, "Allow project switching"),
+    _projectResourceStagingPolicyAction(this, "Resource staging policy", { "Use application default", "Read ranges on demand", "Stage on first read", "Stage immediately" }, "Use application default"),
     _allowedPluginsOnlyAction(this, "Limit use of plugins"),
     _allowedPluginsAction(this, "Allowed Plugins")
 {
@@ -62,6 +63,8 @@ ProjectMetaAction::ProjectMetaAction(Project* project, QObject* parent /*= nullp
     _applicationIconAction.setToolTip("Application icon settings");
 
     _allowProjectSwitchingAction.setToolTip("Allow switching to another database project from the main menu");
+    _projectResourceStagingPolicyAction.setSerializationName("Packed point-tile staging");
+    _projectResourceStagingPolicyAction.setToolTip("Default staging behavior for archive-backed resources in this project. Individual datasets may override it.");
     _allowedPluginsOnlyAction.setToolTip("Only plugins in the allowed list may be created from the UI.");
     _allowedPluginsAction.setToolTip("Only plugins in this list may be created from the UI.");
 
@@ -141,6 +144,18 @@ void ProjectMetaAction::fromVariantMap(const QVariantMap& variantMap)
     _applicationIconAction.fromParentVariantMap(variantMap);
     _compressionAction.fromParentVariantMap(variantMap, true);
     _allowProjectSwitchingAction.fromParentVariantMap(variantMap, true);
+    auto stagingPolicyMap = variantMap.value(_projectResourceStagingPolicyAction.getSerializationName()).toMap();
+    if (stagingPolicyMap.contains("Value"))
+        stagingPolicyMap["Value"] = normalizeProjectResourceStagingPolicyName(stagingPolicyMap.value("Value").toString());
+    if (stagingPolicyMap.contains("Options"))
+    {
+        auto stagingPolicyOptions = stagingPolicyMap.value("Options").toStringList();
+        for (auto& option : stagingPolicyOptions)
+            option = normalizeProjectResourceStagingPolicyName(option);
+        stagingPolicyMap["Options"] = stagingPolicyOptions;
+    }
+    if (!stagingPolicyMap.isEmpty())
+        _projectResourceStagingPolicyAction.fromVariantMap(stagingPolicyMap);
     _allowedPluginsOnlyAction.fromParentVariantMap(variantMap, true);
     _allowedPluginsAction.fromParentVariantMap(variantMap, true);
 }
@@ -175,6 +190,7 @@ QVariantMap ProjectMetaAction::toVariantMap() const
     _applicationIconAction.insertIntoVariantMap(variantMap);
     _compressionAction.insertIntoVariantMap(variantMap);
     _allowProjectSwitchingAction.insertIntoVariantMap(variantMap);
+    _projectResourceStagingPolicyAction.insertIntoVariantMap(variantMap);
     _allowedPluginsOnlyAction.insertIntoVariantMap(variantMap);
     _allowedPluginsAction.insertIntoVariantMap(variantMap);
 

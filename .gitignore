@@ -1,5 +1,6 @@
 build/
 install/
+x64/
 
 # Ignore the downloaded external files but not the existing ones
 external/

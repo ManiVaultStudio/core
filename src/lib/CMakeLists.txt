@@ -32,6 +32,19 @@ set(PUBLIC_CORE_INTERFACE_FILES
     ${PUBLIC_CORE_INTERFACE_SOURCES}
 )
 
+set(PUBLIC_DEVELOPER_HEADERS
+    DeveloperActionRegistry.h
+)
+
+set(PUBLIC_DEVELOPER_SOURCES
+    DeveloperActionRegistry.cpp
+)
+
+set(PUBLIC_DEVELOPER_FILES
+    ${PUBLIC_DEVELOPER_HEADERS}
+    ${PUBLIC_DEVELOPER_SOURCES}
+)
+
 set(PUBLIC_EVENT_HEADERS
     event/Event.h
     event/EventListener.h
@@ -587,6 +600,7 @@ set(PUBLIC_UTIL_HEADERS
     util/HeadsUpDisplayItem.h
     util/SplashScreenBridge.h
     util/StandardPaths.h
+    util/ProjectResourceStagingPolicy.h
     util/CustomAssetsUrlSchemeHandler.h
     util/BlobCodec.h
     util/BlobCodecFactory.h
@@ -808,12 +822,20 @@ set(PUBLIC_APPLICATION_FILES
 
 set(PUBLIC_PROJECT_HEADERS
     Project.h
+    ProjectResourceHandle.h
+    ProjectResourceReference.h
+    ProjectResourceService.h
+    StagedProjectResourceFile.h
     ProjectMetaAction.h
     ProjectCompressionAction.h
 )
 
 set(PUBLIC_PROJECT_SOURCES
     Project.cpp
+    ProjectResourceHandle.cpp
+    ProjectResourceReference.cpp
+    ProjectResourceService.cpp
+    StagedProjectResourceFile.cpp
     ProjectMetaAction.cpp
     ProjectCompressionAction.cpp
 )
@@ -1366,6 +1388,7 @@ set(PUBLIC_GLOBALS_HEADERS
 
 set(PUBLIC_HEADERS
     ${PUBLIC_CORE_INTERFACE_HEADERS}
+    ${PUBLIC_DEVELOPER_HEADERS}
     ${PUBLIC_EVENT_HEADERS}
     ${PUBLIC_COLOR_MAP_ACTION_HEADERS}
     ${PUBLIC_NUMERICAL_ACTIONS_HEADERS}
@@ -1424,6 +1447,7 @@ set(PUBLIC_HEADERS
 )
 
 set(PUBLIC_SOURCES
+    ${PUBLIC_DEVELOPER_SOURCES}
     ${PUBLIC_EVENT_SOURCES}
     ${PUBLIC_COLOR_MAP_ACTION_SOURCES}
     ${PUBLIC_NUMERICAL_ACTIONS_SOURCES}

@@ -6,8 +6,12 @@
 
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QDir>
 #include <QCryptographicHash>
+#include <functional>
+
+#include <cstdint>
 
 class QuaZip;
 
@@ -42,7 +46,7 @@ public:
      * @param fileDoneFn Callback which is called when a file compression is complete
      * @param filters File include filter
      */
-    void compressDirectory(const QString& sourceDirectory, const QString& compressedFilePath, bool recursive = true, std::int32_t compressionLevel = 0, const QString& password = "", QDir::Filters filters = QDir::Filter::Files);
+    void compressDirectory(const QString& sourceDirectory, const QString& compressedFilePath, bool recursive = true, std::int32_t compressionLevel = 0, const QString& password = "", QDir::Filters filters = QDir::Filter::Files, const QString& sourceArchivePath = "", const std::function<void(float)>& progress = {});
 
     /**
      * Decompresses a compressed file to a destination directory
@@ -79,6 +83,9 @@ public:
      */
     void extractSingleFile(const QString& compressedFilePath, const QString& sourceFileName, const QString& targetFilePath, const QString& password = "");
 
+    /** Extracts one archive entry while reporting byte progress and checking cooperative cancellation. */
+    void extractSingleFileCancellable(const QString& compressedFilePath, const QString& sourceFileName, const QString& targetFilePath, const QString& password, const std::function<bool()>& cancellationCheck, const std::function<void(std::uint64_t, std::uint64_t)>& progress);
+
     /*
      * Reads a file from a zip archive directly to memory
      * Might throw a std::runtime_error exception if an error occurs during extraction
@@ -87,6 +94,17 @@ public:
      * @return Byte array containing the file data
      */
     static QByteArray readZipEntryToMemory(const QString& zipPath, const QString& entryName);
+
+    /**
+     * Reads a byte range from a file in a ZIP archive directly to memory.
+     *
+     * @param zipPath File path of the compressed input file.
+     * @param entryName File name of the compressed source file.
+     * @param offset Byte offset within the archive entry.
+     * @param size Number of bytes to read.
+     * @return Byte array containing the requested range.
+     */
+    static QByteArray readZipEntryRangeToMemory(const QString& zipPath, const QString& entryName, std::uint64_t offset, std::uint64_t size);
 
 protected:
 
@@ -100,7 +118,7 @@ protected:
      * @param password Password string if files need to be secured
      * @param filters File include filter
      */
-    void compressSubDirectory(QuaZip* parentZip, const QString& directory, const QString& parentDirectory, bool recursive = true, std::int32_t compressionLevel = 0, const QString& password = "", QDir::Filters filters = QDir::Filter::Files);
+    void compressSubDirectory(QuaZip* parentZip, const QString& directory, const QString& parentDirectory, bool recursive = true, std::int32_t compressionLevel = 0, const QString& password = "", QDir::Filters filters = QDir::Filter::Files, const std::function<void(std::uint64_t)>& bytesWritten = {});
 
     /**
      * Compresses a file
@@ -110,7 +128,10 @@ protected:
      * @param compressionLevel Compression level (zero means no compression)
      * @param password Password string if files need to be secured
      */
-    void compressFile(QuaZip* zip, const QString& sourceFilePath, const QString& compressedFilePath, std::int32_t compressionLevel = 0, const QString& password = "");
+    void compressFile(QuaZip* zip, const QString& sourceFilePath, const QString& compressedFilePath, std::int32_t compressionLevel = 0, const QString& password = "", const std::function<void(std::uint64_t)>& bytesWritten = {});
+
+    /** Copies selected root-level archive entries directly into an open destination archive. */
+    void copyArchiveEntries(QuaZip* destinationZip, const QString& sourceArchivePath, const QStringList& entryNames, const std::function<void(std::uint64_t)>& bytesWritten = {});
 
     /**
      * Extracts a file

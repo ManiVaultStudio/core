@@ -234,8 +234,6 @@ public: // Dataset and selection grouping
      * @param guiName Name of the created dataset in the GUI (if empty, the user will be prompted for a name)
      * @return Smart pointer to created group dataset
      */
-    Dataset<DatasetImpl> groupDatasets(const Datasets& datasets, const QString& guiName = "") override;
-
     /**
      * Get selection grouping toggle action
      * @return Pointer to selection grouping toggle action (only valid if there is a current project)

@@ -45,7 +45,7 @@ public:
      * @param durationType Display duration policy.
      * @param delayMs Delay in milliseconds before the notification is shown.
      */
-    void showMessage(const QString& title, const QString& description, const QIcon& icon, const util::Notification::DurationType& durationType, std::int32_t delayMs);
+    void showMessage(const QString& title, const QString& description, const QIcon& icon, const util::Notification::DurationType& durationType, std::int32_t delayMs, SeverityLevel severity = SeverityLevel::Info);
 
     /**
      * @brief Shows a task notification.

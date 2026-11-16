@@ -56,8 +56,6 @@ private:
      * @brief Creates the item grouping action.
      * @return Action for grouping selected items.
      */
-    QAction* getGroupAction();
-
     /**
      * @brief Creates the selection grouping action.
      * @return Action for grouping by selection index.

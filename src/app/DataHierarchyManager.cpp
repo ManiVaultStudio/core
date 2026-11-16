@@ -5,7 +5,9 @@
 #include "DataHierarchyManager.h"
 #include "DataManager.h"
 
+#include <CoreInterface.h>
 #include <util/Exception.h>
+#include <util/Miscellaneous.h>
 #include <util/Serialization.h>
 
 #include <QtConcurrent>
@@ -360,6 +362,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 
     WorkflowPlan::Jobs saveDatasetsJobs;
     saveDatasetsJobs.reserve(_items.size());
+    double saveDatasetsWeight = 0.0;
 
     QHash<QString, WorkflowHandle> datasetHandles;
 
@@ -368,6 +371,8 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 
         const auto dataset = item->getDataset();
         const auto datasetId = dataset->getId();
+        const auto datasetWeight = std::max(1.0, static_cast<double>(dataset->getRawDataSize()));
+        saveDatasetsWeight += datasetWeight;
 
         WorkflowPlan::Job job(QString("Save dataset %1").arg(datasetId), WorkflowPlan::NestedWorkflowFunction([datasetId](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) -> UniqueWorkflowPlan {
             auto dataset = mv::data().getDataset(datasetId);
@@ -376,7 +381,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
                 return {};
 
             return dataset->toVariantMapWorkflow();
-        }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Nested);
+        }), WorkflowPlan::JobThreadAffinity::CurrentWorkerThread, WorkflowPlan::JobProgressMode::Nested, datasetWeight);
 
         datasetHandles.insert(datasetId, job.getHandle());
 
@@ -385,7 +390,7 @@ UniqueWorkflowPlan DataHierarchyManager::toVariantMapWorkflow() const
 
     plan->addBatchedParallelStage("Save datasets", std::move(saveDatasetsJobs), [](const SharedWorkflowExecutionContext& executionContext) {
         return executionContext->getState()->getOptions().batching.datasetSavingBatchSize;
-    });
+    }, saveDatasetsWeight);
 
     const auto collectDatasetMapsStage = plan->addSequentialStage("Collect dataset maps", [saveItemMapsStage, datasetHandles](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext& executionContext) {
         const auto itemMaps = executionContext->takeOutput(saveItemMapsStage).toMap();
@@ -471,6 +476,24 @@ QVector<QVariantMap> DataHierarchyManager::sortedDataHierarchyItems(const QVaria
 void DataHierarchyManager::populateDataHierarchy(const QVariantMap& itemsMap, const Dataset<DatasetImpl>& parent)
 {
     for (const auto& itemMap : sortedDataHierarchyItems(itemsMap)) {
+        const auto datasetMap = itemMap.value("Dataset").toMap();
+
+        // Older projects represented dataset groups as proxy datasets. Those
+        // wrappers no longer exist; retain their children in the hierarchy.
+        if (datasetMap.value("StorageType").toInt() == 1) {
+            const auto datasetName = datasetMap.value("Name").toString();
+            mv::help().addNotification(
+                "Unsupported proxy dataset",
+                QString("Dataset '%1' was saved as a proxy dataset, which is no longer supported. Its child datasets were loaded without the proxy wrapper.").arg(datasetName),
+                mv::util::StyledIcon("exclamation-triangle"),
+                mv::util::Notification::DurationType::Calculated,
+                0,
+                mv::util::SeverityLevel::Warning);
+
+            populateDataHierarchy(itemMap.value("Children").toMap(), parent);
+            continue;
+        }
+
         auto dataset = createDatasetFromItem(itemMap, parent);
         populateDataHierarchy(itemMap["Children"].toMap(), dataset);
     }

@@ -14,6 +14,32 @@ using namespace mv::util;
 namespace mv::workflow
 {
 
+namespace
+{
+
+QString findActiveStage(const WorkflowProgressNode::Snapshot& snapshot)
+{
+    for (const auto& child : snapshot.children)
+    {
+        if (child.status != WorkflowProgressNode::Status::Running)
+            continue;
+
+        const auto nestedStage = findActiveStage(child);
+        if (!nestedStage.isEmpty())
+            return nestedStage;
+
+        if (child.type == WorkflowExecutionNodeType::SequentialStage || child.type == WorkflowExecutionNodeType::ParallelStage)
+            return child.name;
+
+        if (child.type == WorkflowExecutionNodeType::NestedWorkflow)
+            return child.name;
+    }
+
+    return {};
+}
+
+}
+
 WorkflowExecutionContext::WorkflowExecutionContext() :
     _id(QUuid::createUuid()),
     _outputId(_id)
@@ -268,10 +294,13 @@ void WorkflowExecutionContext::message(SeverityLevel severity, QString text, QSt
 
 void WorkflowExecutionContext::info(QString text, QString location, QVariantMap details, MessageKind kind) const
 {
+    const auto maxDepth = _state ? _state->getOptions().reporting.maxLoggingDepth : std::numeric_limits<int>::max();
+    if (static_cast<std::uint32_t>(details.value("depth").toUInt()) >= maxDepth)
+        return;
+
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    const auto maxDepth         = _state ? _state->getOptions().reporting.maxLoggingDepth : std::numeric_limits<int>::max();
     const auto consoleDetails   = makeConsoleDetails(details);
     const auto consoleMessage   = WorkflowConsoleFormatter::format(SeverityLevel::Info, text, location, consoleDetails, maxDepth);
 
@@ -296,10 +325,13 @@ void WorkflowExecutionContext::info(QString text, QString location, QVariantMap 
 
 void WorkflowExecutionContext::warning(QString text, QString location, QVariantMap details, MessageKind kind) const
 {
+    const auto maxDepth = _state ? _state->getOptions().reporting.maxLoggingDepth : std::numeric_limits<int>::max();
+    if (static_cast<std::uint32_t>(details.value("depth").toUInt()) >= maxDepth)
+        return;
+
     static QMutex mutex;
     QMutexLocker lock(&mutex);
 
-    const auto maxDepth         = _state ? _state->getOptions().reporting.maxLoggingDepth : std::numeric_limits<int>::max();
     const auto consoleDetails   = makeConsoleDetails(details);
     const auto consoleMessage   = WorkflowConsoleFormatter::format(SeverityLevel::Warning, text, location, consoleDetails, maxDepth);
 
@@ -492,10 +524,17 @@ void WorkflowExecutionContext::syncTaskProgress() const
         return;
 
     const auto progress = static_cast<float>(_state->getOverallProgress());
+    const auto progressRoot = _state->getProgressRoot();
+    const auto activeStage = progressRoot ? findActiveStage(progressRoot->createSnapshot()) : QString{};
 
-    QMetaObject::invokeMethod(_task, [task = _task, progress]() {
-    	if (task)
-			task->setProgress(progress);
+    QMetaObject::invokeMethod(_task, [task = _task, progress, activeStage]() {
+        if (task)
+        {
+            task->setProgress(progress);
+
+            if (!activeStage.isEmpty())
+                task->setProgressDescription(activeStage);
+        }
     }, Qt::QueuedConnection);
 }
 

@@ -103,7 +103,7 @@ public:
      * @param durationType Notification duration policy.
      * @param delayMs Delay in milliseconds before showing the notification.
      */
-    void addNotification(const QString& title, const QString& description, const QIcon& icon = QIcon(), const util::Notification::DurationType& durationType = util::Notification::DurationType::Calculated, std::int32_t delayMs = 0) override;
+    void addNotification(const QString& title, const QString& description, const QIcon& icon = QIcon(), const util::Notification::DurationType& durationType = util::Notification::DurationType::Calculated, std::int32_t delayMs = 0, util::SeverityLevel severity = util::SeverityLevel::Info) override;
 
     /**
      * @brief Registers a notification link handler.

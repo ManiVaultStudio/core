@@ -11,6 +11,7 @@
 
 #include "Task.h"
 
+#include <functional>
 #include <QTreeWidget>
 
 class QWidget;
@@ -281,6 +282,15 @@ public: // Visibility
 
 public: // Miscellaneous
 
+    /** Predicate for deciding whether a group participates in the view and text filtering. */
+    using GroupActionVisibilityFilter = std::function<bool(GroupAction*)>;
+
+    /** Set an additional visibility filter without changing each group's stored visibility. */
+    void setGroupActionVisibilityFilter(const GroupActionVisibilityFilter& visibilityFilter);
+
+    /** Get whether a group passes the optional visibility filter. */
+    bool passesGroupActionVisibilityFilter(GroupAction* groupAction) const;
+
     /**
      * Get update task
      * @return Task for reporting update progress
@@ -325,9 +335,13 @@ signals:
      */
     void groupActionHidden(GroupAction* groupAction);
 
+    /** Signals that the optional group action visibility filter changed. */
+    void groupActionVisibilityFilterChanged();
+
 protected:
     GroupActions                _groupActions;      /** Pointers to group actions */
     QMap<GroupAction*, bool>    _visibility;        /** Group action visibility */
+    GroupActionVisibilityFilter _visibilityFilter; /** Optional additional group visibility predicate */
     Task                        _updateTask;        /** Task for reporting update progress */
 };
 

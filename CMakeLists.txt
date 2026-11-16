@@ -79,6 +79,7 @@ file(TO_CMAKE_PATH ${MV_INSTALL_DIR} MV_INSTALL_DIR)
 
 # Other user-facing options
 option(MV_BUILD_TESTING "Build ManiVault tests" OFF)
+option(MV_BUILD_BENCHMARKS "Build ManiVault benchmarks" OFF)
 option(MV_USE_AVX "Use AVX if available - by default OFF" OFF)
 option(MV_USE_ERROR_LOGGING "Use error logging with Sentry" OFF)
 option(MV_PRECOMPILE_HEADERS "Precompile several headers for faster compilation" ON)

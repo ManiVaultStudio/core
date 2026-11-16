@@ -253,7 +253,8 @@ void ProjectSaveWorkflow::archive(ProjectSaveContext& context)
     printLine("Recipe stage", "Archive", 2);
 #endif
 
-    context._archiver.compressDirectory(mv::projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Save), context._filePath, true, 0);
+    const auto sourceArchivePath = mv::projects().getCurrentProject() ? mv::projects().getCurrentProject()->getFilePath() : QString();
+    context._archiver.compressDirectory(mv::projects().getTemporaryDirPath(AbstractProjectManager::TemporaryDirType::Save), context._filePath, true, 0, "", QDir::Filters(QDir::Files), sourceArchivePath);
 }
 
 void ProjectSaveWorkflow::finalize(ProjectSaveContext& context)

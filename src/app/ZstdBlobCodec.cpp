@@ -11,7 +11,13 @@
 
 #include <CoreInterface.h>
 
+#include <QFileInfo>
+#include <QFile>
+#include <QElapsedTimer>
+
 #include <exception/ManiVaultException.h>
+
+#include <limits>
 
 #ifdef _DEBUG
 	#define ZSTD_CODEC_VERBOSE
@@ -430,6 +436,38 @@ void ZstdBlobCodec::decodeFromFileTo(const QString& filePath, char* destination,
     const auto encodedData = Archiver::readZipEntryToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath);
 
     return decodeTo(encodedData, destination, destinationSize);
+}
+
+void ZstdBlobCodec::decodeFromFileRangeTo(const QString& filePath, const std::uint64_t offset, const std::uint64_t encodedSize, char* destination, const std::uint64_t destinationSize) const
+{
+    if (destination == nullptr)
+        throw std::invalid_argument("Destination buffer is null");
+
+    QElapsedTimer readTimer;
+    readTimer.start();
+    QByteArray encodedData;
+    const bool isLocalFile = QFileInfo::exists(filePath);
+    if (isLocalFile)
+    {
+        if (offset > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max()) || encodedSize > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max()))
+            throw std::invalid_argument("Encoded file range exceeds Qt size limits");
+
+        QFile file(filePath);
+        if (!file.open(QIODevice::ReadOnly) || !file.seek(static_cast<qint64>(offset)))
+            throw std::runtime_error(QString("Unable to open or seek encoded file range: %1").arg(filePath).toStdString());
+
+        encodedData = file.read(static_cast<qint64>(encodedSize));
+        if (encodedData.size() != static_cast<qsizetype>(encodedSize))
+            throw std::runtime_error(QString("Unable to read encoded file range: %1").arg(filePath).toStdString());
+    }
+    else
+        encodedData = Archiver::readZipEntryRangeToMemory(mv::projects().getCurrentProject()->getFilePath(), filePath, offset, encodedSize);
+
+    const auto readNanoseconds = static_cast<std::uint64_t>(readTimer.nsecsElapsed());
+    QElapsedTimer decodeTimer;
+    decodeTimer.start();
+    decodeTo(encodedData, destination, destinationSize);
+    recordFileRangeTelemetry(encodedSize, readNanoseconds, static_cast<std::uint64_t>(decodeTimer.nsecsElapsed()));
 }
 
 QString ZstdBlobCodec::getFileExtension() const

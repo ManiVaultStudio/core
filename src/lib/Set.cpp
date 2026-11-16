@@ -213,15 +213,12 @@ UniqueWorkflowPlan DatasetImpl::fromVariantMapWorkflow(QVariantMap variantMap)
     plan->addSequentialStage("Load", [this, variantMap](const WorkflowPlan::Job&, const SharedWorkflowExecutionContext&) {
         variantMapMustContain(variantMap, "Name");
         variantMapMustContain(variantMap, "Locked");
-        variantMapMustContain(variantMap, "StorageType");
         variantMapMustContain(variantMap, "DataType");
         variantMapMustContain(variantMap, "Derived");
         variantMapMustContain(variantMap, "LinkedData");
 
         setText(variantMap["Name"].toString());
         setLocked(variantMap["Locked"].toBool());
-        setStorageType(static_cast<StorageType>(variantMap["StorageType"].toInt()));
-
         assert(variantMap["DataType"].toString() == getDataType().getTypeString());
 
         if (variantMap["Derived"].toBool())
@@ -253,15 +250,6 @@ UniqueWorkflowPlan DatasetImpl::fromVariantMapWorkflow(QVariantMap variantMap)
         if (variantMap.contains("MayUnderive"))
             _mayUnderive = variantMap["MayUnderive"].toBool();
 
-        if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {
-            Datasets proxyMembers;
-
-            for (const auto& proxyMemberGuid : variantMap["ProxyMembers"].toStringList())
-                proxyMembers << mv::data().getDataset(proxyMemberGuid);
-
-            setProxyMembers(proxyMembers);
-        }
-
         for (const auto& linkedDataVariant : variantMap["LinkedData"].toList()) {
             LinkedData linkedData;
 
@@ -290,11 +278,6 @@ UniqueWorkflowPlan DatasetImpl::toVariantMapWorkflow() const
         auto resultMap      = executionContext->takeOutput(saveActionStage).toMap();
         auto propertiesMap  = executionContext->takeOutput(savePropertiesStage).toMap();
 
-        QStringList proxyMemberGuids;
-
-        for (const auto& proxyMember : _proxyMembers)
-            proxyMemberGuids << proxyMember->getId();
-
         QVariantList linkedDataList;
 
         for (const auto& linkedData : _linkedData)
@@ -303,8 +286,6 @@ UniqueWorkflowPlan DatasetImpl::toVariantMapWorkflow() const
         resultMap.insert({
 	        { "Name", QVariant::fromValue(text()) },
 	        { "Locked", QVariant::fromValue(_locked) },
-	        { "StorageType", QVariant::fromValue(static_cast<std::int32_t>(getStorageType())) },
-	        { "ProxyMembers", QVariant::fromValue(proxyMemberGuids) },
 	        { "DataType", QVariant::fromValue(getDataType().getTypeString()) },
 	        { "PluginKind", QVariant::fromValue(_rawData->getKind()) },
 	        { "PluginVersion", QVariant::fromValue(_rawData->getVersion()) },
@@ -334,54 +315,6 @@ void DatasetImpl::setGroupIndex(const std::int32_t& groupIndex)
     _groupIndex = groupIndex;
 
     events().notifyDatasetDataSelectionChanged(this);
-}
-
-mv::Datasets DatasetImpl::getProxyMembers() const
-{
-    return _proxyMembers;
-}
-
-void DatasetImpl::setProxyMembers(const Datasets& proxyDatasets)
-{
-    try
-    {
-        if (proxyDatasets.isEmpty()) {
-            setStorageType(StorageType::Owner);
-            throw std::runtime_error("Proxy dataset requires at least one input dataset");
-        }
-
-        for (const auto& proxyDataset : proxyDatasets)
-            if (proxyDataset->getDataType() != getDataType())
-                throw std::runtime_error("All datasets should be of the same data type");
-
-        _proxyMembers = proxyDatasets;
-
-        setStorageType(StorageType::Proxy);
-
-        events().notifyDatasetDataChanged(this);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to set proxy datasets for " + text(), e);
-    }
-    catch (...)
-    {
-        exceptionMessageBox("Unable to set proxy datasets for " + text());
-    }
-}
-
-bool DatasetImpl::mayProxy(const Datasets& proxyDatasets) const
-{
-    for (const auto& proxyDataset : proxyDatasets)
-        if (proxyDataset->getDataType() != getDataType())
-            return false;
-
-    return true;
-}
-
-bool DatasetImpl::isProxy() const
-{
-    return !_proxyMembers.isEmpty();
 }
 
 void DatasetImpl::addAction(mv::gui::WidgetAction& widgetAction)
@@ -444,7 +377,6 @@ DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/
     WidgetAction(nullptr, "Set"),
     _rawData(nullptr),
     _rawDataName(rawDataName),
-    _storageType(StorageType::Owner),
     _all(true),
     _derived(false),
     _mayUnderive(mayUnderive),
@@ -466,19 +398,6 @@ DatasetImpl::DatasetImpl(const QString& rawDataName, bool mayUnderive /*= true*/
 
 void DatasetImpl::init()
 {
-}
-
-mv::DatasetImpl::StorageType DatasetImpl::getStorageType() const
-{
-    return _storageType;
-}
-
-void DatasetImpl::setStorageType(const StorageType& storageType)
-{
-    if (storageType == _storageType)
-        return;
-
-    _storageType = storageType;
 }
 
 QString DatasetImpl::getGuiName() const

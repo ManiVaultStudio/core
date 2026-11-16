@@ -30,13 +30,11 @@ public:
 
 public: // Action getters
 
-    mv::gui::StringAction& getDataStorageAction() { return _dataStorageAction; }
     mv::gui::StringAction& getNumberOfPointsAction() { return _numberOfPointsAction; }
     mv::gui::StringAction& getRawDataSizeAction() { return _rawDataSizeAction; }
 
 protected:
     mv::Dataset<Text>       _dataset;                           /** Text dataset reference */
-    mv::gui::StringAction   _dataStorageAction;                 /** Type of data storage action */
     mv::gui::StringAction   _numberOfPointsAction;              /** Number of points action */
     mv::gui::StringAction   _rawDataSizeAction;                 /** Amount of memory for raw data */
 };
