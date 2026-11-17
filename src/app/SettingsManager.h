@@ -47,6 +47,12 @@ public: // Global settings actions
     gui::ErrorLoggingSettingsAction& getErrorLoggingSettingsAction() override { return _errorLoggingSettingsAction; };
 
     /**
+     * @brief Gets the global developer settings group.
+     * @return Reference to the developer settings group
+     */
+    gui::DeveloperSettingsAction& getDeveloperSettingsAction() override { return _developerSettingsAction; }
+
+    /**
      * Get plugin global settings for plugin \p kind
      * @param kind Plugin kind
      * @return Pointer to plugin global settings (if available, otherwise returns a nullptr)
@@ -68,6 +74,7 @@ private:
     gui::AppearanceSettingsAction               _appearanceSettingsAction;              /** Appearance global settings */
     gui::TemporaryDirectoriesSettingsAction     _temporaryDirectoriesSettingsAction;    /** Temporary files global settings */
     gui::ErrorLoggingSettingsAction             _errorLoggingSettingsAction;            /** Error logging settings */
+    gui::DeveloperSettingsAction                _developerSettingsAction;               /** Developer add-on settings */
 };
 
 }

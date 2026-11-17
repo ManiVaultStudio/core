@@ -1301,6 +1301,7 @@ set(PUBLIC_GLOBAL_SETTINGS_HEADERS
     ParametersSettingsAction.h
     MiscellaneousSettingsAction.h
     TasksSettingsAction.h
+    DeveloperSettingsAction.h
     AppearanceSettingsAction.h
     TemporaryDirectoriesSettingsAction.h
 	ErrorLoggingSettingsAction.h
@@ -1312,6 +1313,7 @@ set(PUBLIC_GLOBAL_SETTINGS_SOURCES
     ParametersSettingsAction.cpp
     MiscellaneousSettingsAction.cpp
     TasksSettingsAction.cpp
+    DeveloperSettingsAction.cpp
     AppearanceSettingsAction.cpp
     TemporaryDirectoriesSettingsAction.cpp
     ErrorLoggingSettingsAction.cpp

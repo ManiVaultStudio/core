@@ -15,6 +15,7 @@
 #include "TemporaryDirectoriesSettingsAction.h"
 #include "ErrorLoggingSettingsAction.h"
 #include "PluginGlobalSettingsGroupAction.h"
+#include "DeveloperSettingsAction.h"
 
 namespace mv {
     namespace plugin {
@@ -63,6 +64,12 @@ public: // Global settings actions
     virtual gui::AppearanceSettingsAction& getAppearanceSettingsAction() = 0;
     virtual gui::TemporaryDirectoriesSettingsAction& getTemporaryDirectoriesSettingsAction() = 0;
     virtual gui::ErrorLoggingSettingsAction& getErrorLoggingSettingsAction() = 0;
+
+    /**
+     * @brief Gets the global developer settings group.
+     * @return Reference to the application-wide developer settings
+     */
+    virtual gui::DeveloperSettingsAction& getDeveloperSettingsAction() = 0;
 
     /**
      * Get plugin global settings for plugin \p kind

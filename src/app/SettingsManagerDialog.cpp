@@ -85,6 +85,8 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     _systemSettingsGroupActions.append(&mv::settings().getTasksSettingsAction());
     _groupsAction.addGroupAction(&mv::settings().getTemporaryDirectoriesSettingsAction());
     _systemSettingsGroupActions.append(&mv::settings().getTemporaryDirectoriesSettingsAction());
+    _groupsAction.addGroupAction(&mv::settings().getDeveloperSettingsAction());
+    _systemSettingsGroupActions.append(&mv::settings().getDeveloperSettingsAction());
 
     for (auto pluginFactory : mv::plugins().getPluginFactoriesByTypes()) {
         if (auto pluginGlobalSettingsGroupAction = pluginFactory->getGlobalSettingsGroupAction())

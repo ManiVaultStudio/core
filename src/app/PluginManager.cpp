@@ -184,15 +184,22 @@ void PluginManager::loadPluginFactories()
     // For each of the plugin files which are resolved, load them and add them in their proper menu category
     for (const auto& fileName: resolvedPlugins)
     {
+        QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
+
+        // Read metadata before loading dependencies or creating the factory so developer add-ons can be excluded at startup.
+        const QJsonObject pluginMetaData   = pluginLoader.metaData().value("MetaData").toObject();
+        const auto       pluginKind       = pluginMetaData.value("name").toString();
+        const auto       isDeveloperAddon = pluginMetaData.value("developerAddon").toBool();
+
+        if (isDeveloperAddon && !settings().getDeveloperSettingsAction().isDeveloperAddonsEnabled()) {
+            qInfo() << "Skipping developer add-on while developer add-ons are disabled:" << pluginKind;
+            continue;
+        }
+
         // Load plugin dependencies, if there are any
         loadPluginDependencies(pluginsDependenciesDir, fileName);
 
         // Dynamic loader of plugin shared library
-        QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
-        
-        // Get metadata about plugin from the accompanying .json file compiled in the shared library
-        const QJsonObject pluginMetaData = pluginLoader.metaData().value("MetaData").toObject();
-        QString pluginKind      = pluginMetaData.value("name").toString();
 
         // Transition: (OLD) only plugin version, (NEW) nested version object for plugin and core
         QString version         = "";

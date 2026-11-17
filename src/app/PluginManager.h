@@ -32,7 +32,11 @@ public:
     /** Resets the contents of the plugin manager */
     void reset() override;
 
-    /** Loads all plugin factories from the plugin directory */
+    /**
+     * @brief Loads eligible plugin factories from the plugin directory.
+     * A plugin whose embedded PluginInfo.json metadata sets "developerAddon" to true is
+     * excluded when the global setting is disabled; the default for missing metadata is false.
+     */
     void loadPluginFactories() override;
 
     /**
