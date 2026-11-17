@@ -12,9 +12,9 @@ namespace mv::gui
 {
 
 /**
- * Tasks global settings action class
+ * @brief Global settings for task-related application behavior.
  *
- * Action class which groups all tasks-related global settings
+ * This settings group is classified as advanced in the Settings Manager.
  *
  * @author Thomas Kroes
  */

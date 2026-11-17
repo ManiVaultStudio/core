@@ -13,6 +13,7 @@ TasksSettingsAction::TasksSettingsAction(QObject* parent) :
     _hideForegroundTasksPopupAction(this, "Hide foreground tasks popup")
 {
     setShowLabels(false);
+    setAdvanced(true);
 
     addAction(&_hideForegroundTasksPopupAction);
 }

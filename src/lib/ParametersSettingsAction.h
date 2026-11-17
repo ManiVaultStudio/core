@@ -12,9 +12,10 @@ namespace mv::gui
 {
 
 /**
- * Parameters global settings action class
+ * @brief Global settings for shared-parameter behavior.
  *
- * Action class which groups all (shared) parameters based global settings
+ * Controls shared-parameter naming, removal confirmation, and expert-mode display.
+ * This settings group is classified as advanced in the Settings Manager.
  *
  * @author Thomas Kroes
  */

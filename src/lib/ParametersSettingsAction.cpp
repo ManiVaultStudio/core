@@ -16,7 +16,7 @@ ParametersSettingsAction::ParametersSettingsAction(QObject* parent) :
     _confirmRemoveSharedParameterAction(this, "Confirm remove shared parameter", true),
     _expertModeAction(this, "View in expert mode", false)
 {
-    setShowLabels(false);
+    setAdvanced(true);
 
     addAction(&_askForSharedParameterNameAction);
     addAction(&_confirmRemoveSharedParameterAction);

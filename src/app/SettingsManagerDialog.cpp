@@ -5,6 +5,7 @@
 #include "SettingsManagerDialog.h"
 
 #include <CoreInterface.h>
+#include <GlobalSettingsGroupAction.h>
 #include <QOperatingSystemVersion>
 #include <QVBoxLayout>
 #include <QStyle>
@@ -25,7 +26,8 @@ namespace mv::gui {
 SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
     QDialog(parent),
     _groupsAction(this, "Groups"),
-    _settingsFilterAction(this, "Filter settings", { "System", "Plugins" }, { "System", "Plugins" })
+    _settingsFilterGroupAction(this, "Filters", false),
+    _settingsFilterAction(this, "Filter settings", { "System", "Plugins", "Advanced" }, { "System", "Plugins" })
 {
     setWindowIcon(StyledIcon("gears"));
     setWindowModality(Qt::ApplicationModal);
@@ -39,9 +41,21 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
 
     setLayout(layout);
 
-    _settingsFilterAction.setDefaultWidgetFlags(OptionsAction::Tags);
-    _settingsFilterAction.setToolTip("Choose whether system settings, plugin settings, or both are shown.");
-    layout->addWidget(_settingsFilterAction.createWidget(this, OptionsAction::Tags));
+    _settingsFilterAction.setSettingsPrefix("GlobalSettings/SettingsManager/Filters");
+    _settingsFilterAction.setDefaultWidgetFlags(OptionsAction::VerticalCheckboxes);
+    _settingsFilterAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
+    _settingsFilterAction.setToolTip("Choose which settings sections and advanced settings are shown.");
+    _settingsFilterAction.setOptionToolTips({
+        { "System", "Show core application settings" },
+        { "Plugins", "Show plugin settings" },
+        { "Advanced", "Show settings marked as advanced" }
+    });
+    _settingsFilterGroupAction.setIcon(StyledIcon("filter"));
+    _settingsFilterGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
+    _settingsFilterGroupAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::NoLabelInGroup);
+    _settingsFilterGroupAction.addAction(&_settingsFilterAction);
+    _settingsFilterGroupAction.setExpanded(false);
+    _groupsAction.addToolbarAction(&_settingsFilterGroupAction);
 
     auto groupsWidget = _groupsAction.createWidget(this);
     layout->addWidget(groupsWidget);
@@ -89,16 +103,22 @@ SettingsManagerDialog::SettingsManagerDialog(QWidget* parent /*= nullptr*/) :
 void SettingsManagerDialog::updateSettingsFilter()
 {
     const auto selectedOptions = _settingsFilterAction.getSelectedOptions();
-    const auto showSystemSettings = selectedOptions.contains("System");
-    const auto showPluginSettings = selectedOptions.contains("Plugins");
+    const auto showSystemSettings   = selectedOptions.contains("System");
+    const auto showPluginSettings   = selectedOptions.contains("Plugins");
+    const auto showAdvancedSettings = selectedOptions.contains("Advanced");
 
-    _groupsAction.setGroupActionVisibilityFilter([this, showSystemSettings, showPluginSettings](GroupAction* groupAction) {
-        const auto isSystemSettings = _systemSettingsGroupActions.contains(groupAction);
-        const auto isPluginSettings = _pluginSettingsGroupActions.contains(groupAction);
-
-        return (isSystemSettings && showSystemSettings) ||
+    _groupsAction.setGroupActionVisibilityFilter([this, showSystemSettings, showPluginSettings, showAdvancedSettings](GroupAction* groupAction) {
+        const auto globalSettingsGroupAction = dynamic_cast<GlobalSettingsGroupAction*>(groupAction);
+        const auto isSystemSettings = globalSettingsGroupAction && _systemSettingsGroupActions.contains(globalSettingsGroupAction);
+        const auto isPluginSettings = globalSettingsGroupAction && _pluginSettingsGroupActions.contains(globalSettingsGroupAction);
+        const auto matchesCategory =
+            (isSystemSettings && showSystemSettings) ||
             (isPluginSettings && showPluginSettings) ||
             (!isSystemSettings && !isPluginSettings);
+
+        const auto matchesAdvancedFilter = !globalSettingsGroupAction || !globalSettingsGroupAction->isAdvanced() || showAdvancedSettings;
+
+        return matchesCategory && matchesAdvancedFilter;
     });
 
     updateEmptySettingsOverlay();
@@ -109,8 +129,12 @@ void SettingsManagerDialog::updateEmptySettingsOverlay()
     if (!_emptySettingsOverlayWidget)
         return;
 
-    const auto hasEditableSettings = [this](const QVector<GroupAction*>& groupActions) {
-        return std::any_of(groupActions.begin(), groupActions.end(), [](GroupAction* groupAction) {
+    const auto showAdvancedSettings = _settingsFilterAction.getSelectedOptions().contains("Advanced");
+    const auto hasEditableSettings = [showAdvancedSettings](const QVector<GlobalSettingsGroupAction*>& groupActions) {
+        return std::any_of(groupActions.begin(), groupActions.end(), [showAdvancedSettings](GlobalSettingsGroupAction* groupAction) {
+            if (groupAction->isAdvanced() && !showAdvancedSettings)
+                return false;
+
             return !groupAction->getActions().isEmpty();
         });
     };

@@ -10,15 +10,20 @@
 #include <actions/GroupsAction.h>
 #include <actions/GroupAction.h>
 #include <actions/OptionsAction.h>
+#include <actions/VerticalGroupAction.h>
 
 namespace mv::gui {
 
 class InfoOverlayWidget;
+class GlobalSettingsGroupAction;
 
 /**
- * Settings manager dialog class
- * 
- * Dialog class for modifying settings.
+ * @brief Dialog for viewing and changing application and plugin settings.
+ *
+ * System and plugin filters control their respective sections. The Advanced filter
+ * reveals groups marked with GlobalSettingsGroupAction::setAdvanced(bool). Filter choices
+ * are stored in application settings, while the referenced global settings groups are
+ * owned by the settings and plugin systems rather than by this dialog.
  *
  * @author Thomas Kroes
  */
@@ -27,36 +32,43 @@ class SettingsManagerDialog : public QDialog
 public:
 
     /**
-     * Construct a dialog for the settings manager with \p with parent widget
+     * @brief Constructs the settings manager dialog.
      * @param parent Pointer to parent widget
      */
     SettingsManagerDialog(QWidget* parent = nullptr);
 
-    /** Get preferred size */
+    /**
+     * @brief Gets the preferred dialog size.
+     * @return Preferred size of the dialog
+     */
     QSize sizeHint() const override;
 
-    /** Get minimum size hint*/
+    /**
+     * @brief Gets the minimum size hint.
+     * @return Same size as sizeHint()
+     */
     QSize minimumSizeHint() const override {
         return sizeHint();
     }
 
 private:
 
-    /** Applies the selected System and Plugins tags to the settings sections. */
+    /** Applies the selected System, Plugins, and Advanced filters to settings sections. */
     void updateSettingsFilter();
 
     /** Updates the empty-settings overlay to match the active category filter. */
     void updateEmptySettingsOverlay();
 
-    /** Update styling after a theme change */
+    /** @brief Refreshes the dialog styling after a theme change. */
     void updateCustomStyle();
 
 private:
-    GroupsAction                _groupsAction;               /** Groups action for all global settings sections */
-    OptionsAction               _settingsFilterAction;       /** Tagged filter for system and plugin settings */
-    QVector<GroupAction*>       _systemSettingsGroupActions; /** Core application settings sections */
-    QVector<GroupAction*>       _pluginSettingsGroupActions; /** Plugin-provided settings sections */
-    InfoOverlayWidget*          _emptySettingsOverlayWidget = nullptr; /** Overlay shown when no editable settings are available */
+    GroupsAction                        _groupsAction;                         /** Dialog-owned container for the settings sections */
+    VerticalGroupAction                 _settingsFilterGroupAction;            /** Dialog-owned collapsed toolbar group for filter controls */
+    OptionsAction                       _settingsFilterAction;                 /** Dialog-owned, persisted System, Plugins, and Advanced checkboxes */
+    QVector<GlobalSettingsGroupAction*> _systemSettingsGroupActions;           /** Non-owning references to core application settings sections */
+    QVector<GlobalSettingsGroupAction*> _pluginSettingsGroupActions;           /** Non-owning references to plugin-provided settings sections */
+    InfoOverlayWidget*                  _emptySettingsOverlayWidget = nullptr; /** Overlay parented to the groups tree widget, if available */
 };
 
 }

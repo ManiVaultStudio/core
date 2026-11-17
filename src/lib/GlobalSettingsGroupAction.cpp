@@ -41,4 +41,14 @@ void GlobalSettingsGroupAction::addAction(WidgetAction* action, std::int32_t wid
     GroupAction::addAction(action, widgetFlags, widgetConfigurationFunction);
 }
 
+void GlobalSettingsGroupAction::setAdvanced(const bool advanced)
+{
+    _advanced = advanced;
+}
+
+bool GlobalSettingsGroupAction::isAdvanced() const
+{
+    return _advanced;
+}
+
 }

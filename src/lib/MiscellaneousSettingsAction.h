@@ -13,9 +13,9 @@ namespace mv::gui
 {
 
 /**
- * Miscellaneous global settings action class
+ * @brief Global settings for miscellaneous application behavior.
  *
- * Action class which groups all miscellaneous global settings
+ * This settings group is classified as advanced in the Settings Manager.
  *
  * @author Thomas Kroes
  */

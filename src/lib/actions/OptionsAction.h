@@ -14,18 +14,23 @@
 #include "widgets/FlowLayout.h"
 #include "widgets/MultiSelectComboBox.h"
 
+#include <QBoxLayout>
 #include <QComboBox>
 #include <QCompleter>
 #include <QMap>
 #include <QSortFilterProxyModel>
 #include <QTableView>
 
+class QCheckBox;
+
 namespace mv::gui {
 
 /**
- * Options widget action class
+ * @brief Action for managing a multiple-option selection.
  *
- * Action for selecting multiple options at once
+ * The available widget flags provide combo-box, list, tag, and checkbox presentations.
+ * Checkbox views reflect changes to the available options and selected values. If both
+ * checkbox orientations are requested, the vertical presentation takes precedence.
  *
  * @author Thomas Kroes
  */
@@ -62,12 +67,14 @@ public:
 
     /** Describes the widget flags */
     enum WidgetFlag {
-        ComboBox        = 0x00001,      /** The widget includes a combobox widget */
-        ListView        = 0x00002,      /** The widget includes a list view widget */
-        Selection       = 0x00004,      /** The widget includes a selection control */
-        File            = 0x00008,      /** The widget includes a file control */
-        Tags            = 0x00010,      /** The widget includes a flow layout with tags */
-        Filter          = 0x00020,      /** The list view includes filtering controls */
+        ComboBox             = 0x00001, /** The widget includes a combobox widget */
+        ListView             = 0x00002, /** The widget includes a list view widget */
+        Selection            = 0x00004, /** The widget includes a selection control */
+        File                 = 0x00008, /** The widget includes a file control */
+        Tags                 = 0x00010, /** The widget includes a flow layout with tags */
+        Filter               = 0x00020, /** The list view includes filtering controls */
+        VerticalCheckboxes   = 0x00040, /** The widget presents one checkbox per option in a vertical column */
+        HorizontalCheckboxes = 0x00080, /** The widget presents one checkbox per option in a horizontal row */
 
         Default = ComboBox
     };
@@ -250,6 +257,42 @@ public: // Widgets
         friend class OptionsAction;
     };
 
+    /**
+     * @brief Presents each option as a check box.
+     *
+     * The widget does not own the OptionsAction. The action must outlive this view.
+     */
+    class CORE_EXPORT CheckboxesViewWidget : public QWidget {
+    protected:
+
+        /**
+         * @brief Constructs a checkbox view for the options action.
+         * @param parent Parent widget
+         * @param optionsAction Options action whose options are displayed
+         * @param orientation Layout direction for the checkboxes
+         */
+        CheckboxesViewWidget(QWidget* parent, OptionsAction* optionsAction, QBoxLayout::Direction orientation);
+
+    private:
+
+        /**
+         * @brief Rebuilds the checkbox widgets from the available options.
+         */
+        void updateCheckboxes();
+
+        /**
+         * @brief Synchronizes checkbox states with the selected options.
+         */
+        void updateSelection();
+
+    protected:
+        OptionsAction*            _optionsAction; /** Non-owning source of available and selected options */
+        QBoxLayout                _layout;        /** Arranges checkbox widgets in the selected orientation */
+        QMap<QString, QCheckBox*> _checkboxes;    /** Non-owning checkbox pointers keyed by option name */
+
+        friend class OptionsAction;
+    };
+
 protected:
 
     /**
@@ -375,10 +418,20 @@ public:
      */
     void setSelectedOptions(const CheckableStringListModel::CheckedIndicesSet& selectedOptions);
 
-    /** Sets supplementary tooltip text keyed by option name. */
+    /**
+     * @brief Sets supplementary tooltips for the options.
+     *
+     * Checkbox and tag presentations show the tooltip associated with each option.
+     * Options not present in the map have no supplementary tooltip.
+     * @param toolTips Map from option label to supplementary tooltip text
+     */
     void setOptionToolTips(const QMap<QString, QString>& toolTips);
 
-    /** Returns supplementary tooltip text configured for one option, or an empty string. */
+    /**
+     * @brief Gets the supplementary tooltip configured for an option.
+     * @param option Option label to query
+     * @return Configured tooltip, or an empty string when none is set
+     */
     QString getOptionToolTip(const QString& option) const;
 
     /** Selects all options */
@@ -451,7 +504,11 @@ signals:
      */
     void selectedOptionsChanged(const QStringList& selectedOptions);
 
-    /** Emitted when supplementary per-option tooltip text changes. */
+    /**
+     * @brief Signals that supplementary per-option tooltip text changed.
+     *
+     * Emitted after setOptionToolTips() replaces the tooltip map.
+     */
     void optionToolTipsChanged();
 
 protected:
@@ -462,8 +519,8 @@ protected:
     friend class ComboBox;
 
 private:
-    bool    _serializeAllOptions;                   /** Whether all options should be serialzied, by default false */
-    QMap<QString, QString> _optionToolTips;          /** Supplementary tooltip text keyed by option name. */
+    bool                   _serializeAllOptions;    /** Whether all options are serialized; false by default */
+    QMap<QString, QString> _optionToolTips;         /** Supplementary tooltip text keyed by option name */
 };
 
 }   

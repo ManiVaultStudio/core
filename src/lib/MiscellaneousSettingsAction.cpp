@@ -18,6 +18,8 @@ MiscellaneousSettingsAction::MiscellaneousSettingsAction(QObject* parent) :
     _statusBarVisibleAction(this, "Show status bar", true),
     _statusBarOptionsAction(this, "Status bar options", {}, { "Example View OpenGL", "Start Page", "Version", "Plugins", "Logging", "Background Tasks", "Foreground Tasks", "Settings", "Workspace" })
 {
+    setAdvanced(true);
+
     _statusBarOptionsAction.setDefaultWidgetFlag(OptionsAction::WidgetFlag::Selection);
     _statusBarOptionsAction.setEnabled(false);
 

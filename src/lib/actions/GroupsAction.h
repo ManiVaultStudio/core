@@ -21,9 +21,13 @@ namespace mv::gui {
 class GroupSectionTreeItem;
 
 /**
- * Groups action class
+ * @brief Displays and filters a collection of group actions.
  *
- * Contains a list of group actions and displays them in an accordion widget
+ * The groups are referenced without taking ownership and displayed in an accordion widget;
+ * each group must outlive its registration.
+ * Optional toolbar actions are placed between the name filter and expansion controls;
+ * they are also non-owning and must remain alive while registered and while toolbar
+ * widgets use them.
  *
  * @author Thomas Kroes
  */
@@ -93,6 +97,12 @@ public:
         void createToolbar(const std::int32_t& widgetFlags);
 
         /**
+         * @brief Rebuilds the toolbar with custom actions between filtering and expansion controls.
+         * @param widgetFlags Widget flags for the configuration of the widget
+         */
+        void updateToolbarActions(const std::int32_t& widgetFlags);
+
+        /**
          * Create tree widget for display of the groups
          * @param widgetFlags Widget flags for the configuration of the widget
          */
@@ -131,10 +141,10 @@ public:
         void hideGroupAction(GroupAction* groupAction);
         
     protected:
-        GroupsAction*                                   _groupsAction;                  /** Pointer to groups action */
+        GroupsAction*                                   _groupsAction;                  /** Non-owning pointer; the GroupsAction must outlive this widget */
         QVBoxLayout                                     _layout;                        /** Main layout */
         GroupAction                                     _filteredActionsAction;         /** Group action for filtered actions */
-        HorizontalGroupAction                           _toolbarAction;                 /** Toolbar action */
+        HorizontalGroupAction                           _toolbarAction;                 /** Internal group holding toolbar controls */
         StringAction                                    _filterAction;                  /** Filter action */
         TriggerAction                                   _expandAllAction;               /** Expand all datasets action */
         TriggerAction                                   _collapseAllAction;             /** Collapse all datasets action */
@@ -192,6 +202,31 @@ public: // Adding/removing group action(s)
 
     /** Get group actions */
     const GroupActions& getGroupActions() const;
+
+    /**
+     * @brief Adds a non-owning action to the toolbar between name filtering and expansion controls.
+     *
+     * The action is added to existing group widgets and future widgets. The caller retains
+     * ownership and must keep the action alive until it is removed and no toolbar widget
+     * uses it. Adding the same pointer more than once has no effect.
+     * @param action Non-null action to insert; duplicate registration has no effect
+     */
+    void addToolbarAction(WidgetAction* action);
+
+    /**
+     * @brief Removes an action from the groups toolbar.
+     *
+     * Existing group widgets rebuild their toolbar after removal. The action remains owned
+     * by its original owner.
+     * @param action Action to remove; an unregistered pointer has no effect
+     */
+    void removeToolbarAction(WidgetAction* action);
+
+    /**
+     * @brief Gets the non-owning toolbar actions in their display order.
+     * @return Constant reference to the internal list, valid while this GroupsAction exists
+     */
+    const WidgetActions& getToolbarActions() const;
 
 public: // Expand/collapse group(s)
 
@@ -338,11 +373,19 @@ signals:
     /** Signals that the optional group action visibility filter changed. */
     void groupActionVisibilityFilterChanged();
 
+    /**
+     * @brief Signals that the custom toolbar actions changed.
+     *
+     * Emitted after an action is added to or removed from the toolbar.
+     */
+    void toolbarActionsChanged();
+
 protected:
-    GroupActions                _groupActions;      /** Pointers to group actions */
-    QMap<GroupAction*, bool>    _visibility;        /** Group action visibility */
-    GroupActionVisibilityFilter _visibilityFilter; /** Optional additional group visibility predicate */
-    Task                        _updateTask;        /** Task for reporting update progress */
+    GroupActions                _groupActions;       /** Non-owning group actions displayed in the accordion */
+    WidgetActions               _toolbarActions;     /** Non-owning actions inserted between filtering and expansion controls */
+    QMap<GroupAction*, bool>    _visibility;         /** Group action visibility */
+    GroupActionVisibilityFilter _visibilityFilter;   /** Optional additional group visibility predicate */
+    Task                        _updateTask;         /** Task for reporting update progress */
 };
 
 }

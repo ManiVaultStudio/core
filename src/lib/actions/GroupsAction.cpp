@@ -121,6 +121,30 @@ const GroupsAction::GroupActions& GroupsAction::getGroupActions() const
     return _groupActions;
 }
 
+void GroupsAction::addToolbarAction(WidgetAction* action)
+{
+    Q_ASSERT(action != nullptr);
+
+    if (!action || _toolbarActions.contains(action))
+        return;
+
+    _toolbarActions << action;
+    emit toolbarActionsChanged();
+}
+
+void GroupsAction::removeToolbarAction(WidgetAction* action)
+{
+    if (!_toolbarActions.removeOne(action))
+        return;
+
+    emit toolbarActionsChanged();
+}
+
+const WidgetActions& GroupsAction::getToolbarActions() const
+{
+    return _toolbarActions;
+}
+
 bool GroupsAction::canExpandAll() const
 {
     return getNumberOfExpandedGroupActions() < getNumberOfVisibleGroupActions();
@@ -277,6 +301,7 @@ void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
     // Filter action is in search mode
     _filterAction.setSearchMode(true);
     _filterAction.setPlaceHolderString("Filter by name...");
+    _filterAction.setConfigurationFlag(ConfigurationFlag::NoLabelInGroup);
 
     // Set action icon
     _expandAllAction.setIconByName("angles-down");
@@ -291,14 +316,11 @@ void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
     _expandAllAction.setToolTip("Expand all property sections");
     _collapseAllAction.setToolTip("Collapse all property sections");
 
-    // Add toolbar items
-    if (widgetFlags & Filtering)
-        _toolbarAction.addAction(&_filterAction);
+    connect(_groupsAction, &GroupsAction::toolbarActionsChanged, this, [this, widgetFlags] {
+        updateToolbarActions(widgetFlags);
+    });
 
-    if (widgetFlags & Expansion) {
-        _toolbarAction.addAction(&_expandAllAction);
-        _toolbarAction.addAction(&_collapseAllAction);
-    }
+    updateToolbarActions(widgetFlags);
 
     _layout.addWidget(_toolbarAction.createWidget(this));
 
@@ -317,6 +339,22 @@ void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
     // Expand/collapse all when triggered
     connect(&_expandAllAction, &TriggerAction::triggered, _groupsAction, &GroupsAction::expandAll);
     connect(&_collapseAllAction, &TriggerAction::triggered, _groupsAction, &GroupsAction::collapseAll);
+}
+
+void GroupsAction::Widget::updateToolbarActions(const std::int32_t& widgetFlags)
+{
+    _toolbarAction.removeAllActions();
+
+    if (widgetFlags & Filtering)
+        _toolbarAction.addAction(&_filterAction);
+
+    for (auto toolbarAction : _groupsAction->getToolbarActions())
+        _toolbarAction.addAction(toolbarAction);
+
+    if (widgetFlags & Expansion) {
+        _toolbarAction.addAction(&_expandAllAction);
+        _toolbarAction.addAction(&_collapseAllAction);
+    }
 }
 
 void GroupsAction::Widget::createTreeWidget(const std::int32_t& widgetFlags)

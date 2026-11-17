@@ -10,16 +10,19 @@ namespace mv::gui
 {
 
 /**
- * Global settings group action class
+ * @brief Base action for a group of application or plugin-wide settings.
  *
  * Base action class which groups settings for
  * - Common global settings (e.g. tasks & parameters)
  * - Plugin global settings
  * 
- * This class ensures that settings are store in the correct place because it overrides the GroupAction::addAction(...)
- * and adjusts the settings prefix of the added actions.
+ * This class assigns a global-settings prefix to child actions added to the group,
+ * keeping their serialized values under the group name. Child actions are referenced
+ * by the group and must remain alive while registered.
  * 
- * Settings can be found in: ManiVault/GlobalSettings/<global_settings_name>/<action_name>
+ * Settings are stored under ManiVault/GlobalSettings/<global_settings_name>/<action_name>.
+ * The advanced flag classifies the whole group for settings-manager filtering; it does
+ * not change visibility of individual child actions and is not serialized.
  * 
  * Procedure(s) for adding a common global setting:
  * a. Add an action to an existing global settings group:
@@ -58,19 +61,43 @@ public:
      */
     GlobalSettingsGroupAction(QObject* parent, const QString& title, bool expanded = true);
 
-    /** Get settings prefix for child actions */
+    /**
+     * @brief Gets the prefix used for this global settings group.
+     * @return Prefix in the form ManiVault/GlobalSettings/<group-name>/
+     */
     QString getSettingsPrefix() const override;
+
+public: // Advanced group
+
+    /**
+     * @brief Sets whether the whole settings group is classified as advanced.
+     *
+     * The Settings Manager can use this flag to hide the group when advanced settings
+     * are excluded. This metadata is not saved with the settings values.
+     * @param advanced Whether the group should be classified as advanced
+     */
+    void setAdvanced(bool advanced);
+
+    /**
+     * @brief Gets whether the whole settings group is classified as advanced.
+     * @return Whether the group has been marked advanced; false by default
+     */
+    bool isAdvanced() const;
 
 public: // Actions management
 
     /**
-     * Add \p action to the group (facade for GroupAction that automatically sets the WidgetAction settings prefix)
-     * @param action Pointer to action to add
+     * Add an action and assign its settings prefix when it is a child of this group.
+     * The group stores a non-owning pointer; the action must remain alive while registered.
+     * @param action Child action to add
      * @param widgetFlags Action widget flags (default flags if -1)
      * @param widgetConfigurationFunction When set, overrides the standard widget configuration function in the widget action
-     * @param load (currently unused parameter)
+     * @param load Reserved parameter; this override currently ignores it
      */
     void addAction(WidgetAction* action, std::int32_t widgetFlags = -1, mv::gui::WidgetConfigurationFunction widgetConfigurationFunction = mv::gui::WidgetConfigurationFunction(), bool load = true) override;
+
+private:
+    bool _advanced = false; /**< Non-serialized classification flag for the whole group; false by default. */
 };
 
 }

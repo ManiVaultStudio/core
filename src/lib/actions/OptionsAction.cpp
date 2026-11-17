@@ -10,6 +10,7 @@
 
 #include "widgets/FileDialog.h"
 
+#include <QCheckBox>
 #include <QDebug>
 #include <QHeaderView>
 #include <QHBoxLayout>
@@ -17,6 +18,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMouseEvent>
+#include <QSignalBlocker>
 #include <QTimer>
 
 using namespace mv::util;
@@ -522,6 +524,58 @@ OptionsAction::TagsViewWidget::TagsViewWidget(QWidget* parent, OptionsAction* op
     updateFlowLayout();
 }
 
+OptionsAction::CheckboxesViewWidget::CheckboxesViewWidget(QWidget* parent, OptionsAction* optionsAction, QBoxLayout::Direction orientation) :
+    QWidget(parent),
+    _optionsAction(optionsAction),
+    _layout(orientation)
+{
+    _layout.setContentsMargins(0, 0, 0, 0);
+    setLayout(&_layout);
+
+    connect(_optionsAction, &OptionsAction::optionsChanged, this, &CheckboxesViewWidget::updateCheckboxes);
+    connect(_optionsAction, &OptionsAction::selectedOptionsChanged, this, &CheckboxesViewWidget::updateSelection);
+    connect(_optionsAction, &OptionsAction::optionToolTipsChanged, this, &CheckboxesViewWidget::updateCheckboxes);
+
+    updateCheckboxes();
+}
+
+void OptionsAction::CheckboxesViewWidget::updateCheckboxes()
+{
+    QLayoutItem* layoutItem = nullptr;
+
+    while ((layoutItem = _layout.takeAt(0)) != nullptr) {
+        delete layoutItem->widget();
+        delete layoutItem;
+    }
+
+    _checkboxes.clear();
+
+    for (const auto& option : _optionsAction->getOptions()) {
+        auto checkBox = new QCheckBox(option, this);
+        const auto optionToolTip = _optionsAction->getOptionToolTip(option);
+
+        if (!optionToolTip.isEmpty())
+            checkBox->setToolTip(optionToolTip);
+
+        connect(checkBox, &QCheckBox::toggled, this, [this, option](bool checked) {
+            _optionsAction->selectOption(option, !checked);
+        });
+
+        _checkboxes.insert(option, checkBox);
+        _layout.addWidget(checkBox);
+    }
+
+    updateSelection();
+}
+
+void OptionsAction::CheckboxesViewWidget::updateSelection()
+{
+    for (auto checkboxIterator = _checkboxes.cbegin(); checkboxIterator != _checkboxes.cend(); ++checkboxIterator) {
+        const QSignalBlocker signalBlocker(checkboxIterator.value());
+        checkboxIterator.value()->setChecked(_optionsAction->isOptionSelected(checkboxIterator.key()));
+    }
+}
+
 void OptionsAction::TagsViewWidget::updateFlowLayout()
 {
     _widgetsMap.clear();
@@ -686,6 +740,11 @@ QWidget* OptionsAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
 
     if (widgetFlags & WidgetFlag::Tags)
         layout->addWidget(new OptionsAction::TagsViewWidget(parent, this, widgetFlags));
+
+    if (widgetFlags & WidgetFlag::VerticalCheckboxes)
+        layout->addWidget(new OptionsAction::CheckboxesViewWidget(parent, this, QBoxLayout::TopToBottom));
+    else if (widgetFlags & WidgetFlag::HorizontalCheckboxes)
+        layout->addWidget(new OptionsAction::CheckboxesViewWidget(parent, this, QBoxLayout::LeftToRight));
 
     widget->setLayout(layout);
 
