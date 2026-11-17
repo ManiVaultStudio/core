@@ -26,6 +26,10 @@ MiscellaneousSettingsAction::MiscellaneousSettingsAction(QObject* parent) :
     _askConfirmationBeforeRemovingDatasetsAction.setToolTip("Ask confirmation prior to removal of datasets");
     _keepDescendantsAfterRemovalAction.setToolTip("If checked, descendants will not be removed and become orphans (placed at the root of the hierarchy)");
     _showSimplifiedGuidsAction.setToolTip("If checked, views will show a truncated version of a globally unique identifier");
+    _ignoreLoadingErrorsAction.setDescription(
+        "<p>When required serialized data is missing while loading, report the problem as a warning instead of an error. This can allow loading to continue, but the affected object may be incomplete.</p>");
+    _keepDescendantsAfterRemovalAction.setDescription(
+        "<p>When removing a dataset that has descendants, keep those descendants and move them to the root of the hierarchy. Turn this off to remove the selected dataset together with its descendants.</p>");
 
     /* TODO: Fix plugin status bar action visibility
     const auto updateStatusBarOptionsActionReadOnly = [this]() -> void {

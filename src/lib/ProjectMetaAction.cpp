@@ -65,6 +65,13 @@ ProjectMetaAction::ProjectMetaAction(Project* project, QObject* parent /*= nullp
     _allowProjectSwitchingAction.setToolTip("Allow switching to another database project from the main menu");
     _projectResourceStagingPolicyAction.setSerializationName("Packed point-tile staging");
     _projectResourceStagingPolicyAction.setToolTip("Default staging behavior for archive-backed resources in this project. Individual datasets may override it.");
+    _projectResourceStagingPolicyAction.setDescription(
+        "<p>Controls how archive-backed resources are accessed when this project opens. Individual datasets can override this project policy.</p>"
+        "<ul><li><b>Use application default:</b> inherit the policy from Temporary Directory settings.</li>"
+        "<li><b>Read ranges on demand:</b> read requested data directly from the archive without extracting full resource files.</li>"
+        "<li><b>Stage on first read:</b> extract each resource to the temporary directory when it is first accessed.</li>"
+        "<li><b>Stage immediately:</b> extract resources while the project opens, which can increase opening time and temporary disk use.</li></ul>"
+        "<p>The policy applies the next time this saved project is opened.</p>");
     _allowedPluginsOnlyAction.setToolTip("Only plugins in the allowed list may be created from the UI.");
     _allowedPluginsAction.setToolTip("Only plugins in this list may be created from the UI.");
 

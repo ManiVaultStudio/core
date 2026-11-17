@@ -375,7 +375,7 @@ GroupAction::VerticalWidget::VerticalWidget(QWidget* parent, GroupAction* groupA
             const auto numRows = layout->rowCount();
 
             if (groupAction->getShowLabels() && !action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::NoLabelInGroup)) {
-                auto labelWidget = dynamic_cast<WidgetActionLabel*>(action->createLabelWidget(this, WidgetActionLabel::ColonAfterName));
+                auto labelWidget = dynamic_cast<WidgetActionLabel*>(action->createLabelWidget(this, WidgetActionLabel::ColonAfterName | WidgetActionLabel::ShowDescription));
 
                 switch (groupAction->getLabelSizingType())
                 {

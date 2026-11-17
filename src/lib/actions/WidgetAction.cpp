@@ -199,7 +199,7 @@ QWidget* WidgetAction::createCollapsedWidget(QWidget* parent, const WidgetConfig
     return new WidgetActionCollapsedWidget(parent, const_cast<WidgetAction*>(this), widgetConfigurationFunction);
 }
 
-QWidget* WidgetAction::createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags /*= 0x00001*/) const
+QWidget* WidgetAction::createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags /*= 0x00003*/) const
 {
     return new WidgetActionLabel(const_cast<WidgetAction*>(this), parent, widgetFlags);
 }
@@ -903,6 +903,20 @@ void WidgetAction::setText(const QString& text)
     emit textChanged(this->text());
 
     updateLocation();
+}
+
+QString WidgetAction::getDescription() const
+{
+    return _description;
+}
+
+void WidgetAction::setDescription(const QString& description)
+{
+    if (_description == description)
+        return;
+
+    _description = description;
+    emit changed();
 }
 
 bool WidgetAction::mayConnectToPublicAction(const WidgetAction* publicAction) const

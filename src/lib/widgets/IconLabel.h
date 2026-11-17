@@ -47,6 +47,18 @@ public:
     void setIcon(const QIcon& icon);
 
     /**
+     * Sets the rendered icon size.
+     * @param iconSize Size in logical pixels
+     */
+    void setIconSize(const QSize& iconSize);
+
+    /**
+     * Sets the icon opacity while it is not hovered.
+     * @param opacity Opacity from 0.0 (transparent) to 1.0 (fully opaque)
+     */
+    void setIdleOpacity(qreal opacity);
+
+    /**
      * Get the tooltip callback
      * @return TooltipCallback that is called when the sub-action is hovered
      */
@@ -98,6 +110,9 @@ private:
     QGraphicsOpacityEffect  _opacityEffect;         /** Effect for modulating label opacity */
     TooltipCallback         _tooltipCallback;       /** Callback function that is called when a tooltip is required */
     ClickedCallback         _clickedCallback;       /** Callback function that is called when the icon label is clicked (used by non-QObject derived classes) */
+    qreal                   _idleOpacity = 0.6;     /** Opacity when the icon label is not hovered */
+    QSize                   _iconSize = QSize(14, 14); /** Rendered icon size */
+    QIcon                   _icon;                  /** Icon rendered by the label */
 };
 
 }

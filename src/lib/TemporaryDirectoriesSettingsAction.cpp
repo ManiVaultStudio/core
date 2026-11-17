@@ -33,11 +33,24 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
     setIconByName("hard-drive");
 
     _applicationTemporaryDirAction.setToolTip("Application temporary directory root. Changes take effect after restarting ManiVault Studio.");
+    _applicationTemporaryDirAction.setDescription(
+        "<p>Root folder for temporary data managed by ManiVault Studio, including staged project resources.</p>"
+        "<p>Changing this folder does not move existing temporary data. Restart ManiVault Studio for the new location to be used.</p>");
     _defaultProjectResourceStagingPolicyAction.setToolTip("Default staging policy for archive-backed project resources. Projects set to use the application default inherit this policy.");
+    _defaultProjectResourceStagingPolicyAction.setDescription(
+        "<p>Controls how resources stored inside project archives are accessed when a project opens. This is the application default; projects can choose their own policy, and datasets can override the project policy.</p>"
+        "<ul><li><b>Read ranges on demand:</b> read requested data directly from the archive without extracting full resource files.</li>"
+        "<li><b>Stage on first read:</b> extract each resource to the temporary directory when it is first accessed.</li>"
+        "<li><b>Stage immediately:</b> extract resources while the project opens, which can increase opening time and temporary disk use.</li></ul>"
+        "<p>The selected policy is used the next time an applicable project is opened.</p>");
     _checkTemporaryStoragePeriodicallyAction.setToolTip("Periodically check free space on the application temporary directory's drive and notify when it falls below the threshold.");
+    _checkTemporaryStoragePeriodicallyAction.setDescription(
+        "<p>When enabled, ManiVault Studio checks the free space on the temporary directory's drive every 15 minutes and shows a warning if it falls below the configured threshold.</p>");
     _lowTemporaryStorageThresholdAction.setSuffix(" GiB");
     _lowTemporaryStorageThresholdAction.setDefaultWidgetFlags(IntegralAction::SpinBox | IntegralAction::Slider);
     _lowTemporaryStorageThresholdAction.setToolTip("Show a low-storage warning when available space on the application temporary directory's drive falls below this amount.");
+    _lowTemporaryStorageThresholdAction.setDescription(
+        "<p>Sets the free-space level that triggers a low-storage warning for the drive containing the application temporary directory. The periodic check must be enabled for automatic warnings.</p>");
     _temporaryStorageStatusAction.setDisplayMode(MessageCardAction::DisplayMode::Detailed);
 
     _temporaryStorageCheckTimer.setInterval(15 * 60 * 1000);
@@ -106,6 +119,8 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
     });
 
     _removeStaleTemporaryDirsAtStartupAction.setToolTip("Remove stale temporary directories when ManiVault starts up");
+    _removeStaleTemporaryDirsAtStartupAction.setDescription(
+        "<p>Automatically remove temporary directories left behind by earlier ManiVault sessions during startup. Active sessions' temporary directories are not considered stale.</p>");
 
     _scanForStaleTemporaryDirectoriesAction.setToolTip("Rescan for stale temporary directories");
     _scanForStaleTemporaryDirectoriesAction.setDefaultWidgetFlags(TriggerAction::Icon);

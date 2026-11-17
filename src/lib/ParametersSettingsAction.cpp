@@ -18,6 +18,11 @@ ParametersSettingsAction::ParametersSettingsAction(QObject* parent) :
 {
     setAdvanced(true);
 
+    _askForSharedParameterNameAction.setDescription(
+        "<p>Ask for a name when publishing an action as a shared parameter, so connected actions can identify it in the shared-parameter list.</p>");
+    _expertModeAction.setDescription(
+        "<p>Show the full shared-parameter connection tree, including descendant connections. In the simplified view, only the main published connections are shown.</p>");
+
     addAction(&_askForSharedParameterNameAction);
     addAction(&_confirmRemoveSharedParameterAction);
     addAction(&_expertModeAction);

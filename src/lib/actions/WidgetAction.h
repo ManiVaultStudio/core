@@ -400,7 +400,7 @@ public: // Widgets
      * @param widgetFlags Label widget configuration flags
      * @return Pointer to widget
      */
-    QWidget* createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags = 0x00001) const;
+    QWidget* createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags = 0x00003) const;
 
     /**
      * Get the context menu for the action
@@ -489,6 +489,19 @@ public: // Text
      * @param text Text to set
      */
     void setText(const QString& text);
+
+    /**
+     * Gets the optional HTML description shown beside the action label.
+     * @return HTML description, or an empty string when no description is set
+     */
+    QString getDescription() const;
+
+    /**
+     * Sets the optional HTML description shown in an info tooltip beside the action label.
+     * The description is presentation metadata and is not serialized with the action.
+     * @param description HTML fragment to display, or an empty string to hide the info icon
+     */
+    void setDescription(const QString& description);
 
 public: // Widget flags
 

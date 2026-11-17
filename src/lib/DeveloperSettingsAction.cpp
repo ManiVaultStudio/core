@@ -19,6 +19,8 @@ DeveloperSettingsAction::DeveloperSettingsAction(QObject* parent) :
     setIconByName("code");
 
     _enableDeveloperAddonsAction.setToolTip("Enable plugin add-ons marked for developer use. Restart ManiVault Studio for this change to take effect.");
+    _enableDeveloperAddonsAction.setDescription(
+        "<p>Allow plugins to register add-ons marked for developer use. This is intended for development and testing; changing the setting takes effect after restarting ManiVault Studio.</p>");
     addAction(&_enableDeveloperAddonsAction);
 
     const auto legacyDeveloperMenuSetting = QStringLiteral("DeveloperMenu/Visible");

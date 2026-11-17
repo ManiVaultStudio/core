@@ -54,6 +54,13 @@ PointsAction::PointsAction(QObject* parent, const mv::Dataset<Points>& points) :
     _openInPointsViewAction.setIconByName("external-link");
     _openInPointsViewAction.setToolTip("Open this point dataset in the standalone Points View plugin");
     _projectResourceStagingPolicyAction.setToolTip("Choose how this dataset's archive-backed resources are accessed when opening a project. The choice applies from the next project-open session after the project is saved; it does not change the current session. Inherit uses the project or application default.");
+    _projectResourceStagingPolicyAction.setDescription(
+        "<p>Overrides the project resource staging policy for this point dataset.</p>"
+        "<ul><li><b>Inherit:</b> use the project policy, or the application default if the project also inherits.</li>"
+        "<li><b>Read ranges on demand:</b> read requested data directly from the archive without extracting full resource files.</li>"
+        "<li><b>Stage on first read:</b> extract each resource to the temporary directory when first accessed.</li>"
+        "<li><b>Stage immediately:</b> extract resources while the project opens, which can increase opening time and temporary disk use.</li></ul>"
+        "<p>Save the project and reopen it for this policy to take effect; it does not change the current session.</p>");
     _projectResourceStagingPolicyAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
 
     addAction(&_projectResourceStagingPolicyAction);

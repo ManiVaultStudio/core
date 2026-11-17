@@ -26,7 +26,23 @@ IconLabel::IconLabel(const QIcon& icon, QWidget* parent /*= nullptr*/) :
 
 void IconLabel::setIcon(const QIcon& icon)
 {
-    setPixmap(icon.pixmap(QSize(14, 14)));
+    _icon = icon;
+    setPixmap(_icon.pixmap(_iconSize));
+}
+
+void IconLabel::setIconSize(const QSize& iconSize)
+{
+    if (_iconSize == iconSize)
+        return;
+
+    _iconSize = iconSize;
+    setPixmap(_icon.pixmap(_iconSize));
+}
+
+void IconLabel::setIdleOpacity(qreal opacity)
+{
+    _idleOpacity = qBound<qreal>(0.0, opacity, 1.0);
+    updateOpacityEffect();
 }
 
 IconLabel::TooltipCallback IconLabel::getTooltipCallback() const
@@ -92,7 +108,7 @@ bool IconLabel::event(QEvent* event)
 
 void IconLabel::updateOpacityEffect()
 {
-    _opacityEffect.setOpacity(QWidget::underMouse() ? 1.0 : 0.6);
+    _opacityEffect.setOpacity(QWidget::underMouse() ? 1.0 : _idleOpacity);
 }
 
 }

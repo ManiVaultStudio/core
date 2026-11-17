@@ -35,6 +35,8 @@ ErrorManager::ErrorManager(QObject* parent) :
     _loggingShowCrashReportDialogAction(this, "Ask for feedback after a crash", true)
 {
     _loggingAskConsentDialogAction.setToolTip("Show the error logging consent dialog");
+    _loggingAskConsentDialogAction.setDescription(
+        "<p>Open the error reporting consent dialog to review the available reporting options.</p>");
     _loggingAskConsentDialogAction.setDefaultWidgetFlags(TriggerAction::IconText);
 
     _loggingUserHasOptedAction.setSettingsPrefix(QString("%1Logging/UserHasOpted").arg(getSettingsPrefix()));
@@ -42,6 +44,8 @@ ErrorManager::ErrorManager(QObject* parent) :
 
     _loggingEnabledAction.setSettingsPrefix(QString("%1Logging/Enabled").arg(getSettingsPrefix()));
     _loggingEnabledAction.setToolTip("Toggle Sentry error logging");
+    _loggingEnabledAction.setDescription(
+        "<p>Enable or disable sending error reports to the configured Sentry endpoint. The consent dialog explains the reporting choice.</p>");
 
 //#ifdef _DEBUG
 //    _loggingEnabledAction.setEnabled(false);
@@ -49,6 +53,8 @@ ErrorManager::ErrorManager(QObject* parent) :
     
     _loggingDsnAction.setSettingsPrefix(QString("%1Logging/DSN").arg(getSettingsPrefix()));
     _loggingDsnAction.setToolTip("The Sentry Data Source Name (DSN). Hosted and self-hosted HTTP(S) DSNs with optional ports and path prefixes are supported.");
+    _loggingDsnAction.setDescription(
+        "<p>Technical address of the Sentry project that receives error reports. Change this only when configuring a different hosted or self-hosted Sentry endpoint.</p>");
 
     // Current Sentry DSNs do not require a 32-character hexadecimal public
     // key or a numeric project identifier. Keep this structural validator in
@@ -58,9 +64,13 @@ ErrorManager::ErrorManager(QObject* parent) :
 
     _loggingReportHandledExceptionsAction.setSettingsPrefix(QString("%1Logging/ReportHandledExceptions").arg(getSettingsPrefix()));
     _loggingReportHandledExceptionsAction.setToolTip("Send handled error- and fatal-level exceptions shown in an exception dialog to Sentry. Informational and warning-level exceptions remain local.");
+    _loggingReportHandledExceptionsAction.setDescription(
+        "<p>Include handled error- and fatal-level exceptions shown in an exception dialog in Sentry reports. Informational and warning-level exceptions remain local.</p>");
 
     _loggingShowCrashReportDialogAction.setSettingsPrefix(QString("%1Logging/ShowCrashReportDialog").arg(getSettingsPrefix()));
     _loggingShowCrashReportDialogAction.setToolTip("Ask for optional feedback on the next launch after a crash");
+    _loggingShowCrashReportDialogAction.setDescription(
+        "<p>After a crash, show an optional feedback dialog the next time ManiVault Studio starts. This setting is available while error reporting is enabled.</p>");
 
     const auto allowErrorReportingChanged = [this]() -> void {
         _loggingShowCrashReportDialogAction.setEnabled(_loggingEnabledAction.isChecked());

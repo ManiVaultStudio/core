@@ -15,6 +15,7 @@ class QDrag;
 namespace mv::gui {
 
 class WidgetAction;
+class IconLabel;
 
 /**
  * Widget action label class
@@ -41,6 +42,7 @@ public:
     /** Describes the widget flags */
     enum WidgetFlag {
         ColonAfterName  = 0x00001,      /** The name label includes a post-fix colon */
+        ShowDescription = 0x00002,      /** Show the optional description icon before the name label */
     };
 
 public:
@@ -51,7 +53,7 @@ public:
      * @param parent Pointer to parent widget
      * @param windowFlags Window flags
      */
-    explicit WidgetActionLabel(WidgetAction* action, QWidget* parent = nullptr, const std::uint32_t& flags = ColonAfterName);
+    explicit WidgetActionLabel(WidgetAction* action, QWidget* parent = nullptr, const std::uint32_t& flags = ColonAfterName | ShowDescription);
 
     /**
      * Respond to target object events
@@ -87,6 +89,9 @@ private:
     /** Update the state of the name label */
     void updateNameLabel();
 
+    /** Update the description cue based on whether the action has a description and is hovered */
+    void updateDescriptionIndicator();
+
     /** Elides the label text */
     void elide();
 
@@ -105,6 +110,8 @@ private slots:
 
 protected:
     std::uint32_t       _flags;                     /** Configuration flags */
+    IconLabel*          _descriptionIconLabel;       /** Optional HTML description tooltip icon, owned by this widget */
+    bool                _descriptionAreaHovered = false; /** Whether the pointer is within the label area */
     QLabel              _nameLabel;                 /** Action name label */
     bool                _elide;                     /** Whether to enable label elide (e.g. whether to truncate text and show an ellipsis when there is insufficient space for the text) */
     QDrag*              _drag;                      /** Pointer is set during drag and drop action connection */

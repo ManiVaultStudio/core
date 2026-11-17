@@ -23,6 +23,8 @@ AppearanceSettingsAction::AppearanceSettingsAction(QObject* parent) :
 #endif
 
     _lightDarkSystemColorSchemeAction.setShowLabels(false);
+    _lightDarkSystemColorSchemeAction.setDescription(
+        "<p>Choose whether ManiVault Studio uses its Light or Dark color scheme while the theme mode is set to Light/dark.</p>");
 
     connect(Application::current(), &Application::coreInitialized, this, [this](CoreInterface* core) -> void {
         addAction(&mv::theme().getColorSchemeModeAction());

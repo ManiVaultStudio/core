@@ -139,6 +139,20 @@ ThemeManager::ThemeManager(QObject* parent) :
     _disableSystemLightColorSchemeSlot(false),
     _disableSystemDarkColorSchemeSlot(false)
 {
+    _colorSchemeModeAction.setDescription(
+        "<p>Choose how ManiVault Studio selects its appearance:</p>"
+        "<ul><li><b>System:</b> follow the operating system theme.</li>"
+        "<li><b>Light/dark:</b> choose Light or Dark manually.</li>"
+        "<li><b>Custom:</b> select a saved color palette.</li></ul>");
+    _colorSchemeAction.setDescription(
+        "<p>Select a saved custom color palette. This choice is available when the theme mode is set to Custom.</p>");
+
+    auto applicationStyleSheet = qApp->styleSheet();
+    if (!applicationStyleSheet.contains("QToolTip")) {
+        applicationStyleSheet += "\nQToolTip { border: 1px solid rgba(128, 128, 128, 100); }";
+        qApp->setStyleSheet(applicationStyleSheet);
+    }
+
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
     _colorSchemeModeAction.setOptions({ "System", "Light/dark", "Custom" });
 #endif

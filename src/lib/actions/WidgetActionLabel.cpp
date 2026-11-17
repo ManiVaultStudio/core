@@ -8,7 +8,11 @@
 #include "Application.h"
 #include "CoreInterface.h"
 
+#include "widgets/IconLabel.h"
+#include "util/StyledIcon.h"
+
 #include <QDebug>
+#include <QFontMetrics>
 #include <QHBoxLayout>
 #include <QMouseEvent>
 #include <QMenu>
@@ -17,9 +21,10 @@
 
 namespace mv::gui {
 
-WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= nullptr*/, const std::uint32_t& flags /*= ColonAfterName*/) :
+WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= nullptr*/, const std::uint32_t& flags /*= ColonAfterName | ShowDescription*/) :
     WidgetActionViewWidget(parent, action),
     _flags(flags),
+    _descriptionIconLabel(nullptr),
     _elide(false),
     _drag(nullptr)
 {
@@ -32,9 +37,30 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= n
 
     auto layout = new QHBoxLayout();
 
-    layout->setAlignment(Qt::AlignRight | Qt::AlignCenter);
+    layout->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    layout->setSpacing(4);
 
     layout->setContentsMargins(0, 0, 0, 0);
+    _descriptionIconLabel = new IconLabel(util::StyledIcon("circle-info"), this);
+    _descriptionIconLabel->setIconSize(QSize(14, 14));
+    _descriptionIconLabel->setFixedSize(14, 14);
+    _descriptionIconLabel->setAlignment(Qt::AlignCenter);
+    _descriptionIconLabel->setIdleOpacity(0.85);
+    _descriptionIconLabel->setText(QStringLiteral("•"));
+    _descriptionIconLabel->setStyleSheet(QString("QLabel { color: %1; }").arg(palette().color(QPalette::Text).name()));
+    _descriptionIconLabel->setObjectName("DescriptionIcon");
+    _descriptionIconLabel->setAccessibleName(QString("Description for %1").arg(action->text()));
+    _descriptionIconLabel->setTooltipCallback([this]() {
+        const auto actionName = getAction()->text().toHtmlEscaped();
+        const auto headingColor = palette().color(QPalette::Link).name();
+        return QString(
+            "<qt><table width=\"440\" cellpadding=\"12\" cellspacing=\"0\" border=\"0\"><tr><td>"
+            "<div style=\"font-size: 11pt; font-weight: bold; color: %1; margin-bottom: 10px;\">%2</div>"
+            "<div style=\"font-size: 9pt;\">%3</div>"
+            "</td></tr></table></qt>").arg(headingColor, actionName, getAction()->getDescription());
+    });
+    if (_flags & ShowDescription)
+        layout->addWidget(_descriptionIconLabel);
     layout->addWidget(&_nameLabel);
 
     setLayout(layout);
@@ -168,8 +194,18 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 
 bool WidgetActionLabel::event(QEvent* event)
 {
-    if (event->type() == QEvent::ApplicationPaletteChange)
+    if (event->type() == QEvent::ApplicationPaletteChange) {
         updateCustomStyle();
+        updateDescriptionIndicator();
+    }
+    else if (event->type() == QEvent::Enter) {
+        _descriptionAreaHovered = true;
+        updateDescriptionIndicator();
+    }
+    else if (event->type() == QEvent::Leave) {
+        _descriptionAreaHovered = false;
+        updateDescriptionIndicator();
+    }
 
     return WidgetActionViewWidget::event(event);
 }
@@ -177,6 +213,7 @@ bool WidgetActionLabel::event(QEvent* event)
 void WidgetActionLabel::resizeEvent(QResizeEvent* resizeEvent)
 {
     QWidget::resizeEvent(resizeEvent);
+    updateDescriptionIndicator();
     
     if (!_elide)
         return;
@@ -199,6 +236,7 @@ void WidgetActionLabel::setElide(bool elide)
         return;
 
     _elide = elide;
+    updateDescriptionIndicator();
 }
 
 void WidgetActionLabel::elide()
@@ -211,6 +249,8 @@ void WidgetActionLabel::elide()
 
         _nameLabel.setText(metrics.elidedText(getLabelText(), Qt::ElideMiddle, width()));
     }    
+
+    updateDescriptionIndicator();
 }
 
 QString WidgetActionLabel::getLabelText() const
@@ -236,8 +276,30 @@ void WidgetActionLabel::updateNameLabel()
     _nameLabel.setEnabled(getAction()->isEnabled());
     _nameLabel.setToolTip(getAction()->toolTip());
     _nameLabel.setVisible(getAction()->isVisible());
+    updateDescriptionIndicator();
+    _descriptionIconLabel->setEnabled(getAction()->isEnabled());
     
     updateCustomStyle();
+}
+
+void WidgetActionLabel::updateDescriptionIndicator()
+{
+    const auto hasDescription = getAction()->isVisible() && (_flags & ShowDescription) && !getAction()->getDescription().isEmpty();
+
+    _descriptionIconLabel->setVisible(hasDescription);
+
+    if (!hasDescription)
+        return;
+
+    if (_descriptionAreaHovered) {
+        _descriptionIconLabel->setIdleOpacity(1.0);
+        _descriptionIconLabel->setStyleSheet(QString());
+        _descriptionIconLabel->setIcon(util::StyledIcon("circle-info"));
+    } else {
+        _descriptionIconLabel->setIdleOpacity(0.85);
+        _descriptionIconLabel->setStyleSheet(QString("QLabel { color: %1; }").arg(palette().color(QPalette::Text).name()));
+        _descriptionIconLabel->setText(QStringLiteral("•"));
+    }
 }
 
 void WidgetActionLabel::updateCustomStyle()
