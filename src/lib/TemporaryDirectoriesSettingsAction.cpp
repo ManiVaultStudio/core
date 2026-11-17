@@ -20,7 +20,7 @@ namespace mv::gui
 TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Temporary"),
     _applicationTemporaryDirAction(this, "Application temporary directory", Application::current()->getTemporaryDirRoot(), QDir::tempPath()),
-    _defaultProjectResourceStagingPolicyAction(this, "Default project resource staging policy", { "Read ranges on demand", "Stage on first read", "Stage immediately" }, "Read ranges on demand"),
+    _defaultProjectResourceStagingPolicyAction(this, "Default resource staging policy for new projects", { "Read ranges on demand", "Stage on first read", "Stage immediately" }, "Read ranges on demand"),
     _removeStaleTemporaryDirsAtStartupAction(this, "Remove stale temporary directories at startup", true),
     _checkTemporaryStoragePeriodicallyAction(this, "Check temporary storage periodically", false),
     _lowTemporaryStorageThresholdAction(this, "Warn when free space is below", 1, 1000, 10),
@@ -36,13 +36,13 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
     _applicationTemporaryDirAction.setDescription(
         "<p>Root folder for temporary data managed by ManiVault Studio, including staged project resources.</p>"
         "<p>Changing this folder does not move existing temporary data. Restart ManiVault Studio for the new location to be used.</p>");
-    _defaultProjectResourceStagingPolicyAction.setToolTip("Default staging policy for archive-backed project resources. Projects set to use the application default inherit this policy.");
+    _defaultProjectResourceStagingPolicyAction.setToolTip("Initial staging policy copied into each new project. Changing this setting does not affect existing projects.");
     _defaultProjectResourceStagingPolicyAction.setDescription(
-        "<p>Controls how resources stored inside project archives are accessed when a project opens. This is the application default; projects can choose their own policy, and datasets can override the project policy.</p>"
+        "<p>Sets the initial policy copied into a project when it is created. Each project then stores its own policy, and datasets can override it.</p>"
         "<ul><li><b>Read ranges on demand:</b> read requested data directly from the archive without extracting full resource files.</li>"
         "<li><b>Stage on first read:</b> extract each resource to the temporary directory when it is first accessed.</li>"
         "<li><b>Stage immediately:</b> extract resources while the project opens, which can increase opening time and temporary disk use.</li></ul>"
-        "<p>The selected policy is used the next time an applicable project is opened.</p>");
+        "<p>Changing this setting affects projects created afterwards. Existing projects are unchanged.</p>");
     _checkTemporaryStoragePeriodicallyAction.setToolTip("Periodically check free space on the application temporary directory's drive and notify when it falls below the threshold.");
     _checkTemporaryStoragePeriodicallyAction.setDescription(
         "<p>When enabled, ManiVault Studio checks the free space on the temporary directory's drive every 15 minutes and shows a warning if it falls below the configured threshold.</p>");
@@ -114,8 +114,8 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
                 break;
         }
 
-        const auto description = QString("%1 This applies when both the dataset and project inherit the application default. It takes effect the next time a project is opened; open projects and project-level overrides are unchanged.").arg(effect);
-        mv::help().addNotification("Default project resource staging policy changed", description, util::StyledIcon("hard-drive"));
+        const auto description = QString("%1 This policy is copied into projects created after this change. Existing projects and open sessions are unchanged.").arg(effect);
+        mv::help().addNotification("Default policy for new projects changed", description, util::StyledIcon("hard-drive"));
     });
 
     _removeStaleTemporaryDirsAtStartupAction.setToolTip("Remove stale temporary directories when ManiVault starts up");

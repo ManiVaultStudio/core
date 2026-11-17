@@ -20,7 +20,7 @@ namespace mv::util
  */
 enum class ProjectResourceStagingPolicy
 {
-    Inherit,             /**< Use the project policy, falling back to the application default. */
+    Inherit,             /**< Use the project policy; use the application fallback only when no project policy is available. */
     ReadRangesOnDemand,  /**< Keep the resource in the archive and read requested encoded ranges as needed. */
     StageOnFirstRead,    /**< Copy the complete resource to session storage when it is first accessed. */
     StageImmediately     /**< Copy the complete resource to session storage before project loading proceeds. */

@@ -9,6 +9,7 @@
 #include <Project.h>
 #include <ViewPlugin.h>
 #include <util/StyledIcon.h>
+#include <event/Event.h>
 
 #include <QSignalBlocker>
 
@@ -34,7 +35,7 @@ QString projectResourceStagingPolicyDescription(const QString& datasetName, cons
             break;
 
         case mv::util::ProjectResourceStagingPolicy::Inherit:
-            effect = QString("Dataset '%1' will inherit the project's staging policy, or the application default if the project also inherits.").arg(datasetName);
+            effect = QString("Dataset '%1' will use the project's staging policy.").arg(datasetName);
             break;
     }
 
@@ -53,10 +54,10 @@ PointsAction::PointsAction(QObject* parent, const mv::Dataset<Points>& points) :
 {
     _openInPointsViewAction.setIconByName("external-link");
     _openInPointsViewAction.setToolTip("Open this point dataset in the standalone Points View plugin");
-    _projectResourceStagingPolicyAction.setToolTip("Choose how this dataset's archive-backed resources are accessed when opening a project. The choice applies from the next project-open session after the project is saved; it does not change the current session. Inherit uses the project or application default.");
+    _projectResourceStagingPolicyAction.setToolTip("Choose how this dataset's archive-backed resources are accessed when opening a project. The choice applies from the next project-open session after the project is saved; it does not change the current session. Inherit uses the project's policy.");
     _projectResourceStagingPolicyAction.setDescription(
         "<p>Overrides the project resource staging policy for this point dataset.</p>"
-        "<ul><li><b>Inherit:</b> use the project policy, or the application default if the project also inherits.</li>"
+        "<ul><li><b>Inherit:</b> use the project's resource staging policy.</li>"
         "<li><b>Read ranges on demand:</b> read requested data directly from the archive without extracting full resource files.</li>"
         "<li><b>Stage on first read:</b> extract each resource to the temporary directory when first accessed.</li>"
         "<li><b>Stage immediately:</b> extract resources while the project opens, which can increase opening time and temporary disk use.</li></ul>"
@@ -105,6 +106,14 @@ PointsAction::PointsAction(QObject* parent, const mv::Dataset<Points>& points) :
             mv::util::StyledIcon("hard-drive"));
     });
     connect(&points, &mv::Dataset<Points>::dataChanged, this, updateProjectResourceStagingPolicy);
+
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(mv::EventType::DatasetDataChanged));
+    _eventListener.registerDataEventByType(PointType, [this, updateProjectResourceStagingPolicy](mv::DatasetEvent* dataEvent) {
+        if (!_points.isValid() || dataEvent->getDataset()->getId() != _points->getId())
+            return;
+
+        updateProjectResourceStagingPolicy();
+    });
 
     connect(&_openInPointsViewAction, &mv::gui::TriggerAction::triggered, this, [this] {
         if (!_pointsViewAction.getPoints().isValid())

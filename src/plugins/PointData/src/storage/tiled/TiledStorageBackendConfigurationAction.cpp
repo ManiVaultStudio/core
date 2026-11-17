@@ -58,7 +58,7 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _projectResourceStagingPolicyAction.setDefaultWidgetFlags(OptionAction::ComboBox);
     _projectResourceStagingPolicyAction.setToolTip("Select the policy stored on the imported dataset for its archive-backed resources. It takes effect when a saved project is opened; it does not change staging during HDF5 import.");
     _projectResourceStagingPolicyAction.setDescription(
-        "<p>Stores the imported dataset's policy for archive-backed resources in the project. It applies when the saved project is opened, not while HDF5 data is being imported. Inherit uses the project policy, or the application default when the project also inherits.</p>");
+        "<p>Stores the imported dataset's policy for archive-backed resources in the project. It applies when the saved project is opened, not while HDF5 data is being imported. Inherit uses the project's resource staging policy.</p>");
     updateProjectResourceStagingPolicyOption();
 
     connect(this, &StorageBackendConversionAction::optionsChanged, this, [this] {

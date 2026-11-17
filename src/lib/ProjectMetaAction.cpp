@@ -31,7 +31,7 @@ ProjectMetaAction::ProjectMetaAction(Project* project, QObject* parent /*= nullp
     _applicationIconAction(this, "Application icon"),
     _compressionAction(this),
     _allowProjectSwitchingAction(this, "Allow project switching"),
-    _projectResourceStagingPolicyAction(this, "Resource staging policy", { "Use application default", "Read ranges on demand", "Stage on first read", "Stage immediately" }, "Use application default"),
+    _projectResourceStagingPolicyAction(this, "Resource staging policy", { "Read ranges on demand", "Stage on first read", "Stage immediately" }, "Read ranges on demand"),
     _allowedPluginsOnlyAction(this, "Limit use of plugins"),
     _allowedPluginsAction(this, "Allowed Plugins")
 {
@@ -64,14 +64,15 @@ ProjectMetaAction::ProjectMetaAction(Project* project, QObject* parent /*= nullp
 
     _allowProjectSwitchingAction.setToolTip("Allow switching to another database project from the main menu");
     _projectResourceStagingPolicyAction.setSerializationName("Packed point-tile staging");
-    _projectResourceStagingPolicyAction.setToolTip("Default staging behavior for archive-backed resources in this project. Individual datasets may override it.");
+    _projectResourceStagingPolicyAction.setCurrentText(settings().getTemporaryDirectoriesSettingsAction().getDefaultProjectResourceStagingPolicyAction().getCurrentText());
+    _projectResourceStagingPolicyAction.setToolTip("Staging behavior for archive-backed resources in this project. New projects copy the application default when they are created. Individual datasets may override it.");
     _projectResourceStagingPolicyAction.setDescription(
-        "<p>Controls how archive-backed resources are accessed when this project opens. Individual datasets can override this project policy.</p>"
-        "<ul><li><b>Use application default:</b> inherit the policy from Temporary Directory settings.</li>"
-        "<li><b>Read ranges on demand:</b> read requested data directly from the archive without extracting full resource files.</li>"
+        "<p>Controls how archive-backed resources are accessed when this project opens. This project stores its own policy, so changing the application default affects only projects created afterwards. Individual datasets can override this project policy.</p>"
+        "<ul><li><b>Read ranges on demand:</b> read requested data directly from the archive without extracting full resource files.</li>"
         "<li><b>Stage on first read:</b> extract each resource to the temporary directory when it is first accessed.</li>"
         "<li><b>Stage immediately:</b> extract resources while the project opens, which can increase opening time and temporary disk use.</li></ul>"
         "<p>The policy applies the next time this saved project is opened.</p>");
+
     _allowedPluginsOnlyAction.setToolTip("Only plugins in the allowed list may be created from the UI.");
     _allowedPluginsAction.setToolTip("Only plugins in this list may be created from the UI.");
 
@@ -153,14 +154,17 @@ void ProjectMetaAction::fromVariantMap(const QVariantMap& variantMap)
     _allowProjectSwitchingAction.fromParentVariantMap(variantMap, true);
     auto stagingPolicyMap = variantMap.value(_projectResourceStagingPolicyAction.getSerializationName()).toMap();
     if (stagingPolicyMap.contains("Value"))
-        stagingPolicyMap["Value"] = normalizeProjectResourceStagingPolicyName(stagingPolicyMap.value("Value").toString());
-    if (stagingPolicyMap.contains("Options"))
     {
-        auto stagingPolicyOptions = stagingPolicyMap.value("Options").toStringList();
-        for (auto& option : stagingPolicyOptions)
-            option = normalizeProjectResourceStagingPolicyName(option);
-        stagingPolicyMap["Options"] = stagingPolicyOptions;
+        const auto savedValue = stagingPolicyMap.value("Value").toString();
+        const auto savedPolicy = savedValue == QStringLiteral("Use application default") || savedValue.startsWith(QStringLiteral("Inherited ("))
+            ? ProjectResourceStagingPolicy::Inherit
+            : projectResourceStagingPolicyFromName(normalizeProjectResourceStagingPolicyName(savedValue));
+        stagingPolicyMap["Value"] = savedPolicy == ProjectResourceStagingPolicy::Inherit
+            ? settings().getTemporaryDirectoriesSettingsAction().getDefaultProjectResourceStagingPolicyAction().getCurrentText()
+            : projectResourceStagingPolicyName(savedPolicy);
     }
+    if (stagingPolicyMap.contains("Options"))
+        stagingPolicyMap["Options"] = _projectResourceStagingPolicyAction.getOptions();
     if (!stagingPolicyMap.isEmpty())
         _projectResourceStagingPolicyAction.fromVariantMap(stagingPolicyMap);
     _allowedPluginsOnlyAction.fromParentVariantMap(variantMap, true);

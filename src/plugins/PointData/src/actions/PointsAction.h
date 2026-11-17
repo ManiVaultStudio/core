@@ -10,6 +10,7 @@
 #include <actions/GroupAction.h>
 #include <actions/OptionAction.h>
 #include <actions/TriggerAction.h>
+#include <event/EventListener.h>
 
 class Points;
 
@@ -53,4 +54,5 @@ private:
     PointsViewAction     _pointsViewAction;     /**< Embedded point-data view action. */
     mv::gui::TriggerAction _openInPointsViewAction; /**< Opens the standalone Points View plugin. */
     mv::gui::OptionAction _projectResourceStagingPolicyAction; /**< Per-dataset project resource staging policy. */
+    mv::EventListener _eventListener; /**< Refreshes the policy selector when dataset state is restored. */
 };

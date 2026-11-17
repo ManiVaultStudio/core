@@ -24,8 +24,8 @@ namespace mv::gui
  * @brief Global settings for application temporary storage.
  *
  * In addition to the application temporary directory and storage checks, this group
- * contains the default staging policy for archive-backed project resources. Projects
- * that inherit the application default use this policy when they are opened.
+ * contains the initial policy for archive-backed resources in new projects. Each
+ * new project copies this setting into its own project policy.
  *
  * @author Thomas Kroes
  */

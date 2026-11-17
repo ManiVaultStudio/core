@@ -379,7 +379,7 @@ void ProjectManager::applyProjectResourceStagingPolicyOverride()
         return;
 
     const auto projectPolicyText = project->getProjectMetaAction().getProjectResourceStagingPolicyAction().getCurrentText();
-    const auto policy = projectPolicyText == QStringLiteral("Use application default") ? ProjectResourceStagingService::Policy::Inherit : util::projectResourceStagingPolicyFromName(projectPolicyText);
+    const auto policy = util::projectResourceStagingPolicyFromName(projectPolicyText);
     _projectResourceStagingService->setProjectPolicy(policy);
 }
 

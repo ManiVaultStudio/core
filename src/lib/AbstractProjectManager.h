@@ -212,9 +212,9 @@ public:
     virtual QString resolveStagedProjectResourcePath(const QString& archiveEntry) { static_cast<void>(archiveEntry); return {}; }
 
     /**
-     * @brief Resolves a dataset staging policy against the current project and application default.
-     * @param datasetPolicy Dataset policy, or Inherit to use project and application settings
-     * @return Effective policy, falling back to on-demand reads when all levels inherit
+     * @brief Resolves a dataset staging policy against the current project policy.
+     * @param datasetPolicy Dataset policy, or Inherit to use the project policy
+     * @return Effective policy, falling back to on-demand reads when no project policy is available
      */
     virtual util::ProjectResourceStagingPolicy resolveProjectResourceStagingPolicy(const util::ProjectResourceStagingPolicy datasetPolicy) const = 0;
 
