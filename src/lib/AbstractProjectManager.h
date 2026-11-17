@@ -16,6 +16,7 @@
 #include "models/ProjectsTreeModel.h"
 #include "models/ProjectsModelProject.h"
 
+#include "util/ProjectResourceStagingPolicy.h"
 #include "util/SeverityLevel.h"
 
 #include <QObject>
@@ -209,6 +210,13 @@ public:
      * @return Staged file path, or an empty string when the resource should remain archive-backed.
      */
     virtual QString resolveStagedProjectResourcePath(const QString& archiveEntry) { static_cast<void>(archiveEntry); return {}; }
+
+    /**
+     * @brief Resolves a dataset staging policy against the current project and application default.
+     * @param datasetPolicy Dataset policy, or Inherit to use project and application settings
+     * @return Effective policy, falling back to on-demand reads when all levels inherit
+     */
+    virtual util::ProjectResourceStagingPolicy resolveProjectResourceStagingPolicy(const util::ProjectResourceStagingPolicy datasetPolicy) const = 0;
 
     /**
      * Download project from \p url, store it in \p targetDir and open it

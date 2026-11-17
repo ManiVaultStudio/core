@@ -86,6 +86,13 @@ public:
     QString resolveStagedProjectResourcePath(const QString& archiveEntry) override;
 
     /**
+     * @brief Resolves a dataset policy through the current project and application defaults.
+     * @param datasetPolicy Dataset policy, or Inherit to use the project and application defaults
+     * @return Effective policy, falling back to on-demand reads when all levels inherit
+     */
+    util::ProjectResourceStagingPolicy resolveProjectResourceStagingPolicy(const util::ProjectResourceStagingPolicy datasetPolicy) const override;
+
+    /**
      * Download project from \p url, store it in \p targetDir and open it
      * @param url URL of the project
      * @param targetDirectory Directory where the project is stored (temporary directory when empty)

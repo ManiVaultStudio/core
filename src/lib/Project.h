@@ -122,6 +122,12 @@ public:
     ProjectMetaAction& getProjectMetaAction();
 
     /**
+     * @brief Gets the project meta action for read-only access.
+     * @return Constant reference to the project meta action
+     */
+    const ProjectMetaAction& getProjectMetaAction() const;
+
+    /**
      * Get shared pointer to project meta action from the compressed \p projectFilePath
      * @return Shared pointer to project meta action (nullptr if not found)
      */

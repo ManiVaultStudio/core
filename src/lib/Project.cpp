@@ -295,6 +295,11 @@ ProjectMetaAction& Project::getProjectMetaAction()
     return _projectMetaAction;
 }
 
+const ProjectMetaAction& Project::getProjectMetaAction() const
+{
+    return _projectMetaAction;
+}
+
 QSharedPointer<ProjectMetaAction> Project::getProjectMetaActionFromProjectFilePath(const QString& projectFilePath)
 {
     const auto projectMetaJsonFilePath = projects().extractFileFromManiVaultProject(projectFilePath, Application::current()->getTemporaryDir(), "meta.json");

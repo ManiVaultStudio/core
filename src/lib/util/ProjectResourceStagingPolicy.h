@@ -26,6 +26,27 @@ enum class ProjectResourceStagingPolicy
     StageImmediately     /**< Copy the complete resource to session storage before project loading proceeds. */
 };
 
+/**
+ * @brief Resolves dataset, project, and application staging policy overrides.
+ * @param datasetPolicy Policy selected for the dataset
+ * @param projectPolicy Project override, or Inherit to use the application default
+ * @param applicationDefault Application-wide policy, or Inherit to use the safe on-demand fallback
+ * @return The effective policy after applying dataset, project, and application precedence
+ */
+[[nodiscard]] inline ProjectResourceStagingPolicy resolveProjectResourceStagingPolicy(const ProjectResourceStagingPolicy datasetPolicy, const ProjectResourceStagingPolicy projectPolicy, const ProjectResourceStagingPolicy applicationDefault)
+{
+    if (datasetPolicy != ProjectResourceStagingPolicy::Inherit)
+        return datasetPolicy;
+
+    if (projectPolicy != ProjectResourceStagingPolicy::Inherit)
+        return projectPolicy;
+
+    if (applicationDefault != ProjectResourceStagingPolicy::Inherit)
+        return applicationDefault;
+
+    return ProjectResourceStagingPolicy::ReadRangesOnDemand;
+}
+
 /** Returns the canonical user-facing and serialized name of a policy. */
 [[nodiscard]] inline QString projectResourceStagingPolicyName(const ProjectResourceStagingPolicy policy)
 {

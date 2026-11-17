@@ -363,7 +363,7 @@ void ProjectManager::prepareProjectStagingDirectory(const QString& projectArchiv
 
     setTemporaryDirPath(TemporaryDirType::Staging, _projectStagingDirectory->path());
 
-    const auto defaultPolicyText = Application::current()->getConfigurationAction().getProjectsConfigurationAction().getDefaultProjectResourceStagingPolicyAction().getCurrentText();
+    const auto defaultPolicyText = settings().getTemporaryDirectoriesSettingsAction().getDefaultProjectResourceStagingPolicyAction().getCurrentText();
     auto defaultPolicy = util::projectResourceStagingPolicyFromName(defaultPolicyText);
     if (defaultPolicy == ProjectResourceStagingService::Policy::Inherit)
         defaultPolicy = ProjectResourceStagingService::Policy::ReadRangesOnDemand;
@@ -401,6 +401,16 @@ workflow::UniqueWorkflowPlan ProjectManager::createProjectResourceStagingWorkflo
 QString ProjectManager::resolveStagedProjectResourcePath(const QString& archiveEntry)
 {
     return _projectResourceStagingService->resolvePath(archiveEntry);
+}
+
+util::ProjectResourceStagingPolicy ProjectManager::resolveProjectResourceStagingPolicy(const util::ProjectResourceStagingPolicy datasetPolicy) const
+{
+    auto projectPolicy = util::ProjectResourceStagingPolicy::Inherit;
+    if (const auto project = getCurrentProject())
+        projectPolicy = util::projectResourceStagingPolicyFromName(project->getProjectMetaAction().getProjectResourceStagingPolicyAction().getCurrentText());
+
+    const auto applicationDefault = util::projectResourceStagingPolicyFromName(settings().getTemporaryDirectoriesSettingsAction().getDefaultProjectResourceStagingPolicyAction().getCurrentText());
+    return util::resolveProjectResourceStagingPolicy(datasetPolicy, projectPolicy, applicationDefault);
 }
 
 void ProjectManager::openProject(QString filePath /*= ""*/, bool importDataOnly /*= false*/, bool loadWorkspace /*= true*/)

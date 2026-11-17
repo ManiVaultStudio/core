@@ -8,6 +8,7 @@
 
 #include "actions/file/TemporaryDirectoryAction.h"
 #include "actions/ToggleAction.h"
+#include "actions/OptionAction.h"
 #include "actions/OptionsAction.h"
 #include "actions/TriggerAction.h"
 #include "actions/HorizontalGroupAction.h"
@@ -20,9 +21,11 @@ namespace mv::gui
 {
 
 /**
- * Temporary directories settings action class
+ * @brief Global settings for application temporary storage.
  *
- * Action class which groups all temporary directories global settings
+ * In addition to the application temporary directory and storage checks, this group
+ * contains the default staging policy for archive-backed project resources. Projects
+ * that inherit the application default use this policy when they are opened.
  *
  * @author Thomas Kroes
  */
@@ -46,6 +49,11 @@ public: // Action getters
 
     TemporaryDirectoryAction& getApplicationTemporaryDirAction() { return _applicationTemporaryDirAction; }
     ToggleAction& getRemoveStaleTemporaryDirsAtStartupAction() { return _removeStaleTemporaryDirsAtStartupAction; }
+    /**
+     * @brief Gets the default policy for staging archive-backed project resources.
+     * @return Application-wide policy used by projects that inherit the default
+     */
+    OptionAction& getDefaultProjectResourceStagingPolicyAction() { return _defaultProjectResourceStagingPolicyAction; }
     TriggerAction& getScanForStaleTemporaryDirectoriesAction() { return _scanForStaleTemporaryDirectoriesAction; }
     OptionsAction& getStaleTemporaryDirectoriesAction() { return _selectStaleTemporaryDirectoriesAction; }
     TriggerAction& getRemoveStaleTemporaryDirectoriesAction() { return _removeStaleTemporaryDirectoriesAction; }
@@ -69,6 +77,8 @@ private:
 
 private:
     TemporaryDirectoryAction _applicationTemporaryDirAction;           /** Temporary directory picker and reset action */
+    /** Application-wide default for archive-backed project resource staging. */
+    OptionAction             _defaultProjectResourceStagingPolicyAction;
     ToggleAction             _removeStaleTemporaryDirsAtStartupAction; /** Turn on/off the automatic removal of the application temporary directories at application startup */
     ToggleAction             _checkTemporaryStoragePeriodicallyAction; /** Enables periodic checks for low free space on application temporary storage */
     IntegralAction           _lowTemporaryStorageThresholdAction;      /** Free-space threshold, in GiB, for low-storage warnings */

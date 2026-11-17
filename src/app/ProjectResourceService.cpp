@@ -237,7 +237,7 @@ public:
             throw std::logic_error("Project resources can only be opened from the active project");
 
         const auto resourcePath = resourcePathFromReference(reference);
-        auto policy = stagingPolicy == util::ProjectResourceStagingPolicy::Inherit ? _stagingService->getEffectiveDefaultPolicy() : stagingPolicy;
+        const auto policy = _stagingService->resolvePolicy(stagingPolicy);
         QString localPath;
         std::shared_ptr<QTemporaryDir> localResourceDirectory;
         std::uint64_t resourceSize = 0;

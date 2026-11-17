@@ -49,10 +49,15 @@ void ProjectResourceStagingService::setProjectPolicy(const Policy policy)
     _projectPolicy = policy;
 }
 
-ProjectResourceStagingService::Policy ProjectResourceStagingService::getEffectiveDefaultPolicy() const
+ProjectResourceStagingService::Policy ProjectResourceStagingService::resolvePolicy(const Policy requestedPolicy) const
 {
     std::lock_guard lock(_mutex);
-    return _projectPolicy == Policy::Inherit ? _systemPolicy : _projectPolicy;
+    return util::resolveProjectResourceStagingPolicy(requestedPolicy, _projectPolicy, _systemPolicy);
+}
+
+ProjectResourceStagingService::Policy ProjectResourceStagingService::getEffectiveDefaultPolicy() const
+{
+    return resolvePolicy(Policy::Inherit);
 }
 
 QString ProjectResourceStagingService::validateArchiveEntry(const QString& archiveEntry)
@@ -80,11 +85,6 @@ void ProjectResourceStagingService::registerResources(const QStringList& archive
 void ProjectResourceStagingService::registerResources(const QList<ResourceRequest>& requests)
 {
     std::lock_guard lock(_mutex);
-    const auto effectivePolicy = [this](const Policy requestedPolicy) {
-        if (requestedPolicy != Policy::Inherit)
-            return requestedPolicy;
-        return _projectPolicy != Policy::Inherit ? _projectPolicy : _systemPolicy;
-    };
     const auto policyRank = [](const Policy policy) {
         switch (policy)
         {
@@ -98,7 +98,7 @@ void ProjectResourceStagingService::registerResources(const QList<ResourceReques
     for (const auto& request : requests)
     {
         const auto safeEntry = validateArchiveEntry(request.archiveEntry);
-        const auto resolvedPolicy = effectivePolicy(request.policy);
+        const auto resolvedPolicy = util::resolveProjectResourceStagingPolicy(request.policy, _projectPolicy, _systemPolicy);
         if (!_resources.contains(safeEntry))
         {
             auto state = std::make_shared<ResourceState>();

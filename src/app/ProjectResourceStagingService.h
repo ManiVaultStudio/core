@@ -61,6 +61,13 @@ public:
     /** Sets the policy saved on the project; Inherit preserves the system fallback. */
     void setProjectPolicy(Policy policy);
 
+    /**
+     * @brief Resolves a dataset policy against this session's project and system policies.
+     * @param requestedPolicy Dataset-level policy, or Inherit to use the configured defaults
+     * @return Effective policy, falling back to on-demand reads when every level inherits
+     */
+    [[nodiscard]] Policy resolvePolicy(Policy requestedPolicy) const;
+
     /** Resolves project and system settings to the policy used for inherited resources. */
     [[nodiscard]] Policy getEffectiveDefaultPolicy() const;
 

@@ -6,7 +6,6 @@
 
 #include "VerticalGroupAction.h"
 #include "StringsAction.h"
-#include "OptionAction.h"
 
 namespace mv::gui {
 
@@ -49,12 +48,9 @@ public: // Serialization
 public: // Action getters
 
     StringsAction& getProjectsDsnsAction() { return _projectsDsnsAction; }
-    OptionAction& getDefaultProjectResourceStagingPolicyAction() { return _defaultProjectResourceStagingPolicyAction; }
-    [[deprecated("Use getDefaultProjectResourceStagingPolicyAction()")]] OptionAction& getDefaultPackedTileStagingPolicyAction() { return getDefaultProjectResourceStagingPolicyAction(); }
 
 private:
-    StringsAction       _projectsDsnsAction;                  /** Projects DSNs action */
-    OptionAction        _defaultProjectResourceStagingPolicyAction; /** Application default for archive-backed project resources. */
+    StringsAction _projectsDsnsAction; /** Projects DSNs action */
 };
 
 }

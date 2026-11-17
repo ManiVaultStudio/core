@@ -599,18 +599,7 @@ mv::util::ProjectResourceStagingPolicy TiledStorageBackendConfigurationAction::g
 
 void TiledStorageBackendConfigurationAction::updateProjectResourceStagingPolicyOption()
 {
-    auto inheritedPolicy = mv::util::ProjectResourceStagingPolicy::Inherit;
-    if (mv::projects().hasProject())
-    {
-        const auto projectPolicyText = mv::projects().getCurrentProject()->getProjectMetaAction().getProjectResourceStagingPolicyAction().getCurrentText();
-        inheritedPolicy = mv::util::projectResourceStagingPolicyFromName(projectPolicyText);
-    }
-
-    if (inheritedPolicy == mv::util::ProjectResourceStagingPolicy::Inherit && mv::Application::current())
-    {
-        const auto defaultPolicyText = mv::Application::current()->getConfigurationAction().getProjectsConfigurationAction().getDefaultProjectResourceStagingPolicyAction().getCurrentText();
-        inheritedPolicy = mv::util::projectResourceStagingPolicyFromName(defaultPolicyText);
-    }
+    const auto inheritedPolicy = mv::projects().resolveProjectResourceStagingPolicy(mv::util::ProjectResourceStagingPolicy::Inherit);
 
     auto options = _projectResourceStagingPolicyAction.getOptions();
     if (options.isEmpty())

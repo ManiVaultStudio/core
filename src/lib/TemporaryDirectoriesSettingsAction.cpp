@@ -8,6 +8,7 @@
 
 #include "util/StyledIcon.h"
 #include "util/Miscellaneous.h"
+#include "util/ProjectResourceStagingPolicy.h"
 
 #include <QDir>
 #include <QSettings>
@@ -19,6 +20,7 @@ namespace mv::gui
 TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Temporary"),
     _applicationTemporaryDirAction(this, "Application temporary directory", Application::current()->getTemporaryDirRoot(), QDir::tempPath()),
+    _defaultProjectResourceStagingPolicyAction(this, "Default project resource staging policy", { "Read ranges on demand", "Stage on first read", "Stage immediately" }, "Read ranges on demand"),
     _removeStaleTemporaryDirsAtStartupAction(this, "Remove stale temporary directories at startup", true),
     _checkTemporaryStoragePeriodicallyAction(this, "Check temporary storage periodically", false),
     _lowTemporaryStorageThresholdAction(this, "Warn when free space is below", 1, 1000, 10),
@@ -31,6 +33,7 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
     setIconByName("hard-drive");
 
     _applicationTemporaryDirAction.setToolTip("Application temporary directory root. Changes take effect after restarting ManiVault Studio.");
+    _defaultProjectResourceStagingPolicyAction.setToolTip("Default staging policy for archive-backed project resources. Projects set to use the application default inherit this policy.");
     _checkTemporaryStoragePeriodicallyAction.setToolTip("Periodically check free space on the application temporary directory's drive and notify when it falls below the threshold.");
     _lowTemporaryStorageThresholdAction.setSuffix(" GiB");
     _lowTemporaryStorageThresholdAction.setDefaultWidgetFlags(IntegralAction::SpinBox | IntegralAction::Slider);
@@ -69,11 +72,38 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
     });
 
     addAction(&_applicationTemporaryDirAction);
+    addAction(&_defaultProjectResourceStagingPolicyAction);
     addAction(&_removeStaleTemporaryDirsAtStartupAction);
     addAction(&_checkTemporaryStoragePeriodicallyAction);
     addAction(&_lowTemporaryStorageThresholdAction);
     addAction(&_temporaryStorageStatusAction);
     addAction(&_staleTemporaryDirectoriesGroupAction);
+
+    connect(&_defaultProjectResourceStagingPolicyAction, &OptionAction::currentTextChanged, this, [](const QString& policyName) {
+        const auto policy = util::projectResourceStagingPolicyFromName(policyName);
+        QString effect;
+
+        switch (policy) {
+            case util::ProjectResourceStagingPolicy::ReadRangesOnDemand:
+                effect = "Archive-backed resources are read from the project archive as needed, without copying entire files into staging.";
+                break;
+
+            case util::ProjectResourceStagingPolicy::StageOnFirstRead:
+                effect = "Each archive-backed resource is copied into temporary storage on its first read; later reads use the staged file.";
+                break;
+
+            case util::ProjectResourceStagingPolicy::StageImmediately:
+                effect = "All archive-backed resources are copied into temporary storage while the project opens, which can increase open time and disk use.";
+                break;
+
+            case util::ProjectResourceStagingPolicy::Inherit:
+                effect = "The fallback policy is on-demand reads from the project archive.";
+                break;
+        }
+
+        const auto description = QString("%1 This applies when both the dataset and project inherit the application default. It takes effect the next time a project is opened; open projects and project-level overrides are unchanged.").arg(effect);
+        mv::help().addNotification("Default project resource staging policy changed", description, util::StyledIcon("hard-drive"));
+    });
 
     _removeStaleTemporaryDirsAtStartupAction.setToolTip("Remove stale temporary directories when ManiVault starts up");
 

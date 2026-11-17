@@ -67,21 +67,10 @@ PointsAction::PointsAction(QObject* parent, const mv::Dataset<Points>& points) :
 
         auto options = _projectResourceStagingPolicyAction.getOptions();
         const auto datasetPolicy = _points->getProjectResourceStagingPolicy();
-        auto inheritedPolicy = mv::util::ProjectResourceStagingPolicy::Inherit;
-        if (mv::projects().hasProject())
-        {
-            const auto projectPolicyText = mv::projects().getCurrentProject()->getProjectMetaAction().getProjectResourceStagingPolicyAction().getCurrentText();
-            inheritedPolicy = mv::util::projectResourceStagingPolicyFromName(projectPolicyText);
-        }
-
-        if (inheritedPolicy == mv::util::ProjectResourceStagingPolicy::Inherit && mv::Application::current())
-        {
-            const auto defaultPolicyText = mv::Application::current()->getConfigurationAction().getProjectsConfigurationAction().getDefaultProjectResourceStagingPolicyAction().getCurrentText();
-            inheritedPolicy = mv::util::projectResourceStagingPolicyFromName(defaultPolicyText);
-        }
+        const auto effectivePolicy = mv::projects().resolveProjectResourceStagingPolicy(datasetPolicy);
 
         if (!options.isEmpty())
-            options[0] = QStringLiteral("Inherited (%1)").arg(mv::util::projectResourceStagingPolicyName(inheritedPolicy));
+            options[0] = QStringLiteral("Inherited (%1)").arg(mv::util::projectResourceStagingPolicyName(effectivePolicy));
 
         const QSignalBlocker blocker(&_projectResourceStagingPolicyAction);
         _projectResourceStagingPolicyAction.setOptions(options);
