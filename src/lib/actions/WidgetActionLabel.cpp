@@ -218,8 +218,6 @@ void WidgetActionLabel::resizeEvent(QResizeEvent* resizeEvent)
     if (!_elide)
         return;
 
-    _nameLabel.setText("");
-
     QTimer::singleShot(25, this, [this]() {
         elide();
      });
@@ -246,8 +244,10 @@ void WidgetActionLabel::elide()
     }
     else {
         QFontMetrics metrics(font());
+        const auto elidedLabelText = metrics.elidedText(getLabelText(), Qt::ElideMiddle, _nameLabel.width());
 
-        _nameLabel.setText(metrics.elidedText(getLabelText(), Qt::ElideMiddle, width()));
+        if (_nameLabel.text() != elidedLabelText)
+            _nameLabel.setText(elidedLabelText);
     }    
 
     updateDescriptionIndicator();
