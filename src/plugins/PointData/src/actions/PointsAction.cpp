@@ -52,7 +52,7 @@ PointsAction::PointsAction(QObject* parent, const mv::Dataset<Points>& points) :
     _openInPointsViewAction(this, "Open in Points View"),
     _projectResourceStagingPolicyAction(this, "Resource staging policy", { "Inherit", "Read ranges on demand", "Stage on first read", "Stage immediately" }, "Inherit")
 {
-    _openInPointsViewAction.setIconByName("external-link");
+    _openInPointsViewAction.setIconByName("arrow-up-right-from-square");
     _openInPointsViewAction.setToolTip("Open this point dataset in the standalone Points View plugin");
     _projectResourceStagingPolicyAction.setToolTip("Choose how this dataset's archive-backed resources are accessed when opening a project. The choice applies from the next project-open session after the project is saved; it does not change the current session. Inherit uses the project's policy.");
     _projectResourceStagingPolicyAction.setDescription(
