@@ -141,7 +141,7 @@ function(get_vcpkg_copyright PKG_NAME OUT_VAR)
 endfunction()
 
 # Qt
-find_package(Qt6 6.9 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets Concurrent REQUIRED)
+find_package(Qt6 6.10 COMPONENTS Core Widgets OpenGL OpenGLWidgets WebEngineWidgets Concurrent REQUIRED)
 
 get_vcpkg_copyright(qt Qt6_COPYRIGHT)
 add_definitions(-DQT_MESSAGELOGCONTEXT)
