@@ -107,6 +107,11 @@ PointsAction::PointsAction(QObject* parent, const mv::Dataset<Points>& points) :
     });
     connect(&points, &mv::Dataset<Points>::dataChanged, this, updateProjectResourceStagingPolicy);
 
+    if (const auto project = mv::projects().getCurrentProject())
+        connect(&project->getProjectMetaAction().getProjectResourceStagingPolicyAction(), &mv::gui::OptionAction::currentTextChanged, this, [updateProjectResourceStagingPolicy](const QString&) {
+            updateProjectResourceStagingPolicy();
+        });
+
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(mv::EventType::DatasetDataChanged));
     _eventListener.registerDataEventByType(PointType, [this, updateProjectResourceStagingPolicy](mv::DatasetEvent* dataEvent) {
         if (!_points.isValid() || dataEvent->getDataset()->getId() != _points->getId())
