@@ -31,6 +31,16 @@ ProjectSettingsDialog::ProjectSettingsDialog(QWidget* parent /*= nullptr*/) :
 
     const auto project = projects().getCurrentProject();
 
+    project->getTitleAction().setDescription("Name used to identify this project in the application.");
+    project->getDescriptionAction().setDescription("A short summary shown when browsing or opening projects.");
+    project->getApplicationIconAction().setDescription("Choose the icon used to represent this project in the application.");
+    project->getProjectVersionAction().setDescription("Project data version. Increase this when the project format or its contents change in a way that matters to collaborators.");
+    project->getTagsAction().setDescription("Keywords that help categorize and find this project.");
+    project->getCommentsAction().setDescription("Additional notes about this project.");
+    project->getContributorsAction().setDescription("People recorded as contributors to this project. This list is managed by the application.");
+    project->getStudioModeAction().setDescription("Enable studio mode to arrange plugin panels and customize the project workspace.");
+    workspaces().getLockingAction().getLockedAction().setDescription("Prevent changes to the current workspace layout. Unlock it to move, resize, or close panels.");
+
     _groupAction.addAction(&project->getTitleAction());
     _groupAction.addAction(&project->getDescriptionAction());
     _groupAction.addAction(&project->getApplicationIconAction());
