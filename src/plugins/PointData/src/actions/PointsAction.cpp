@@ -119,11 +119,24 @@ PointsAction::PointsAction(QObject* parent, const mv::Dataset<Points>& points) :
         if (!_pointsViewAction.getPoints().isValid())
             return;
 
+        if (!mv::plugins().getPluginFactory("Points View")) {
+            mv::help().addNotification(
+                "Points View unavailable",
+                "The Points View plugin is not available. Check that it is installed and that its dependencies are available.",
+                mv::util::StyledIcon("circle-info"));
+            return;
+        }
+
         const auto viewState = _pointsViewAction.getViewState();
         auto* pointsViewPlugin = mv::plugins().requestViewPluginFloated("Points View", { _pointsViewAction.getPoints() });
 
-        if (!pointsViewPlugin)
+        if (!pointsViewPlugin) {
+            mv::help().addNotification(
+                "Could not open Points View",
+                "The Points View plugin is available, but a view could not be created.",
+                mv::util::StyledIcon("circle-info"));
             return;
+        }
 
         if (auto* pointsViewWidget = pointsViewPlugin->getWidget().findChild<PointsViewWidget*>())
             pointsViewWidget->setViewState(viewState);
