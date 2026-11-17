@@ -28,6 +28,8 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
     _removeStaleTemporaryDirectoriesAction(this, "Remove all stale"),
     _staleTemporaryDirectoriesGroupAction(this, "Stale temporary directories")
 {
+    setIconByName("hard-drive");
+
     _applicationTemporaryDirAction.setToolTip("Application temporary directory root. Changes take effect after restarting ManiVault Studio.");
     _checkTemporaryStoragePeriodicallyAction.setToolTip("Periodically check free space on the application temporary directory's drive and notify when it falls below the threshold.");
     _lowTemporaryStorageThresholdAction.setSuffix(" GiB");

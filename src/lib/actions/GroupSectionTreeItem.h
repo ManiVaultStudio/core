@@ -19,9 +19,11 @@ class GroupAction;
 class GroupWidgetTreeItem;
 
 /**
- * Group section tree item class
+ * @brief Tree item that displays a collapsible group section.
  *
- * Tree item class for displaying a section push button with which the group contents can be expanded/collapsed
+ * Tree item class for displaying a section push button that expands or collapses the group.
+ * The button shows the group action's icon when one is assigned. The tree widget owns this
+ * item; the referenced GroupAction is non-owning and must remain alive while the item exists.
  *
  * @author Thomas Kroes
  */

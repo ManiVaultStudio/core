@@ -14,6 +14,8 @@ AppearanceSettingsAction::AppearanceSettingsAction(QObject* parent) :
     _applicationSessionIdAction(this, "Application session ID", Application::current()->getId()),
     _lightDarkSystemColorSchemeAction(this, "Color scheme")
 {
+    setIconByName("palette");
+
     _applicationSessionIdAction.setEnabled(false);
 
 #ifdef _DEBUG

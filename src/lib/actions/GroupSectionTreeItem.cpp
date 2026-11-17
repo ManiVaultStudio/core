@@ -60,6 +60,8 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     _groupWidget(nullptr),
     _overlayWidget(this)
 {
+    setIconSize(QSize(12, 12));
+
     auto isMacOS = QOperatingSystemVersion::currentType() == QOperatingSystemVersion::MacOS;
     
     // on macOS the buttons look extremely squished and foreign with fixed height
@@ -102,10 +104,16 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     };
 
     const auto updateText = [this, groupAction]() -> void {
-        setText(groupAction->text());
+        const auto text = groupAction->icon().isNull()
+            ? groupAction->text()
+            : QStringLiteral("\u2009") + groupAction->text();
+
+        setText(text);
+        setIcon(groupAction->icon());
     };
 
     connect(groupAction, &WidgetAction::changed, this, updateText);
+    updateText();
 
     // Update when the group action is expanded or collapsed
     connect(_widgetActionGroup, &GroupAction::expanded, this, update);

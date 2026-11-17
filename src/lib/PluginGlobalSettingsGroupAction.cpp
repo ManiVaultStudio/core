@@ -13,6 +13,7 @@ PluginGlobalSettingsGroupAction::PluginGlobalSettingsGroupAction(QObject* parent
     GlobalSettingsGroupAction(parent, "Plugin: " + pluginFactory->getKind())
 {
     setSerializationName(pluginFactory->getKind());
+    setIconByName("plugin");
 }
 
 }
