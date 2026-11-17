@@ -108,7 +108,7 @@ bool IconLabel::event(QEvent* event)
 
 void IconLabel::updateOpacityEffect()
 {
-    _opacityEffect.setOpacity(QWidget::underMouse() ? 1.0 : _idleOpacity);
+    _opacityEffect.setOpacity(QWidget::underMouse() && isEnabled() ? 1.0 : _idleOpacity);
 }
 
 }

@@ -284,7 +284,11 @@ void WidgetActionLabel::updateNameLabel()
 
 void WidgetActionLabel::updateDescriptionIndicator()
 {
+    if (!_descriptionIconLabel)
+        return;
+
     const auto hasDescription = getAction()->isVisible() && (_flags & ShowDescription) && !getAction()->getDescription().isEmpty();
+    const auto actionEnabled = getAction()->isEnabled();
 
     _descriptionIconLabel->setVisible(hasDescription);
 
@@ -292,12 +296,13 @@ void WidgetActionLabel::updateDescriptionIndicator()
         return;
 
     if (_descriptionAreaHovered) {
-        _descriptionIconLabel->setIdleOpacity(1.0);
+        _descriptionIconLabel->setIdleOpacity(actionEnabled ? 1.0 : 0.45);
         _descriptionIconLabel->setStyleSheet(QString());
         _descriptionIconLabel->setIcon(util::StyledIcon("circle-info"));
     } else {
-        _descriptionIconLabel->setIdleOpacity(0.85);
-        _descriptionIconLabel->setStyleSheet(QString("QLabel { color: %1; }").arg(palette().color(QPalette::Text).name()));
+        _descriptionIconLabel->setIdleOpacity(actionEnabled ? 0.85 : 0.45);
+        const auto textColor = actionEnabled ? palette().color(QPalette::Text) : palette().color(QPalette::Disabled, QPalette::Text);
+        _descriptionIconLabel->setStyleSheet(QString("QLabel { color: %1; }").arg(textColor.name()));
         _descriptionIconLabel->setText(QStringLiteral("•"));
     }
 }
