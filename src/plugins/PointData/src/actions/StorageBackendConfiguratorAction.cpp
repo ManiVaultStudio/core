@@ -42,6 +42,8 @@ StorageBackendConfiguratorAction::StorageBackendConfiguratorAction(QObject* pare
     _configureAction(this, "Configure...")
 {
     setShowLabels(false);
+    setDescription(
+        "<p>Choose how point data is stored. The backend selector shows whether each option supports reading and writing. Changing an existing dataset's backend converts its storage representation; configure the current backend to adjust its settings without changing the backend type.</p>");
 
     _backendTypeAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
     _backendTypeAction.setToolTip("Select the storage backend; the suffix shows whether it supports reading and writing.");

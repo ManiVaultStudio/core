@@ -29,6 +29,8 @@ SparseStorageBackendConversionAction::SparseStorageBackendConversionAction(QObje
     _initialChunkRows(std::clamp<std::size_t>(chunkRows, 1, 65536))
 {
     setShowLabels(true);
+    _layoutAction.setDescription(
+        "<p>Choose the compressed orientation for sparse data: CSR stores rows contiguously and generally suits row access, while CSC stores columns contiguously and generally suits column access. This changes the storage layout, not the logical matrix values.</p>");
     addAction(&_layoutAction);
     _performanceAction.setShowLabels(false);
     _performanceAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);

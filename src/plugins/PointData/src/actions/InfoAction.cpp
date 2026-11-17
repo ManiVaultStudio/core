@@ -36,6 +36,8 @@ InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
     _numberOfPointsAction.setToolTip("The number of points");
     _numberOfDimensionsAction.setToolTip("The number of dimensions in the point data");
     _rawDataSizeAction.setToolTip("The amount of memory occupied for raw data by the dataset");
+    _rawDataSizeAction.setDescription(
+        "<p>Size of the dataset's underlying point values. For lazily loaded storage, this is the data size and may be larger than the amount currently resident in memory.</p>");
 
     _createSetFromSelection.setVisible(false);
 

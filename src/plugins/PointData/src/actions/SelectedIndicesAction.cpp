@@ -18,6 +18,9 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, const Dataset<Poin
     _manualUpdateAction(this, "Manual update")
 {
     setText("Selected indices");
+    setDescription(
+        QString("<p>Lists the indices of points selected in this dataset. For datasets with %1 or more points, the list updates only when you press Update, avoiding repeated work on large selections.</p>")
+            .arg(MANUAL_UPDATE_THRESHOLD));
 }
 
 Dataset<Points>& SelectedIndicesAction::getPoints()

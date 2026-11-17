@@ -222,6 +222,8 @@ StorageBackendConversionAction::StorageBackendConversionAction(QObject* parent, 
     _hasElementTypeAction = true;
     _elementTypeAction.setOptions(elementTypeOptions);
     _elementTypeAction.setCurrentIndex(static_cast<int>(*currentElementTypeIndex));
+    _elementTypeAction.setDescription(
+        "<p>Choose the numeric type used to store point values. Converting to a type with less precision or a narrower range can round, truncate, or reject values; review the analysis shown when changing this option.</p>");
     addAction(&_elementTypeAction);
     // Keep the action tree stable while the selector is active. Inserting or
     // removing the analysis card from inside currentIndexChanged can invalidate

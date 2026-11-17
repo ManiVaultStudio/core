@@ -12,6 +12,8 @@ PointsViewAction::PointsViewAction(QObject* parent, const mv::Dataset<Points>& p
     _points(points)
 {
     setToolTip("Inspect point data through lazy table and facade access");
+    setDescription(
+        "<p>Open a standalone table for this point dataset. The table retrieves rows and columns through the storage-independent points facade, so it can inspect lazy or tiled data without materializing the entire dataset first.</p>");
 }
 
 QWidget* PointsViewAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)

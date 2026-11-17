@@ -57,6 +57,8 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _projectResourceStagingPolicyAction.setCurrentText(mv::util::projectResourceStagingPolicyName(projectResourceStagingPolicy));
     _projectResourceStagingPolicyAction.setDefaultWidgetFlags(OptionAction::ComboBox);
     _projectResourceStagingPolicyAction.setToolTip("Select the policy stored on the imported dataset for its archive-backed resources. It takes effect when a saved project is opened; it does not change staging during HDF5 import.");
+    _projectResourceStagingPolicyAction.setDescription(
+        "<p>Stores the imported dataset's policy for archive-backed resources in the project. It applies when the saved project is opened, not while HDF5 data is being imported. Inherit uses the project policy, or the application default when the project also inherits.</p>");
     updateProjectResourceStagingPolicyOption();
 
     connect(this, &StorageBackendConversionAction::optionsChanged, this, [this] {
@@ -73,12 +75,18 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _tileSizeAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _deriveTileDimensionsAction.setDefaultWidgetFlags(ToggleAction::CheckBox);
     _deriveTileDimensionsAction.setToolTip("When enabled, calculate tile height and width from the target tile size and row-to-column asymmetry. You can still edit the calculated dimensions directly.");
+    _tileSizeAction.setDescription(
+        "<p>Target uncompressed size for an individual tile. When deriving tile dimensions, this target is combined with the row-to-column asymmetry; actual tile sizes can vary with the selected value type and dataset dimensions.</p>");
     _rowTileSizeAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _columnTileSizeAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _rowTileSizePercentageAction.setDefaultWidgetFlags(DecimalAction::SpinBox | DecimalAction::Slider);
     _columnTileSizePercentageAction.setDefaultWidgetFlags(DecimalAction::SpinBox | DecimalAction::Slider);
     _rowTileSizeGroupAction.setShowLabels(false);
     _columnTileSizeGroupAction.setShowLabels(false);
+    _rowTileSizeGroupAction.setDescription(
+        "<p>Set the number of dataset rows in each tile, directly or as a percentage of the dataset's row count. Larger tiles can help contiguous row access but may fetch more unrelated data for random access.</p>");
+    _columnTileSizeGroupAction.setDescription(
+        "<p>Set the number of dimensions in each tile, directly or as a percentage of the dataset's column count. Wider tiles can help column-range access but may fetch more unrelated data for narrow requests.</p>");
     _rowTileSizePercentageAction.setSuffix("%");
     _columnTileSizePercentageAction.setSuffix("%");
     _rowTileSizeAction.setStretch(1);
@@ -91,11 +99,19 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _rowTileSizePercentageAction.setUpdateDuringDrag(false);
     _columnTileSizePercentageAction.setUpdateDuringDrag(false);
     _cacheCapacityAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
+    _cacheCapacityAction.setDescription(
+        "<p>Maximum number of decoded tiles kept in memory. A larger cache can reduce repeated reads, at the cost of using more memory.</p>");
     _tileCountObservationAction.setToolTip("Heuristic based on the number of resident tile descriptors.");
     _tileCacheObservationAction.setToolTip("Checks whether one decoded tile fits within the configured cache byte limit.");
     _packedTilesAction.setDefaultWidgetFlags(ToggleAction::CheckBox);
     _superTileRowsAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _superTileColumnsAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
+    _superTileRowsAction.setDescription(
+        "<p>Number of tile rows grouped into each packed container file. Larger values can reduce file and metadata overhead, but may increase the amount of data read for an individual tile request.</p>");
+    _superTileColumnsAction.setDescription(
+        "<p>Number of tile columns grouped into each packed container file. Larger values can reduce file and metadata overhead, but may increase the amount of data read for an individual tile request.</p>");
+    _tileAsymmetryAction.setDescription(
+        "<p>Balance tile geometry between row-oriented and column-oriented access. The slider runs from column-oriented tiles through balanced tiles to row-oriented tiles; choose a shape that matches the dataset's common access pattern.</p>");
 
     addAction(&_deriveTileDimensionsAction);
     addAction(&_tileAsymmetryAction);
@@ -123,6 +139,8 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
         _importPerformanceSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
         _importPerformanceSettingsAction.setIconByName("sliders");
         _importPerformanceSettingsAction.setToolTip("Edit import performance settings");
+        _importPerformanceSettingsAction.setDescription(
+            "<p>Advanced HDF5 import controls for sparse-entry bucketing, tiled output staging, and CSR chunk grouping. Higher worker counts may improve throughput but use more CPU and memory.</p>");
         _bucketingThreadCountAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
         _stagingThreadCountAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
         _rowChunkTileFactorAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
