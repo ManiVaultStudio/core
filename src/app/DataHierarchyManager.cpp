@@ -268,9 +268,6 @@ UniqueWorkflowPlan DataHierarchyManager::fromVariantMapWorkflow(QVariantMap vari
 
             const QVariantMap datasetMap = nodeMap.value("Dataset").toMap();
 
-            qDebug() << "Enumerating dataset"
-                << datasetMap.value("Name").toString();
-
             datasetConfigs.emplace_back(DatasetConfig{
                 .id = datasetMap.value("ID").toString(),
                 .map = datasetMap,
