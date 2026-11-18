@@ -80,6 +80,7 @@ void Notifications::addNotification(Notification* notification)
     });
 
     _notifications.append(notification);
+    notification->adjustSize();
     notification->updatePosition();
     notification->show();
     notification->raise();

@@ -288,6 +288,10 @@ void Notification::finish()
 
 void Notification::slideIn()
 {
+    const auto targetPosition = pos();
+    setWindowOpacity(0.0);
+    move(targetPosition - QPoint(25, 0));
+
     auto animationGroup         = new QParallelAnimationGroup(this);
     auto windowOpacityAnimation = new QPropertyAnimation(this, "windowOpacity");
     auto positionAnimation      = new QPropertyAnimation(this, "pos");
@@ -302,8 +306,8 @@ void Notification::slideIn()
 
     positionAnimation->setEasingCurve(QEasingCurve::InOutQuad);
     positionAnimation->setDuration(animationDuration);
-    positionAnimation->setStartValue(pos() - QPoint(25, 0));
-    positionAnimation->setEndValue(pos());
+    positionAnimation->setStartValue(pos());
+    positionAnimation->setEndValue(targetPosition);
 
     animationGroup->start();
 }
@@ -480,12 +484,7 @@ QSize Notification::sizeHint() const
 void Notification::showEvent(QShowEvent* event)
 {
     QWidget::showEvent(event);
-
-    QTimer::singleShot(10, this, [this]() -> void {
-        adjustSize();
-        updatePosition();
-        slideIn();
-    });
+    slideIn();
 }
 
 void Notification::updatePosition()
