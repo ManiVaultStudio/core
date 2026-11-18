@@ -37,8 +37,16 @@ do not answer a local layout question.
 - Keep ordinary calls on one line when they remain understandable. For a call
   with a lambda, keep the ordinary arguments and lambda introducer on the
   opening line; indent the lambda body normally.
+- When a function or member call contains a multi-line lambda or other
+  multi-line body, separate the call from neighboring setup or processing
+  statements with blank lines. Keep the lambda body attached to its call and
+  do not insert blank lines inside its argument/body structure.
 - Align related declarations or assignments locally. Do not force alignment
   across unrelated statements or logical sections.
+- In a cohesive declaration block, align the assignment operators even when
+  identifiers have different lengths. Include related derived values and
+  lambdas in the same alignment group when they belong to the same setup phase.
+  Do not break an initializer solely to make the alignment possible.
 - Align related structure and class data members locally, including member
   initializers and aligned inline documentation when present. Keep one member
   group visually consistent without forcing alignment across unrelated groups.
@@ -52,6 +60,10 @@ do not answer a local layout question.
 - Use empty lines to separate setup, validation, processing, and reporting.
   Leave an empty line after an early exception or validation guard before the
   main loop or operation.
+- Keep a cohesive block of assignments together without blank lines between
+  its statements. When a separate operation or function call comes immediately
+  before or after that block, use a blank line to visually separate the block
+  from those operations.
 - Do not add empty lines between every statement in a short cohesive group.
 - Use braces for every multi-line `for` body, including an outer loop that
   contains a nested loop or another multi-line body.
@@ -74,12 +86,18 @@ Before handing off the change, inspect the changed lines for:
 
 - one-line signatures;
 - compact, understandable calls and lambda openings;
+- multi-line calls with lambda or body blocks separated from neighboring
+  operations by blank lines;
 - aligned related assignments;
+- aligned assignment operators across cohesive declaration blocks, including
+  longer identifiers and related lambda declarations;
 - aligned related structure and class members, including their initializers
   and inline documentation where applicable;
 - clear blank-line grouping between Qt widget creation, configuration, and
   layout insertion;
 - useful empty lines between logical sections;
+- cohesive assignment blocks are kept together and separated by blank lines
+  from surrounding operations when appropriate;
 - braces around multi-line and nested `for` loops;
 - indented and separated switch cases;
 - no unrelated formatting churn;
