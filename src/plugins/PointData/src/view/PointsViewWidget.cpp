@@ -498,7 +498,21 @@ void PointsViewWidget::fetchVisibleRange()
     const auto firstRow    = std::max(0, _table->rowAt(0));
     const auto lastRow     = _table->rowAt(std::max(0, _table->viewport()->height() - 1));
     const auto firstColumn = std::max(0, _table->columnAt(0));
-    const auto lastColumn  = _table->columnAt(std::max(0, _table->viewport()->width() - 1));
+    auto lastColumn = firstColumn;
+    const auto viewportWidth = _table->viewport()->width();
+    // The viewport can have unused space after the last table column, so columnAt() at its right edge can return -1.
+    for (auto column = firstColumn; column < _model->columnCount(); ++column)
+    {
+        if (_table->isColumnHidden(column))
+            continue;
+
+        const auto sectionPosition = _table->horizontalHeader()->sectionViewportPosition(column);
+        if (sectionPosition >= viewportWidth)
+            break;
+
+        if (sectionPosition + _table->horizontalHeader()->sectionSize(column) > 0)
+            lastColumn = column;
+    }
     const auto rowCount    = lastRow >= firstRow
         ? static_cast<std::uint64_t>(lastRow - firstRow + 1)
         : 1;
