@@ -21,7 +21,11 @@
 #include <QSortFilterProxyModel>
 #include <QTableView>
 
+#include <functional>
+
 class QCheckBox;
+class QResizeEvent;
+class QToolButton;
 
 namespace mv::gui {
 
@@ -212,6 +216,11 @@ public: // Widgets
              */
             void leaveEvent(QEvent* leaveEvent) override;
 
+            /** Keeps the optional configuration control at the trailing edge of the tag.
+             * @param resizeEvent Resize event forwarded to QLabel
+             */
+            void resizeEvent(QResizeEvent* resizeEvent) override;
+
         private:
 
             /** Update the current style */
@@ -221,6 +230,7 @@ public: // Widgets
             Type            _type;              /** Type of tag label */
             QString         _option;            /** Tag name */
             OptionsAction*  _optionsAction;     /** Pointer to options action */
+            QToolButton*    _configurationButton = nullptr;    /** Child-owned configuration control; present only for regular tags with a callback */
         };
 
     protected:
@@ -434,6 +444,37 @@ public:
      */
     QString getOptionToolTip(const QString& option) const;
 
+    /**
+     * @brief Assigns an optional configuration callback to an option tag.
+     *
+     * When the Tags presentation is used, a gear control appears beside this
+     * option. Activating it invokes the callback synchronously without changing
+     * selection. The action owns the callable; any objects captured by it must
+     * remain valid for as long as the callback is registered.
+     *
+     * The option must currently exist. An unknown option is ignored. Passing an
+     * empty callback removes the registration. Registrations are cleared when
+     * their options are removed and are not serialized.
+     * @param option Option label to configure
+     * @param callback Callback to invoke, or an empty callback to remove it
+     */
+    void setOptionConfigurationCallback(const QString& option, std::function<void()> callback);
+
+    /**
+     * @brief Gets whether an option currently has a configuration callback.
+     * @param option Option label to query
+     * @return Whether a callback is registered for the option
+     */
+    bool hasOptionConfigurationCallback(const QString& option) const;
+
+    /**
+     * @brief Invokes an option's configuration callback immediately when assigned.
+     * @param option Option label whose callback to invoke
+     *
+     * Does nothing when the option has no registered callback.
+     */
+    void configureOption(const QString& option) const;
+
     /** Selects all options */
     void selectAll();
 
@@ -511,6 +552,9 @@ signals:
      */
     void optionToolTipsChanged();
 
+    /** Emitted after an option configuration callback is added, replaced, or removed so tag views can refresh. */
+    void optionConfigurationChanged();
+
 protected:
     CheckableStringListModel    _optionsModel;      /** Options model */
     FileAction                  _fileAction;        /** File action */
@@ -519,8 +563,9 @@ protected:
     friend class ComboBox;
 
 private:
-    bool                   _serializeAllOptions;    /** Whether all options are serialized; false by default */
-    QMap<QString, QString> _optionToolTips;         /** Supplementary tooltip text keyed by option name */
+    bool                                     _serializeAllOptions;                                  /** Whether all options are serialized; false by default */
+    QMap<QString, QString>                   _optionToolTips;                                       /** Supplementary tooltip text keyed by option name */
+    QMap<QString, std::function<void()>>     _optionConfigurationCallbacks;                         /** Action-owned presentation callbacks, keyed by current option; omitted from serialization */
 };
 
 }   

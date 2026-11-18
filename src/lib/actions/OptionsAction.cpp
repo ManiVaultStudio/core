@@ -18,8 +18,12 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMouseEvent>
+#include <QResizeEvent>
 #include <QSignalBlocker>
 #include <QTimer>
+#include <QToolButton>
+
+#include <utility>
 
 using namespace mv::util;
 
@@ -80,6 +84,14 @@ bool OptionsAction::hasOptions() const
 void OptionsAction::setOptions(const QStringList& options, bool clearSelection /*= false*/)
 {
     _optionsModel.setStrings(options);
+
+    for (auto callback = _optionConfigurationCallbacks.begin(); callback != _optionConfigurationCallbacks.end();)
+    {
+        if (!options.contains(callback.key()))
+            callback = _optionConfigurationCallbacks.erase(callback);
+        else
+            ++callback;
+    }
 
     if (clearSelection)
         _optionsModel.setCheckedIndicesFromStrings({});
@@ -169,6 +181,31 @@ void OptionsAction::setOptionToolTips(const QMap<QString, QString>& toolTips)
 QString OptionsAction::getOptionToolTip(const QString& option) const
 {
     return _optionToolTips.value(option);
+}
+
+void OptionsAction::setOptionConfigurationCallback(const QString& option, std::function<void()> callback)
+{
+    if (!hasOption(option))
+        return;
+
+    if (callback)
+        _optionConfigurationCallbacks.insert(option, std::move(callback));
+    else
+        _optionConfigurationCallbacks.remove(option);
+
+    emit optionConfigurationChanged();
+}
+
+bool OptionsAction::hasOptionConfigurationCallback(const QString& option) const
+{
+    return _optionConfigurationCallbacks.contains(option) && static_cast<bool>(_optionConfigurationCallbacks.value(option));
+}
+
+void OptionsAction::configureOption(const QString& option) const
+{
+    const auto callback = _optionConfigurationCallbacks.value(option);
+    if (callback)
+        callback();
 }
 
 void OptionsAction::selectAll()
@@ -520,6 +557,7 @@ OptionsAction::TagsViewWidget::TagsViewWidget(QWidget* parent, OptionsAction* op
 
     connect(_optionsAction, &OptionsAction::optionsChanged, this, &TagsViewWidget::updateFlowLayout);
     connect(_optionsAction, &OptionsAction::optionToolTipsChanged, this, &TagsViewWidget::updateFlowLayout);
+    connect(_optionsAction, &OptionsAction::optionConfigurationChanged, this, &TagsViewWidget::updateFlowLayout);
 
     updateFlowLayout();
 }
@@ -616,6 +654,23 @@ OptionsAction::TagsViewWidget::TagLabel::TagLabel(const QString& option, const T
 {
     setObjectName("Tag");
 
+    if (_type == Type::Regular && _optionsAction->hasOptionConfigurationCallback(_option)) {
+        _configurationButton = new QToolButton(this);
+
+        _configurationButton->setObjectName("OptionConfigurationButton");
+        _configurationButton->setToolTip(tr("Configure %1").arg(_option));
+        _configurationButton->setAutoRaise(true);
+        _configurationButton->setCursor(Qt::PointingHandCursor);
+        _configurationButton->setFocusPolicy(Qt::StrongFocus);
+        _configurationButton->setStyleSheet("QToolButton { background: transparent; border: none; padding: 0 2px; }");
+        TriggerAction configurationIcon(this, tr("Configure %1").arg(_option));
+        configurationIcon.setIconByName("gear");
+        _configurationButton->setIcon(configurationIcon.icon());
+        _configurationButton->setIconSize(QSize(14, 14));
+        setContentsMargins(0, 0, _configurationButton->sizeHint().width(), 0);
+        connect(_configurationButton, &QToolButton::clicked, this, [this] { _optionsAction->configureOption(_option); });
+    }
+
     connect(_optionsAction, &OptionsAction::selectedOptionsChanged, this, &TagLabel::updateStyle);
 
     updateStyle();
@@ -646,6 +701,14 @@ void OptionsAction::TagsViewWidget::TagLabel::mousePressEvent(QMouseEvent* event
             _optionsAction->selectInvert();
             break;
     }
+}
+
+void OptionsAction::TagsViewWidget::TagLabel::resizeEvent(QResizeEvent* resizeEvent)
+{
+    QLabel::resizeEvent(resizeEvent);
+
+    if (_configurationButton)
+        _configurationButton->setGeometry(width() - _configurationButton->sizeHint().width() - 3, 1, _configurationButton->sizeHint().width(), height() - 2);
 }
 
 void OptionsAction::TagsViewWidget::TagLabel::enterEvent(QEnterEvent* enterEvent)
