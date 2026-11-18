@@ -52,6 +52,17 @@ public:
     /** Returns the operations supported by this backend. */
     virtual StorageBackendCapabilities getCapabilities() const = 0;
 
+    /**
+     * @brief Returns whether this backend has project resources affected by staging policy.
+     *
+     * A true result means the dataset's project resource staging policy can
+     * affect resources serialized by this backend. The project resource
+     * service performs staging; the backend only reports whether the policy
+     * applies to its representation. The default is false so existing custom
+     * backends remain compatible and opt in only when they support it.
+     */
+    [[nodiscard]] virtual bool supportsProjectResourceStaging() const { return false; }
+
     /** Creates the controls used to configure conversion to \p targetType. */
     virtual std::unique_ptr<mv::gui::StorageBackendConversionAction> createConversionAction(StorageBackendType targetType, QObject* parent) const = 0;
 

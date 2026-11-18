@@ -107,6 +107,9 @@ public:
     /** Returns tiled access, lazy loading, and materialization capabilities. */
     StorageBackendCapabilities getCapabilities() const override;
 
+    /** Returns whether this backend serializes tile resources that support project-open staging. */
+    [[nodiscard]] bool supportsProjectResourceStaging() const override;
+
     /** Creates controls for converting to or configuring the requested backend. */
     std::unique_ptr<mv::gui::StorageBackendConversionAction> createConversionAction(StorageBackendType targetType, QObject* parent) const override;
     /** Applies the tiled cache setting without changing tile geometry or backend type. */

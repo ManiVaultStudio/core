@@ -650,6 +650,7 @@ void TiledStorageBackendConfigurationAction::updatePackedTileControls()
 {
     _superTileRowsAction.setEnabled(_packedTilesAction.isChecked());
     _superTileColumnsAction.setEnabled(_packedTilesAction.isChecked());
+    _projectResourceStagingPolicyAction.setEnabled(!_showImportPerformanceOptions || _packedTilesAction.isChecked());
 }
 
 void TiledStorageBackendConfigurationAction::updateCacheCapacity()

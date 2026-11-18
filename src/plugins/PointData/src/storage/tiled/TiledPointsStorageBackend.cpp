@@ -137,6 +137,11 @@ StorageBackendCapabilities TiledPointsStorageBackend::getCapabilities() const
     return getStorageBackendCapabilities(StorageBackendType::Tiled);
 }
 
+bool TiledPointsStorageBackend::supportsProjectResourceStaging() const
+{
+    return _storage && _storage->packedTiles();
+}
+
 std::unique_ptr<mv::gui::StorageBackendConversionAction> TiledPointsStorageBackend::createConversionAction(const StorageBackendType targetType, QObject* parent) const
 {
     if (targetType == StorageBackendType::Tiled && _storage)

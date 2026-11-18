@@ -3,6 +3,7 @@
 #include "PointsAction.h"
 
 #include "../PointData.h"
+#include "../storage/interface/PointsStorageBackend.h"
 #include "../view/PointsViewWidget.h"
 
 #include <CoreInterface.h>
@@ -54,9 +55,9 @@ PointsAction::PointsAction(QObject* parent, const mv::Dataset<Points>& points) :
 {
     _openInPointsViewAction.setIconByName("arrow-up-right-from-square");
     _openInPointsViewAction.setToolTip("Open this point dataset in the standalone Points View plugin");
-    _projectResourceStagingPolicyAction.setToolTip("Choose how this dataset's archive-backed resources are accessed when opening a project. The choice applies from the next project-open session after the project is saved; it does not change the current session. Inherit uses the project's policy.");
+    _projectResourceStagingPolicyAction.setToolTip("Choose how this dataset's packed tile resources are accessed when opening a project. This option is available only when the storage backend supports project resource staging.");
     _projectResourceStagingPolicyAction.setDescription(
-        "<p>Overrides the project resource staging policy for this point dataset.</p>"
+        "<p>Overrides the project resource staging policy for this point dataset's packed tile resources.</p>"
         "<ul><li><b>Inherit:</b> use the project's resource staging policy.</li>"
         "<li><b>Read ranges on demand:</b> read requested data directly from the archive without extracting full resource files.</li>"
         "<li><b>Stage on first read:</b> extract each resource to the temporary directory when first accessed.</li>"
@@ -72,6 +73,13 @@ PointsAction::PointsAction(QObject* parent, const mv::Dataset<Points>& points) :
     const auto updateProjectResourceStagingPolicy = [this] {
         if (!_points.isValid())
             return;
+
+        const auto* storageBackend = _points->getStorageBackend();
+        const auto supportsProjectResourceStaging = storageBackend && storageBackend->supportsProjectResourceStaging();
+        _projectResourceStagingPolicyAction.setEnabled(supportsProjectResourceStaging);
+        _projectResourceStagingPolicyAction.setToolTip(supportsProjectResourceStaging
+            ? "Choose how this dataset's packed tile resources are accessed when opening a project. The choice applies from the next project-open session after the project is saved."
+            : "Project resource staging is unavailable because this storage backend does not use stageable packed tile resources.");
 
         auto options = _projectResourceStagingPolicyAction.getOptions();
         const auto datasetPolicy = _points->getProjectResourceStagingPolicy();
