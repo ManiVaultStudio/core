@@ -757,7 +757,7 @@ void OptionsAction::TagsViewWidget::TagLabel::updateStyle()
             backgroundColor = backgroundColor.lighter(115);
 
         const auto textColor = widgetPalette.color(isOptionSelected ? QPalette::HighlightedText : QPalette::ButtonText);
-        const auto borderColor = isOptionSelected ? widgetPalette.color(QPalette::Highlight) : widgetPalette.color(QPalette::Mid);
+        const auto borderColor = isOptionSelected || isHovered ? widgetPalette.color(QPalette::Highlight) : widgetPalette.color(QPalette::Mid);
 
         const auto selectionToolTip = QString("%1 %2 selected, click to toggle").arg(_option, isOptionSelected ? "is" : "is not");
         const auto optionToolTip = _optionsAction->getOptionToolTip(_option);
