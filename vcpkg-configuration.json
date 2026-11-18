@@ -8,7 +8,7 @@
     {
       "kind": "git",
       "repository": "https://github.com/ManiVaultStudio/vcpkg-registry-external",
-      "baseline": "3015b7ee0a816e6d45ef6bcfb1ba7f180bc86488",
+      "baseline": "a8d614ff99a3c9510290d54264f8fda90128e918",
       "packages": [
         "qt6", "biovault-bfloat16"
       ]
