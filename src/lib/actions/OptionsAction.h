@@ -216,6 +216,9 @@ public: // Widgets
              */
             void leaveEvent(QEvent* leaveEvent) override;
 
+            /** Refreshes gear emphasis as the pointer enters or leaves its button. */
+            bool eventFilter(QObject* watched, QEvent* event) override;
+
             /** Keeps the optional configuration control at the trailing edge of the tag.
              * @param resizeEvent Resize event forwarded to QLabel
              */

@@ -12,6 +12,7 @@
 
 #include <QCheckBox>
 #include <QDebug>
+#include <QGraphicsOpacityEffect>
 #include <QHeaderView>
 #include <QHBoxLayout>
 #include <QJsonArray>
@@ -663,15 +664,24 @@ OptionsAction::TagsViewWidget::TagLabel::TagLabel(const QString& option, const T
         _configurationButton->setCursor(Qt::PointingHandCursor);
         _configurationButton->setFocusPolicy(Qt::StrongFocus);
         _configurationButton->setStyleSheet("QToolButton { background: transparent; border: none; padding: 0 2px; }");
+        auto* opacityEffect = new QGraphicsOpacityEffect(_configurationButton);
+        _configurationButton->setGraphicsEffect(opacityEffect);
+        _configurationButton->installEventFilter(this);
         TriggerAction configurationIcon(this, tr("Configure %1").arg(_option));
         configurationIcon.setIconByName("gear");
         _configurationButton->setIcon(configurationIcon.icon());
-        _configurationButton->setIconSize(QSize(14, 14));
+        _configurationButton->setIconSize(QSize(10, 10));
         setContentsMargins(0, 0, _configurationButton->sizeHint().width(), 0);
-        connect(_configurationButton, &QToolButton::clicked, this, [this] { _optionsAction->configureOption(_option); });
+        connect(_configurationButton, &QToolButton::clicked, this, [this] {
+            if (_optionsAction->isOptionSelected(_option))
+                _optionsAction->configureOption(_option);
+        });
     }
 
     connect(_optionsAction, &OptionsAction::selectedOptionsChanged, this, &TagLabel::updateStyle);
+    connect(&_optionsAction->getOptionsModel(), &QAbstractItemModel::dataChanged, this, [this](const QModelIndex&, const QModelIndex&, const QList<int>&) {
+        QTimer::singleShot(0, this, &TagLabel::updateStyle);
+    });
 
     updateStyle();
 }
@@ -722,7 +732,15 @@ void OptionsAction::TagsViewWidget::TagLabel::leaveEvent(QEvent* leaveEvent)
 {
     QLabel::leaveEvent(leaveEvent);
 
-    updateStyle();
+    QTimer::singleShot(0, this, &TagLabel::updateStyle);
+}
+
+bool OptionsAction::TagsViewWidget::TagLabel::eventFilter(QObject* watched, QEvent* event)
+{
+    if (watched == _configurationButton && (event->type() == QEvent::Enter || event->type() == QEvent::Leave || event->type() == QEvent::FocusIn || event->type() == QEvent::FocusOut))
+        QTimer::singleShot(0, this, &TagLabel::updateStyle);
+
+    return QLabel::eventFilter(watched, event);
 }
 
 void OptionsAction::TagsViewWidget::TagLabel::updateStyle()
@@ -732,26 +750,27 @@ void OptionsAction::TagsViewWidget::TagLabel::updateStyle()
     if (_type == Type::Regular)
     {
         const auto widgetPalette = palette();
-        auto backgroundColor = isOptionSelected ? widgetPalette.color(QPalette::Highlight) : widgetPalette.color(QPalette::Button);
-
-        if (underMouse())
-            backgroundColor = isOptionSelected ? backgroundColor.lighter(115) : widgetPalette.color(QPalette::Midlight);
+        const auto isHovered = underMouse() || (_configurationButton && _configurationButton->underMouse());
+        const auto unselectedColor = widgetPalette.color(QPalette::Midlight);
+        auto backgroundColor = isOptionSelected ? widgetPalette.color(QPalette::Highlight) : unselectedColor;
+        if (isOptionSelected && isHovered)
+            backgroundColor = backgroundColor.lighter(115);
 
         const auto textColor = widgetPalette.color(isOptionSelected ? QPalette::HighlightedText : QPalette::ButtonText);
-        const auto borderColor = widgetPalette.color(isOptionSelected ? QPalette::Highlight : QPalette::Mid);
+        const auto borderColor = isOptionSelected ? widgetPalette.color(QPalette::Highlight) : widgetPalette.color(QPalette::Mid);
 
         const auto selectionToolTip = QString("%1 %2 selected, click to toggle").arg(_option, isOptionSelected ? "is" : "is not");
         const auto optionToolTip = _optionsAction->getOptionToolTip(_option);
         setToolTip(optionToolTip.isEmpty() ? selectionToolTip : QString("%1\n%2").arg(selectionToolTip, optionToolTip));
-        setStyleSheet(QString("QLabel#Tag { \
-            background-color: %1; \
-            color: %2; \
-            font-size: 90%; \
-            font-weight: normal; \
-            border: 1px solid %3; \
-            border-radius: 5px; \
-            padding: 2px 5px; \
-        }").arg(getColorAsCssString(backgroundColor), getColorAsCssString(textColor), getColorAsCssString(borderColor)));
+        if (_configurationButton)
+        {
+            const auto isGearHovered = _configurationButton->underMouse() || _configurationButton->hasFocus();
+            _configurationButton->setEnabled(isOptionSelected);
+            if (auto* opacityEffect = qobject_cast<QGraphicsOpacityEffect*>(_configurationButton->graphicsEffect()))
+                opacityEffect->setOpacity(isOptionSelected ? (isGearHovered ? 1.0 : isHovered ? 0.72 : 0.32) : isHovered ? 0.28 : 0.20);
+        }
+        setStyleSheet(QStringLiteral("QLabel#Tag { background-color: %1; color: %2; font-size: 90%; font-weight: normal; border: 1px solid %3; border-radius: 5px; padding: 2px 5px; }")
+            .arg(getColorAsCssString(backgroundColor), getColorAsCssString(textColor), getColorAsCssString(borderColor)));
         return;
     }
 
@@ -778,13 +797,8 @@ void OptionsAction::TagsViewWidget::TagLabel::updateStyle()
             break;
     }
 
-    setStyleSheet(QString("QLabel#Tag { \
-        background-color: %1; \
-        color: %2; \
-        font-weight: %3; \
-        border-radius: 5px; \
-        padding: 3px; \
-    }").arg(isOptionSelected ? (underMouse() ? "rgb(160, 160, 160)" : "rgb(150, 150, 150)") : (underMouse() ? "rgb(220, 220, 220)" : "rgb(210, 210, 210)"), getColorAsCssString(textColor), _type == Type::Regular ? "normal" : "bold"));
+    setStyleSheet(QStringLiteral("QLabel#Tag { background-color: %1; color: %2; font-weight: %3; border-radius: 5px; padding: 3px; }")
+        .arg(isOptionSelected ? (underMouse() ? "rgb(160, 160, 160)" : "rgb(150, 150, 150)") : (underMouse() ? "rgb(220, 220, 220)" : "rgb(210, 210, 210)"), getColorAsCssString(textColor), _type == Type::Regular ? "normal" : "bold"));
 }
 
 QWidget* OptionsAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
