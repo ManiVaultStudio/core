@@ -119,19 +119,22 @@ struct StorageBackendCreationOptions : StorageBackendConfigurationOptions
  * Tile dimensions are physical limits in matrix rows and columns. The cache
  * capacity limits the number of decoded tile payloads retained in memory. The
  * capacity is runtime metadata and is persisted by the tiled point-data
- * serializer; changing it does not force all tiles to be loaded.
+ * serializer; changing it does not force all tiles to be loaded. Packed tile
+ * payloads can use a per-dataset codec, persisted with their supertile metadata
+ * and restored independently of the active project compression setting.
  */
 struct StorageBackendConfiguration : StorageBackendConfigurationOptions
 {
-    std::size_t rowTileSize         = 256;                              /**< Maximum number of matrix rows in one tile. */
-    std::size_t columnTileSize      = 8;                                /**< Maximum number of matrix columns in one tile. */
-    std::size_t cacheCapacity       = 8;                                /**< Maximum number of tile payloads retained in memory. */
-    std::size_t cacheCapacityBytes  = defaultTileCacheCapacityBytes;    /**< Maximum decoded tile payload bytes retained in memory. */
-    bool        packedTiles         = false;                            /**< Whether serialized tiles are grouped into jointly encoded super tiles. */
-    std::size_t superTileRows       = 1;                                /**< Number of base tile rows in one serialized super tile. */
-    std::size_t superTileColumns    = 1;                                /**< Number of base tile columns in one serialized super tile. */
-    std::size_t conversionWorkerCount = 4;                               /**< Maximum workers used to generate converted tiles. */
-    std::size_t conversionChunkTileRows = 3;                             /**< Tile-row height of one bounded conversion work chunk. */
+    std::size_t rowTileSize               = 256;                           /**< Maximum number of matrix rows in one tile. */
+    std::size_t columnTileSize            = 8;                             /**< Maximum number of matrix columns in one tile. */
+    std::size_t cacheCapacity             = 8;                             /**< Maximum number of tile payloads retained in memory. */
+    std::size_t cacheCapacityBytes        = defaultTileCacheCapacityBytes; /**< Maximum decoded tile payload bytes retained in memory. */
+    bool        packedTiles               = false;                         /**< Whether serialized tiles are grouped into jointly encoded super tiles. */
+    std::size_t superTileRows             = 1;                             /**< Number of base tile rows in one serialized super tile. */
+    std::size_t superTileColumns          = 1;                             /**< Number of base tile columns in one serialized super tile. */
+    QString     tileCodecName;                                              /**< Registered codec key for packed payloads; empty inherits project compression. */
+    std::size_t conversionWorkerCount     = 4;                             /**< Maximum workers used to generate converted tiles. */
+    std::size_t conversionChunkTileRows   = 3;                             /**< Tile-row height of one bounded conversion work chunk. */
 };
 
 /** Selects the compressed orientation used when converting a dense matrix to sparse storage. */

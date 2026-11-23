@@ -23,8 +23,9 @@ namespace mv::pointdata::storage
  * @brief Describes generator-backed tiled storage to be created by the tiled backend.
  *
  * The generator returns row-major bytes for the requested tile. The cache
- * capacity is applied while the tiled storage is constructed. The options
- * object itself is not retained by the backend after creation.
+ * capacity and packed-tile codec are applied while the tiled storage is
+ * constructed. The options object itself is not retained by the backend after
+ * creation.
  *
  * @author T. Kroes
  */
@@ -55,6 +56,7 @@ struct TiledStorageBackendCreationOptions final : StorageBackendCreationOptions
     bool          materializeGeneratedTiles = false;                    /**< Whether generated tiles should be retained immediately instead of loading lazily. */
     std::size_t   superTileRows        = 1;                             /**< Number of base tile rows in one super tile. */
     std::size_t   superTileColumns     = 1;                             /**< Number of base tile columns in one super tile. */
+    QString       tileCodecName;                                        /**< Registered codec key used for packed tile payloads. */
     std::size_t   materializationWorkerCount = 4;                       /**< Maximum workers used to materialize generated tiles. */
     std::size_t   materializationChunkTileRows = 3;                     /**< Tile-row height of one bounded materialization chunk. */
     bool          loaderThreadSafe     = false;                         /**< Whether independent tile loader calls may run concurrently. */
@@ -69,6 +71,10 @@ struct TiledStorageBackendCreationOptions final : StorageBackendCreationOptions
  * tile views through the common backend contract. It does not duplicate tile
  * ownership: PointDataTiledStorage remains responsible for descriptors,
  * loading, caching, and serialization.
+ *
+ * Multi-tile fetches schedule acquisitions on a shared pool capped at eight
+ * workers. The storage loader itself runs concurrently only when marked
+ * thread-safe; visitor callbacks remain serial and ordered on the caller.
  *
  * @author Thomas Kroes
  */
@@ -132,7 +138,35 @@ public:
     /** Loads the requested row and returns a lifetime-safe read-only view. */
     PointDataAccessView getRow(std::uint64_t row) const override;
 
-    /** Visits a bounded range without materializing unrelated tiles. */
+    /**
+     * Visits selected rows in caller order while loading intersecting tiles with bounded concurrency. Visitor callbacks run serially on the calling thread.
+     *
+     * Duplicate row IDs are visited repeatedly. Invalid row IDs throw std::out_of_range; an invalid visitor throws std::invalid_argument.
+     */
+    void visitRows(const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+
+    /**
+     * Visits a column range for selected rows, preserving the supplied row order and loading intersecting tiles with bounded concurrency. Visitor callbacks run serially on the calling thread.
+     *
+     * Duplicate row IDs are visited repeatedly. Invalid bounds throw std::out_of_range; an invalid visitor throws std::invalid_argument.
+     */
+    void visitRange(const std::vector<std::uint64_t>& rowIds, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const;
+
+    /**
+     * Visits selected columns in row order while loading intersecting tiles with bounded concurrency. Visitor callbacks run serially on the calling thread.
+     *
+     * Consecutive column IDs are grouped into contiguous views. Invalid column IDs throw std::out_of_range; an invalid visitor throws std::invalid_argument.
+     */
+    void visitColumns(const std::vector<std::uint64_t>& columnIds, const PointDataAccessVisitor& visitor) const;
+
+    /**
+     * Visits selected columns for the requested row IDs, preserving row and column ID order while loading intersecting tiles with bounded concurrency. Visitor callbacks run serially on the calling thread.
+     *
+     * Duplicate IDs are visited repeatedly. Invalid IDs throw std::out_of_range; an invalid visitor throws std::invalid_argument.
+     */
+    void visitColumns(const std::vector<std::uint64_t>& columnIds, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+
+    /** Visits a bounded range in row-major order, preloading tiles with bounded concurrency without materializing unrelated tiles. */
     void visitRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const override;
 
     /** Loads one row-major element and converts it to float. */

@@ -7,6 +7,8 @@
 #include <Application.h>
 #include <CoreInterface.h>
 #include <Project.h>
+#include <util/BlobCodec.h>
+#include <util/CodecRegistry.h>
 #include <util/Miscellaneous.h>
 
 #include <QSignalBlocker>
@@ -18,6 +20,26 @@
 
 namespace mv::gui
 {
+
+namespace
+{
+QString projectTileCodecName()
+{
+    auto* project = mv::projects().getCurrentProject();
+    if (!project)
+        return mv::util::BlobCodec::typeToString(mv::util::BlobCodec::Type::Zstd);
+
+    return mv::util::BlobCodec::typeToString(mv::util::codecRegistry().typeFromDisplayName(project->getCompressionAction().getCodecTypeAction().getCurrentText()));
+}
+
+QStringList tileCodecOptions()
+{
+    return {
+        mv::util::codecRegistry().factory(mv::util::BlobCodec::Type::None).displayName(),
+        mv::util::codecRegistry().factory(mv::util::BlobCodec::Type::Zstd).displayName()
+    };
+}
+}
 
 TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(QObject* parent, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration, const bool initializeFromConfiguration, const std::optional<std::uint32_t> currentElementTypeIndex, const bool showImportPerformanceOptions, const std::size_t bucketingThreadCount, const std::size_t stagingThreadCount, const std::size_t rowChunkTileFactor, const bool showImportStagingSpaceObservation, const QString& stagingDirectory, const mv::util::ProjectResourceStagingPolicy projectResourceStagingPolicy) :
     StorageBackendConversionAction(parent, "Tiled storage", currentElementTypeIndex),
@@ -34,6 +56,7 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _columnTileSizeAction(this, "Tile width", 1, std::numeric_limits<std::int32_t>::max(), 8),
     _columnTileSizePercentageAction(this, "Width (% of columns)", 0.1f, 100.0f, 1.0f, 1),
     _cacheCapacityAction(this, "Tile cache capacity", 1, std::numeric_limits<std::int32_t>::max(), 1),
+    _tileCodecAction(this, "Packed tile codec"),
     _tileCountObservationAction(this),
     _tileCacheObservationAction(this),
     _stagingSpaceObservationAction(this),
@@ -60,6 +83,14 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _projectResourceStagingPolicyAction.setDescription(
         "<p>Stores the imported dataset's policy for archive-backed resources in the project. It applies when the saved project is opened, not while HDF5 data is being imported. Inherit uses the project's resource staging policy.</p>");
     updateProjectResourceStagingPolicyOption();
+    const auto initialTileCodecName = configuration.tileCodecName.isEmpty() ? projectTileCodecName() : configuration.tileCodecName;
+    _tileCodecAction.initialize(tileCodecOptions(), mv::util::codecRegistry().factory(initialTileCodecName).displayName());
+    _tileCodecAction.setSerializationName("Packed tile codec");
+    _tileCodecAction.setDefaultWidgetFlags(OptionAction::ComboBox);
+    _tileCodecAction.setToolTip("Choose how each packed tile payload is encoded. This choice is stored with the dataset and used when tiles are read later.");
+    _tileCodecAction.setDescription(
+        "<p>Select no compression or Zstandard for packed tile payloads. The selected codec is stored with this dataset and used to decode its tiles when the project is reopened. Changing the codec for an existing packed dataset causes its tiles to be re-encoded the next time the project is saved.</p>");
+    _tileCodecAction.setEnabled(false);
 
     connect(this, &StorageBackendConversionAction::optionsChanged, this, [this] {
         const auto targetElementSize = getTargetElementSize();
@@ -124,6 +155,7 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     addAction(&_columnTileSizeGroupAction);
     addAction(&_cacheCapacityAction);
     addAction(&_packedTilesAction);
+    addAction(&_tileCodecAction);
     addAction(&_superTileRowsAction);
     addAction(&_superTileColumnsAction);
 
@@ -217,6 +249,10 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
 
     connect(&_cacheCapacityAction, &IntegralAction::valueChanged, this, [this] {
         updateStorageObservations();
+        notifyOptionsChanged();
+    });
+
+    connect(&_tileCodecAction, &OptionAction::currentIndexChanged, this, [this] {
         notifyOptionsChanged();
     });
 
@@ -386,6 +422,7 @@ void TiledStorageBackendConfigurationAction::fromVariantMap(const QVariantMap& v
     // after geometry policy updates so the explicit override is preserved.
     restoreAction(_cacheCapacityAction, variantMap);
     restoreLegacyIntegralValue(_cacheCapacityAction, "CacheCapacity", "CacheCapacityAction");
+    restoreAction(_tileCodecAction, variantMap);
 
     updatePackedTileControls();
     updateImportPerformanceSummary();
@@ -401,6 +438,7 @@ QVariantMap TiledStorageBackendConfigurationAction::toVariantMap() const
     _deriveTileDimensionsAction.insertIntoVariantMap(variantMap);
     _tileSizeAction.insertIntoVariantMap(variantMap);
     _cacheCapacityAction.insertIntoVariantMap(variantMap);
+    _tileCodecAction.insertIntoVariantMap(variantMap);
     _packedTilesAction.insertIntoVariantMap(variantMap);
     _superTileRowsAction.insertIntoVariantMap(variantMap);
     _superTileColumnsAction.insertIntoVariantMap(variantMap);
@@ -510,6 +548,7 @@ bool TiledStorageBackendConfigurationAction::hasChanges() const
         configuration.columnTileSize != _initialConfiguration.columnTileSize ||
         configuration.cacheCapacity != _initialConfiguration.cacheCapacity ||
         configuration.cacheCapacityBytes != _initialConfiguration.cacheCapacityBytes ||
+        configuration.tileCodecName != _initialConfiguration.tileCodecName ||
         configuration.packedTiles != _initialConfiguration.packedTiles ||
         configuration.superTileRows != _initialConfiguration.superTileRows ||
         configuration.superTileColumns != _initialConfiguration.superTileColumns ||
@@ -519,13 +558,14 @@ bool TiledStorageBackendConfigurationAction::hasChanges() const
 pointdata::storage::StorageBackendConfiguration TiledStorageBackendConfigurationAction::getConfiguration() const
 {
     pointdata::storage::StorageBackendConfiguration configuration;
-    configuration.rowTileSize        = static_cast<std::size_t>(_rowTileSizeAction.getValue());
-    configuration.columnTileSize     = static_cast<std::size_t>(_columnTileSizeAction.getValue());
-    configuration.cacheCapacity      = static_cast<std::size_t>(_cacheCapacityAction.getValue());
+    configuration.rowTileSize          = static_cast<std::size_t>(_rowTileSizeAction.getValue());
+    configuration.columnTileSize       = static_cast<std::size_t>(_columnTileSizeAction.getValue());
+    configuration.cacheCapacity         = static_cast<std::size_t>(_cacheCapacityAction.getValue());
     configuration.cacheCapacityBytes = _cacheCapacityBytes;
-    configuration.packedTiles        = _packedTilesAction.isChecked();
-    configuration.superTileRows      = static_cast<std::size_t>(_superTileRowsAction.getValue());
-    configuration.superTileColumns   = static_cast<std::size_t>(_superTileColumnsAction.getValue());
+    configuration.tileCodecName         = mv::util::BlobCodec::typeToString(mv::util::codecRegistry().typeFromDisplayName(_tileCodecAction.getCurrentText()));
+    configuration.packedTiles           = _packedTilesAction.isChecked();
+    configuration.superTileRows         = static_cast<std::size_t>(_superTileRowsAction.getValue());
+    configuration.superTileColumns      = static_cast<std::size_t>(_superTileColumnsAction.getValue());
     if (_showConversionPerformanceOptions)
     {
         configuration.conversionWorkerCount = static_cast<std::size_t>(_stagingThreadCountAction.getValue());
@@ -650,6 +690,7 @@ void TiledStorageBackendConfigurationAction::updatePackedTileControls()
 {
     _superTileRowsAction.setEnabled(_packedTilesAction.isChecked());
     _superTileColumnsAction.setEnabled(_packedTilesAction.isChecked());
+    _tileCodecAction.setEnabled(_packedTilesAction.isChecked());
     _projectResourceStagingPolicyAction.setEnabled(!_showImportPerformanceOptions || _packedTilesAction.isChecked());
 }
 
@@ -683,9 +724,26 @@ void TiledStorageBackendConfigurationAction::updateStorageObservations()
         static_cast<std::size_t>(_cacheCapacityAction.getValue()),
         _cacheCapacityBytes);
     const auto tileSeverity = memoryEstimate.tileCount >= 100000 ? util::SeverityLevel::Warning : util::SeverityLevel::Info;
-    auto tileDescription = QString("The layout uses %1 tiles; the resident tile index is estimated at %2.")
-        .arg(memoryEstimate.tileCount)
-        .arg(util::getNoBytesHumanReadable(memoryEstimate.indexBytes));
+    const auto tileRows = _rows / static_cast<std::uint64_t>(_rowTileSizeAction.getValue()) + (_rows % static_cast<std::uint64_t>(_rowTileSizeAction.getValue()) != 0);
+    const auto tileColumns = _columns / static_cast<std::uint64_t>(_columnTileSizeAction.getValue()) + (_columns % static_cast<std::uint64_t>(_columnTileSizeAction.getValue()) != 0);
+    const auto superTileRows = static_cast<std::uint64_t>(_superTileRowsAction.getValue());
+    const auto superTileColumns = static_cast<std::uint64_t>(_superTileColumnsAction.getValue());
+    const auto superTileRowCount = tileRows / superTileRows + (tileRows % superTileRows != 0);
+    const auto superTileColumnCount = tileColumns / superTileColumns + (tileColumns % superTileColumns != 0);
+    const auto superTileCount = _packedTilesAction.isChecked() ? superTileRowCount * superTileColumnCount : memoryEstimate.tileCount;
+    const auto tilesPerSuperTile = _packedTilesAction.isChecked()
+        ? std::min(tileRows, superTileRows) * std::min(tileColumns, superTileColumns)
+        : 1;
+    auto tileDescription = _packedTilesAction.isChecked()
+        ? QString("The layout uses %1 tiles across %2 supertiles, with up to %3 tiles per supertile; the resident tile index is estimated at %4.")
+            .arg(memoryEstimate.tileCount)
+            .arg(superTileCount)
+            .arg(tilesPerSuperTile)
+            .arg(util::getNoBytesHumanReadable(memoryEstimate.indexBytes))
+        : QString("The layout uses %1 tiles (%2 supertiles, 1 tile per supertile); the resident tile index is estimated at %3.")
+            .arg(memoryEstimate.tileCount)
+            .arg(superTileCount)
+            .arg(util::getNoBytesHumanReadable(memoryEstimate.indexBytes));
 
     if (tileSeverity == util::SeverityLevel::Warning)
         tileDescription += " Many small tiles can increase index memory and setup time. Consider increasing tile height or width.";

@@ -27,6 +27,8 @@
 #include <graphics/Vector2f.h>
 
 #include <util/Serialization.h>
+#include <util/BlobCodec.h>
+#include <util/CodecRegistry.h>
 #include <util/JSON.h>
 
 #include <workflow/WorkflowContextVariantMap.h>
@@ -62,6 +64,19 @@ using namespace mv::workflow;
 
 namespace
 {
+    SharedCodec createTiledStorageCodec(const QString& codecName)
+    {
+        auto* project = mv::projects().getCurrentProject();
+        if (!project)
+            throw std::runtime_error("Unable to create tiled storage codec without an active project");
+
+        const auto projectCodecName = BlobCodec::typeToString(codecRegistry().typeFromDisplayName(project->getCompressionAction().getCodecTypeAction().getCurrentText()));
+        if (codecName.isEmpty() || codecName == projectCodecName)
+            return project->getCompressionAction().createCodec(nullptr);
+
+        return codecRegistry().createCodec(nullptr, codecName);
+    }
+
     template<typename T>
     bool isNonZeroValue(const char* valueBytes)
     {
@@ -411,6 +426,7 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
             creation->loaderThreadSafe = true;
             creation->superTileRows = configuration->superTileRows;
             creation->superTileColumns = configuration->superTileColumns;
+            creation->tileCodecName = configuration->tileCodecName;
             creation->materializationWorkerCount = configuration->conversionWorkerCount;
             creation->materializationChunkTileRows = configuration->conversionChunkTileRows;
             creation->generator = [this, sourceBackend, sourceElementTypeIndex, targetElementTypeIndex, targetElementSize, columns](const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t tileRows, const std::uint64_t tileColumns) {
@@ -474,6 +490,7 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
             creation->loaderThreadSafe = true;
             creation->superTileRows = configuration->superTileRows;
             creation->superTileColumns = configuration->superTileColumns;
+            creation->tileCodecName = configuration->tileCodecName;
             creation->materializationWorkerCount = configuration->conversionWorkerCount;
             creation->materializationChunkTileRows = configuration->conversionChunkTileRows;
             creation->generator = [sparseStorage, elementSize = creation->elementSize, columns = creation->columns](const std::uint64_t rowOffset, const std::uint64_t columnOffset, const std::uint64_t tileRows, const std::uint64_t tileColumns) {
@@ -514,12 +531,8 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
             std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> convertedStorage;
             if (configuration->packedTiles)
             {
-                const auto* project = mv::projects().getCurrentProject();
-                if (!project)
-                    throw std::runtime_error("Unable to convert tiled point data without an active project");
-
-                const auto codec = project->getCompressionAction().createCodec(nullptr);
-                const auto codecFactory = [project] { return project->getCompressionAction().createCodec(nullptr); };
+                const auto codec = createTiledStorageCodec(configuration->tileCodecName);
+                const auto codecFactory = [codecName = configuration->tileCodecName] { return createTiledStorageCodec(codecName); };
                 convertedStorage = mv::pointdata::tiled::PointDataTiledStorage::retileToPackedFiles(
                     tiledStorage,
                     configuration->rowTileSize,

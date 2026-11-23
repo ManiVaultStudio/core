@@ -62,6 +62,7 @@ std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> TiledPointsStorageB
     storage->setCacheCapacity(options.cacheCapacity);
     storage->setCacheCapacityBytes(options.cacheCapacityBytes);
     storage->setPackedTiles(options.packedTiles, options.superTileRows, options.superTileColumns);
+    storage->setSerializationCodecName(options.tileCodecName);
     storage->setLoaderThreadSafe(options.loaderThreadSafe);
 
     if (options.packedSource)
@@ -154,6 +155,7 @@ std::unique_ptr<mv::gui::StorageBackendConversionAction> TiledPointsStorageBacke
         configuration.packedTiles    = _storage->packedTiles();
         configuration.superTileRows  = _storage->superTileRows();
         configuration.superTileColumns = _storage->superTileColumns();
+        configuration.tileCodecName = _storage->serializationCodecName();
         return std::make_unique<mv::gui::TiledStorageBackendConversionAction>(parent, _storage->rows(), _storage->columns(), _storage->elementSize(), configuration, true, true, _elementTypeIndex);
     }
 
@@ -179,6 +181,7 @@ void TiledPointsStorageBackend::applyConfiguration(const StorageBackendConfigura
 
     _storage->setCacheCapacity(configuration->cacheCapacity);
     _storage->setCacheCapacityBytes(configuration->cacheCapacityBytes);
+    _storage->setSerializationCodecName(configuration->tileCodecName);
     _storage->setPackedTiles(configuration->packedTiles, configuration->superTileRows, configuration->superTileColumns);
 }
 

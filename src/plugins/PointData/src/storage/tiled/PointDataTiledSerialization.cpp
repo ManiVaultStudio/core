@@ -7,6 +7,7 @@
 
 #include <ProjectCompressionAction.h>
 
+#include <util/BlobCodec.h>
 #include <util/Serialization.h>
 #include <util/CodecRegistry.h>
 
@@ -58,6 +59,23 @@ bool isLocalPackedTileFile(const QString& path)
 {
     const QFileInfo fileInfo(path);
     return fileInfo.isAbsolute() && fileInfo.isFile();
+}
+
+mv::util::SharedCodec createStorageCodec(const mv::pointdata::tiled::PointDataTiledStorage& storage)
+{
+    const auto codecName = storage.serializationCodecName();
+    if (codecName.isEmpty())
+        return mv::projects().getCurrentProject()->getCompressionAction().createCodec(nullptr);
+
+    auto* project = mv::projects().getCurrentProject();
+    if (project)
+    {
+        const auto projectCodecName = mv::util::BlobCodec::typeToString(mv::util::codecRegistry().typeFromDisplayName(project->getCompressionAction().getCodecTypeAction().getCurrentText()));
+        if (codecName == projectCodecName)
+            return project->getCompressionAction().createCodec(nullptr);
+    }
+
+    return mv::util::codecRegistry().createCodec(nullptr, codecName);
 }
 
 struct PackedTileReaderState
@@ -370,6 +388,7 @@ QVariantMap makeTiledVariantMap(const mv::pointdata::tiled::PointDataTiledStorag
     result["ColumnTileSize"]  = QVariant::fromValue(static_cast<qulonglong>(storage.columnTileSize()));
     result["CacheCapacity"]   = QVariant::fromValue(static_cast<qulonglong>(storage.cacheCapacity()));
     result["CacheCapacityBytes"] = QVariant::fromValue(static_cast<qulonglong>(storage.cacheCapacityBytes()));
+    result["TileCodec"]         = storage.serializationCodecName();
     result["ElementSize"]     = QVariant::fromValue(static_cast<qulonglong>(storage.elementSize()));
     result["RawDataBytes"]    = QVariant::fromValue(static_cast<qulonglong>(memoryEstimate.rawDataBytes));
     result["TileCount"]       = QVariant::fromValue(static_cast<qulonglong>(memoryEstimate.tileCount));
@@ -477,7 +496,7 @@ QVariantMap makePackedTiledVariantMap(const mv::pointdata::tiled::PointDataTiled
     const auto tileColumns = storage.tileColumnCount();
     const auto tileCount = storage.descriptors().size();
     std::size_t completedTileCount = 0;
-    const auto codec = mv::projects().getCurrentProject()->getCompressionAction().createCodec(nullptr);
+    const auto codec = createStorageCodec(storage);
     const auto saveDirectory = QDir::cleanPath(mv::projects().getTemporaryDirPath(mv::AbstractProjectManager::TemporaryDirType::Save));
 
     tiles.resize(static_cast<qsizetype>(storage.descriptors().size()));
@@ -593,7 +612,7 @@ mv::workflow::UniqueWorkflowPlan PointDataTiledSerialization::toVariantMapWorkfl
             for (std::uint64_t superTileColumn = 0; superTileColumn < tileColumns; superTileColumn += storage.superTileColumns())
             {
                 const auto currentSuperTileIndex = superTileIndex++;
-                const auto codec = mv::projects().getCurrentProject()->getCompressionAction().createCodec(nullptr);
+                const auto codec = createStorageCodec(storage);
                 const auto lastTileRow = std::min(tileRows, superTileRow + storage.superTileRows());
                 const auto lastTileColumn = std::min(tileColumns, superTileColumn + storage.superTileColumns());
                 std::uint64_t superTileByteCount = 0;
@@ -699,6 +718,7 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantM
     const auto columnTileSize = map.value("ColumnTileSize").toULongLong();
     const auto cacheCapacity  = map.value("CacheCapacity", QVariant::fromValue<qulonglong>(8)).toULongLong();
     const auto cacheCapacityBytes = map.value("CacheCapacityBytes", QVariant::fromValue<qulonglong>(mv::pointdata::storage::defaultTileCacheCapacityBytes)).toULongLong();
+    const auto tileCodecName = map.value("TileCodec").toString();
     const auto tileMaps       = map.value("Tiles").toList();
     const auto storageType    = map.value("Storage").toString();
     const auto packedTiles    = storageType == QStringLiteral("SuperTileBlobs") || storageType == QStringLiteral("PackedTileFiles");
@@ -780,6 +800,7 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledSerialization::fromVariantM
     auto storage = std::make_shared<PointDataTiledStorage>(rows, columns, elementSize, rowTileSize, columnTileSize, loader);
     storage->setCacheCapacity(static_cast<std::size_t>(cacheCapacity));
     storage->setCacheCapacityBytes(static_cast<std::size_t>(cacheCapacityBytes));
+    storage->setSerializationCodecName(tileCodecName);
 
     if (packedTiles)
     {

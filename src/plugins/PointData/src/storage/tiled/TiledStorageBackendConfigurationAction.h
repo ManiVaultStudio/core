@@ -42,8 +42,8 @@ public:
      *
      * The tile-size and asymmetry controls calculate a suggested geometry;
      * the row and column dimensions remain directly editable. When requested,
-     * the current physical geometry and cache capacity are copied from
-     * \p configuration for backend inspection or reconfiguration.
+     * the current physical geometry, cache limits, and packed tile codec are
+     * copied from \p configuration for backend inspection or reconfiguration.
      * @param parent Parent action that owns this configuration action.
      * @param rows Logical matrix row count used to bound tile geometry.
      * @param columns Logical matrix column count used to bound tile geometry.
@@ -57,7 +57,7 @@ public:
     /** Returns the tiled backend type represented by this action. */
     pointdata::storage::StorageBackendType getTargetBackendType() const override;
 
-    /** Returns the currently selected physical tile geometry and cache capacity. */
+    /** Returns the selected tile geometry, cache limits, and packed tile codec. */
     pointdata::storage::StorageBackendConfigurationOptionsPtr getConversionOptions() const override;
 
     /** Returns whether the selected element type or tiled settings differ from their initial values. */
@@ -118,6 +118,7 @@ private:
     IntegralAction              _columnTileSizeAction;               /**< Maximum number of matrix columns per tile. */
     DecimalAction               _columnTileSizePercentageAction;     /**< Column tile width as a percentage of matrix columns. */
     IntegralAction              _cacheCapacityAction;                /**< Maximum resident tile count. */
+    OptionAction                _tileCodecAction;                    /**< Codec used for independently encoded packed tile payloads. */
     MessageCardAction           _tileCountObservationAction;         /**< Estimated tile-index size and high tile-count notice. */
     MessageCardAction           _tileCacheObservationAction;         /**< Estimated tile payload size compared with the cache byte limit. */
     MessageCardAction           _stagingSpaceObservationAction;      /**< Disk-space estimate for import staging, when enabled. */

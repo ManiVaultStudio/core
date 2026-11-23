@@ -195,6 +195,18 @@ public:
     std::size_t superTileColumns() const { return _superTileColumns; }
 
     /**
+     * Sets the codec key used when this storage writes packed tile payloads.
+     * Changing the codec detaches the direct-serialization metadata for an
+     * existing packed source, so the next save re-encodes tiles with the new
+     * codec. The lazy source loader remains available for those reads.
+     * @param codecName Registered codec key, or empty to inherit project compression.
+     */
+    void setSerializationCodecName(const QString& codecName);
+
+    /** Returns the codec key used when this storage writes packed tile payloads. */
+    const QString& serializationCodecName() const { return _serializationCodecName; }
+
+    /**
      * @brief Attaches already encoded packed supertile files as the tile source.
      *
      * The storage remains read-only and retains file-backed readers for lazy
@@ -276,6 +288,7 @@ private:
     bool                         _packedTiles = false; /**< Whether serialized tiles are grouped into super tiles. */
     std::size_t                  _superTileRows = 1; /**< Number of base tile rows in one serialized super tile. */
     std::size_t                  _superTileColumns = 1; /**< Number of base tile columns in one serialized super tile. */
+    QString                      _serializationCodecName; /**< Registered codec key selected for packed tile payloads; empty inherits project compression. */
     QStringList                  _packedTileSourcePaths; /**< Non-owning paths for pre-encoded staged supertiles. */
     QString                      _packedTileSourceCodec; /**< Registered codec name used by pre-encoded staged supertiles. */
     std::vector<TileDescriptor>  _descriptors;    /**< Resident row/column tile index. */

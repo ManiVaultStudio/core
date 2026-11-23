@@ -301,6 +301,7 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::retile(const std::
 
         return bytes;
     });
+    storage->setSerializationCodecName(source->serializationCodecName());
 
     if (progress)
         progress(1.0f);
@@ -749,6 +750,20 @@ void PointDataTiledStorage::setPackedTileSource(const QStringList& filePaths, co
     _loader = std::move(loader);
     _packedTileSourcePaths = filePaths;
     _packedTileSourceCodec = codecName;
+    _serializationCodecName = codecName;
+}
+
+void PointDataTiledStorage::setSerializationCodecName(const QString& codecName)
+{
+    if (_serializationCodecName == codecName)
+        return;
+
+    _serializationCodecName = codecName;
+    if (!_packedTileSourcePaths.isEmpty() && _packedTileSourceCodec != codecName)
+    {
+        _packedTileSourcePaths.clear();
+        _packedTileSourceCodec.clear();
+    }
 }
 
 std::size_t PointDataTiledStorage::cacheSize() const
