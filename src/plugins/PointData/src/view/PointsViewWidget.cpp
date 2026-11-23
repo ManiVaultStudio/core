@@ -6,6 +6,8 @@
 #include "../PointData.h"
 
 #include <QAbstractItemView>
+#include <QDebug>
+#include <QElapsedTimer>
 #include <QEvent>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -648,6 +650,8 @@ void PointsViewWidget::displayQuery(const std::vector<std::uint64_t>& rowIds, co
     std::vector<float> values(rowIds.size() * columnIds.size(), 0.0f);
     std::uint64_t destinationRow    = 0;
     std::uint64_t destinationColumn = 0;
+    QElapsedTimer fetchTimer;
+    fetchTimer.start();
 
     try
     {
@@ -683,6 +687,11 @@ void PointsViewWidget::displayQuery(const std::vector<std::uint64_t>& rowIds, co
         setStatus("Unable to load the requested point-data tiles: unknown error");
         return;
     }
+
+    qInfo().noquote() << QStringLiteral("[PointData] Facade fetch: %1 rows × %2 columns in %3 ms")
+        .arg(rowIds.size())
+        .arg(columnIds.size())
+        .arg(fetchTimer.elapsed());
 
     _liveTableAction.setChecked(false);
     _model->setQueryResult(rowIds, columnIds, values);

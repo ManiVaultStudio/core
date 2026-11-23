@@ -4,6 +4,9 @@
 
 #include "PointRenderer.h"
 
+#include <QDebug>
+#include <QElapsedTimer>
+
 #include <algorithm>
 #include <limits>
 
@@ -270,10 +273,19 @@ namespace mv
         {
             glBindVertexArray(_handle);
 
+            const auto hadDirtyBuffers = _dirtyPositions || _dirtyHighlights || _dirtyFocusHighlights || _dirtyColors || _dirtyColorScalars || _dirtyColorScalars2 || _dirtyColorScalars3 || _dirtySizeScalars || _dirtyOpacityScalars || _dirtyZOrderScalars;
+            QElapsedTimer bufferUploadTimer;
+            bufferUploadTimer.start();
+
             if (_dirtyPositions)
             {
+                QElapsedTimer positionUploadTimer;
+                positionUploadTimer.start();
                 _positionBuffer.bind();
                 _positionBuffer.setData(_positions);
+                qInfo().noquote() << QStringLiteral("[Scatterplot] GPU position upload: %1 points in %2 ms")
+                    .arg(_positions.size())
+                    .arg(positionUploadTimer.nsecsElapsed() / 1000000.0, 0, 'f', 3);
 
                 _dirtyPositions = false;
             }
@@ -366,6 +378,13 @@ namespace mv
                 enableAttribute(ATTRIBUTE_SCALARS_Z_ORDER, !_zOrderScalars.empty());
 
                 _dirtyZOrderScalars = false;
+            }
+
+            if (hadDirtyBuffers)
+            {
+                qInfo().noquote() << QStringLiteral("[Scatterplot] GPU buffer uploads: %1 points in %2 ms")
+                    .arg(_positions.size())
+                    .arg(bufferUploadTimer.nsecsElapsed() / 1000000.0, 0, 'f', 3);
             }
 
             // Before calling glDrawArraysInstanced, check if _positions is non-empty, to
