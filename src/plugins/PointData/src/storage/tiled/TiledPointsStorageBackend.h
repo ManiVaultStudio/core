@@ -81,6 +81,8 @@ struct TiledStorageBackendCreationOptions final : StorageBackendCreationOptions
 class POINTDATA_EXPORT TiledPointsStorageBackend final : public PointsStorageBackend
 {
 public:
+    /** Reads a bounded row-major matrix rectangle from an alternate strip layout. */
+    using RangeLoader = std::function<QByteArray(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount)>;
     /**
      * Creates an adapter around \p storage and retains shared ownership of it.
      *
@@ -100,6 +102,12 @@ public:
 
     /** Enables concurrent tile-loader callbacks for this tiled backend. */
     void setLoaderThreadSafe(bool threadSafe);
+
+    /**
+     * Installs an optional strip-aware reader used by range, row, and column access.
+     * The callback must return exactly rowCount * columnCount * elementSize row-major bytes and support concurrent calls.
+     */
+    void setRangeLoader(RangeLoader loader);
 
     /** Rewrites the current tiled payload into project-owned blob storage. */
     void persist(StorageBackendProgressCallback progress = {});
@@ -178,6 +186,7 @@ public:
 private:
     std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> _storage; /**< Tiled payload and cache owner. */
     std::uint32_t                                               _elementTypeIndex = 0; /**< Stored PointData element type. */
+    RangeLoader                                                 _rangeLoader; /**< Optional region reader for experimental independently compressed strips. */
 };
 
 }

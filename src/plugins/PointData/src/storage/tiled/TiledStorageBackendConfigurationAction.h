@@ -13,6 +13,7 @@
 #include <actions/OptionAction.h>
 #include <actions/StringAction.h>
 #include <actions/ToggleAction.h>
+#include <actions/TriggerAction.h>
 #include <actions/VerticalGroupAction.h>
 #include <util/ProjectResourceStagingPolicy.h>
 #include <QString>
@@ -90,6 +91,7 @@ public:
 private:
     void updateProjectResourceStagingPolicyOption();
     void updateTileGeometryFromPolicy();
+    void estimateBalancedLayout();
     void updateTargetTileSizeFromGeometry();
     void updateTileSizePercentages();
     void setRowTileSizeFromPercentage();
@@ -98,6 +100,7 @@ private:
     void updateCacheCapacity();
     void updateStorageObservations();
     void updatePackedTileControls();
+    void updateExperimentalStripControls();
     void updateImportPerformanceSummary();
     void updateStagingSpaceObservation();
 
@@ -110,6 +113,7 @@ private:
 
     TiledStorageAsymmetryAction _tileAsymmetryAction;                /**< Row-versus-column tile preference control. */
     ToggleAction                _deriveTileDimensionsAction;         /**< Whether target size and asymmetry derive editable dimensions. */
+    TriggerAction               _estimateBalancedLayoutAction;        /**< Applies a balanced tile and supertile layout estimate. */
     IntegralAction              _tileSizeAction;                     /**< Desired target tile payload size in MiB. */
     HorizontalGroupAction       _rowTileSizeGroupAction;             /**< Row tile size and percentage controls. */
     IntegralAction              _rowTileSizeAction;                  /**< Maximum number of matrix rows per tile. */
@@ -123,6 +127,9 @@ private:
     MessageCardAction           _tileCacheObservationAction;         /**< Estimated tile payload size compared with the cache byte limit. */
     MessageCardAction           _stagingSpaceObservationAction;      /**< Disk-space estimate for import staging, when enabled. */
     ToggleAction                _packedTilesAction;                  /**< Whether serialized tile blocks are grouped into super tiles. */
+    ToggleAction                _experimentalStripStorageAction;      /**< Whether HDF5 import uses independently compressed row and column strips. */
+    IntegralAction              _rowStripHeightAction;                /**< Number of rows in each compressed row strip. */
+    IntegralAction              _columnStripWidthAction;              /**< Number of columns in each compressed column strip. */
     IntegralAction              _superTileRowsAction;                /**< Base tile rows per serialized super tile. */
     IntegralAction              _superTileColumnsAction;             /**< Base tile columns per serialized super tile. */
     HorizontalGroupAction       _importPerformanceAction;            /**< Collapsible import or conversion performance settings. */

@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <thread>
 
 namespace mv::gui
 {
@@ -48,6 +49,7 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _elementSize(elementSize),
     _tileAsymmetryAction(this),
     _deriveTileDimensionsAction(this, "Derive dimensions from target tile size", false),
+    _estimateBalancedLayoutAction(this, "Estimate balanced layout"),
     _tileSizeAction(this, "Target tile size (MiB)", 1, 1024, 1),
     _rowTileSizeGroupAction(this, "Tile height"),
     _rowTileSizeAction(this, "Tile height", 1, std::numeric_limits<std::int32_t>::max(), 256),
@@ -61,6 +63,9 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _tileCacheObservationAction(this),
     _stagingSpaceObservationAction(this),
     _packedTilesAction(this, "Packed tiles", false),
+    _experimentalStripStorageAction(this, "Experimental row/column strip storage", false),
+    _rowStripHeightAction(this, "Rows per row strip", 1, std::numeric_limits<std::int32_t>::max(), 8),
+    _columnStripWidthAction(this, "Columns per column strip", 1, std::numeric_limits<std::int32_t>::max(), 8),
     _superTileRowsAction(this, "Super-tile rows", 1, std::numeric_limits<std::int32_t>::max(), 1),
     _superTileColumnsAction(this, "Super-tile columns", 1, std::numeric_limits<std::int32_t>::max(), 1),
     _importPerformanceAction(this, "Import performance"),
@@ -106,6 +111,9 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _tileSizeAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _deriveTileDimensionsAction.setDefaultWidgetFlags(ToggleAction::CheckBox);
     _deriveTileDimensionsAction.setToolTip("When enabled, calculate tile height and width from the target tile size and row-to-column asymmetry. You can still edit the calculated dimensions directly.");
+    _estimateBalancedLayoutAction.setDefaultWidgetFlags(TriggerAction::Text);
+    _estimateBalancedLayoutAction.setToolTip("Choose a balanced starting layout for row, column, and range access. This is a heuristic; benchmark with your workload before settling on the layout.");
+    _estimateBalancedLayoutAction.setDescription("<p>Estimates tile dimensions from dataset size and element type, then groups up to 16 tiles per supertile. For HDF5 imports, it also suggests conservative worker counts and CSR chunk grouping. The estimate favors moderate tile sizes and is a starting point, not a performance guarantee.</p>");
     _tileSizeAction.setDescription(
         "<p>Target uncompressed size for an individual tile. When deriving tile dimensions, this target is combined with the row-to-column asymmetry; actual tile sizes can vary with the selected value type and dataset dimensions.</p>");
     _rowTileSizeAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
@@ -135,6 +143,13 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _tileCountObservationAction.setToolTip("Heuristic based on the number of resident tile descriptors.");
     _tileCacheObservationAction.setToolTip("Checks whether one decoded tile fits within the configured cache byte limit.");
     _packedTilesAction.setDefaultWidgetFlags(ToggleAction::CheckBox);
+    _experimentalStripStorageAction.setDefaultWidgetFlags(ToggleAction::CheckBox);
+    _experimentalStripStorageAction.setToolTip("For HDF5 import experiments, store row and column strips as independent compressed blocks. Project save currently rewrites the data in the regular tiled format.");
+    _experimentalStripStorageAction.setDescription("<p>Stores each tile as independently compressed row and column strips. Set their heights and widths below. Row and column reads can fetch matching strip blocks without decoding the whole tile. This experimental layout is used for the imported session; saving the project currently rewrites the data using the regular tiled format.</p>");
+    _rowStripHeightAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
+    _columnStripWidthAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
+    _rowStripHeightAction.setToolTip("Number of matrix rows stored in each independently compressed row strip.");
+    _columnStripWidthAction.setToolTip("Number of matrix columns stored in each independently compressed column strip.");
     _superTileRowsAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _superTileColumnsAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _superTileRowsAction.setDescription(
@@ -145,6 +160,7 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
         "<p>Balance tile geometry between row-oriented and column-oriented access. The slider runs from column-oriented tiles through balanced tiles to row-oriented tiles; choose a shape that matches the dataset's common access pattern.</p>");
 
     addAction(&_deriveTileDimensionsAction);
+    addAction(&_estimateBalancedLayoutAction);
     addAction(&_tileAsymmetryAction);
     addAction(&_tileSizeAction);
     _rowTileSizeGroupAction.addAction(&_rowTileSizeAction);
@@ -155,6 +171,12 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     addAction(&_columnTileSizeGroupAction);
     addAction(&_cacheCapacityAction);
     addAction(&_packedTilesAction);
+    if (showImportPerformanceOptions)
+    {
+        addAction(&_experimentalStripStorageAction);
+        addAction(&_rowStripHeightAction);
+        addAction(&_columnStripWidthAction);
+    }
     addAction(&_tileCodecAction);
     addAction(&_superTileRowsAction);
     addAction(&_superTileColumnsAction);
@@ -196,6 +218,8 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
         connect(&_bucketingThreadCountAction, &IntegralAction::valueChanged, this, updateTuningOptions);
         connect(&_stagingThreadCountAction, &IntegralAction::valueChanged, this, updateTuningOptions);
         connect(&_rowChunkTileFactorAction, &IntegralAction::valueChanged, this, updateTuningOptions);
+        connect(&_rowStripHeightAction, &IntegralAction::valueChanged, this, updateTuningOptions);
+        connect(&_columnStripWidthAction, &IntegralAction::valueChanged, this, updateTuningOptions);
         connect(&_projectResourceStagingPolicyAction, &OptionAction::currentIndexChanged, this, notifyTuningOptionsChanged);
     }
 
@@ -221,6 +245,8 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     });
 
     connect(&_deriveTileDimensionsAction, &ToggleAction::toggled, this, [this] { updateTileSizingMode(); });
+
+    connect(&_estimateBalancedLayoutAction, &TriggerAction::triggered, this, [this] { estimateBalancedLayout(); });
 
     connect(&_rowTileSizeAction, &IntegralAction::valueChanged, this, [this] {
         if (!_updatingGeometryFromPolicy && _deriveTileDimensionsAction.isChecked())
@@ -261,6 +287,12 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
         notifyOptionsChanged();
     });
 
+    connect(&_experimentalStripStorageAction, &ToggleAction::toggled, this, [this] {
+        updateExperimentalStripControls();
+        updateImportPerformanceSummary();
+        notifyOptionsChanged();
+    });
+
     connect(&_superTileRowsAction, &IntegralAction::valueChanged, this, [this] {
         notifyOptionsChanged();
     });
@@ -277,6 +309,9 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
         updateTargetTileSizeFromGeometry();
         _cacheCapacityAction.setValue(static_cast<std::int32_t>(configuration.cacheCapacity));
         _packedTilesAction.setChecked(configuration.packedTiles);
+        _experimentalStripStorageAction.setChecked(configuration.experimentalStripStorage);
+        _rowStripHeightAction.setValue(static_cast<std::int32_t>(configuration.rowStripHeight));
+        _columnStripWidthAction.setValue(static_cast<std::int32_t>(configuration.columnStripWidth));
         _superTileRowsAction.setValue(static_cast<std::int32_t>(configuration.superTileRows));
         _superTileColumnsAction.setValue(static_cast<std::int32_t>(configuration.superTileColumns));
     }
@@ -289,6 +324,7 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     updateTileSizePercentages();
     updateTileSizingMode();
     updatePackedTileControls();
+    updateExperimentalStripControls();
 
     if (initializeFromConfiguration)
     {
@@ -362,6 +398,9 @@ void TiledStorageBackendConfigurationAction::fromVariantMap(const QVariantMap& v
             restoreAction(_bucketingThreadCountAction, performanceSettings);
             restoreAction(_stagingThreadCountAction, performanceSettings);
             restoreAction(_rowChunkTileFactorAction, performanceSettings);
+            restoreAction(_experimentalStripStorageAction, performanceSettings);
+            restoreAction(_rowStripHeightAction, performanceSettings);
+            restoreAction(_columnStripWidthAction, performanceSettings);
         }
 
     }
@@ -403,6 +442,9 @@ void TiledStorageBackendConfigurationAction::fromVariantMap(const QVariantMap& v
     restoreLegacyIntegralValue(_rowTileSizeAction, "TileHeight", "RowTileSizeAction");
     restoreLegacyIntegralValue(_columnTileSizeAction, "TileWidth", "ColumnTileSizeAction");
     restoreLegacyToggleValue(_packedTilesAction, "PackedTiles", "PackedTilesAction");
+    restoreLegacyToggleValue(_experimentalStripStorageAction, "ExperimentalStripStorage", "ExperimentalStripStorageAction");
+    restoreLegacyIntegralValue(_rowStripHeightAction, "RowStripHeight", "RowStripHeightAction");
+    restoreLegacyIntegralValue(_columnStripWidthAction, "ColumnStripWidth", "ColumnStripWidthAction");
     restoreLegacyIntegralValue(_superTileRowsAction, "SuperTileRows", "SuperTileRowsAction");
     restoreLegacyIntegralValue(_superTileColumnsAction, "SuperTileColumns", "SuperTileColumnsAction");
     restoreLegacyIntegralValue(_bucketingThreadCountAction, "BucketingThreadCount", "BucketingThreadCountAction");
@@ -460,6 +502,12 @@ QVariantMap TiledStorageBackendConfigurationAction::toVariantMap() const
             _bucketingThreadCountAction.insertIntoVariantMap(performanceSettings);
         _stagingThreadCountAction.insertIntoVariantMap(performanceSettings);
         _rowChunkTileFactorAction.insertIntoVariantMap(performanceSettings);
+        if (_showImportPerformanceOptions)
+        {
+            _experimentalStripStorageAction.insertIntoVariantMap(performanceSettings);
+            _rowStripHeightAction.insertIntoVariantMap(performanceSettings);
+            _columnStripWidthAction.insertIntoVariantMap(performanceSettings);
+        }
 
         auto importPerformance = _importPerformanceAction.toVariantMap();
         _importPerformanceSummaryAction.insertIntoVariantMap(importPerformance);
@@ -552,6 +600,9 @@ bool TiledStorageBackendConfigurationAction::hasChanges() const
         configuration.packedTiles != _initialConfiguration.packedTiles ||
         configuration.superTileRows != _initialConfiguration.superTileRows ||
         configuration.superTileColumns != _initialConfiguration.superTileColumns ||
+        configuration.experimentalStripStorage != _initialConfiguration.experimentalStripStorage ||
+        configuration.rowStripHeight != _initialConfiguration.rowStripHeight ||
+        configuration.columnStripWidth != _initialConfiguration.columnStripWidth ||
         (_showConversionPerformanceOptions && (configuration.conversionWorkerCount != _initialConfiguration.conversionWorkerCount || configuration.conversionChunkTileRows != _initialConfiguration.conversionChunkTileRows));
 }
 
@@ -566,6 +617,9 @@ pointdata::storage::StorageBackendConfiguration TiledStorageBackendConfiguration
     configuration.packedTiles           = _packedTilesAction.isChecked();
     configuration.superTileRows         = static_cast<std::size_t>(_superTileRowsAction.getValue());
     configuration.superTileColumns      = static_cast<std::size_t>(_superTileColumnsAction.getValue());
+    configuration.experimentalStripStorage = _experimentalStripStorageAction.isChecked();
+    configuration.rowStripHeight        = static_cast<std::size_t>(_rowStripHeightAction.getValue());
+    configuration.columnStripWidth      = static_cast<std::size_t>(_columnStripWidthAction.getValue());
     if (_showConversionPerformanceOptions)
     {
         configuration.conversionWorkerCount = static_cast<std::size_t>(_stagingThreadCountAction.getValue());
@@ -680,10 +734,13 @@ void TiledStorageBackendConfigurationAction::updateImportPerformanceSummary()
             .arg(_stagingThreadCountAction.getValue())
             .arg(_rowChunkTileFactorAction.getValue()));
     else
-        _importPerformanceSummaryAction.setString(QStringLiteral("%1 bucket threads, %2 staging threads, CSR chunk tile-height factor %3")
+        _importPerformanceSummaryAction.setString(QStringLiteral("%1 bucket threads, %2 staging threads, CSR chunk tile-height factor %3%4")
             .arg(_bucketingThreadCountAction.getValue())
             .arg(_stagingThreadCountAction.getValue())
-            .arg(_rowChunkTileFactorAction.getValue()));
+            .arg(_rowChunkTileFactorAction.getValue())
+            .arg(_showImportPerformanceOptions && _experimentalStripStorageAction.isChecked()
+                ? QStringLiteral(", %1x%2 strip storage enabled").arg(_rowStripHeightAction.getValue()).arg(_columnStripWidthAction.getValue())
+                : QString()));
 }
 
 void TiledStorageBackendConfigurationAction::updatePackedTileControls()
@@ -692,6 +749,13 @@ void TiledStorageBackendConfigurationAction::updatePackedTileControls()
     _superTileColumnsAction.setEnabled(_packedTilesAction.isChecked());
     _tileCodecAction.setEnabled(_packedTilesAction.isChecked());
     _projectResourceStagingPolicyAction.setEnabled(!_showImportPerformanceOptions || _packedTilesAction.isChecked());
+}
+
+void TiledStorageBackendConfigurationAction::updateExperimentalStripControls()
+{
+    const auto enabled = _showImportPerformanceOptions && _experimentalStripStorageAction.isChecked();
+    _rowStripHeightAction.setEnabled(enabled);
+    _columnStripWidthAction.setEnabled(enabled);
 }
 
 void TiledStorageBackendConfigurationAction::updateCacheCapacity()
@@ -821,5 +885,54 @@ void TiledStorageBackendConfigurationAction::updateTileGeometryFromPolicy()
     _updatingGeometryFromPolicy = false;
     updateTileSizePercentages();
     updateCacheCapacity();
+}
+
+void TiledStorageBackendConfigurationAction::estimateBalancedLayout()
+{
+    if (_rows == 0 || _columns == 0 || _elementSize == 0)
+        return;
+
+    constexpr std::uint64_t minimumTileBytes = 1024ull * 1024ull;
+    constexpr std::uint64_t maximumTileBytes = 16ull * 1024ull * 1024ull;
+    constexpr std::uint64_t targetTileCount = 50000;
+    constexpr std::uint64_t maximumTileWidth = 512;
+    constexpr std::uint64_t targetTilesPerSuperTile = 16;
+    constexpr std::uint64_t maximumSuperTileColumns = 4;
+
+    const auto totalBytes = static_cast<long double>(_rows) * static_cast<long double>(_columns) * static_cast<long double>(_elementSize);
+    const auto bytesPerTile = static_cast<std::uint64_t>(std::clamp(totalBytes / targetTileCount, static_cast<long double>(minimumTileBytes), static_cast<long double>(maximumTileBytes)));
+    const auto columnTileSize = std::min<std::uint64_t>(_columns, maximumTileWidth);
+    const auto bytesPerTileRow = columnTileSize * _elementSize;
+    const auto rowTileSize = std::clamp<std::uint64_t>(bytesPerTile / bytesPerTileRow, 1, std::min<std::uint64_t>(_rows, std::numeric_limits<std::int32_t>::max()));
+    const auto tileRows = _rows / rowTileSize + (_rows % rowTileSize != 0);
+    const auto tileColumns = _columns / columnTileSize + (_columns % columnTileSize != 0);
+    const auto superTileColumns = std::min(tileColumns, maximumSuperTileColumns);
+    const auto superTileRows = std::min(tileRows, std::max<std::uint64_t>(1, targetTilesPerSuperTile / superTileColumns));
+
+    _deriveTileDimensionsAction.setChecked(false);
+    _tileSizeAction.setValue(static_cast<std::int32_t>(std::clamp<std::uint64_t>((bytesPerTile + 1024 * 1024 - 1) / (1024 * 1024), 1, 16)));
+    _tileAsymmetryAction.getAsymmetryAction().setValue(50);
+    _rowTileSizeAction.setValue(static_cast<std::int32_t>(rowTileSize));
+    _columnTileSizeAction.setValue(static_cast<std::int32_t>(columnTileSize));
+    _packedTilesAction.setChecked(true);
+    _superTileRowsAction.setValue(static_cast<std::int32_t>(superTileRows));
+    _superTileColumnsAction.setValue(static_cast<std::int32_t>(superTileColumns));
+
+    if (_showImportPerformanceOptions)
+    {
+        const auto detectedThreadCount = std::thread::hardware_concurrency();
+        const auto suggestedWorkerCount = std::clamp<std::size_t>(detectedThreadCount > 0 ? detectedThreadCount : 8, 1, 8);
+        _bucketingThreadCountAction.setValue(static_cast<std::int32_t>(suggestedWorkerCount));
+        _stagingThreadCountAction.setValue(static_cast<std::int32_t>(suggestedWorkerCount));
+        _rowChunkTileFactorAction.setValue(2);
+    }
+
+    updateTileSizingMode();
+    updatePackedTileControls();
+    updateTileSizePercentages();
+    updateTargetTileSizeFromGeometry();
+    updateCacheCapacity();
+    updateStorageObservations();
+    notifyOptionsChanged();
 }
 }

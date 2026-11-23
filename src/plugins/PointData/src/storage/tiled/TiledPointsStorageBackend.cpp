@@ -11,6 +11,7 @@
 #include "PointDataTiledSerialization.h"
 
 #include <algorithm>
+#include <chrono>
 #include <cstring>
 #include <exception>
 #include <limits>
@@ -19,6 +20,7 @@
 #include <utility>
 
 #include <QFutureSynchronizer>
+#include <QDebug>
 #include <QThreadPool>
 #include <QtConcurrent/QtConcurrentRun>
 
@@ -36,6 +38,101 @@ using TileCoordinate = std::pair<std::uint64_t, std::uint64_t>;
 constexpr std::size_t maxConcurrentTileLoads = 8;
 constexpr std::size_t maxTilesPerLoadBatch = maxConcurrentTileLoads;
 
+class FetchTiming
+{
+public:
+    FetchTiming(const char* operation, const std::uint64_t rows, const std::uint64_t columns, const bool rangeLoader, const mv::pointdata::tiled::PointDataTiledStorage& storage) :
+        _operation(operation),
+        _rows(rows),
+        _columns(columns),
+        _rangeLoader(rangeLoader),
+        _storage(rangeLoader ? nullptr : &storage),
+        _initialCacheHits(_storage ? _storage->cacheHits() : 0),
+        _initialCacheMisses(_storage ? _storage->cacheMisses() : 0),
+        _started(std::chrono::steady_clock::now())
+    {
+    }
+
+    ~FetchTiming()
+    {
+        const auto totalMilliseconds = elapsedMilliseconds(_started);
+        qInfo().noquote() << QStringLiteral("[PointData] Tiled fetch: %1 %2 rows × %3 columns; path=%4; range loads=%5 (%6 ms); tile acquire=%7 ms across %8 batches/%9 tiles; visitor=%10 ms across %11 calls; total=%12 ms%13")
+            .arg(QString::fromLatin1(_operation))
+            .arg(_rows)
+            .arg(_columns)
+            .arg(_rangeLoader ? QStringLiteral("range-loader") : QStringLiteral("tile-cache"))
+            .arg(_rangeLoadCalls)
+            .arg(milliseconds(_rangeLoadNanoseconds))
+            .arg(milliseconds(_tileAcquireNanoseconds), 0, 'f', 3)
+            .arg(_tileBatches)
+            .arg(_tilesRequested)
+            .arg(milliseconds(_visitorNanoseconds), 0, 'f', 3)
+            .arg(_visitorCalls)
+            .arg(totalMilliseconds, 0, 'f', 3)
+            .arg(_storage
+                ? QStringLiteral("; cache delta=%1 hits/%2 misses").arg(_storage->cacheHits() - _initialCacheHits).arg(_storage->cacheMisses() - _initialCacheMisses)
+                : QString());
+    }
+
+    template<typename Loader>
+    auto loadRange(Loader&& loader)
+    {
+        const auto start = std::chrono::steady_clock::now();
+        auto result = std::forward<Loader>(loader)();
+        _rangeLoadNanoseconds += elapsedNanoseconds(start);
+        ++_rangeLoadCalls;
+        return result;
+    }
+
+    template<typename Visitor>
+    void visit(Visitor&& visitor, const PointDataAccessView& view)
+    {
+        const auto start = std::chrono::steady_clock::now();
+        std::forward<Visitor>(visitor)(view);
+        _visitorNanoseconds += elapsedNanoseconds(start);
+        ++_visitorCalls;
+    }
+
+    void tileBatch(const std::chrono::steady_clock::time_point start, const std::size_t tileCount)
+    {
+        _tileAcquireNanoseconds += elapsedNanoseconds(start);
+        ++_tileBatches;
+        _tilesRequested += tileCount;
+    }
+
+private:
+    static std::uint64_t elapsedNanoseconds(const std::chrono::steady_clock::time_point start)
+    {
+        return static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - start).count());
+    }
+
+    static double elapsedMilliseconds(const std::chrono::steady_clock::time_point start)
+    {
+        return static_cast<double>(elapsedNanoseconds(start)) / 1000000.0;
+    }
+
+    static double milliseconds(const std::uint64_t nanoseconds)
+    {
+        return static_cast<double>(nanoseconds) / 1000000.0;
+    }
+
+    const char* _operation;
+    std::uint64_t _rows;
+    std::uint64_t _columns;
+    bool _rangeLoader;
+    const mv::pointdata::tiled::PointDataTiledStorage* _storage;
+    std::uint64_t _initialCacheHits;
+    std::uint64_t _initialCacheMisses;
+    std::chrono::steady_clock::time_point _started;
+    std::uint64_t _rangeLoadNanoseconds = 0;
+    std::uint64_t _tileAcquireNanoseconds = 0;
+    std::uint64_t _visitorNanoseconds = 0;
+    std::uint64_t _rangeLoadCalls = 0;
+    std::uint64_t _tileBatches = 0;
+    std::uint64_t _tilesRequested = 0;
+    std::uint64_t _visitorCalls = 0;
+};
+
 QThreadPool& tileLoadThreadPool()
 {
     static QThreadPool pool;
@@ -48,15 +145,19 @@ QThreadPool& tileLoadThreadPool()
     return pool;
 }
 
-std::vector<mv::pointdata::tiled::TileView> acquireTiles(const mv::pointdata::tiled::PointDataTiledStorage& storage, const std::vector<TileCoordinate>& coordinates)
+std::vector<mv::pointdata::tiled::TileView> acquireTiles(const mv::pointdata::tiled::PointDataTiledStorage& storage, const std::vector<TileCoordinate>& coordinates, FetchTiming* timing = nullptr)
 {
     std::vector<mv::pointdata::tiled::TileView> tiles(coordinates.size());
     if (coordinates.size() == 1)
     {
+        const auto start = std::chrono::steady_clock::now();
         tiles.front() = storage.acquire(coordinates.front().first, coordinates.front().second);
+        if (timing)
+            timing->tileBatch(start, coordinates.size());
         return tiles;
     }
 
+    const auto start = std::chrono::steady_clock::now();
     std::exception_ptr failure;
     std::mutex failureMutex;
     QFutureSynchronizer<void> futures;
@@ -82,6 +183,9 @@ std::vector<mv::pointdata::tiled::TileView> acquireTiles(const mv::pointdata::ti
     if (failure)
         std::rethrow_exception(failure);
 
+    if (timing)
+        timing->tileBatch(start, coordinates.size());
+
     return tiles;
 }
 
@@ -100,7 +204,32 @@ PointDataAccessView makeTileAccessView(const mv::pointdata::tiled::TileView& til
     return view;
 }
 
-void visitSelectedColumns(const mv::pointdata::tiled::PointDataTiledStorage& storage, const std::uint32_t elementTypeIndex, const std::vector<std::uint64_t>& columnIds, const std::vector<std::uint64_t>* selectedRows, const PointDataAccessVisitor& visitor)
+PointDataAccessView makeOwnedRangeView(const std::shared_ptr<QByteArray>& bytes, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const std::uint32_t typeIndex)
+{
+    PointDataAccessView view;
+    view.data = bytes->constData();
+    view.rows = rows;
+    view.columns = columns;
+    view.rowStrideBytes = columns * elementSize;
+    view.elementTypeIndex = typeIndex;
+    view.elementSizeBytes = static_cast<std::uint32_t>(elementSize);
+    view.lifetime = std::shared_ptr<const void>(bytes, bytes->constData());
+    return view;
+}
+
+std::shared_ptr<QByteArray> loadRangeBytes(const TiledPointsStorageBackend::RangeLoader& loader, const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount, const std::size_t elementSize)
+{
+    if (elementSize == 0 || (columnCount != 0 && rowCount > static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max()) / columnCount / elementSize))
+        throw std::overflow_error("Strip-backed point-data range exceeds the supported size");
+
+    const auto expectedSize = rowCount * columnCount * elementSize;
+    auto bytes = std::make_shared<QByteArray>(loader(firstRow, rowCount, firstColumn, columnCount));
+    if (bytes->size() != static_cast<qsizetype>(expectedSize))
+        throw std::runtime_error("Strip-backed point-data range has an unexpected size");
+    return bytes;
+}
+
+void visitSelectedColumns(const mv::pointdata::tiled::PointDataTiledStorage& storage, const std::uint32_t elementTypeIndex, const std::vector<std::uint64_t>& columnIds, const std::vector<std::uint64_t>* selectedRows, const PointDataAccessVisitor& visitor, FetchTiming* timing = nullptr)
 {
     if (!visitor)
         throw std::invalid_argument("Point-data visitor is invalid");
@@ -165,7 +294,7 @@ void visitSelectedColumns(const mv::pointdata::tiled::PointDataTiledStorage& sto
                 coordinates.emplace_back(tileRow, tileColumn);
         }
 
-        const auto tiles = acquireTiles(storage, coordinates);
+        const auto tiles = acquireTiles(storage, coordinates, timing);
         for (auto rowIndex = rowBatchStart; rowIndex < rowBatchEnd; ++rowIndex)
         {
             const auto row = selectedRows ? selectedRows->at(rowIndex) : static_cast<std::uint64_t>(rowIndex);
@@ -188,7 +317,11 @@ void visitSelectedColumns(const mv::pointdata::tiled::PointDataTiledStorage& sto
                         throw std::runtime_error("Unable to load tiled point-data payload for selected-column access");
 
                     const auto segmentEnd = std::min(columnIds[runEnd - 1] + 1, tile.columnOffset() + tile.columns());
-                    visitor(makeTileAccessView(tile, row - tile.rowOffset(), currentColumn - tile.columnOffset(), 1, segmentEnd - currentColumn, elementTypeIndex));
+                    const auto view = makeTileAccessView(tile, row - tile.rowOffset(), currentColumn - tile.columnOffset(), 1, segmentEnd - currentColumn, elementTypeIndex);
+                    if (timing)
+                        timing->visit(visitor, view);
+                    else
+                        visitor(view);
                     while (columnIndex < runEnd && columnIds[columnIndex] < segmentEnd)
                         ++columnIndex;
                     currentColumn = segmentEnd;
@@ -200,7 +333,7 @@ void visitSelectedColumns(const mv::pointdata::tiled::PointDataTiledStorage& sto
     }
 }
 
-void visitSelectedRows(const mv::pointdata::tiled::PointDataTiledStorage& storage, const std::uint32_t elementTypeIndex, const std::vector<std::uint64_t>& rowIds, const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor)
+void visitSelectedRows(const mv::pointdata::tiled::PointDataTiledStorage& storage, const std::uint32_t elementTypeIndex, const std::vector<std::uint64_t>& rowIds, const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor, FetchTiming* timing = nullptr)
 {
     if (!visitor)
         throw std::invalid_argument("Point-data visitor is invalid");
@@ -255,7 +388,7 @@ void visitSelectedRows(const mv::pointdata::tiled::PointDataTiledStorage& storag
                 coordinates.emplace_back(tileRow, tileColumn);
         }
 
-        const auto tiles = acquireTiles(storage, coordinates);
+        const auto tiles = acquireTiles(storage, coordinates, timing);
         for (auto rowIndex = rowBatchStart; rowIndex < rowBatchEnd; ++rowIndex)
         {
             const auto row = rowIds[rowIndex];
@@ -271,7 +404,11 @@ void visitSelectedRows(const mv::pointdata::tiled::PointDataTiledStorage& storag
                     throw std::runtime_error("Unable to load tiled point-data payload for selected-row access");
 
                 const auto segmentEnd = std::min(endColumn, tile.columnOffset() + tile.columns());
-                visitor(makeTileAccessView(tile, row - tile.rowOffset(), column - tile.columnOffset(), 1, segmentEnd - column, elementTypeIndex));
+                const auto view = makeTileAccessView(tile, row - tile.rowOffset(), column - tile.columnOffset(), 1, segmentEnd - column, elementTypeIndex);
+                if (timing)
+                    timing->visit(visitor, view);
+                else
+                    visitor(view);
                 column = segmentEnd;
             }
         }
@@ -339,6 +476,11 @@ void TiledPointsStorageBackend::setLoaderThreadSafe(const bool threadSafe)
 {
     if (_storage)
         _storage->setLoaderThreadSafe(threadSafe);
+}
+
+void TiledPointsStorageBackend::setRangeLoader(RangeLoader loader)
+{
+    _rangeLoader = std::move(loader);
 }
 
 void TiledPointsStorageBackend::persist(StorageBackendProgressCallback progress)
@@ -464,8 +606,19 @@ PointDataAccessView TiledPointsStorageBackend::getRow(const std::uint64_t row) c
     if (!_storage || row >= _storage->rows())
         return {};
 
+    FetchTiming timing("getRow", 1, _storage->columns(), static_cast<bool>(_rangeLoader), *_storage);
+
     if (_storage->elementSize() == 0 || _storage->columns() > std::numeric_limits<std::size_t>::max() / _storage->elementSize())
         throw std::overflow_error("Tiled point-data row is too large");
+
+    if (_rangeLoader)
+    {
+        const auto expectedSize = _storage->columns() * _storage->elementSize();
+        if (expectedSize > static_cast<std::size_t>(std::numeric_limits<qsizetype>::max()))
+            throw std::overflow_error("Strip-backed point-data row exceeds the supported size");
+        auto bytes = timing.loadRange([&] { return loadRangeBytes(_rangeLoader, row, 1, 0, _storage->columns(), _storage->elementSize()); });
+        return makeOwnedRangeView(bytes, 1, _storage->columns(), _storage->elementSize(), _elementTypeIndex);
+    }
 
     auto values = std::make_shared<std::vector<std::uint8_t>>(static_cast<std::size_t>(_storage->columns() * _storage->elementSize()));
 
@@ -478,7 +631,7 @@ PointDataAccessView TiledPointsStorageBackend::getRow(const std::uint64_t row) c
         for (std::uint64_t tileColumn = firstTileColumn; tileColumn < firstTileColumn + batchSize; ++tileColumn)
             coordinates.emplace_back(row / _storage->rowTileSize(), tileColumn);
 
-        const auto tiles = acquireTiles(*_storage, coordinates);
+        const auto tiles = acquireTiles(*_storage, coordinates, &timing);
         for (const auto& tile : tiles)
         {
             if (!tile || tile.columns() == 0 || tile.rows() == 0)
@@ -507,7 +660,24 @@ void TiledPointsStorageBackend::visitRows(const std::vector<std::uint64_t>& rowI
     if (!_storage)
         throw std::logic_error("Tiled point-data storage is unavailable");
 
-    visitSelectedRows(*_storage, _elementTypeIndex, rowIds, 0, _storage->columns(), visitor);
+    FetchTiming timing("visitRows", rowIds.size(), _storage->columns(), static_cast<bool>(_rangeLoader), *_storage);
+
+    if (!_rangeLoader)
+    {
+        visitSelectedRows(*_storage, _elementTypeIndex, rowIds, 0, _storage->columns(), visitor, &timing);
+        return;
+    }
+
+    if (!visitor)
+        throw std::invalid_argument("Point-data visitor is invalid");
+    for (const auto row : rowIds)
+    {
+        if (row >= _storage->rows())
+            throw std::out_of_range("Point-data row ID is out of bounds");
+        auto bytes = timing.loadRange([&] { return loadRangeBytes(_rangeLoader, row, 1, 0, _storage->columns(), _storage->elementSize()); });
+        const auto view = makeOwnedRangeView(bytes, 1, _storage->columns(), _storage->elementSize(), _elementTypeIndex);
+        timing.visit(visitor, view);
+    }
 }
 
 void TiledPointsStorageBackend::visitRange(const std::vector<std::uint64_t>& rowIds, const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
@@ -515,7 +685,32 @@ void TiledPointsStorageBackend::visitRange(const std::vector<std::uint64_t>& row
     if (!_storage)
         throw std::logic_error("Tiled point-data storage is unavailable");
 
-    visitSelectedRows(*_storage, _elementTypeIndex, rowIds, firstColumn, columnCount, visitor);
+    FetchTiming timing("visitRange(selected rows)", rowIds.size(), columnCount, static_cast<bool>(_rangeLoader), *_storage);
+
+    if (!_rangeLoader)
+    {
+        visitSelectedRows(*_storage, _elementTypeIndex, rowIds, firstColumn, columnCount, visitor, &timing);
+        return;
+    }
+    if (!visitor || firstColumn > _storage->columns() || columnCount > _storage->columns() - firstColumn)
+        throw std::out_of_range("Point-data selected-row range is invalid");
+    if (columnCount == 0)
+    {
+        for (const auto row : rowIds)
+        {
+            if (row >= _storage->rows())
+                throw std::out_of_range("Point-data row ID is out of bounds");
+        }
+        return;
+    }
+    for (const auto row : rowIds)
+    {
+        if (row >= _storage->rows())
+            throw std::out_of_range("Point-data row ID is out of bounds");
+        auto bytes = timing.loadRange([&] { return loadRangeBytes(_rangeLoader, row, 1, firstColumn, columnCount, _storage->elementSize()); });
+        const auto view = makeOwnedRangeView(bytes, 1, columnCount, _storage->elementSize(), _elementTypeIndex);
+        timing.visit(visitor, view);
+    }
 }
 
 void TiledPointsStorageBackend::visitColumns(const std::vector<std::uint64_t>& columnIds, const PointDataAccessVisitor& visitor) const
@@ -523,7 +718,41 @@ void TiledPointsStorageBackend::visitColumns(const std::vector<std::uint64_t>& c
     if (!_storage)
         throw std::logic_error("Tiled point-data storage is unavailable");
 
-    visitSelectedColumns(*_storage, _elementTypeIndex, columnIds, nullptr, visitor);
+    FetchTiming timing("visitColumns", _storage->rows(), columnIds.size(), static_cast<bool>(_rangeLoader), *_storage);
+
+    if (!_rangeLoader)
+    {
+        visitSelectedColumns(*_storage, _elementTypeIndex, columnIds, nullptr, visitor, &timing);
+        return;
+    }
+    if (!visitor)
+        throw std::invalid_argument("Point-data visitor is invalid");
+    for (const auto column : columnIds)
+    {
+        if (column >= _storage->columns())
+            throw std::out_of_range("Point-data column ID is out of bounds");
+    }
+    for (std::size_t first = 0; first < columnIds.size();)
+    {
+        auto end = first + 1;
+        while (end < columnIds.size() && columnIds[end] == columnIds[end - 1] + 1)
+            ++end;
+        if (columnIds[first] >= _storage->columns() || columnIds[end - 1] >= _storage->columns())
+            throw std::out_of_range("Point-data column ID is out of bounds");
+        const auto count = columnIds[end - 1] - columnIds[first] + 1;
+        constexpr std::uint64_t maxRangeBytes = 64ull * 1024ull * 1024ull;
+        const auto bytesPerRow = count * _storage->elementSize();
+        const auto batchRows = std::max<std::uint64_t>(1, maxRangeBytes / std::max<std::uint64_t>(1, bytesPerRow));
+        for (std::uint64_t firstRow = 0; firstRow < _storage->rows();)
+        {
+            const auto rowCount = std::min(batchRows, _storage->rows() - firstRow);
+            auto bytes = timing.loadRange([&] { return loadRangeBytes(_rangeLoader, firstRow, rowCount, columnIds[first], count, _storage->elementSize()); });
+            const auto view = makeOwnedRangeView(bytes, rowCount, count, _storage->elementSize(), _elementTypeIndex);
+            timing.visit(visitor, view);
+            firstRow += rowCount;
+        }
+        first = end;
+    }
 }
 
 void TiledPointsStorageBackend::visitColumns(const std::vector<std::uint64_t>& columnIds, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
@@ -531,7 +760,38 @@ void TiledPointsStorageBackend::visitColumns(const std::vector<std::uint64_t>& c
     if (!_storage)
         throw std::logic_error("Tiled point-data storage is unavailable");
 
-    visitSelectedColumns(*_storage, _elementTypeIndex, columnIds, &rowIds, visitor);
+    FetchTiming timing("visitColumns(selected rows)", rowIds.size(), columnIds.size(), static_cast<bool>(_rangeLoader), *_storage);
+
+    if (!_rangeLoader)
+    {
+        visitSelectedColumns(*_storage, _elementTypeIndex, columnIds, &rowIds, visitor, &timing);
+        return;
+    }
+    if (!visitor)
+        throw std::invalid_argument("Point-data visitor is invalid");
+    for (const auto column : columnIds)
+    {
+        if (column >= _storage->columns())
+            throw std::out_of_range("Point-data column ID is out of bounds");
+    }
+    for (const auto row : rowIds)
+    {
+        if (row >= _storage->rows())
+            throw std::out_of_range("Point-data row ID is out of bounds");
+        for (std::size_t first = 0; first < columnIds.size();)
+        {
+            auto end = first + 1;
+            while (end < columnIds.size() && columnIds[end] == columnIds[end - 1] + 1)
+                ++end;
+            if (columnIds[first] >= _storage->columns() || columnIds[end - 1] >= _storage->columns())
+                throw std::out_of_range("Point-data column ID is out of bounds");
+            const auto count = columnIds[end - 1] - columnIds[first] + 1;
+            auto bytes = timing.loadRange([&] { return loadRangeBytes(_rangeLoader, row, 1, columnIds[first], count, _storage->elementSize()); });
+            const auto view = makeOwnedRangeView(bytes, 1, count, _storage->elementSize(), _elementTypeIndex);
+            timing.visit(visitor, view);
+            first = end;
+        }
+    }
 }
 
 void TiledPointsStorageBackend::visitRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
@@ -541,6 +801,24 @@ void TiledPointsStorageBackend::visitRange(const std::uint64_t firstRow, const s
 
     if (rowCount == 0 || columnCount == 0)
         return;
+
+    FetchTiming timing("visitRange", rowCount, columnCount, static_cast<bool>(_rangeLoader), *_storage);
+
+    if (_rangeLoader)
+    {
+        constexpr std::uint64_t maxRangeBytes = 64ull * 1024ull * 1024ull;
+        const auto bytesPerRow = columnCount * _storage->elementSize();
+        const auto batchRows = std::max<std::uint64_t>(1, maxRangeBytes / std::max<std::uint64_t>(1, bytesPerRow));
+        for (std::uint64_t completedRows = 0; completedRows < rowCount;)
+        {
+            const auto batchRowCount = std::min(batchRows, rowCount - completedRows);
+            auto bytes = timing.loadRange([&] { return loadRangeBytes(_rangeLoader, firstRow + completedRows, batchRowCount, firstColumn, columnCount, _storage->elementSize()); });
+            const auto view = makeOwnedRangeView(bytes, batchRowCount, columnCount, _storage->elementSize(), _elementTypeIndex);
+            timing.visit(visitor, view);
+            completedRows += batchRowCount;
+        }
+        return;
+    }
 
     const auto firstTileRow = firstRow / _storage->rowTileSize();
     const auto lastTileRow = (firstRow + rowCount - 1) / _storage->rowTileSize();
@@ -561,7 +839,7 @@ void TiledPointsStorageBackend::visitRange(const std::uint64_t firstRow, const s
             for (auto tileColumn = firstTileColumn; tileColumn <= lastTileColumn; ++tileColumn)
                 coordinates.emplace_back(tileRow, tileColumn);
 
-        const auto tiles = acquireTiles(*_storage, coordinates);
+        const auto tiles = acquireTiles(*_storage, coordinates, &timing);
 
         const auto batchFirstRow = tileRowBatchStart * _storage->rowTileSize();
         const auto batchEndRow = tileRowBatchEnd > _storage->rows() / _storage->rowTileSize() ? _storage->rows() : tileRowBatchEnd * _storage->rowTileSize();
@@ -578,7 +856,8 @@ void TiledPointsStorageBackend::visitRange(const std::uint64_t firstRow, const s
 
                 const auto segmentEnd = std::min(endColumn, tile.columnOffset() + tile.columns());
 
-                visitor(makeTileAccessView(tile, row - tile.rowOffset(), column - tile.columnOffset(), 1, segmentEnd - column, _elementTypeIndex));
+                const auto view = makeTileAccessView(tile, row - tile.rowOffset(), column - tile.columnOffset(), 1, segmentEnd - column, _elementTypeIndex);
+                timing.visit(visitor, view);
                 column = segmentEnd;
             }
         }
@@ -605,6 +884,27 @@ void TiledPointsStorageBackend::materialize(char* destination, StorageBackendPro
 
     if (progress)
         progress(0.0f);
+
+    if (_rangeLoader)
+    {
+        constexpr std::uint64_t maxRangeBytes = 64ull * 1024ull * 1024ull;
+        if (_storage->elementSize() != 0 && _storage->columns() > std::numeric_limits<std::uint64_t>::max() / _storage->elementSize())
+            throw std::overflow_error("Strip-backed point-data row exceeds the supported size");
+        const auto bytesPerRow = _storage->columns() * _storage->elementSize();
+        const auto chunkRows = std::max<std::uint64_t>(1, maxRangeBytes / std::max<std::uint64_t>(1, bytesPerRow));
+        for (std::uint64_t firstRow = 0; firstRow < _storage->rows();)
+        {
+            const auto rowCount = std::min(chunkRows, _storage->rows() - firstRow);
+            const auto bytes = loadRangeBytes(_rangeLoader, firstRow, rowCount, 0, _storage->columns(), _storage->elementSize());
+            std::memcpy(destination + firstRow * bytesPerRow, bytes->constData(), static_cast<std::size_t>(bytes->size()));
+            firstRow += rowCount;
+            if (progress)
+                progress(static_cast<float>(firstRow) / static_cast<float>(_storage->rows()));
+        }
+        if (_storage->rows() == 0 && progress)
+            progress(1.0f);
+        return;
+    }
 
     const auto rowBatchSize = tileColumns == 0 ? 1 : std::max<std::uint64_t>(1, maxTilesPerLoadBatch / tileColumns);
     const auto progressInterval = std::max<std::uint64_t>(1, totalTiles / 100);

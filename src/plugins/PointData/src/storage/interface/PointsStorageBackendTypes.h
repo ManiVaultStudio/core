@@ -130,6 +130,9 @@ struct StorageBackendConfiguration : StorageBackendConfigurationOptions
     std::size_t cacheCapacity             = 8;                             /**< Maximum number of tile payloads retained in memory. */
     std::size_t cacheCapacityBytes        = defaultTileCacheCapacityBytes; /**< Maximum decoded tile payload bytes retained in memory. */
     bool        packedTiles               = false;                         /**< Whether serialized tiles are grouped into jointly encoded super tiles. */
+    bool        experimentalStripStorage  = false;                         /**< Whether HDF5 import stores independently compressed row and column strips for experiments. */
+    std::size_t rowStripHeight            = 8;                             /**< Number of rows in each independently compressed row strip during HDF5 import. */
+    std::size_t columnStripWidth          = 8;                             /**< Number of columns in each independently compressed column strip during HDF5 import. */
     std::size_t superTileRows             = 1;                             /**< Number of base tile rows in one serialized super tile. */
     std::size_t superTileColumns          = 1;                             /**< Number of base tile columns in one serialized super tile. */
     QString     tileCodecName;                                              /**< Registered codec key for packed payloads; empty inherits project compression. */
