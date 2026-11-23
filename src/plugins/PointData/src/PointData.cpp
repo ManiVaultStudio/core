@@ -104,6 +104,23 @@ namespace
         }
     }
 
+    float readPointDataAccessValue(const PointDataAccessView& view, const std::uint64_t row, const std::uint64_t column)
+    {
+        const auto* bytes = view.rowData(row) + column * view.elementSizeBytes;
+        switch (view.elementTypeIndex)
+        {
+            case 0: { float value; std::memcpy(&value, bytes, sizeof(value)); return value; }
+            case 1: { biovault::bfloat16_t value; std::memcpy(&value, bytes, sizeof(value)); return static_cast<float>(value); }
+            case 2: { std::int32_t value; std::memcpy(&value, bytes, sizeof(value)); return static_cast<float>(value); }
+            case 3: { std::uint32_t value; std::memcpy(&value, bytes, sizeof(value)); return static_cast<float>(value); }
+            case 4: { std::int16_t value; std::memcpy(&value, bytes, sizeof(value)); return static_cast<float>(value); }
+            case 5: { std::uint16_t value; std::memcpy(&value, bytes, sizeof(value)); return static_cast<float>(value); }
+            case 6: { std::int8_t value; std::memcpy(&value, bytes, sizeof(value)); return static_cast<float>(value); }
+            case 7: { std::uint8_t value; std::memcpy(&value, bytes, sizeof(value)); return static_cast<float>(value); }
+            default: throw std::invalid_argument("Unsupported point-data access value type");
+        }
+    }
+
     namespace local
     {
         template<typename outT, typename inT>
@@ -985,12 +1002,17 @@ void PointData::visitRows(const std::uint64_t firstRow, const std::uint64_t rowC
     if (firstRow > getNumPoints() || rowCount > getNumPoints() - firstRow)
         throw std::out_of_range("Point-data row range is out of bounds");
 
-    for (std::uint64_t row = firstRow; row < firstRow + rowCount; ++row)
-        visitRange(row, 1, 0, _numDimensions, visitor);
+    visitRange(firstRow, rowCount, 0, _numDimensions, visitor);
 }
 
 void PointData::visitRows(const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
 {
+    if (const auto* tiledBackend = dynamic_cast<const pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get()))
+    {
+        tiledBackend->visitRows(rowIds, visitor);
+        return;
+    }
+
     for (const auto row : rowIds)
         visitRows(row, 1, visitor);
 }
@@ -1000,12 +1022,17 @@ void PointData::visitColumns(const std::uint64_t firstColumn, const std::uint64_
     if (firstColumn > _numDimensions || columnCount > _numDimensions - firstColumn)
         throw std::out_of_range("Point-data column range is out of bounds");
 
-    for (std::uint64_t row = 0; row < getNumPoints(); ++row)
-        visitRange(row, 1, firstColumn, columnCount, visitor);
+    visitRange(0, getNumPoints(), firstColumn, columnCount, visitor);
 }
 
 void PointData::visitColumns(const std::vector<std::uint64_t>& columnIds, const PointDataAccessVisitor& visitor) const
 {
+    if (const auto* tiledBackend = dynamic_cast<const pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get()))
+    {
+        tiledBackend->visitColumns(columnIds, visitor);
+        return;
+    }
+
     std::vector<std::uint64_t> rowIds(getNumPoints());
     std::iota(rowIds.begin(), rowIds.end(), 0);
 
@@ -1017,6 +1044,12 @@ void PointData::visitColumns(const std::uint64_t firstColumn, const std::uint64_
     if (firstColumn > _numDimensions || columnCount > _numDimensions - firstColumn)
         throw std::out_of_range("Point-data column range is out of bounds");
 
+    if (const auto* tiledBackend = dynamic_cast<const pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get()))
+    {
+        tiledBackend->visitRange(rowIds, firstColumn, columnCount, visitor);
+        return;
+    }
+
     for (const auto row : rowIds)
     {
         if (row >= getNumPoints())
@@ -1027,6 +1060,12 @@ void PointData::visitColumns(const std::uint64_t firstColumn, const std::uint64_
 
 void PointData::visitColumns(const std::vector<std::uint64_t>& columnIds, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
 {
+    if (const auto* tiledBackend = dynamic_cast<const pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get()))
+    {
+        tiledBackend->visitColumns(columnIds, rowIds, visitor);
+        return;
+    }
+
     if (!visitor)
         throw std::invalid_argument("Point-data visitor is invalid");
 
@@ -1506,8 +1545,15 @@ void PointData::extractFullDataForDimension(std::vector<float>& result, const in
 
     if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Dense)
     {
-        for (std::size_t i = 0; i < result.size(); ++i)
-            result[i] = getValueAt(i * _numDimensions + static_cast<std::size_t>(dimensionIndex));
+        std::size_t outputIndex = 0;
+        visitColumns(static_cast<std::uint64_t>(dimensionIndex), 1, [&result, &outputIndex](const PointDataAccessView& view) {
+            for (std::uint64_t row = 0; row < view.rows; ++row)
+                for (std::uint64_t column = 0; column < view.columns; ++column)
+                    result[outputIndex++] = readPointDataAccessValue(view, row, column);
+        });
+
+        if (outputIndex != result.size())
+            throw std::runtime_error("Point-data column access returned an unexpected number of values");
         return;
     }
 
@@ -1578,8 +1624,16 @@ void PointData::extractDataForDimension(std::vector<float>& result, const int di
 
     if (_storageBackend && _storageBackend->getType() != pointdata::storage::StorageBackendType::Dense)
     {
-        for (std::size_t i = 0; i < result.size(); ++i)
-            result[i] = getValueAt(static_cast<std::size_t>(indices[i]) * _numDimensions + static_cast<std::size_t>(dimensionIndex));
+        const std::vector<std::uint64_t> rowIds(indices.begin(), indices.end());
+        std::size_t outputIndex = 0;
+        visitColumns(static_cast<std::uint64_t>(dimensionIndex), 1, rowIds, [&result, &outputIndex](const PointDataAccessView& view) {
+            for (std::uint64_t row = 0; row < view.rows; ++row)
+                for (std::uint64_t column = 0; column < view.columns; ++column)
+                    result[outputIndex++] = readPointDataAccessValue(view, row, column);
+        });
+
+        if (outputIndex != result.size())
+            throw std::runtime_error("Point-data selected-column access returned an unexpected number of values");
         return;
     }
 
@@ -2075,8 +2129,17 @@ void Points::visitRows(const std::uint64_t firstRow, const std::uint64_t rowCoun
 
 void Points::visitRows(const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
 {
+    const auto* rawPointData = getRawData<PointData>();
+    std::vector<std::uint64_t> absoluteRowIds;
+    absoluteRowIds.reserve(rowIds.size());
     for (const auto row : rowIds)
-        visitRange(row, 1, 0, getNumDimensions(), visitor);
+    {
+        if (row >= getNumPoints())
+            throw std::out_of_range("Point-data row ID is out of bounds");
+        absoluteRowIds.push_back(isFull() ? row : indices[static_cast<std::size_t>(row)]);
+    }
+
+    rawPointData->visitRows(absoluteRowIds, visitor);
 }
 
 void Points::visitColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
@@ -2110,8 +2173,17 @@ void Points::visitColumns(const std::vector<std::uint64_t>& columnIds, const Poi
 
 void Points::visitColumns(const std::uint64_t firstColumn, const std::uint64_t columnCount, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
 {
+    const auto* rawPointData = getRawData<PointData>();
+    std::vector<std::uint64_t> absoluteRowIds;
+    absoluteRowIds.reserve(rowIds.size());
     for (const auto row : rowIds)
-        visitRange(row, 1, firstColumn, columnCount, visitor);
+    {
+        if (row >= getNumPoints())
+            throw std::out_of_range("Point-data row ID is out of bounds");
+        absoluteRowIds.push_back(isFull() ? row : indices[static_cast<std::size_t>(row)]);
+    }
+
+    rawPointData->visitColumns(firstColumn, columnCount, absoluteRowIds, visitor);
 }
 
 void Points::visitRange(const std::uint64_t firstRow, const std::uint64_t rowCount, const std::uint64_t firstColumn, const std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const
