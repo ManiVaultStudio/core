@@ -93,6 +93,13 @@ struct PackedBlobBlock
     std::uint64_t uncompressedSize = 0; /**< Number of decoded bytes. */
 };
 
+/** Optional per-append timings for packed-blob encoding and output. */
+struct PackedBlobAppendTimings
+{
+    std::uint64_t encodeNanoseconds = 0; /**< Time spent in the payload codec. */
+    std::uint64_t writeNanoseconds = 0;  /**< Time spent framing and writing the encoded payload. */
+};
+
 /**
  * @brief Appends independently encoded blobs to one packed project file.
  *
@@ -132,13 +139,26 @@ public:
      */
     PackedBlobBlock append(const char* data, std::size_t size);
 
+    /** Appends one payload and reports codec and output timings.
+     * @param data Source bytes; must remain valid for the duration of the call.
+     * @param size Number of source bytes.
+     * @param timings Accumulates codec and output timings.
+     * @return Encoded byte range needed by PackedBlobFileReader.
+     */
+    PackedBlobBlock append(const char* data, std::size_t size, PackedBlobAppendTimings& timings);
+
     /** Appends one non-empty QByteArray payload and returns its encoded range. */
     PackedBlobBlock append(const QByteArray& data);
+
+    /** Appends one payload and accumulates codec and output timings. */
+    PackedBlobBlock append(const QByteArray& data, PackedBlobAppendTimings& timings);
 
     /** Flushes and closes the file; subsequent append operations fail. */
     void close();
 
 private:
+    PackedBlobBlock appendImpl(const char* data, std::size_t size, PackedBlobAppendTimings* timings);
+
     QFile       _file;           /**< Uncompressed container receiving encoded block payloads. */
     SharedCodec _codec;          /**< Shared codec retained for append operations. */
     bool        _closed = false; /**< Whether close() has flushed and closed the output. */

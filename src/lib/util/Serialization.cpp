@@ -17,6 +17,7 @@
 #include <QDataStream>
 
 #include <exception>
+#include <chrono>
 
 #include <math.h>
 #include <limits>
@@ -812,6 +813,16 @@ PackedBlobFileWriter::PackedBlobFileWriter(const QString& filePath, const Shared
 
 PackedBlobBlock PackedBlobFileWriter::append(const char* data, const std::size_t size)
 {
+    return appendImpl(data, size, nullptr);
+}
+
+PackedBlobBlock PackedBlobFileWriter::append(const char* data, const std::size_t size, PackedBlobAppendTimings& timings)
+{
+    return appendImpl(data, size, &timings);
+}
+
+PackedBlobBlock PackedBlobFileWriter::appendImpl(const char* data, const std::size_t size, PackedBlobAppendTimings* timings)
+{
     if (_closed)
         throw std::logic_error("Cannot append to a closed packed blob file");
 
@@ -821,7 +832,12 @@ PackedBlobBlock PackedBlobFileWriter::append(const char* data, const std::size_t
     if (size > static_cast<std::size_t>(std::numeric_limits<qsizetype>::max()))
         throw std::overflow_error("Packed blob file block exceeds QByteArray size limits");
 
+    const auto encodeStart = std::chrono::steady_clock::now();
     const auto encoded = _codec->encode(data, static_cast<qsizetype>(size));
+    if (timings)
+        timings->encodeNanoseconds += static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - encodeStart).count());
+
+    const auto writeStart = std::chrono::steady_clock::now();
     const auto blockHeaderOffset = static_cast<std::uint64_t>(_file.pos());
     QByteArray block;
     block.reserve(static_cast<qsizetype>(packedBlobBlockHeaderSize + encoded.size()));
@@ -833,6 +849,9 @@ PackedBlobBlock PackedBlobFileWriter::append(const char* data, const std::size_t
     if (stream.status() != QDataStream::Ok || _file.write(block) != block.size())
         throw std::runtime_error("Unable to write packed blob block");
 
+    if (timings)
+        timings->writeNanoseconds += static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - writeStart).count());
+
     const auto payloadOffset = blockHeaderOffset + packedBlobBlockHeaderSize;
 
     return { payloadOffset, static_cast<std::uint64_t>(encoded.size()), static_cast<std::uint64_t>(size) };
@@ -841,6 +860,11 @@ PackedBlobBlock PackedBlobFileWriter::append(const char* data, const std::size_t
 PackedBlobBlock PackedBlobFileWriter::append(const QByteArray& data)
 {
     return append(data.constData(), static_cast<std::size_t>(data.size()));
+}
+
+PackedBlobBlock PackedBlobFileWriter::append(const QByteArray& data, PackedBlobAppendTimings& timings)
+{
+    return appendImpl(data.constData(), static_cast<std::size_t>(data.size()), &timings);
 }
 
 void PackedBlobFileWriter::close()
