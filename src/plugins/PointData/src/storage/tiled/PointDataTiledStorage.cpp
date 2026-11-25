@@ -426,7 +426,9 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::retileToPackedFile
         const auto chunkEnd = std::min(totalSuperTiles, chunkStart + superTileChunkSize);
         for (std::size_t batchStart = chunkStart; batchStart < chunkEnd; batchStart += maximumWorkers)
         {
-            const auto batchEnd = std::min(chunkEnd, batchStart + maximumWorkers);
+            const auto batchEnd = std::min(
+                chunkEnd,
+                static_cast<decltype(chunkEnd)>(batchStart + maximumWorkers));
             std::vector<std::future<std::size_t>> jobs;
             jobs.reserve(batchEnd - batchStart);
             for (std::size_t superTileIndex = batchStart; superTileIndex < batchEnd; ++superTileIndex)
