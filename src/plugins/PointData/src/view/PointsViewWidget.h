@@ -152,6 +152,8 @@ private:
     mv::gui::TriggerAction          _getColumnsAction;                       /**< Executes the column-list query. */
     mv::gui::TriggerAction          _getColumnsForRowsAction;                /**< Executes the selected-columns-for-rows query. */
     mv::gui::TriggerAction          _getRangeAction;                         /**< Executes the rectangular range query. */
+    mv::gui::TriggerAction          _runFetchBenchmarkAction;                /**< Runs the fixed fetch comparison and saves its results as JSON. */
+    QFutureWatcher<QString>*        _benchmarkWatcher;                        /**< Tracks the background fetch benchmark and its output path or error. */
     mv::gui::StringAction           _rowFilterAction;                        /**< Filter expression selecting displayed rows. */
     mv::gui::StringAction           _columnFilterAction;                     /**< Filter expression selecting displayed columns. */
     mv::gui::ToggleAction           _liveTableAction;                        /**< Whether visible table ranges update automatically. */

@@ -4,23 +4,39 @@
 
 #include <CoreInterface.h>
 #include "../PointData.h"
+#include "../storage/tiled/TiledPointsStorageBackend.h"
 
 #include <QAbstractItemView>
 #include <QDebug>
+#include <QDateTime>
+#include <QDir>
 #include <QElapsedTimer>
 #include <QEvent>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QFutureWatcher>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QLabel>
+#include <QSaveFile>
 #include <QScrollBar>
+#include <QSettings>
 #include <QShowEvent>
 #include <QSpinBox>
+#include <QSysInfo>
 #include <QTableView>
 #include <QTimer>
+#include <QThread>
 #include <QVBoxLayout>
 #include <QWheelEvent>
 #include <QtConcurrent/QtConcurrentRun>
+#include <util/StyledIcon.h>
 #include <algorithm>
+#include <exception>
+#include <functional>
 #include <limits>
 #include <numeric>
 #include <unordered_set>
@@ -59,6 +75,155 @@ float valueAt(const PointDataAccessView& view, const std::uint64_t row, const st
 
         default:
             return 0.0f;
+    }
+}
+
+QString makeSafeFileName(QString name)
+{
+    name = name.trimmed();
+    for (auto& character : name)
+        if (QStringLiteral("<>:\"/\\|?*").contains(character) || character.unicode() < 32)
+            character = QLatin1Char('_');
+
+    while (name.endsWith(QLatin1Char('.')) || name.endsWith(QLatin1Char(' ')))
+        name.chop(1);
+
+    return name.isEmpty() ? QStringLiteral("point-data") : name;
+}
+
+QString saveFetchBenchmark(const mv::Dataset<Points>& points, const QString& outputPath)
+{
+    try
+    {
+        const auto startedUtc = QDateTime::currentDateTimeUtc();
+        constexpr int repetitions = 3;
+        constexpr std::uint64_t requestedColumnCount = 11;
+        constexpr std::uint64_t requestedRangeRows = 1000;
+        constexpr std::uint64_t requestedRangeColumns = 32;
+        const auto rowCount = points->getNumPoints();
+        const auto columnCount = points->getNumDimensions();
+        const auto actualMultiColumnCount = std::min(requestedColumnCount, columnCount);
+        const auto actualRangeRows = std::min(requestedRangeRows, rowCount);
+        const auto actualRangeColumns = std::min(requestedRangeColumns, columnCount);
+        const auto* tiledBackend = dynamic_cast<const mv::pointdata::storage::TiledPointsStorageBackend*>(points->getStorageBackend());
+        const auto tiledStorage = tiledBackend ? tiledBackend->getStorage() : nullptr;
+        const auto resetApplicationCache = [&] {
+            if (tiledStorage)
+                tiledStorage->resetCache();
+        };
+
+        QJsonObject datasetObject;
+        datasetObject.insert(QStringLiteral("name"), points->getGuiName());
+        datasetObject.insert(QStringLiteral("rows"), static_cast<qint64>(rowCount));
+        datasetObject.insert(QStringLiteral("columns"), static_cast<qint64>(columnCount));
+        datasetObject.insert(QStringLiteral("element_type"), points->getElementTypeName());
+        if (const auto backendType = points->getStorageBackendType())
+            datasetObject.insert(QStringLiteral("storage_backend"), mv::pointdata::storage::getStorageBackendTypeName(*backendType));
+
+        if (tiledStorage)
+        {
+            QJsonObject storageObject;
+            storageObject.insert(QStringLiteral("tile_rows"), static_cast<qint64>(tiledStorage->rowTileSize()));
+            storageObject.insert(QStringLiteral("tile_columns"), static_cast<qint64>(tiledStorage->columnTileSize()));
+            storageObject.insert(QStringLiteral("cache_tiles"), static_cast<qint64>(tiledStorage->cacheCapacity()));
+            storageObject.insert(QStringLiteral("cache_bytes"), static_cast<qint64>(tiledStorage->cacheCapacityBytes()));
+            storageObject.insert(QStringLiteral("packed_tiles"), tiledStorage->packedTiles());
+            storageObject.insert(QStringLiteral("supertile_rows"), static_cast<qint64>(tiledStorage->superTileRows()));
+            storageObject.insert(QStringLiteral("supertile_columns"), static_cast<qint64>(tiledStorage->superTileColumns()));
+            storageObject.insert(QStringLiteral("codec"), tiledStorage->serializationCodecName());
+            datasetObject.insert(QStringLiteral("tiled_storage"), storageObject);
+        }
+
+        QJsonArray results;
+        const auto measure = [&](const QString& name, const std::uint64_t requestedRows, const std::uint64_t requestedColumns, const std::function<void(const PointDataAccessVisitor&)>& query) {
+            resetApplicationCache();
+            QJsonArray samples;
+            QJsonArray checksums;
+            std::vector<double> elapsedMilliseconds;
+            elapsedMilliseconds.reserve(repetitions);
+
+            for (int repetition = 0; repetition < repetitions; ++repetition)
+            {
+                double checksum = 0.0;
+                QElapsedTimer timer;
+                timer.start();
+                query([&](const PointDataAccessView& view) {
+                    for (std::uint64_t row = 0; row < view.rows; ++row)
+                    {
+                        for (std::uint64_t column = 0; column < view.columns; ++column)
+                        {
+                            checksum += valueAt(view, row, column);
+                        }
+                    }
+                });
+                const auto elapsed = static_cast<double>(timer.nsecsElapsed()) / 1.0e6;
+                elapsedMilliseconds.push_back(elapsed);
+                samples.append(elapsed);
+                checksums.append(checksum);
+            }
+
+            auto sortedTimes = elapsedMilliseconds;
+            std::sort(sortedTimes.begin(), sortedTimes.end());
+            QJsonObject result;
+            result.insert(QStringLiteral("pattern"), name);
+            result.insert(QStringLiteral("requested_rows"), static_cast<qint64>(requestedRows));
+            result.insert(QStringLiteral("requested_columns"), static_cast<qint64>(requestedColumns));
+            result.insert(QStringLiteral("first_run_ms"), elapsedMilliseconds.front());
+            result.insert(QStringLiteral("median_ms"), sortedTimes[sortedTimes.size() / 2]);
+            result.insert(QStringLiteral("samples_ms"), samples);
+            result.insert(QStringLiteral("checksums"), checksums);
+            results.append(result);
+        };
+
+        measure(QStringLiteral("one_full_column"), rowCount, 1, [&](const PointDataAccessVisitor& visitor) {
+            points->visitColumns(0, 1, visitor);
+        });
+        measure(QStringLiteral("eleven_full_columns"), rowCount, actualMultiColumnCount, [&](const PointDataAccessVisitor& visitor) {
+            points->visitColumns(0, actualMultiColumnCount, visitor);
+        });
+        measure(QStringLiteral("one_full_row"), 1, columnCount, [&](const PointDataAccessVisitor& visitor) {
+            points->visitRows(0, 1, visitor);
+        });
+        measure(QStringLiteral("range"), actualRangeRows, actualRangeColumns, [&](const PointDataAccessVisitor& visitor) {
+            points->visitRange(0, actualRangeRows, 0, actualRangeColumns, visitor);
+        });
+
+        QJsonObject benchmarkObject;
+        benchmarkObject.insert(QStringLiteral("started_utc"), startedUtc.toString(Qt::ISODateWithMs));
+        benchmarkObject.insert(QStringLiteral("repetitions"), repetitions);
+        benchmarkObject.insert(QStringLiteral("multi_column_count"), static_cast<qint64>(actualMultiColumnCount));
+        benchmarkObject.insert(QStringLiteral("column_start"), 0);
+        benchmarkObject.insert(QStringLiteral("row_index"), 0);
+        benchmarkObject.insert(QStringLiteral("range_rows"), static_cast<qint64>(actualRangeRows));
+        benchmarkObject.insert(QStringLiteral("range_columns"), static_cast<qint64>(actualRangeColumns));
+        benchmarkObject.insert(QStringLiteral("range_start_row"), 0);
+        benchmarkObject.insert(QStringLiteral("range_start_column"), 0);
+        benchmarkObject.insert(QStringLiteral("logical_cores"), QThread::idealThreadCount());
+        benchmarkObject.insert(QStringLiteral("operating_system"), QSysInfo::prettyProductName());
+        benchmarkObject.insert(QStringLiteral("timing_notes"), QStringLiteral("Timings include consuming each returned value into a checksum. The application tiled cache is reset once before each pattern. OS file cache and importer-owned strip cache are not cleared. First-run timing is therefore not guaranteed to be a cold-cache measurement; later samples may be warm."));
+
+        QJsonObject document;
+        document.insert(QStringLiteral("schema_version"), 1);
+        document.insert(QStringLiteral("dataset"), datasetObject);
+        document.insert(QStringLiteral("benchmark"), benchmarkObject);
+        document.insert(QStringLiteral("results"), results);
+
+        QSaveFile output(outputPath);
+        if (!output.open(QIODevice::WriteOnly))
+            return QStringLiteral("ERROR: Unable to open %1: %2").arg(outputPath, output.errorString());
+        const auto json = QJsonDocument(document).toJson(QJsonDocument::Indented);
+        if (output.write(json) != json.size() || !output.commit())
+            return QStringLiteral("ERROR: Unable to save %1: %2").arg(outputPath, output.errorString());
+
+        return outputPath;
+    }
+    catch (const std::exception& exception)
+    {
+        return QStringLiteral("ERROR: %1").arg(QString::fromUtf8(exception.what()));
+    }
+    catch (...)
+    {
+        return QStringLiteral("ERROR: Unknown failure while benchmarking point data");
     }
 }
 }
@@ -106,6 +271,8 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
     _getColumnsAction(&_getColumnsGroupAction, "Get columns"),
     _getColumnsForRowsAction(&_getColumnsForRowsGroupAction, "Get columns for rows"),
     _getRangeAction(&_getRangeGroupAction, "Get range"),
+    _runFetchBenchmarkAction(&_facadeGroupAction, "Benchmark fetch patterns and save JSON"),
+    _benchmarkWatcher(new QFutureWatcher<QString>(this)),
     _rowFilterAction(this, "Rows"),
     _columnFilterAction(this, "Columns"),
     _liveTableAction(this, "Live", true)
@@ -173,6 +340,8 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
     _getColumnsAction.setIconByName("download");
     _getColumnsForRowsAction.setIconByName("download");
     _getRangeAction.setIconByName("download");
+    _runFetchBenchmarkAction.setIconByName("gauge-high");
+    _runFetchBenchmarkAction.setToolTip("Measure one full column, eleven full columns, one full row, and a 1,000 × 32 range three times each. Save timings, checksums, dataset settings, and cache notes to a JSON file.");
     _getRowGroupAction.setToolTip("Points::getRow(row)");
     _getRowRangeGroupAction.setToolTip("Points::visitRows(firstRow, rowCount)");
     _getRowsGroupAction.setToolTip("Points::visitRows(rowIds)");
@@ -223,6 +392,7 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
     _facadeGroupAction.addAction(&_getColumnsGroupAction);
     _facadeGroupAction.addAction(&_getColumnsForRowsGroupAction);
     _facadeGroupAction.addAction(&_getRangeGroupAction);
+    _facadeGroupAction.addAction(&_runFetchBenchmarkAction, mv::gui::TriggerAction::Text);
     _filterGroupAction.addAction(&_facadeGroupAction);
 
     _table->setModel(_model);
@@ -292,6 +462,47 @@ PointsViewWidget::PointsViewWidget(QWidget* parent, const bool showDatasetContro
     connect(&_getColumnsAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getColumns);
     connect(&_getColumnsForRowsAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getColumnsForRows);
     connect(&_getRangeAction, &mv::gui::TriggerAction::triggered, this, &PointsViewWidget::getRange);
+    connect(&_runFetchBenchmarkAction, &mv::gui::TriggerAction::triggered, this, [this] {
+        if (!_points.isValid() || _benchmarkWatcher->isRunning())
+            return;
+
+        if (_fetchInProgress)
+        {
+            mv::help().addNotification("Fetch benchmark unavailable", "Wait for the current table fetch to finish before starting the benchmark.", mv::util::StyledIcon("circle-info"));
+            return;
+        }
+
+        const auto timestamp = QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd-HHmmss"));
+        const auto suggestedName = QStringLiteral("%1-fetch-benchmark-%2.json").arg(makeSafeFileName(_points->getGuiName()), timestamp);
+        QSettings settings;
+        const auto lastBenchmarkDirectory = settings.value(QStringLiteral("PointData/fetchBenchmarkDirectory"), QDir::homePath()).toString();
+        const auto suggestedPath = QDir(lastBenchmarkDirectory).filePath(suggestedName);
+        const auto outputPath = QFileDialog::getSaveFileName(this, tr("Save fetch benchmark"), suggestedPath, tr("JSON files (*.json)"));
+        if (outputPath.isEmpty())
+            return;
+
+        settings.setValue(QStringLiteral("PointData/fetchBenchmarkDirectory"), QFileInfo(outputPath).absolutePath());
+
+        _fetchTimer->stop();
+        _filterTimer->stop();
+        _liveTableAction.setChecked(false);
+
+        const auto points = _points;
+        _runFetchBenchmarkAction.setEnabled(false);
+        mv::help().addNotification("Fetch benchmark started", "Measuring four point-data fetch patterns and writing JSON results.", mv::util::StyledIcon("gauge-high"));
+        _benchmarkWatcher->setFuture(QtConcurrent::run([points, outputPath] {
+            return saveFetchBenchmark(points, outputPath);
+        }));
+    });
+    connect(_benchmarkWatcher, &QFutureWatcher<QString>::finished, this, [this] {
+        const auto result = _benchmarkWatcher->result();
+        if (result.startsWith(QStringLiteral("ERROR: ")))
+            mv::help().addNotification("Fetch benchmark failed", result.mid(7), mv::util::StyledIcon("times"));
+        else
+            mv::help().addNotification("Fetch benchmark saved", result, mv::util::StyledIcon("check"));
+
+        updateFacadeActionState();
+    });
     connect(&_rowIdAction, &mv::gui::IntegralAction::valueChanged, this, &PointsViewWidget::updateFacadeActionState);
     connect(&_columnIdAction, &mv::gui::IntegralAction::valueChanged, this, &PointsViewWidget::updateFacadeActionState);
     connect(&_rowStartAction, &mv::gui::IntegralAction::valueChanged, this, &PointsViewWidget::updateFacadeActionState);
@@ -396,6 +607,7 @@ void PointsViewWidget::updateFacadeActionState()
         _getColumnsAction.setEnabled(false);
         _getColumnsForRowsAction.setEnabled(false);
         _getRangeAction.setEnabled(false);
+        _runFetchBenchmarkAction.setEnabled(false);
         return;
     }
 
@@ -429,6 +641,7 @@ void PointsViewWidget::updateFacadeActionState()
     _getColumnsAction.setEnabled(!columnIds.empty() && columnIdsError.isEmpty());
     _getColumnsForRowsAction.setEnabled(dimensionCount > 0 && !columnRowIds.empty() && columnRowsError.isEmpty() && columnsForRowsStart <= columnsForRowsEnd && columnsForRowsEnd < dimensionCount);
     _getRangeAction.setEnabled(pointCount > 0 && dimensionCount > 0 && rangeRowStart <= rangeRowEnd && rangeRowEnd < pointCount && rangeColumnStart <= rangeColumnEnd && rangeColumnEnd < dimensionCount);
+    _runFetchBenchmarkAction.setEnabled(pointCount > 0 && dimensionCount > 0 && !_benchmarkWatcher->isRunning());
 }
 
 void PointsViewWidget::refreshPoints()
