@@ -11,11 +11,82 @@
 #include "util/ProjectResourceStagingPolicy.h"
 
 #include <QDir>
+#include <QFileInfo>
 #include <QSettings>
 #include <QStorageInfo>
 
+#ifdef Q_OS_WIN
+#include <Windows.h>
+#include <winioctl.h>
+#endif
+
 namespace mv::gui
 {
+
+namespace
+{
+
+enum class StorageSeekPenalty
+{
+    Unknown,
+    Present,
+    Absent
+};
+
+StorageSeekPenalty getStorageSeekPenalty(const QString& directory)
+{
+#ifdef Q_OS_WIN
+    const auto nativePath = QDir::toNativeSeparators(QFileInfo(directory).absoluteFilePath());
+    wchar_t volumePath[MAX_PATH] = {};
+    if (!GetVolumePathNameW(reinterpret_cast<LPCWSTR>(nativePath.utf16()), volumePath, MAX_PATH))
+        return StorageSeekPenalty::Unknown;
+
+    // The volume handle form below is available for drive-letter volumes. For
+    // mounted folders and other volume layouts, leave the classification unknown.
+    if (volumePath[0] == L'\0' || volumePath[1] != L':')
+        return StorageSeekPenalty::Unknown;
+
+    const auto volumeDevice = QStringLiteral("\\\\.\\%1").arg(QString::fromWCharArray(volumePath, 2));
+    const auto volumeHandle = CreateFileW(reinterpret_cast<LPCWSTR>(volumeDevice.utf16()), 0,
+        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, 0, nullptr);
+    if (volumeHandle == INVALID_HANDLE_VALUE)
+        return StorageSeekPenalty::Unknown;
+
+    STORAGE_PROPERTY_QUERY query{};
+    query.PropertyId = StorageDeviceSeekPenaltyProperty;
+    query.QueryType = PropertyStandardQuery;
+
+    DEVICE_SEEK_PENALTY_DESCRIPTOR descriptor{};
+    DWORD bytesReturned = 0;
+    const auto succeeded = DeviceIoControl(volumeHandle, IOCTL_STORAGE_QUERY_PROPERTY, &query, sizeof(query),
+        &descriptor, sizeof(descriptor), &bytesReturned, nullptr);
+    CloseHandle(volumeHandle);
+
+    if (!succeeded || bytesReturned < sizeof(descriptor))
+        return StorageSeekPenalty::Unknown;
+
+    return descriptor.IncursSeekPenalty ? StorageSeekPenalty::Present : StorageSeekPenalty::Absent;
+#else
+    Q_UNUSED(directory);
+    return StorageSeekPenalty::Unknown;
+#endif
+}
+
+QString describeStorageSeekPenalty(const StorageSeekPenalty seekPenalty)
+{
+    switch (seekPenalty) {
+        case StorageSeekPenalty::Present:
+            return "Windows reports a disk seek penalty (likely a hard disk drive).";
+        case StorageSeekPenalty::Absent:
+            return "Windows reports no disk seek penalty (typically an SSD or flash storage).";
+        case StorageSeekPenalty::Unknown:
+            return "Drive type could not be determined.";
+    }
+
+    return "Drive type could not be determined.";
+}
+
+}
 
 TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* parent) :
     GlobalSettingsGroupAction(parent, "Temporary"),
@@ -79,8 +150,16 @@ TemporaryDirectoriesSettingsAction::TemporaryDirectoriesSettingsAction(QObject* 
         // Settings can be restored before the notification UI and main window are ready.
         // The startup check will inspect the active and configured paths once initialization
         // has completed; only user changes made afterwards need an immediate notification.
-        if (_startupStorageCheckComplete)
+        if (_startupStorageCheckComplete) {
             checkTemporaryStorage(directory, true, true, true);
+            if (getStorageSeekPenalty(directory) == StorageSeekPenalty::Present) {
+                scheduleTemporaryStorageNotification(
+                    "Temporary directory may be slow",
+                    QString("Windows reports a disk seek penalty for <code>%1</code>, which usually means it is a hard disk drive. Large imports and staging workloads may run more slowly there; an SSD or NVMe location may improve performance. Drive type detection can be inconclusive for some storage devices.")
+                        .arg(directory.toHtmlEscaped()),
+                    util::SeverityLevel::Warning);
+            }
+        }
         _scanForStaleTemporaryDirectoriesAction.trigger();
     });
 
@@ -276,21 +355,26 @@ void TemporaryDirectoriesSettingsAction::updateTemporaryStorageStatus()
     const auto hasPendingDirectory = QDir::cleanPath(configuredDirectory) != QDir::cleanPath(activeDirectory);
     bool anyLow = false;
     bool anyUnknown = false;
+    bool anySeekPenalty = false;
 
     const auto describeDirectory = [&](const QString& directory, const QString& label) {
+        const auto seekPenalty = getStorageSeekPenalty(directory);
+        anySeekPenalty = anySeekPenalty || seekPenalty == StorageSeekPenalty::Present;
+        const auto driveDescription = describeStorageSeekPenalty(seekPenalty);
+
         QStorageInfo storage(directory);
         storage.refresh();
         if (!storage.isValid() || !storage.isReady() || storage.bytesAvailable() < 0) {
             anyUnknown = true;
-            return QString("%1: <code>%2</code> — free space unavailable.").arg(label, directory.toHtmlEscaped());
+            return QString("%1: <code>%2</code> — free space unavailable; %3").arg(label, directory.toHtmlEscaped(), driveDescription);
         }
 
         const auto availableBytes = static_cast<std::uint64_t>(storage.bytesAvailable());
         const auto isLow = availableBytes < thresholdBytes;
         anyLow = anyLow || isLow;
         const auto state = isLow ? QString("below warning threshold") : QString("above warning threshold");
-        return QString("%1: <code>%2</code> — %3 available (%4; threshold %5).")
-            .arg(label, directory.toHtmlEscaped(), util::getNoBytesHumanReadable(availableBytes), state, util::getNoBytesHumanReadable(thresholdBytes));
+        return QString("%1: <code>%2</code> — %3 available (%4; threshold %5); %6")
+            .arg(label, directory.toHtmlEscaped(), util::getNoBytesHumanReadable(availableBytes), state, util::getNoBytesHumanReadable(thresholdBytes), driveDescription);
     };
 
     auto description = describeDirectory(activeDirectory, "Active temporary directory");
@@ -303,7 +387,7 @@ void TemporaryDirectoriesSettingsAction::updateTemporaryStorageStatus()
     } });
 
     _temporaryStorageStatusAction.setMessage(
-        anyLow || anyUnknown ? util::SeverityLevel::Warning : util::SeverityLevel::Info,
+        anyLow || anyUnknown || anySeekPenalty ? util::SeverityLevel::Warning : util::SeverityLevel::Info,
         "Temporary storage",
         description,
         buttonActions);
