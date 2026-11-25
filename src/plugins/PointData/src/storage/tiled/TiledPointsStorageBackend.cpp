@@ -20,7 +20,6 @@
 #include <utility>
 
 #include <QFutureSynchronizer>
-#include <QDebug>
 #include <QThreadPool>
 #include <QtConcurrent/QtConcurrentRun>
 
@@ -53,26 +52,7 @@ public:
     {
     }
 
-    ~FetchTiming()
-    {
-        const auto totalMilliseconds = elapsedMilliseconds(_started);
-        qInfo().noquote() << QStringLiteral("[PointData] Tiled fetch: %1 %2 rows × %3 columns; path=%4; range loads=%5 (%6 ms); tile acquire=%7 ms across %8 batches/%9 tiles; visitor=%10 ms across %11 calls; total=%12 ms%13")
-            .arg(QString::fromLatin1(_operation))
-            .arg(_rows)
-            .arg(_columns)
-            .arg(_rangeLoader ? QStringLiteral("range-loader") : QStringLiteral("tile-cache"))
-            .arg(_rangeLoadCalls)
-            .arg(milliseconds(_rangeLoadNanoseconds))
-            .arg(milliseconds(_tileAcquireNanoseconds), 0, 'f', 3)
-            .arg(_tileBatches)
-            .arg(_tilesRequested)
-            .arg(milliseconds(_visitorNanoseconds), 0, 'f', 3)
-            .arg(_visitorCalls)
-            .arg(totalMilliseconds, 0, 'f', 3)
-            .arg(_storage
-                ? QStringLiteral("; cache delta=%1 hits/%2 misses").arg(_storage->cacheHits() - _initialCacheHits).arg(_storage->cacheMisses() - _initialCacheMisses)
-                : QString());
-    }
+    ~FetchTiming() = default;
 
     template<typename Loader>
     auto loadRange(Loader&& loader)
@@ -104,16 +84,6 @@ private:
     static std::uint64_t elapsedNanoseconds(const std::chrono::steady_clock::time_point start)
     {
         return static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - start).count());
-    }
-
-    static double elapsedMilliseconds(const std::chrono::steady_clock::time_point start)
-    {
-        return static_cast<double>(elapsedNanoseconds(start)) / 1000000.0;
-    }
-
-    static double milliseconds(const std::uint64_t nanoseconds)
-    {
-        return static_cast<double>(nanoseconds) / 1000000.0;
     }
 
     const char* _operation;
