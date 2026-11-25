@@ -64,8 +64,8 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _stagingSpaceObservationAction(this),
     _packedTilesAction(this, "Packed tiles", false),
     _experimentalStripStorageAction(this, "Experimental row/column strip storage", false),
-    _rowStripHeightAction(this, "Rows per row strip", 1, std::numeric_limits<std::int32_t>::max(), 8),
-    _columnStripWidthAction(this, "Columns per column strip", 1, std::numeric_limits<std::int32_t>::max(), 8),
+    _rowStripHeightAction(this, "Rows per row strip", 1, std::numeric_limits<std::int32_t>::max(), 32),
+    _columnStripWidthAction(this, "Columns per column strip", 1, std::numeric_limits<std::int32_t>::max(), 32),
     _superTileRowsAction(this, "Super-tile rows", 1, std::numeric_limits<std::int32_t>::max(), 1),
     _superTileColumnsAction(this, "Super-tile columns", 1, std::numeric_limits<std::int32_t>::max(), 1),
     _importPerformanceAction(this, "Import performance"),
@@ -284,6 +284,7 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
 
     connect(&_packedTilesAction, &ToggleAction::toggled, this, [this] {
         updatePackedTileControls();
+        updateStorageObservations();
         notifyOptionsChanged();
     });
 
@@ -294,10 +295,12 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     });
 
     connect(&_superTileRowsAction, &IntegralAction::valueChanged, this, [this] {
+        updateStorageObservations();
         notifyOptionsChanged();
     });
 
     connect(&_superTileColumnsAction, &IntegralAction::valueChanged, this, [this] {
+        updateStorageObservations();
         notifyOptionsChanged();
     });
 
