@@ -32,6 +32,7 @@ namespace
 constexpr char packedBlobMagic[] = "MVPTPK01";
 constexpr qsizetype packedBlobHeaderSize = sizeof(packedBlobMagic) - 1;
 constexpr qsizetype packedBlobBlockHeaderSize = sizeof(std::uint64_t) * 2;
+constexpr qsizetype packedBlobWriteBufferCapacity = 4 * 1024 * 1024;
 
 void writePackedBlobHeader(QFile& file)
 {
@@ -838,6 +839,7 @@ PackedBlobBlock PackedBlobFileWriter::appendImpl(const char* data, const std::si
         timings->encodeNanoseconds += static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - encodeStart).count());
 
     const auto writeStart = std::chrono::steady_clock::now();
+    flushWriteBuffer();
     const auto blockHeaderOffset = static_cast<std::uint64_t>(_file.pos());
     QByteArray block;
     block.reserve(static_cast<qsizetype>(packedBlobBlockHeaderSize + encoded.size()));
@@ -867,10 +869,68 @@ PackedBlobBlock PackedBlobFileWriter::append(const QByteArray& data, PackedBlobA
     return appendImpl(data.constData(), static_cast<std::size_t>(data.size()), &timings);
 }
 
+PackedBlobBlock PackedBlobFileWriter::appendEncoded(const QByteArray& encodedData, const std::size_t uncompressedSize, PackedBlobAppendTimings& timings)
+{
+    if (_closed)
+        throw std::logic_error("Cannot append to a closed packed blob file");
+
+    if (encodedData.isEmpty() || uncompressedSize == 0)
+        throw std::invalid_argument("Packed blob encoded block is empty");
+
+    if (uncompressedSize > static_cast<std::size_t>(std::numeric_limits<qsizetype>::max()))
+        throw std::overflow_error("Packed blob block exceeds QByteArray size limits");
+
+    const auto writeStart = std::chrono::steady_clock::now();
+    if (encodedData.size() > std::numeric_limits<qsizetype>::max() - packedBlobBlockHeaderSize)
+        throw std::overflow_error("Packed blob encoded block exceeds QByteArray size limits");
+    const auto blockSize = packedBlobBlockHeaderSize + encodedData.size();
+
+    if (!_writeBuffer.isEmpty() && blockSize > packedBlobWriteBufferCapacity - _writeBuffer.size())
+        flushWriteBuffer();
+
+    const auto blockHeaderOffset = static_cast<std::uint64_t>(_file.pos()) + static_cast<std::uint64_t>(_writeBuffer.size());
+    QByteArray blockHeader;
+    QDataStream stream(&blockHeader, QIODevice::WriteOnly);
+    stream.setByteOrder(QDataStream::LittleEndian);
+    stream << static_cast<quint64>(uncompressedSize) << static_cast<quint64>(encodedData.size());
+
+    if (stream.status() != QDataStream::Ok || blockHeader.size() != packedBlobBlockHeaderSize)
+        throw std::runtime_error("Unable to frame packed blob block");
+
+    _writeBuffer.append(blockHeader);
+    _writeBuffer.append(encodedData);
+
+    if (_writeBuffer.size() >= packedBlobWriteBufferCapacity)
+        flushWriteBuffer();
+
+    timings.writeNanoseconds += static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - writeStart).count());
+    return { blockHeaderOffset + packedBlobBlockHeaderSize, static_cast<std::uint64_t>(encodedData.size()), static_cast<std::uint64_t>(uncompressedSize) };
+}
+
+void PackedBlobFileWriter::flushWriteBuffer()
+{
+    if (_writeBuffer.isEmpty())
+        return;
+
+    qsizetype bytesWritten = 0;
+    while (bytesWritten < _writeBuffer.size())
+    {
+        const auto writeSize = _file.write(_writeBuffer.constData() + bytesWritten, _writeBuffer.size() - bytesWritten);
+        if (writeSize <= 0)
+            throw std::runtime_error("Unable to write packed blob buffer");
+
+        bytesWritten += writeSize;
+    }
+
+    _writeBuffer.clear();
+}
+
 void PackedBlobFileWriter::close()
 {
     if (_closed)
         return;
+
+    flushWriteBuffer();
 
     if (!_file.flush())
         throw std::runtime_error("Unable to flush packed blob file");

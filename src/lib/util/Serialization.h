@@ -153,14 +153,37 @@ public:
     /** Appends one payload and accumulates codec and output timings. */
     PackedBlobBlock append(const QByteArray& data, PackedBlobAppendTimings& timings);
 
+    /**
+     * Appends an independently encoded payload produced by another worker.
+     *
+     * The caller must encode the payload with a codec compatible with the
+     * codec used by readers of this file. This method serializes only the
+     * block header and payload; it does not invoke the writer's codec. Framed
+     * blocks are buffered and written together when the buffer fills or the
+     * writer closes. Returned offsets include bytes still in the buffer.
+     *
+     * @param encodedData Non-empty encoded payload.
+     * @param uncompressedSize Original payload size in bytes.
+     * @param timings Receives time spent buffering the block and flushing any
+     *                full write buffer.
+     * @return Encoded byte range needed by PackedBlobFileReader.
+     * @throws std::invalid_argument If the encoded payload or original size is empty.
+     * @throws std::overflow_error If the original payload exceeds QByteArray size limits.
+     * @throws std::logic_error If the writer has already been closed.
+     * @throws std::runtime_error If framing or writing fails.
+     */
+    PackedBlobBlock appendEncoded(const QByteArray& encodedData, std::size_t uncompressedSize, PackedBlobAppendTimings& timings);
+
     /** Flushes and closes the file; subsequent append operations fail. */
     void close();
 
 private:
     PackedBlobBlock appendImpl(const char* data, std::size_t size, PackedBlobAppendTimings* timings);
+    void flushWriteBuffer();
 
     QFile       _file;           /**< Uncompressed container receiving encoded block payloads. */
     SharedCodec _codec;          /**< Shared codec retained for append operations. */
+    QByteArray  _writeBuffer;    /**< Framed encoded blocks waiting for a batched file write. */
     bool        _closed = false; /**< Whether close() has flushed and closed the output. */
 };
 
