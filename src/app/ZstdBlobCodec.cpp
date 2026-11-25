@@ -61,6 +61,15 @@ QString ZstdBlobCodec::getName() const
     return QStringLiteral("zstd");
 }
 
+bool ZstdBlobCodec::setCompressionLevel(const std::int32_t level)
+{
+    if (level < 1 || level > 22)
+        return false;
+
+    _compressionLevelOverride = level;
+    return true;
+}
+
 QByteArray ZstdBlobCodec::encode(const QByteArray& input) const
 {
 #ifdef ZSTD_CODEC_VERBOSE
@@ -100,9 +109,10 @@ QByteArray ZstdBlobCodec::encode(const char* data, qsizetype size) const
             }
         );
 
-    auto settings = dynamic_cast<ZstdCodecSettingsAction*>(getSettingsAction());
+    const auto settings = dynamic_cast<ZstdCodecSettingsAction*>(getSettingsAction());
+    const auto compressionLevel = _compressionLevelOverride > 0 ? _compressionLevelOverride : settings ? settings->getLevelAction().getValue() : 0;
 
-    if (!settings)
+    if (compressionLevel == 0)
         throw mv::ManiVaultException(
             SeverityLevel::Error,
             "Failed to encode input data",
@@ -150,7 +160,7 @@ QByteArray ZstdBlobCodec::encode(const char* data, qsizetype size) const
         bound,
         data,
         inputSize,
-        settings->getLevelAction().getValue()
+        compressionLevel
     );
 
     if (ZSTD_isError(compressedSize))

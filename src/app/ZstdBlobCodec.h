@@ -14,7 +14,7 @@
  *
  * @maintainer Thomas Kroes (BioVault - Biomedical Visual Analytics Unit LUMC - TU Delft)
  */
-class ZstdBlobCodec final : public mv::util::BlobCodec
+class ZstdBlobCodec final : public mv::util::BlobCodec, public mv::util::CompressionLevelConfigurableBlobCodec
 {
 public:
 
@@ -36,6 +36,9 @@ public:
      * @return Name used for serialization and diagnostics.
      */
     [[nodiscard]] QString getName() const override;
+
+    /** Sets the compression level override used for subsequent encodes. */
+    bool setCompressionLevel(std::int32_t level) override;
 
     /**
      * @brief Encodes raw bytes.
@@ -91,4 +94,8 @@ public:
      * @return File extension without a leading dot.
      */
     [[nodiscard]] QString getFileExtension() const override;
+
+private:
+
+    std::int32_t _compressionLevelOverride = 0; /**< Explicit compression level, or zero to use the settings action. */
 };

@@ -199,6 +199,16 @@ private:
     gui::CodecSettingsActionPtr  _codecSettingsAction;    /* Cached settings action instance (if any) for this codec */
 };
 
+/** Optional interface for codecs that allow their compression level to be set directly. */
+class CORE_EXPORT CompressionLevelConfigurableBlobCodec
+{
+public:
+    virtual ~CompressionLevelConfigurableBlobCodec() = default;
+
+    /** Sets the codec-specific compression level, returning false when the value is invalid or unsupported. */
+    virtual bool setCompressionLevel(std::int32_t level) = 0;
+};
+
 using SharedCodec = std::shared_ptr<BlobCodec>;
 
 }
