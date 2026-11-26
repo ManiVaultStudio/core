@@ -5,9 +5,10 @@
 #include "../interface/PointsStorageBackendTypes.h"
 #include "PointDataAccess.h"
 
-#include <actions/GroupAction.h>
+#include <actions/GroupsAction.h>
 #include <actions/MessageCardAction.h>
 #include <actions/OptionAction.h>
+#include <actions/VerticalGroupAction.h>
 #include <PointData/pointdata_export.h>
 
 #include <atomic>
@@ -29,7 +30,7 @@ namespace mv::gui
  *
  * @author T. Kroes
  */
-class POINTDATA_EXPORT StorageBackendConversionAction : public GroupAction
+class POINTDATA_EXPORT StorageBackendConversionAction : public GroupsAction
 {
     Q_OBJECT
 
@@ -72,15 +73,35 @@ signals:
     void optionsChanged();
 
 protected:
+    /** Adds a control to the expanded settings section. */
+    void addAction(WidgetAction* action);
+
+    /** Returns the expanded settings section for backend-specific grouping. */
+    VerticalGroupAction& getSettingsGroupAction();
+
+    /** Adds a control to the pre-flight checks section. */
+    void addCheckAction(WidgetAction* action);
+
+    /** Adds a control to the advanced options section and shows that section. */
+    void addAdvancedAction(WidgetAction* action);
+
+    VerticalGroupAction& getAdvancedOptionsGroupAction();
+
     void notifyOptionsChanged() { emit optionsChanged(); }
     /** Moves the optional element-type analysis card after backend-specific controls and observations. */
     void moveElementTypeAnalysisActionToEnd();
+
+    /** Returns the pre-flight checks group so derived actions can configure its presentation. */
+    VerticalGroupAction& getChecksGroupAction();
 
 private:
     void updateElementTypeAnalysis();
     void startElementTypeAnalysis(bool fullScan);
     void cancelElementTypeAnalysis();
 
+    VerticalGroupAction             _settingsGroupAction;
+    VerticalGroupAction             _advancedOptionsGroupAction;
+    VerticalGroupAction             _checksGroupAction;
     OptionAction                    _elementTypeAction;           /**< Optional selector for the converted matrix element type. */
     MessageCardAction               _elementTypeAnalysisAction;   /**< Sample and full-scan findings for the selected element type. */
     bool                            _hasElementTypeAction = false; /**< Whether an element-type selector is available. */

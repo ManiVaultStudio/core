@@ -17,8 +17,7 @@ DenseStorageBackendConversionAction::DenseStorageBackendConversionAction(QObject
     _columns(columns),
     _memoryObservationAction(this)
 {
-    setShowLabels(true);
-    addAction(&_memoryObservationAction);
+    addCheckAction(&_memoryObservationAction);
 
     connect(this, &StorageBackendConversionAction::optionsChanged, this, &DenseStorageBackendConversionAction::updateMemoryObservation);
     updateMemoryObservation();

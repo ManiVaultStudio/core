@@ -28,7 +28,6 @@ SparseStorageBackendConversionAction::SparseStorageBackendConversionAction(QObje
     _initialWorkerCount(std::clamp<std::size_t>(workerCount, 1, 32)),
     _initialChunkRows(std::clamp<std::size_t>(chunkRows, 1, 65536))
 {
-    setShowLabels(true);
     _layoutAction.setDescription(
         "<p>Choose the compressed orientation for sparse data: CSR stores rows contiguously and generally suits row access, while CSC stores columns contiguously and generally suits column access. This changes the storage layout, not the logical matrix values.</p>");
     addAction(&_layoutAction);
@@ -40,7 +39,7 @@ SparseStorageBackendConversionAction::SparseStorageBackendConversionAction(QObje
     _performanceSummaryAction.setEnabled(false);
     _performanceSummaryAction.setStretch(1);
     _performanceSettingsAction.setShowLabels(true);
-    _performanceSettingsAction.setLabelSizingType(LabelSizingType::Auto);
+    _performanceSettingsAction.setLabelSizingType(GroupAction::LabelSizingType::Fixed);
     _performanceSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ForceCollapsedInGroup);
     _performanceSettingsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::ToolButtonAutoRaise);
     _performanceSettingsAction.setIconByName("sliders");
@@ -52,8 +51,8 @@ SparseStorageBackendConversionAction::SparseStorageBackendConversionAction(QObje
     _performanceAction.addAction(&_performanceSettingsAction);
     _performanceSettingsAction.addAction(&_workerCountAction);
     _performanceSettingsAction.addAction(&_chunkRowsAction);
-    addAction(&_performanceAction);
-    addAction(&_memoryObservationAction);
+    addAdvancedAction(&_performanceAction);
+    addCheckAction(&_memoryObservationAction);
 
     connect(&_layoutAction, &OptionAction::currentIndexChanged, this, [this] {
         updateObservation();

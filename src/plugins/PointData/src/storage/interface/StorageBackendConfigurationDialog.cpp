@@ -60,9 +60,11 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique
     {
         auto* conversionWidget = _conversionAction->createWidget(this);
         conversionWidget->setMinimumWidth(0);
-        conversionWidget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
-        layout->addWidget(conversionWidget);
+        conversionWidget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Expanding);
+        layout->addWidget(conversionWidget, 1);
     }
+    else
+        layout->addStretch(1);
 
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
 
@@ -87,8 +89,6 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique
             applyButton->setEnabled(_conversionAction->canApply());
         });
     }
-
-    layout->addStretch(1);
 
     auto* buttonLayout = new QHBoxLayout();
     if (_presetsAction)

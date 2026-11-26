@@ -10,7 +10,9 @@
 #include <workflow/WorkflowOptions.h>
 #include <workflow/WorkflowPlan.h>
 
+#include <QAction>
 #include <QStringList>
+#include <QWidget>
 
 #include <algorithm>
 #include <cmath>
@@ -200,11 +202,20 @@ namespace
 }
 
 StorageBackendConversionAction::StorageBackendConversionAction(QObject* parent, const QString& title, const std::optional<std::uint32_t> currentElementTypeIndex) :
-    GroupAction(parent, title),
+    GroupsAction(parent, title),
+    _settingsGroupAction(this, "Settings", true),
+    _advancedOptionsGroupAction(this, "Advanced options", false),
+    _checksGroupAction(this, "Pre-flight checks", true),
     _elementTypeAction(this, "Element type"),
     _elementTypeAnalysisAction(this)
 {
-    setLabelSizingType(LabelSizingType::Auto);
+    setDefaultWidgetFlags(GroupsAction::Filtering | GroupsAction::Expansion);
+    _settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Fixed);
+    _advancedOptionsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Fixed);
+    _checksGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Fixed);
+    addGroupAction(&_settingsGroupAction);
+    addGroupAction(&_advancedOptionsGroupAction, false);
+    addGroupAction(&_checksGroupAction);
 
     if (!currentElementTypeIndex)
         return;
@@ -224,12 +235,17 @@ StorageBackendConversionAction::StorageBackendConversionAction(QObject* parent, 
     _elementTypeAction.setCurrentIndex(static_cast<int>(*currentElementTypeIndex));
     _elementTypeAction.setDescription(
         "<p>Choose the numeric type used to store point values. Converting to a type with less precision or a narrower range can round, truncate, or reject values; review the analysis shown when changing this option.</p>");
-    addAction(&_elementTypeAction);
+    _settingsGroupAction.addAction(&_elementTypeAction);
     // Keep the action tree stable while the selector is active. Inserting or
     // removing the analysis card from inside currentIndexChanged can invalidate
     // the dialog widget's live child-action iteration.
     _elementTypeAnalysisAction.setVisible(false);
-    addAction(&_elementTypeAnalysisAction);
+    _settingsGroupAction.addAction(&_elementTypeAnalysisAction, -1, [](WidgetAction* action, QWidget* widget) {
+        widget->setVisible(action->isVisible());
+        QObject::connect(action, &QAction::changed, widget, [action, widget] {
+            widget->setVisible(action->isVisible());
+        });
+    });
 
     connect(&_elementTypeAction, &OptionAction::currentIndexChanged, this, [this] {
         notifyOptionsChanged();
@@ -247,8 +263,45 @@ void StorageBackendConversionAction::moveElementTypeAnalysisActionToEnd()
     if (!_hasElementTypeAction)
         return;
 
-    removeAction(&_elementTypeAnalysisAction);
-    addAction(&_elementTypeAnalysisAction);
+    _settingsGroupAction.removeAction(&_elementTypeAnalysisAction);
+    _settingsGroupAction.addAction(&_elementTypeAnalysisAction, -1, [](WidgetAction* action, QWidget* widget) {
+        widget->setVisible(action->isVisible());
+        QObject::connect(action, &QAction::changed, widget, [action, widget] {
+            widget->setVisible(action->isVisible());
+        });
+    });
+}
+
+void StorageBackendConversionAction::addAction(WidgetAction* action)
+{
+    _settingsGroupAction.addAction(action);
+}
+
+VerticalGroupAction& StorageBackendConversionAction::getSettingsGroupAction()
+{
+    return _settingsGroupAction;
+}
+
+void StorageBackendConversionAction::addCheckAction(WidgetAction* action)
+{
+    _checksGroupAction.addAction(action);
+}
+
+VerticalGroupAction& StorageBackendConversionAction::getChecksGroupAction()
+{
+    return _checksGroupAction;
+}
+
+void StorageBackendConversionAction::addAdvancedAction(WidgetAction* action)
+{
+    _advancedOptionsGroupAction.addAction(action);
+    showGroupAction(&_advancedOptionsGroupAction);
+}
+
+VerticalGroupAction& StorageBackendConversionAction::getAdvancedOptionsGroupAction()
+{
+    showGroupAction(&_advancedOptionsGroupAction);
+    return _advancedOptionsGroupAction;
 }
 
 void StorageBackendConversionAction::setSourceData(const std::uint64_t rows, const std::uint64_t columns, const std::uint32_t sourceElementTypeIndex, SourceRowReader rowReader)
@@ -364,7 +417,13 @@ bool StorageBackendConversionAction::hasChanges() const
 
 void StorageBackendConversionAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    GroupAction::fromVariantMap(variantMap);
+    GroupsAction::fromVariantMap(variantMap);
+    if (variantMap.contains("SettingsExpanded"))
+        _settingsGroupAction.setExpanded(variantMap.value("SettingsExpanded").toBool());
+    if (variantMap.contains("AdvancedOptionsExpanded"))
+        _advancedOptionsGroupAction.setExpanded(variantMap.value("AdvancedOptionsExpanded").toBool());
+    if (variantMap.contains("ChecksExpanded"))
+        _checksGroupAction.setExpanded(variantMap.value("ChecksExpanded").toBool());
 
     if (!_hasElementTypeAction)
         return;
@@ -390,7 +449,10 @@ void StorageBackendConversionAction::fromVariantMap(const QVariantMap& variantMa
 
 QVariantMap StorageBackendConversionAction::toVariantMap() const
 {
-    auto variantMap = GroupAction::toVariantMap();
+    auto variantMap = GroupsAction::toVariantMap();
+    variantMap.insert("SettingsExpanded", _settingsGroupAction.isExpanded());
+    variantMap.insert("AdvancedOptionsExpanded", _advancedOptionsGroupAction.isExpanded());
+    variantMap.insert("ChecksExpanded", _checksGroupAction.isExpanded());
 
     if (_hasElementTypeAction)
         _elementTypeAction.insertIntoVariantMap(variantMap);

@@ -370,7 +370,7 @@ void GroupsAction::Widget::createTreeWidget(const std::int32_t& widgetFlags)
     _treeWidget.setBackgroundRole(QPalette::ColorRole::Window);
 
     // Add tree widget to the layout
-    _layout.addWidget(&_treeWidget);
+    _layout.addWidget(&_treeWidget, 1);
 
     // Add/remove group section tree items when requested
     connect(_groupsAction, &GroupsAction::groupActionAdded, this, &Widget::addGroupAction);

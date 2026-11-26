@@ -57,6 +57,7 @@ struct TiledStorageBackendCreationOptions final : StorageBackendCreationOptions
     std::size_t   superTileRows        = 1;                             /**< Number of base tile rows in one super tile. */
     std::size_t   superTileColumns     = 1;                             /**< Number of base tile columns in one super tile. */
     QString       tileCodecName;                                        /**< Registered codec key used for packed tile payloads. */
+    int           tileCompressionLevel = 3;                             /**< Compression level for codecs that support level selection. */
     std::size_t   materializationWorkerCount = 4;                       /**< Maximum workers used to materialize generated tiles. */
     std::size_t   materializationChunkTileRows = 3;                     /**< Tile-row height of one bounded materialization chunk. */
     bool          loaderThreadSafe     = false;                         /**< Whether independent tile loader calls may run concurrently. */
@@ -186,7 +187,7 @@ public:
 private:
     std::shared_ptr<mv::pointdata::tiled::PointDataTiledStorage> _storage; /**< Tiled payload and cache owner. */
     std::uint32_t                                               _elementTypeIndex = 0; /**< Stored PointData element type. */
-    RangeLoader                                                 _rangeLoader; /**< Optional region reader for experimental independently compressed strips. */
+    RangeLoader                                                 _rangeLoader; /**< Optional region reader for independently compressed row/column strips. */
 };
 
 }

@@ -3,10 +3,9 @@
 #pragma once
 
 #include "../interface/StorageBackendConversionAction.h"
-#include "TiledStorageAsymmetryAction.h"
 #include "TiledStorageGeometry.h"
 
-#include <actions/MessageCardAction.h>
+#include <actions/DirectoryPickerAction.h>
 #include <actions/DecimalAction.h>
 #include <actions/HorizontalGroupAction.h>
 #include <actions/IntegralAction.h>
@@ -28,8 +27,8 @@ namespace mv::gui
  * describe its physical representation. The controls can be used during import
  * as well as by the conversion-specific action specialization. Live observations
  * report estimated tile-index size and whether a tile exceeds the cache byte
- * limit. The high tile-count warning begins at 100,000 descriptors and is a
- * heuristic, not a conversion failure.
+ * limit. Pre-flight rows estimate tile, supertile, cache, and staging costs;
+ * their warning thresholds are planning heuristics, not conversion failures.
  *
  * @author T. Kroes
  */
@@ -41,8 +40,7 @@ public:
     /**
      * @brief Constructs controls for configuring tiled storage for a matrix.
      *
-     * The tile-size and asymmetry controls calculate a suggested geometry;
-     * the row and column dimensions remain directly editable. When requested,
+     * Tile height and width remain directly editable. When requested,
      * the current physical geometry, cache limits, and packed tile codec are
      * copied from \p configuration for backend inspection or reconfiguration.
      * @param parent Parent action that owns this configuration action.
@@ -53,7 +51,7 @@ public:
      * @param initializeFromConfiguration Whether to display existing geometry and cache values instead of suggestions.
      * @param currentElementTypeIndex Current matrix element type; when supplied, the action exposes a target-type selector.
      */
-    TiledStorageBackendConfigurationAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration = {}, bool initializeFromConfiguration = false, std::optional<std::uint32_t> currentElementTypeIndex = {}, bool showImportPerformanceOptions = false, std::size_t bucketingThreadCount = 4, std::size_t stagingThreadCount = 4, std::size_t rowChunkTileFactor = 3, bool showImportStagingSpaceObservation = false, const QString& stagingDirectory = QString(), mv::util::ProjectResourceStagingPolicy projectResourceStagingPolicy = mv::util::ProjectResourceStagingPolicy::Inherit);
+    TiledStorageBackendConfigurationAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration = {}, bool initializeFromConfiguration = false, std::optional<std::uint32_t> currentElementTypeIndex = {}, bool showImportStagingSpaceObservation = false, const QString& stagingDirectory = QString());
 
     /** Returns the tiled backend type represented by this action. */
     pointdata::storage::StorageBackendType getTargetBackendType() const override;
@@ -88,21 +86,30 @@ public:
     /** Returns the project resource staging policy selected in an import configuration. */
     [[nodiscard]] mv::util::ProjectResourceStagingPolicy getProjectResourceStagingPolicy() const;
 
+    /** Returns the Zstandard compression level selected for H5AD import staging. */
+    [[nodiscard]] int getZstdCompressionLevel() const;
+
+    /** Returns the optional HDF5 import benchmark report path selected in developer options. */
+    [[nodiscard]] QString getImportBenchmarkFilePath() const;
+
+    /** Returns the directory selected for the next HDF5 import benchmark report. */
+    [[nodiscard]] QString getImportBenchmarkDirectory() const;
+
 private:
     void updateProjectResourceStagingPolicyOption();
-    void updateTileGeometryFromPolicy();
     void estimateBalancedLayout();
-    void updateTargetTileSizeFromGeometry();
     void updateTileSizePercentages();
+    void updateTileCountAction(std::uint64_t tileCount, bool available = true);
     void setRowTileSizeFromPercentage();
     void setColumnTileSizeFromPercentage();
-    void updateTileSizingMode();
     void updateCacheCapacity();
     void updateStorageObservations();
     void updatePackedTileControls();
-    void updateExperimentalStripControls();
     void updateImportPerformanceSummary();
+    void updateZstdCompressionLevelAvailability();
     void updateStagingSpaceObservation();
+    void updateEstimateAction(StringAction& action, std::uint64_t value, const QString& unit, std::uint64_t warningThreshold, const QString& warningTitle, const QString& warningDescription);
+    void synchronizeSquareTileSize(bool rowTileSizeChanged);
 
     std::uint64_t _rows               = 0;                                                 /**< Logical matrix row count used to bound geometry and observations. */
     std::uint64_t _columns            = 0;                                                 /**< Logical matrix column count used to bound geometry and observations. */
@@ -111,23 +118,29 @@ private:
     pointdata::storage::StorageBackendConfiguration _initialConfiguration;                 /**< Original tiled settings used to detect changes in configure mode. */
     bool _hasInitialConfiguration = false;                                                 /**< Whether an original tiled configuration was provided. */
 
-    TiledStorageAsymmetryAction _tileAsymmetryAction;                /**< Row-versus-column tile preference control. */
-    ToggleAction                _deriveTileDimensionsAction;         /**< Whether target size and asymmetry derive editable dimensions. */
+    VerticalGroupAction         _developerOptionsGroupAction;          /**< Developer-only settings, shown when the global developer option is enabled. */
+    VerticalGroupAction         _performanceOptionsGroupAction;        /**< Developer-only worker and chunk tuning controls. */
+    VerticalGroupAction         _compressionSettingsAction;            /**< Codec and compression-level settings. */
+    VerticalGroupAction         _superTileOptionsAction;               /**< Packed-tile and supertile geometry settings. */
+    VerticalGroupAction         _stripLayoutOptionsAction;             /**< Row and column strip dimensions. */
     TriggerAction               _estimateBalancedLayoutAction;        /**< Applies a balanced tile and supertile layout estimate. */
-    IntegralAction              _tileSizeAction;                     /**< Desired target tile payload size in MiB. */
     HorizontalGroupAction       _rowTileSizeGroupAction;             /**< Row tile size and percentage controls. */
+    ToggleAction                _squareTilesAction;                  /**< Keeps row and column tile dimensions equal. */
     IntegralAction              _rowTileSizeAction;                  /**< Maximum number of matrix rows per tile. */
     DecimalAction               _rowTileSizePercentageAction;        /**< Row tile height as a percentage of matrix rows. */
     HorizontalGroupAction       _columnTileSizeGroupAction;          /**< Column tile size and percentage controls. */
     IntegralAction              _columnTileSizeAction;               /**< Maximum number of matrix columns per tile. */
     DecimalAction               _columnTileSizePercentageAction;     /**< Column tile width as a percentage of matrix columns. */
+    StringAction                _tileCountAction;                    /**< Read-only current tile count with an optional warning indicator. */
+    StringAction                _superTileCountAction;               /**< Read-only estimated number of packed supertiles. */
+    StringAction                _tileByteSizeAction;                 /**< Estimated uncompressed payload size of one tile. */
+    StringAction                _superTileByteSizeAction;            /**< Estimated uncompressed payload size of one supertile. */
+    StringAction                _cacheByteSizeAction;               /**< Estimated decoded cache use under the configured limits. */
+    StringAction                _diskSpaceAction;                    /**< Available staging disk space compared with dense-equivalent data size. */
     IntegralAction              _cacheCapacityAction;                /**< Maximum resident tile count. */
+    IntegralAction              _cacheCapacityBytesAction;           /**< Maximum decoded tile-cache bytes, in MiB. */
     OptionAction                _tileCodecAction;                    /**< Codec used for independently encoded packed tile payloads. */
-    MessageCardAction           _tileCountObservationAction;         /**< Estimated tile-index size and high tile-count notice. */
-    MessageCardAction           _tileCacheObservationAction;         /**< Estimated tile payload size compared with the cache byte limit. */
-    MessageCardAction           _stagingSpaceObservationAction;      /**< Disk-space estimate for import staging, when enabled. */
     ToggleAction                _packedTilesAction;                  /**< Whether serialized tile blocks are grouped into super tiles. */
-    ToggleAction                _experimentalStripStorageAction;      /**< Whether HDF5 import uses independently compressed row and column strips. */
     IntegralAction              _rowStripHeightAction;                /**< Number of rows in each compressed row strip. */
     IntegralAction              _columnStripWidthAction;              /**< Number of columns in each compressed column strip. */
     IntegralAction              _superTileRowsAction;                /**< Base tile rows per serialized super tile. */
@@ -139,13 +152,16 @@ private:
     IntegralAction              _stagingThreadCountAction;           /**< Maximum workers used for staging or tile conversion. */
     IntegralAction              _rowChunkTileFactorAction;           /**< Requested CSR tile-row factor per conversion chunk. */
     OptionAction                _projectResourceStagingPolicyAction; /**< Project-open staging policy stored with imported resources. */
+    IntegralAction              _zstdCompressionLevelAction;         /**< H5AD staging compression level when Zstandard is selected. */
+    ToggleAction                _importBenchmarkEnabledAction;       /**< Whether to write an HDF5 import benchmark report. */
+    DirectoryPickerAction       _importBenchmarkDirectoryAction;     /**< Directory for the optional HDF5 import benchmark report. */
     mv::util::ProjectResourceStagingPolicy _initialProjectResourceStagingPolicy = mv::util::ProjectResourceStagingPolicy::Inherit; /**< Initial policy used for change detection. */
     QString                     _stagingDirectory;                          /**< App-managed directory checked for import staging space. */
     bool                        _showImportPerformanceOptions = false;      /**< Whether the action exposes import worker settings. */
     bool                        _showConversionPerformanceOptions = false;  /**< Whether the performance controls are configured for conversion. */
     bool                        _showImportStagingSpaceObservation = false; /**< Whether to display the import disk-space estimate. */
     bool                        _updatingTileSizePercentage = false;        /**< Guards reciprocal updates between size and percentage controls. */
-    bool                        _updatingGeometryFromPolicy = false;        /**< Guards control updates while policy-derived geometry is applied. */
+    bool                        _updatingSquareTileSize = false;            /**< Guards reciprocal tile size updates when square tiles are enabled. */
 };
 
 }

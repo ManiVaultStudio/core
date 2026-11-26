@@ -35,7 +35,6 @@ private:
     bool _hasTiledSource = false;               /**< Whether the source representation is tiled. */
     bool _canApply = true;                      /**< Whether the latest memory preflight allows conversion. */
     bool _checksMaterialization = false;        /**< Whether conversion will hold a fully materialized matrix. */
-    MessageCardAction _memoryObservationAction; /**< Estimated memory required by conversion and available-memory warning. */
 };
 
 }
