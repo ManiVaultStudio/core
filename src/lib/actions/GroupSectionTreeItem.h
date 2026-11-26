@@ -64,6 +64,7 @@ public:
         QWidget                 _overlayWidget;             /** Overlay widget for buttons etc. */
         QHBoxLayout             _overlayLayout;             /** Overlay layout */
         QLabel                  _iconLabel;                 /** Left-aligned icon label */
+        QLabel                  _subTextLabel;              /** Right-aligned secondary group label */
     };
 
 public:

@@ -10,6 +10,7 @@
 
 #include <QResizeEvent>
 #include <QOperatingSystemVersion>
+#include <QGraphicsOpacityEffect>
 
 //#define GROUP_SECTION_TREE_ITEM_VERBOSE
 
@@ -58,7 +59,8 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     _parentTreeWidgetItem(treeWidgetItem),
     _groupTreeWidgetItem(nullptr),
     _groupWidget(nullptr),
-    _overlayWidget(this)
+    _overlayWidget(this),
+    _subTextLabel(&_overlayWidget)
 {
     setIconSize(QSize(12, 12));
 
@@ -75,8 +77,14 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     _overlayLayout.setContentsMargins(8, 4, 8, 4);
     _overlayLayout.addWidget(&_iconLabel);
     _overlayLayout.addStretch(1);
+    _overlayLayout.addWidget(&_subTextLabel);
 
     _iconLabel.setAlignment(Qt::AlignCenter);
+    _subTextLabel.setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    _subTextLabel.setAttribute(Qt::WA_TransparentForMouseEvents);
+    auto* subTextOpacity = new QGraphicsOpacityEffect(&_subTextLabel);
+    subTextOpacity->setOpacity(0.5);
+    _subTextLabel.setGraphicsEffect(subTextOpacity);
 
     if (isMacOS) {
         _iconLabel.setFont(util::StyledIcon::getIconFont());
@@ -110,6 +118,8 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
 
         setText(text);
         setIcon(groupAction->icon());
+        _subTextLabel.setText(groupAction->getSubText());
+        _subTextLabel.setVisible(!groupAction->getSubText().isEmpty());
     };
 
     connect(groupAction, &WidgetAction::changed, this, updateText);

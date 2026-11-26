@@ -40,6 +40,21 @@ Qt::AlignmentFlag GroupAction::getAlignment() const
     return _alignment;
 }
 
+QString GroupAction::getSubText() const
+{
+    return _subText;
+}
+
+void GroupAction::setSubText(const QString& subText)
+{
+    if (subText == _subText)
+        return;
+
+    _subText = subText;
+    emit subTextChanged(_subText);
+    emit changed();
+}
+
 void GroupAction::setExpanded(const bool& expanded)
 {
     if (expanded == _expanded)
@@ -285,6 +300,9 @@ void GroupAction::fromVariantMap(const QVariantMap& variantMap)
 {
     WidgetAction::fromVariantMap(variantMap);
 
+    if (variantMap.contains("SubText"))
+        setSubText(variantMap.value("SubText").toString());
+
     if (variantMap.contains("Expanded"))
 		setExpanded(variantMap["Expanded"].toBool());
 }
@@ -294,7 +312,8 @@ QVariantMap GroupAction::toVariantMap() const
     auto variantMap = WidgetAction::toVariantMap();
 
     variantMap.insert({
-        { "Expanded", isExpanded() }
+        { "Expanded", isExpanded() },
+        { "SubText", getSubText() }
     });
 
     return variantMap;

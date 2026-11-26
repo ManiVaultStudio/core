@@ -120,6 +120,12 @@ public:
      */
     Qt::AlignmentFlag getAlignment() const;
 
+    /** Returns the secondary text displayed at the right edge of the group header. */
+    QString getSubText() const;
+
+    /** Sets secondary text displayed at the right edge of the group header. */
+    void setSubText(const QString& subText);
+
     /** Set expanded/collapsed */
     void setExpanded(const bool& expanded);
 
@@ -289,6 +295,9 @@ signals:
      */
     void showLabelsChanged(const bool& showLabels);
 
+    /** Signals that the secondary group header text changed. */
+    void subTextChanged(const QString& subText);
+
     /**
      * Signals that the label sizing type changed to \p labelSizingType
      * @param labelSizingType Label sizing type
@@ -309,6 +318,7 @@ signals:
 
 private:
     Qt::AlignmentFlag                   _alignment;                         /** Item alignment */
+    QString                             _subText;                           /** Secondary text displayed in the group header */
     bool                                _expanded;                          /** Whether or not the group is expanded */
     bool                                _readOnly;                          /** Whether or not the group is read-only */
     WidgetActions                       _actions;                           /** Vector of pointers to widget actions in the group */

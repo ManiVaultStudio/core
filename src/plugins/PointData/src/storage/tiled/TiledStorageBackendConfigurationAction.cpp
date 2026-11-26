@@ -200,6 +200,7 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
         groupAction.setShowLabels(true);
         groupAction.setLabelSizingType(GroupAction::LabelSizingType::Fixed);
         groupAction.setIconByName("code");
+        groupAction.setSubText(QObject::tr("Developer-only"));
         groupAction.setToolTip(toolTip);
         groupAction.setDescription(description);
     };
@@ -224,13 +225,14 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _rowTileSizeGroupAction.addAction(&_rowTileSizePercentageAction);
     _columnTileSizeGroupAction.addAction(&_columnTileSizeAction);
     _columnTileSizeGroupAction.addAction(&_columnTileSizePercentageAction);
-    _developerOptionsGroupAction.setText("General options");
+    _developerOptionsGroupAction.setSubText(tr("Developer-only"));
     _developerOptionsGroupAction.setIconByName("code");
     _developerOptionsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Fixed);
     addGroupAction(&_developerOptionsGroupAction, false);
     _performanceOptionsGroupAction.setShowLabels(true);
     _performanceOptionsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Fixed);
     _performanceOptionsGroupAction.setIconByName("code");
+    _performanceOptionsGroupAction.setSubText(tr("Developer-only"));
     _performanceOptionsGroupAction.setDescription(
         "<p>Controls worker count and tile-row chunk size during tiled storage conversion. More workers may improve throughput but use more CPU and memory.</p>");
     addGroupAction(&_performanceOptionsGroupAction, false);
