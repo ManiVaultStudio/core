@@ -33,8 +33,6 @@ StorageBackendConfigurationDialog::StorageBackendConfigurationDialog(std::unique
         const auto settingsKey = QStringLiteral("PointData/StorageBackend/%1/Presets").arg(static_cast<int>(backendType));
         _presetsAction = std::make_unique<mv::gui::PresetsAction>(nullptr, _conversionAction.get(), settingsKey, tr("Point data storage backend"), mv::util::StyledIcon("prescription"));
 
-        if (backendType == mv::pointdata::storage::StorageBackendType::Dense)
-            backendName = tr("In-Memory Storage");
     }
 
     switch (purpose)
