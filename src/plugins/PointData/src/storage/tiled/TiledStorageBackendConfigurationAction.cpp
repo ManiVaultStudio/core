@@ -46,6 +46,17 @@ QStringList tileCodecOptions()
         mv::util::codecRegistry().factory(mv::util::BlobCodec::Type::Zstd).displayName()
     };
 }
+
+QString warningToolTip(const QString& title, const QString& description)
+{
+    const auto headingColor = QApplication::palette().color(QPalette::Link).name();
+    return QStringLiteral(
+        "<qt><table width=\"440\" cellpadding=\"12\" cellspacing=\"0\" border=\"0\"><tr><td>"
+        "<div style=\"font-size: 11pt; font-weight: bold; color: %1; margin-bottom: 10px;\">%2</div>"
+        "<div style=\"font-size: 9pt;\">%3</div>"
+        "</td></tr></table></qt>")
+        .arg(headingColor, title.toHtmlEscaped(), description.toHtmlEscaped());
+}
 }
 
 TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(QObject* parent, const std::uint64_t rows, const std::uint64_t columns, const std::size_t elementSize, const pointdata::storage::StorageBackendConfiguration& configuration, const bool initializeFromConfiguration, const std::optional<std::uint32_t> currentElementTypeIndex, const bool showImportStagingSpaceObservation, const QString& stagingDirectory) :
@@ -53,11 +64,11 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _rows(rows),
     _columns(columns),
     _elementSize(elementSize),
-    _developerOptionsGroupAction(this, "General options"),
-    _performanceOptionsGroupAction(this, "Performance options"),
-    _compressionSettingsAction(this, "Compression options"),
-    _superTileOptionsAction(this, "Supertile options"),
-    _stripLayoutOptionsAction(this, "Strip layout options"),
+    _developerOptionsGroupAction(this, "Caching"),
+    _performanceOptionsGroupAction(this, "Performance"),
+    _compressionSettingsAction(this, "Compression"),
+    _superTileOptionsAction(this, "Supertile"),
+    _stripLayoutOptionsAction(this, "Strip layout"),
     _estimateBalancedLayoutAction(this, "Estimate balanced layout"),
     _rowTileSizeGroupAction(this, "Tile height"),
     _squareTilesAction(this, "Square tiles", false),
@@ -178,8 +189,12 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _columnStripWidthAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _rowStripHeightAction.setToolTip("Number of matrix rows stored in each independently compressed row strip.");
     _columnStripWidthAction.setToolTip("Number of matrix columns stored in each independently compressed column strip.");
-    _rowStripHeightAction.setDescription("<p>Rows per strip controls how many adjacent matrix rows are stored together. Larger strips reduce container overhead, but may read extra rows for a small request.</p>");
-    _columnStripWidthAction.setDescription("<p>Columns per strip controls how many adjacent matrix columns are stored together. Larger strips reduce container overhead, but may read extra columns for a narrow request.</p>");
+    _rowStripHeightAction.setDescription(
+        "<p>Rows per strip controls how many adjacent matrix rows are stored together. Larger strips reduce container overhead, but may read extra rows for a small request.</p>"
+        "<p><img src=\":/Images/PointData/RowStripLayout.svg\" width=\"440\" height=\"170\" /></p>");
+    _columnStripWidthAction.setDescription(
+        "<p>Columns per strip controls how many adjacent matrix columns are stored together. Larger strips reduce container overhead, but may read extra columns for a narrow request.</p>"
+        "<p><img src=\":/Images/PointData/ColumnStripLayout.svg\" width=\"440\" height=\"170\" /></p>");
     _superTileRowsAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _superTileColumnsAction.setDefaultWidgetFlags(IntegralAction::SpinBox);
     _superTileRowsAction.setDescription(
@@ -202,7 +217,8 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     configureOptionsGroup(
         _superTileOptionsAction,
         "Configure whether tiles are packed together and the supertile dimensions.",
-        "<p>Supertile settings control how neighboring tiles are grouped into packed files. Grouping reduces file overhead, while larger groups may increase read amplification.</p>");
+        "<p>Supertile settings control how neighboring tiles are grouped into packed files. Grouping reduces file overhead, while larger groups may increase read amplification.</p>"
+        "<p><img src=\":/Images/PointData/SupertileLayout.svg\" width=\"440\" height=\"170\" /></p>");
     configureOptionsGroup(
         _stripLayoutOptionsAction,
         "Configure row and column strip dimensions.",
@@ -860,9 +876,7 @@ void TiledStorageBackendConfigurationAction::updateEstimateAction(StringAction& 
     if (warning)
     {
         warningAction.setIcon(mv::util::StyledIcon(QStringLiteral("triangle-exclamation")).withColor(QApplication::palette().color(QPalette::Disabled, QPalette::Text)));
-        const auto title = warningTitle.toHtmlEscaped();
-        const auto description = warningDescription.toHtmlEscaped();
-        warningAction.setToolTip(QStringLiteral("<qt><table width=\"420\" cellpadding=\"10\"><tr><td><b>%1</b><br/>%2</td></tr></table></qt>").arg(title, description));
+        warningAction.setToolTip(warningToolTip(warningTitle, warningDescription));
     }
     else
         warningAction.setToolTip(QString());
@@ -887,16 +901,10 @@ void TiledStorageBackendConfigurationAction::updateTileCountAction(const std::ui
     {
         warningAction.setIcon(mv::util::StyledIcon(QStringLiteral("triangle-exclamation")).withColor(QApplication::palette().color(QPalette::Disabled, QPalette::Text)));
 
-        const auto headingColor = QApplication::palette().color(QPalette::Link).name();
-        const auto heading = tr("High tile count").toHtmlEscaped();
+        const auto heading = tr("High tile count");
         const auto description = tr("This layout creates %L1 tiles. A high tile count can increase index memory and import time; consider increasing tile height or width.")
-            .arg(static_cast<qulonglong>(tileCount))
-            .toHtmlEscaped();
-        warningAction.setToolTip(QStringLiteral(
-            "<qt><table width=\"440\" cellpadding=\"12\" cellspacing=\"0\" border=\"0\"><tr><td>"
-            "<div style=\"font-size: 11pt; font-weight: bold; color: %1; margin-bottom: 10px;\">%2</div>"
-            "<div style=\"font-size: 9pt;\">%3</div>"
-            "</td></tr></table></qt>").arg(headingColor, heading, description));
+            .arg(static_cast<qulonglong>(tileCount));
+        warningAction.setToolTip(warningToolTip(heading, description));
     }
     else
     {

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="170" viewBox="0 0 440 170">
+  <text x="20" y="26" fill="#62a8f5" font-family="Arial, sans-serif" font-size="15" font-weight="bold">2 rows per strip</text>
+
+  <!-- One tile split into three horizontal strips, each two rows high. -->
+  <g shape-rendering="crispEdges">
+    <rect x="20" y="40" width="300" height="90" fill="#344f6a"/>
+    <rect x="20" y="70" width="300" height="30" fill="#36594f"/>
+    <rect x="20" y="100" width="300" height="30" fill="#5d5132"/>
+    <path d="M70 40V130 M120 40V130 M170 40V130 M220 40V130 M270 40V130 M20 55H320 M20 115H320" fill="none" stroke="#aab5c2" stroke-opacity="0.55" stroke-width="1"/>
+    <path d="M20 70H320 M20 100H320" fill="none" stroke="#c4cbd4" stroke-width="2"/>
+    <rect x="20.75" y="40.75" width="298.5" height="88.5" fill="none" stroke="#c4cbd4" stroke-width="1.5"/>
+  </g>
+
+  <text x="20" y="154" fill="#c4cbd4" font-family="Arial, sans-serif" font-size="12">Each strip spans the tile’s full width.</text>
+</svg>
