@@ -95,6 +95,7 @@ protected:
     VerticalGroupAction& getChecksGroupAction();
 
 private:
+    void updatePreflightSummary();
     void updateElementTypeAnalysis();
     void startElementTypeAnalysis(bool fullScan);
     void cancelElementTypeAnalysis();

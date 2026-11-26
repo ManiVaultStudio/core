@@ -87,6 +87,13 @@ void MessageCardAction::setMessage(const util::SeverityLevel severity, const QSt
             updateWidget(widget);
         }
     }
+
+    emit messageChanged();
+}
+
+util::SeverityLevel MessageCardAction::getSeverity() const
+{
+    return _severity;
 }
 
 void MessageCardAction::setDisplayMode(const DisplayMode displayMode)

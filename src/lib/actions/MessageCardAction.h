@@ -73,11 +73,18 @@ public:
      */
     void setMessage(util::SeverityLevel severity, const QString& category, const QString& description, const ButtonActions& buttonActions = {});
 
+    /** Returns the severity of the currently displayed message. */
+    [[nodiscard]] util::SeverityLevel getSeverity() const;
+
     /** Sets the display mode for existing and subsequently created card widgets. */
     void setDisplayMode(DisplayMode displayMode);
 
     /** Returns the display mode applied to generated card widgets. */
     [[nodiscard]] DisplayMode getDisplayMode() const;
+
+signals:
+    /** Signals that the displayed message or its severity changed. */
+    void messageChanged();
 
 protected:
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;

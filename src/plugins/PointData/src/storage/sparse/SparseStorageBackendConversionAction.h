@@ -4,7 +4,6 @@
 
 #include "../interface/StorageBackendConversionAction.h"
 
-#include <actions/MessageCardAction.h>
 #include <actions/HorizontalGroupAction.h>
 #include <actions/IntegralAction.h>
 #include <actions/OptionAction.h>
@@ -15,13 +14,12 @@ namespace mv::gui
 {
 
 /**
- * @brief Selects CSR or CSC layout and reports the memory implications of sparse conversion.
+ * @brief Selects CSR or CSC layout for sparse conversion.
  *
  * Sparse conversion scans the complete matrix and stores exact nonzero values.
- * The reported sparse footprint is an upper bound assuming every matrix value
- * is nonzero; actual memory use depends on the data. The element type can be
- * changed as part of conversion, with values outside an integer type's range
- * causing conversion to fail without replacing the current representation.
+ * The element type can be changed as part of conversion, with values outside
+ * an integer type's range causing conversion to fail without replacing the
+ * current representation.
  *
  * @author Thomas Kroes
  */
@@ -41,13 +39,10 @@ public:
     bool hasChanges() const override;
 
 private:
-    void updateObservation();
-
     std::uint64_t _rows = 0;                        /**< Matrix row count used for the size and representability estimates. */
     std::uint64_t _columns = 0;                     /**< Matrix column count used for the size and representability estimates. */
     bool _initialColumnCompressed = false;          /**< Original compressed orientation for configuration change detection. */
     OptionAction _layoutAction;                     /**< CSR or CSC selection. */
-    MessageCardAction _memoryObservationAction;     /**< Estimated sparse storage footprint and limits. */
     HorizontalGroupAction _performanceAction;       /**< Collapsible conversion performance controls. */
     StringAction _performanceSummaryAction;         /**< Read-only summary of conversion settings. */
     VerticalGroupAction _performanceSettingsAction; /**< Group containing worker and chunk settings. */

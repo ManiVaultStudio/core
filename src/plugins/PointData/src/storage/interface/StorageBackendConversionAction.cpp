@@ -9,6 +9,7 @@
 #include <workflow/WorkflowExecutionContext.h>
 #include <workflow/WorkflowOptions.h>
 #include <workflow/WorkflowPlan.h>
+#include <actions/StringAction.h>
 
 #include <QAction>
 #include <QStringList>
@@ -205,17 +206,20 @@ StorageBackendConversionAction::StorageBackendConversionAction(QObject* parent, 
     GroupsAction(parent, title),
     _settingsGroupAction(this, "Settings", true),
     _advancedOptionsGroupAction(this, "Advanced options", false),
-    _checksGroupAction(this, "Pre-flight checks", true),
+    _checksGroupAction(this, "Pre-flight checks", false),
     _elementTypeAction(this, "Element type"),
     _elementTypeAnalysisAction(this)
 {
     setDefaultWidgetFlags(GroupsAction::Filtering | GroupsAction::Expansion);
     _settingsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Fixed);
+    _settingsGroupAction.setIconByName("table");
     _advancedOptionsGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Fixed);
     _checksGroupAction.setLabelSizingType(GroupAction::LabelSizingType::Fixed);
+    _checksGroupAction.setIconByName("list-check");
+    _checksGroupAction.setSubText(QString());
     addGroupAction(&_settingsGroupAction);
     addGroupAction(&_advancedOptionsGroupAction, false);
-    addGroupAction(&_checksGroupAction);
+    addGroupAction(&_checksGroupAction, false);
 
     if (!currentElementTypeIndex)
         return;
@@ -285,6 +289,79 @@ VerticalGroupAction& StorageBackendConversionAction::getSettingsGroupAction()
 void StorageBackendConversionAction::addCheckAction(WidgetAction* action)
 {
     _checksGroupAction.addAction(action);
+
+    connect(action, &WidgetAction::visibleChanged, this, [this] { updatePreflightSummary(); });
+
+    if (auto* messageCardAction = dynamic_cast<MessageCardAction*>(action))
+        connect(messageCardAction, &MessageCardAction::messageChanged, this, [this] { updatePreflightSummary(); });
+
+    if (auto* stringAction = dynamic_cast<StringAction*>(action))
+        connect(&stringAction->getTrailingAction(), &QAction::changed, this, [this] { updatePreflightSummary(); });
+
+    updatePreflightSummary();
+}
+
+void StorageBackendConversionAction::updatePreflightSummary()
+{
+    std::int32_t warningCount = 0;
+    std::int32_t issueCount = 0;
+    auto hasVisibleActions = false;
+
+    for (auto* action : _checksGroupAction.getActions())
+    {
+        if (!action->isVisible())
+            continue;
+
+        hasVisibleActions = true;
+
+        if (auto* messageCardAction = dynamic_cast<MessageCardAction*>(action))
+        {
+            switch (messageCardAction->getSeverity())
+            {
+                case util::SeverityLevel::Warning:
+                    ++warningCount;
+                    break;
+
+                case util::SeverityLevel::Error:
+                case util::SeverityLevel::Fatal:
+                    ++issueCount;
+                    break;
+
+                case util::SeverityLevel::Info:
+                    break;
+            }
+        }
+        else if (auto* stringAction = dynamic_cast<StringAction*>(action); stringAction && stringAction->getTrailingAction().isVisible())
+        {
+            ++warningCount;
+        }
+    }
+
+    if (hasVisibleActions)
+        showGroupAction(&_checksGroupAction);
+    else
+        hideGroupAction(&_checksGroupAction);
+
+    if (warningCount == 0 && issueCount == 0)
+    {
+        _checksGroupAction.setSubText(QString());
+        return;
+    }
+
+    const auto warningSummary = warningCount == 1
+        ? tr("%1 warning").arg(warningCount)
+        : tr("%1 warnings").arg(warningCount);
+    const auto issueSummary = issueCount == 1
+        ? tr("%1 issue").arg(issueCount)
+        : tr("%1 issues").arg(issueCount);
+
+    if (warningCount > 0 && issueCount > 0)
+    {
+        _checksGroupAction.setSubText(tr("%1; %2").arg(warningSummary, issueSummary));
+        return;
+    }
+
+    _checksGroupAction.setSubText(warningCount > 0 ? warningSummary : issueSummary);
 }
 
 VerticalGroupAction& StorageBackendConversionAction::getChecksGroupAction()
