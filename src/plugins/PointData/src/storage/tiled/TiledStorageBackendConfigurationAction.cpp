@@ -55,7 +55,7 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _elementSize(elementSize),
     _developerOptionsGroupAction(this, "General options"),
     _performanceOptionsGroupAction(this, "Performance options"),
-    _compressionSettingsAction(this, "Compression settings"),
+    _compressionSettingsAction(this, "Compression options"),
     _superTileOptionsAction(this, "Supertile options"),
     _stripLayoutOptionsAction(this, "Strip layout options"),
     _estimateBalancedLayoutAction(this, "Estimate balanced layout"),
@@ -120,6 +120,7 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     getSettingsGroupAction().setLabelSizingType(GroupAction::LabelSizingType::Fixed);
     getChecksGroupAction().setIconByName("list-check");
     _estimateBalancedLayoutAction.setDefaultWidgetFlags(TriggerAction::Text);
+    _estimateBalancedLayoutAction.setIconByName("wand-magic-sparkles");
     _estimateBalancedLayoutAction.setToolTip("Choose a balanced starting layout with square tiles. This heuristic aims for moderate tile sizes; benchmark with your workload before settling on the layout.");
     _estimateBalancedLayoutAction.setDescription("<p>Estimates square tile dimensions from dataset size and element type, then groups up to 16 tiles per supertile. Square estimates are easier to reason about and provide a neutral starting point for row and column access, but are not a performance guarantee.</p>");
     _tileCountAction.setDefaultWidgetFlags(StringAction::LineEdit);
