@@ -14,7 +14,6 @@
 #include <actions/ToggleAction.h>
 #include <actions/TriggerAction.h>
 #include <actions/VerticalGroupAction.h>
-#include <util/ProjectResourceStagingPolicy.h>
 #include <QString>
 
 namespace mv::gui
@@ -83,9 +82,6 @@ public:
     /** Enables bounded parallel generation controls for backend conversion. */
     void enableConversionPerformanceOptions(std::size_t workerCount, std::size_t chunkTileRows);
 
-    /** Returns the project resource staging policy selected in an import configuration. */
-    [[nodiscard]] mv::util::ProjectResourceStagingPolicy getProjectResourceStagingPolicy() const;
-
     /** Returns the Zstandard compression level selected for H5AD import staging. */
     [[nodiscard]] int getZstdCompressionLevel() const;
 
@@ -96,7 +92,6 @@ public:
     [[nodiscard]] QString getImportBenchmarkDirectory() const;
 
 private:
-    void updateProjectResourceStagingPolicyOption();
     void estimateBalancedLayout();
     void updateTileSizePercentages();
     void updateTileCountAction(std::uint64_t tileCount, bool available = true);
@@ -151,11 +146,9 @@ private:
     IntegralAction              _bucketingThreadCountAction;         /**< Maximum workers used to bucket HDF5 input. */
     IntegralAction              _stagingThreadCountAction;           /**< Maximum workers used for staging or tile conversion. */
     IntegralAction              _rowChunkTileFactorAction;           /**< Requested CSR tile-row factor per conversion chunk. */
-    OptionAction                _projectResourceStagingPolicyAction; /**< Project-open staging policy stored with imported resources. */
     IntegralAction              _zstdCompressionLevelAction;         /**< H5AD staging compression level when Zstandard is selected. */
     ToggleAction                _importBenchmarkEnabledAction;       /**< Whether to write an HDF5 import benchmark report. */
     DirectoryPickerAction       _importBenchmarkDirectoryAction;     /**< Directory for the optional HDF5 import benchmark report. */
-    mv::util::ProjectResourceStagingPolicy _initialProjectResourceStagingPolicy = mv::util::ProjectResourceStagingPolicy::Inherit; /**< Initial policy used for change detection. */
     QString                     _stagingDirectory;                          /**< App-managed directory checked for import staging space. */
     bool                        _showImportPerformanceOptions = false;      /**< Whether the action exposes import worker settings. */
     bool                        _showConversionPerformanceOptions = false;  /**< Whether the performance controls are configured for conversion. */

@@ -86,23 +86,13 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
     _bucketingThreadCountAction(&_importPerformanceSettingsAction, "Bucketing thread count", 1, 32, 4),
     _stagingThreadCountAction(&_importPerformanceSettingsAction, "Staging thread count", 1, 32, 4),
     _rowChunkTileFactorAction(&_importPerformanceSettingsAction, "Chunk tile-height factor", 1, 256, 3),
-    _projectResourceStagingPolicyAction(this, "Resource staging policy", { "Inherit", "Read ranges on demand", "Stage on first read", "Stage immediately" }, "Inherit"),
     _zstdCompressionLevelAction(this, "Zstandard compression level", 1, 22, std::clamp(configuration.tileCompressionLevel, 1, 22)),
     _importBenchmarkEnabledAction(this, "Enable import benchmarking", false),
     _importBenchmarkDirectoryAction(this, "Import benchmark location"),
-    _initialProjectResourceStagingPolicy(mv::util::ProjectResourceStagingPolicy::Inherit),
     _stagingDirectory(stagingDirectory),
     _showImportPerformanceOptions(false),
     _showImportStagingSpaceObservation(showImportStagingSpaceObservation)
 {
-    const auto projectResourceStagingPolicy = mv::util::ProjectResourceStagingPolicy::Inherit;
-    _projectResourceStagingPolicyAction.setSerializationName("Project-open tile staging");
-    _projectResourceStagingPolicyAction.setCurrentText(mv::util::projectResourceStagingPolicyName(projectResourceStagingPolicy));
-    _projectResourceStagingPolicyAction.setDefaultWidgetFlags(OptionAction::ComboBox);
-    _projectResourceStagingPolicyAction.setToolTip("Select the policy stored on the imported dataset for its archive-backed resources. It takes effect when a saved project is opened; it does not change staging during HDF5 import.");
-    _projectResourceStagingPolicyAction.setDescription(
-        "<p>Stores the imported dataset's policy for archive-backed resources in the project. It applies when the saved project is opened, not while HDF5 data is being imported. Inherit uses the project's resource staging policy.</p>");
-    updateProjectResourceStagingPolicyOption();
     const auto initialTileCodecName = configuration.tileCodecName.isEmpty() ? projectTileCodecName() : configuration.tileCodecName;
     _tileCodecAction.initialize(tileCodecOptions(), mv::util::codecRegistry().factory(initialTileCodecName).displayName());
     _tileCodecAction.setSerializationName("Packed tile codec");
@@ -306,7 +296,6 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
         _performanceOptionsGroupAction.addAction(&_rowChunkTileFactorAction);
         _importPerformanceAction.addAction(&_importPerformanceSummaryAction);
         _importPerformanceAction.addAction(&_importPerformanceSettingsAction);
-        _developerOptionsGroupAction.addAction(&_projectResourceStagingPolicyAction);
         updateImportPerformanceSummary();
         const auto notifyTuningOptionsChanged = [this] { this->notifyOptionsChanged(); };
         const auto updateTuningOptions = [this, notifyTuningOptionsChanged] {
@@ -316,7 +305,6 @@ TiledStorageBackendConfigurationAction::TiledStorageBackendConfigurationAction(Q
         connect(&_bucketingThreadCountAction, &IntegralAction::valueChanged, this, updateTuningOptions);
         connect(&_stagingThreadCountAction, &IntegralAction::valueChanged, this, updateTuningOptions);
         connect(&_rowChunkTileFactorAction, &IntegralAction::valueChanged, this, updateTuningOptions);
-        connect(&_projectResourceStagingPolicyAction, &OptionAction::currentIndexChanged, this, notifyTuningOptionsChanged);
     }
 
     connect(&_rowStripHeightAction, &IntegralAction::valueChanged, this, [this] { notifyOptionsChanged(); });
@@ -486,20 +474,7 @@ void TiledStorageBackendConfigurationAction::fromVariantMap(const QVariantMap& v
 
     }
 
-    auto projectResourceStagingPolicyMap = variantMap.value(_projectResourceStagingPolicyAction.getSerializationName()).toMap();
-    if (projectResourceStagingPolicyMap.contains("Value"))
-        projectResourceStagingPolicyMap["Value"] = mv::util::normalizeProjectResourceStagingPolicyName(projectResourceStagingPolicyMap.value("Value").toString());
-    if (projectResourceStagingPolicyMap.contains("Options"))
-    {
-        auto projectResourceStagingPolicyOptions = projectResourceStagingPolicyMap.value("Options").toStringList();
-        for (auto& option : projectResourceStagingPolicyOptions)
-            option = mv::util::normalizeProjectResourceStagingPolicyName(option);
-        projectResourceStagingPolicyMap["Options"] = projectResourceStagingPolicyOptions;
-    }
-    if (!projectResourceStagingPolicyMap.isEmpty())
-        _projectResourceStagingPolicyAction.fromVariantMap(projectResourceStagingPolicyMap);
     restoreAction(_zstdCompressionLevelAction, variantMap);
-    updateProjectResourceStagingPolicyOption();
     // Accept value-only settings written by legacy presets.
     const auto restoreLegacyIntegralValue = [&](IntegralAction& action, const char* key, const char* legacyKey) {
         if (variantMap.contains(action.getSerializationName()))
@@ -596,8 +571,6 @@ QVariantMap TiledStorageBackendConfigurationAction::toVariantMap() const
         _importPerformanceSummaryAction.insertIntoVariantMap(importPerformance);
         importPerformance.insert(_importPerformanceSettingsAction.getSerializationName(), performanceSettings);
         variantMap.insert(_importPerformanceAction.getSerializationName(), importPerformance);
-        if (_showImportPerformanceOptions)
-            _projectResourceStagingPolicyAction.insertIntoVariantMap(variantMap);
     }
 
     return variantMap;
@@ -656,9 +629,6 @@ pointdata::storage::StorageBackendConfigurationOptionsPtr TiledStorageBackendCon
 bool TiledStorageBackendConfigurationAction::hasChanges() const
 {
     if (StorageBackendConversionAction::hasChanges())
-        return true;
-
-    if (getProjectResourceStagingPolicy() != _initialProjectResourceStagingPolicy)
         return true;
 
     if (!_hasInitialConfiguration)
@@ -759,14 +729,6 @@ void TiledStorageBackendConfigurationAction::enableConversionPerformanceOptions(
     });
 }
 
-mv::util::ProjectResourceStagingPolicy TiledStorageBackendConfigurationAction::getProjectResourceStagingPolicy() const
-{
-    const auto currentText = _projectResourceStagingPolicyAction.getCurrentText();
-    return currentText.startsWith(QStringLiteral("Inherited ("))
-        ? mv::util::ProjectResourceStagingPolicy::Inherit
-        : mv::util::projectResourceStagingPolicyFromName(currentText);
-}
-
 int TiledStorageBackendConfigurationAction::getZstdCompressionLevel() const
 {
     return _zstdCompressionLevelAction.getValue();
@@ -808,24 +770,6 @@ void TiledStorageBackendConfigurationAction::synchronizeSquareTileSize(const boo
     notifyOptionsChanged();
 }
 
-void TiledStorageBackendConfigurationAction::updateProjectResourceStagingPolicyOption()
-{
-    const auto inheritedPolicy = mv::projects().resolveProjectResourceStagingPolicy(mv::util::ProjectResourceStagingPolicy::Inherit);
-
-    auto options = _projectResourceStagingPolicyAction.getOptions();
-    if (options.isEmpty())
-        return;
-
-    const auto selectedPolicy = getProjectResourceStagingPolicy();
-    options[0] = QStringLiteral("Inherited (%1)").arg(mv::util::projectResourceStagingPolicyName(inheritedPolicy));
-
-    const QSignalBlocker blocker(&_projectResourceStagingPolicyAction);
-    _projectResourceStagingPolicyAction.setOptions(options);
-    _projectResourceStagingPolicyAction.setCurrentText(selectedPolicy == mv::util::ProjectResourceStagingPolicy::Inherit
-        ? options[0]
-        : mv::util::projectResourceStagingPolicyName(selectedPolicy));
-}
-
 void TiledStorageBackendConfigurationAction::updateImportPerformanceSummary()
 {
     if (_showConversionPerformanceOptions)
@@ -846,7 +790,6 @@ void TiledStorageBackendConfigurationAction::updatePackedTileControls()
     _superTileRowsAction.setEnabled(_packedTilesAction.isChecked());
     _superTileColumnsAction.setEnabled(_packedTilesAction.isChecked());
     _tileCodecAction.setEnabled(_packedTilesAction.isChecked());
-    _projectResourceStagingPolicyAction.setEnabled(!_showImportPerformanceOptions || _packedTilesAction.isChecked());
 }
 
 void TiledStorageBackendConfigurationAction::updateZstdCompressionLevelAvailability()
