@@ -115,12 +115,19 @@ QWidget* MessageCardAction::getWidget(QWidget* parent, const std::int32_t&)
 
     card->setObjectName(QStringLiteral("MessageCard"));
 
-    auto* layout = new QHBoxLayout(card);
+    auto* cardLayout = new QVBoxLayout(card);
 
-    layout->setContentsMargins(8, 6, 8, 6);
+    cardLayout->setContentsMargins(8, 6, 8, 6);
+    cardLayout->setSpacing(4);
+
+    auto* contentRow = new QWidget(card);
+    contentRow->setObjectName(QStringLiteral("ContentRow"));
+    auto* layout = new QHBoxLayout(contentRow);
+
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
 
-    auto* icon = new QLabel(card);
+    auto* icon = new QLabel(contentRow);
 
     icon->setObjectName(QStringLiteral("SeverityIcon"));
     icon->setFixedSize(20, 20);
@@ -129,7 +136,7 @@ QWidget* MessageCardAction::getWidget(QWidget* parent, const std::int32_t&)
 
     layout->addWidget(icon);
 
-    auto* textWidget = new QWidget(card);
+    auto* textWidget = new QWidget(contentRow);
     textWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
     auto* textLayout = new QVBoxLayout(textWidget);
 
@@ -175,9 +182,7 @@ QWidget* MessageCardAction::getWidget(QWidget* parent, const std::int32_t&)
     actionButtonsLayout->setContentsMargins(0, 0, 0, 0);
     actionButtonsLayout->setSpacing(4);
 
-    layout->addWidget(actionButtonsWidget, 0, Qt::AlignVCenter);
-
-    auto* expandCollapseButton = new QToolButton(card);
+    auto* expandCollapseButton = new QToolButton(contentRow);
     expandCollapseButton->setObjectName(QStringLiteral("ExpandCollapseButton"));
     expandCollapseButton->setArrowType(Qt::DownArrow);
     expandCollapseButton->setAutoRaise(true);
@@ -185,6 +190,8 @@ QWidget* MessageCardAction::getWidget(QWidget* parent, const std::int32_t&)
     expandCollapseButton->setToolTip(tr("Expand message"));
     expandCollapseButton->setAccessibleName(tr("Expand message"));
     layout->addWidget(expandCollapseButton, 0, Qt::AlignVCenter);
+    cardLayout->addWidget(contentRow);
+    cardLayout->addWidget(actionButtonsWidget, 0, Qt::AlignRight);
     connect(expandCollapseButton, &QToolButton::clicked, this, [this, card] { toggleCard(card); });
 
     _widgets.append(card);
@@ -204,6 +211,8 @@ void MessageCardAction::updateWidget(QWidget* widget)
     const auto color            = getSeverityColor(_severity);
     const auto severityName     = util::getSeverityLevelName(_severity);
     auto* icon                  = widget->findChild<QLabel*>(QStringLiteral("SeverityIcon"));
+    auto* contentRow            = widget->findChild<QWidget*>(QStringLiteral("ContentRow"));
+    auto* contentLayout         = qobject_cast<QHBoxLayout*>(contentRow->layout());
     auto* severityLabel         = widget->findChild<QLabel*>(QStringLiteral("SeverityLabel"));
     auto* categoryLabel         = widget->findChild<QLabel*>(QStringLiteral("CategoryLabel"));
     auto* descriptionLabel      = widget->findChild<QLabel*>(QStringLiteral("DescriptionLabel"));
@@ -227,10 +236,23 @@ void MessageCardAction::updateWidget(QWidget* widget)
     compactTextLabel->setFullText(_category.isEmpty() ? _description : QStringLiteral("%1 — %2").arg(_category, _description));
     compactTextLabel->setVisible(compact);
 
-    if (auto* cardLayout = qobject_cast<QHBoxLayout*>(widget->layout()))
+    if (auto* cardLayout = qobject_cast<QVBoxLayout*>(widget->layout()))
     {
         cardLayout->setContentsMargins(compact ? 6 : 8, compact ? 3 : 6, compact ? 6 : 8, compact ? 3 : 6);
         icon->setAlignment(compact ? Qt::AlignCenter : Qt::AlignTop | Qt::AlignHCenter);
+
+        if (compact && actionButtonsWidget->parentWidget() != contentRow)
+        {
+            cardLayout->removeWidget(actionButtonsWidget);
+            actionButtonsWidget->setParent(contentRow);
+            contentLayout->insertWidget(contentLayout->count() - 1, actionButtonsWidget, 0, Qt::AlignVCenter);
+        }
+        else if (!compact && actionButtonsWidget->parentWidget() != widget)
+        {
+            contentLayout->removeWidget(actionButtonsWidget);
+            actionButtonsWidget->setParent(widget);
+            cardLayout->insertWidget(1, actionButtonsWidget, 0, Qt::AlignRight);
+        }
     }
     actionButtonsLayout->setDirection(compact ? QBoxLayout::LeftToRight : QBoxLayout::TopToBottom);
 

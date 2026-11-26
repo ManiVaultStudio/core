@@ -45,7 +45,7 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* action, QWidget* parent /*= n
     _descriptionIconLabel->setIconSize(QSize(14, 14));
     _descriptionIconLabel->setFixedSize(14, 14);
     _descriptionIconLabel->setAlignment(Qt::AlignCenter);
-    _descriptionIconLabel->setIdleOpacity(0.85);
+    _descriptionIconLabel->setIdleOpacity(0.4);
     _descriptionIconLabel->setText(QStringLiteral("•"));
     _descriptionIconLabel->setStyleSheet(QString("QLabel { color: %1; }").arg(palette().color(QPalette::Text).name()));
     _descriptionIconLabel->setObjectName("DescriptionIcon");
@@ -300,7 +300,7 @@ void WidgetActionLabel::updateDescriptionIndicator()
         _descriptionIconLabel->setStyleSheet(QString());
         _descriptionIconLabel->setIcon(util::StyledIcon("circle-info"));
     } else {
-        _descriptionIconLabel->setIdleOpacity(actionEnabled ? 0.85 : 0.45);
+        _descriptionIconLabel->setIdleOpacity(actionEnabled ? 0.4 : 0.25);
         const auto textColor = actionEnabled ? palette().color(QPalette::Text) : palette().color(QPalette::Disabled, QPalette::Text);
         _descriptionIconLabel->setStyleSheet(QString("QLabel { color: %1; }").arg(textColor.name()));
         _descriptionIconLabel->setText(QStringLiteral("•"));
