@@ -52,10 +52,10 @@ struct TiledStorageBackendCreationOptions final : StorageBackendCreationOptions
     std::size_t   columnTileSize       = 8;                             /**< Maximum number of columns per tile. */
     std::size_t   cacheCapacity        = 8;                             /**< Maximum number of generated tile payloads retained in memory. */
     std::size_t   cacheCapacityBytes   = defaultTileCacheCapacityBytes; /**< Maximum decoded tile payload bytes retained in memory. */
-    bool          packedTiles          = false;                         /**< Whether serialized tiles are grouped into super tiles. */
+    bool          packedTiles          = true;                          /**< Whether serialized tiles are grouped into super tiles. */
     bool          materializeGeneratedTiles = false;                    /**< Whether generated tiles should be retained immediately instead of loading lazily. */
-    std::size_t   superTileRows        = 1;                             /**< Number of base tile rows in one super tile. */
-    std::size_t   superTileColumns     = 1;                             /**< Number of base tile columns in one super tile. */
+    std::size_t   superTileRows        = 8;                             /**< Number of base tile rows in one super tile. */
+    std::size_t   superTileColumns     = 8;                             /**< Number of base tile columns in one super tile. */
     QString       tileCodecName;                                        /**< Registered codec key used for packed tile payloads. */
     int           tileCompressionLevel = 3;                             /**< Compression level for codecs that support level selection. */
     std::size_t   materializationWorkerCount = 4;                       /**< Maximum workers used to materialize generated tiles. */

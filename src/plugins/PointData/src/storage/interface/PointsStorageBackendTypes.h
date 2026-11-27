@@ -129,11 +129,11 @@ struct StorageBackendConfiguration : StorageBackendConfigurationOptions
     std::size_t columnTileSize            = 8;                             /**< Maximum number of matrix columns in one tile. */
     std::size_t cacheCapacity             = 8;                             /**< Maximum number of tile payloads retained in memory. */
     std::size_t cacheCapacityBytes        = defaultTileCacheCapacityBytes; /**< Maximum decoded tile payload bytes retained in memory. */
-    bool        packedTiles               = false;                         /**< Whether serialized tiles are grouped into jointly encoded super tiles. */
+    bool        packedTiles               = true;                          /**< Whether serialized tiles are grouped into jointly encoded super tiles. */
     std::size_t rowStripHeight            = 32;                            /**< Number of rows in each independently compressed row strip during HDF5 import. */
     std::size_t columnStripWidth          = 32;                            /**< Number of columns in each independently compressed column strip during HDF5 import. */
-    std::size_t superTileRows             = 1;                             /**< Number of base tile rows in one serialized super tile. */
-    std::size_t superTileColumns          = 1;                             /**< Number of base tile columns in one serialized super tile. */
+    std::size_t superTileRows             = 8;                             /**< Number of base tile rows in one serialized super tile. */
+    std::size_t superTileColumns          = 8;                             /**< Number of base tile columns in one serialized super tile. */
     QString     tileCodecName;                                              /**< Registered codec key for packed payloads; empty inherits project compression. */
     int         tileCompressionLevel     = 3;                               /**< Compression level for codecs that support level selection. */
     std::size_t conversionWorkerCount     = 4;                             /**< Maximum workers used to generate converted tiles. */

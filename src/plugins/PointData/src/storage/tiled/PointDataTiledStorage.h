@@ -183,7 +183,7 @@ public:
     std::size_t cacheCapacityBytes() const;
 
     /** Sets whether serialized tiles are grouped into jointly encoded super tiles. */
-    void setPackedTiles(bool enabled, std::size_t superTileRows = 1, std::size_t superTileColumns = 1);
+    void setPackedTiles(bool enabled, std::size_t superTileRows = 8, std::size_t superTileColumns = 8);
 
     /** Returns whether serialized tiles are grouped into super tiles. */
     bool packedTiles() const { return _packedTiles; }
