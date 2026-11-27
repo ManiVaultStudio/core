@@ -43,7 +43,7 @@
 
 namespace
 {
-float valueAt(const PointDataAccessView& view, const std::uint64_t row, const std::uint64_t column)
+float pointViewValueAt(const PointDataAccessView& view, const std::uint64_t row, const std::uint64_t column)
 {
     const auto* bytes = view.rowData(row) + column * view.elementSizeBytes;
 
@@ -152,7 +152,7 @@ QString saveFetchBenchmark(const mv::Dataset<Points>& points, const QString& out
                     {
                         for (std::uint64_t column = 0; column < view.columns; ++column)
                         {
-                            checksum += valueAt(view, row, column);
+                            checksum += pointViewValueAt(view, row, column);
                         }
                     }
                 });
@@ -877,7 +877,7 @@ void PointsViewWidget::displayQuery(const std::vector<std::uint64_t>& rowIds, co
                     const auto targetColumn = destinationColumn + column;
 
                     if (targetRow < rowIds.size() && targetColumn < columnIds.size())
-                        values[static_cast<std::size_t>(targetRow * columnIds.size() + targetColumn)] = valueAt(view, row, column);
+                        values[static_cast<std::size_t>(targetRow * columnIds.size() + targetColumn)] = pointViewValueAt(view, row, column);
                 }
             }
 
