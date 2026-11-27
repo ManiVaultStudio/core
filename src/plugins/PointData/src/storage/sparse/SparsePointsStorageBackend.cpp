@@ -50,7 +50,7 @@ SparsePointsStorageBackend::SparsePointsStorageBackend(const std::uint64_t rows,
         (_elementTypeIndex == 1 && _elementSize != 2) || (_elementTypeIndex >= 2 && _elementTypeIndex <= 3 && _elementSize != 4) ||
         (_elementTypeIndex >= 4 && _elementTypeIndex <= 5 && _elementSize != 2) || (_elementTypeIndex >= 6 && _elementTypeIndex <= 7 && _elementSize != 1);
     const auto invalidValues     = _elementSize == 0 || _values.size() % _elementSize != 0 || _indices.size() != _values.size() / _elementSize;
-    const auto invalidPointers   = invalidElementType || invalidValues || compressedSize >= std::numeric_limits<std::size_t>::max() ||
+    const auto invalidPointers   = invalidElementType || invalidValues || compressedSize >= (std::numeric_limits<std::size_t>::max)() ||
         _pointers.size() != compressedSize + 1 || _pointers.empty() || _pointers.front() != 0 || _pointers.back() != _indices.size();
 
     if (invalidPointers)
@@ -137,7 +137,7 @@ PointDataAccessView SparsePointsStorageBackend::getRow(const std::uint64_t row) 
     if (row >= _rows)
         return {};
 
-    if (_columns > std::numeric_limits<std::size_t>::max() / _elementSize)
+    if (_columns > (std::numeric_limits<std::size_t>::max)() / _elementSize)
         throw std::overflow_error("Sparse row is too large");
 
     auto values = std::make_shared<std::vector<std::uint8_t>>(static_cast<std::size_t>(_columns) * _elementSize, 0);
@@ -165,7 +165,7 @@ void SparsePointsStorageBackend::visitRange(const std::uint64_t firstRow, const 
 
     for (auto row = firstRow; row < firstRow + rowCount; ++row)
     {
-        if (columnCount > std::numeric_limits<std::size_t>::max() / _elementSize)
+        if (columnCount > (std::numeric_limits<std::size_t>::max)() / _elementSize)
             throw std::overflow_error("Sparse range row is too large");
 
         auto values = std::make_shared<std::vector<std::uint8_t>>(static_cast<std::size_t>(columnCount) * _elementSize, 0);
@@ -185,7 +185,7 @@ void SparsePointsStorageBackend::visitRange(const std::uint64_t firstRow, const 
 
 float SparsePointsStorageBackend::getValueAt(const std::uint64_t flatIndex) const
 {
-    if (_columns == 0 || (_rows != 0 && _columns > std::numeric_limits<std::uint64_t>::max() / _rows) || flatIndex >= _rows * _columns)
+    if (_columns == 0 || (_rows != 0 && _columns > (std::numeric_limits<std::uint64_t>::max)() / _rows) || flatIndex >= _rows * _columns)
         throw std::out_of_range("Sparse point-data index is invalid");
 
     return valueAt(flatIndex / _columns, flatIndex % _columns);
@@ -196,11 +196,11 @@ void SparsePointsStorageBackend::materialize(char* destination, StorageBackendPr
     if (progress)
         progress(0.0f);
 
-    if (_rows != 0 && _columns > std::numeric_limits<std::uint64_t>::max() / _rows)
+    if (_rows != 0 && _columns > (std::numeric_limits<std::uint64_t>::max)() / _rows)
         throw std::overflow_error("Sparse matrix dimensions overflow the dense element count");
 
     const auto elementCount = _rows * _columns;
-    if (_elementSize == 0 || elementCount > std::numeric_limits<std::size_t>::max() / _elementSize)
+    if (_elementSize == 0 || elementCount > (std::numeric_limits<std::size_t>::max)() / _elementSize)
         throw std::overflow_error("Sparse matrix is too large to materialize");
 
     const auto totalBytes = static_cast<std::size_t>(elementCount) * _elementSize;
@@ -209,7 +209,7 @@ void SparsePointsStorageBackend::materialize(char* destination, StorageBackendPr
     const auto zeroChunkBytes = std::max<std::size_t>(64U * 1024U * 1024U, totalBytes / 100);
     for (std::size_t offset = 0; offset < totalBytes;)
     {
-        const auto bytes = std::min(zeroChunkBytes, totalBytes - offset);
+        const auto bytes = (std::min)(zeroChunkBytes, totalBytes - offset);
         std::memset(destination + offset, 0, bytes);
         offset += bytes;
         if (progress)
