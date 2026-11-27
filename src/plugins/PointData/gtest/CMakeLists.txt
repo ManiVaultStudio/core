@@ -34,6 +34,12 @@ else()
     target_compile_options(PointDataGTest PRIVATE -Wall -Wextra -pedantic)
 endif()
 
+# Xcode 16's libc++ gates std::jthread behind this library option.
+if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(PointDataGTest PRIVATE -fexperimental-library)
+    target_link_options(PointDataGTest PRIVATE -fexperimental-library)
+endif()
+
 add_test(NAME PointDataGTest COMMAND PointDataGTest)
 set_tests_properties(PointDataGTest PROPERTIES
     LABELS "unit;pointdata"
