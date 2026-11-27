@@ -47,6 +47,7 @@ target_include_directories(MV_Application_ArchiverTest PRIVATE
 target_link_libraries(MV_Application_ArchiverTest PRIVATE
     ManiVault::Core
     Qt6::Core
+    Qt6::Widgets
     QuaZip
     ZLIB::ZLIB
 )
