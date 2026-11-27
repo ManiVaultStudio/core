@@ -1054,7 +1054,7 @@ void PointDataPhantomGenerator::populateMenu(QMenu& menu, QWidget* owner)
 
 namespace
 {
-const bool registered = [] {
+const bool phantomGeneratorMenuPopulatorRegistered = [] {
     mv::developer::registerMenuPopulator(QStringLiteral("PointData.DataSynthesis.PhantomGenerator"),
         [](QMenu& menu, QWidget* owner) { PointDataPhantomGenerator::populateMenu(menu, owner); });
     return true;

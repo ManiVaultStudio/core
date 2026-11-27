@@ -1380,7 +1380,7 @@ void PointDataBenchmark::populateMenu(QMenu& menu, QWidget* owner)
 
 namespace
 {
-const bool registered = [] {
+const bool benchmarkMenuPopulatorRegistered = [] {
     mv::developer::registerMenuPopulator(QStringLiteral("PointData.PerformanceTesting.Benchmark"), [](QMenu& menu, QWidget* owner) {
         PointDataBenchmark::populateMenu(menu, owner);
     });

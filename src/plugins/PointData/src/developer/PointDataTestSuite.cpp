@@ -787,7 +787,7 @@ void startWorkflow(QWidget* owner, const bool thorough, const std::vector<Points
     });
 }
 
-const bool registered = [] {
+const bool rowFetchMenuPopulatorRegistered = [] {
     mv::developer::registerMenuPopulator(QStringLiteral("PointData.Testing.RowFetch"), [](QMenu& menu, QWidget* owner) {
         auto populateMode = [owner](QMenu& modeMenu, const bool thorough) {
             constexpr Points::StorageBackendType backends[] = { Points::StorageBackendType::Dense, Points::StorageBackendType::Tiled, Points::StorageBackendType::Sparse };
