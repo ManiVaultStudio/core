@@ -140,10 +140,12 @@ struct StorageBackendConfiguration : StorageBackendConfigurationOptions
     std::size_t conversionChunkTileRows   = 3;                             /**< Tile-row height of one bounded conversion work chunk. */
 };
 
-/** Selects the compressed orientation used when converting a dense matrix to sparse storage. */
+/** Selects the compressed orientation indexes stored for sparse conversion. */
 struct SparseStorageBackendConfiguration : StorageBackendConfigurationOptions
 {
-    bool        columnCompressed = false; /**< Use CSC when true, otherwise CSR. */
+    bool        columnCompressed = false; /**< Legacy single-layout selection; true selects CSC. */
+    bool        storeRowCompressed = true; /**< Store CSR for efficient row access. */
+    bool        storeColumnCompressed = false; /**< Store CSC for efficient column access. */
     std::size_t conversionWorkerCount = 4; /**< Maximum workers used to scan source rows. */
     std::size_t conversionChunkRows = 128; /**< Number of rows assigned to one bounded sparse scan chunk. */
 };

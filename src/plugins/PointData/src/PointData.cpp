@@ -49,6 +49,7 @@
 #include <set>
 #include <stdexcept>
 #include <thread>
+#include <tuple>
 #include <type_traits>
 
 Q_PLUGIN_METADATA(IID "studio.manivault.PointData")
@@ -705,7 +706,11 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
         const auto chunkCount = static_cast<std::size_t>(rows / chunkRows + (rows % chunkRows != 0));
         const auto workerCount = std::min<std::size_t>(std::clamp<std::size_t>(configuration->conversionWorkerCount, 1, 32), std::max<std::size_t>(1, chunkCount));
         std::vector<SparseConversionChunk> chunks(chunkCount);
-        const auto rowScanProgressEnd = configuration->columnCompressed ? 0.65f : 0.99f;
+        const auto storeRows = configuration->storeRowCompressed && !configuration->columnCompressed;
+        const auto storeColumns = configuration->storeColumnCompressed || configuration->columnCompressed;
+        if (!storeRows && !storeColumns)
+            throw std::invalid_argument("Sparse conversion must store CSR, CSC, or both");
+        const auto rowScanProgressEnd = storeColumns ? 0.65f : 0.99f;
 
         if (progress)
             progress(0.0f);
@@ -833,13 +838,16 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
         auto indices = std::move(rowIndices);
         auto values = std::move(sparseValues);
         auto layout = pointdata::storage::SparseMatrixLayout::RowCompressed;
+        std::vector<std::uint64_t> columnPointers;
+        std::vector<std::uint64_t> columnIndices;
+        std::vector<std::uint8_t> columnValues;
 
-        if (configuration->columnCompressed)
+        if (storeColumns)
         {
             if (columns >= std::numeric_limits<std::size_t>::max())
                 throw std::overflow_error("Column-compressed sparse storage has too many column pointers");
 
-            std::vector<std::uint64_t> columnPointers(static_cast<std::size_t>(columns) + 1, 0);
+            columnPointers.assign(static_cast<std::size_t>(columns) + 1, 0);
             const auto countProgressInterval = std::max<std::size_t>(1, indices.size() / 100);
             for (std::size_t index = 0; index < indices.size(); ++index)
             {
@@ -864,8 +872,8 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
                 progress(0.78f);
 
             auto next = columnPointers;
-            std::vector<std::uint64_t> columnIndices(indices.size());
-            std::vector<std::uint8_t> columnValues(values.size());
+            columnIndices.resize(indices.size());
+            columnValues.resize(values.size());
             const auto scatterProgressInterval = std::max<std::uint64_t>(1, rows / 100);
             for (std::uint64_t row = 0; row < rows; ++row)
             {
@@ -884,13 +892,21 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
             if (progress && rows == 0)
                 progress(0.99f);
 
-            pointers = std::move(columnPointers);
-            indices = std::move(columnIndices);
-            values = std::move(columnValues);
-            layout = pointdata::storage::SparseMatrixLayout::ColumnCompressed;
+            if (!storeRows)
+            {
+                pointers = std::move(columnPointers);
+                indices = std::move(columnIndices);
+                values = std::move(columnValues);
+                layout = pointdata::storage::SparseMatrixLayout::ColumnCompressed;
+            }
         }
 
-        auto sparseBackend = std::make_unique<pointdata::storage::SparsePointsStorageBackend>(rows, columns, layout, elementTypeIndex, elementSize, std::move(pointers), std::move(indices), std::move(values));
+        std::unique_ptr<pointdata::storage::SparsePointsStorageBackend> sparseBackend;
+        if (storeRows && storeColumns)
+            sparseBackend = std::make_unique<pointdata::storage::SparsePointsStorageBackend>(rows, columns, elementTypeIndex, elementSize,
+                std::move(pointers), std::move(indices), std::move(values), std::move(columnPointers), std::move(columnIndices), std::move(columnValues));
+        else
+            sparseBackend = std::make_unique<pointdata::storage::SparsePointsStorageBackend>(rows, columns, layout, elementTypeIndex, elementSize, std::move(pointers), std::move(indices), std::move(values));
         setElementTypeSpecifier(static_cast<ElementTypeSpecifier>(elementTypeIndex));
         _numDimensions = columns;
         _numRows = rows;
@@ -910,7 +926,7 @@ void PointData::convertToStorageBackend(const pointdata::storage::StorageBackend
             .arg(maximumConcurrentWorkers.load())
             .arg(aggregateWorkerMs)
             .arg(elapsedMs)
-            .arg(configuration->columnCompressed ? QStringLiteral("CSC") : QStringLiteral("CSR"));
+            .arg(storeRows && storeColumns ? QStringLiteral("CSR + CSC") : storeColumns ? QStringLiteral("CSC") : QStringLiteral("CSR"));
 
         return;
     }
@@ -1026,6 +1042,16 @@ void PointData::visitColumns(const std::uint64_t firstColumn, const std::uint64_
     if (firstColumn > _numDimensions || columnCount > _numDimensions - firstColumn)
         throw std::out_of_range("Point-data column range is out of bounds");
 
+    if (const auto* sparseBackend = dynamic_cast<const pointdata::storage::SparsePointsStorageBackend*>(_storageBackend.get()))
+    {
+        std::vector<std::uint64_t> columnIds(static_cast<std::size_t>(columnCount));
+        std::iota(columnIds.begin(), columnIds.end(), firstColumn);
+        std::vector<std::uint64_t> rowIds(static_cast<std::size_t>(getNumPoints()));
+        std::iota(rowIds.begin(), rowIds.end(), 0);
+        sparseBackend->visitColumns(columnIds, rowIds, visitor);
+        return;
+    }
+
     visitRange(0, getNumPoints(), firstColumn, columnCount, visitor);
 }
 
@@ -1034,6 +1060,14 @@ void PointData::visitColumns(const std::vector<std::uint64_t>& columnIds, const 
     if (const auto* tiledBackend = dynamic_cast<const pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get()))
     {
         tiledBackend->visitColumns(columnIds, visitor);
+        return;
+    }
+
+    if (const auto* sparseBackend = dynamic_cast<const pointdata::storage::SparsePointsStorageBackend*>(_storageBackend.get()))
+    {
+        std::vector<std::uint64_t> rowIds(static_cast<std::size_t>(getNumPoints()));
+        std::iota(rowIds.begin(), rowIds.end(), 0);
+        sparseBackend->visitColumns(columnIds, rowIds, visitor);
         return;
     }
 
@@ -1054,6 +1088,14 @@ void PointData::visitColumns(const std::uint64_t firstColumn, const std::uint64_
         return;
     }
 
+    if (const auto* sparseBackend = dynamic_cast<const pointdata::storage::SparsePointsStorageBackend*>(_storageBackend.get()))
+    {
+        std::vector<std::uint64_t> columnIds(static_cast<std::size_t>(columnCount));
+        std::iota(columnIds.begin(), columnIds.end(), firstColumn);
+        sparseBackend->visitColumns(columnIds, rowIds, visitor);
+        return;
+    }
+
     for (const auto row : rowIds)
     {
         if (row >= getNumPoints())
@@ -1067,6 +1109,12 @@ void PointData::visitColumns(const std::vector<std::uint64_t>& columnIds, const 
     if (const auto* tiledBackend = dynamic_cast<const pointdata::storage::TiledPointsStorageBackend*>(_storageBackend.get()))
     {
         tiledBackend->visitColumns(columnIds, rowIds, visitor);
+        return;
+    }
+
+    if (const auto* sparseBackend = dynamic_cast<const pointdata::storage::SparsePointsStorageBackend*>(_storageBackend.get()))
+    {
+        sparseBackend->visitColumns(columnIds, rowIds, visitor);
         return;
     }
 
@@ -1315,6 +1363,59 @@ UniqueWorkflowPlan PointData::fromVariantMapWorkflow(QVariantMap variantMap)
         else if (dataMap.contains("Sparse") && dataMap["Sparse"].canConvert<QVariantMap>())
         {
             const auto sparseMap = dataMap["Sparse"].toMap();
+            if (sparseMap.contains("CSR") || sparseMap.contains("CSC"))
+            {
+                const auto elementType = dataMap.contains("TypeName")
+                    ? elementTypeSpecifier(dataMap.value("TypeName").toString())
+                    : static_cast<ElementTypeSpecifier>(dataMap.value("TypeIndex").toInt());
+                setElementTypeSpecifier(elementType);
+                resizeVector(0);
+                _numRows = 0;
+                const auto elementSize = elementType == ElementTypeSpecifier::bfloat16 || elementType == ElementTypeSpecifier::int16 || elementType == ElementTypeSpecifier::uint16 ? 2 :
+                    elementType == ElementTypeSpecifier::int8 || elementType == ElementTypeSpecifier::uint8 ? 1 : 4;
+                const auto readIndex = [&](const QString& key) {
+                    std::vector<std::uint64_t> pointers, indices;
+                    std::vector<std::uint8_t> values;
+                    const auto map = sparseMap.value(key).toMap();
+                    for (const auto* required : {"Pointers", "Indices", "Values"})
+                        variantMapMustContain(map, required);
+                    const auto pointerBlob = map.value("Pointers").toMap();
+                    const auto indexBlob = map.value("Indices").toMap();
+                    const auto valueBlob = map.value("Values").toMap();
+                    const auto pointerBytes = pointerBlob.value("Size").toULongLong();
+                    const auto indexBytes = indexBlob.value("Size").toULongLong();
+                    const auto valueBytes = valueBlob.value("Size").toULongLong();
+                    if (pointerBytes % sizeof(std::uint64_t) || indexBytes % sizeof(std::uint64_t) || valueBytes % elementSize ||
+                        pointerBytes > std::numeric_limits<std::size_t>::max() || indexBytes > std::numeric_limits<std::size_t>::max() || valueBytes > std::numeric_limits<std::size_t>::max())
+                        throw std::invalid_argument("Serialized sparse point-data arrays have invalid byte sizes");
+                    pointers.resize(static_cast<std::size_t>(pointerBytes / sizeof(std::uint64_t)));
+                    indices.resize(static_cast<std::size_t>(indexBytes / sizeof(std::uint64_t)));
+                    values.resize(static_cast<std::size_t>(valueBytes));
+                    if (pointerBytes) populateBytesFromBlobMap(pointerBlob, reinterpret_cast<char*>(pointers.data()), pointerBytes);
+                    if (indexBytes) populateBytesFromBlobMap(indexBlob, reinterpret_cast<char*>(indices.data()), indexBytes);
+                    if (valueBytes) populateBytesFromBlobMap(valueBlob, reinterpret_cast<char*>(values.data()), valueBytes);
+                    return std::make_tuple(std::move(pointers), std::move(indices), std::move(values));
+                };
+                const auto rows = variantMap["NumberOfPoints"].toULongLong();
+                if (sparseMap.contains("CSR") && sparseMap.contains("CSC"))
+                {
+                    auto [rowPointers, columnIndices, rowValues] = readIndex("CSR");
+                    auto [columnPointers, rowIndices, columnValues] = readIndex("CSC");
+                    auto backend = std::make_unique<pointdata::storage::SparsePointsStorageBackend>(rows, _numDimensions, static_cast<std::uint32_t>(elementType), elementSize,
+                        std::move(rowPointers), std::move(columnIndices), std::move(rowValues), std::move(columnPointers), std::move(rowIndices), std::move(columnValues));
+                    initializeStorageBackend(std::move(backend));
+                }
+                else
+                {
+                    const auto key = sparseMap.contains("CSR") ? QStringLiteral("CSR") : QStringLiteral("CSC");
+                    const auto layout = key == "CSR" ? pointdata::storage::SparseMatrixLayout::RowCompressed : pointdata::storage::SparseMatrixLayout::ColumnCompressed;
+                    auto [pointers, indices, values] = readIndex(key);
+                    auto backend = std::make_unique<pointdata::storage::SparsePointsStorageBackend>(rows, _numDimensions, layout, static_cast<std::uint32_t>(elementType), elementSize,
+                        std::move(pointers), std::move(indices), std::move(values));
+                    initializeStorageBackend(std::move(backend));
+                }
+                return;
+            }
             variantMapMustContain(sparseMap, "Layout");
             variantMapMustContain(sparseMap, "Pointers");
             variantMapMustContain(sparseMap, "Indices");
@@ -1449,6 +1550,24 @@ UniqueWorkflowPlan PointData::toVariantMapWorkflow() const
             sparseMap["Pointers"] = bytesToBlobVariantMap(reinterpret_cast<const char*>(pointers.data()), pointers.size() * sizeof(std::uint64_t));
             sparseMap["Indices"] = bytesToBlobVariantMap(reinterpret_cast<const char*>(indices.data()), indices.size() * sizeof(std::uint64_t));
             sparseMap["Values"] = bytesToBlobVariantMap(reinterpret_cast<const char*>(values.data()), values.size());
+            if (sparseStorage->hasRowCompressedIndex() && sparseStorage->hasColumnCompressedIndex())
+            {
+                QVariantMap csr, csc;
+                const auto& rowPointers = sparseStorage->getRowPointers();
+                const auto& columnIndices = sparseStorage->getColumnIndices();
+                const auto& rowValues = sparseStorage->getRowValues();
+                csr["Pointers"] = bytesToBlobVariantMap(reinterpret_cast<const char*>(rowPointers.data()), rowPointers.size() * sizeof(std::uint64_t));
+                csr["Indices"] = bytesToBlobVariantMap(reinterpret_cast<const char*>(columnIndices.data()), columnIndices.size() * sizeof(std::uint64_t));
+                csr["Values"] = bytesToBlobVariantMap(reinterpret_cast<const char*>(rowValues.data()), rowValues.size());
+                const auto& columnPointers = sparseStorage->getColumnPointers();
+                const auto& rowIndices = sparseStorage->getRowIndices();
+                const auto& columnValues = sparseStorage->getColumnValues();
+                csc["Pointers"] = bytesToBlobVariantMap(reinterpret_cast<const char*>(columnPointers.data()), columnPointers.size() * sizeof(std::uint64_t));
+                csc["Indices"] = bytesToBlobVariantMap(reinterpret_cast<const char*>(rowIndices.data()), rowIndices.size() * sizeof(std::uint64_t));
+                csc["Values"] = bytesToBlobVariantMap(reinterpret_cast<const char*>(columnValues.data()), columnValues.size());
+                sparseMap["CSR"] = csr;
+                sparseMap["CSC"] = csc;
+            }
 
             QVariantMap outputMap;
             outputMap["TypeIndex"] = static_cast<std::int32_t>(getElementTypeSpecifier());

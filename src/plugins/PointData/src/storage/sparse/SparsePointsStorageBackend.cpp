@@ -80,6 +80,21 @@ SparsePointsStorageBackend::SparsePointsStorageBackend(const std::uint64_t rows,
     }
 }
 
+SparsePointsStorageBackend::SparsePointsStorageBackend(const std::uint64_t rows, const std::uint64_t columns, const std::uint32_t elementTypeIndex, const std::size_t elementSize,
+    std::vector<std::uint64_t> rowPointers, std::vector<std::uint64_t> columnIndices, std::vector<std::uint8_t> rowValues,
+    std::vector<std::uint64_t> columnPointers, std::vector<std::uint64_t> rowIndices, std::vector<std::uint8_t> columnValues) :
+    SparsePointsStorageBackend(rows, columns, SparseMatrixLayout::RowCompressed, elementTypeIndex, elementSize,
+        std::move(rowPointers), std::move(columnIndices), std::move(rowValues))
+{
+    SparsePointsStorageBackend validatedColumnIndex(rows, columns, SparseMatrixLayout::ColumnCompressed, elementTypeIndex, elementSize,
+        std::move(columnPointers), std::move(rowIndices), std::move(columnValues));
+    _secondaryPointers = std::move(validatedColumnIndex._pointers);
+    _secondaryIndices = std::move(validatedColumnIndex._indices);
+    _secondaryValues = std::move(validatedColumnIndex._values);
+    if (_secondaryIndices.size() != _indices.size() || _secondaryValues.size() != _values.size())
+        throw std::invalid_argument("CSR and CSC sparse indexes must contain the same number of values");
+}
+
 StorageBackendType SparsePointsStorageBackend::getType() const
 {
     return StorageBackendType::Sparse;
@@ -95,7 +110,8 @@ std::unique_ptr<mv::gui::StorageBackendConversionAction> SparsePointsStorageBack
     const auto elementTypeIndex = getElementTypeIndex();
 
     if (targetType == StorageBackendType::Sparse)
-        return std::make_unique<mv::gui::SparseStorageBackendConversionAction>(parent, _rows, _columns, elementTypeIndex, _layout == SparseMatrixLayout::ColumnCompressed);
+        return std::make_unique<mv::gui::SparseStorageBackendConversionAction>(parent, _rows, _columns, elementTypeIndex,
+            _layout == SparseMatrixLayout::ColumnCompressed, 4, 128, hasRowCompressedIndex(), hasColumnCompressedIndex());
 
     if (targetType == StorageBackendType::Tiled)
         return std::make_unique<mv::gui::TiledStorageBackendConversionAction>(parent, _rows, _columns, _elementSize, StorageBackendConfiguration{}, false, true, elementTypeIndex);
@@ -183,6 +199,63 @@ void SparsePointsStorageBackend::visitRange(const std::uint64_t firstRow, const 
     }
 }
 
+void SparsePointsStorageBackend::visitColumns(const std::vector<std::uint64_t>& columnIds, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const
+{
+    if (!visitor)
+        throw std::invalid_argument("Point-data visitor is invalid");
+    for (const auto column : columnIds)
+        if (column >= _columns)
+            throw std::out_of_range("Point-data column ID is out of bounds");
+    for (const auto row : rowIds)
+        if (row >= _rows)
+            throw std::out_of_range("Point-data row ID is out of bounds");
+    if (columnIds.empty())
+        return;
+
+    const auto& pointers = hasColumnCompressedIndex() ? getColumnPointers() : _pointers;
+    const auto& indices = hasColumnCompressedIndex() ? getRowIndices() : _indices;
+    const auto& values = hasColumnCompressedIndex() ? getColumnValues() : _values;
+    const auto columnCompressed = hasColumnCompressedIndex();
+    for (const auto row : rowIds)
+    {
+        for (std::size_t first = 0; first < columnIds.size();)
+        {
+            auto end = first + 1;
+            while (end < columnIds.size() && columnIds[end - 1] != std::numeric_limits<std::uint64_t>::max() && columnIds[end] == columnIds[end - 1] + 1)
+                ++end;
+            const auto count = end - first;
+            if (count > std::numeric_limits<std::size_t>::max() / _elementSize)
+                throw std::overflow_error("Sparse selected columns exceed the process address space");
+            auto output = std::make_shared<std::vector<std::uint8_t>>(count * _elementSize, 0);
+            for (std::size_t outputColumn = 0; outputColumn < count; ++outputColumn)
+            {
+                const auto column = columnIds[first + outputColumn];
+                if (columnCompressed)
+                {
+                    const auto begin = pointers[static_cast<std::size_t>(column)];
+                    const auto segmentEnd = pointers[static_cast<std::size_t>(column + 1)];
+                    const auto segment = indices.begin() + static_cast<std::ptrdiff_t>(begin);
+                    const auto found = std::lower_bound(segment, indices.begin() + static_cast<std::ptrdiff_t>(segmentEnd), row);
+                    if (found != indices.begin() + static_cast<std::ptrdiff_t>(segmentEnd) && *found == row)
+                        std::memcpy(output->data() + outputColumn * _elementSize, values.data() + static_cast<std::size_t>(found - indices.begin()) * _elementSize, _elementSize);
+                }
+                else
+                    copyRowRange(row, column, 1, output->data() + outputColumn * _elementSize);
+            }
+            PointDataAccessView view;
+            view.data = output->data();
+            view.rows = 1;
+            view.columns = count;
+            view.rowStrideBytes = count * _elementSize;
+            view.elementTypeIndex = getElementTypeIndex();
+            view.elementSizeBytes = static_cast<std::uint32_t>(_elementSize);
+            view.lifetime = std::shared_ptr<const void>(output, output->data());
+            visitor(view);
+            first = end;
+        }
+    }
+}
+
 float SparsePointsStorageBackend::getValueAt(const std::uint64_t flatIndex) const
 {
     if (_columns == 0 || (_rows != 0 && _columns > std::numeric_limits<std::uint64_t>::max() / _rows) || flatIndex >= _rows * _columns)
@@ -265,7 +338,9 @@ std::uint64_t SparsePointsStorageBackend::getNumNonZeros() const
 
 std::uint64_t SparsePointsStorageBackend::getStorageSizeBytes() const
 {
-    return static_cast<std::uint64_t>(_pointers.size()) * sizeof(std::uint64_t) + static_cast<std::uint64_t>(_indices.size()) * sizeof(std::uint64_t) + _values.size();
+    return (static_cast<std::uint64_t>(_pointers.size()) + _secondaryPointers.size()) * sizeof(std::uint64_t) +
+        (static_cast<std::uint64_t>(_indices.size()) + _secondaryIndices.size()) * sizeof(std::uint64_t) +
+        static_cast<std::uint64_t>(_values.size()) + _secondaryValues.size();
 }
 
 const std::vector<std::uint64_t>& SparsePointsStorageBackend::getPointers() const
@@ -282,6 +357,15 @@ const std::vector<std::uint8_t>& SparsePointsStorageBackend::getValues() const
 {
     return _values;
 }
+
+bool SparsePointsStorageBackend::hasRowCompressedIndex() const { return _layout == SparseMatrixLayout::RowCompressed || (_secondaryLayout == SparseMatrixLayout::RowCompressed && !_secondaryPointers.empty()); }
+bool SparsePointsStorageBackend::hasColumnCompressedIndex() const { return _layout == SparseMatrixLayout::ColumnCompressed || (_secondaryLayout == SparseMatrixLayout::ColumnCompressed && !_secondaryPointers.empty()); }
+const std::vector<std::uint64_t>& SparsePointsStorageBackend::getRowPointers() const { return _layout == SparseMatrixLayout::RowCompressed ? _pointers : _secondaryPointers; }
+const std::vector<std::uint64_t>& SparsePointsStorageBackend::getColumnIndices() const { return _layout == SparseMatrixLayout::RowCompressed ? _indices : _secondaryIndices; }
+const std::vector<std::uint8_t>& SparsePointsStorageBackend::getRowValues() const { return _layout == SparseMatrixLayout::RowCompressed ? _values : _secondaryValues; }
+const std::vector<std::uint64_t>& SparsePointsStorageBackend::getColumnPointers() const { return _layout == SparseMatrixLayout::ColumnCompressed ? _pointers : _secondaryPointers; }
+const std::vector<std::uint64_t>& SparsePointsStorageBackend::getRowIndices() const { return _layout == SparseMatrixLayout::ColumnCompressed ? _indices : _secondaryIndices; }
+const std::vector<std::uint8_t>& SparsePointsStorageBackend::getColumnValues() const { return _layout == SparseMatrixLayout::ColumnCompressed ? _values : _secondaryValues; }
 
 float SparsePointsStorageBackend::valueAt(const std::uint64_t row, const std::uint64_t column) const
 {

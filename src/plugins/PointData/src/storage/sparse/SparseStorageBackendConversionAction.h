@@ -4,17 +4,15 @@
 
 #include "../interface/StorageBackendConversionAction.h"
 
-#include <actions/HorizontalGroupAction.h>
 #include <actions/IntegralAction.h>
-#include <actions/OptionAction.h>
-#include <actions/StringAction.h>
+#include <actions/ToggleAction.h>
 #include <actions/VerticalGroupAction.h>
 
 namespace mv::gui
 {
 
 /**
- * @brief Selects CSR or CSC layout for sparse conversion.
+ * @brief Selects CSR, CSC, or both indexes for sparse conversion.
  *
  * Sparse conversion scans the complete matrix and stores exact nonzero values.
  * The element type can be changed as part of conversion, with values outside
@@ -27,7 +25,7 @@ class POINTDATA_EXPORT SparseStorageBackendConversionAction final : public Stora
 {
 public:
     /** Constructs sparse conversion controls for a matrix with the supplied shape and current element type. */
-    SparseStorageBackendConversionAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::uint32_t currentElementTypeIndex, bool columnCompressed = false, std::size_t workerCount = 4, std::size_t chunkRows = 128);
+    SparseStorageBackendConversionAction(QObject* parent, std::uint64_t rows, std::uint64_t columns, std::uint32_t currentElementTypeIndex, bool columnCompressed = false, std::size_t workerCount = 4, std::size_t chunkRows = 128, bool storeRowCompressed = true, bool storeColumnCompressed = false);
 
     /** Returns the sparse backend type. */
     pointdata::storage::StorageBackendType getTargetBackendType() const override;
@@ -41,11 +39,11 @@ public:
 private:
     std::uint64_t _rows = 0;                        /**< Matrix row count used for the size and representability estimates. */
     std::uint64_t _columns = 0;                     /**< Matrix column count used for the size and representability estimates. */
-    bool _initialColumnCompressed = false;          /**< Original compressed orientation for configuration change detection. */
-    OptionAction _layoutAction;                     /**< CSR or CSC selection. */
-    HorizontalGroupAction _performanceAction;       /**< Collapsible conversion performance controls. */
-    StringAction _performanceSummaryAction;         /**< Read-only summary of conversion settings. */
-    VerticalGroupAction _performanceSettingsAction; /**< Group containing worker and chunk settings. */
+    bool _initialColumnCompressed = false;          /**< Original single compressed orientation for configuration change detection. */
+    bool _initialStoreRowCompressed = true;         /**< Whether CSR was initially stored. */
+    bool _initialStoreColumnCompressed = false;     /**< Whether CSC was initially stored. */
+    ToggleAction _storeRowsAction;                  /**< Keep CSR for row-oriented access. */
+    ToggleAction _storeColumnsAction;               /**< Keep CSC for column-oriented access. */
     IntegralAction _workerCountAction;              /**< Maximum conversion worker count. */
     IntegralAction _chunkRowsAction;                /**< Source rows assigned to a sparse conversion chunk. */
     std::size_t _initialWorkerCount = 4;            /**< Worker count used to detect changes from initial settings. */

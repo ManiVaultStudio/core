@@ -26,17 +26,19 @@ enum class SparseMatrixLayout
 };
 
 /**
- * @brief Immutable typed sparse matrix backend in CSR or CSC form.
+ * @brief Immutable typed sparse matrix backend in CSR, CSC, or dual-index form.
  *
  * This backend lets a sparse matrix satisfy the common point-data access
  * contract without keeping a dense matrix as its backing representation.
  *
- * The backend owns the compressed pointer, index, and value arrays. Indices
+ * The backend owns compressed pointer, index, and value arrays for each
+ * enabled orientation. When both are stored, values are duplicated so row
+ * and column reads each access contiguous payloads. Indices
  * within each compressed segment must be strictly increasing, so duplicate
  * coordinates are rejected and explicit zero values are retained as supplied.
  * CSR favors row reads. CSC stores each column contiguously, which suits
- * column-oriented sources or consumers; the Points backend interface remains
- * row-major, so CSC row and range reads search the requested columns. The
+ * column-oriented sources or consumers. When both indexes are present, row
+ * requests use CSR and column requests use CSC. The
  * generic scalar accessor converts stored values to float; row and range views
  * preserve the configured PointData element type.
  *
@@ -68,6 +70,11 @@ public:
      * @throws std::invalid_argument If the element type or layout is unsupported, dimensions cannot be represented by the pointer array, or array sizes, pointer sequence, or indices are invalid.
      */
     SparsePointsStorageBackend(std::uint64_t rows, std::uint64_t columns, SparseMatrixLayout layout, std::uint32_t elementTypeIndex, std::size_t elementSize, std::vector<std::uint64_t> pointers, std::vector<std::uint64_t> indices, std::vector<std::uint8_t> values);
+
+    /** Creates a dual-index backend with CSR arrays followed by CSC arrays. */
+    SparsePointsStorageBackend(std::uint64_t rows, std::uint64_t columns, std::uint32_t elementTypeIndex, std::size_t elementSize,
+        std::vector<std::uint64_t> rowPointers, std::vector<std::uint64_t> columnIndices, std::vector<std::uint8_t> rowValues,
+        std::vector<std::uint64_t> columnPointers, std::vector<std::uint64_t> rowIndices, std::vector<std::uint8_t> columnValues);
 
     /** @brief Returns the sparse backend type. */
     StorageBackendType getType() const override;
@@ -120,6 +127,9 @@ public:
      */
     void visitRange(std::uint64_t firstRow, std::uint64_t rowCount, std::uint64_t firstColumn, std::uint64_t columnCount, const PointDataAccessVisitor& visitor) const override;
 
+    /** Visits selected columns for selected rows, using CSC when available. */
+    void visitColumns(const std::vector<std::uint64_t>& columnIds, const std::vector<std::uint64_t>& rowIds, const PointDataAccessVisitor& visitor) const;
+
     /**
      * Reads one row-major element and converts the stored value to float.
      *
@@ -158,6 +168,16 @@ public:
     /** Returns the backend-owned byte-packed values. */
     const std::vector<std::uint8_t>& getValues() const;
 
+    /** Returns whether CSR and CSC indexes are available. */
+    bool hasRowCompressedIndex() const;
+    bool hasColumnCompressedIndex() const;
+    const std::vector<std::uint64_t>& getRowPointers() const;
+    const std::vector<std::uint64_t>& getColumnIndices() const;
+    const std::vector<std::uint8_t>& getRowValues() const;
+    const std::vector<std::uint64_t>& getColumnPointers() const;
+    const std::vector<std::uint64_t>& getRowIndices() const;
+    const std::vector<std::uint8_t>& getColumnValues() const;
+
 private:
     float valueAt(std::uint64_t row, std::uint64_t column) const;
     void copyRowRange(std::uint64_t row, std::uint64_t firstColumn, std::uint64_t columnCount, std::uint8_t* destination) const;
@@ -170,6 +190,10 @@ private:
     std::vector<std::uint64_t> _pointers;                                               /**< Segment offsets, including the terminal nonzero count. */
     std::vector<std::uint64_t> _indices;                                                /**< Sorted coordinate indices for each compressed segment. */
     std::vector<std::uint8_t>  _values;                                                 /**< Byte-packed values corresponding to the coordinate indices. */
+    std::vector<std::uint64_t> _secondaryPointers;                                      /**< Optional second orientation's pointer array. */
+    std::vector<std::uint64_t> _secondaryIndices;                                       /**< Optional second orientation's indices. */
+    std::vector<std::uint8_t>  _secondaryValues;                                        /**< Optional second orientation's values. */
+    SparseMatrixLayout         _secondaryLayout = SparseMatrixLayout::ColumnCompressed; /**< Orientation of optional secondary arrays. */
 };
 
 }
