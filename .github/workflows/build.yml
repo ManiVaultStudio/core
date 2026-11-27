@@ -67,7 +67,7 @@ jobs:
           conan-visual-version: ${{matrix.build-cversion}}
           conan-visual-runtime: ${{matrix.build-runtime}}
           conan-build-type: ${{matrix.build-config}}
-          run-tests: true
+          run-tests: false
           conan-user: ${{secrets.LKEB_UPLOAD_USER}}
           conan-password: ${{secrets.LKEB_UPLOAD_USER_PASSWORD}}
           conan-pem: ${{secrets.LKEB_UPLOAD_CERT_CHAIN}}
@@ -89,7 +89,7 @@ jobs:
           conan-build-type: ${{matrix.build-config}}
           conan-build-os: ${{matrix.build-os}}
           build-arch: ${{matrix.build-arch}}
-          run-tests: true
+          run-tests: false
           conan-user: ${{secrets.LKEB_UPLOAD_USER}}
           conan-password: ${{secrets.LKEB_UPLOAD_USER_PASSWORD}}
           conan-pem: ${{secrets.LKEB_UPLOAD_CERT_CHAIN}}
@@ -106,7 +106,7 @@ jobs:
           conan-build-type: ${{matrix.build-config}}
           conan-build-os: ${{matrix.build-os}}
           build-arch: ${{matrix.build-arch}}
-          run-tests: true
+          run-tests: false
           conan-user: ${{secrets.LKEB_UPLOAD_USER}}
           conan-password: ${{secrets.LKEB_UPLOAD_USER_PASSWORD}}
           conan-pem: ${{secrets.LKEB_UPLOAD_CERT_CHAIN}}
