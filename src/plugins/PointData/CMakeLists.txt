@@ -218,6 +218,12 @@ target_compile_options(${POINTDATA}
             $<$<AND:$<BOOL:${MV_WARNINGS_AS_ERRORS}>,$<CXX_COMPILER_ID:MSVC>>:/WX>
     )
 
+# Xcode 16's libc++ gates std::jthread behind this library option.
+if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(${POINTDATA} PRIVATE -fexperimental-library)
+    target_link_options(${POINTDATA} PRIVATE -fexperimental-library)
+endif()
+
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
 generate_export_header(${POINTDATA}
