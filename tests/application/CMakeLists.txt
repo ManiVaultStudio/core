@@ -48,6 +48,7 @@ target_link_libraries(MV_Application_ArchiverTest PRIVATE
     ManiVault::Core
     Qt6::Core
     Qt6::Widgets
+    Qt6::WebEngineWidgets
     QuaZip
     ZLIB::ZLIB
 )
