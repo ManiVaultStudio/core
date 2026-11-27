@@ -51,7 +51,7 @@ StorageBackendConfiguratorAction::StorageBackendConfiguratorAction(QObject* pare
 
     _backendTypeAction.setDefaultWidgetFlags(mv::gui::OptionAction::ComboBox);
     _backendTypeAction.setToolTip("Select the storage backend; the suffix shows whether it supports reading and writing.");
-    _configureAction.setIconByName("ellipsis");
+    _configureAction.setIconByName("gear");
     _configureAction.setToolTip("Configure the selected storage backend");
 
     addAction(&_backendTypeAction);
