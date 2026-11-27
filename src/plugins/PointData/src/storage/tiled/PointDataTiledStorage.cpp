@@ -27,6 +27,32 @@ namespace mv::pointdata::tiled
 {
 namespace
 {
+class PointDataTiledStorageThreadJoiner
+{
+public:
+    explicit PointDataTiledStorageThreadJoiner(std::vector<std::thread>& threads) :
+        _threads(threads)
+    {
+    }
+
+    ~PointDataTiledStorageThreadJoiner()
+    {
+        joinAll();
+    }
+
+    void joinAll()
+    {
+        for (auto& thread : _threads)
+        {
+            if (thread.joinable())
+                thread.join();
+        }
+    }
+
+private:
+    std::vector<std::thread>& _threads;
+};
+
 std::size_t typeSize(const std::uint32_t typeIndex)
 {
     static constexpr std::size_t sizes[] = { sizeof(float), 2, 4, 4, 2, 2, 1, 1 };
@@ -201,7 +227,8 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromGenerator(cons
             worker();
         else
         {
-            std::vector<std::jthread> workers;
+            std::vector<std::thread> workers;
+            PointDataTiledStorageThreadJoiner threadJoiner(workers);
             workers.reserve(workerCount);
             for (std::size_t workerIndex = 0; workerIndex < workerCount; ++workerIndex)
                 workers.emplace_back(worker);
@@ -231,7 +258,8 @@ std::shared_ptr<PointDataTiledStorage> PointDataTiledStorage::fromGenerator(cons
                     }
                 }
             }
-            workers.clear(); // jthread destruction joins every worker.
+            threadJoiner.joinAll();
+            workers.clear();
         }
     }
 
